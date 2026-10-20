@@ -385,8 +385,10 @@ until a blank line.
 | a time that can't be read | long ago | at once |
 | a time more than 24 hours in the future | long ago | at once |
 
-- **Several marks on one line,** for example after a Sync merge: the earliest counts. The plugin
-  collapses them the next time it edits that line.
+- **Several marks on one line (call),** for example after a Sync merge: the earliest mark whose
+  time can be read and is no more than 24 hours ahead counts. When there is none, the line counts
+  as done long ago. The plugin collapses them the next time it edits that line, keeping the mark
+  with the earliest time that can be read, or the first one when none can be read.
 - **The plugin never adds a `✔` to a line it didn't tick.** That would be a write the user didn't
   make in the view.
 - **A leftover `✔` on an open line** is ignored. It is removed the next time that line is edited.
