@@ -83,9 +83,13 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 - **The environment scrub (call).** Both workflows set `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`, so the
   commands Claude runs don't get the credentials it recognizes, such as the Claude token. GitHub
   tokens stay, so `gh` works. It cleans only the processes Claude starts, not the action's own,
-  hence the read block above. Don't count on Claude Code's process namespace for those commands:
-  it needs bubblewrap, which the runner image's documentation doesn't list, and Ubuntu 24.04's
-  AppArmor policy blocks it unless changed. The first run checks it (see "Not yet verified").
+  hence the read block above. Claude Code also runs those commands in their own process
+  namespace, which hides the action's processes from them.
+  - **It needs bubblewrap, and fails closed without it.** The first run stopped with "error:
+    bubblewrap is required for subprocess env scrubbing and isolation". So a step before the action
+    installs bubblewrap and lifts Ubuntu 24.04's AppArmor block on user namespaces, as the action's
+    own isolation step does. That step only runs with `allowed_non_write_users`. A failed install
+    fails the job.
 - **No approvals.** No tool can approve, and the repository doesn't let the job's token approve
   pull requests. The owner merges.
 - **Configuration and rules.** The action restores `.claude/`, `.mcp.json`, `CLAUDE.md` and similar
@@ -143,8 +147,7 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   argument parser was replayed locally too. No run on the runner has tested them.
 - **The scrub.** The first run's log should list `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: 1` in the
   environment of the action's "Run Claude Code Action" step.
-- **The process namespace.** Asking `@claude` to run `ps aux | wc -l` tells: a single-digit count
-  means the namespace applies, and a larger one means Claude's commands can see the action's
-  processes, which the read block then has to cover alone.
+- **The process namespace.** With bubblewrap installed it should apply. Asking `@claude` to run
+  `ps aux | wc -l` confirms it: the count should be in single digits.
 - **The `@AGENTS.md` import.** Claude Code's docs say a `CLAUDE.md` import loads the file, and
   the action loads project settings. No run has shown it yet.
