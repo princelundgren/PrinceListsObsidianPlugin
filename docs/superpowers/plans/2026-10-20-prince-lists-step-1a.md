@@ -205,9 +205,14 @@ test("lineIndexAt maps a character offset to its line", () => {
   order of precedence. `splitLines("")` is `[]`.
 - [ ] **Step 7: Run** `npm test && npm run lint && npm run build`. Expected: all pass, and
   `main.js` exists.
-- [ ] **Step 8: Write `.github/workflows/ci.yml`.** On every push and pull request it runs
-  `npm ci`, `npm run lint`, `npm run build` and `npm test` on `ubuntu-latest` with Node 26. Node 26
-  is Active LTS from 2026-10-28, and Node 24 has been in maintenance since 2026-10-20.
+- [ ] **Step 8: Write `.github/workflows/ci.yml`.** On pushes to `main` and on pull requests, it
+  runs `npm ci`, `npm run lint`, `npm run build` and `npm test` on `ubuntu-latest` with Node 26.
+  These are `docs.yml`'s triggers without its `edited` type, which only its pull request text
+  check needs. A push to a pull request's branch then runs CI once, not twice.
+  Node 26 is Active LTS from 2026-10-28, and Node 24 has been in maintenance since 2026-10-20.
+  - The test step sets `env: TZ: America/New_York`, so code that works in local time, such as
+    `formatStamp` and the archived rule, is tested at an offset from UTC with daylight saving
+    time.
   - Pull requests run it, so it follows the read-only pattern of the docs check's
     `.github/workflows/docs.yml`, not the release workflow's: `permissions: contents: read`,
     `actions/checkout@v7` with `persist-credentials: false`, and `actions/setup-node@v7` with
