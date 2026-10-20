@@ -66,7 +66,9 @@ first. This plan cites its sections by heading.
     colors.
   - Interface text is in sentence case. Menu, command and button labels are exactly these:
     "New list", "Open as list", "Open as Markdown", "Show archived", "New item below",
-    "New heading below", "New item", "Delete", "Rename heading", "Delete heading", "Undo".
+    "New heading below", "New item", "Item actions", "Delete", "Rename heading",
+    "Delete heading", "Undo". The icon-only "+" and ⋯ buttons get the accessible names
+    (`aria-label`) "New item" and "Item actions".
 - **Dependencies:** the only runtime dependency is `commonmark`.
 - **Privacy:** no telemetry, and no network requests unless one is agreed on in an issue first
   (the design's privacy rule).
@@ -273,7 +275,8 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `getViewData()` returns `this.text`.
   - `setViewData(data, clear)` sets `this.text`, re-renders a placeholder (the file's basename in
     an `h2` plus a line that reads "List view"), and switches the pane to Markdown when
-    `!isListText(data)`.
+    `!isListText(data)`. It switches with `leaf.setViewState` directly, not through
+    `openAsMarkdown`, so the leaf doesn't join `markdownChosen`: the user didn't choose Markdown.
   - `clear()` empties `this.text`.
   - Leave `canAcceptExtension` at its default.
   - In `setState(state, result)`, call super and then set `result.history = false` (spec,
@@ -521,7 +524,10 @@ test("lineIndexAt maps a character offset to its line", () => {
     that opens a fenced code block, a `%%` comment or a `$$` math block that never closes, or
     `null`. Such a block runs to the end of the file, so there is at most one.
   - Line numbers are 0-based indexes into `lines`, and every `end` is exclusive.
-  - `endLine` excludes trailing blank lines.
+  - `ItemBlock.endLine` excludes trailing blank lines.
+  - `Section.endLine` is the next heading's line, or the end of the file, less trailing blank
+    lines, so untouched content at the end of a section counts. For an unnamed section with no
+    items, it is `listNote.end`.
   - `notesIndent` is the leading whitespace of the first non-blank notes line when that line
     reaches the item's content column. Otherwise, when the item has no notes or that line is a
     lazy line (indented less than the content column), it is `"\t"` if the content column is 4 or
@@ -603,7 +609,11 @@ every file stays under about 300 lines and each pull request stays reviewable.
   It splices, then sets the endings at the end of the file as the Global Constraints' "Writing to
   files" says. Every edit in 7a and 7b writes through it.
 - Produces, in `src/core/edit-items.ts`. Each function returns a new `Line[]` and inserts new
-  lines with `dominantEol`.
+  lines with `dominantEol`. Each except `moveItem` replaces one run of lines that starts at the
+  edited item's `titleLine` (just after it for notes), or at the `titleLine` an insert returns:
+  every line before the run stays where it was, and every line after it shifts by the change in
+  length. Apart from that run, only the endings at the end of the file can change, which moves no
+  line. Task 9 relies on this.
   - `toggleItem(lines, item: ItemBlock, now: Date): Line[]`, which throws `RepeatingItemError`
     when it would tick a 🔁 line.
   - `insertItem(lines, model, after: ItemBlock | null, title: string): { lines: Line[]; titleLine: number }`.
@@ -612,12 +622,17 @@ every file stays under about 300 lines and each pull request stays reviewable.
   - `insertItemInSection(lines, model, section: Section, title: string): { lines: Line[]; titleLine: number }`,
     which adds the item as the first under that heading. For the unnamed top section it goes where
     `insertItem` puts it with `after === null`.
-  - `deleteItem(lines, item): Line[]`
+  - `deleteItem(lines, item): Line[]`. It removes the item's lines and, when the item sits
+    between two gaps, the gap after it, so no double blank line is left.
   - `moveItem(lines, model, item, to: { after: ItemBlock } | { firstIn: Section }): Line[]`.
     `{ firstIn }` puts the item where `insertItemInSection` would put a new one.
-  - `getItemNotes(lines, item): string`. It removes `notesIndent` from each notes line that starts
-    with it, and all leading whitespace from a lazy line.
-  - `setItemNotes(lines, item, markdown: string): Line[]`
+  - `getItemNotes(lines, item): string`. It removes up to `notesIndent`'s width of indentation
+    from each notes line, counting columns with a tab moving to the next multiple of 4, so a tab
+    and 4 spaces strip alike. A tab that crosses that width leaves its remaining columns as
+    spaces, as CommonMark does. It removes all leading whitespace from a lazy line.
+  - `setItemNotes(lines, item, markdown: string): Line[]`. It drops trailing blank lines from
+    `markdown` first, because the editor writes on every keystroke: an Enter at the end would
+    otherwise leave a stray blank line outside the item.
   - `setItemTitle(lines, item, title: string): Line[]`
   - `class RepeatingItemError extends Error`
 - Produces, in `src/core/guard.ts`:
@@ -647,14 +662,18 @@ every file stays under about 300 lines and each pull request stays reviewable.
 | `insertItemInSection(H, "new")` | `- [ ] a\n## H\n- [ ] b\n` | `- [ ] a\n## H\n- [ ] new\n- [ ] b\n` |
 | `deleteItem(a)` | `- [ ] a\n\n\tn\n- [ ] b\n` | `- [ ] b\n` |
 | `deleteItem(b)` | `- [ ] a\n- [ ] b` | `- [ ] a` |
+| `deleteItem(b)` | `- [ ] a\n\n- [ ] b\n\n- [ ] c\n` | `- [ ] a\n\n- [ ] c\n` (one gap is left) |
 | `setItemNotes` | `- [ ] a\n- [ ] b\n` with notes `Buy 6:\n- one\n\nlast` on a | `- [ ] a\n\n\tBuy 6:\n\t- one\n\n\tlast\n- [ ] b\n` |
 | `setItemNotes` | an item with 4-space notes, new notes `x` | the notes line is `    x` |
 | `setItemNotes` | `100. [ ] x\n` with notes `n` | `100. [ ] x\n\n     n\n` (five spaces: a tab would make a code block) |
 | `setItemNotes(…, "")` | `- [ ] a\n\n\tnote\n- [ ] b\n` | `- [ ] a\n- [ ] b\n` |
+| `setItemNotes(…, "x\n\n")` | `- [ ] a\n- [ ] b\n` (item a) | `- [ ] a\n\n\tx\n- [ ] b\n`, the same as notes `x` |
 | `moveItem(a, {after: b})` | `- [ ] a\n\n\tn\n\n- [ ] b\n` | `- [ ] b\n\n- [ ] a\n\n\tn\n` (the gap stays where it was) |
 | `moveItem(a, {after: c})` | `## G\n- [ ] a\n\n- [ ] b\n## K\n- [ ] c\n` | `## G\n- [ ] b\n\n## K\n- [ ] c\n- [ ] a\n` (the gap stays in G, at its end) |
 | `moveItem(b, {firstIn: <top section>})` | `- [ ] a\n- [ ] b` | `- [ ] b\n- [ ] a` |
 | `moveItem(a, {firstIn: H})` | `- [ ] a\n## H\n- [ ] b\n` | `## H\n- [ ] a\n- [ ] b\n` |
+| `moveItem(b, {after: c})` | `## G\n- [ ] a\n\nNote\n\n- [ ] b\n## K\n- [ ] c\n` | `## G\n- [ ] a\n\nNote\n\n## K\n- [ ] c\n- [ ] b\n` (`Note` stays) |
+| `moveItem(first, {after: last})` | `top-level-untouched.md` | `- [ ] last` becomes the first line and `- [ ] first` the last; nothing else changes |
 | `mapLine(old, new, 0)`, `(…, 1)`, `(…, 2)` | old `a\nb\nc\n`, new `a\nx\ny\nc\n` | `0` (before the change), `null` (inside it), `3` (after it) |
 | `guardedApply` | `("x","x","y")`, `("z","x","y")` | `"y"`, `"z"` |
 
@@ -666,18 +685,23 @@ every file stays under about 300 lines and each pull request stays reviewable.
     `getItemNotes`'s output leaves the text byte-identical. For `lazy.md` it gives
     `- [ ] a\n\n\tlazy line\n- [ ] b`, and for `title-heading.md` it gives
     `- [ ] a\n\n\t---\n- [ ] b`. For `- [ ] c\n lazy\n` it gives `- [ ] c\n\n\tlazy\n`, and for
-    `100. [ ] x\n\tlazy\n` it gives `100. [ ] x\n\n     lazy\n`.
+    `100. [ ] x\n\tlazy\n` it gives `100. [ ] x\n\n     lazy\n`. For
+    `- [ ] a\n\n\tnote\n\n    more\n`, whose notes mix a tab and 4 spaces, it gives
+    `- [ ] a\n\n\tnote\n\n\tmore\n`: the bytes change, but under commonmark the item holds the
+    same blocks before and after (`paragraph`, `paragraph`, `paragraph`).
   - an NFD title survives `insertItem`
   - `moveItem` never adds or loses a line: across 20 random moves, the sorted texts of
-    `splitLines(joinLines(result))` equal those before, on `example.md` and on `example.md` with
-    its final newline removed
+    `splitLines(joinLines(result))` equal those before, on `example.md`, on `example.md` with
+    its final newline removed, and on `top-level-untouched.md`
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
   - Every edit splices whole `Line` objects with `spliceLines`, which sets the endings at the end
-    of the file.
-  - **In `moveItem`, items change order but the blank-line gaps stay in their slots,** as in the
-    table's `moveItem` rows. When an item moves to another section, a gap in the section it
-    leaves that no longer sits between two items moves to the end of that section, and the moved
-    item is inserted without a gap.
+    of the file. Only LF and CRLF count as a file's ending, as in the spec, so a file that uses
+    a lone CR gets LF on new lines. Say so in a comment at `spliceLines`.
+  - **In `moveItem`, only items change order.** Blank-line gaps and untouched blocks stay in their
+    slots, as in the table's `moveItem` rows. When an item moves to another section, a gap in the
+    section it leaves that no longer sits between two items moves to the end of that section, and
+    the moved item is inserted without a gap. An untouched block that the move leaves outside a
+    pair of items stays where it is.
   - Notes are written with a blank line between the title and the notes. They are indented with
     the item's `notesIndent`, and their blank lines are written empty.
 - [ ] **Step 3: Commit** with the message "Edit items by replacing only the lines that change".
@@ -692,7 +716,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
 - Consumes: `Line`, `splitLines`, `joinLines` and `dominantEol` (Task 1); `ItemBlock`, `Section`,
   `ListModel`, `parseList` and `maskBlocks` (Task 6); `spliceLines` (Task 7a).
 - Produces, in `src/core/edit-headings.ts`. Each function returns a new `Line[]`, or `null` where
-  its signature says so, and inserts new lines with `dominantEol`.
+  its signature says so, and inserts new lines with `dominantEol`. Like 7a's edits, each replaces
+  one run of lines, here starting at the section's `headingLine` or the `headingLine` an insert
+  returns.
   - `insertHeading(lines, model, at: { afterItem: ItemBlock } | { afterSection: Section }, text: string): { lines: Line[]; headingLine: number }`.
     This writes `## text`, or `##` when `text` is empty, at the item's or the section's
     `endLine`. A section's `endLine` comes after its hidden archived rows, so they stay in their
@@ -707,11 +733,13 @@ every file stays under about 300 lines and each pull request stays reviewable.
     before inline parsing: for an ATX heading, what lies between the `#` run and any closing
     sequence, without leading or trailing spaces and tabs; for a setext heading, its content
     lines.
-- Produces, in `src/core/edit-list-note.ts`:
+- Produces, in `src/core/edit-list-note.ts`. `setListNote` replaces one run of lines that starts
+  at the list note's `start`, like 7a's edits.
   - `getListNote(lines, model): string`
-  - `setListNote(lines, model, markdown: string): Line[]`. When the new note isn't empty and an
-    item or heading follows the list note directly, it writes one blank line between them, so a
-    note that ends in an HTML block can't swallow the first item (spec, "The list note").
+  - `setListNote(lines, model, markdown: string): Line[]`. It drops trailing blank lines from
+    `markdown` first, as `setItemNotes` does. When the new note isn't empty and an item or heading
+    follows the list note directly, it writes one blank line between them, so a note that ends in
+    an HTML block can't swallow the first item (spec, "The list note").
   - `listNoteWouldRestructure(markdown: string): boolean`, true when
     `parseList(splitLines(markdown), 0)` finds a heading or an item
   - `listNoteUnclosedBlock(markdown: string): boolean`, true when
@@ -741,6 +769,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
 | `getListNote` | `---\nprincelists: true\n---\nStuff\n\nMore\n\n- [ ] a\n` | `Stuff\n\nMore` |
 | `setListNote(…, "New note")` | `---\nprincelists: true\n---\nOld\n\n- [ ] a\n` | `---\nprincelists: true\n---\nNew note\n\n- [ ] a\n` |
 | `setListNote(…, "Note")` | `---\nprincelists: true\n---\n` | `---\nprincelists: true\n---\nNote\n` |
+| `setListNote(…, "New note\n\n")` | `---\nprincelists: true\n---\nOld\n\n- [ ] a\n` | `---\nprincelists: true\n---\nNew note\n\n- [ ] a\n`, the same as `"New note"` |
 | `setListNote(…, "<div>x</div>")` | `---\nprincelists: true\n---\n- [ ] a\n` | `---\nprincelists: true\n---\n<div>x</div>\n\n- [ ] a\n` (`a` stays an item) |
 | `listNoteWouldRestructure` | `Text\n---`; `## H`; `- [ ] x` | `true` |
 | `listNoteWouldRestructure` | `Text\n\n---`; `plain *text*`; `- bullet` | `false` |
@@ -765,8 +794,10 @@ every file stays under about 300 lines and each pull request stays reviewable.
   - `writeAction(view: PrinceListView, next: string, expected = view.text, refusedNotice = "This list changed elsewhere. Try again."): Promise<boolean>`,
     in `src/view/write.ts`. It first awaits `view.save()` (`TextFileView.save`, public since
     0.10.12) so pending typing is on disk, then runs
-    `vault.process(file, cur => guardedApply(cur, expected, next))`. It sets `view.text = next` on
-    success, and shows a `Notice` reading `refusedNotice` when the guard refused.
+    `vault.process(file, cur => guardedApply(cur, expected, next))`. Inside that callback, once
+    the guard accepts, it sets `view.text = next`, so `setViewData`'s early return holds whatever
+    the timing of Obsidian's modify echo. It shows a `Notice` reading `refusedNotice` when the
+    guard refused.
 
 - [ ] **Step 1: Implement the rendering** that the spec's "Layout" describes:
   - the title (the basename)
@@ -781,7 +812,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
     file (`TextFileView.setViewData`). Keep it out of the view's `getState` and out of local
     storage, so nothing restores it (spec, "Done and archived").
 
-  Re-render whenever `setViewData` runs.
+  Re-render whenever `setViewData` runs, except that it returns early when `clear` is false and
+  `data === this.text`. The view's own writes come back that way (spec, "Saving and outside
+  changes"), and a redraw then would tear down a field that has focus.
 - [ ] **Step 2: Make the checkbox tick.** A click calls `writeAction(view, joinLines(toggleItem(...)))`,
   using `new Date()`. On `RepeatingItemError` it shows a `Notice` reading "Repeating items can't be
   ticked here yet." The click never opens a card.
@@ -804,6 +837,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
      it works as a list there. Record the results in the pull request. If one fails, stop and
      record it in the pull request with the spec's proposed fallback. The owner decides before
      it's built.
+  10. For this check only, log when `writeAction` sets `view.text` and when `setViewData` runs
+      after a tick, and don't commit the logging. Record the order once in the pull request.
 - [ ] **Step 5: Commit** with the message "Draw lists, tick items and hide archived ones".
 
 ### Task 9: The card, editing, and outside changes
@@ -840,7 +875,12 @@ every file stays under about 300 lines and each pull request stays reviewable.
   and adding" sections describe:
   - **The card:** clicking a row (not its checkbox) opens it, and clicking empty space closes it.
     It shows the same checkbox.
-  - **The title:** editing it calls `setItemTitle`, with typing saved through `requestSave`.
+  - **The title:** editing it calls `setItemTitle`, with typing saved through `requestSave`. The
+    field keeps the title line as it was when it took focus, and each keystroke calls
+    `setItemTitle` on the current lines with that saved line put back, which gives
+    `setTitle(thatLine, typed)`. Starting from the current line instead would read a typed
+    `#tag`, `📅 date` or ` ^id` as tail and copy it on every keystroke. The field refreshes the
+    saved line only when an outside change lands, or the view's own write changes that line.
   - **Notes:** rendered with `renderNotes`, and switched to a `<textarea>` of `getItemNotes` on
     click. They're saved with `setItemNotes` through `requestSave`.
   - **The list note:** edited the same way. While `listNoteWouldRestructure` is true, a gray line
@@ -849,15 +889,31 @@ every file stays under about 300 lines and each pull request stays reviewable.
     hides the items below it." (spec, "The list note").
   - **The list title:** renamed with `fileManager.renameFile` on Enter or blur. If the name is
     taken, show the `Notice` "A note with that name already exists." and keep the old name.
-  - **Empty items:** an item whose title is empty when its card closes is removed with
-    `deleteItem`.
+  - **Empty items:** remove an item with `deleteItem` only when this card created it ("+", Enter,
+    "New item" or "New item below"), its title is still empty, it has no notes, and the user
+    closed the card in the view: Escape, a click elsewhere, "+", Enter or a drag start. Never
+    remove one from `setViewData`, `onClose` or a file switch, which would be a write on close or
+    on an outside change.
   - **An empty list:** shows a gray "Notes" placeholder.
   - **Keys:** Escape closes the card.
   - **`getViewData()` includes text being typed.** Apply each keystroke to `this.text`, so
     Obsidian's own merge on outside changes covers it.
-  - **`setViewData(_, false)`** re-renders, but keeps a `<textarea>` that has focus. It updates
-    that textarea's item only after blur. It moves `selected` with `mapLine`, and closes the card
-    after blur when that returns `null`.
+  - **`setViewData(_, false)`** re-renders, but keeps any field that has focus: an item title,
+    the notes, the list note or the list title. It updates that field only after blur. It moves
+    `selected` with `mapLine`, and closes the card after blur when that returns `null`.
+  - **`selected` follows the view's own writes too.** The view knows which lines each of its own
+    edits replaced. A `selected` line before them stays, one after them shifts by the change in
+    length, and an edit to the selected item's own lines (typing in it, ticking it) leaves
+    `selected` as it is. `mapLine` is for outside changes only: it compares lines by text, so it
+    can't tell two empty new items apart.
+    - The view learns the run from the edit it called, as Tasks 7a and 7b describe it: the run
+      starts at the item's `titleLine`, the section's `headingLine`, the list note's `start`, or
+      the `titleLine` or `headingLine` an insert returns. The change in length is
+      `newLines.length - oldLines.length`.
+    - A `selected` line at or after an insert's start shifts too, because the new lines go in
+      before it: an insert at the first item, or `setListNote` when no list note exists yet.
+    - Deleting the selected item closes its card. A drag closes any open card before it calls
+      `moveItem` (Task 11), so a move never has a `selected` line to follow.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 3: Check it by hand on the Mac.**
   1. A picture embed and a link render in a card, and the link opens. Right-clicking the link
@@ -872,6 +928,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
      link in a card render, and the link opens.
   7. Renaming that list from its title renames the file in its own folder, and the file stays
      outside the vault.
+  8. Typing `buy #milk2` into an item's title leaves `#milk2` in the file's line once.
 
   If check 6 or 7 fails, stop and record it in the pull request with the spec's proposed
   fallback. The owner decides before it's built.
@@ -892,23 +949,27 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 - [ ] **Step 1: Build adding, menus and Undo:**
   - **The floating "+":** a round button at the bottom right, placed outside the scrolling element
-    and drawn with `setIcon(el, "plus")`. It calls `insertItem` after the selected item, or with
-    `null`, then `openCard(view, titleLine, true)`, which puts the cursor in the title.
+    and drawn with `setIcon(el, "plus")`, with the accessible name (`aria-label`) "New item". It
+    calls `insertItem` after the selected item, or with `null`, then
+    `openCard(view, titleLine, true)`, which puts the cursor in the title.
   - **Enter in an item's title** inserts the next item below it and opens it the same way.
   - **New item below and New item,** in `itemMenu` and `headingMenu`, insert with `insertItem`
     after the item or `insertItemInSection` first in the section, then
     `openCard(view, titleLine, true)`.
-  - **In an empty list, Enter in the list title starts the first item,** with `insertItem` and
-    `after === null`, then `openCard(view, titleLine, true)`.
+  - **In an empty list, Enter in the list title** first renames the file (Task 9), and then
+    inserts the first item with `insertItem` and `after === null`, then
+    `openCard(view, titleLine, true)`.
   - **Right-click on the Mac:** only when `Platform.isDesktop`, `contextmenu` on rows and headings
     opens `itemMenu` or `headingMenu` through `menu.showAtMouseEvent(evt)`. A right-click on a
-    link in an open card shows only Obsidian's link menu (Task 9), not the item menu.
+    link in an open card shows only Obsidian's link menu (Task 9), not the item menu: the row
+    handler returns early when the event's target is inside `a.internal-link`.
   - **No long-press menu on the iPhone:** Obsidian fires `contextmenu` after an 800 ms hold (not
     yet confirmed on a device; spec, "Touch on the iPhone"), so on the iPhone `contextmenu` on
-    rows and headings is canceled.
+    rows and headings is canceled in the capture phase, as Task 3's notes record.
   - **Tapping a heading on the iPhone** (`Platform.isMobile`) opens `headingMenu` through
     `menu.showAtMouseEvent(evt)` on the tap's `click` event (spec, "Item actions").
-  - **The card's ⋯ button** opens `itemMenu` through `menu.showAtPosition`, on both platforms.
+  - **The card's ⋯ button,** with the accessible name (`aria-label`) "Item actions", opens
+    `itemMenu` through `menu.showAtPosition`, on both platforms.
   - **Rename heading:** in `headingMenu`, it opens an inline editor: a text field in place of the
     heading row, holding the heading's raw content (a setext heading's content lines joined with
     spaces). Taps inside the field don't open the heading menu. Enter or blur trims the name, then
@@ -923,7 +984,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
     that `setHeadingText` refuses shows "That name can't be used for this heading." and keeps the
     field open; Escape then removes the empty heading.
   - **The heading field survives outside changes.** `setViewData(_, false)` keeps a focused
-    heading field, as it keeps a focused `<textarea>`. On save, map the heading's line with
+    heading field, as it keeps the fields of Task 9. On save, map the heading's line with
     `mapLine` from the lines the field opened on to the current ones, and rename the section
     whose heading is on that line. When `mapLine` returns `null`, or no section's heading is on
     that line, cancel, write nothing and show the `Notice` "This list changed elsewhere. Try
@@ -935,6 +996,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
     notice, because trying again can't succeed once the list has changed. Build the button in a
     `DocumentFragment` (`createFragment`) passed to `new Notice(fragment, 6000)`, not through
     `Notice.messageEl`, which is `@since 1.8.7` and would raise `minAppVersion`.
+  - **Removing an empty new item or heading is a cancel, not a delete (call).** Whatever removes
+    it, no Undo notice shows. The Undo notice follows Delete and Delete heading only.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 3: Check it by hand on the Mac and the iPhone.**
   1. "+" with nothing selected adds the item first in the list. With an item selected, it adds it
@@ -975,6 +1038,13 @@ every file stays under about 300 lines and each pull request stays reviewable.
 - [ ] **Step 1: Implement HTML5 drag on rows.** It shows a drop line between visible rows and
   calls `moveItem` with `{ after: <the visible item above the line> }`, or `{ firstIn: <section> }`
   directly under a heading. Hidden archived rows never move (spec, "Selecting and adding").
+  - **A drag closes the open card first (call).** When a drag starts, the view closes any open
+    card, and with it `selected`, before it calls `moveItem`. Pending typing is saved by
+    `writeAction` as usual. The cost: after a drag, a click reopens the card.
+  - **A drag start closes the card the way a click elsewhere does (call).** An empty new item is
+    removed first (Task 9), and that is a cancel with no Undo. The drag then works on the
+    re-parsed list, so `moveItem` gets fresh `ItemBlock`s. If the dragged row was that empty item,
+    the drag ends.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 3: Check it by hand on the Mac.**
   1. Drag within a section.

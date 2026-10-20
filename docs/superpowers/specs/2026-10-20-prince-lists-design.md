@@ -402,7 +402,8 @@ until a blank line.
 - **Why:** this kind of view saves when it closes. If the text it hands back differed from the
   file in any way the user didn't cause, closing a list would write to the file, which is a
   background write.
-- **A drag moves an item's whole block.** The blank lines between items stay where they were.
+- **A drag moves an item's whole block.** Only items change order: the blank lines between
+  items, and content the plugin leaves alone, stay where they were **(call)**.
 
 ## The list view
 
@@ -467,12 +468,15 @@ until a blank line.
 - **Selecting (call):** clicking an item, anywhere except its checkbox, opens its card and selects
   it. Clicking empty space closes the card and clears the selection.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
-  the list scrolls, on the Mac and the iPhone.
+  the list scrolls, on the Mac and the iPhone. Its accessible name is "New item" **(call)**.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.
   - Enter in a title adds another item below it, and Escape closes the card.
-  - If an item's title is still empty when its card closes, the item is removed **(call)**.
+  - A new item is removed again if you close its card while its title is still empty and it has
+    no notes **(call)**. Closing means Escape, a click elsewhere, "+", Enter or starting a drag.
+    Closing the list, switching files or a change from outside never removes an item, and an item
+    that existed before the card opened is never removed this way.
 - **An empty new list (call)** shows a gray "Notes" placeholder under the title. Pressing Enter in
   the title starts the first item.
 - **Hidden archived items don't count for positions (call):**
@@ -497,7 +501,8 @@ until a blank line.
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them.
 - **On both the Mac and the iPhone,** the open card has a ⋯ button with the same item actions. On
-  the iPhone this is the only way to reach them **(owner)**.
+  the iPhone this is the only way to reach them **(owner)**. The button's accessible name is "Item
+  actions" **(call)**.
 - **On the iPhone, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading and Delete heading **(owner, 2026-10-20)**. It's a tap, not a long-press, so there is
   still no long-press menu.
@@ -517,6 +522,9 @@ until a blank line.
 
 - **Mac (1a):** drag items with the mouse, within and between sections. An item's notes move with
   it.
+  - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
+    item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
+    drag, a click reopens the card.
 - **iPhone (1b, owner):**
   - Hold an item and then move to drag it.
   - Holding an item row never opens a menu.
