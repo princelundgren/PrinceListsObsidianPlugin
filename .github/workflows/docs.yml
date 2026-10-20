@@ -1,0 +1,49 @@
+name: Docs check
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        types:
+            - opened
+            - edited
+            - synchronize
+            - reopened
+
+permissions:
+    contents: read
+
+jobs:
+    docs:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  persist-credentials: false
+
+            - name: Use Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 26
+
+            - name: Test the docs check
+              run: node --test scripts/check-docs.test.mjs
+
+            # Only Dependabot skips the pull request text, because its pull requests don't use the
+            # template. Agents' pull requests are checked. The author is pull_request.user;
+            # github.actor is whoever triggered this run, such as someone who edited the
+            # description or pushed to the branch.
+            - name: Check the docs
+              if: github.event_name != 'pull_request' || github.event.pull_request.user.login == 'dependabot[bot]'
+              run: node scripts/check-docs.mjs
+
+            - name: Check the docs and the pull request text
+              if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
+              env:
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+                  PR_BODY: ${{ github.event.pull_request.body }}
+              # The = form keeps a title that starts with "-" from being read as an option.
+              run: |
+                  printf '%s' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
+                  node scripts/check-docs.mjs "--pr-title=$PR_TITLE" --pr-body-file "$RUNNER_TEMP/pr-body.md"

@@ -1,0 +1,7 @@
+# npm is added when package.json arrives with the project scaffold.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

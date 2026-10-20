@@ -1,0 +1,28 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = tab
+indent_size = 4
+quote_type = single
+tab_width = 4
+
+# Added for this repo: YAML can't be indented with tabs, and the docs use
+# 2-space hanging indents.
+[*.{md,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# The workflows use 4-space indents, as the sample plugin's do.
+[.github/workflows/*.{yml,yaml}]
+indent_size = 4
+
+# Test fixtures are byte-exact inputs, including missing final newlines.
+[tests/fixtures/**]
+indent_style = unset
+insert_final_newline = unset
+end_of_line = unset
+trim_trailing_whitespace = false

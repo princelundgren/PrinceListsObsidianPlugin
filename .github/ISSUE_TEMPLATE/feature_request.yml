@@ -1,0 +1,43 @@
+name: Feature request
+description: Suggest a new feature or improvement.
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. A clear pitch for *why* a feature would be useful tends to
+        land much better than just *what* it would do. Feel free to describe the use case in
+        plain words rather than proposing an implementation.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: |
+        What were you trying to do when you reached for this feature? What does the absence of
+        it look like in practice?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like PrinceLists to do?
+      description: |
+        A short description of the desired behavior. Sketches and screenshots are very welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: |
+        Other plugins, apps or workarounds you've tried, and what they got wrong.
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Links to similar features in other apps, prior art, etc.
