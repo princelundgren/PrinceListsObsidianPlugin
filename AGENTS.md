@@ -74,7 +74,7 @@ The docs check needs only Node.js 22 or later, and CI runs it:
 | `node scripts/check-docs.mjs --pr-title="<title>" --pr-body-file <file>` | Also check a pull request's title, and its description saved in `<file>`: the template's five parts, 400 words at most |
 | `node --test scripts/check-docs.test.mjs` | Run the docs check's tests |
 
-These are available once the project scaffold from plan Task 1 has landed:
+The project's npm commands:
 
 | Command | What it does |
 |---|---|
@@ -102,7 +102,7 @@ These are available once the project scaffold from plan Task 1 has landed:
   touches.
 - **In `src/core/`, write the failing test first,** then the code.
 - **Before opening a pull request:**
-  - `npm run lint`, `npm run build` and `npm test` pass (after plan Task 1's scaffold).
+  - `npm run lint`, `npm run build` and `npm test` pass.
   - The docs check passes, on the docs and on the title and description (see Commands).
   - The template's five parts are filled in, in 400 words or fewer.
   - Each commit does one thing, with a message that says what and why.
