@@ -685,7 +685,7 @@ From here on the document is for the builder.
 - **On restart, background tabs may be deferred views.** Check `instanceof` before calling into
   the view.
 - **Pane menu:** add the list view's own items by overriding `onPaneMenu`. Use `file-menu` only for
-  "Open as list", filtered on `leaf?.view instanceof MarkdownView`.
+  "Open as list" among the view's own items, filtered on `leaf?.view instanceof MarkdownView`.
 
 ### Saving and outside changes
 

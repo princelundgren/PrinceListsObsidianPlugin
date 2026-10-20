@@ -29,7 +29,10 @@ first. This plan cites its sections by heading.
 **How work lands:**
 - The repo is open source (MIT). `AGENTS.md` holds the rules every change follows, and
   `CONTRIBUTING.md` the pull request process.
-- Each task lands as its own pull request, and the owner squash-merges it.
+- Each task lands as its own pull request, and the owner squash-merges it. The squash uses the
+  pull request's title and description as the commit message, so "Commit with the message X"
+  means the pull request's title is X. Details meant for `main`, such as the sample plugin's SHA,
+  go in the pull request description.
 - Each task's pull request checks the design against the change and updates it, or says in one
   line that it still holds (`AGENTS.md`, "Keep the design true").
 - **`<test vault>`** below means the path to a test vault on the Mac that holds no real notes and
@@ -117,7 +120,7 @@ first. This plan cites its sections by heading.
 
 - [ ] **Step 1: Copy the scaffold.** Copy `package.json`, `tsconfig.json`, `esbuild.config.mjs`,
   `eslint.config.mts`, `.npmrc` and `version-bump.mjs` from `obsidianmd/obsidian-sample-plugin`
-  `master`. Record the commit SHA in the commit message.
+  `master`. Record the commit SHA in the pull request description.
   - Move `typescript` to `~6.0.3`. Not 7.x: TypeScript 7.0 ships no compiler API (one is planned
     for 7.1). The tilde keeps it inside typescript-eslint's supported range, `>=4.8.4 <6.1.0`.
   - In `tsconfig.json`, make these two changes for TypeScript 6:
@@ -243,7 +246,8 @@ test("lineIndexAt maps a character offset to its line", () => {
 
 **Files:**
 - Create: `src/constants.ts`, `src/obsidian/marker.ts`, `src/obsidian/switch.ts`,
-  `src/view/list-view.ts`, `src/core/frontmatter.ts`, `tests/core/frontmatter.test.ts`
+  `src/view/list-view.ts`, `src/core/frontmatter.ts`, `tests/core/frontmatter.test.ts`,
+  `docs/superpowers/notes/<date>-spike-open.md`
 - Modify: `src/main.ts`
 
 **Interfaces:**
@@ -261,7 +265,9 @@ test("lineIndexAt maps a character offset to its line", () => {
     on, and 0 when no frontmatter counts. A file that is only frontmatter has `contentStartLine`
     equal to its line count, so it has no list note to overwrite.
   - `class PrinceListView extends TextFileView`, with a field `text: string` that holds the exact
-    file text, and `getViewType()` returning `VIEW_TYPE_LIST`.
+    file text, and `getViewType()` returning `VIEW_TYPE_LIST`. `text` is separate from the
+    inherited `TextFileView.data` because it holds each keystroke, for `getViewData` and
+    Obsidian's merge.
   - From `src/obsidian/switch.ts`:
     - `registerAutoSwitch(plugin: Plugin): void`
     - `openAsList(leaf: WorkspaceLeaf, file: TFile): Promise<void>`
@@ -280,7 +286,7 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `clear()` empties `this.text`.
   - Leave `canAcceptExtension` at its default.
   - In `setState(state, result)`, call super and then set `result.history = false` (spec,
-    Implementation notes, "Back history").
+    Implementation notes, "Opening and switching views").
 - [ ] **Step 4: Implement `registerAutoSwitch`** exactly as the spec's Implementation notes,
   "Opening and switching views", describe it:
   - Listen to `file-open`.
@@ -393,7 +399,7 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `untickLine(text: string): string`
   - `setTitle(text: string, title: string): string`
   - `isRepeating(text: string): boolean`
-  - `TASKS_SIGNIFIERS`, the 18 emoji from the spec's "Where ✔ goes".
+  - `TASKS_SIGNIFIERS`, the 18 emoji from the spec's "Where `✔` goes".
   - `MARK_PATTERN`, a `RegExp` without the `g` flag that matches one `✔` mark, as Step 3 defines
     it. A caller that needs every match uses a copy with the flag,
     `new RegExp(MARK_PATTERN, "g")`, so no shared `lastIndex` carries over between calls.
@@ -829,7 +835,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
   6. "Show archived" stays as it was while the open list is renamed.
   7. A generated 500-item list opens and scrolls without visible lag on the iPhone.
   8. Closing the list after only viewing it doesn't change the file: compare `git hash-object`
-     and the modification time (`stat -f %m`) before and after, on a copy.
+     and the modification time (`stat -f %m`) before and after, on a copy. Then tick an item, wait
+     for the write, and close the list: the modification time stays at the tick's write.
   9. On the Mac, with a list from outside the vault (spec, "Notes outside the vault"): ticking
      writes the file, and an edit made to it in another app while it's open shows in the view.
      First check that the same edit shows in Obsidian's own Markdown view of that note. Then open
@@ -929,6 +936,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
   7. Renaming that list from its title renames the file in its own folder, and the file stays
      outside the vault.
   8. Typing `buy #milk2` into an item's title leaves `#milk2` in the file's line once.
+  9. Typing in a card of the generated 500-item list (Task 8, check 7) shows no lag.
 
   If check 6 or 7 fails, stop and record it in the pull request with the spec's proposed
   fallback. The owner decides before it's built.
@@ -1085,8 +1093,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
   - `file-menu` on a `TFolder`, "New list", which creates the list in that folder
 - [ ] **Step 4: Check it by hand.**
   1. All three routes work on the Mac.
-  2. Long-pressing a folder on the iPhone offers "New list". If it doesn't, record that in the 1a
-     checks notes (Task 13); the command still covers the phone.
+  2. Long-pressing a folder on the iPhone offers "New list". If it doesn't, record that in the
+     pull request, for Task 13 to copy into the 1a checks notes; the command still covers the
+     phone.
   3. A second new list in the same folder is "Untitled list 1".
 - [ ] **Step 5: Commit** with the message "Create lists the same ways as notes".
 
@@ -1094,10 +1103,11 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Files:**
 - Create: `docs/superpowers/notes/<date>-1a-checks.md`
-- Modify: the spec (reconcile it)
+- Modify: the spec (reconcile it), `README.md` (installing from the release, and the status line)
 
 - [ ] **Step 1: Run the full check on the iPhone in the test vault.** It covers the basics:
-  open, tick, add, edit, ⋯ actions, the heading menu and the archived toggle.
+  open, tick, add, edit, ⋯ actions, the heading menu and the archived toggle. Copy Task 12's
+  folder long-press result from its pull request into the notes file.
 - [ ] **Step 2: Check alongside other plugins.** Install Tasks and Kanban in the test vault and repeat
   the opening checks from Task 2, Step 7. A Tasks query (`not done`) must still list the items
   with their dates.
@@ -1111,12 +1121,14 @@ every file stays under about 300 lines and each pull request stays reviewable.
 - [ ] **Step 5: Reconcile the spec.** Check each claim in the design against the code. Record
   any decided deviations with their reasons and raise anything undecided. Keep
   `status: building` (step one isn't done until 1b and the two weeks), and set `verified`.
-- [ ] **Step 6: Commit** the notes and the spec with the message "Finish part 1a".
-  Open the pull request; the owner merges it.
+- [ ] **Step 6: Commit** the notes, the spec and `README.md` with the message "Finish part 1a".
+  In the README, replace the status line ("There's nothing to install yet…") with where 1a
+  stands, and say how to install from the `0.1.0` release. Open the pull request; the owner
+  merges it.
 - [ ] **Step 7: Release `0.1.0`.** The owner pushes the tag `0.1.0` (no `v`); agents never push
-  tags (`AGENTS.md`, "Releases"). It comes after the go-public checklist is done, because the
-  release's attestation needs a public repository. The release workflow then builds a draft
-  release, and the owner reviews and publishes it.
+  tags (`AGENTS.md`, "Releases"). It comes after the go-public checklist (the "Go public" issue)
+  is done, because the release's attestation needs a public repository. The release workflow
+  then builds a draft release, and the owner reviews and publishes it.
 - [ ] **Step 8: Install in the everyday vault.** Run `npm run install-vault -- <everyday vault>`
   from the released commit. The owner moves one real list in by hand, and the two weeks start.
   Submitting to Obsidian's community directory isn't part of 1a.
