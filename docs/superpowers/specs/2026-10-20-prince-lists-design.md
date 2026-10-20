@@ -723,6 +723,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 1. Strip a trailing block ID (` ^id`).
 2. Strip trailing Tasks fields and `#tags`, using Tasks' full set of signifiers:
    🔺⏫🔼🔽⏬🛫➕⏳⌛📅📆🗓✅❌🔁🏁🆔⛔.
+   Like Tasks, accept an optional U+FE0F after each signifier.
 3. Insert ` ✔ YYYY-MM-DD HH:mm` there, then put back what was stripped.
 
 - **Obsidian's own block-ID writer** puts ` ^id` after an item's last block. For an item with
