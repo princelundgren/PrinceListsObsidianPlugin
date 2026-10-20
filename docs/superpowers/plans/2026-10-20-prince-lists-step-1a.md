@@ -560,14 +560,15 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `moveItem(lines, model, item, to: { after: ItemBlock } | { firstIn: Section }): Line[]`.
     `{ firstIn }` puts the item where `insertItemInSection` would put a new one.
   - `insertHeading(lines, model, at: { afterItem: ItemBlock } | { afterSection: Section }, text: string): { lines: Line[]; headingLine: number }`.
-    This writes `## text` at the item's or the section's `endLine`. A section's `endLine` comes
-    after its hidden archived rows, so they stay in their section (spec, "Selecting and
-    adding").
+    This writes `## text`, or `##` when `text` is empty, at the item's or the section's
+    `endLine`. A section's `endLine` comes after its hidden archived rows, so they stay in their
+    section (spec, "Selecting and adding").
   - `deleteHeading(lines, section): Line[]`
   - `setHeadingText(lines, section, text: string): Line[] | null`. It rewrites only the heading's
     own lines and keeps the heading's level: the `#` run, any indent, any closing `#`s and the line
-    ending stay as written. A setext heading keeps its `===` or `---` underline, and its content
-    lines become one line holding the text. It returns `null` when the result wouldn't parse as a
+    ending stay as written. An empty ATX heading such as `##` gets one space between the `#` run
+    and the text. A setext heading keeps its `===` or `---` underline, and its content lines
+    become one line holding the text. It returns `null` when the result wouldn't parse as a
     heading of the same level whose raw content is exactly `text`. Raw content is the source
     before inline parsing: for an ATX heading, what lies between the `#` run and any closing
     sequence, without leading or trailing spaces and tabs; for a setext heading, its content
@@ -577,7 +578,9 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `setItemNotes(lines, item, markdown: string): Line[]`
   - `setItemTitle(lines, item, title: string): Line[]`
   - `getListNote(lines, model): string`
-  - `setListNote(lines, model, markdown: string): Line[]`
+  - `setListNote(lines, model, markdown: string): Line[]`. When the new note isn't empty and an
+    item or heading follows the list note directly, it writes one blank line between them, so a
+    note that ends in an HTML block can't swallow the first item (spec, "The list note").
   - `listNoteWouldRestructure(markdown: string): boolean`
   - `listNoteUnclosedBlock(markdown: string): boolean`, true when the list note opens a fenced code
     block, a `%%` comment or a `$$` math block and never closes it
@@ -610,7 +613,9 @@ test("lineIndexAt maps a character offset to its line", () => {
 | `moveItem(a, {firstIn: H})` | `- [ ] a\n## H\n- [ ] b\n` | `## H\n- [ ] a\n- [ ] b\n` |
 | `insertHeading({afterItem: a}, "H")` | `- [ ] a\n- [ ] b\n` | `- [ ] a\n## H\n- [ ] b\n` |
 | `insertHeading({afterSection: G}, "H")` | `## G\n- [ ] a\n## K\n- [ ] b\n` | `## G\n- [ ] a\n## H\n## K\n- [ ] b\n` |
+| `insertHeading({afterItem: a}, "")` | `- [ ] a\n- [ ] b\n` | `- [ ] a\n##\n- [ ] b\n` |
 | `deleteHeading(H)` | `## G\n- [ ] a\n## H\n- [ ] b\n` | `## G\n- [ ] a\n- [ ] b\n` |
+| `deleteHeading(<empty>)` | `- [ ] a\n##\n- [ ] b\n` | `- [ ] a\n- [ ] b\n` |
 | `setHeadingText(Kitchen, "Pantry")` | `## Kitchen\n- [ ] a\n` | `## Pantry\n- [ ] a\n` |
 | `setHeadingText(Old, "New")` | `### Old\n- [ ] a\n` | `### New\n- [ ] a\n` |
 | `setHeadingText(Kitchen, "Pantry")` | `## Kitchen\r\n- [ ] a\r\n` | `## Pantry\r\n- [ ] a\r\n` |
@@ -620,9 +625,11 @@ test("lineIndexAt maps a character offset to its line", () => {
 | `setHeadingText(Old, "- [ ] New")` | `Old\n===\n- [ ] a\n` | `null` (it would become an item) |
 | `setHeadingText(Old, "C #")` | `## Old\n- [ ] a\n` | `null` (` #` would close the heading) |
 | `setHeadingText(Old, "New")` | `Old\nline two\n===\n- [ ] a\n` | `New\n===\n- [ ] a\n` |
+| `setHeadingText(<empty>, "H")` | `- [ ] a\n##\n- [ ] b\n` | `- [ ] a\n## H\n- [ ] b\n` |
 | `getListNote` | `---\nprincelists: true\n---\nStuff\n\nMore\n\n- [ ] a\n` | `Stuff\n\nMore` |
 | `setListNote(…, "New note")` | `---\nprincelists: true\n---\nOld\n\n- [ ] a\n` | `---\nprincelists: true\n---\nNew note\n\n- [ ] a\n` |
 | `setListNote(…, "Note")` | `---\nprincelists: true\n---\n` | `---\nprincelists: true\n---\nNote\n` |
+| `setListNote(…, "<div>x</div>")` | `---\nprincelists: true\n---\n- [ ] a\n` | `---\nprincelists: true\n---\n<div>x</div>\n\n- [ ] a\n` (`a` stays an item) |
 | `mapLine(old, new, 0)`, `(…, 1)`, `(…, 2)` | old `a\nb\nc\n`, new `a\nx\ny\nc\n` | `0` (before the change), `null` (inside it), `3` (after it) |
 | `guardedApply` | `("x","x","y")`, `("z","x","y")` | `"y"`, `"z"` |
 | `listNoteWouldRestructure` | `Text\n---`; `## H`; `- [ ] x` | `true` |
@@ -713,7 +720,7 @@ test("lineIndexAt maps a character offset to its line", () => {
 
 **Files:**
 - Create: `src/view/card.ts`, `src/view/notes.ts`
-- Modify: `src/view/list-view.ts`, `src/view/render-list.ts`, `styles.css`, `src/main.ts`
+- Modify: `src/view/list-view.ts`, `src/view/render-list.ts`, `styles.css`
 
 **Interfaces:**
 - Consumes: `getItemNotes`, `setItemNotes`, `setItemTitle`, `getListNote`, `setListNote`,
@@ -729,9 +736,8 @@ test("lineIndexAt maps a character offset to its line", () => {
       filled by `workspace.handleLinkContextMenu(menu, href, file.path)` and shown with
       `menu.showAtMouseEvent(evt)` (spec, "Rendering notes in the card"). On the iPhone it adds
       no link menu.
-    - It triggers `hover-link` with the source `'princelists'`. `main.ts` registers that source
-      with `registerHoverLinkSource('princelists', { display: 'PrinceLists', defaultMod: true })`
-      (since 1.1.0).
+    - It triggers no `hover-link` event. Page previews wait until Obsidian documents that event's
+      payload (spec, "Not in step one").
     - It disables `.task-list-item-checkbox`.
   - `openCard(view, titleLine: number): void` and `closeCard(view): void`. `view.selected` holds
     the `titleLine` of the open item, or `null`. A line number is used because a new item's
@@ -814,6 +820,12 @@ test("lineIndexAt maps a character offset to its line", () => {
     that follows doesn't save. An empty (after trimming) or unchanged name writes nothing. When
     `setHeadingText` returns `null`, show a `Notice` reading "That name can't be used for this
     heading." and write nothing.
+  - **New heading below,** in `itemMenu` and `headingMenu`, writes an empty heading with
+    `insertHeading(…, "")`, then opens the same field as Rename heading on the returned
+    `headingLine`, with the cursor in it. A name is saved as Rename heading saves it. Escape, or a
+    name that is empty after trimming, removes the heading again with `deleteHeading`. A name
+    that `setHeadingText` refuses shows "That name can't be used for this heading." and keeps the
+    field open; Escape then removes the empty heading.
   - **The heading field survives outside changes.** `setViewData(_, false)` keeps a focused
     heading field, as it keeps a focused `<textarea>`. On save, map the heading's line with
     `mapLine` from the lines the field opened on to the current ones, and rename the section
@@ -845,6 +857,9 @@ test("lineIndexAt maps a character offset to its line", () => {
      and leaves the file unchanged. With the field open, change that heading's line in the same
      note opened as Markdown in another pane, then press Enter: "This list changed elsewhere. Try
      again." shows and nothing is written.
+  9. "New heading below" opens the heading field with the cursor in it, and Enter writes
+     `## <name>`. Escape, or Enter with an empty name, leaves the file as it was before the menu
+     opened (`git diff` on a copy). `C #` shows the notice and keeps the field open.
 - [ ] **Step 4: Commit** with the message "Add items with the floating button and act on them
   from menus".
 

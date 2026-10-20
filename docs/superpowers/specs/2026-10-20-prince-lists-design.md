@@ -139,6 +139,10 @@ These are wanted later, roughly in this order. The file format already leaves ro
   `registerEditorExtension` for the editor.
 - **A sidebar of all lists built on Bases.** A Base filtered on `princelists: true` already lists
   them all, and `registerBasesView` (since 1.10.0) lets a plugin add its own Bases view type.
+- **Page previews of links in a card (owner, 2026-10-20).** A preview on hover needs the
+  `hover-link` event. `obsidian.d.ts` names it only in the docs of `registerHoverLinkSource` and
+  `HoverLinkSource`, with no payload type, so previews wait until Obsidian documents the payload.
+  Links in a card still open, and on the Mac they still get Obsidian's link menu.
 
 **Not possible through the official API.** These limits matter for replacing a standalone todo app:
 
@@ -273,6 +277,11 @@ says so before it saves **(call)**.
 The editor also warns when the list note opens a fenced code block, a comment (`%%`) or a math
 block (`$$`) without closing it, because an unclosed block hides every item below it **(owner,
 2026-10-20)**.
+
+When the list note isn't empty and an item or heading follows it directly, saving the note writes
+one blank line between them **(owner, 2026-10-20)**. Without it, a list note that ends in an HTML
+block such as `<div>x</div>` would swallow the first item: CommonMark continues that kind of block
+until a blank line.
 
 ### Sections
 
@@ -490,6 +499,9 @@ block (`$$`) without closing it, because an unclosed block hides every item belo
 - **On the iPhone, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading and Delete heading **(owner, 2026-10-20)**. It's a tap, not a long-press, so there is
   still no long-press menu.
+- **New heading below (owner, 2026-10-20)** adds an empty heading at that point and opens the
+  same field as Rename heading, with the cursor in it. Escape, or an empty name, removes the
+  heading again.
 - **A new heading inserted below an item takes the items after it (call).** This is the same as
   typing that heading into the raw file at that point.
 - **Undoing a delete (call):** after a delete, a message with an **Undo** button shows for a few
@@ -692,8 +704,10 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   Without a Component, embeds don't load and Obsidian logs a memory leak (observed).
 - **The rendered output does nothing on click.**
   - Delegate `a.internal-link` clicks to
-    `workspace.openLinkText(href, file.path, Keymap.isModEvent(evt))`.
-  - Trigger `hover-link` for previews. Kanban's `src/helpers/renderMarkdown.ts` does both.
+    `workspace.openLinkText(href, file.path, Keymap.isModEvent(evt))`, as Kanban's
+    `src/helpers/renderMarkdown.ts` does.
+  - No page previews on hover **(owner, 2026-10-20)**. They would need the `hover-link` event,
+    and Obsidian documents no payload for it, so they wait until it does (see "Not in step one").
   - On the Mac (`Platform.isDesktop`), handle `contextmenu` on `a.internal-link`: create a `Menu`,
     let `workspace.handleLinkContextMenu(menu, linktext, file.path)` fill it, and show it with
     `menu.showAtMouseEvent(evt)`. The method returns a `boolean` whose meaning isn't documented,
@@ -854,8 +868,10 @@ Checked 2026-10-20.
     `registerObsidianProtocolHandler`, `Plugin.registerCliHandler` (1.12.2)
   - look and feel: `setIcon` (Lucide icons); `addStatusBarItem` ("Not available on mobile");
     `Platform`
-  - absent: an API for adding actions to the New tab screen, and any notification API beyond
-    `Notice`
+  - absent: an API for adding actions to the New tab screen, any notification API beyond
+    `Notice`, and a payload type for the `hover-link` event, which only the docs of
+    `registerHoverLinkSource` (1.1.0) and `HoverLinkSource` name. Step one uses neither the event
+    nor that method.
 - **Obsidian docs:**
   - custom views (docs.obsidian.md, Views)
   - mobile limits (Mobile development)
