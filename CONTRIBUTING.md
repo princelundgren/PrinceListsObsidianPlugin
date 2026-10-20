@@ -40,14 +40,12 @@ request that breaks one won't be merged; to change a rule, open an issue first.
   the edits and the archived rule.
 - **Fill in the pull request template,** in 400 words or fewer. It asks what the change does, why,
   how you tested it, steps to reproduce, and related issues.
-- **CI must pass.** For now it checks the docs and the pull request's title and description; the
-  plugin's lint, build and tests join it with the project scaffold. To check your description
-  before you open the pull request, save it to a file and run
-  `node scripts/check-docs.mjs --pr-title="<title>" --pr-body-file <file>`.
+- **CI must pass.** It runs the plugin's lint, build and tests, and checks the docs and the pull
+  request's title and description. To check your description before you open the pull request, save
+  it to a file and run `node scripts/check-docs.mjs --pr-title="<title>" --pr-body-file <file>`.
 - **Your commits don't need to be signed.** The maintainer squash-merges pull requests, and GitHub
   signs the merged commit.
 
 ### Development setup
 
-The commands are in [AGENTS.md](AGENTS.md#commands). The docs check works now, with Node.js 22 or
-later; the npm commands work once the project scaffold from the plan's Task 1 has landed.
+The commands are in [AGENTS.md](AGENTS.md#commands).

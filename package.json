@@ -1,0 +1,34 @@
+{
+	"name": "princelists",
+	"version": "0.1.0",
+	"description": "Todo lists on plain Markdown notes, with sections, item notes and drag and drop.",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"lint": "eslint . --max-warnings 0",
+		"test": "vitest run --dir tests",
+		"install-vault": "node scripts/install.mjs"
+	},
+	"keywords": [],
+	"license": "MIT",
+	"devDependencies": {
+		"@eslint/js": "^9.39.4",
+		"@types/node": "^22.15.17",
+		"esbuild": "^0.28",
+		"eslint": "^10.13.0",
+		"eslint-plugin-obsidianmd": "^0.4.0",
+		"globals": "^17.6.0",
+		"jiti": "^2.6.1",
+		"obsidian": "1.14.4",
+		"typescript": "~6.0.3",
+		"typescript-eslint": "^8.59.1",
+		"@types/commonmark": "^0.27.10",
+		"vitest": "^5.0.5"
+	},
+	"dependencies": {
+		"commonmark": "^0.31.2"
+	}
+}

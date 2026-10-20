@@ -1,5 +1,6 @@
 ---
-status: approved
+status: building
+governs: [src/**, styles.css, manifest.json]
 ---
 
 # PrinceLists for Obsidian: step one, a single list

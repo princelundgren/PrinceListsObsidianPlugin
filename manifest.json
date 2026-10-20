@@ -1,0 +1,9 @@
+{
+	"id": "princelists",
+	"name": "PrinceLists",
+	"version": "0.1.0",
+	"minAppVersion": "1.5.7",
+	"description": "Todo lists on plain Markdown notes, with sections, item notes and drag and drop.",
+	"author": "Prince Lundgren",
+	"isDesktopOnly": false
+}
