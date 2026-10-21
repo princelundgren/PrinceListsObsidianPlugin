@@ -7,11 +7,12 @@ import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openAsMarkdown } from '../obsidian/switch';
+import { buildNewItemButton } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
 import { fitHeight } from './dom';
 import { registerFieldEvents } from './events';
 import { rereadListNote, type ListNoteSession, type ListTitleSession } from './fields';
-import { registerLinkMenu } from './notes';
+import type { HeadingField } from './heading-field';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
 import { UNSAFE_EDIT_NOTICE } from './write';
@@ -32,6 +33,8 @@ export class PrinceListView extends TextFileView {
 	// sets text on while it loads the view, so a field of that name broke opening a list.
 	listTitleEl: HTMLTextAreaElement | null = null;
 	listNoteEl: HTMLElement | null = null;
+	headingField: HeadingField | null = null;
+	newItemButton: HTMLButtonElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
 	readonly blocks = new Map<HTMLElement, Component>();
 	// One-off writes wait for the one before to land, then edit the text as it left it, so two quick
@@ -91,6 +94,7 @@ export class PrinceListView extends TextFileView {
 		this.editing.text = '';
 		this.listTitle = null;
 		this.endListNote();
+		this.headingField = null;
 		this.showArchived = false;
 		this.outsideChanges++;
 		// Nothing of the old file stays, not even a field with focus, which render() would keep.
@@ -102,7 +106,7 @@ export class PrinceListView extends TextFileView {
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
 		registerFieldEvents(this);
-		registerLinkMenu(this);
+		this.newItemButton = buildNewItemButton(this);
 	}
 
 	protected async onClose(): Promise<void> {
@@ -191,8 +195,8 @@ export class PrinceListView extends TextFileView {
 		this.blocks.delete(el);
 	}
 
-	// Draws everything again from the text, except the title, list note or card holding focus, or
-	// about to (`focusing`): those stay in place and update after blur.
+	// Draws everything again from the text, except the title, list note, card or heading field holding
+	// focus, or about to (`focusing`): those stay in place and update after blur.
 	render(focusing: Element | null = null): void {
 		redraw(this, focusing);
 	}

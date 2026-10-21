@@ -1,4 +1,4 @@
-import { Component, Keymap, MarkdownRenderer, Menu, Platform } from 'obsidian';
+import { Component, Keymap, MarkdownRenderer, Menu } from 'obsidian';
 import { asInline, needsMarkdown } from '../core/inline';
 import type { PrinceListView } from './list-view';
 
@@ -7,7 +7,7 @@ const INTERNAL_LINK = 'a.internal-link';
 // Obsidian's own rendering, so pictures, links and embeds look as they do in any note (spec,
 // "Rendering notes in the card"). Without a Component, embeds don't load and Obsidian logs a leak, so
 // each block gets its own child of the view, which the caller removes on re-render or close. Links
-// are handled by handleLinkClick and registerLinkMenu, delegated once on the view.
+// are handled by handleLinkClick and handleLinkMenu, delegated once on the view.
 export function renderNotes(view: PrinceListView, el: HTMLElement, markdown: string): Component {
 	const child = view.addChild(new Component());
 	MarkdownRenderer.render(view.app, markdown, el, view.file?.path ?? '', child).then(
@@ -44,22 +44,21 @@ export function handleLinkClick(view: PrinceListView, evt: MouseEvent, target: H
 	return true;
 }
 
-// Obsidian's link menu on the Mac. The iPhone has no right-click, and the plugin opens no menu on a
-// long-press (spec, "Layout"). No page previews: they wait until Obsidian documents the `hover-link`
-// event's payload (spec, "Not in step one").
-export function registerLinkMenu(view: PrinceListView): void {
-	if (!Platform.isDesktop) return;
-	view.registerDomEvent(view.contentEl, 'contextmenu', (evt) => {
-		const target = evt.targetNode;
-		const link = target?.instanceOf(HTMLElement) ? target.closest(INTERNAL_LINK) : null;
-		const href = link ? linkText(link) : null;
-		if (!href || !view.file) return;
-		evt.preventDefault();
-		const menu = new Menu();
-		// It returns a boolean whose meaning isn't documented, so it isn't used.
-		view.app.workspace.handleLinkContextMenu(menu, href, view.file.path);
-		menu.showAtMouseEvent(evt);
-	});
+// For the view's contextmenu listener, on the Mac only: the iPhone has no right-click, and the plugin
+// opens no menu on a long-press (spec, "Layout"). True when the right-click was on an internal link,
+// which then shows Obsidian's link menu and no other. No page previews: they wait until Obsidian
+// documents the `hover-link` event's payload (spec, "Not in step one").
+export function handleLinkMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
+	const link = target.closest(INTERNAL_LINK);
+	if (!link) return false;
+	const href = linkText(link);
+	if (!href || !view.file) return true;
+	evt.preventDefault();
+	const menu = new Menu();
+	// It returns a boolean whose meaning isn't documented, so it isn't used.
+	view.app.workspace.handleLinkContextMenu(menu, href, view.file.path);
+	menu.showAtMouseEvent(evt);
+	return true;
 }
 
 // As Kanban reads it: a Markdown-style link's `href` may be URL-encoded, while `data-href` holds the

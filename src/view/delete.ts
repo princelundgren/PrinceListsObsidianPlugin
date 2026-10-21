@@ -1,0 +1,56 @@
+import { Notice, type TFile } from 'obsidian';
+import { planHeadingDelete, planItemDelete, type PlannedDelete } from '../core/list-actions';
+import { contentStartLine } from '../obsidian/marker';
+import { closeCard, isNewEmptyItem } from './card';
+import type { PrinceListView } from './list-view';
+import { enqueueAt, writeAction, writePlanned } from './write';
+
+// Delete on an item. An empty item the open card added is closed instead, which removes it: that is a
+// cancel, with no Undo (spec, "Selecting and adding").
+export function deleteItemAt(view: PrinceListView, titleLine: number): void {
+	if (isNewEmptyItem(view, titleLine)) closeCard(view);
+	else deleteWithUndo(view, titleLine, planItemDelete, 'Item deleted.');
+}
+
+export function deleteHeadingAt(view: PrinceListView, headingLine: number): void {
+	deleteWithUndo(view, headingLine, planHeadingDelete, 'Heading deleted.');
+}
+
+function deleteWithUndo(
+	view: PrinceListView,
+	line: number,
+	plan: (text: string, contentStart: number, line: number) => PlannedDelete | null,
+	message: string,
+): void {
+	const file = view.file;
+	enqueueAt(view, line, async (pending) => {
+		const deleted = await writePlanned(view, (text) => {
+			const at = pending?.line ?? null;
+			return at === null ? null : plan(text, contentStartLine(text), at);
+		});
+		if (!deleted || !file) return;
+		// Obsidian's echo of the write returns early in setViewData, so the view draws the change.
+		view.render();
+		offerUndo(view, file, deleted.undo, message);
+	});
+}
+
+// A notice with an Undo button for a few seconds (spec, "Item actions"). Built in a fragment, since
+// Notice.messageEl is newer than minAppVersion.
+function offerUndo(view: PrinceListView, file: TFile, undo: PlannedDelete['undo'], message: string): void {
+	const fragment = createFragment();
+	fragment.createSpan({ text: message });
+	const button = fragment.createEl('button', { cls: 'princelists-undo', text: 'Undo' });
+	new Notice(fragment, 6000);
+	// The notice's own button, which goes with the notice.
+	button.addEventListener('click', () => void view.enqueue(() => undoDelete(view, file, undo)), { once: true });
+}
+
+// Writes the text from before the delete back, only while the file still holds what the delete left.
+// Any refusal gets this notice rather than writeAction's: trying again can't succeed once the list has
+// changed, and typing that lands while it writes has changed it too.
+async function undoDelete(view: PrinceListView, file: TFile, undo: PlannedDelete['undo']): Promise<void> {
+	const written = !view.viewClosed && view.file === file && (await writeAction(view, undo.next, undo.expected, null, undo.edit));
+	if (written) view.render();
+	else new Notice("This list changed since the delete, so it can't be undone.");
+}

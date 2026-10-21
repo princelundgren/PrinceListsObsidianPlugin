@@ -1,0 +1,125 @@
+import { describe, expect, test } from 'vitest';
+import { headingText } from '../../src/core/display';
+import { UnsafeEditError } from '../../src/core/edit-check';
+import { planHeadingRemoval, saveHeadingName } from '../../src/core/heading-field';
+import { planHeadingInsert } from '../../src/core/list-actions';
+import { splitLines } from '../../src/core/lines';
+import { contentStartOf, crlf, FIXTURES, JOINING_CASES, list, readFixture } from './edit-helpers';
+
+const start = (text: string) => contentStartOf(splitLines(text));
+
+// The field as it opens on the heading at `line` of `text`.
+const fieldOn = (text: string, line: number) => {
+	const lines = splitLines(text);
+	return { lines, line, before: headingText(lines, line) };
+};
+
+const save = (text: string, field: ReturnType<typeof fieldOn>, typed: string) => saveHeadingName(text, start(text), field, typed);
+
+describe('saveHeadingName', () => {
+	test('writes the trimmed name and keeps the level', () => {
+		const text = '- [ ] a\n### Old\n- [ ] b\n';
+		expect(save(text, fieldOn(text, 1), '  New  ')).toEqual({
+			kind: 'write',
+			next: '- [ ] a\n### New\n- [ ] b\n',
+			line: 1,
+			edit: { start: 1, delta: 0, kind: 'change' },
+		});
+	});
+	test('names an empty new heading `## <name>`, with the file ending', () => {
+		const text = crlf('- [ ] a\n##\n- [ ] b\n');
+		const saved = save(text, fieldOn(text, 1), 'Kitchen');
+		expect(saved.kind === 'write' && saved.next).toBe(crlf('- [ ] a\n## Kitchen\n- [ ] b\n'));
+	});
+	test('an empty or unchanged name writes nothing', () => {
+		const text = '## Old\n- [ ] a\n';
+		for (const typed of ['', '   ', 'Old', ' Old ']) expect(save(text, fieldOn(text, 0), typed)).toEqual({ kind: 'none' });
+	});
+	test("refuses a name that wouldn't come back as this heading, at its level and with exactly that text", () => {
+		const setext = 'Old\n===\n- [ ] a\n';
+		expect(save(setext, fieldOn(setext, 0), '- [ ] New')).toEqual({ kind: 'refused' });
+		const atx = '- [ ] a\n##\n';
+		expect(save(atx, fieldOn(atx, 1), 'C #')).toEqual({ kind: 'refused' });
+	});
+	test("refuses a name the heading wouldn't read back as, such as an underline on a setext heading", () => {
+		for (const underline of ['===', '---']) {
+			const text = `Old\n${underline}\n- [ ] a\n`;
+			for (const typed of ['===', '---']) expect(save(text, fieldOn(text, 0), typed), `${typed} on ${underline}`).toEqual({ kind: 'refused' });
+			const saved = save(text, fieldOn(text, 0), 'New');
+			expect(saved.kind === 'write' && saved.next).toBe(`New\n${underline}\n- [ ] a\n`);
+		}
+	});
+	test("a setext heading's content lines become the one name, and the lines after follow", () => {
+		const text = 'Old\nline two\n===\n- [ ] a\n';
+		const field = fieldOn(text, 0);
+		expect(field.before).toBe('Old line two');
+		expect(save(text, field, 'New')).toEqual({
+			kind: 'write',
+			next: 'New\n===\n- [ ] a\n',
+			line: 0,
+			edit: { start: 0, delta: -1, kind: 'change' },
+		});
+	});
+	test('finds the heading after an outside change elsewhere moved it', () => {
+		const text = '## G\n- [ ] a\n## H\n- [ ] b\n';
+		const field = fieldOn(text, 2);
+		const now = '## G\n- [ ] new\n- [ ] a\n## H\n- [ ] b\n';
+		const saved = save(now, field, 'Hall');
+		expect(saved.kind === 'write' && saved.next).toBe('## G\n- [ ] new\n- [ ] a\n## Hall\n- [ ] b\n');
+	});
+	test("is lost when an outside change took the heading's line, or left no heading on it", () => {
+		const text = '## G\n- [ ] a\n## H\n- [ ] b\n';
+		const field = fieldOn(text, 2);
+		expect(save('## G\n- [ ] a\n## Hall\n- [ ] b\n', field, 'Kitchen')).toEqual({ kind: 'lost' });
+		// The fence turns the rest into code, so the line maps but holds no heading.
+		expect(save('```\n## G\n- [ ] a\n## H\n- [ ] b\n', field, 'Kitchen')).toEqual({ kind: 'lost' });
+	});
+});
+
+describe('planHeadingRemoval', () => {
+	test('removes the empty heading, leaving the file as it was before the insert, at every place New heading below can add one', () => {
+		const cases: Record<string, string> = {
+			gapsAround: '- [ ] a\n\n## H\n\n- [ ] b\n',
+			noFinalNewline: '## G\n- [ ] a',
+			...JOINING_CASES,
+			...Object.fromEntries(FIXTURES.map((name) => [name, readFixture(name)])),
+		};
+		for (const variant of [(t: string) => t, crlf]) {
+			for (const [name, original] of Object.entries(cases)) {
+				const text = variant(original);
+				const { model, items } = list(text);
+				const places = [
+					...items.map((item) => ({ afterItem: item.titleLine })),
+					...model.sections.flatMap((s) => (s.headingLine === null ? [] : [{ afterSection: s.headingLine }])),
+				];
+				for (const place of places) {
+					let inserted;
+					try {
+						inserted = planHeadingInsert(text, start(text), place);
+					} catch (error) {
+						if (error instanceof UnsafeEditError) continue;
+						throw error;
+					}
+					if (!inserted) continue;
+					const removal = planHeadingRemoval(inserted.next, start(text), fieldOn(inserted.next, inserted.line));
+					expect(removal?.next, `${name} ${JSON.stringify(place)}`).toBe(text);
+					expect(removal?.edit, `${name} ${JSON.stringify(place)}`).toEqual({ start: inserted.line, delta: -1, kind: 'delete' });
+				}
+			}
+		}
+	});
+	test('removes it from the current text after an outside change elsewhere', () => {
+		const text = '- [ ] a\n##\n- [ ] b\n';
+		const field = fieldOn(text, 1);
+		expect(planHeadingRemoval('- [ ] new\n- [ ] a\n##\n- [ ] b\n', 0, field)?.next).toBe('- [ ] new\n- [ ] a\n- [ ] b\n');
+	});
+	test('null when the heading has a name now, or its line is gone', () => {
+		const text = '- [ ] a\n##\n- [ ] b\n';
+		const field = fieldOn(text, 1);
+		expect(planHeadingRemoval('- [ ] a\n## Named\n- [ ] b\n', 0, field)).toBeNull();
+		expect(planHeadingRemoval('- [ ] a\n- [ ] b\n', 0, field)).toBeNull();
+		// mapLine finds the line, but it holds a name: a field opened on a named heading never removes it.
+		const named = '- [ ] a\n## H\n- [ ] b\n';
+		expect(planHeadingRemoval(named, 0, fieldOn(named, 1))).toBeNull();
+	});
+});

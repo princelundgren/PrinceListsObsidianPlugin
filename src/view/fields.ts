@@ -53,19 +53,21 @@ export function keepOneLine(field: HTMLTextAreaElement): void {
 }
 
 // On Enter or when the field loses focus, not on every keystroke (spec, "Editing"). A name the user
-// didn't change isn't written back, so a rename from elsewhere while the field had focus stands.
+// didn't change isn't written back, so a rename from elsewhere while the field had focus stands. The
+// rename waits on the view's write queue, so the first item Enter adds to an empty list lands after it.
 export function commitListTitle(view: PrinceListView, field: HTMLTextAreaElement): void {
 	const session = view.listTitle;
 	view.listTitle = null;
 	if (session && session.file === view.file && field.value !== session.before) {
-		void renameList(view, session.file, field);
+		const typed = field.value;
+		void view.enqueue(() => renameList(view, session.file, field, typed));
 	} else if (view.file) {
 		field.value = view.file.basename;
 	}
 }
 
-async function renameList(view: PrinceListView, file: TFile, field: HTMLTextAreaElement): Promise<void> {
-	const name = oneLineTitle(field.value).trim();
+async function renameList(view: PrinceListView, file: TFile, field: HTMLTextAreaElement, typed: string): Promise<void> {
+	const name = oneLineTitle(typed).trim();
 	const keepName = (notice?: string) => {
 		if (notice) new Notice(notice);
 		if (view.file === file) field.value = file.basename;

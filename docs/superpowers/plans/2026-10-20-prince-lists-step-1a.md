@@ -1090,8 +1090,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
     shows "The list couldn't be renamed." and keeps the old name.
   - **Empty items:** remove an item only when this card created it ("+", Enter, "New item" or "New
     item below"), its title is still empty, it has no notes, and the user closed the card in the
-    view: Escape, a click elsewhere, "+", Enter or a drag start. Remove it by restoring the text
-    from before the insert, `writeAction(view, textBeforeInsert, textAfterInsert)`, which applies
+    view: Escape, a click elsewhere, Enter, a drag start, or a Task 10 menu choice that adds an
+    item or deletes this one. Remove it by restoring the text from before the insert,
+    `writeAction(view, textBeforeInsert, textAfterInsert)`, which applies
     `guardedApply(current, textAfterInsert, textBeforeInsert)`: `deleteItem` would leave behind
     an empty line the insert wrote. The restore is tried only while the view's text is still
     `textAfterInsert`; otherwise it goes straight to the fallback. Pass `refusedNotice` as `null`:
@@ -1165,8 +1166,12 @@ every file stays under about 300 lines and each pull request stays reviewable.
 ### Task 10: Adding items, menus, and deleting with Undo
 
 **Files:**
-- Create: `src/view/menus.ts`, `src/view/add-button.ts`
-- Modify: `src/view/list-view.ts`, `src/view/card.ts`, `src/view/render-list.ts`, `styles.css`
+- Create: `src/view/menus.ts`, `src/view/add-button.ts`, `src/view/delete.ts`,
+  `src/view/heading-field.ts`, and in `src/core/`: `list-actions.ts` (what each insert and delete
+  writes, with its Undo) and `heading-field.ts` (what saving a heading name does)
+- Modify: `src/view/list-view.ts`, `src/view/card.ts`, `src/view/render-list.ts`,
+  `src/view/redraw.ts`, `src/view/events.ts`, `src/view/fields.ts`, `src/view/notes.ts`,
+  `src/view/write.ts`, `styles.css`
 
 **Interfaces:**
 - Consumes: `insertItem`, `insertItemInSection`, `insertHeading`, `deleteItem`, `deleteHeading`,
@@ -1206,8 +1211,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
     spaces). Taps inside the field don't open the heading menu. Enter or blur trims the name, then
     saves with `writeAction(view, joinLines(setHeadingText(...)))`. Escape cancels, and the blur
     that follows doesn't save. An empty (after trimming) or unchanged name writes nothing. When
-    `setHeadingText` returns `null`, show a `Notice` reading "That name can't be used for this
-    heading." and write nothing.
+    `setHeadingText` returns `null`, or its result wouldn't read back as the trimmed name (a setext
+    heading named `===` reads as an empty one), show a `Notice` reading "That name can't be used
+    for this heading." and write nothing.
   - **New heading below,** in `itemMenu` and `headingMenu`, writes an empty heading with
     `insertHeading(…, "")`, then opens the same field as Rename heading on the returned
     `headingLine`, with the cursor in it. A name is saved as Rename heading saves it. Escape, or a
@@ -1229,6 +1235,27 @@ every file stays under about 300 lines and each pull request stays reviewable.
     `Notice.messageEl`, which is `@since 1.8.7` and would raise `minAppVersion`.
   - **Removing an empty new item or heading is a cancel, not a delete (call).** Whatever removes
     it, no Undo notice shows. The Undo notice follows Delete and Delete heading only.
+  - **Built as follows, where the steps above leave it open:**
+    - **An empty new item in the open card:** Enter closes the card, which removes it. "+" and New
+      item below keep it, with the cursor in its title. Delete closes the card, the cancel.
+    - **Menu choices that add no item leave the open card open.** Those that add one close it
+      first, as above.
+    - **The list title's rename waits on the view's write queue,** so the first item that Enter
+      adds to an empty list lands in the renamed file.
+    - **Right-click on the Mac and the iPhone's hold** leave a text field alone. One `contextmenu`
+      listener per platform: on the Mac it shows the link menu or the item and heading menus.
+    - **The Undo notice** reads "Item deleted." or "Heading deleted.", then the button. Any
+      refused Undo shows its notice, typing that landed while it wrote included.
+    - **The heading field** has the accessible name "Heading". On blur, a refused name shows the
+      notice and closes the field, and a new heading then goes again. A redraw keeps the field in
+      place of its heading, by its line as mapped with `mapLine`.
+    - **The "+" sits on the view's `containerEl`,** which the plugin's own class makes
+      `position: relative`. It keeps above the iPhone's floating navbar with Obsidian's
+      undocumented `--view-bottom-spacing` (design, "Touch on the iPhone"). Space under the last
+      row lets it scroll clear of the "+".
+    - **Rows and headings can't be selected or show iOS's callout** (`user-select: none`,
+      `-webkit-touch-callout: none`), as in spike 2, so a hold opens nothing. The card, the
+      fields, the list title and the list note stay selectable.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 3: Check it by hand on the Mac and the iPhone.**
   1. "+" with nothing selected adds the item first in the list. With an item selected, it adds it
