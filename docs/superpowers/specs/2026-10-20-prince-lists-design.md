@@ -383,7 +383,8 @@ extent from the file after such a keystroke would delete or repeat lines.
   A drag isn't bound by that, so it writes the blank line.
 - **Other content is kept byte for byte where it is:** paragraphs between items, bullets without
   a checkbox, tables, and link reference definitions.
-  - How the view shows this content is the builder's choice.
+  - **The view shows it in its place as gray plain text (call),** like the list note, so it can be
+    seen. That goes for the blocks above too: fenced code, HTML blocks, comments and math.
   - It is never lost and never silently reordered.
   - **Edits leave it parsing as it did (call).** Every top-level block an edit doesn't touch keeps
     its type and source text, the list note's blocks included. Where an edit would leave text
@@ -391,7 +392,7 @@ extent from the file after such a keystroke would delete or repeat lines.
     setext heading's text, the edit writes one empty line between them. Parsing the text before
     and after decides, not hand-written rules.
   - **An edit that one empty line can't make safe is refused (call),** and nothing is written. The
-    view says the list's layout can't take that change and suggests "Open as Markdown". An
+    view says the list's layout can't take that change and suggests making it in Markdown. An
     example: text indented to an item's content column, which would become the notes of the item
     above once the item between them is deleted. A list note that leaves a block open is the one
     exception (see "The list note").
@@ -507,7 +508,11 @@ extent from the file after such a keystroke would delete or repeat lines.
   the title **(call)**.
 - **Headings** are bold, with a thin rule below.
 - **Items** show a checkbox and a title, one per line.
-- **Clicking an item** opens it into a raised card that shows the title and the rendered notes.
+- **Item titles and headings are rendered as Markdown (owner, 2026-10-21),** with Obsidian's own
+  rendering, as in any note: bold is bold, and links can be clicked. A click on a link in a row
+  opens the link. It doesn't tick the item or open the card.
+- **Clicking an item** (not a link in its title) opens it into a raised card that shows the title
+  and the rendered notes.
   - Notes use Obsidian's own Markdown rendering, so pictures, links and embeds look the way they
     do in any note.
   - Links in a card can be clicked.
@@ -545,8 +550,8 @@ extent from the file after such a keystroke would delete or repeat lines.
 
 ### Selecting and adding
 
-- **Selecting (call):** clicking an item, anywhere except its checkbox, opens its card and selects
-  it. Clicking empty space closes the card and clears the selection.
+- **Selecting (call):** clicking an item, anywhere except its checkbox or a link in its title, opens
+  its card and selects it. Clicking empty space closes the card and clears the selection.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
   the list scrolls, on the Mac and the iPhone. Its accessible name is "New item" **(call)**.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
@@ -971,8 +976,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Left to the builder
 
-- **Display:** how existing dates and tags show in step one, and how content the plugin leaves
-  alone shows.
+- **Display:** how existing dates and tags show in step one.
 - **Renaming a list:** what happens when the new name is already taken.
 - **Editing:** the editor used for notes, how the list-note editor warns, and keyboard details
   beyond Enter, Escape and undo.

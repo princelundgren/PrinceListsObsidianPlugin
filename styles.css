@@ -1,1 +1,68 @@
 /* PrinceLists styles. */
+
+.princelists-title {
+	margin: 0 0 var(--size-4-2);
+	font-family: var(--inline-title-font);
+	font-size: var(--inline-title-size);
+	font-weight: var(--inline-title-weight);
+	line-height: var(--inline-title-line-height);
+	color: var(--inline-title-color);
+}
+
+.princelists-list-note,
+.princelists-untouched {
+	color: var(--text-muted);
+	white-space: pre-wrap;
+}
+
+/* A long URL wraps instead of widening the pane on the iPhone. */
+.princelists-list-note,
+.princelists-untouched,
+.princelists-heading,
+.princelists-item-title {
+	min-width: 0;
+	overflow-wrap: break-word;
+}
+
+.princelists-list-note {
+	margin-bottom: var(--size-4-4);
+}
+
+.princelists-untouched {
+	margin: var(--size-4-1) 0;
+}
+
+.princelists-heading {
+	margin: var(--size-4-4) 0 var(--size-4-1);
+	padding-bottom: var(--size-4-1);
+	border-bottom: var(--border-width) solid var(--background-modifier-border);
+	font-size: inherit;
+	font-weight: var(--font-bold);
+}
+
+.princelists-items {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.princelists-item {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--size-4-2);
+	padding: var(--size-4-1) 0;
+	line-height: var(--line-height-normal);
+}
+
+/* Centered on the title's first line, so it stays there when the title wraps. The font size is the
+   row's, so 1em matches the title's. Two classes outrank Obsidian's own input[type=checkbox] rule. */
+.princelists-item .princelists-checkbox {
+	flex: none;
+	margin: calc((var(--line-height-normal) * 1em - var(--checkbox-size)) / 2) 0 0;
+	font-size: inherit;
+}
+
+/* Gray in place, with no strikethrough (spec, "Ticking"). */
+.princelists-item.is-done .princelists-item-title {
+	color: var(--checklist-done-color);
+}
