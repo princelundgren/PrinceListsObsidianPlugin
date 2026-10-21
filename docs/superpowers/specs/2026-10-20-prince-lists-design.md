@@ -828,7 +828,10 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   - Because holding only ever drags, item rows must not open a menu. Cancel `contextmenu` on rows, in the capture
     phase, while a finger is down.
 - **Dragging uses Pointer Events with a hold timer.** Kanban uses 500 ms, canceled if the finger
-  moves more than 5 px first.
+  moves more than 5 px first. Spike 2 confirmed both values on the iPhone, with the rows'
+  `-webkit-user-select: none` and `-webkit-touch-callout: none`: the maintainer keeps 500 ms
+  (`docs/superpowers/notes/2026-10-21-spike-touch.md`). The 800 ms `contextmenu` above is still
+  unconfirmed.
   - Once a drag is armed, a non-passive `touchmove` handler calls `preventDefault` to stop
     scrolling.
   - Kanban's `src/dnd/managers/DragManager.ts` is the reference.

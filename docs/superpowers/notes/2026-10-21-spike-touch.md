@@ -6,11 +6,12 @@ one passed. The 500 ms hold "feels just right", and nothing felt wrong.
 The spike branch, `spike/touch-drag`, was never merged and is deleted after this note. "What was
 built" therefore says enough to rebuild the gesture in 1b without it.
 
-- **Build under test:** the spike branch's one commit, 83bcb02, built with `npm run build` and
-  copied to the test vault with `npm run install-vault -- <path to the test vault>`.
+- **Build under test:** the spike branch's one commit (83bcb02, never pushed, so the hash is only
+  a label), built with `npm run build` and copied to the test vault with
+  `npm run install-vault -- <path to the test vault>`.
 - **Never use a vault with real notes** (`AGENTS.md`).
 - **Versions:**
-  - iPhone: not recorded
+  - iPhone: Obsidian 1.14.5; iOS version not recorded
 
 ## What was built
 
@@ -91,7 +92,8 @@ cancels nothing until a row lifts, which is why a swipe still scrolls.
   for padding.
 - **The scrolling element was the view's own `contentEl`,** with no wrapper. Obsidian 1.14.4's
   stylesheet gives `.workspace-leaf-content .view-content` `overflow: auto`. That was read from the
-  stylesheet and isn't documented.
+  stylesheet and isn't documented, so 1b gives the list a scrolling element of its own instead of
+  relying on it.
 
 ## Timings and constants
 

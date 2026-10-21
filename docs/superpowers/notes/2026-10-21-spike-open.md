@@ -18,7 +18,7 @@ ignored, and a new tab announcing itself before and after its text loads).
 - **Never use a vault with real notes** (`AGENTS.md`).
 - **Versions:**
   - Mac: Obsidian 1.14.4 (installer 1.14.4)
-  - iPhone: not recorded
+  - iPhone: Obsidian 1.14.5; iOS version not recorded
 
 ## Step 7: the Mac, in the test vault
 
