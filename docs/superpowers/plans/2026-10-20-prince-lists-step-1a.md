@@ -923,6 +923,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
     saved line only when an outside change lands, or the view's own write changes that line.
   - **Notes:** rendered with `renderNotes`, and switched to a `<textarea>` of `getItemNotes` on
     click. They're saved with `setItemNotes` through `requestSave`.
+  - **A refused edit while typing:** when a keystroke's edit throws `UnsafeEditError`, the field
+    keeps what was typed and the next keystroke tries again. The unsafe-edit `Notice` shows once
+    until the field loses focus, not on every keystroke.
   - **The list note:** edited the same way. While `listNoteWouldRestructure` is true, a gray line
     under the editor reads "A heading or checkbox line here becomes a section or item when
     saved." While `listNoteUnclosedBlock` is true, a second gray line reads "An unclosed block here

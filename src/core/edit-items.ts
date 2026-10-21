@@ -193,7 +193,10 @@ function surplus<T extends { key: string }>(after: T[], before: readonly string[
 
 // Order is ignored on purpose: a move reorders items, so only which blocks there are must match.
 function sameBlocks(after: { key: string }[], expected: readonly string[]): boolean {
-	return JSON.stringify(after.map((b) => b.key).sort()) === JSON.stringify([...expected].sort());
+	if (after.length !== expected.length) return false;
+	const keys = after.map((b) => b.key).sort();
+	const wanted = [...expected].sort();
+	return keys.every((key, i) => key === wanted[i]);
 }
 
 // A named section without items takes the item after its content: right under the heading, a
