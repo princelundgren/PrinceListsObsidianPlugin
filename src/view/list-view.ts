@@ -1,29 +1,57 @@
-import { type Menu, TextFileView, type TFile, type ViewStateResult } from 'obsidian';
+import { type Component, type Menu, Notice, TextFileView, type TFile, type ViewStateResult } from 'obsidian';
 import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
-import { itemRow } from '../core/display';
-import { toggleItem } from '../core/edit-items';
-import { joinLines, splitLines, type Line } from '../core/lines';
-import { parseList } from '../core/parse';
+import { ListEditing, type Typed } from '../core/editing';
+import { followLine, type OwnEdit } from '../core/follow';
+import { splitLines, type Line } from '../core/lines';
+import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openAsMarkdown } from '../obsidian/switch';
-import { CHECKBOX_CLASS, ITEM_CLASS, renderList, showDone } from './render-list';
-import { tryEdit, writeAction } from './write';
-
-const OPEN_AS_MARKDOWN_CLASS = 'princelists-open-as-markdown';
+import { cardLost, dismissCard, type Card } from './card';
+import { fitHeight } from './dom';
+import { registerFieldEvents } from './events';
+import { rereadListNote, type ListNoteSession, type ListTitleSession } from './fields';
+import { registerLinkMenu } from './notes';
+import { redraw } from './redraw';
+import { LINE_ATTR, lineOf, setLine } from './render-list';
+import { UNSAFE_EDIT_NOTICE } from './write';
 
 // canAcceptExtension stays at its default of false: true would open every note clicked from a
 // list pane in the list view.
 export class PrinceListView extends TextFileView {
-	// The exact file text. Kept apart from the inherited `data` because it holds each keystroke,
-	// for getViewData and Obsidian's merge.
-	text = '';
+	// The exact file text, apart from the inherited `data`, with every keystroke applied to it for
+	// getViewData and Obsidian's merge, and the line-based state that follows it.
+	readonly editing = new ListEditing(contentStartLine);
 	// Off each time a list opens: clear() turns it off, and it stays out of getState and local
 	// storage, so nothing restores it (spec, "Done and archived").
 	showArchived = false;
-	// Each tap waits for the one before it to write, then edits the text as that write left it, so
-	// two quick taps on one box tick and untick it, and taps on two rows both land.
-	private readonly queueTap = serialQueue((error) => console.error(error));
+	card: Card | null = null;
+	listTitle: ListTitleSession | null = null;
+	listNote: ListNoteSession | null = null;
+	// Not `titleEl`: ItemView has an undocumented `titleEl`, the pane header's title, which Obsidian
+	// sets text on while it loads the view, so a field of that name broke opening a list.
+	listTitleEl: HTMLTextAreaElement | null = null;
+	listNoteEl: HTMLElement | null = null;
+	/** The rendered titles, headings and list note, by the element they belong to. */
+	readonly blocks = new Map<HTMLElement, Component>();
+	// One-off writes wait for the one before to land, then edit the text as it left it, so two quick
+	// taps on one box tick and untick it, and taps on two rows both land.
+	readonly enqueue = serialQueue((error) => console.error(error));
+	/** How many outside changes the view has taken, so a queued tap can tell one landed. */
+	outsideChanges = 0;
+	/** Whether the last redraw left out rows inside the list note being typed. */
+	rowsHeldBack = false;
+	/** Set once the view closes, so a tap still queued then does nothing. */
+	viewClosed = false;
+
+	get text(): string {
+		return this.editing.text;
+	}
+
+	/** The titleLine of the item whose card is open, or null. */
+	get selected(): number | null {
+		return this.editing.selected;
+	}
 
 	getViewType(): string {
 		return VIEW_TYPE_LIST;
@@ -38,8 +66,12 @@ export class PrinceListView extends TextFileView {
 		// "Saving and outside changes"), and a redraw would tear down a field that has focus.
 		if (!clear && data === this.text) return;
 		// TextFileView's per-file reset, for when a different file loads.
-		if (clear) this.clear();
-		this.text = data;
+		if (clear) {
+			this.clear();
+			this.editing.text = data;
+		} else {
+			this.outsideChange(data);
+		}
 		this.render();
 		// Only a reload (`clear` false) switches. A switch from inside the leaf's own load doesn't
 		// take effect, and a later one would record a Back entry that lands here again, so Back
@@ -51,31 +83,41 @@ export class PrinceListView extends TextFileView {
 		}
 	}
 
+	// Nothing here writes: an empty new item stays when the file switches (spec, "Selecting and
+	// adding").
 	clear(): void {
-		this.text = '';
+		dismissCard(this);
+		this.editing.reset();
+		this.editing.text = '';
+		this.listTitle = null;
+		this.endListNote();
 		this.showArchived = false;
+		this.outsideChanges++;
+		// Nothing of the old file stays, not even a field with focus, which render() would keep.
+		this.contentEl.empty();
 		// A different file opens at the top; render() keeps the scroll position otherwise.
 		this.contentEl.scrollTop = 0;
 	}
 
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
-		// One delegated listener on the view's own element, which goes away with the view.
-		this.contentEl.on('click', `.${OPEN_AS_MARKDOWN_CLASS}, .${CHECKBOX_CLASS}`, (evt, target) => {
-			if (target.hasClass(OPEN_AS_MARKDOWN_CLASS)) {
-				if (this.file) void openAsMarkdown(this.leaf, this.file);
-				return;
-			}
-			// The box shows what the file holds: it changes once the write lands, not while a tap waits.
-			evt.preventDefault();
-			const row = target.closest<HTMLElement>(`.${ITEM_CLASS}`);
-			if (row) void this.queueTap(() => this.toggle(row));
-		});
+		registerFieldEvents(this);
+		registerLinkMenu(this);
+	}
+
+	protected async onClose(): Promise<void> {
+		this.viewClosed = true;
+		await super.onClose();
 	}
 
 	async onRename(file: TFile): Promise<void> {
 		await super.onRename(file);
 		this.render();
+	}
+
+	onResize(): void {
+		super.onResize();
+		for (const field of this.contentEl.querySelectorAll('textarea')) fitHeight(field);
 	}
 
 	// setViewState records a history entry when the view type changes, so Back would land on the
@@ -110,38 +152,68 @@ export class PrinceListView extends TextFileView {
 		);
 	}
 
-	// Parsed from `text`, which the write's guard expects, not taken from the last render: an earlier
-	// tick may have changed `text` since, and an edit of the older lines would undo it.
-	private async toggle(row: HTMLElement): Promise<void> {
-		// A redraw while this tap waited, as for an outside change, may have moved lines. Ticking the
-		// wrong item is worse than dropping the tap.
-		if (!row.isConnected) return;
-		const titleLine = Number(row.dataset.line);
-		const lines = splitLines(this.text);
-		const items = parseList(lines, contentStartLine(this.text)).sections.flatMap((section) => section.items);
-		const item = items.find((candidate) => candidate.titleLine === titleLine);
-		if (!item) return;
-		const edited = tryEdit(() => toggleItem(lines, item, new Date()));
-		if (!edited || !(await writeAction(this, joinLines(edited)))) return;
-		// Obsidian's echo of this write returns early in setViewData, so the row is updated here. A
-		// tick moves no line, so the row still stands for this item. A redraw during the write, such
-		// as "Show archived", drew from the text before the tick, so the view redraws again.
-		if (row.isConnected) showDone(row, itemRow((edited[titleLine] as Line).text, titleLine).done);
-		else this.render();
+	focusListTitle(): void {
+		this.listTitleEl?.focus();
+		this.listTitleEl?.select();
 	}
 
-	private render(): void {
-		// contentEl is what scrolls in Obsidian's CSS as seen in 1.14.4 (not a documented API), so the
-		// floating "+" (Task 10) must sit outside it.
-		const { scrollTop } = this.contentEl;
-		this.contentEl.empty();
-		this.contentEl.createEl('h1', { cls: 'princelists-title', text: this.file?.basename ?? '' });
-		if (isListText(this.text)) {
-			renderList(this.contentEl, this.text, this.showArchived);
-		} else {
-			this.contentEl.createEl('p', { text: "This note isn't a list" });
-			this.contentEl.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
+	lines(): Line[] {
+		return splitLines(this.text);
+	}
+
+	parse(): { lines: Line[]; model: ListModel } {
+		const lines = this.lines();
+		return { lines, model: parseList(lines, contentStartLine(this.text)) };
+	}
+
+	// One of the view's own writes landed (writeAction). The line-based state and every row's line
+	// follow it at once, so no row is read with a stale line.
+	applyOwnText(next: string, edit: OwnEdit): void {
+		this.editing.applyOwn(next, edit);
+		this.shiftLines(edit);
+		// Deleting the selected item closes its card.
+		if (this.card && this.selected === null && this.card.lostAt === null) dismissCard(this);
+	}
+
+	// A keystroke's edit is already in the text: it saves after Obsidian's 2-second wait.
+	handleTyped(typed: Typed): void {
+		if ('edit' in typed) {
+			this.shiftLines(typed.edit);
+			this.requestSave();
+		} else if ('refused' in typed && typed.firstRefusal) {
+			new Notice(UNSAFE_EDIT_NOTICE);
 		}
-		this.contentEl.scrollTop = scrollTop;
+	}
+
+	dropBlock(el: HTMLElement): void {
+		const block = this.blocks.get(el);
+		if (block) this.removeChild(block);
+		this.blocks.delete(el);
+	}
+
+	// Draws everything again from the text, except the title, list note or card holding focus, or
+	// about to (`focusing`): those stay in place and update after blur.
+	render(focusing: Element | null = null): void {
+		redraw(this, focusing);
+	}
+
+	endListNote(): void {
+		this.listNote = null;
+		this.editing.closeListNote();
+	}
+
+	private outsideChange(data: string): void {
+		this.outsideChanges++;
+		const before = this.selected;
+		const { lostSelected, noteText } = this.editing.outsideChange(data);
+		if (noteText !== null) rereadListNote(this, noteText);
+		if (lostSelected && this.card && before !== null) cardLost(this, this.card, before);
+	}
+
+	private shiftLines(edit: OwnEdit): void {
+		if (edit.delta === 0 && edit.kind !== 'delete') return;
+		for (const el of this.contentEl.querySelectorAll(`[${LINE_ATTR}]`)) {
+			setLine(el, followLine(lineOf(el) as number, edit));
+		}
 	}
 }

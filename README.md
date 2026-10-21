@@ -49,7 +49,9 @@ The full format is in the [design](docs/superpowers/specs/2026-10-20-prince-list
 ## Privacy
 
 PrinceLists works only on notes you open in Obsidian: in your vault, or on the Mac a note opened
-from outside it. It makes no network requests, collects no data, and needs no account.
+from outside it. It makes no network requests of its own, collects no data, and needs no account.
+A list's notes are rendered by Obsidian, so a picture from the web in them loads as it does in any
+note.
 
 ## Contributing
 

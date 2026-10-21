@@ -122,6 +122,12 @@ export function untickLine(text: string): string {
 	return joinItemLine({ ...parts, status: ' ', marks: '', tail: parts.tail.replace(DONE_DATE_FIELD, '') });
 }
 
+// A tick of an open line, or an untick of a done one, as a box does it.
+export function toggleLine(text: string, now: Date): string {
+	const parts = parseItemLine(text);
+	return parts && isDoneStatus(parts.status) ? untickLine(text) : tickLine(text, now);
+}
+
 export function setTitle(text: string, title: string): string {
 	const parts = parseItemLine(text);
 	if (!parts) return text;

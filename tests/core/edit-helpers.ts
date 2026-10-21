@@ -8,7 +8,7 @@ export const FIXTURES = readdirSync(new URL('../fixtures/', import.meta.url));
 export const readFixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8');
 
 // Content starts after the frontmatter's closing ---, when there is frontmatter.
-const contentStartOf = (lines: Line[]) =>
+export const contentStartOf = (lines: Line[]) =>
 	lines[0]?.text === '---' ? lines.findIndex((line, i) => i > 0 && line.text === '---') + 1 : 0;
 
 export function list(text: string) {

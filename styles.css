@@ -1,6 +1,30 @@
 /* PrinceLists styles. */
 
-.princelists-title {
+/* Every field reads as the text it edits: no frame, and as tall as its text (fitHeight). The class
+   and the element together outrank Obsidian's own textarea rule. */
+textarea.princelists-field {
+	display: block;
+	width: 100%;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	line-height: inherit;
+	resize: none;
+	overflow: hidden;
+}
+
+/* The titles read as titles even while they have focus. */
+textarea.princelists-title:focus,
+textarea.princelists-card-title:focus {
+	box-shadow: none;
+}
+
+textarea.princelists-title {
 	margin: 0 0 var(--size-4-2);
 	font-family: var(--inline-title-font);
 	font-size: var(--inline-title-size);
@@ -9,7 +33,11 @@
 	color: var(--inline-title-color);
 }
 
-.princelists-list-note,
+.princelists-list-note {
+	margin-bottom: var(--size-4-4);
+	color: var(--text-muted);
+}
+
 .princelists-untouched {
 	color: var(--text-muted);
 	white-space: pre-wrap;
@@ -24,8 +52,8 @@
 	overflow-wrap: break-word;
 }
 
-.princelists-list-note {
-	margin-bottom: var(--size-4-4);
+textarea.princelists-list-note-editor {
+	color: var(--text-normal);
 }
 
 .princelists-untouched {
@@ -65,4 +93,60 @@
 /* Gray in place, with no strikethrough (spec, "Ticking"). */
 .princelists-item.is-done .princelists-item-title {
 	color: var(--checklist-done-color);
+}
+
+/* A rendered title or heading is one paragraph, laid out as the line it replaces. */
+.princelists-item-title p,
+.princelists-heading p {
+	margin: 0;
+}
+
+.princelists-list-note-text > :first-child,
+.princelists-card-notes > :first-child {
+	margin-top: 0;
+}
+
+.princelists-list-note-text > :last-child,
+.princelists-card-notes > :last-child {
+	margin-bottom: 0;
+}
+
+/* The open card: raised above the list, in place of its row (spec, "Layout"). Its margins stay inside
+   the pane, so the iPhone gets no sideways scrolling. */
+.princelists-item.princelists-card {
+	margin: var(--size-4-2) 0;
+	padding: var(--size-4-2);
+	border: var(--border-width) solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background-color: var(--background-primary);
+	box-shadow: var(--shadow-s);
+}
+
+/* It takes focus so that Escape reaches it; being raised already shows that it is open. */
+.princelists-card:focus {
+	outline: none;
+}
+
+.princelists-card-body {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: var(--size-4-2);
+	min-width: 0;
+	overflow-wrap: break-word;
+}
+
+.princelists-card.is-done .princelists-card-title {
+	color: var(--checklist-done-color);
+}
+
+.princelists-placeholder {
+	color: var(--text-faint);
+	cursor: text;
+}
+
+.princelists-field-warning {
+	margin-top: var(--size-4-1);
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
 }

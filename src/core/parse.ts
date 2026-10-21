@@ -63,6 +63,15 @@ export function maskBlocks(
 	return { text, unclosedStart: unclosedStart(new Parser().parse(text), masked, contentStart) };
 }
 
+// The item whose title is on `titleLine`, if one is.
+export function itemAt(model: ListModel, titleLine: number): ItemBlock | undefined {
+	for (const section of model.sections) {
+		const item = section.items.find((candidate) => candidate.titleLine === titleLine);
+		if (item) return item;
+	}
+	return undefined;
+}
+
 export function topLevelBlocks(lines: readonly Line[], contentStart: number): Block[] {
 	const doc = new Parser().parse(joinLines(maskLines(lines, contentStart)));
 	return [...topLevelParts(doc)].map((node) => {

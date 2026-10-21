@@ -275,7 +275,7 @@ top level:
   A single `-`, typed to start a bullet, counts until a space and more text follow it
 
 If you type one of these, it becomes a section or an item when it is saved. The list-note editor
-says so before it saves **(call)**.
+says so in a gray line under it before it saves **(call)**.
 
 The editor also warns when the list note opens a fenced code block, a comment (`%%`) or a math
 block (`$$`) without closing it, because an unclosed block hides every item below it **(owner,
@@ -306,7 +306,10 @@ a first item indented to a list item's content column would join that item.
 Each save replaces exactly the lines the editor's previous save wrote, not the list note as the file
 now parses **(call)**. Typing can change how the note's own lines parse: a `-` under text makes a
 heading, and an opening fence makes the rest of the file part of the note. Re-reading the note's
-extent from the file after such a keystroke would delete or repeat lines.
+extent from the file after such a keystroke would delete or repeat lines. That includes the blank
+line a save wrote under the note, so a note typed and erased again leaves none behind, but only
+while it is still blank and directly under the note **(call)**: a line another device added there
+stays, and the blank line stays with it.
 
 ### Sections
 
@@ -536,7 +539,9 @@ extent from the file after such a keystroke would delete or repeat lines.
   Completion).
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
   not on every keystroke. The rename uses `fileManager.renameFile`, which updates links according
-  to the user's link settings.
+  to the user's link settings. Escape puts the old name back. If a note with the new name already
+  exists, a message says so and the old name stays. So does a name with `/` or `\`, which would
+  move the list to another folder.
 - **The list note and item notes (call):**
   - Both show as rendered Markdown. Clicking into one switches to a plain-text editor of the raw
     Markdown, without the item's indent.
@@ -566,8 +571,9 @@ extent from the file after such a keystroke would delete or repeat lines.
     click elsewhere, "+", Enter or starting a drag.
     Closing the list, switching files or a change from outside never removes an item, and an item
     that existed before the card opened is never removed this way.
-- **An empty new list (call)** shows a gray "Notes" placeholder under the title. Pressing Enter in
-  the title starts the first item.
+- **An empty list note (call)** shows as a gray "Notes" placeholder under the title, in any list,
+  so a note can be added from the view. In an empty new list, pressing Enter in the title starts
+  the first item.
 - **Hidden archived items don't count for positions (call):**
   - New items, drops and new headings go directly after the visible row above them, before any
     hidden rows that follow it.
@@ -681,6 +687,9 @@ needs no code.
     data".
   - Before a one-off action writes, the view first saves pending typing (`TextFileView.save`), so
     the file already holds the typing and the guard doesn't refuse the write.
+  - Typing that lands while an action waits to write makes it write nothing, since it was worked
+    out without that typing **(call)**. A tick then runs again on the new text, and the removal of
+    an empty new item deletes it from the current text.
   - The write is guarded: it is applied only if the file's text is still what the view expects.
 - **The file is the only copy of the truth.** When the file changes from outside (Sync or an agent),
   the view redraws from it.
@@ -756,6 +765,14 @@ From here on the document is for the builder.
   (observed).
 - **Leave `canAcceptExtension` at its default of `false` (observed).** Returning `true` would open
   every note clicked from a list pane in the list view.
+- **Don't reuse the names Obsidian's view classes use at runtime** for a field or method of the
+  view: a field initializer runs after `super()` and replaces Obsidian's own member. A field named
+  `titleEl` broke opening a list. These are undocumented, read from the 1.14.4 app bundle:
+  `ItemView`'s `headerEl`, `titleEl`, `titleContainerEl`, `titleParentEl`, `actionsEl`,
+  `backButtonEl`, `forwardButtonEl`, `moreOptionsButtonEl`, `leftSidebarToggleEl` and
+  `canDropAnywhere`; `EditableFileView`'s `fileBeingRenamed`; `TextFileView`'s `dirty`,
+  `isPlaintext`, `lastSavedData`, `saving` and `saveAgain`; and the methods `loadFile`, `setData`,
+  `saveImmediately`, `onModify`, `updateNavButtons`, `handleDrop` and `onTitleBlur`.
 - **The view implements** `getViewType`, `getViewData`, `setViewData` and `clear`.
 - **Switching on `file-open` and `active-leaf-change` (call),** through one guarded check:
   - Take `workspace.getActiveViewOfType(MarkdownView)`. On `file-open(file)`, require
@@ -840,6 +857,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 - **The view's own `vault.process` writes come back through `setViewData`.** Recognize them by
   comparing with the text last written.
 - **`setViewData(_, false)` updates the model** without rebuilding an editor that has focus.
+- **An outside change that edits lines both above and below the item being typed in (call)** loses
+  track of the item, since the line mapping finds a single changed run. The card says the list
+  changed elsewhere and closes once it loses focus. What was typed until then is in the file.
 
 ### Rendering notes in the card
 
@@ -847,9 +867,10 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `Component` per rendered block: `addChild` it, then `removeChild` it on re-render or close.
   Without a Component, embeds don't load and Obsidian logs a memory leak (observed).
 - **The rendered output does nothing on click.**
-  - Delegate `a.internal-link` clicks to
-    `workspace.openLinkText(href, file.path, Keymap.isModEvent(evt))`, as Kanban's
-    `src/helpers/renderMarkdown.ts` does.
+  - Delegate `a.internal-link` clicks, once on the view for every rendered block, to
+    `workspace.openLinkText(linktext, file.path, Keymap.isModEvent(evt))`, as Kanban's
+    `src/helpers/renderMarkdown.ts` does. Like Kanban, read `linktext` from the link's `data-href`,
+    or its `href` when it has none: a Markdown-style link's `href` can be URL-encoded.
   - No page previews on hover **(owner, 2026-10-20)**. They would need the `hover-link` event,
     and Obsidian documents no payload for it, so they wait until it does (see "Not in step one").
   - On the Mac (`Platform.isDesktop`), handle `contextmenu` on `a.internal-link`: create a `Menu`,
@@ -935,6 +956,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   the note's own folder. The check is that the file is renamed where it is and stays outside the
   vault. Proposed fallback: an outside note's title can't be edited, and it's renamed outside
   Obsidian.
+  - Seen in 1.14.4: the file is renamed in its own folder, and then its tab closes. Obsidian's own
+    Markdown view does the same when an outside note is renamed.
 - **Telling an outside note apart (call):** only the fallbacks need it.
   - `vault.getAbstractFileByPath(file.path)` can't do it. Its doc says it finds a file "inside the
     vault" (since 0.11.11), but spike 1 found that it returns the outside note too (observed in
@@ -977,9 +1000,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 ## Left to the builder
 
 - **Display:** how existing dates and tags show in step one.
-- **Renaming a list:** what happens when the new name is already taken.
-- **Editing:** the editor used for notes, how the list-note editor warns, and keyboard details
-  beyond Enter, Escape and undo.
+- **Editing:** keyboard details beyond Enter, Escape and undo.
 - **Parsing:** whether to keep commonmark.js if pre-masking `%%` and `$$` gets awkward.
 
 ## Verified facts
