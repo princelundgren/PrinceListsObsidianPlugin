@@ -527,8 +527,9 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `maskBlocks(lines: readonly Line[], contentStart: number): { text: string; unclosedStart: number | null }`.
     `text` is the copy that `parseList` parses: the lines from `contentStart` on, joined, with each
     top-level `%%` and `$$` region masked as Step 3 says. `unclosedStart` is the index of the line
-    that opens a fenced code block, a `%%` comment or a `$$` math block that never closes, or
-    `null`. Such a block runs to the end of the file, so there is at most one.
+    that opens a fenced code block, a `%%` comment, a `$$` math block or an HTML block of CommonMark
+    types 1–5 (such as `<!--` or `<pre>`) that never closes, or `null`. Such a block runs to the end
+    of the file, so there is at most one.
   - Line numbers are 0-based indexes into `lines`, and every `end` is exclusive.
   - `ItemBlock.endLine` excludes trailing blank lines.
   - `Section.endLine` is the next heading's line, or the end of the file, less trailing blank
@@ -750,7 +751,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
     `parseList(splitLines(markdown), 0)` finds a heading or an item
   - `listNoteUnclosedBlock(markdown: string): boolean`, true when
     `maskBlocks(splitLines(markdown), 0).unclosedStart` isn't `null`: the list note opens a fenced
-    code block, a `%%` comment or a `$$` math block and never closes it
+    code block, a `%%` comment, a `$$` math block or an HTML block of CommonMark types 1–5 (such as
+    `<!--` or `<pre>`) and never closes it
 
 - [ ] **Step 1: Write the failing tests** with exact strings, in `tests/core/edit-headings.test.ts`
   and `tests/core/edit-list-note.test.ts`:
@@ -780,6 +782,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
 | `listNoteWouldRestructure` | `Text\n---`; `## H`; `- [ ] x` | `true` |
 | `listNoteWouldRestructure` | `Text\n\n---`; `plain *text*`; `- bullet` | `false` |
 | `listNoteUnclosedBlock` | `` ```js\ncode ``; `%%\nhidden`; `$$\nx` | `true` |
+| `listNoteUnclosedBlock` | `<!--\nhidden` | `true` |
 | `listNoteUnclosedBlock` | `` ```\ncode\n``` ``; `%% inline %%`; `$$x$$`; `plain` | `false` |
 
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS. Every edit writes

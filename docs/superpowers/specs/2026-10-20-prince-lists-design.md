@@ -278,7 +278,8 @@ says so before it saves **(call)**.
 
 The editor also warns when the list note opens a fenced code block, a comment (`%%`) or a math
 block (`$$`) without closing it, because an unclosed block hides every item below it **(owner,
-2026-10-20)**.
+2026-10-20)**. It warns the same way about an HTML block that CommonMark runs to the end of the
+file when its end is missing, such as `<!--` without `-->` or `<pre>` without `</pre>` **(call)**.
 
 When the list note isn't empty and an item or heading follows it directly, saving the note writes
 one blank line between them **(owner, 2026-10-20)**. Without it, a list note that ends in an HTML
@@ -342,10 +343,18 @@ until a blank line.
   - HTML blocks
   - `%%` comments
   - `$$` math
+- **A `%%` comment or a `$$` block is recognized only when its opening line starts with `%%` or
+  `$$` at column 0 (call):** an indented one may belong to an item's notes, where masking it would
+  change the item's extent. The accepted cost: a top-level comment or math block indented 1 to 3
+  spaces isn't recognized, so checkbox lines inside it become items. Masking also doesn't track
+  HTML blocks such as `<div>`, which end at a blank line, so a fence line inside one, with no blank
+  line before the fence, can leave a later `%%` or `$$` region unmasked.
 - **Other content is kept byte for byte where it is:** paragraphs between items, bullets without
-  a checkbox, and tables.
+  a checkbox, tables, and link reference definitions.
   - How the view shows this content is the builder's choice.
   - It is never lost and never silently reordered.
+  - A setext heading's line is its first line after any link reference definitions that open its
+    paragraph, so those definitions stay untouched content **(call)**.
 
 ### Checklists (call; the format is reserved now)
 
