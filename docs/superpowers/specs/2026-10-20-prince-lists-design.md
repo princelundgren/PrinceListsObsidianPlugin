@@ -688,6 +688,10 @@ From here on the document is for the builder.
   the view.
 - **Pane menu:** add the list view's own items by overriding `onPaneMenu`. Use `file-menu` only for
   "Open as list" among the view's own items, filtered on `leaf?.view instanceof MarkdownView`.
+  - The `file-menu` item also requires `view.file === file`, because `file-menu` also fires for
+    link menus, where the file is the link's target **(call)**.
+- **Switching to Markdown uses the view type `'markdown'`,** which obsidian.d.ts names in the doc
+  comment of `WorkspaceLeaf.isDeferred` ("like MarkdownView for the `markdown` type").
 
 ### Saving and outside changes
 

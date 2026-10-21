@@ -315,10 +315,21 @@ test("lineIndexAt maps a character offset to its line", () => {
   5. After "Open as Markdown", switching to another tab and back leaves this pane as Markdown.
   6. Restarting Obsidian brings the pane back as the list view.
   7. After deleting the frontmatter in Markdown, "Open as list" isn't offered.
-  8. For this check only, log `getFrontMatterInfo(text).contentStart` and
-     `contentStartLine(text)` at `onload` for `---\nprincelists: true\n---\nNote` and for the
+  8. With a list open in the list view, open the same note as Markdown in a second pane and
+     delete its `princelists: true` line. Expected: about 2 seconds after the edit, once the
+     Markdown pane saves, the list pane switches to Markdown without an error in the developer
+     console, and "Open as list" isn't offered for it.
+  9. For this check only, log `getFrontMatterInfo(text).contentStart`, `contentStartLine(text)`
+     and `isListText(text)` at `onload` for `---\nprincelists: true\n---\nNote` and for the
      same text with CRLF endings, and don't commit the logging. Expected: `contentStartLine` is 3
-     for both. Record both `contentStart` values in the notes file.
+     and `isListText` is `true` for both. Record both `contentStart` values in the notes file.
+  10. After check 8, press Back in the pane that switched. Expected: it goes to the previous note,
+      with no flicking between list and Markdown and no console error. Also, after a restart with
+      a list note whose marker was removed outside Obsidian, the pane opens as Markdown with no
+      error.
+  11. After "Open as Markdown", "Open as list" is offered in the pane's ⋯ menu and in the command
+      palette, opens the list view, and the pane stays a list after switching tabs and back.
+      Right-clicking a link to `Spike list.md` offers no "Open as list".
 - [ ] **Step 8: Repeat checks 1, 2, 4 and 5 on the iPhone.**
 - [ ] **Step 9: Check a note from outside the vault on the Mac** (spec, Implementation notes,
   "Notes outside the vault").
