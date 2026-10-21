@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 import { splitLines } from '../../src/core/lines';
-import { maskBlocks, parseList } from '../../src/core/parse';
+import { maskBlocks, parseList, topLevelBlocks } from '../../src/core/parse';
 
 const readFixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8');
 const fixture = (name: string) => splitLines(readFixture(name));
@@ -74,6 +74,24 @@ test('keeps a lazy line in its item and indents new notes to the content column'
 	expect(parseList(fixture('lazy.md'), 0).sections[0]?.items).toEqual([item(0, 2), item(2, 3)]);
 	expect(parse('- [ ] c\n lazy\n').sections[0]?.items).toEqual([item(0, 2)]);
 	expect(parse('100. [ ] x\n\tlazy\n').sections[0]?.items).toEqual([item(0, 2, '     ')]);
+});
+
+test('topLevelBlocks splits lists into items, masks %% regions and ends blocks before blank lines', () => {
+	const lines = splitLines('---\nx: 1\n---\nNote\n\n- [ ] a\n\n\tn\n- b\n## H\n%%\n- [ ] y\n%%\n\n');
+	expect(topLevelBlocks(lines, 3)).toEqual([
+		{ type: 'paragraph', start: 3, end: 4 },
+		{ type: 'item', start: 5, end: 8 },
+		{ type: 'item', start: 8, end: 9 },
+		{ type: 'heading', start: 9, end: 10 },
+		{ type: 'code_block', start: 10, end: 13 },
+	]);
+});
+
+test('notes that open with indented code take the content-column indent, not the code indent', () => {
+	expect(parse('- [ ] a\n\n\t\tcode\n\n\tpara\n').sections[0]?.items).toEqual([item(0, 5)]);
+	expect(parse('- [ ] a\n\n      code\n\n    para\n').sections[0]?.items).toEqual([item(0, 5)]);
+	expect(parse('- [ ] a\n\n     five\n').sections[0]?.items).toEqual([item(0, 3, '     ')]);
+	expect(parse('100. [ ] x\n\n         code\n').sections[0]?.items).toEqual([item(0, 3, ' '.repeat(5))]);
 });
 
 test('notes that reach the content column exactly keep their indent, and column 4 takes a tab', () => {
