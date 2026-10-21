@@ -139,6 +139,10 @@ These are wanted later, roughly in this order. The file format already leaves ro
   `registerEditorExtension` for the editor.
 - **A sidebar of all lists built on Bases.** A Base filtered on `princelists: true` already lists
   them all, and `registerBasesView` (since 1.10.0) lets a plugin add its own Bases view type.
+- **Page previews of links in a card (owner, 2026-10-20).** A preview on hover needs the
+  `hover-link` event. `obsidian.d.ts` names it only in the docs of `registerHoverLinkSource` and
+  `HoverLinkSource`, with no payload type, so previews wait until Obsidian documents the payload.
+  Links in a card still open, and on the Mac they still get Obsidian's link menu.
 
 **Not possible through the official API.** These limits matter for replacing a standalone todo app:
 
@@ -274,6 +278,11 @@ The editor also warns when the list note opens a fenced code block, a comment (`
 block (`$$`) without closing it, because an unclosed block hides every item below it **(owner,
 2026-10-20)**.
 
+When the list note isn't empty and an item or heading follows it directly, saving the note writes
+one blank line between them **(owner, 2026-10-20)**. Without it, a list note that ends in an HTML
+block such as `<div>x</div>` would swallow the first item: CommonMark continues that kind of block
+until a blank line.
+
 ### Sections
 
 - **A heading that isn't inside an item starts a section (owner).**
@@ -376,8 +385,10 @@ block (`$$`) without closing it, because an unclosed block hides every item belo
 | a time that can't be read | long ago | at once |
 | a time more than 24 hours in the future | long ago | at once |
 
-- **Several marks on one line,** for example after a Sync merge: the earliest counts. The plugin
-  collapses them the next time it edits that line.
+- **Several marks on one line (call),** for example after a Sync merge: the earliest mark whose
+  time can be read and is no more than 24 hours ahead counts. When there is none, the line counts
+  as done long ago. The plugin collapses them the next time it edits that line, keeping the mark
+  with the earliest time that can be read, or the first one when none can be read.
 - **The plugin never adds a `✔` to a line it didn't tick.** That would be a write the user didn't
   make in the view.
 - **A leftover `✔` on an open line** is ignored. It is removed the next time that line is edited.
@@ -391,7 +402,8 @@ block (`$$`) without closing it, because an unclosed block hides every item belo
 - **Why:** this kind of view saves when it closes. If the text it hands back differed from the
   file in any way the user didn't cause, closing a list would write to the file, which is a
   background write.
-- **A drag moves an item's whole block.** The blank lines between items stay where they were.
+- **A drag moves an item's whole block.** Only items change order: the blank lines between
+  items, and content the plugin leaves alone, stay where they were **(call)**.
 
 ## The list view
 
@@ -456,12 +468,15 @@ block (`$$`) without closing it, because an unclosed block hides every item belo
 - **Selecting (call):** clicking an item, anywhere except its checkbox, opens its card and selects
   it. Clicking empty space closes the card and clears the selection.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
-  the list scrolls, on the Mac and the iPhone.
+  the list scrolls, on the Mac and the iPhone. Its accessible name is "New item" **(call)**.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.
   - Enter in a title adds another item below it, and Escape closes the card.
-  - If an item's title is still empty when its card closes, the item is removed **(call)**.
+  - A new item is removed again if you close its card while its title is still empty and it has
+    no notes **(call)**. Closing means Escape, a click elsewhere, "+", Enter or starting a drag.
+    Closing the list, switching files or a change from outside never removes an item, and an item
+    that existed before the card opened is never removed this way.
 - **An empty new list (call)** shows a gray "Notes" placeholder under the title. Pressing Enter in
   the title starts the first item.
 - **Hidden archived items don't count for positions (call):**
@@ -486,10 +501,14 @@ block (`$$`) without closing it, because an unclosed block hides every item belo
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them.
 - **On both the Mac and the iPhone,** the open card has a ⋯ button with the same item actions. On
-  the iPhone this is the only way to reach them **(owner)**.
+  the iPhone this is the only way to reach them **(owner)**. The button's accessible name is "Item
+  actions" **(call)**.
 - **On the iPhone, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading and Delete heading **(owner, 2026-10-20)**. It's a tap, not a long-press, so there is
   still no long-press menu.
+- **New heading below (owner, 2026-10-20)** adds an empty heading at that point and opens the
+  same field as Rename heading, with the cursor in it. Escape, or an empty name, removes the
+  heading again.
 - **A new heading inserted below an item takes the items after it (call).** This is the same as
   typing that heading into the raw file at that point.
 - **Undoing a delete (call):** after a delete, a message with an **Undo** button shows for a few
@@ -503,6 +522,9 @@ block (`$$`) without closing it, because an unclosed block hides every item belo
 
 - **Mac (1a):** drag items with the mouse, within and between sections. An item's notes move with
   it.
+  - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
+    item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
+    drag, a click reopens the card.
 - **iPhone (1b, owner):**
   - Hold an item and then move to drag it.
   - Holding an item row never opens a menu.
@@ -663,7 +685,7 @@ From here on the document is for the builder.
 - **On restart, background tabs may be deferred views.** Check `instanceof` before calling into
   the view.
 - **Pane menu:** add the list view's own items by overriding `onPaneMenu`. Use `file-menu` only for
-  "Open as list", filtered on `leaf?.view instanceof MarkdownView`.
+  "Open as list" among the view's own items, filtered on `leaf?.view instanceof MarkdownView`.
 
 ### Saving and outside changes
 
@@ -692,8 +714,10 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   Without a Component, embeds don't load and Obsidian logs a memory leak (observed).
 - **The rendered output does nothing on click.**
   - Delegate `a.internal-link` clicks to
-    `workspace.openLinkText(href, file.path, Keymap.isModEvent(evt))`.
-  - Trigger `hover-link` for previews. Kanban's `src/helpers/renderMarkdown.ts` does both.
+    `workspace.openLinkText(href, file.path, Keymap.isModEvent(evt))`, as Kanban's
+    `src/helpers/renderMarkdown.ts` does.
+  - No page previews on hover **(owner, 2026-10-20)**. They would need the `hover-link` event,
+    and Obsidian documents no payload for it, so they wait until it does (see "Not in step one").
   - On the Mac (`Platform.isDesktop`), handle `contextmenu` on `a.internal-link`: create a `Menu`,
     let `workspace.handleLinkContextMenu(menu, linktext, file.path)` fill it, and show it with
     `menu.showAtMouseEvent(evt)`. The method returns a `boolean` whose meaning isn't documented,
@@ -856,8 +880,10 @@ Checked 2026-10-20.
     `registerObsidianProtocolHandler`, `Plugin.registerCliHandler` (1.12.2)
   - look and feel: `setIcon` (Lucide icons); `addStatusBarItem` ("Not available on mobile");
     `Platform`
-  - absent: an API for adding actions to the New tab screen, and any notification API beyond
-    `Notice`
+  - absent: an API for adding actions to the New tab screen, any notification API beyond
+    `Notice`, and a payload type for the `hover-link` event, which only the docs of
+    `registerHoverLinkSource` (1.1.0) and `HoverLinkSource` name. Step one uses neither the event
+    nor that method.
 - **Obsidian docs:**
   - custom views (docs.obsidian.md, Views)
   - mobile limits (Mobile development)

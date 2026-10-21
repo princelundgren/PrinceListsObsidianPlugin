@@ -29,7 +29,10 @@ first. This plan cites its sections by heading.
 **How work lands:**
 - The repo is open source (MIT). `AGENTS.md` holds the rules every change follows, and
   `CONTRIBUTING.md` the pull request process.
-- Each task lands as its own pull request, and the owner squash-merges it.
+- Each task lands as its own pull request, and the owner squash-merges it. The squash uses the
+  pull request's title and description as the commit message, so "Commit with the message X"
+  means the pull request's title is X. Details meant for `main`, such as the sample plugin's SHA,
+  go in the pull request description.
 - Each task's pull request checks the design against the change and updates it, or says in one
   line that it still holds (`AGENTS.md`, "Keep the design true").
 - **`<test vault>`** below means the path to a test vault on the Mac that holds no real notes and
@@ -66,7 +69,9 @@ first. This plan cites its sections by heading.
     colors.
   - Interface text is in sentence case. Menu, command and button labels are exactly these:
     "New list", "Open as list", "Open as Markdown", "Show archived", "New item below",
-    "New heading below", "New item", "Delete", "Rename heading", "Delete heading", "Undo".
+    "New heading below", "New item", "Item actions", "Delete", "Rename heading",
+    "Delete heading", "Undo". The icon-only "+" and ⋯ buttons get the accessible names
+    (`aria-label`) "New item" and "Item actions".
 - **Dependencies:** the only runtime dependency is `commonmark`.
 - **Privacy:** no telemetry, and no network requests unless one is agreed on in an issue first
   (the design's privacy rule).
@@ -80,7 +85,7 @@ first. This plan cites its sections by heading.
 ## Review Focus
 
 1. **A list changed on the iPhone through Sync while you're typing in it on the Mac.** The text
-   you're typing must survive, and the redraw must show the phone's change (Task 7's `mapLine`
+   you're typing must survive, and the redraw must show the phone's change (Task 7a's `mapLine`
    test, Task 9 manual check 3).
 2. **Items pasted by hand from another app,** with `*` bullets, notes indented by 4
    spaces, or CRLF line endings. They must parse as items with notes, and nothing may be lost
@@ -88,7 +93,7 @@ first. This plan cites its sections by heading.
 3. **A list with hundreds of items.** It must open and scroll without lag on the iPhone, and
    parsing 1500 items must take under 1 s (Task 6 test, Task 8 manual check).
 4. **Accented letters, emoji and NFD text** in titles and notes must round-trip byte for byte
-   (Task 1 test, Task 7 test).
+   (Task 1 test, Task 7a test).
 5. **Other plugins' code blocks** (```` ```tasks ```` queries, Kanban or Excalidraw embeds) in the
    list note or between items must be left alone and never read as items (Task 6 fixture).
 
@@ -115,7 +120,7 @@ first. This plan cites its sections by heading.
 
 - [ ] **Step 1: Copy the scaffold.** Copy `package.json`, `tsconfig.json`, `esbuild.config.mjs`,
   `eslint.config.mts`, `.npmrc` and `version-bump.mjs` from `obsidianmd/obsidian-sample-plugin`
-  `master`. Record the commit SHA in the commit message.
+  `master`. Record the commit SHA in the pull request description.
   - Move `typescript` to `~6.0.3`. Not 7.x: TypeScript 7.0 ships no compiler API (one is planned
     for 7.1). The tilde keeps it inside typescript-eslint's supported range, `>=4.8.4 <6.1.0`.
   - In `tsconfig.json`, make these two changes for TypeScript 6:
@@ -205,9 +210,14 @@ test("lineIndexAt maps a character offset to its line", () => {
   order of precedence. `splitLines("")` is `[]`.
 - [ ] **Step 7: Run** `npm test && npm run lint && npm run build`. Expected: all pass, and
   `main.js` exists.
-- [ ] **Step 8: Write `.github/workflows/ci.yml`.** On every push and pull request it runs
-  `npm ci`, `npm run lint`, `npm run build` and `npm test` on `ubuntu-latest` with Node 26. Node 26
-  is Active LTS from 2026-10-28, and Node 24 has been in maintenance since 2026-10-20.
+- [ ] **Step 8: Write `.github/workflows/ci.yml`.** On pushes to `main` and on pull requests, it
+  runs `npm ci`, `npm run lint`, `npm run build` and `npm test` on `ubuntu-latest` with Node 26.
+  These are `docs.yml`'s triggers without its `edited` type, which only its pull request text
+  check needs. A push to a pull request's branch then runs CI once, not twice.
+  Node 26 is Active LTS from 2026-10-28, and Node 24 has been in maintenance since 2026-10-20.
+  - The test step sets `env: TZ: America/New_York`, so code that works in local time, such as
+    `formatStamp` and the archived rule, is tested at an offset from UTC with daylight saving
+    time.
   - Pull requests run it, so it follows the read-only pattern of the docs check's
     `.github/workflows/docs.yml`, not the release workflow's: `permissions: contents: read`,
     `actions/checkout@v7` with `persist-credentials: false`, and `actions/setup-node@v7` with
@@ -236,7 +246,8 @@ test("lineIndexAt maps a character offset to its line", () => {
 
 **Files:**
 - Create: `src/constants.ts`, `src/obsidian/marker.ts`, `src/obsidian/switch.ts`,
-  `src/view/list-view.ts`, `src/core/frontmatter.ts`, `tests/core/frontmatter.test.ts`
+  `src/view/list-view.ts`, `src/core/frontmatter.ts`, `tests/core/frontmatter.test.ts`,
+  `docs/superpowers/notes/<date>-spike-open.md`
 - Modify: `src/main.ts`
 
 **Interfaces:**
@@ -249,10 +260,14 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `isListText(text: string): boolean` and `contentStartLine(text: string): number`, in
     `src/obsidian/marker.ts`. Both use `getFrontMatterInfo` and `parseYaml`; frontmatter counts
     only when `from` is right after a leading `---` at offset 0. `isListText` returns `false`
-    when `parseYaml` throws. A file that is only frontmatter has `contentStartLine` equal to its
-    line count, so it has no list note to overwrite.
+    when `parseYaml` throws. `contentStartLine` is `lineIndexAt(text, info.contentStart - 1) + 1`,
+    the line after the closing `---`, whichever side of that line's break `contentStart` falls
+    on, and 0 when no frontmatter counts. A file that is only frontmatter has `contentStartLine`
+    equal to its line count, so it has no list note to overwrite.
   - `class PrinceListView extends TextFileView`, with a field `text: string` that holds the exact
-    file text, and `getViewType()` returning `VIEW_TYPE_LIST`.
+    file text, and `getViewType()` returning `VIEW_TYPE_LIST`. `text` is separate from the
+    inherited `TextFileView.data` because it holds each keystroke, for `getViewData` and
+    Obsidian's merge.
   - From `src/obsidian/switch.ts`:
     - `registerAutoSwitch(plugin: Plugin): void`
     - `openAsList(leaf: WorkspaceLeaf, file: TFile): Promise<void>`
@@ -266,11 +281,12 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `getViewData()` returns `this.text`.
   - `setViewData(data, clear)` sets `this.text`, re-renders a placeholder (the file's basename in
     an `h2` plus a line that reads "List view"), and switches the pane to Markdown when
-    `!isListText(data)`.
+    `!isListText(data)`. It switches with `leaf.setViewState` directly, not through
+    `openAsMarkdown`, so the leaf doesn't join `markdownChosen`: the user didn't choose Markdown.
   - `clear()` empties `this.text`.
   - Leave `canAcceptExtension` at its default.
   - In `setState(state, result)`, call super and then set `result.history = false` (spec,
-    Implementation notes, "Back history").
+    Implementation notes, "Opening and switching views").
 - [ ] **Step 4: Implement `registerAutoSwitch`** exactly as the spec's Implementation notes,
   "Opening and switching views", describe it:
   - Listen to `file-open`.
@@ -299,6 +315,10 @@ test("lineIndexAt maps a character offset to its line", () => {
   5. After "Open as Markdown", switching to another tab and back leaves this pane as Markdown.
   6. Restarting Obsidian brings the pane back as the list view.
   7. After deleting the frontmatter in Markdown, "Open as list" isn't offered.
+  8. For this check only, log `getFrontMatterInfo(text).contentStart` and
+     `contentStartLine(text)` at `onload` for `---\nprincelists: true\n---\nNote` and for the
+     same text with CRLF endings, and don't commit the logging. Expected: `contentStartLine` is 3
+     for both. Record both `contentStart` values in the notes file.
 - [ ] **Step 8: Repeat checks 1, 2, 4 and 5 on the iPhone.**
 - [ ] **Step 9: Check a note from outside the vault on the Mac** (spec, Implementation notes,
   "Notes outside the vault").
@@ -366,7 +386,8 @@ test("lineIndexAt maps a character offset to its line", () => {
       title: string;
       marks: string;       // the run of ✔ fields right before the tail, including the leading
                            // space, or ""
-      tail: string;        // trailing Tasks fields, #tags and block ID, verbatim, or ""
+      tail: string;        // trailing Tasks fields, #tags, block ID and trailing whitespace,
+                           // verbatim, or ""
     }
     ```
   - `parseItemLine(text: string): ItemLineParts | null`, which returns `null` for a line that
@@ -378,7 +399,14 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `untickLine(text: string): string`
   - `setTitle(text: string, title: string): string`
   - `isRepeating(text: string): boolean`
-  - `TASKS_SIGNIFIERS`, the 18 emoji from the spec's "Where ✔ goes".
+  - `TASKS_SIGNIFIERS`, the 18 emoji from the spec's "Where `✔` goes".
+  - `MARK_PATTERN`, a `RegExp` without the `g` flag that matches one `✔` mark, as Step 3 defines
+    it. A caller that needs every match uses a copy with the flag,
+    `new RegExp(MARK_PATTERN, "g")`, so no shared `lastIndex` carries over between calls.
+  - `markTime(mark: string): Date | null`, for one `✔` mark or one `✅ YYYY-MM-DD` field:
+    - `✔ YYYY-MM-DD HH:mm` gives that local time.
+    - A date-only `✔`, or a `✅`, gives that day at 23:59:59.999 local time.
+    - A date or time that doesn't exist, such as `✔ 2026-13-01`, gives `null`.
 
 - [ ] **Step 1: Write the failing tests** with these exact pairs (`now = new Date(2026, 9, 20, 23, 55)`):
 
@@ -392,21 +420,34 @@ test("lineIndexAt maps a character offset to its line", () => {
 | `untickLine` | `- [X] a` | `- [ ] a` |
 | `setTitle(…, "b")` | `- [ ] a ✔ 2026-10-19 10:00 📅 2026-10-30` | `- [ ] b 📅 2026-10-30` (a leftover mark on an open line is dropped) |
 | `setTitle(…, "b")` | `- [x] a ✔ 2026-10-20 09:07 ✔ 2026-10-20 09:00` | `- [x] b ✔ 2026-10-20 09:00` (the earliest is kept) |
+| `setTitle(…, "b")` | `- [x] a ✔ 2026-10-20 ✔ 2026-10-20 09:00` | `- [x] b ✔ 2026-10-20 09:00` (a date-only mark means the end of its day) |
 | `isRepeating` | `- [ ] a 🔁 every week 📅 2026-10-30` | `true` |
 | `parseItemLine` | `- [ ] a ✔\uFE0F 2026-10-20 10:00` | `marks` is `" ✔\uFE0F 2026-10-20 10:00"` (U+FE0F accepted) |
 | `parseItemLine` | `- bullet`, `## h`, `-[ ] x`, `- [ab] x` | `null` |
+| `markTime` | `✔ 2026-10-20 09:07` | `new Date(2026, 9, 20, 9, 7)` |
+| `markTime` | `✔ 2026-10-20` | `new Date(2026, 9, 20, 23, 59, 59, 999)` |
+| `markTime` | `✅ 2026-10-20` | `new Date(2026, 9, 20, 23, 59, 59, 999)` |
+| `markTime` | `✔ 2026-13-01` | `null` |
 
   Also test that `joinItemLine(parseItemLine(t)!) === t` for every input above that parses, and
   that `setTitle(t, parseItemLine(t)!.title) === t` for lines with no doubled or leftover marks.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL.
 - [ ] **Step 3: Implement.**
   - **Marks:** a mark is `✔\uFE0F? +\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?`. A `✔` followed by
-    anything else is title text.
+    anything else is title text. `setTitle`'s collapse keeps the mark with the earliest time that
+    `markTime` can read, and the first mark when it can read none. A `null` time never counts as
+    earliest.
   - **Building `tail`:** strip from the end of the line, in this order:
-    1. a trailing ` ^[A-Za-z0-9-]+`
-    2. repeatedly, a Tasks field or `#tag`, using the field patterns ported from Tasks'
-       `src/TaskSerializer/DefaultTaskSerializer.ts` (`main` branch), including 🔁's free-text
-       value
+    1. trailing whitespace, because Tasks trims the line before it strips the block link
+    2. a trailing ` ^[A-Za-z0-9-]+`
+    3. repeatedly, a Tasks field or `#tag`, using the field patterns ported from Tasks'
+       `src/TaskSerializer/DefaultTaskSerializer.ts` at the `8.6.0` tag, the release the spec
+       verified, including 🔁's free-text value. Port from the tag, not `main`, which keeps
+       moving; the file at the tag is byte-identical to `main` at `fa04fc1`. Cite the file, the
+       tag and Tasks' MIT license in a comment.
+  - **The `⛔` pattern stays linear:** Tasks' id list also allows spaces after each id, which
+    backtracks exponentially on a long line. Leave those out: the text is trimmed first, so the
+    pattern accepts the same lines.
   - **Where marks go:** they are matched right before `tail`.
 - [ ] **Step 4: Run** `npm test`. Expected: PASS.
 - [ ] **Step 5: Commit** with the message "Parse and edit item lines without breaking Tasks
@@ -416,10 +457,13 @@ test("lineIndexAt maps a character offset to its line", () => {
 
 **Files:**
 - Create: `src/core/archive.ts`, `tests/core/archive.test.ts`
+- Modify: `src/core/item-line.ts`
 
 **Interfaces:**
-- Consumes: `parseItemLine` and `isDoneStatus`.
+- Consumes: `parseItemLine`, `isDoneStatus`, `MARK_PATTERN` and `markTime`.
 - Produces:
+  - `DONE_DATE_PATTERN`, in `src/core/item-line.ts`: Task 4's internal `DONE_DATE_FIELD`, Tasks'
+    `✅ YYYY-MM-DD` field, exported without the `g` flag.
   - `ARCHIVE_DELAY_MS = 86_400_000`
   - `type DoneAt = { kind: "at"; time: Date } | { kind: "longAgo" }`
   - `doneAt(text: string, now: Date): DoneAt | null`, which returns `null` for an open line or a
@@ -440,13 +484,23 @@ test("lineIndexAt maps a character offset to its line", () => {
 | `- [x] a ✔ 2026-10-21 11:00` | `at` that time (23 h ahead), not archived |
 | `- [x] a ✔ 2026-10-21 12:00` | `at` that time (exactly 24 h ahead), not archived |
 | `- [x] a ✔ 2026-10-20 09:07 ✔ 2026-10-20 09:00` | `at` 09:00 |
+| `- [x] a ✔ 2026-10-20 09:00 ✔ 2026-13-45 10:00` | `at` 09:00 (the unreadable mark is skipped) |
 | `- [x] a ✔ 2026-10-20 09:00 ✅ 2026-10-19` | `at` 2026-10-19 23:59:59.999 (the earliest) |
 | `- [ ] a ✔ 2026-10-19 10:00` | `null` |
 | `- [-] a`, `- [/] a`, `- [X] a` | `longAgo` (any non-space status is done) |
 
-- [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS. "End of day"
-  means `new Date(y, m, d, 23, 59, 59, 999)`.
-- [ ] **Step 3: Commit** with the message "Work out when a done item is archived".
+- [ ] **Step 2: Export `DONE_DATE_PATTERN`.** In `src/core/item-line.ts`, export the existing
+  `DONE_DATE_FIELD` pattern as `DONE_DATE_PATTERN`, without the `g` flag. `untickLine` keeps
+  removing every `✅` field, with a copy that has the flag.
+- [ ] **Step 3: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
+  - `doneAt` finds each `✔` mark in `marks` with `MARK_PATTERN` and each `✅` field in `tail`
+    with `DONE_DATE_PATTERN`, and times every one with `markTime`. It reads no date itself, so
+    the end-of-day rule lives only in `markTime`. The pattern also matches the spaces before
+    `✅`, and `markTime` gives `null` for them, so trim each match first.
+  - A mark is readable when `markTime` doesn't give `null` and the time is no more than 24 h
+    after `now`. `doneAt` gives `at` the earliest readable time, and `longAgo` only when no mark
+    is readable, including a done line with no mark at all.
+- [ ] **Step 4: Commit** with the message "Work out when a done item is archived".
 
 ### Task 6: Find sections and items
 
@@ -470,8 +524,16 @@ test("lineIndexAt maps a character offset to its line", () => {
     }
     ```
   - `parseList(lines: readonly Line[], contentStart: number): ListModel`
+  - `maskBlocks(lines: readonly Line[], contentStart: number): { text: string; unclosedStart: number | null }`.
+    `text` is the copy that `parseList` parses: the lines from `contentStart` on, joined, with each
+    top-level `%%` and `$$` region masked as Step 3 says. `unclosedStart` is the index of the line
+    that opens a fenced code block, a `%%` comment or a `$$` math block that never closes, or
+    `null`. Such a block runs to the end of the file, so there is at most one.
   - Line numbers are 0-based indexes into `lines`, and every `end` is exclusive.
-  - `endLine` excludes trailing blank lines.
+  - `ItemBlock.endLine` excludes trailing blank lines.
+  - `Section.endLine` is the next heading's line, or the end of the file, less trailing blank
+    lines, so untouched content at the end of a section counts. For an unnamed section with no
+    items, it is `listNote.end`.
   - `notesIndent` is the leading whitespace of the first non-blank notes line when that line
     reaches the item's content column. Otherwise, when the item has no notes or that line is a
     lazy line (indented less than the content column), it is `"\t"` if the content column is 4 or
@@ -505,7 +567,7 @@ test("lineIndexAt maps a character offset to its line", () => {
     `notesIndent === "     "` (five spaces).
   - **`title-heading.md`:** `- [ ] a\n\t---\n- [ ] b` is two items, `{titleLine: 0, endLine: 2}`
     and `{titleLine: 2, endLine: 3}`. The plugin's blank line between title and notes applies on
-    write (Task 7).
+    write (Task 7a).
   - **`trailing-whitespace.md`:** `- [ ] a  \n\n\tnote \t\n  \n- [ ] b\t\n` (check that the file
     keeps its trailing whitespace) is two items, `{titleLine: 0, endLine: 3}` and
     `{titleLine: 4, endLine: 5}`. The spaces-only line 3 counts as blank.
@@ -516,16 +578,16 @@ test("lineIndexAt maps a character offset to its line", () => {
   - **`unclosed.md`:** `- [ ] a\n\n%%\n- [ ] b\n- [ ] c\n`, a comment that is never closed. Item
     a parses; from the `%%` line to the end of the file is one `untouched` block, so b and c are
     not items (CommonMark closes an unclosed fence at the end of the document, and the `%%` mask
-    turns the comment into a fence).
+    turns the comment into a fence). `maskBlocks(lines, 0).unclosedStart` is 2.
   - **CRLF:** `example.md` converted to CRLF in the test gives the same model.
   - **Speed:** 1500 generated items under 10 headings parse in under 1000 ms.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL.
 - [ ] **Step 3: Implement.**
   - Parse with commonmark.js from `contentStart` on. Map `sourcepos` lines back to indexes into
     `lines`.
-  - Before parsing, mask top-level `%%` and `$$` regions in a copy used only for parsing. Rewrite
-    each region's opening and closing delimiter lines to a fence longer than any fence inside the
-    region, so the line count stays the same.
+  - Before parsing, `maskBlocks` masks top-level `%%` and `$$` regions in a copy used only for
+    parsing. It rewrites each region's opening and closing delimiter lines to a fence longer than
+    any fence inside the region, so the line count stays the same.
   - A top-level list item is an `ItemBlock` when `parseItemLine` accepts its first line.
     Anything else at the top level is either the list note (before the first heading or item) or
     `untouched`.
@@ -533,16 +595,31 @@ test("lineIndexAt maps a character offset to its line", () => {
 - [ ] **Step 5: Commit** with the message "Find sections and items with CommonMark's own list
   rules".
 
-### Task 7: Edits and the guarded write
+### Task 7a: Item edits, line endings and the guarded write
+
+Task 7 lands as two pull requests, 7a and then 7b. Its edits are split by responsibility into
+item edits, headings, the list note, and `mapLine` with the guard, each with its own test file, so
+every file stays under about 300 lines and each pull request stays reviewable.
 
 **Files:**
-- Create: `src/core/edit.ts`, `src/core/guard.ts`, `tests/core/edit.test.ts`,
+- Create: `src/core/edit-items.ts`, `src/core/guard.ts`, `tests/core/edit-items.test.ts`,
   `tests/core/guard.test.ts`
+- Modify: `src/core/lines.ts`, `tests/core/lines.test.ts`
 
 **Interfaces:**
-- Consumes: Tasks 1, 4 and 6.
-- Produces, in `src/core/edit.ts`. Each function returns a new `Line[]`, or `null` where its
-  signature says so, and inserts new lines with `dominantEol`.
+- Consumes: `Line`, `splitLines`, `joinLines` and `dominantEol` (Task 1); `parseItemLine`,
+  `isDoneStatus`, `tickLine`, `untickLine`, `setTitle` and `isRepeating` (Task 4); `ItemBlock`,
+  `Section`, `ListModel` and `parseList` (Task 6).
+- Produces, in `src/core/lines.ts`:
+  `spliceLines(lines: readonly Line[], start: number, deleteCount: number, insert: readonly Line[]): Line[]`.
+  It splices, then sets the endings at the end of the file as the Global Constraints' "Writing to
+  files" says. Every edit in 7a and 7b writes through it.
+- Produces, in `src/core/edit-items.ts`. Each function returns a new `Line[]` and inserts new
+  lines with `dominantEol`. Each except `moveItem` replaces one run of lines that starts at the
+  edited item's `titleLine` (just after it for notes), or at the `titleLine` an insert returns:
+  every line before the run stays where it was, and every line after it shifts by the change in
+  length. Apart from that run, only the endings at the end of the file can change, which moves no
+  line. Task 9 relies on this.
   - `toggleItem(lines, item: ItemBlock, now: Date): Line[]`, which throws `RepeatingItemError`
     when it would tick a 🔁 line.
   - `insertItem(lines, model, after: ItemBlock | null, title: string): { lines: Line[]; titleLine: number }`.
@@ -551,40 +628,36 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `insertItemInSection(lines, model, section: Section, title: string): { lines: Line[]; titleLine: number }`,
     which adds the item as the first under that heading. For the unnamed top section it goes where
     `insertItem` puts it with `after === null`.
-  - `deleteItem(lines, item): Line[]`
+  - `deleteItem(lines, item): Line[]`. It removes the item's lines and, when the item sits
+    between two gaps, the gap after it, so no double blank line is left.
   - `moveItem(lines, model, item, to: { after: ItemBlock } | { firstIn: Section }): Line[]`.
     `{ firstIn }` puts the item where `insertItemInSection` would put a new one.
-  - `insertHeading(lines, model, at: { afterItem: ItemBlock } | { afterSection: Section }, text: string): { lines: Line[]; headingLine: number }`.
-    This writes `## text` at the item's or the section's `endLine`. A section's `endLine` comes
-    after its hidden archived rows, so they stay in their section (spec, "Selecting and
-    adding").
-  - `deleteHeading(lines, section): Line[]`
-  - `setHeadingText(lines, section, text: string): Line[] | null`. It rewrites only the heading's
-    own lines and keeps the heading's level: the `#` run, any indent, any closing `#`s and the line
-    ending stay as written. A setext heading keeps its `===` or `---` underline, and its content
-    lines become one line holding the text. It returns `null` when the result wouldn't parse as a
-    heading of the same level whose raw content is exactly `text`. Raw content is the source
-    before inline parsing: for an ATX heading, what lies between the `#` run and any closing
-    sequence, without leading or trailing spaces and tabs; for a setext heading, its content
-    lines.
-  - `getItemNotes(lines, item): string`. It removes `notesIndent` from each notes line that starts
-    with it, and all leading whitespace from a lazy line.
-  - `setItemNotes(lines, item, markdown: string): Line[]`
+  - `getItemNotes(lines, item): string`. It removes up to `notesIndent`'s width of indentation
+    from each notes line, counting columns with a tab moving to the next multiple of 4, so a tab
+    and 4 spaces strip alike. A tab that crosses that width leaves its remaining columns as
+    spaces, as CommonMark does. It removes all leading whitespace from a lazy line.
+  - `setItemNotes(lines, item, markdown: string): Line[]`. It drops trailing blank lines from
+    `markdown` first, because the editor writes on every keystroke: an Enter at the end would
+    otherwise leave a stray blank line outside the item.
   - `setItemTitle(lines, item, title: string): Line[]`
-  - `getListNote(lines, model): string`
-  - `setListNote(lines, model, markdown: string): Line[]`
-  - `listNoteWouldRestructure(markdown: string): boolean`
-  - `listNoteUnclosedBlock(markdown: string): boolean`, true when the list note opens a fenced code
-    block, a `%%` comment or a `$$` math block and never closes it
   - `class RepeatingItemError extends Error`
+- Produces, in `src/core/guard.ts`:
+  - `guardedApply(current: string, expected: string, next: string): string`, which returns `next`
+    when `current === expected`, and `current` otherwise.
   - `mapLine(oldLines: readonly Line[], newLines: readonly Line[], line: number): number | null`.
     It keeps the common prefix and suffix (lines compare by `text`, and the suffix never overlaps
     the prefix), shifts a line in the suffix by the change in length, and returns `null` inside
     the changed range.
-- Produces, in `src/core/guard.ts`: `guardedApply(current: string, expected: string, next: string): string`,
-  which returns `next` when `current === expected`, and `current` otherwise.
 
-- [ ] **Step 1: Write the failing tests** with exact strings (`now` = 2026-10-20 23:55 local):
+- [ ] **Step 1: Write the failing tests** with exact strings (`now` = 2026-10-20 23:55 local).
+  First add two for `spliceLines` to `tests/core/lines.test.ts`:
+  - `joinLines(spliceLines(splitLines("a\nb"), 2, 0, [{ text: "c", eol: "\n" }]))` is `"a\nb\nc"`:
+    `b` moves off the end and takes LF, and `c` becomes last and takes `b`'s old ending, none.
+  - `joinLines(spliceLines(splitLines("a\r\nb"), 1, 1, []))` is `"a"`: `a` becomes last and takes
+    `b`'s old ending, none.
+
+  The `mapLine` and `guardedApply` rows go in `tests/core/guard.test.ts`, the rest in
+  `tests/core/edit-items.test.ts`:
 
 | Call | Input | Expected |
 |---|---|---|
@@ -595,35 +668,20 @@ test("lineIndexAt maps a character offset to its line", () => {
 | `insertItemInSection(H, "new")` | `- [ ] a\n## H\n- [ ] b\n` | `- [ ] a\n## H\n- [ ] new\n- [ ] b\n` |
 | `deleteItem(a)` | `- [ ] a\n\n\tn\n- [ ] b\n` | `- [ ] b\n` |
 | `deleteItem(b)` | `- [ ] a\n- [ ] b` | `- [ ] a` |
+| `deleteItem(b)` | `- [ ] a\n\n- [ ] b\n\n- [ ] c\n` | `- [ ] a\n\n- [ ] c\n` (one gap is left) |
 | `setItemNotes` | `- [ ] a\n- [ ] b\n` with notes `Buy 6:\n- one\n\nlast` on a | `- [ ] a\n\n\tBuy 6:\n\t- one\n\n\tlast\n- [ ] b\n` |
 | `setItemNotes` | an item with 4-space notes, new notes `x` | the notes line is `    x` |
 | `setItemNotes` | `100. [ ] x\n` with notes `n` | `100. [ ] x\n\n     n\n` (five spaces: a tab would make a code block) |
 | `setItemNotes(…, "")` | `- [ ] a\n\n\tnote\n- [ ] b\n` | `- [ ] a\n- [ ] b\n` |
+| `setItemNotes(…, "x\n\n")` | `- [ ] a\n- [ ] b\n` (item a) | `- [ ] a\n\n\tx\n- [ ] b\n`, the same as notes `x` |
 | `moveItem(a, {after: b})` | `- [ ] a\n\n\tn\n\n- [ ] b\n` | `- [ ] b\n\n- [ ] a\n\n\tn\n` (the gap stays where it was) |
 | `moveItem(a, {after: c})` | `## G\n- [ ] a\n\n- [ ] b\n## K\n- [ ] c\n` | `## G\n- [ ] b\n\n## K\n- [ ] c\n- [ ] a\n` (the gap stays in G, at its end) |
 | `moveItem(b, {firstIn: <top section>})` | `- [ ] a\n- [ ] b` | `- [ ] b\n- [ ] a` |
 | `moveItem(a, {firstIn: H})` | `- [ ] a\n## H\n- [ ] b\n` | `## H\n- [ ] a\n- [ ] b\n` |
-| `insertHeading({afterItem: a}, "H")` | `- [ ] a\n- [ ] b\n` | `- [ ] a\n## H\n- [ ] b\n` |
-| `insertHeading({afterSection: G}, "H")` | `## G\n- [ ] a\n## K\n- [ ] b\n` | `## G\n- [ ] a\n## H\n## K\n- [ ] b\n` |
-| `deleteHeading(H)` | `## G\n- [ ] a\n## H\n- [ ] b\n` | `## G\n- [ ] a\n- [ ] b\n` |
-| `setHeadingText(Kitchen, "Pantry")` | `## Kitchen\n- [ ] a\n` | `## Pantry\n- [ ] a\n` |
-| `setHeadingText(Old, "New")` | `### Old\n- [ ] a\n` | `### New\n- [ ] a\n` |
-| `setHeadingText(Kitchen, "Pantry")` | `## Kitchen\r\n- [ ] a\r\n` | `## Pantry\r\n- [ ] a\r\n` |
-| `setHeadingText(Old, "New")` | `## Old ##\n- [ ] a\n` | `## New ##\n- [ ] a\n` |
-| `setHeadingText(Old, "New")` | `Old\n===\n- [ ] a\n` | `New\n===\n- [ ] a\n` |
-| `setHeadingText(Old, "New")` | `  ## Old\n- [ ] a\n` | `  ## New\n- [ ] a\n` |
-| `setHeadingText(Old, "- [ ] New")` | `Old\n===\n- [ ] a\n` | `null` (it would become an item) |
-| `setHeadingText(Old, "C #")` | `## Old\n- [ ] a\n` | `null` (` #` would close the heading) |
-| `setHeadingText(Old, "New")` | `Old\nline two\n===\n- [ ] a\n` | `New\n===\n- [ ] a\n` |
-| `getListNote` | `---\nprincelists: true\n---\nStuff\n\nMore\n\n- [ ] a\n` | `Stuff\n\nMore` |
-| `setListNote(…, "New note")` | `---\nprincelists: true\n---\nOld\n\n- [ ] a\n` | `---\nprincelists: true\n---\nNew note\n\n- [ ] a\n` |
-| `setListNote(…, "Note")` | `---\nprincelists: true\n---\n` | `---\nprincelists: true\n---\nNote\n` |
+| `moveItem(b, {after: c})` | `## G\n- [ ] a\n\nNote\n\n- [ ] b\n## K\n- [ ] c\n` | `## G\n- [ ] a\n\nNote\n\n## K\n- [ ] c\n- [ ] b\n` (`Note` stays) |
+| `moveItem(first, {after: last})` | `top-level-untouched.md` | `- [ ] last` becomes the first line and `- [ ] first` the last; nothing else changes |
 | `mapLine(old, new, 0)`, `(…, 1)`, `(…, 2)` | old `a\nb\nc\n`, new `a\nx\ny\nc\n` | `0` (before the change), `null` (inside it), `3` (after it) |
 | `guardedApply` | `("x","x","y")`, `("z","x","y")` | `"y"`, `"z"` |
-| `listNoteWouldRestructure` | `Text\n---`; `## H`; `- [ ] x` | `true` |
-| `listNoteWouldRestructure` | `Text\n\n---`; `plain *text*`; `- bullet` | `false` |
-| `listNoteUnclosedBlock` | `` ```js\ncode ``; `%%\nhidden`; `$$\nx` | `true` |
-| `listNoteUnclosedBlock` | `` ```\ncode\n``` ``; `%% inline %%`; `$$x$$`; `plain` | `false` |
 
   Also test:
   - toggling a `🔁` item throws `RepeatingItemError`
@@ -633,38 +691,119 @@ test("lineIndexAt maps a character offset to its line", () => {
     `getItemNotes`'s output leaves the text byte-identical. For `lazy.md` it gives
     `- [ ] a\n\n\tlazy line\n- [ ] b`, and for `title-heading.md` it gives
     `- [ ] a\n\n\t---\n- [ ] b`. For `- [ ] c\n lazy\n` it gives `- [ ] c\n\n\tlazy\n`, and for
-    `100. [ ] x\n\tlazy\n` it gives `100. [ ] x\n\n     lazy\n`.
+    `100. [ ] x\n\tlazy\n` it gives `100. [ ] x\n\n     lazy\n`. For
+    `- [ ] a\n\n\tnote\n\n    more\n`, whose notes mix a tab and 4 spaces, it gives
+    `- [ ] a\n\n\tnote\n\n\tmore\n`: the bytes change, but under commonmark the item holds the
+    same blocks before and after (`paragraph`, `paragraph`, `paragraph`).
   - an NFD title survives `insertItem`
   - `moveItem` never adds or loses a line: across 20 random moves, the sorted texts of
-    `splitLines(joinLines(result))` equal those before, on `example.md` and on `example.md` with
-    its final newline removed
+    `splitLines(joinLines(result))` equal those before, on `example.md`, on `example.md` with
+    its final newline removed, and on `top-level-untouched.md`
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
-  - Every edit splices whole `Line` objects, then sets the endings at the end of the file as the
-    Global Constraints' "Writing to files" says.
-  - **In `moveItem`, items change order but the blank-line gaps stay in their slots,** as in the
-    table's `moveItem` rows. When an item moves to another section, a gap in the section it
-    leaves that no longer sits between two items moves to the end of that section, and the moved
-    item is inserted without a gap.
+  - Every edit splices whole `Line` objects with `spliceLines`, which sets the endings at the end
+    of the file. Only LF and CRLF count as a file's ending, as in the spec, so a file that uses
+    a lone CR gets LF on new lines. Say so in a comment at `spliceLines`.
+  - **In `moveItem`, only items change order.** Blank-line gaps and untouched blocks stay in their
+    slots, as in the table's `moveItem` rows. When an item moves to another section, a gap in the
+    section it leaves that no longer sits between two items moves to the end of that section, and
+    the moved item is inserted without a gap. An untouched block that the move leaves outside a
+    pair of items stays where it is.
   - Notes are written with a blank line between the title and the notes. They are indented with
     the item's `notesIndent`, and their blank lines are written empty.
-- [ ] **Step 3: Commit** with the message "Edit lists by replacing only the lines that change".
+- [ ] **Step 3: Commit** with the message "Edit items by replacing only the lines that change".
+
+### Task 7b: Heading and list-note edits
+
+**Files:**
+- Create: `src/core/edit-headings.ts`, `src/core/edit-list-note.ts`,
+  `tests/core/edit-headings.test.ts`, `tests/core/edit-list-note.test.ts`
+
+**Interfaces:**
+- Consumes: `Line`, `splitLines`, `joinLines` and `dominantEol` (Task 1); `ItemBlock`, `Section`,
+  `ListModel`, `parseList` and `maskBlocks` (Task 6); `spliceLines` (Task 7a).
+- Produces, in `src/core/edit-headings.ts`. Each function returns a new `Line[]`, or `null` where
+  its signature says so, and inserts new lines with `dominantEol`. Like 7a's edits, each replaces
+  one run of lines, here starting at the section's `headingLine` or the `headingLine` an insert
+  returns.
+  - `insertHeading(lines, model, at: { afterItem: ItemBlock } | { afterSection: Section }, text: string): { lines: Line[]; headingLine: number }`.
+    This writes `## text`, or `##` when `text` is empty, at the item's or the section's
+    `endLine`. A section's `endLine` comes after its hidden archived rows, so they stay in their
+    section (spec, "Selecting and adding").
+  - `deleteHeading(lines, section): Line[]`
+  - `setHeadingText(lines, section, text: string): Line[] | null`. It rewrites only the heading's
+    own lines and keeps the heading's level: the `#` run, any indent, any closing `#`s and the line
+    ending stay as written. An empty ATX heading such as `##` gets one space between the `#` run
+    and the text. A setext heading keeps its `===` or `---` underline, and its content lines
+    become one line holding the text. It returns `null` when the result wouldn't parse as a
+    heading of the same level whose raw content is exactly `text`. Raw content is the source
+    before inline parsing: for an ATX heading, what lies between the `#` run and any closing
+    sequence, without leading or trailing spaces and tabs; for a setext heading, its content
+    lines.
+- Produces, in `src/core/edit-list-note.ts`. `setListNote` replaces one run of lines that starts
+  at the list note's `start`, like 7a's edits.
+  - `getListNote(lines, model): string`
+  - `setListNote(lines, model, markdown: string): Line[]`. It drops trailing blank lines from
+    `markdown` first, as `setItemNotes` does. When the new note isn't empty and an item or heading
+    follows the list note directly, it writes one blank line between them, so a note that ends in
+    an HTML block can't swallow the first item (spec, "The list note").
+  - `listNoteWouldRestructure(markdown: string): boolean`, true when
+    `parseList(splitLines(markdown), 0)` finds a heading or an item
+  - `listNoteUnclosedBlock(markdown: string): boolean`, true when
+    `maskBlocks(splitLines(markdown), 0).unclosedStart` isn't `null`: the list note opens a fenced
+    code block, a `%%` comment or a `$$` math block and never closes it
+
+- [ ] **Step 1: Write the failing tests** with exact strings, in `tests/core/edit-headings.test.ts`
+  and `tests/core/edit-list-note.test.ts`:
+
+| Call | Input | Expected |
+|---|---|---|
+| `insertHeading({afterItem: a}, "H")` | `- [ ] a\n- [ ] b\n` | `- [ ] a\n## H\n- [ ] b\n` |
+| `insertHeading({afterSection: G}, "H")` | `## G\n- [ ] a\n## K\n- [ ] b\n` | `## G\n- [ ] a\n## H\n## K\n- [ ] b\n` |
+| `insertHeading({afterItem: a}, "")` | `- [ ] a\n- [ ] b\n` | `- [ ] a\n##\n- [ ] b\n` |
+| `deleteHeading(H)` | `## G\n- [ ] a\n## H\n- [ ] b\n` | `## G\n- [ ] a\n- [ ] b\n` |
+| `deleteHeading(<empty>)` | `- [ ] a\n##\n- [ ] b\n` | `- [ ] a\n- [ ] b\n` |
+| `setHeadingText(Kitchen, "Pantry")` | `## Kitchen\n- [ ] a\n` | `## Pantry\n- [ ] a\n` |
+| `setHeadingText(Old, "New")` | `### Old\n- [ ] a\n` | `### New\n- [ ] a\n` |
+| `setHeadingText(Kitchen, "Pantry")` | `## Kitchen\r\n- [ ] a\r\n` | `## Pantry\r\n- [ ] a\r\n` |
+| `setHeadingText(Old, "New")` | `## Old ##\n- [ ] a\n` | `## New ##\n- [ ] a\n` |
+| `setHeadingText(Old, "New")` | `Old\n===\n- [ ] a\n` | `New\n===\n- [ ] a\n` |
+| `setHeadingText(Old, "New")` | `  ## Old\n- [ ] a\n` | `  ## New\n- [ ] a\n` |
+| `setHeadingText(Old, "- [ ] New")` | `Old\n===\n- [ ] a\n` | `null` (it would become an item) |
+| `setHeadingText(Old, "C #")` | `## Old\n- [ ] a\n` | `null` (` #` would close the heading) |
+| `setHeadingText(Old, "New")` | `Old\nline two\n===\n- [ ] a\n` | `New\n===\n- [ ] a\n` |
+| `setHeadingText(<empty>, "H")` | `- [ ] a\n##\n- [ ] b\n` | `- [ ] a\n## H\n- [ ] b\n` |
+| `getListNote` | `---\nprincelists: true\n---\nStuff\n\nMore\n\n- [ ] a\n` | `Stuff\n\nMore` |
+| `setListNote(…, "New note")` | `---\nprincelists: true\n---\nOld\n\n- [ ] a\n` | `---\nprincelists: true\n---\nNew note\n\n- [ ] a\n` |
+| `setListNote(…, "Note")` | `---\nprincelists: true\n---\n` | `---\nprincelists: true\n---\nNote\n` |
+| `setListNote(…, "New note\n\n")` | `---\nprincelists: true\n---\nOld\n\n- [ ] a\n` | `---\nprincelists: true\n---\nNew note\n\n- [ ] a\n`, the same as `"New note"` |
+| `setListNote(…, "<div>x</div>")` | `---\nprincelists: true\n---\n- [ ] a\n` | `---\nprincelists: true\n---\n<div>x</div>\n\n- [ ] a\n` (`a` stays an item) |
+| `listNoteWouldRestructure` | `Text\n---`; `## H`; `- [ ] x` | `true` |
+| `listNoteWouldRestructure` | `Text\n\n---`; `plain *text*`; `- bullet` | `false` |
+| `listNoteUnclosedBlock` | `` ```js\ncode ``; `%%\nhidden`; `$$\nx` | `true` |
+| `listNoteUnclosedBlock` | `` ```\ncode\n``` ``; `%% inline %%`; `$$x$$`; `plain` | `false` |
+
+- [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS. Every edit writes
+  through `spliceLines`.
+- [ ] **Step 3: Commit** with the message "Edit headings and the list note by replacing only their
+  lines".
 
 ### Task 8: Draw the list, tick items and hide archived ones
 
 **Files:**
 - Create: `src/view/render-list.ts`, `src/view/write.ts`
-- Modify: `src/view/list-view.ts`, `styles.css`, `src/main.ts`
+- Modify: `src/view/list-view.ts`, `styles.css`
 
 **Interfaces:**
-- Consumes: `parseList(splitLines(view.text), contentStartLine(view.text))`, `isArchived`,
-  `toggleItem` and `guardedApply`.
+- Consumes: `parseList(splitLines(view.text), contentStartLine(view.text))`, `parseItemLine`,
+  `isArchived`, `toggleItem`, `RepeatingItemError`, `joinLines` and `guardedApply`.
 - Produces:
-  - `writeAction(view: PrinceListView, next: string, expected = view.text): Promise<boolean>`, in
-    `src/view/write.ts`. It first awaits `view.save()` (`TextFileView.save`, public since 0.10.12)
-    so pending typing is on disk, then runs
-    `vault.process(file, cur => guardedApply(cur, expected, next))`. It sets `view.text = next` on
-    success, and shows a `Notice` reading "This list changed elsewhere. Try again." when the guard
-    refused.
+  - `writeAction(view: PrinceListView, next: string, expected = view.text, refusedNotice = "This list changed elsewhere. Try again."): Promise<boolean>`,
+    in `src/view/write.ts`. It first awaits `view.save()` (`TextFileView.save`, public since
+    0.10.12) so pending typing is on disk, then runs
+    `vault.process(file, cur => guardedApply(cur, expected, next))`. Inside that callback, once
+    the guard accepts, it sets `view.text = next`, so `setViewData`'s early return holds whatever
+    the timing of Obsidian's modify echo. It shows a `Notice` reading `refusedNotice` when the
+    guard refused.
 
 - [ ] **Step 1: Implement the rendering** that the spec's "Layout" describes:
   - the title (the basename)
@@ -679,7 +818,9 @@ test("lineIndexAt maps a character offset to its line", () => {
     file (`TextFileView.setViewData`). Keep it out of the view's `getState` and out of local
     storage, so nothing restores it (spec, "Done and archived").
 
-  Re-render whenever `setViewData` runs.
+  Re-render whenever `setViewData` runs, except that it returns early when `clear` is false and
+  `data === this.text`. The view's own writes come back that way (spec, "Saving and outside
+  changes"), and a redraw then would tear down a field that has focus.
 - [ ] **Step 2: Make the checkbox tick.** A click calls `writeAction(view, joinLines(toggleItem(...)))`,
   using `new Date()`. On `RepeatingItemError` it shows a `Notice` reading "Repeating items can't be
   ticked here yet." The click never opens a card.
@@ -694,7 +835,8 @@ test("lineIndexAt maps a character offset to its line", () => {
   6. "Show archived" stays as it was while the open list is renamed.
   7. A generated 500-item list opens and scrolls without visible lag on the iPhone.
   8. Closing the list after only viewing it doesn't change the file: compare `git hash-object`
-     and the modification time (`stat -f %m`) before and after, on a copy.
+     and the modification time (`stat -f %m`) before and after, on a copy. Then tick an item, wait
+     for the write, and close the list: the modification time stays at the tick's write.
   9. On the Mac, with a list from outside the vault (spec, "Notes outside the vault"): ticking
      writes the file, and an edit made to it in another app while it's open shows in the view.
      First check that the same edit shows in Obsidian's own Markdown view of that note. Then open
@@ -702,13 +844,15 @@ test("lineIndexAt maps a character offset to its line", () => {
      it works as a list there. Record the results in the pull request. If one fails, stop and
      record it in the pull request with the spec's proposed fallback. The owner decides before
      it's built.
+  10. For this check only, log when `writeAction` sets `view.text` and when `setViewData` runs
+      after a tick, and don't commit the logging. Record the order once in the pull request.
 - [ ] **Step 5: Commit** with the message "Draw lists, tick items and hide archived ones".
 
 ### Task 9: The card, editing, and outside changes
 
 **Files:**
 - Create: `src/view/card.ts`, `src/view/notes.ts`
-- Modify: `src/view/list-view.ts`, `src/view/render-list.ts`, `styles.css`, `src/main.ts`
+- Modify: `src/view/list-view.ts`, `src/view/render-list.ts`, `styles.css`
 
 **Interfaces:**
 - Consumes: `getItemNotes`, `setItemNotes`, `setItemTitle`, `getListNote`, `setListNote`,
@@ -724,19 +868,26 @@ test("lineIndexAt maps a character offset to its line", () => {
       filled by `workspace.handleLinkContextMenu(menu, href, file.path)` and shown with
       `menu.showAtMouseEvent(evt)` (spec, "Rendering notes in the card"). On the iPhone it adds
       no link menu.
-    - It triggers `hover-link` with the source `'princelists'`. `main.ts` registers that source
-      with `registerHoverLinkSource('princelists', { display: 'PrinceLists', defaultMod: true })`
-      (since 1.1.0).
+    - It triggers no `hover-link` event. Page previews wait until Obsidian documents that event's
+      payload (spec, "Not in step one").
     - It disables `.task-list-item-checkbox`.
-  - `openCard(view, titleLine: number): void` and `closeCard(view): void`. `view.selected` holds
-    the `titleLine` of the open item, or `null`. A line number is used because a new item's
-    `ItemBlock` doesn't exist until the list is re-parsed.
+  - `openCard(view, titleLine: number, focusTitle = false): void` and `closeCard(view): void`, in
+    `src/view/card.ts`. `openCard` puts the cursor in the title only when `focusTitle` is true,
+    so a tap on a row doesn't open the iPhone keyboard. `view.selected` holds the `titleLine` of
+    the open item, or `null`. A line number is used because a new item's `ItemBlock` doesn't
+    exist until the list is re-parsed.
+  - `PrinceListView.focusListTitle(): void`, which puts the cursor in the list title field.
 
 - [ ] **Step 1: Build the card and editing** as the spec's "Ticking", "Editing" and "Selecting
   and adding" sections describe:
   - **The card:** clicking a row (not its checkbox) opens it, and clicking empty space closes it.
     It shows the same checkbox.
-  - **The title:** editing it calls `setItemTitle`, with typing saved through `requestSave`.
+  - **The title:** editing it calls `setItemTitle`, with typing saved through `requestSave`. The
+    field keeps the title line as it was when it took focus, and each keystroke calls
+    `setItemTitle` on the current lines with that saved line put back, which gives
+    `setTitle(thatLine, typed)`. Starting from the current line instead would read a typed
+    `#tag`, `📅 date` or ` ^id` as tail and copy it on every keystroke. The field refreshes the
+    saved line only when an outside change lands, or the view's own write changes that line.
   - **Notes:** rendered with `renderNotes`, and switched to a `<textarea>` of `getItemNotes` on
     click. They're saved with `setItemNotes` through `requestSave`.
   - **The list note:** edited the same way. While `listNoteWouldRestructure` is true, a gray line
@@ -745,15 +896,31 @@ test("lineIndexAt maps a character offset to its line", () => {
     hides the items below it." (spec, "The list note").
   - **The list title:** renamed with `fileManager.renameFile` on Enter or blur. If the name is
     taken, show the `Notice` "A note with that name already exists." and keep the old name.
-  - **Empty items:** an item whose title is empty when its card closes is removed with
-    `deleteItem`.
+  - **Empty items:** remove an item with `deleteItem` only when this card created it ("+", Enter,
+    "New item" or "New item below"), its title is still empty, it has no notes, and the user
+    closed the card in the view: Escape, a click elsewhere, "+", Enter or a drag start. Never
+    remove one from `setViewData`, `onClose` or a file switch, which would be a write on close or
+    on an outside change.
   - **An empty list:** shows a gray "Notes" placeholder.
   - **Keys:** Escape closes the card.
   - **`getViewData()` includes text being typed.** Apply each keystroke to `this.text`, so
     Obsidian's own merge on outside changes covers it.
-  - **`setViewData(_, false)`** re-renders, but keeps a `<textarea>` that has focus. It updates
-    that textarea's item only after blur. It moves `selected` with `mapLine`, and closes the card
-    after blur when that returns `null`.
+  - **`setViewData(_, false)`** re-renders, but keeps any field that has focus: an item title,
+    the notes, the list note or the list title. It updates that field only after blur. It moves
+    `selected` with `mapLine`, and closes the card after blur when that returns `null`.
+  - **`selected` follows the view's own writes too.** The view knows which lines each of its own
+    edits replaced. A `selected` line before them stays, one after them shifts by the change in
+    length, and an edit to the selected item's own lines (typing in it, ticking it) leaves
+    `selected` as it is. `mapLine` is for outside changes only: it compares lines by text, so it
+    can't tell two empty new items apart.
+    - The view learns the run from the edit it called, as Tasks 7a and 7b describe it: the run
+      starts at the item's `titleLine`, the section's `headingLine`, the list note's `start`, or
+      the `titleLine` or `headingLine` an insert returns. The change in length is
+      `newLines.length - oldLines.length`.
+    - A `selected` line at or after an insert's start shifts too, because the new lines go in
+      before it: an insert at the first item, or `setListNote` when no list note exists yet.
+    - Deleting the selected item closes its card. A drag closes any open card before it calls
+      `moveItem` (Task 11), so a move never has a `selected` line to follow.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 3: Check it by hand on the Mac.**
   1. A picture embed and a link render in a card, and the link opens. Right-clicking the link
@@ -768,6 +935,8 @@ test("lineIndexAt maps a character offset to its line", () => {
      link in a card render, and the link opens.
   7. Renaming that list from its title renames the file in its own folder, and the file stays
      outside the vault.
+  8. Typing `buy #milk2` into an item's title leaves `#milk2` in the file's line once.
+  9. Typing in a card of the generated 500-item list (Task 8, check 7) shows no lag.
 
   If check 6 or 7 fails, stop and record it in the pull request with the spec's proposed
   fallback. The owner decides before it's built.
@@ -788,20 +957,27 @@ test("lineIndexAt maps a character offset to its line", () => {
 
 - [ ] **Step 1: Build adding, menus and Undo:**
   - **The floating "+":** a round button at the bottom right, placed outside the scrolling element
-    and drawn with `setIcon(el, "plus")`. It calls `insertItem` after the selected item, or with
-    `null`, then `openCard(view, titleLine)` with the cursor in the title.
-  - **Enter in an item's title** inserts the next item below it.
-  - **In an empty list, Enter in the list title starts the first item,** with `insertItem` and
-    `after === null`, then `openCard`.
+    and drawn with `setIcon(el, "plus")`, with the accessible name (`aria-label`) "New item". It
+    calls `insertItem` after the selected item, or with `null`, then
+    `openCard(view, titleLine, true)`, which puts the cursor in the title.
+  - **Enter in an item's title** inserts the next item below it and opens it the same way.
+  - **New item below and New item,** in `itemMenu` and `headingMenu`, insert with `insertItem`
+    after the item or `insertItemInSection` first in the section, then
+    `openCard(view, titleLine, true)`.
+  - **In an empty list, Enter in the list title** first renames the file (Task 9), and then
+    inserts the first item with `insertItem` and `after === null`, then
+    `openCard(view, titleLine, true)`.
   - **Right-click on the Mac:** only when `Platform.isDesktop`, `contextmenu` on rows and headings
     opens `itemMenu` or `headingMenu` through `menu.showAtMouseEvent(evt)`. A right-click on a
-    link in an open card shows only Obsidian's link menu (Task 9), not the item menu.
+    link in an open card shows only Obsidian's link menu (Task 9), not the item menu: the row
+    handler returns early when the event's target is inside `a.internal-link`.
   - **No long-press menu on the iPhone:** Obsidian fires `contextmenu` after an 800 ms hold (not
     yet confirmed on a device; spec, "Touch on the iPhone"), so on the iPhone `contextmenu` on
-    rows and headings is canceled.
+    rows and headings is canceled in the capture phase, as Task 3's notes record.
   - **Tapping a heading on the iPhone** (`Platform.isMobile`) opens `headingMenu` through
     `menu.showAtMouseEvent(evt)` on the tap's `click` event (spec, "Item actions").
-  - **The card's ⋯ button** opens `itemMenu` through `menu.showAtPosition`, on both platforms.
+  - **The card's ⋯ button,** with the accessible name (`aria-label`) "Item actions", opens
+    `itemMenu` through `menu.showAtPosition`, on both platforms.
   - **Rename heading:** in `headingMenu`, it opens an inline editor: a text field in place of the
     heading row, holding the heading's raw content (a setext heading's content lines joined with
     spaces). Taps inside the field don't open the heading menu. Enter or blur trims the name, then
@@ -809,17 +985,27 @@ test("lineIndexAt maps a character offset to its line", () => {
     that follows doesn't save. An empty (after trimming) or unchanged name writes nothing. When
     `setHeadingText` returns `null`, show a `Notice` reading "That name can't be used for this
     heading." and write nothing.
+  - **New heading below,** in `itemMenu` and `headingMenu`, writes an empty heading with
+    `insertHeading(…, "")`, then opens the same field as Rename heading on the returned
+    `headingLine`, with the cursor in it. A name is saved as Rename heading saves it. Escape, or a
+    name that is empty after trimming, removes the heading again with `deleteHeading`. A name
+    that `setHeadingText` refuses shows "That name can't be used for this heading." and keeps the
+    field open; Escape then removes the empty heading.
   - **The heading field survives outside changes.** `setViewData(_, false)` keeps a focused
-    heading field, as it keeps a focused `<textarea>`. On save, map the heading's line with
+    heading field, as it keeps the fields of Task 9. On save, map the heading's line with
     `mapLine` from the lines the field opened on to the current ones, and rename the section
     whose heading is on that line. When `mapLine` returns `null`, or no section's heading is on
     that line, cancel, write nothing and show the `Notice` "This list changed elsewhere. Try
     again."
   - **Delete with Undo:** after `deleteItem` or `deleteHeading`, show a `Notice` for 6 s holding
-    an "Undo" button. The button calls `writeAction(view, before, after)`, where `before` is the
-    text from before the delete and `after` the text right after it. Build the button in a
+    an "Undo" button. The button calls `writeAction(view, before, after, refused)`, where `before`
+    is the text from before the delete, `after` the text right after it, and `refused` is "This
+    list changed since the delete, so it can't be undone." That replaces `writeAction`'s usual
+    notice, because trying again can't succeed once the list has changed. Build the button in a
     `DocumentFragment` (`createFragment`) passed to `new Notice(fragment, 6000)`, not through
     `Notice.messageEl`, which is `@since 1.8.7` and would raise `minAppVersion`.
+  - **Removing an empty new item or heading is a cancel, not a delete (call).** Whatever removes
+    it, no Undo notice shows. The Undo notice follows Delete and Delete heading only.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 3: Check it by hand on the Mac and the iPhone.**
   1. "+" with nothing selected adds the item first in the list. With an item selected, it adds it
@@ -840,6 +1026,9 @@ test("lineIndexAt maps a character offset to its line", () => {
      and leaves the file unchanged. With the field open, change that heading's line in the same
      note opened as Markdown in another pane, then press Enter: "This list changed elsewhere. Try
      again." shows and nothing is written.
+  9. "New heading below" opens the heading field with the cursor in it, and Enter writes
+     `## <name>`. Escape, or Enter with an empty name, leaves the file as it was before the menu
+     opened (`git diff` on a copy). `C #` shows the notice and keeps the field open.
 - [ ] **Step 4: Commit** with the message "Add items with the floating button and act on them
   from menus".
 
@@ -857,6 +1046,13 @@ test("lineIndexAt maps a character offset to its line", () => {
 - [ ] **Step 1: Implement HTML5 drag on rows.** It shows a drop line between visible rows and
   calls `moveItem` with `{ after: <the visible item above the line> }`, or `{ firstIn: <section> }`
   directly under a heading. Hidden archived rows never move (spec, "Selecting and adding").
+  - **A drag closes the open card first (call).** When a drag starts, the view closes any open
+    card, and with it `selected`, before it calls `moveItem`. Pending typing is saved by
+    `writeAction` as usual. The cost: after a drag, a click reopens the card.
+  - **A drag start closes the card the way a click elsewhere does (call).** An empty new item is
+    removed first (Task 9), and that is a cancel with no Undo. The drag then works on the
+    re-parsed list, so `moveItem` gets fresh `ItemBlock`s. If the dragged row was that empty item,
+    the drag ends.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 3: Check it by hand on the Mac.**
   1. Drag within a section.
@@ -874,13 +1070,17 @@ test("lineIndexAt maps a character offset to its line", () => {
 - Modify: `src/main.ts`
 
 **Interfaces:**
+- Consumes: `MARKER_KEY`, `RIBBON_ICON` and `openAsList` (Task 2), and
+  `PrinceListView.focusListTitle()` (Task 9).
 - Produces:
   - `nextUntitledName(existing: ReadonlySet<string>): string`, in `src/core/untitled.ts`. It
     returns `"Untitled list"`, then `"Untitled list 1"`, `"Untitled list 2"` and so on, the first
     whose `<name>.md` isn't in `existing`.
   - `createList(app: App, folder: TFolder): Promise<TFile>`, in `src/obsidian/create-list.ts`. It
-    writes `---\nprincelists: true\n---\n` and opens the file with
-    `openAsList(app.workspace.getLeaf(false), file)`, with the title field focused.
+    writes `---\n${MARKER_KEY}: true\n---\n`, which is `---\nprincelists: true\n---\n`, and opens
+    the file with `openAsList(leaf, file)` on `leaf = app.workspace.getLeaf(false)`. Once that
+    resolves, it checks `leaf.view instanceof PrinceListView` and calls
+    `leaf.view.focusListTitle()`.
 
 - [ ] **Step 1: Write the failing tests.**
   - `nextUntitledName(new Set())` is `"Untitled list"`.
@@ -893,8 +1093,9 @@ test("lineIndexAt maps a character offset to its line", () => {
   - `file-menu` on a `TFolder`, "New list", which creates the list in that folder
 - [ ] **Step 4: Check it by hand.**
   1. All three routes work on the Mac.
-  2. Long-pressing a folder on the iPhone offers "New list". If it doesn't, record that in the 1a
-     checks notes (Task 13); the command still covers the phone.
+  2. Long-pressing a folder on the iPhone offers "New list". If it doesn't, record that in the
+     pull request, for Task 13 to copy into the 1a checks notes; the command still covers the
+     phone.
   3. A second new list in the same folder is "Untitled list 1".
 - [ ] **Step 5: Commit** with the message "Create lists the same ways as notes".
 
@@ -902,10 +1103,11 @@ test("lineIndexAt maps a character offset to its line", () => {
 
 **Files:**
 - Create: `docs/superpowers/notes/<date>-1a-checks.md`
-- Modify: the spec (reconcile it)
+- Modify: the spec (reconcile it), `README.md` (installing from the release, and the status line)
 
 - [ ] **Step 1: Run the full check on the iPhone in the test vault.** It covers the basics:
-  open, tick, add, edit, ⋯ actions, the heading menu and the archived toggle.
+  open, tick, add, edit, ⋯ actions, the heading menu and the archived toggle. Copy Task 12's
+  folder long-press result from its pull request into the notes file.
 - [ ] **Step 2: Check alongside other plugins.** Install Tasks and Kanban in the test vault and repeat
   the opening checks from Task 2, Step 7. A Tasks query (`not done`) must still list the items
   with their dates.
@@ -919,12 +1121,14 @@ test("lineIndexAt maps a character offset to its line", () => {
 - [ ] **Step 5: Reconcile the spec.** Check each claim in the design against the code. Record
   any decided deviations with their reasons and raise anything undecided. Keep
   `status: building` (step one isn't done until 1b and the two weeks), and set `verified`.
-- [ ] **Step 6: Commit** the notes and the spec with the message "Finish part 1a".
-  Open the pull request; the owner merges it.
+- [ ] **Step 6: Commit** the notes, the spec and `README.md` with the message "Finish part 1a".
+  In the README, replace the status line ("There's nothing to install yet…") with where 1a
+  stands, and say how to install from the `0.1.0` release. Open the pull request; the owner
+  merges it.
 - [ ] **Step 7: Release `0.1.0`.** The owner pushes the tag `0.1.0` (no `v`); agents never push
-  tags (`AGENTS.md`, "Releases"). It comes after the go-public checklist is done, because the
-  release's attestation needs a public repository. The release workflow then builds a draft
-  release, and the owner reviews and publishes it.
+  tags (`AGENTS.md`, "Releases"). It comes after the go-public checklist (the "Go public" issue)
+  is done, because the release's attestation needs a public repository. The release workflow
+  then builds a draft release, and the owner reviews and publishes it.
 - [ ] **Step 8: Install in the everyday vault.** Run `npm run install-vault -- <everyday vault>`
   from the released commit. The owner moves one real list in by hand, and the two weeks start.
   Submitting to Obsidian's community directory isn't part of 1a.
