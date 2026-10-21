@@ -48,7 +48,8 @@ export class PrinceListView extends TextFileView {
 	}
 
 	// setViewState records a history entry when the view type changes, so Back would land on the
-	// same note as Markdown. That `false` suppresses the entry is observed, not documented.
+	// same note as Markdown. `ViewStateResult.history` is documented; that `false` keeps the entry
+	// out is observed (1.14.4, spike 1's check 4).
 	async setState(state: unknown, result: ViewStateResult): Promise<void> {
 		await super.setState(state, result);
 		result.history = false;

@@ -743,8 +743,9 @@ From here on the document is for the builder.
   - `setViewState` records a history entry when the view type changes, so Back would land on the
     same note as Markdown (observed).
   - In the list view's `setState`, call super and then set `result.history = false`.
-    `ViewStateResult` is documented as something the view fills in. That `false` suppresses the
-    entry is observed, not documented, so spike it.
+    `ViewStateResult.history` is documented as something the view fills in. That `false` keeps
+    the entry out is observed, not documented: spike 1's check 4 confirmed it in 1.14.4, and an
+    Obsidian that recorded the entry anyway would cost only one extra Back stop.
   - Kanban passes an undocumented `popstate` flag instead. That's not allowed here.
 - **A new list opens with `setViewState({ type: <list view type> })`,** never with `openFile`.
 - **If the marker is gone in `setViewData` (owner, 2026-10-21):**

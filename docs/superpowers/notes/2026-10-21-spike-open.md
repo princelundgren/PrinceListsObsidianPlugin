@@ -8,6 +8,10 @@ The Mac checks, Steps 7 and 9, ran in the test vault through Obsidian's own comm
 closing and reopening the vault's window, and Step 9's check 3.2 was a full restart by the
 maintainer. The maintainer ran the iPhone checks and judged the flash by eye.
 
+After an Obsidian update, run checks 4, 10 and 12 again: they rely on behavior seen in 1.14.4
+that Obsidian doesn't document (Back skipping the switch, a switch during a pane's load being
+ignored, and a new tab announcing itself before and after its text loads).
+
 - **Build under test:** the commit of this pull request, built with `npm run build` and copied to
   the test vault with `npm run install-vault -- <path to the test vault>`.
 - **Never use a vault with real notes** (`AGENTS.md`).
