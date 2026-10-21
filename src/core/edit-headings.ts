@@ -30,7 +30,12 @@ export function deleteHeading(lines: readonly Line[], model: ListModel, section:
 // Whether the result is still this heading can depend on the lines above it: a setext heading's text
 // indented to the content column of an item above joins that item. So, as for the other edits, the
 // file is parsed again and every block compared. A setext heading's link reference definitions stay.
-export function setHeadingText(lines: readonly Line[], model: ListModel, section: Section, text: string): Line[] | null {
+export function setHeadingText(
+	lines: readonly Line[],
+	model: ListModel,
+	section: Section,
+	text: string,
+): Line[] | null {
 	if (hasLineBreak(text)) return null;
 	const { at, heading, blocks } = findHeading(lines, model, section);
 	const own = lines[at] as Line;

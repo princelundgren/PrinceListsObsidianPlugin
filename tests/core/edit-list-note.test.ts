@@ -227,6 +227,35 @@ describe('setListNote across a typing session', () => {
 		expect(joinLines(result.lines)).toBe('Phone\n\nM\n\n- [ ] a\n');
 		expect(result.note).toEqual({ start: 2, end: 3 });
 	});
+	test('a closing keystroke that makes the note take in the first item deletes nothing', () => {
+		// The save that closes the block skips the check, and `- b` takes in the indented first item.
+		const text = `${FRONTMATTER}\n  - [ ] a\n`;
+		const steps = typeInto(text, [...keystrokes('', '```\n- b'), '``\n- b']);
+		expectSessionKeepsRest(text, steps);
+		expect(steps.filter((step) => step.refused)).toEqual([]);
+		const final = (steps[steps.length - 1] as (typeof steps)[number]).text;
+		expect(final).toBe(`${FRONTMATTER}\`\`\n- b\n\n  - [ ] a\n`);
+		const { lines, model, items } = list(final);
+		expect(items).toEqual([]);
+		expect(getListNote(lines, model)).toBe('``\n- b\n\n  - [ ] a');
+	});
+	// A <div> runs to a blank line, so a fence line inside it opens nothing: the note isn't left open,
+	// and every save gets the check. Masking doesn't track a <div>, so while that fence line is there a
+	// %% region further down reads unmasked, and the save is refused (spec, "Content the plugin leaves
+	// alone").
+	test.each([
+		[`${FRONTMATTER}\n  - [ ] a\n`, [...keystrokes('', '<div>\n```\n- b'), '<div>\n``\n- b'], []],
+		[`${FRONTMATTER}\n- [ ] a\n\n%%\n- [ ] h\n%%\n`, [...keystrokes('', '<div>\n```'), '<div>\n``'], ['<div>\n```']],
+	])('%j: a fence line typed inside a <div> is refused only where it unmasks a region', (text, typed, refused) => {
+		const steps = typeInto(text, typed);
+		expectSessionKeepsRest(text, steps);
+		expect(steps.filter((step) => step.refused).map((step) => step.markdown)).toEqual(refused);
+		const itemLines = (t: string) => {
+			const { lines, items } = list(t);
+			return items.map((item) => (lines[item.titleLine] as Line).text);
+		};
+		for (const step of steps) expect(itemLines(step.text), step.markdown).toEqual(itemLines(text));
+	});
 	test('erasing the note and typing it again restores the file', () => {
 		const text = `${FRONTMATTER}Hello\n\n- [ ] milk\n`;
 		const erase = ['Hell', 'Hel', 'He', 'H', ''];

@@ -1,7 +1,9 @@
 import { expect, test } from 'vitest';
+import { setHeadingText } from '../../src/core/edit-headings';
 import { moveItem, setItemNotes } from '../../src/core/edit-items';
+import { setListNote } from '../../src/core/edit-list-note';
 import { joinLines, splitLines } from '../../src/core/lines';
-import type { ItemBlock } from '../../src/core/parse';
+import type { ItemBlock, Section } from '../../src/core/parse';
 import { list } from './edit-helpers';
 
 // About 3,000 lines: 1,500 items under 10 headings, every other one with a note, then a section
@@ -32,6 +34,20 @@ test('setItemNotes, which runs on every keystroke, takes under 100 ms on a list 
 	const { lines, model, items } = list(text);
 	expect(lines.length).toBeGreaterThan(3000);
 	const { ms } = timed(() => setItemNotes(lines, model, items[760] as ItemBlock, 'Typed\n- a bullet'));
+	expect(ms).toBeLessThan(100);
+});
+
+test('setListNote, which runs on every keystroke, takes under 100 ms on a list of 3,000 lines', () => {
+	const { lines, model } = list(text);
+	const { result, ms } = timed(() => setListNote(lines, model, model.listNote, 'Typed\n- a bullet'));
+	expect(joinLines(result.lines).startsWith('Typed\n- a bullet\n\n## Section 0\n')).toBe(true);
+	expect(ms).toBeLessThan(100);
+});
+
+test('setHeadingText takes under 100 ms on a list of 3,000 lines', () => {
+	const { lines, model } = list(text);
+	const { result, ms } = timed(() => setHeadingText(lines, model, model.sections[5] as Section, 'Renamed'));
+	expect(result?.[(model.sections[5] as Section).headingLine as number]?.text).toBe('## Renamed');
 	expect(ms).toBeLessThan(100);
 });
 
