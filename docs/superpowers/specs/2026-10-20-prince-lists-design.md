@@ -278,7 +278,8 @@ says so before it saves **(call)**.
 
 The editor also warns when the list note opens a fenced code block, a comment (`%%`) or a math
 block (`$$`) without closing it, because an unclosed block hides every item below it **(owner,
-2026-10-20)**.
+2026-10-20)**. It warns the same way about an HTML block that CommonMark runs to the end of the
+file when its end is missing, such as `<!--` without `-->` or `<pre>` without `</pre>` **(call)**.
 
 When the list note isn't empty and an item or heading follows it directly, saving the note writes
 one blank line between them **(owner, 2026-10-20)**. Without it, a list note that ends in an HTML
@@ -322,6 +323,8 @@ until a blank line.
 - **Indentation:** the plugin keeps whatever indent the item's notes already use, when it reaches
   the item's content column. Otherwise, as for new notes, it uses one tab, which is Obsidian's
   default, or spaces up to the item's content column when that is wider.
+  - Notes that open with indented code, 4 or more columns past the content column, don't lend
+    that indent either **(call)**: every note written with it would become code.
   - A tab reaches column 4. With `100. [ ] x` the content column is 5, so a tab-indented note
     there turns into a code block.
   - A lazy line, indented less than the content column, still belongs to the item. Written back
@@ -342,10 +345,31 @@ until a blank line.
   - HTML blocks
   - `%%` comments
   - `$$` math
+- **A `%%` comment or a `$$` block is recognized only when its opening line starts with `%%` or
+  `$$` at column 0 (call):** an indented one may belong to an item's notes, where masking it would
+  change the item's extent. The accepted cost: a top-level comment or math block indented 1 to 3
+  spaces isn't recognized, so checkbox lines inside it become items. Masking also doesn't track
+  HTML blocks such as `<div>`, which end at a blank line, so a fence line inside one, with no blank
+  line before the fence, can leave a later `%%` or `$$` region unmasked. Likewise, a new item
+  added right after such a block would join it: at the end of the file after a list note that
+  ends in one, or in a section without items whose content does. Preventing that needs a blank
+  line before the item, outside the lines the edit replaces, so that insert is refused **(call)**,
+  as below. A drag isn't bound by that, so it writes the blank line.
 - **Other content is kept byte for byte where it is:** paragraphs between items, bullets without
-  a checkbox, and tables.
+  a checkbox, tables, and link reference definitions.
   - How the view shows this content is the builder's choice.
   - It is never lost and never silently reordered.
+  - **Edits leave it parsing as it did (call).** Every top-level block an edit doesn't touch keeps
+    its type and source text, the list note's blocks included. Where an edit would leave text
+    right below a block that would take it in, as a lazy line, as more of a paragraph or as a
+    setext heading's text, the edit writes one empty line between them. Parsing the text before
+    and after decides, not hand-written rules.
+  - **An edit that one empty line can't make safe is refused (call),** and nothing is written. The
+    view says the list's layout can't take that change and suggests "Open as Markdown". An
+    example: text indented to an item's content column, which would become the notes of the item
+    above once the item between them is deleted.
+  - A setext heading's line is its first line after any link reference definitions that open its
+    paragraph, so those definitions stay untouched content **(call)**.
 
 ### Checklists (call; the format is reserved now)
 
@@ -401,11 +425,27 @@ until a blank line.
   rebuilds the file from its own picture of the list.
 - **An edit replaces only the whole lines it concerns.** It keeps the file's line endings (LF or
   CRLF) and whether the file ends with a newline, and it applies no Unicode normalization.
+  - It adds one empty line where the text below would otherwise join the block above **(call)**:
+    after a new item or rewritten notes, or in place of a deleted item. When that isn't enough,
+    the edit is refused. See "Content the plugin leaves alone".
 - **Why:** this kind of view saves when it closes. If the text it hands back differed from the
   file in any way the user didn't cause, closing a list would write to the file, which is a
   background write.
 - **A drag moves an item's whole block.** Only items change order: the blank lines between
   items, and content the plugin leaves alone, stay where they were **(call)**.
+  - **Into another section (call),** the item goes without a blank line. In the section it
+    leaves, the blank lines after it move to that section's end when they no longer sit directly
+    between two items.
+  - **The blank lines before the item stay (call).** Moved away, untouched text after the item
+    would join the item above as a lazy line.
+  - **An item between two runs of blank lines (call)** takes the run after it to the section's
+    end, as a delete removes it, so no double blank line is left between items. When only blank
+    lines follow the item in its section, both runs end up at its end.
+  - **A drag adds an empty line (call)** wherever the text below one of the boundaries it makes
+    would otherwise join the block above, as any edit does. It checks again after each, since one
+    can uncover the next. A join with a link reference definition, which belongs to no block,
+    can't be traced to a boundary, so the drag then writes an empty line at every boundary it
+    made. It's refused only when that isn't enough either.
 
 ## The list view
 
@@ -483,7 +523,11 @@ until a blank line.
   - The new item opens with the cursor in its title.
   - Enter in a title adds another item below it, and Escape closes the card.
   - A new item is removed again if you close its card while its title is still empty and it has
-    no notes **(call)**. Closing means Escape, a click elsewhere, "+", Enter or starting a drag.
+    no notes **(call)**. Removing it restores the text from before it was added, so an empty line
+    the insert wrote goes too. If the file changed outside the view while the card was open, the
+    item is deleted from the current text instead, without a message **(call)**. If even that would
+    change how the rest reads, the empty item stays and the view says so. Closing means Escape, a
+    click elsewhere, "+", Enter or starting a drag.
     Closing the list, switching files or a change from outside never removes an item, and an item
     that existed before the card opened is never removed this way.
 - **An empty new list (call)** shows a gray "Notes" placeholder under the title. Pressing Enter in
@@ -501,7 +545,9 @@ until a blank line.
   **(call)**. Delete removes the item and its notes.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading and Delete heading.
-  - New item adds one as the first item under the heading.
+  - New item adds one as the first item under the heading. In a section without items, it goes
+    after the section's content **(call)**: directly under the heading, a paragraph there would
+    join the item as a lazy line, and a setext heading spans more than one line.
   - **Rename heading (owner, 2026-10-20)** edits the heading text in place. It keeps the
     heading's level, pressing Enter or leaving the field saves, Escape cancels, and an empty name
     keeps the old one **(call)**. A name that wouldn't come back as this heading, at its level and

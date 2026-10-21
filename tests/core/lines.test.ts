@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { dominantEol, joinLines, lineIndexAt, splitLines } from '../../src/core/lines';
+import { dominantEol, joinLines, lineIndexAt, spliceLines, splitLines } from '../../src/core/lines';
 
 test('round-trips every line-ending shape byte for byte', () => {
 	for (const t of ['', 'a', 'a\n', 'a\r\nb\r\n', 'a\nb\r\nc\rd', '\n\n', 'x\n\n']) {
@@ -37,4 +37,13 @@ test('splitLines handles lone and mixed carriage returns', () => {
 test('lineIndexAt keeps an offset between \\r and \\n on that line', () => {
 	expect(lineIndexAt('a\r\nb', 2)).toBe(0);
 	expect(lineIndexAt('a\r\nb', 3)).toBe(1);
+});
+test('spliceLines gives a line that moves off the end the dominant ending, and the new last line the old one', () => {
+	expect(joinLines(spliceLines(splitLines('a\nb'), 2, 0, [{ text: 'c', eol: '\n' }]))).toBe('a\nb\nc');
+	expect(joinLines(spliceLines(splitLines('a\r\nb'), 1, 1, []))).toBe('a');
+});
+test('spliceLines ends a line that moves off the end of a CRLF file with CRLF, and of a lone-CR file with LF', () => {
+	expect(joinLines(spliceLines(splitLines('a\r\nb'), 2, 0, [{ text: 'c', eol: '\r\n' }]))).toBe('a\r\nb\r\nc');
+	expect(joinLines(spliceLines(splitLines('a\rb'), 2, 0, [{ text: 'c', eol: '\n' }]))).toBe('a\rb\nc');
+	expect(joinLines(spliceLines(splitLines('a\nb\n'), 2, 0, [{ text: 'c', eol: '\n' }]))).toBe('a\nb\nc\n');
 });
