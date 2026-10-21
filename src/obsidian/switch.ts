@@ -2,13 +2,14 @@ import { MarkdownView, type Plugin, type TFile, type Workspace, type WorkspaceLe
 import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { isListText } from './marker';
 
-// The paths of the notes each pane was told to "Open as Markdown". A choice holds for that note in
-// that pane, so another list opened there still shows as a list, until the note is switched back
-// or Obsidian restarts.
-const markdownChosen = new WeakMap<WorkspaceLeaf, Set<string>>();
+// The notes each pane was told to "Open as Markdown". A choice holds for that note in that pane, so
+// another list opened there still shows as a list, until the note is switched back or Obsidian
+// restarts. Keyed by the TFile, not its path, so a rename or move keeps the choice: the vault's
+// `rename` event passes that same file with its new path.
+const markdownChosen = new WeakMap<WorkspaceLeaf, WeakSet<TFile>>();
 
 function choseMarkdown(leaf: WorkspaceLeaf, file: TFile): boolean {
-	return markdownChosen.get(leaf)?.has(file.path) ?? false;
+	return markdownChosen.get(leaf)?.has(file) ?? false;
 }
 
 // The same check runs on `file-open` and `active-leaf-change`, and the first event that finds the
@@ -33,21 +34,23 @@ export function registerAutoSwitch(plugin: Plugin): void {
 
 function switchActiveIfList(workspace: Workspace): void {
 	const view = workspace.getActiveViewOfType(MarkdownView);
-	// `data` is unset until the text loads (observed). A later event decides then.
-	if (!view?.file || !view.data || choseMarkdown(view.leaf, view.file) || !isListText(view.data)) return;
-	void openAsList(view.leaf, view.file);
+	// `data` is unset until the text loads (observed), and a later event decides then. It only
+	// gates: the marker is read from getViewData, the editor's text, because `data` waits for the
+	// 2-second save and would still hold a marker the user just deleted.
+	if (!view?.file || !view.data || choseMarkdown(view.leaf, view.file)) return;
+	if (isListText(view.getViewData())) void openAsList(view.leaf, view.file);
 }
 
 // Through setViewState, never openFile: Markdown is the view `.md` files open in.
 // Both update markdownChosen before awaiting setViewState, because `file-open` and
 // `active-leaf-change` can fire during the switch.
 export async function openAsList(leaf: WorkspaceLeaf, file: TFile): Promise<void> {
-	markdownChosen.get(leaf)?.delete(file.path);
+	markdownChosen.get(leaf)?.delete(file);
 	await leaf.setViewState({ type: VIEW_TYPE_LIST, state: { file: file.path } });
 }
 
 export async function openAsMarkdown(leaf: WorkspaceLeaf, file: TFile): Promise<void> {
-	const paths = markdownChosen.get(leaf) ?? new Set<string>();
-	markdownChosen.set(leaf, paths.add(file.path));
+	const files = markdownChosen.get(leaf) ?? new WeakSet<TFile>();
+	markdownChosen.set(leaf, files.add(file));
 	await leaf.setViewState({ type: VIEW_TYPE_MARKDOWN, state: { file: file.path } });
 }

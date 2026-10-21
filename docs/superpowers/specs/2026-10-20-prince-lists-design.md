@@ -724,16 +724,22 @@ From here on the document is for the builder.
     `view.file === file`: the event also fires for embeds, canvas nodes and keyboard navigation in
     the file explorer (its doc: "The file could be in a new leaf, an existing leaf, or an embed").
   - Skip the note if the user chose Markdown for it in this pane **(owner, 2026-10-21)**: a
-    `WeakMap<WorkspaceLeaf, Set<string>>` from each pane to the paths it was told to open as
-    Markdown. "Open as Markdown" adds the path, and "Open as list" removes it.
-  - Detect the marker from the view's loaded text, `TextFileView.data`, with `getFrontMatterInfo`
-    and `parseYaml`. Not from `getFileCache`: it returns `null` for a file that isn't cached yet,
-    such as one Sync or an agent just wrote.
+    `WeakMap<WorkspaceLeaf, WeakSet<TFile>>` from each pane to the files it was told to open as
+    Markdown. "Open as Markdown" adds the file, and "Open as list" removes it.
+    - The choice survives a rename or move because it's keyed by the file object, not its path:
+      the vault's `rename` event (0.9.7) passes that same file with its new path.
+  - Wait until the view's text has loaded: `TextFileView.data` is unset until then (observed).
+  - Detect the marker from the editor's text, `getViewData()`, with `getFrontMatterInfo` and
+    `parseYaml`.
+    - Not from `data`: it waits for the save, up to 2 seconds after an edit, so it would still hold
+      a marker the user just deleted.
+    - Not from `getFileCache`: it returns `null` for a file that isn't cached yet, such as one Sync
+      or an agent just wrote.
   - Then call `leaf.setViewState({ type: <list view type>, state: { file: file.path } })`.
 - **Why both events:**
   - **Documented:** `file-open` is "Triggered when the active file changes", `active-leaf-change`
-    is "Triggered when the active leaf changes", and `TextFileView.data` is the view's "In-memory
-    data".
+    is "Triggered when the active leaf changes", `TextFileView.data` is the view's "In-memory
+    data", and `getViewData` "Gets the data from the editor".
   - **Observed in 1.14.4:** a switch made while the leaf is still loading its note is ignored. A
     note opening in the same tab has its text loaded when `file-open` fires. A new tab doesn't: it
     fires `active-leaf-change` once before its text loads and once after. So the first event that

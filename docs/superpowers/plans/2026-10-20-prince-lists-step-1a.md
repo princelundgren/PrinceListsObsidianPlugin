@@ -297,14 +297,16 @@ test("lineIndexAt maps a character offset to its line", () => {
   - Listen to `file-open` and `active-leaf-change`, and run one guarded check on both:
     - `getActiveViewOfType(MarkdownView)` shows the file (on `file-open`, `view.file === file`);
     - the user hasn't chosen Markdown for that file in that leaf: a module-level
-      `WeakMap<WorkspaceLeaf, Set<string>>` of file paths named `markdownChosen` (owner,
-      2026-10-21: the choice holds per note in a pane, not for the whole pane);
-    - `isListText(view.data)`.
+      `WeakMap<WorkspaceLeaf, WeakSet<TFile>>` named `markdownChosen` (owner, 2026-10-21: the
+      choice holds per note in a pane, not for the whole pane; keyed by the file, so it survives a
+      rename);
+    - `view.data` is set, meaning the text has loaded;
+    - `isListText(view.getViewData())`, the editor's text, because `data` waits for the save and
+      would still hold a marker the user just deleted.
   - Then call `openAsList`. The first event that finds the text loaded switches. A switch made
     while the leaf is still loading is ignored, and a new tab fires `active-leaf-change` once before
     its text loads and once after (observed in 1.14.4).
-  - `openAsMarkdown` adds the file's path to the leaf's set in `markdownChosen`. `openAsList`
-    removes it.
+  - `openAsMarkdown` adds the file to the leaf's set in `markdownChosen`. `openAsList` removes it.
 - [ ] **Step 5: Wire up the view in `main.ts`.**
   - Call `registerView(VIEW_TYPE_LIST, …)` and `registerAutoSwitch`.
   - Add the commands `open-as-list` and `open-as-markdown`. Each is offered only when it applies,
