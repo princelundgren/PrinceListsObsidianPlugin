@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-20
+verified: 2026-10-21
 governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
 ---
 
@@ -133,21 +133,23 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 - **`persist-credentials: false` in `claude.yml`,** for tidiness only (see "The job token is
   readable"). Once the repository is public, the action's branch setup can fetch without it.
 
+## Verified on the first runs (2026-10-21)
+
+- **Both workflows run.** The review ran on the pull request that added it and posted its summary
+  as `github-actions[bot]`. `@claude` answered a check issue. So the job token's permissions are
+  enough for both.
+- **The read block works on the runner.** Asked to use its Read tool on `/etc/hostname`, `@claude`
+  was refused by `permissions.blockReadsOutsideWorkingDirectories`; only the checkout and
+  `_temp/github-ci-logs` were readable.
+- **The scrub and the process namespace apply.** The log lists `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: 1`
+  in the action's environment, and `ps aux | wc -l` gave 5 inside Claude's shell.
+- **The exact comment rule matches.** The review posted with `gh pr comment N --body-file -`.
+
 ## Not yet verified
 
-- **Neither workflow has run.** They need the secret. With it set, the review should also run on
-  the pull request that adds it.
-- **The job token's permissions are enough.** The action's docs support passing it, and GitHub's
-  docs list the permissions each call needs, but no run has shown it.
-- **The permission rules.** Local `claude -p` probes on macOS, with the read block on, showed:
-  the exact rules allow their commands and refuse near misses; a heredoc on standard input
-  passes; a `$(cat <<EOF)` body is refused; and the deny rules stop `git commit` and the push
-  script. With `Read` allowed, as the action allows it for `@claude`, the Read tool read a file
-  outside the working directory without the read block and was refused with it. The action's
-  argument parser was replayed locally too. No run on the runner has tested them.
-- **The scrub.** The first run's log should list `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: 1` in the
-  environment of the action's "Run Claude Code Action" step.
-- **The process namespace.** With bubblewrap installed it should apply. Asking `@claude` to run
-  `ps aux | wc -l` confirms it: the count should be in single digits.
-- **The `@AGENTS.md` import.** Claude Code's docs say a `CLAUDE.md` import loads the file, and
-  the action loads project settings. No run has shown it yet.
+- **Which calls the permission rules refused.** The first review reported 4 refusals, one of them
+  `node scripts/check-docs.mjs`; the full output is hidden, so the others aren't known. Local
+  `claude -p` probes showed the exact rules refuse near misses and the deny rules stop `git commit`
+  and the push script.
+- **The `@AGENTS.md` import.** Both prompts name `AGENTS.md` themselves, so a review that cites it
+  doesn't show the import loaded.
