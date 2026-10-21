@@ -57,12 +57,13 @@ princelists: true
 
    - **Result, LF:** `contentStart` = , `contentStartLine` = , `isListText` =
    - **Result, CRLF:** `contentStart` = , `contentStartLine` = , `isListText` =
-10. After check 8, press Back in the pane that switched. Expected: it goes to the previous note,
-    with no flicking between list and Markdown and no console error.
+10. After check 8, press Back in the pane that switched. Expected: the note's name, "This note
+    isn't a list" and an "Open as Markdown" button. One more Back reaches the previous note, with
+    no flicking between list and Markdown and no console error.
     - **Result:**
     - Then quit Obsidian with a list note open in the list view, remove its `princelists: true`
-      line with another editor, and start Obsidian. Expected: the pane opens as Markdown, with no
-      error.
+      line with another editor, and start Obsidian. Expected: the pane shows the same message and
+      button, with no error. The button opens the note as Markdown.
     - **Result:**
 11. After "Open as Markdown", "Open as list" is offered in the pane's ⋯ menu and in the command
     palette, opens the list view, and the pane stays a list after switching tabs and back.

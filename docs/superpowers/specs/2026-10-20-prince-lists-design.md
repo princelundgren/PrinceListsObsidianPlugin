@@ -422,6 +422,13 @@ until a blank line.
   Choosing Markdown holds for that pane until it is switched back or Obsidian restarts.
 - **On restart,** Obsidian restores a list pane as the list view.
 - **If the marker is removed** while the list is open, the pane switches to Markdown.
+- **A note without the marker that loads in the list view stays there (owner, 2026-10-21).** That
+  happens through Back, Forward or a restart. It shows the note's name, then "This note isn't a
+  list", then an "Open as Markdown" button.
+  - The pane can't switch by itself there: Back would loop on the note ("Opening and switching
+    views").
+  - The accepted cost: after the pane switches to Markdown by itself, Back stops once on the note,
+    which shows the message. One more Back reaches the previous note.
 
 ### Layout (owner)
 
@@ -683,7 +690,22 @@ From here on the document is for the builder.
     entry is observed, not documented, so spike it.
   - Kanban passes an undocumented `popstate` flag instead. That's not allowed here.
 - **A new list opens with `setViewState({ type: <list view type> })`,** never with `openFile`.
-- **If the marker is gone in `setViewData`,** switch the pane to Markdown.
+- **If the marker is gone in `setViewData` (owner, 2026-10-21):**
+  - **On a reload** (`clear` is `false`, as when the file changes on disk), switch the pane to
+    Markdown with `leaf.setViewState`, not `openAsMarkdown`: the user didn't choose Markdown.
+  - **On a load** (`clear` is `true`: opening, Back, Forward, a restore), don't switch. Show the
+    note's name, "This note isn't a list" and an "Open as Markdown" button that calls
+    `openAsMarkdown`, since that is the user's choice.
+  - **Why the split:**
+    - A `setViewState` from inside the leaf's own load doesn't take effect (observed).
+    - Every list-to-Markdown switch records a Back entry for the list view (observed). Only the view
+      switched to can clear `ViewStateResult.history`, and that's Obsidian's `MarkdownView`.
+    - No documented API avoids either. So a switch on load, from there or later, would record the
+      entry that Back just left, and Back would loop on the note.
+  - **The accepted cost:** after a switch on reload, Back stops once on the note, which shows the
+    message. One more Back reaches the previous note.
+  - **What's documented:** `clear` means "a different file is being opened". That a reload passes
+    `false` and every load passes `true` is observed.
 - **On restart, background tabs may be deferred views.** Check `instanceof` before calling into
   the view.
 - **Pane menu:** add the list view's own items by overriding `onPaneMenu`. Use `file-menu` only for

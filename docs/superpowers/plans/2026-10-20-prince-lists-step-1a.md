@@ -67,11 +67,11 @@ first. This plan cites its sections by heading.
 - **The UI:**
   - No UI framework. Use only Obsidian CSS variables and `setIcon` (Lucide); no hard-coded
     colors.
-  - Interface text is in sentence case. Menu, command and button labels are exactly these:
-    "New list", "Open as list", "Open as Markdown", "Show archived", "New item below",
-    "New heading below", "New item", "Item actions", "Delete", "Rename heading",
-    "Delete heading", "Undo". The icon-only "+" and ⋯ buttons get the accessible names
-    (`aria-label`) "New item" and "Item actions".
+  - Interface text is in sentence case. Menu, command and button labels, and the list view's
+    message, are exactly these: "New list", "Open as list", "Open as Markdown",
+    "This note isn't a list", "Show archived", "New item below", "New heading below", "New item",
+    "Item actions", "Delete", "Rename heading", "Delete heading", "Undo". The icon-only "+" and ⋯
+    buttons get the accessible names (`aria-label`) "New item" and "Item actions".
 - **Dependencies:** the only runtime dependency is `commonmark`.
 - **Privacy:** no telemetry, and no network requests unless one is agreed on in an issue first
   (the design's privacy rule).
@@ -279,10 +279,15 @@ test("lineIndexAt maps a character offset to its line", () => {
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement `isMarkerValue`, and expect PASS.
 - [ ] **Step 3: Implement `PrinceListView`.**
   - `getViewData()` returns `this.text`.
-  - `setViewData(data, clear)` sets `this.text`, re-renders a placeholder (the file's basename in
-    an `h2` plus a line that reads "List view"), and switches the pane to Markdown when
-    `!isListText(data)`. It switches with `leaf.setViewState` directly, not through
-    `openAsMarkdown`, so the leaf doesn't join `markdownChosen`: the user didn't choose Markdown.
+  - `setViewData(data, clear)` sets `this.text` and re-renders. With the marker, it shows a
+    placeholder: the file's basename in an `h2`, plus a line that reads "List view". Without it
+    (owner, 2026-10-21; spec, Implementation notes, "Opening and switching views"):
+    - On a reload (`clear` is `false`), it switches the pane to Markdown with `leaf.setViewState`
+      directly, not through `openAsMarkdown`, so the leaf doesn't join `markdownChosen`: the user
+      didn't choose Markdown.
+    - On a load (`clear` is `true`), it doesn't switch. It shows the basename in an `h2`, then
+      "This note isn't a list", then a button "Open as Markdown" that calls `openAsMarkdown` for
+      this pane. The button uses one delegated listener on the view's container.
   - `clear()` empties `this.text`.
   - Leave `canAcceptExtension` at its default.
   - In `setState(state, result)`, call super and then set `result.history = false` (spec,
@@ -323,10 +328,11 @@ test("lineIndexAt maps a character offset to its line", () => {
      and `isListText(text)` at `onload` for `---\nprincelists: true\n---\nNote` and for the
      same text with CRLF endings, and don't commit the logging. Expected: `contentStartLine` is 3
      and `isListText` is `true` for both. Record both `contentStart` values in the notes file.
-  10. After check 8, press Back in the pane that switched. Expected: it goes to the previous note,
-      with no flicking between list and Markdown and no console error. Also, after a restart with
-      a list note whose marker was removed outside Obsidian, the pane opens as Markdown with no
-      error.
+  10. After check 8, press Back in the pane that switched. Expected: the note's name, "This note
+      isn't a list" and an "Open as Markdown" button. One more Back reaches the previous note, with
+      no flicking between list and Markdown and no console error. Also, after a restart with a
+      list note whose marker was removed outside Obsidian, the pane shows the same message, with
+      no error.
   11. After "Open as Markdown", "Open as list" is offered in the pane's ⋯ menu and in the command
       palette, opens the list view, and the pane stays a list after switching tabs and back.
       Right-clicking a link to `Spike list.md` offers no "Open as list".
