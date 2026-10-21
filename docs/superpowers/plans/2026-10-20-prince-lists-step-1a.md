@@ -67,11 +67,11 @@ first. This plan cites its sections by heading.
 - **The UI:**
   - No UI framework. Use only Obsidian CSS variables and `setIcon` (Lucide); no hard-coded
     colors.
-  - Interface text is in sentence case. Menu, command and button labels are exactly these:
-    "New list", "Open as list", "Open as Markdown", "Show archived", "New item below",
-    "New heading below", "New item", "Item actions", "Delete", "Rename heading",
-    "Delete heading", "Undo". The icon-only "+" and ⋯ buttons get the accessible names
-    (`aria-label`) "New item" and "Item actions".
+  - Interface text is in sentence case. Menu, command and button labels, and the list view's
+    message, are exactly these: "New list", "Open as list", "Open as Markdown",
+    "This note isn't a list", "Show archived", "New item below", "New heading below", "New item",
+    "Item actions", "Delete", "Rename heading", "Delete heading", "Undo". The icon-only "+" and ⋯
+    buttons get the accessible names (`aria-label`) "New item" and "Item actions".
 - **Dependencies:** the only runtime dependency is `commonmark`.
 - **Privacy:** no telemetry, and no network requests unless one is agreed on in an issue first
   (the design's privacy rule).
@@ -279,22 +279,34 @@ test("lineIndexAt maps a character offset to its line", () => {
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement `isMarkerValue`, and expect PASS.
 - [ ] **Step 3: Implement `PrinceListView`.**
   - `getViewData()` returns `this.text`.
-  - `setViewData(data, clear)` sets `this.text`, re-renders a placeholder (the file's basename in
-    an `h2` plus a line that reads "List view"), and switches the pane to Markdown when
-    `!isListText(data)`. It switches with `leaf.setViewState` directly, not through
-    `openAsMarkdown`, so the leaf doesn't join `markdownChosen`: the user didn't choose Markdown.
+  - `setViewData(data, clear)` sets `this.text` and re-renders. With the marker, it shows a
+    placeholder: the file's basename in an `h2`, plus a line that reads "List view". Without it
+    (owner, 2026-10-21; spec, Implementation notes, "Opening and switching views"):
+    - On a reload (`clear` is `false`), it switches the pane to Markdown with `leaf.setViewState`
+      directly, not through `openAsMarkdown`, so the note doesn't join `markdownChosen`: the user
+      didn't choose Markdown.
+    - On a load (`clear` is `true`), it doesn't switch. It shows the basename in an `h2`, then
+      "This note isn't a list", then a button "Open as Markdown" that calls `openAsMarkdown` for
+      this pane. The button uses one delegated listener on the view's container.
   - `clear()` empties `this.text`.
   - Leave `canAcceptExtension` at its default.
   - In `setState(state, result)`, call super and then set `result.history = false` (spec,
     Implementation notes, "Opening and switching views").
 - [ ] **Step 4: Implement `registerAutoSwitch`** exactly as the spec's Implementation notes,
   "Opening and switching views", describe it:
-  - Listen to `file-open`.
-  - Require `getActiveViewOfType(MarkdownView)` and `view.file === file`.
-  - Skip leaves in a module-level `WeakSet<WorkspaceLeaf>` named `markdownChosen`.
-  - Test `isListText(view.data)`.
-  - Call `openAsList`.
-  - `openAsMarkdown` adds the leaf to `markdownChosen`. `openAsList` removes it.
+  - Listen to `file-open` and `active-leaf-change`, and run one guarded check on both:
+    - `getActiveViewOfType(MarkdownView)` shows the file (on `file-open`, `view.file === file`);
+    - the user hasn't chosen Markdown for that file in that leaf: a module-level
+      `WeakMap<WorkspaceLeaf, WeakSet<TFile>>` named `markdownChosen` (owner, 2026-10-21: the
+      choice holds per note in a pane, not for the whole pane; keyed by the file, so it survives a
+      rename);
+    - `view.data` is set, meaning the text has loaded;
+    - `isListText(view.getViewData())`, the editor's text, because `data` waits for the save and
+      would still hold a marker the user just deleted.
+  - Then call `openAsList`. The first event that finds the text loaded switches. A switch made
+    while the leaf is still loading is ignored, and a new tab fires `active-leaf-change` once before
+    its text loads and once after (observed in 1.14.4).
+  - `openAsMarkdown` adds the file to the leaf's set in `markdownChosen`. `openAsList` removes it.
 - [ ] **Step 5: Wire up the view in `main.ts`.**
   - Call `registerView(VIEW_TYPE_LIST, …)` and `registerAutoSwitch`.
   - Add the commands `open-as-list` and `open-as-markdown`. Each is offered only when it applies,
@@ -313,13 +325,30 @@ test("lineIndexAt maps a character offset to its line", () => {
   4. Back, after opening it from another note, returns to that other note, not to this one as
      Markdown.
   5. After "Open as Markdown", switching to another tab and back leaves this pane as Markdown.
+     Opening another list in that tab shows it as a list.
   6. Restarting Obsidian brings the pane back as the list view.
   7. After deleting the frontmatter in Markdown, "Open as list" isn't offered.
-  8. For this check only, log `getFrontMatterInfo(text).contentStart` and
-     `contentStartLine(text)` at `onload` for `---\nprincelists: true\n---\nNote` and for the
+  8. With a list open in the list view, open the same note as Markdown in a second pane and
+     delete its `princelists: true` line. Expected: about 2 seconds after the edit, once the
+     Markdown pane saves, the list pane switches to Markdown without an error in the developer
+     console, and "Open as list" isn't offered for it.
+  9. For this check only, log `getFrontMatterInfo(text).contentStart`, `contentStartLine(text)`
+     and `isListText(text)` at `onload` for `---\nprincelists: true\n---\nNote` and for the
      same text with CRLF endings, and don't commit the logging. Expected: `contentStartLine` is 3
-     for both. Record both `contentStart` values in the notes file.
-- [ ] **Step 8: Repeat checks 1, 2, 4 and 5 on the iPhone.**
+     and `isListText` is `true` for both. Record both `contentStart` values in the notes file.
+  10. After check 8, press Back in the pane that switched. Expected: the note's name, "This note
+      isn't a list" and an "Open as Markdown" button. One more Back reaches the previous note, with
+      no flicking between list and Markdown and no console error. Also, after a restart with a
+      list note whose marker was removed outside Obsidian, the pane shows the same message, with
+      no error.
+  11. After "Open as Markdown", "Open as list" is offered in the pane's ⋯ menu and in the command
+      palette, opens the list view, and the pane stays a list after switching tabs and back.
+      Right-clicking a link to `Spike list.md` offers no "Open as list".
+  12. Cmd+click `Spike list` in the file explorer, and Cmd+click the link in `Link test`, a note
+      that links to `Spike list` (in Source mode, Cmd+Shift+click). Each opens a new tab in the
+      list view.
+- [ ] **Step 8: Repeat checks 1, 2, 4, 5 and 12 on the iPhone.** For check 12, open each in a new
+  tab from its long-press menu. If the phone offers no way to do that, record it.
 - [ ] **Step 9: Check a note from outside the vault on the Mac** (spec, Implementation notes,
   "Notes outside the vault").
   - First check the installer: Settings → General shows the installer version, with a notice when

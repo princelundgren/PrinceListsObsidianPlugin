@@ -459,9 +459,18 @@ until a blank line.
   first build task is a spike to see how that looks. If it is bad, the owner decides, and the
   plugin doesn't fall back to patching.
 - **"Open as Markdown" and "Open as list"** are in the pane's ⋯ menu and are also commands.
-  Choosing Markdown holds for that pane until it is switched back or Obsidian restarts.
+  Choosing Markdown holds for that note in that pane until it is switched back or Obsidian
+  restarts **(owner, 2026-10-21)**. Another list opened in the same pane still opens as a list,
+  and going Back to the first note shows it as Markdown again.
 - **On restart,** Obsidian restores a list pane as the list view.
 - **If the marker is removed** while the list is open, the pane switches to Markdown.
+- **A note without the marker that loads in the list view stays there (owner, 2026-10-21).** That
+  happens through Back, Forward or a restart. It shows the note's name, then "This note isn't a
+  list", then an "Open as Markdown" button.
+  - The pane can't switch by itself there: Back would loop on the note ("Opening and switching
+    views").
+  - The accepted cost: after the pane switches to Markdown by itself, Back stops once on the note,
+    which shows the message. One more Back reaches the previous note.
 
 ### Layout (owner)
 
@@ -710,30 +719,69 @@ From here on the document is for the builder.
 - **Leave `canAcceptExtension` at its default of `false` (observed).** Returning `true` would open
   every note clicked from a list pane in the list view.
 - **The view implements** `getViewType`, `getViewData`, `setViewData` and `clear`.
-- **Switching on `file-open(file)`:**
-  - Take `workspace.getActiveViewOfType(MarkdownView)` and require `view.file === file`. The event
-    also fires for embeds, canvas nodes and keyboard navigation in the file explorer (its doc: "The
-    file could be in a new leaf, an existing leaf, or an embed").
-  - Skip any leaf in a `WeakSet<WorkspaceLeaf>` of panes where the user chose Markdown.
-  - Detect the marker from the view's text with `getFrontMatterInfo` and `parseYaml`.
-    `getFileCache` returns `null` for a file that isn't cached yet, such as one Sync or an agent
-    just wrote.
+- **Switching on `file-open` and `active-leaf-change` (call),** through one guarded check:
+  - Take `workspace.getActiveViewOfType(MarkdownView)`. On `file-open(file)`, require
+    `view.file === file`: the event also fires for embeds, canvas nodes and keyboard navigation in
+    the file explorer (its doc: "The file could be in a new leaf, an existing leaf, or an embed").
+  - Skip the note if the user chose Markdown for it in this pane **(owner, 2026-10-21)**: a
+    `WeakMap<WorkspaceLeaf, WeakSet<TFile>>` from each pane to the files it was told to open as
+    Markdown. "Open as Markdown" adds the file, and "Open as list" removes it.
+    - The choice survives a rename or move because it's keyed by the file object, not its path:
+      the vault's `rename` event (0.9.7) passes that same file with its new path.
+  - Wait until the view's text has loaded: `TextFileView.data` is unset until then (observed).
+  - Detect the marker from the editor's text, `getViewData()`, with `getFrontMatterInfo` and
+    `parseYaml`.
+    - Not from `data`: it waits for the save, up to 2 seconds after an edit, so it would still hold
+      a marker the user just deleted.
+    - Not from `getFileCache`: it returns `null` for a file that isn't cached yet, such as one Sync
+      or an agent just wrote.
   - Then call `leaf.setViewState({ type: <list view type>, state: { file: file.path } })`.
-- **Don't switch on `active-leaf-change`.** It fires on every file load in the active leaf, so it
-  would push a pane straight back after "Open as Markdown" (observed).
+- **Why both events:**
+  - **Documented:** `file-open` is "Triggered when the active file changes", `active-leaf-change`
+    is "Triggered when the active leaf changes", `TextFileView.data` is the view's "In-memory
+    data", and `getViewData` "Gets the data from the editor".
+  - **Observed in 1.14.4:** a switch made while the leaf is still loading its note is ignored. A
+    note opening in the same tab has its text loaded when `file-open` fires. A new tab doesn't: it
+    fires `active-leaf-change` once before its text loads and once after. So the first event that
+    finds the text loaded switches. Reading the file instead, with `vault.cachedRead`, doesn't
+    help, because the switch would still run during the load.
+- **`active-leaf-change` fires on every file load in the active leaf (observed).** Without that
+  record, it would push a pane straight back after "Open as Markdown". After the pane switches
+  to Markdown by itself because the marker was removed, the marker is gone, so nothing switches it
+  back.
 - **Back history:**
   - `setViewState` records a history entry when the view type changes, so Back would land on the
     same note as Markdown (observed).
   - In the list view's `setState`, call super and then set `result.history = false`.
-    `ViewStateResult` is documented as something the view fills in. That `false` suppresses the
-    entry is observed, not documented, so spike it.
+    `ViewStateResult.history` is documented as something the view fills in. That `false` keeps
+    the entry out is observed, not documented: spike 1's check 4 confirmed it in 1.14.4, and an
+    Obsidian that recorded the entry anyway would cost only one extra Back stop.
   - Kanban passes an undocumented `popstate` flag instead. That's not allowed here.
 - **A new list opens with `setViewState({ type: <list view type> })`,** never with `openFile`.
-- **If the marker is gone in `setViewData`,** switch the pane to Markdown.
+- **If the marker is gone in `setViewData` (owner, 2026-10-21):**
+  - **On a reload** (`clear` is `false`, as when the file changes on disk), switch the pane to
+    Markdown with `leaf.setViewState`, not `openAsMarkdown`: the user didn't choose Markdown.
+  - **On a load** (`clear` is `true`: opening, Back, Forward, a restore), don't switch. Show the
+    note's name, "This note isn't a list" and an "Open as Markdown" button that calls
+    `openAsMarkdown`, since that is the user's choice.
+  - **Why the split:**
+    - A `setViewState` from inside the leaf's own load doesn't take effect (observed).
+    - Every list-to-Markdown switch records a Back entry for the list view (observed). Only the view
+      switched to can clear `ViewStateResult.history`, and that's Obsidian's `MarkdownView`.
+    - No documented API avoids either. So a switch on load, from there or later, would record the
+      entry that Back just left, and Back would loop on the note.
+  - **The accepted cost:** after a switch on reload, Back stops once on the note, which shows the
+    message. One more Back reaches the previous note.
+  - **What's documented:** `clear` means "a different file is being opened". That a reload passes
+    `false` and every load passes `true` is observed.
 - **On restart, background tabs may be deferred views.** Check `instanceof` before calling into
   the view.
 - **Pane menu:** add the list view's own items by overriding `onPaneMenu`. Use `file-menu` only for
   "Open as list" among the view's own items, filtered on `leaf?.view instanceof MarkdownView`.
+  - The `file-menu` item also requires `view.file === file`, because `file-menu` also fires for
+    link menus, where the file is the link's target **(call)**.
+- **Switching to Markdown uses the view type `'markdown'`,** which obsidian.d.ts names in the doc
+  comment of `WorkspaceLeaf.isDeferred` ("like MarkdownView for the `markdown` type").
 
 ### Saving and outside changes
 
@@ -831,9 +879,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   falls back without the owner's decision.
 - **The marker (call):** it is read from the note's text, as for every list ("Opening and
   switching views"). So it doesn't matter whether the metadata cache covers outside notes.
-- **Opening (call):** the same switch on `file-open` and `setViewState` with `file.path`. The check
-  is that it opens the note in the list view and restores it after a restart. Proposed fallback:
-  outside notes open as Markdown, like ordinary notes.
+- **Opening (call):** the same switch on `file-open` and `active-leaf-change`, and `setViewState`
+  with `file.path`. The check is that it opens the note in the list view and restores it after a
+  restart. Proposed fallback: outside notes open as Markdown, like ordinary notes.
 - **Rendering (call):** `MarkdownRenderer.render` with the note's `file.path`, as for any list.
   Obsidian resolves an outside note's picture embeds and links from the note's own folder (1.14
   changelog). The check is that the same happens in a card. Proposed fallback: outside notes open
@@ -847,13 +895,15 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   vault. Proposed fallback: an outside note's title can't be edited, and it's renamed outside
   Obsidian.
 - **Telling an outside note apart (call):** only the fallbacks need it.
-  - Use `vault.getAbstractFileByPath(file.path) !== file`. That method finds a file "inside the
-    vault" (since 0.11.11). Task 2's spike checks that it doesn't return an outside note.
-  - `file instanceof TExternalFile` would mean raising `minAppVersion` to 1.14.4, the owner's
-    call. `TExternalFile` is `@since 1.14.4`, so it's not in the API before that, and where the
-    class is missing at runtime, `instanceof` throws a `TypeError`. The
-    `obsidianmd/no-unsupported-api` lint rule doesn't check `instanceof`, so it wouldn't catch
-    that (tested with `eslint-plugin-obsidianmd` 0.4.2 on 2026-10-20).
+  - `vault.getAbstractFileByPath(file.path)` can't do it. Its doc says it finds a file "inside the
+    vault" (since 0.11.11), but spike 1 found that it returns the outside note too (observed in
+    1.14.4).
+  - The only documented way is `file instanceof TExternalFile`. It needs `minAppVersion` 1.14.4,
+    and raising it is the owner's call if a later fallback needs it. `TExternalFile` is
+    `@since 1.14.4`, so it's not in the API before that, and where the class is missing at
+    runtime, `instanceof` throws a `TypeError`. The `obsidianmd/no-unsupported-api` lint rule
+    doesn't check `instanceof`, so it wouldn't catch that (tested with `eslint-plugin-obsidianmd`
+    0.4.2 on 2026-10-20).
 - **Outside notes leave `minAppVersion` at 1.5.7:** nothing here uses a newer API.
 
 ## Testing and owner checkpoints
@@ -914,7 +964,8 @@ Checked 2026-10-20.
     - `Vault.createBinary`, `Vault.process` (1.1.0) and `Vault.on('modify')`
     - `TExternalFile` (1.14.4): "Represents a file that is outside the Vault. Can be used with the
       vault API just like any other file."
-    - `Vault.getAbstractFileByPath` (0.11.11), which gets "a file or folder inside the vault"
+    - `Vault.getAbstractFileByPath` (0.11.11), which gets "a file or folder inside the vault",
+      though it returns a note from outside the vault too (observed in 1.14.4)
   - settings: `getSettingDefinitions` (1.13.0), `onExternalSettingsChange` (1.5.7)
   - the minimum version: the `@since` tags decide it. The newest among the APIs step one uses is
     1.5.7, for `getFrontMatterInfo` (and `FileManager.getAvailablePathForAttachment` in 1b). The
@@ -961,6 +1012,8 @@ Checked 2026-10-20.
   - `registerExtensions(['md'])` throwing
   - `canAcceptExtension` defaulting to `false`
   - when `file-open` and `active-leaf-change` fire
+  - a `setViewState` made while a leaf is still loading its note being ignored
+  - `Vault.getAbstractFileByPath` returning a note from outside the vault
   - `setViewState` history entries
   - `TextFileView` reloading and merging on outside changes
   - `MarkdownRenderer` needing a Component
