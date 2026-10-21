@@ -271,7 +271,8 @@ top level:
 
 - a heading
 - a checkbox line
-- a `---` or `===` line directly under text, which turns the text above it into a heading
+- a line of `-` or `=` signs directly under text, which turns the text above it into a heading.
+  A single `-`, typed to start a bullet, counts until a space and more text follow it
 
 If you type one of these, it becomes a section or an item when it is saved. The list-note editor
 says so before it saves **(call)**.
@@ -285,6 +286,27 @@ When the list note isn't empty and an item or heading follows it directly, savin
 one blank line between them **(owner, 2026-10-20)**. Without it, a list note that ends in an HTML
 block such as `<div>x</div>` would swallow the first item: CommonMark continues that kind of block
 until a blank line.
+
+A note the editor warns about for an unclosed block still saves, with no check of what follows, so
+nothing typed is lost **(owner, 2026-10-21)**. Saving changes only the note's own lines, so what
+follows is never lost:
+
+- **While the block stays open,** the items and headings below are hidden. Where a fence or comment
+  further down closes the block, the text after that line reads differently instead, as when a
+  fenced block's checkbox lines become items.
+- **The save that closes the block** skips the check as well **(call)**. It brings them back as they
+  were, unless it also makes the note take them in, as a list item in the note does with an
+  indented first item. Nothing is deleted then either, and leaving the field and coming back shows
+  those lines in the note.
+
+This is the one exception to refusing an edit that changes how the rest reads (see "Content the
+plugin leaves alone"). Any other note that would change what follows is refused **(call)**, as when
+a first item indented to a list item's content column would join that item.
+
+Each save replaces exactly the lines the editor's previous save wrote, not the list note as the file
+now parses **(call)**. Typing can change how the note's own lines parse: a `-` under text makes a
+heading, and an opening fence makes the rest of the file part of the note. Re-reading the note's
+extent from the file after such a keystroke would delete or repeat lines.
 
 ### Sections
 
@@ -329,6 +351,9 @@ until a blank line.
     there turns into a code block.
   - A lazy line, indented less than the content column, still belongs to the item. Written back
     after the blank line with its own indent, it would leave the item.
+  - While the notes editor is open, every save uses the indent the notes had when it opened
+    **(call)**. Taken afresh from the file after each keystroke, a space typed at the start of the
+    notes would widen it, and the next save would turn a paragraph into code.
   - Blank lines are written empty.
 - **Notes can hold any Markdown, with nothing escaped:** bullet points, headings, links, pictures,
   callouts, code, `---` lines and `$$` math.
@@ -352,9 +377,10 @@ until a blank line.
   HTML blocks such as `<div>`, which end at a blank line, so a fence line inside one, with no blank
   line before the fence, can leave a later `%%` or `$$` region unmasked. Likewise, a new item
   added right after such a block would join it: at the end of the file after a list note that
-  ends in one, or in a section without items whose content does. Preventing that needs a blank
-  line before the item, outside the lines the edit replaces, so that insert is refused **(call)**,
-  as below. A drag isn't bound by that, so it writes the blank line.
+  ends in one, or in a section without items whose content does. So would a new heading added
+  after a section whose content ends in one. Preventing that needs a blank line before the item
+  or heading, outside the lines the edit replaces, so that insert is refused **(call)**, as below.
+  A drag isn't bound by that, so it writes the blank line.
 - **Other content is kept byte for byte where it is:** paragraphs between items, bullets without
   a checkbox, tables, and link reference definitions.
   - How the view shows this content is the builder's choice.
@@ -367,9 +393,12 @@ until a blank line.
   - **An edit that one empty line can't make safe is refused (call),** and nothing is written. The
     view says the list's layout can't take that change and suggests "Open as Markdown". An
     example: text indented to an item's content column, which would become the notes of the item
-    above once the item between them is deleted.
+    above once the item between them is deleted. A list note that leaves a block open is the one
+    exception (see "The list note").
   - A setext heading's line is its first line after any link reference definitions that open its
-    paragraph, so those definitions stay untouched content **(call)**.
+    paragraph, so those definitions stay untouched content **(call)**. The accepted cost: the
+    check reads such a heading as starting at its definitions, so an edit that would separate
+    them from its text is refused, as is any save of a list note that ends with them **(call)**.
 
 ### Checklists (call; the format is reserved now)
 
@@ -426,8 +455,8 @@ until a blank line.
 - **An edit replaces only the whole lines it concerns.** It keeps the file's line endings (LF or
   CRLF) and whether the file ends with a newline, and it applies no Unicode normalization.
   - It adds one empty line where the text below would otherwise join the block above **(call)**:
-    after a new item or rewritten notes, or in place of a deleted item. When that isn't enough,
-    the edit is refused. See "Content the plugin leaves alone".
+    after a new item or rewritten notes, or in place of a deleted item or heading. When that isn't
+    enough, the edit is refused. See "Content the plugin leaves alone".
 - **Why:** this kind of view saves when it closes. If the text it hands back differed from the
   file in any way the user didn't cause, closing a list would write to the file, which is a
   background write.
@@ -556,7 +585,8 @@ until a blank line.
     with exactly that text, isn't written, and a message says so **(call)**: for example one
     starting with `- [ ]` under a `===` underline, or one ending in ` #`.
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
-    them.
+    them. A heading between two runs of blank lines takes the run after it, as a deleted item
+    does, so no double blank line is left **(call)**.
 - **On both the Mac and the iPhone,** the open card has a ⋯ button with the same item actions. On
   the iPhone this is the only way to reach them **(owner)**. The button's accessible name is "Item
   actions" **(call)**.
@@ -650,6 +680,9 @@ needs no code.
 - **The file is the only copy of the truth.** When the file changes from outside (Sync or an agent),
   the view redraws from it.
   - An editor that has focus isn't torn down.
+  - An outside change inside the lines a focused editor writes, an item's notes or the list note,
+    is overwritten by its next keystroke, so typing wins **(call)**. When the change moves the
+    list note's lines so the editor can't tell where they are, it reads the note again instead.
   - Text being typed in an open card is part of what the view reports to Obsidian, so Obsidian's
     own merge covers it.
 - **Sync conflicts can't be fully prevented.** If both devices edit the same list while offline,
