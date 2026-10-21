@@ -59,10 +59,19 @@ export const REFUSED_CASES = {
 // Every top-level CommonMark block, each list split into its items, as its type and source text.
 // Built here from commonmark directly, apart from the code under test.
 export function blocks(text: string): string[] {
+	return sourceBlocks(text)
+		.map((b) => b.block)
+		.sort();
+}
+
+// The top-level block that holds `line`, as its type and source text, and where it starts and ends.
+export const blockAt = (text: string, line: number) => sourceBlocks(text).find((b) => b.start <= line && line < b.end);
+
+function sourceBlocks(text: string): { block: string; start: number; end: number }[] {
 	const lines = splitLines(text);
 	const contentStart = contentStartOf(lines);
 	const doc = new Parser().parse(maskBlocks(lines, contentStart).text);
-	const out: string[] = [];
+	const out: { block: string; start: number; end: number }[] = [];
 	for (let block: Node | null = doc.firstChild; block; block = block.next) {
 		const nodes: Node[] = [];
 		if (block.type === 'list') for (let item = block.firstChild; item; item = item.next) nodes.push(item);
@@ -71,10 +80,21 @@ export function blocks(text: string): string[] {
 			const start = contentStart + node.sourcepos[0][0] - 1;
 			let end = Math.min(lines.length, contentStart + node.sourcepos[1][0]);
 			while (end > start && isBlank((lines[end - 1] as Line).text)) end--;
-			out.push(`${node.type}:${lines.slice(start, end).map((line) => line.text).join('\n')}`);
+			out.push({ block: `${node.type}:${lines.slice(start, end).map((line) => line.text).join('\n')}`, start, end });
 		}
 	}
-	return out.sort();
+	return out;
+}
+
+// An edit replaces one run of lines: the lines before it keep their text, and the lines after it
+// shift. Only the endings at the end of the file can change, which spliceLines' own tests cover.
+export function expectLinesBeforeKept(before: readonly Line[], after: readonly Line[], runStart: number) {
+	expect(after.slice(0, runStart).map((line) => line.text)).toEqual(before.slice(0, runStart).map((line) => line.text));
+}
+
+export function expectLinesAfterKept(before: readonly Line[], after: readonly Line[], runEnd: number) {
+	const kept = before.length - runEnd;
+	expect(after.slice(after.length - kept).map((line) => line.text)).toEqual(before.slice(runEnd).map((line) => line.text));
 }
 
 export const itemBlock = (lines: readonly Line[], item: ItemBlock) =>

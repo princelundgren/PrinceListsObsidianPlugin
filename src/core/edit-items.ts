@@ -1,6 +1,11 @@
+import { blockKey, blockKeys, replaceRun, sameBlocks, UnsafeEditError } from './edit-check';
+import { gapEnd, hasLineBreak, isBlankAt, typedLines } from './edit-lines';
 import { isDoneStatus, isRepeating, parseItemLine, setTitle, tickLine, untickLine } from './item-line';
-import { dominantEol, spliceLines, splitLines, type Line } from './lines';
-import { columnOf, isBlank, topLevelBlocks, type ItemBlock, type ListModel, type Section } from './parse';
+import { dominantEol, spliceLines, type Line } from './lines';
+import { columnOf, isBlank, type ItemBlock, type ListModel, type Section } from './parse';
+
+// Callers of the item edits import it from here.
+export { UnsafeEditError };
 
 type MoveTarget = { after: ItemBlock } | { firstIn: Section };
 
@@ -8,15 +13,6 @@ export class RepeatingItemError extends Error {
 	constructor() {
 		super('A repeating item cannot be ticked');
 		this.name = 'RepeatingItemError';
-	}
-}
-
-// Thrown, with nothing changed, when an edit would change how the rest of the file parses and the
-// empty lines it may write can't prevent it.
-export class UnsafeEditError extends Error {
-	constructor() {
-		super('This edit would change how the rest of the list reads');
-		this.name = 'UnsafeEditError';
 	}
 }
 
@@ -55,7 +51,7 @@ export function insertItemInSection(
 export function deleteItem(lines: readonly Line[], model: ListModel, item: ItemBlock): Line[] {
 	const gapBefore = isBlankAt(lines, item.titleLine - 1);
 	const end = gapBefore ? gapEnd(lines, item.endLine) : item.endLine;
-	return replaceRun(lines, model, item.titleLine, end, [], { removed: itemKey(lines, item) });
+	return replaceRun(lines, model, item.titleLine, end, [], { removed: [itemKey(lines, item)] });
 }
 
 export function moveItem(lines: readonly Line[], model: ListModel, item: ItemBlock, to: MoveTarget): Line[] {
@@ -111,18 +107,24 @@ export function getItemNotes(lines: readonly Line[], item: ItemBlock): string {
 		.join('\n');
 }
 
-export function setItemNotes(lines: readonly Line[], model: ListModel, item: ItemBlock, markdown: string): Line[] {
-	const texts = splitLines(markdown).map((line) => line.text);
-	// The editor writes on every keystroke, so an Enter at the end would otherwise leave a blank
-	// line that falls outside the item.
-	while (texts.length > 0 && isBlank(texts[texts.length - 1] as string)) texts.pop();
+// A field that saves on every keystroke passes the indent the notes had when it took focus. Re-parsed
+// after a save, notesIndent takes in spaces typed at the start of the notes, and the next save would
+// add them to every line, turning a paragraph into code.
+export function setItemNotes(
+	lines: readonly Line[],
+	model: ListModel,
+	item: ItemBlock,
+	markdown: string,
+	indent = item.notesIndent,
+): Line[] {
+	const texts = typedLines(markdown);
 	const eol = dominantEol(lines);
 	// The blank line after the title keeps a `---` in the notes from turning the title into a heading.
-	const notes = texts.length === 0 ? [] : ['', ...texts.map((text) => (isBlank(text) ? '' : item.notesIndent + text))];
+	const notes = texts.length === 0 ? [] : ['', ...texts.map((text) => (isBlank(text) ? '' : indent + text))];
 	const title = (lines[item.titleLine] as Line).text;
 	return replaceRun(lines, model, item.titleLine + 1, item.endLine, notes.map((text) => ({ text, eol })), {
-		removed: itemKey(lines, item),
-		added: blockKey('item', [title, ...notes]),
+		removed: [itemKey(lines, item)],
+		added: [blockKey('item', [title, ...notes])],
 	});
 }
 
@@ -132,50 +134,12 @@ function replaceLine(lines: readonly Line[], at: number, text: string): Line[] {
 
 function insertAt(lines: readonly Line[], model: ListModel, at: number, title: string): { lines: Line[]; titleLine: number } {
 	const line = { text: `- [ ] ${oneLine(title)}`, eol: dominantEol(lines) };
-	return { lines: replaceRun(lines, model, at, at, [line], { added: blockKey('item', [line.text]) }), titleLine: at };
+	return { lines: replaceRun(lines, model, at, at, [line], { added: [blockKey('item', [line.text])] }), titleLine: at };
 }
 
-// A line break in a title would write a second line that no item owns.
 function oneLine(title: string): string {
-	if (/[\r\n]/.test(title)) throw new Error('A title must be a single line');
+	if (hasLineBreak(title)) throw new Error('A title must be a single line');
 	return title;
-}
-
-// Writes `run` in place of lines [start, end), where `edit` names the block the run removes and the
-// one it adds. Every other block must parse as it did, as a block of the same type and source text.
-// If it doesn't, one empty line ends the run; if that doesn't help either, the edit is refused.
-function replaceRun(
-	lines: readonly Line[],
-	model: ListModel,
-	start: number,
-	end: number,
-	run: Line[],
-	edit: { removed?: string; added?: string },
-): Line[] {
-	const expected = blockKeys(lines, model.contentStart).map((b) => b.key);
-	const removed = edit.removed === undefined ? -1 : expected.indexOf(edit.removed);
-	if (removed !== -1) expected.splice(removed, 1);
-	if (edit.added !== undefined) expected.push(edit.added);
-	for (const tail of [[], [{ text: '', eol: dominantEol(lines) }]]) {
-		const edited = spliceLines(lines, start, end - start, [...run, ...tail]);
-		if (sameBlocks(blockKeys(edited, model.contentStart), expected)) return edited;
-	}
-	throw new UnsafeEditError();
-}
-
-// Each top-level block with its type and source text, so that an edit can tell whether a block
-// still parses as it did: joined to the text below it, split, or turned from a paragraph into a
-// setext heading.
-function blockKeys(lines: readonly Line[], contentStart: number): { key: string; start: number; end: number }[] {
-	return topLevelBlocks(lines, contentStart).map(({ type, start, end }) => ({
-		key: blockKey(type, lines.slice(start, end).map((line) => line.text)),
-		start,
-		end,
-	}));
-}
-
-function blockKey(type: string, texts: readonly string[]): string {
-	return `${type}:${texts.join('\n')}`;
 }
 
 function itemKey(lines: readonly Line[], item: ItemBlock): string {
@@ -189,14 +153,6 @@ function surplus<T extends { key: string }>(after: T[], before: readonly string[
 	for (const key of before) count.set(key, (count.get(key) ?? 0) + 1);
 	for (const { key } of after) count.set(key, (count.get(key) ?? 0) - 1);
 	return after.filter(({ key }) => (count.get(key) as number) < 0);
-}
-
-// Order is ignored on purpose: a move reorders items, so only which blocks there are must match.
-function sameBlocks(after: { key: string }[], expected: readonly string[]): boolean {
-	if (after.length !== expected.length) return false;
-	const keys = after.map((b) => b.key).sort();
-	const wanted = [...expected].sort();
-	return keys.every((key, i) => key === wanted[i]);
 }
 
 // A named section without items takes the item after its content: right under the heading, a
@@ -256,17 +212,6 @@ function gapThatMoves(lines: readonly Line[], section: Section, item: ItemBlock)
 	if (isBlankAt(lines, item.titleLine - 1)) return after;
 	const previousIsAdjacent = section.items[k - 1]?.endLine === item.titleLine;
 	return section.items[k + 1]?.titleLine === after.end && !previousIsAdjacent ? after : null;
-}
-
-function gapEnd(lines: readonly Line[], start: number): number {
-	let end = start;
-	while (isBlankAt(lines, end)) end++;
-	return end;
-}
-
-function isBlankAt(lines: readonly Line[], i: number): boolean {
-	const line = lines[i];
-	return line !== undefined && isBlank(line.text);
 }
 
 function range(start: number, end: number): number[] {

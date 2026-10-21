@@ -678,9 +678,12 @@ every file stays under about 300 lines and each pull request stays reviewable.
     from each notes line, counting columns with a tab moving to the next multiple of 4, so a tab
     and 4 spaces strip alike. A tab that crosses that width leaves its remaining columns as
     spaces, as CommonMark does. It removes all leading whitespace from a lazy line.
-  - `setItemNotes(lines, model, item, markdown: string): Line[]`. It drops trailing blank lines from
-    `markdown` first, because the editor writes on every keystroke: an Enter at the end would
-    otherwise leave a stray blank line outside the item.
+  - `setItemNotes(lines, model, item, markdown: string, indent = item.notesIndent): Line[]`. It
+    drops trailing blank lines from `markdown` first, because the editor writes on every keystroke:
+    an Enter at the end would otherwise leave a stray blank line outside the item. `indent` is the
+    notes indent the field captured when it took focus (Task 7b added it). Re-parsed after a save,
+    `notesIndent` takes in spaces typed at the start of the notes, and the next save would add them
+    to every line, so the notes would flip between a paragraph and code.
   - `setItemTitle(lines, item, title: string): Line[]`
   - `class RepeatingItemError extends Error`
   - `class UnsafeEditError extends Error`, thrown by the inserts, `deleteItem`, `setItemNotes` and
@@ -771,12 +774,29 @@ every file stays under about 300 lines and each pull request stays reviewable.
 ### Task 7b: Heading and list-note edits
 
 **Files:**
-- Create: `src/core/edit-headings.ts`, `src/core/edit-list-note.ts`,
-  `tests/core/edit-headings.test.ts`, `tests/core/edit-list-note.test.ts`
+- Create: `src/core/edit-check.ts`, `src/core/edit-lines.ts`, `src/core/edit-headings.ts`,
+  `src/core/edit-list-note.ts`, `tests/core/edit-headings.test.ts`, `tests/core/edit-list-note.test.ts`
+- Modify: `src/core/edit-items.ts` (its check moves to `edit-check.ts` and its line helpers to
+  `edit-lines.ts`, and `setItemNotes` takes the notes indent from focus), `tests/core/edit-helpers.ts`,
+  `tests/core/edit-timing.test.ts` (the fastest of several runs counts)
+- Create, for `setItemNotes`: `tests/core/notes-typing.test.ts`
 
 **Interfaces:**
 - Consumes: `Line`, `splitLines`, `joinLines` and `dominantEol` (Task 1); `ItemBlock`, `Section`,
   `ListModel`, `parseList` and `maskBlocks` (Task 6); `spliceLines` (Task 7a).
+- Produces, in `src/core/edit-check.ts`: Task 7a's check, moved out of `edit-items.ts` with no
+  change in behavior so that every edit shares it: `replaceRun`, `blockKeys`, `blockKey`,
+  `sameBlocks` and `class UnsafeEditError`. `replaceRun` takes the keys of the blocks a run removes
+  and adds as arrays, since a list note holds several. `edit-items.ts` still exports
+  `UnsafeEditError`.
+- Produces, in `src/core/edit-lines.ts`: `typedLines` (a field's lines without its trailing blank
+  lines), `hasLineBreak`, `gapEnd` and `isBlankAt`, moved out of `edit-items.ts` with no change in
+  behavior so that the item, heading and list-note edits share them.
+- Every edit below keeps the rest of the file parsing as it did, as Task 7a's edits do: each
+  top-level block it doesn't touch, the list note's included, keeps its type and source text. If
+  it wouldn't, the run ends with one empty line, and if it still wouldn't, `insertHeading`,
+  `deleteHeading` and `setListNote` throw `UnsafeEditError` and change nothing. `deleteHeading`
+  and `setHeadingText` take the `model` for its `contentStart`, which that parse needs.
 - Produces, in `src/core/edit-headings.ts`. Each function returns a new `Line[]`, or `null` where
   its signature says so, and inserts new lines with `dominantEol`. Like 7a's edits, each replaces
   one run of lines, here starting at the section's `headingLine` or the `headingLine` an insert
@@ -784,24 +804,41 @@ every file stays under about 300 lines and each pull request stays reviewable.
   - `insertHeading(lines, model, at: { afterItem: ItemBlock } | { afterSection: Section }, text: string): { lines: Line[]; headingLine: number }`.
     This writes `## text`, or `##` when `text` is empty, at the item's or the section's
     `endLine`. A section's `endLine` comes after its hidden archived rows, so they stay in their
-    section (spec, "Selecting and adding").
-  - `deleteHeading(lines, section): Line[]`
-  - `setHeadingText(lines, section, text: string): Line[] | null`. It rewrites only the heading's
-    own lines and keeps the heading's level: the `#` run, any indent, any closing `#`s and the line
-    ending stay as written. An empty ATX heading such as `##` gets one space between the `#` run
-    and the text. A setext heading keeps its `===` or `---` underline, and its content lines
-    become one line holding the text. It returns `null` when the result wouldn't parse as a
-    heading of the same level whose raw content is exactly `text`. Raw content is the source
-    before inline parsing: for an ATX heading, what lies between the `#` run and any closing
-    sequence, without leading or trailing spaces and tabs; for a setext heading, its content
-    lines.
+    section (spec, "Selecting and adding"). A text with a line break throws an `Error`.
+  - `deleteHeading(lines, model, section): Line[]`. It removes the heading's lines, a setext
+    heading's underline included. Link reference definitions that open a setext heading's
+    paragraph stay. As `deleteItem` does, a heading between two gaps takes the gap after it, so
+    no double blank line is left.
+  - `setHeadingText(lines, model, section, text: string): Line[] | null`. It rewrites only the
+    heading's own lines and keeps the heading's level: the `#` run, any indent, any closing `#`s
+    and the line ending stay as written. An empty ATX heading such as `##` gets one space between
+    the `#` run and the text. A setext heading keeps its `===` or `---` underline, and its content
+    lines become one line holding the text. It returns `null` when the result wouldn't parse as a
+    heading of the same level whose raw content is exactly `text`, with every other block as it
+    was. Raw content is the source before inline parsing: for an ATX heading, what lies between
+    the `#` run and any closing sequence, without leading or trailing spaces and tabs; for a
+    setext heading, its content lines. The whole file is parsed to decide, since the lines above
+    a setext heading can take in its text: indented to an item's content column, it joins the
+    item.
 - Produces, in `src/core/edit-list-note.ts`. `setListNote` replaces one run of lines that starts
   at the list note's `start`, like 7a's edits.
   - `getListNote(lines, model): string`
-  - `setListNote(lines, model, markdown: string): Line[]`. It drops trailing blank lines from
-    `markdown` first, as `setItemNotes` does. When the new note isn't empty and an item or heading
-    follows the list note directly, it writes one blank line between them, so a note that ends in
-    an HTML block can't swallow the first item (spec, "The list note").
+  - `setListNote(lines, model, note: { start: number; end: number }, markdown: string): { lines: Line[]; note: { start: number; end: number } }`.
+    - `note` is the range of lines the editor's previous save wrote. The view seeds it from
+      `model.listNote` when the field takes focus, and passes on the range each save returns: the
+      lines the new note now fills. Re-parsing can't stand in for it, since a keystroke can change
+      how the note's own lines parse, and replacing the re-parsed list note would then delete or
+      repeat lines (spec, "The list note").
+    - It drops trailing blank lines from `markdown` first, as `setItemNotes` does. When the new
+      note isn't empty and an item or heading follows the range directly, it writes one blank line
+      between them, outside the returned range, so a note that ends in an HTML block can't swallow
+      the first item.
+    - The note's blocks are replaced by the new note's, which may include a heading or an item.
+      When `listNoteUnclosedBlock` is true for the new note or for the lines it replaces, it writes
+      the note without the check, so typing is never lost (owner, 2026-10-21). What follows stays
+      hidden while the block is open, and is never lost.
+    - Any other note throws `UnsafeEditError` when the lines outside the range wouldn't parse as
+      they did, as when the first item would join a list item in the note.
   - `listNoteWouldRestructure(markdown: string): boolean`, true when
     `parseList(splitLines(markdown), 0)` finds a heading or an item
   - `listNoteUnclosedBlock(markdown: string): boolean`, true when
@@ -840,6 +877,29 @@ every file stays under about 300 lines and each pull request stays reviewable.
 | `listNoteUnclosedBlock` | `<!--\nhidden` | `true` |
 | `listNoteUnclosedBlock` | `` ```\ncode\n``` ``; `%% inline %%`; `$$x$$`; `plain` | `false` |
 
+  Also test:
+  - `deleteHeading` on `Text\n## H\nMore\n` gives `Text\n\nMore\n`, and on `- [ ] a\n## H\nText\n`
+    gives `- [ ] a\n\nText\n`; on `- [ ] a\n## H\n  more\n`, where `  more` would join `a`, it throws
+    `UnsafeEditError`; on `- [ ] a\n\n## H\n\n- [ ] b\n` it gives `- [ ] a\n\n- [ ] b\n`
+  - `insertHeading` after a section whose content ends in `<div>…</div>` throws `UnsafeEditError`
+  - `setHeadingText` on `- [ ] a\n\nOld\n===\n- [ ] b\n` with `  New` returns `null`
+  - `setListNote` with `` ```js\ncode `` above `- [ ] a` gives `` ```js\ncode\n\n- [ ] a\n `` after the
+    frontmatter, and `listNoteUnclosedBlock` is true for that note; with a fenced block further
+    down, which closes the note's block, it saves too; with `- bullet` above `  - [ ] a`, which
+    would nest the item, it throws `UnsafeEditError`
+  - typing sessions in the list note, one character at a time with a re-parse between saves, as
+    Task 9 saves: an opening and closing fence, `%%`, `$$` and `<!--`; `Weekend` then `-` then
+    ` eg`; `# K`; `Text` then `---`. In every session each save writes the typed note once, and
+    the lines after the range are those after the note at the start, with at most the one blank
+    line in front. Random sessions on every fixture keep every line outside the range.
+  - typing ` x`, ` xy`, ` xyz` as the notes of `- [ ] a\n- [ ] b\n`, with a re-parse between saves
+    and the indent captured at focus: every save renders the blocks typed, where the re-parsed
+    indent made ` xy` code
+  - every insert, delete, rename and list-note edit on every fixture leaves every other item,
+    heading and untouched block as it parsed, or is refused, apart from a list note that leaves
+    a block open; and in a file whose lines all end the same way, writing back a heading's
+    current text, or `getListNote`'s output, leaves the file byte-identical, but for the list
+    note's blank line
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS. Every edit writes
   through `spliceLines`.
 - [ ] **Step 3: Commit** with the message "Edit headings and the list note by replacing only their
@@ -953,14 +1013,25 @@ every file stays under about 300 lines and each pull request stays reviewable.
     `#tag`, `📅 date` or ` ^id` as tail and copy it on every keystroke. The field refreshes the
     saved line only when an outside change lands, or the view's own write changes that line.
   - **Notes:** rendered with `renderNotes`, and switched to a `<textarea>` of `getItemNotes` on
-    click. They're saved with `setItemNotes` through `requestSave`.
+    click. They're saved with `setItemNotes` through `requestSave`, passing the item's
+    `notesIndent` as the textarea had it when it took focus, not the one each re-parse gives.
   - **A refused edit while typing:** when a keystroke's edit throws `UnsafeEditError`, the field
     keeps what was typed and the next keystroke tries again. The unsafe-edit `Notice` shows once
     until the field loses focus, not on every keystroke.
   - **The list note:** edited the same way. While `listNoteWouldRestructure` is true, a gray line
     under the editor reads "A heading or checkbox line here becomes a section or item when
     saved." While `listNoteUnclosedBlock` is true, a second gray line reads "An unclosed block here
-    hides the items below it." (spec, "The list note").
+    hides the items below it." (spec, "The list note"). Such a note still saves, so typing is
+    never lost, and the items below stay hidden while the block is open.
+    - **The note's range:** when the field takes focus, the view seeds the range `setListNote`
+      takes from `model.listNote`. Each save passes the range the previous one returned, and the
+      view carries the range across its own writes as it does `selected`: an edit whose run starts
+      after the range leaves it, and the range's own saves replace it.
+    - **An outside change** maps the range with `mapLine`: its `start`, and its last line,
+      `end - 1`, when it isn't empty. When either maps to `null`, the field re-reads
+      `getListNote` from the new text and seeds the range again from its model. A change inside
+      the range that leaves both ends in place is overwritten by the next keystroke, as typing
+      wins in any focused field.
   - **The list title:** renamed with `fileManager.renameFile` on Enter or blur. If the name is
     taken, show the `Notice` "A note with that name already exists." and keep the old name.
   - **Empty items:** remove an item only when this card created it ("+", Enter, "New item" or "New
@@ -978,7 +1049,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
   - **`getViewData()` includes text being typed.** Apply each keystroke to `this.text`, so
     Obsidian's own merge on outside changes covers it.
   - **`setViewData(_, false)`** re-renders, but keeps any field that has focus: an item title,
-    the notes, the list note or the list title. It updates that field only after blur. It moves
+    the notes, the list note or the list title. It updates that field only after blur, except the
+    list note's re-read when its range can't be mapped (see above). It moves
     `selected` with `mapLine`, and closes the card after blur when that returns `null`.
   - **`selected` follows the view's own writes too.** The view knows which lines each of its own
     edits replaced. A `selected` line before them stays, one after them shifts by the change in

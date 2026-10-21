@@ -15,12 +15,17 @@ for (let h = 0; h < 10; h++) {
 text += CASCADE;
 
 // Each edit parses the whole file at least twice, so these catch a regression in that cost. The
-// bounds leave room for a slow CI machine.
+// bounds leave room for a slow CI machine. The fastest of several runs counts: on a busy machine
+// one run can be paused for longer than a bound, while a real regression slows every run.
 function timed<T>(edit: () => T): { result: T; ms: number } {
-	edit();
-	const started = performance.now();
-	const result = edit();
-	return { result, ms: performance.now() - started };
+	let result = edit();
+	let ms = Infinity;
+	for (let run = 0; run < 5; run++) {
+		const started = performance.now();
+		result = edit();
+		ms = Math.min(ms, performance.now() - started);
+	}
+	return { result, ms };
 }
 
 test('setItemNotes, which runs on every keystroke, takes under 100 ms on a list of 3,000 lines', () => {
