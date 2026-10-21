@@ -1,7 +1,8 @@
 # Spike 1: opening a list note in the list view
 
-Plan step 1a, Task 2, Steps 7 to 10. Every check passed on the final build, though check 12 on the
-iPhone wasn't reported separately. The maintainer saw no flash on the Mac or the iPhone.
+Plan step 1a, Task 2, Steps 7 to 10. Every check passed on the final build. Check 5's second part
+came with a later change and is still to run. The maintainer saw no flash on the Mac or the
+iPhone.
 
 The Mac checks, Steps 7 and 9, ran in the test vault through Obsidian's own command-line interface
 (`obsidian eval`, with `dev:cdp` for real clicks and keys). "Restart" in checks 6 and 10 was
@@ -41,7 +42,10 @@ princelists: true
    Markdown.
    - **Result:** pass. Back returns to the other note, and Forward goes straight to the list view.
 5. After "Open as Markdown", switching to another tab and back leaves this pane as Markdown.
+   Opening another list in that tab shows it as a list.
    - **Result:** pass, with "Open as Markdown" from the ⋯ menu.
+   - **Result, another list in that tab:** pass. It shows as a list, Back to the first note shows
+     it still as Markdown, and "Open as list" ends the choice.
 6. Restarting Obsidian brings the pane back as the list view.
    - **Result:** pass.
 7. After deleting the frontmatter in Markdown, "Open as list" isn't offered, in the pane's ⋯ menu
@@ -108,7 +112,7 @@ Repeat checks 1, 2, 4, 5 and 12 from Step 7, numbered as there.
 - **Check 12:** opening it in a new tab from the long-press menu, in the file explorer and on the
   link in `Link test`, shows the placeholder. If the phone offers no way to open a new tab there,
   record that.
-  - **Result:** not reported separately.
+  - **Result:** pass, with a new tab through the long-press menu's "Open in new tab".
 
 ## Step 9: a note from outside the vault, on the Mac
 

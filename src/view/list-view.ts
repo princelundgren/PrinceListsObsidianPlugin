@@ -21,6 +21,8 @@ export class PrinceListView extends TextFileView {
 	}
 
 	setViewData(data: string, clear: boolean): void {
+		// TextFileView's per-file reset, for when a different file loads. It only empties `text`
+		// for now, which the next line sets anyway, but later tasks keep per-file state there.
 		if (clear) this.clear();
 		this.text = data;
 		const isList = isListText(data);
@@ -29,8 +31,8 @@ export class PrinceListView extends TextFileView {
 		// take effect, and a later one would record a Back entry that lands here again, so Back
 		// would loop (spec, "Opening and switching views"). A load shows the button instead.
 		if (!isList && !clear && this.file) {
-			// Not through openAsMarkdown: the user didn't choose Markdown, so the pane mustn't
-			// stay Markdown when it next opens a list.
+			// Not through openAsMarkdown: the user didn't choose Markdown, so this note mustn't be
+			// held as Markdown in this pane if its marker comes back.
 			void this.leaf.setViewState({ type: VIEW_TYPE_MARKDOWN, state: { file: this.file.path } });
 		}
 	}

@@ -2,9 +2,14 @@ import { MarkdownView, type Plugin, type TFile, type Workspace, type WorkspaceLe
 import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { isListText } from './marker';
 
-// Panes where the user chose "Open as Markdown". The choice holds until the pane is switched back
+// The paths of the notes each pane was told to "Open as Markdown". A choice holds for that note in
+// that pane, so another list opened there still shows as a list, until the note is switched back
 // or Obsidian restarts.
-const markdownChosen = new WeakSet<WorkspaceLeaf>();
+const markdownChosen = new WeakMap<WorkspaceLeaf, Set<string>>();
+
+function choseMarkdown(leaf: WorkspaceLeaf, file: TFile): boolean {
+	return markdownChosen.get(leaf)?.has(file.path) ?? false;
+}
 
 // The same check runs on `file-open` and `active-leaf-change`, and the first event that finds the
 // view's text loaded switches: a switch made while the leaf is still loading is ignored. A note
@@ -29,7 +34,7 @@ export function registerAutoSwitch(plugin: Plugin): void {
 function switchActiveIfList(workspace: Workspace): void {
 	const view = workspace.getActiveViewOfType(MarkdownView);
 	// `data` is unset until the text loads (observed). A later event decides then.
-	if (!view?.file || !view.data || markdownChosen.has(view.leaf) || !isListText(view.data)) return;
+	if (!view?.file || !view.data || choseMarkdown(view.leaf, view.file) || !isListText(view.data)) return;
 	void openAsList(view.leaf, view.file);
 }
 
@@ -37,11 +42,12 @@ function switchActiveIfList(workspace: Workspace): void {
 // Both update markdownChosen before awaiting setViewState, because `file-open` and
 // `active-leaf-change` can fire during the switch.
 export async function openAsList(leaf: WorkspaceLeaf, file: TFile): Promise<void> {
-	markdownChosen.delete(leaf);
+	markdownChosen.get(leaf)?.delete(file.path);
 	await leaf.setViewState({ type: VIEW_TYPE_LIST, state: { file: file.path } });
 }
 
 export async function openAsMarkdown(leaf: WorkspaceLeaf, file: TFile): Promise<void> {
-	markdownChosen.add(leaf);
+	const paths = markdownChosen.get(leaf) ?? new Set<string>();
+	markdownChosen.set(leaf, paths.add(file.path));
 	await leaf.setViewState({ type: VIEW_TYPE_MARKDOWN, state: { file: file.path } });
 }

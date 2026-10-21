@@ -459,7 +459,9 @@ until a blank line.
   first build task is a spike to see how that looks. If it is bad, the owner decides, and the
   plugin doesn't fall back to patching.
 - **"Open as Markdown" and "Open as list"** are in the pane's ⋯ menu and are also commands.
-  Choosing Markdown holds for that pane until it is switched back or Obsidian restarts.
+  Choosing Markdown holds for that note in that pane until it is switched back or Obsidian
+  restarts **(owner, 2026-10-21)**. Another list opened in the same pane still opens as a list,
+  and going Back to the first note shows it as Markdown again.
 - **On restart,** Obsidian restores a list pane as the list view.
 - **If the marker is removed** while the list is open, the pane switches to Markdown.
 - **A note without the marker that loads in the list view stays there (owner, 2026-10-21).** That
@@ -721,7 +723,9 @@ From here on the document is for the builder.
   - Take `workspace.getActiveViewOfType(MarkdownView)`. On `file-open(file)`, require
     `view.file === file`: the event also fires for embeds, canvas nodes and keyboard navigation in
     the file explorer (its doc: "The file could be in a new leaf, an existing leaf, or an embed").
-  - Skip any leaf in a `WeakSet<WorkspaceLeaf>` of panes where the user chose Markdown.
+  - Skip the note if the user chose Markdown for it in this pane **(owner, 2026-10-21)**: a
+    `WeakMap<WorkspaceLeaf, Set<string>>` from each pane to the paths it was told to open as
+    Markdown. "Open as Markdown" adds the path, and "Open as list" removes it.
   - Detect the marker from the view's loaded text, `TextFileView.data`, with `getFrontMatterInfo`
     and `parseYaml`. Not from `getFileCache`: it returns `null` for a file that isn't cached yet,
     such as one Sync or an agent just wrote.
@@ -735,8 +739,8 @@ From here on the document is for the builder.
     fires `active-leaf-change` once before its text loads and once after. So the first event that
     finds the text loaded switches. Reading the file instead, with `vault.cachedRead`, doesn't
     help, because the switch would still run during the load.
-- **`active-leaf-change` fires on every file load in the active leaf (observed).** Without the
-  `WeakSet`, it would push a pane straight back after "Open as Markdown". After the pane switches
+- **`active-leaf-change` fires on every file load in the active leaf (observed).** Without that
+  record, it would push a pane straight back after "Open as Markdown". After the pane switches
   to Markdown by itself because the marker was removed, the marker is gone, so nothing switches it
   back.
 - **Back history:**

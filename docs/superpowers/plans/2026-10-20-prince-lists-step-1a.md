@@ -283,7 +283,7 @@ test("lineIndexAt maps a character offset to its line", () => {
     placeholder: the file's basename in an `h2`, plus a line that reads "List view". Without it
     (owner, 2026-10-21; spec, Implementation notes, "Opening and switching views"):
     - On a reload (`clear` is `false`), it switches the pane to Markdown with `leaf.setViewState`
-      directly, not through `openAsMarkdown`, so the leaf doesn't join `markdownChosen`: the user
+      directly, not through `openAsMarkdown`, so the note doesn't join `markdownChosen`: the user
       didn't choose Markdown.
     - On a load (`clear` is `true`), it doesn't switch. It shows the basename in an `h2`, then
       "This note isn't a list", then a button "Open as Markdown" that calls `openAsMarkdown` for
@@ -296,12 +296,15 @@ test("lineIndexAt maps a character offset to its line", () => {
   "Opening and switching views", describe it:
   - Listen to `file-open` and `active-leaf-change`, and run one guarded check on both:
     - `getActiveViewOfType(MarkdownView)` shows the file (on `file-open`, `view.file === file`);
-    - its leaf isn't in a module-level `WeakSet<WorkspaceLeaf>` named `markdownChosen`;
+    - the user hasn't chosen Markdown for that file in that leaf: a module-level
+      `WeakMap<WorkspaceLeaf, Set<string>>` of file paths named `markdownChosen` (owner,
+      2026-10-21: the choice holds per note in a pane, not for the whole pane);
     - `isListText(view.data)`.
   - Then call `openAsList`. The first event that finds the text loaded switches. A switch made
     while the leaf is still loading is ignored, and a new tab fires `active-leaf-change` once before
     its text loads and once after (observed in 1.14.4).
-  - `openAsMarkdown` adds the leaf to `markdownChosen`. `openAsList` removes it.
+  - `openAsMarkdown` adds the file's path to the leaf's set in `markdownChosen`. `openAsList`
+    removes it.
 - [ ] **Step 5: Wire up the view in `main.ts`.**
   - Call `registerView(VIEW_TYPE_LIST, …)` and `registerAutoSwitch`.
   - Add the commands `open-as-list` and `open-as-markdown`. Each is offered only when it applies,
@@ -320,6 +323,7 @@ test("lineIndexAt maps a character offset to its line", () => {
   4. Back, after opening it from another note, returns to that other note, not to this one as
      Markdown.
   5. After "Open as Markdown", switching to another tab and back leaves this pane as Markdown.
+     Opening another list in that tab shows it as a list.
   6. Restarting Obsidian brings the pane back as the list view.
   7. After deleting the frontmatter in Markdown, "Open as list" isn't offered.
   8. With a list open in the list view, open the same note as Markdown in a second pane and
