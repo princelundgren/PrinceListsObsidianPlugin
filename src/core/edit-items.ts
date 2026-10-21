@@ -191,6 +191,7 @@ function surplus<T extends { key: string }>(after: T[], before: readonly string[
 	return after.filter(({ key }) => (count.get(key) as number) < 0);
 }
 
+// Order is ignored on purpose: a move reorders items, so only which blocks there are must match.
 function sameBlocks(after: { key: string }[], expected: readonly string[]): boolean {
 	return JSON.stringify(after.map((b) => b.key).sort()) === JSON.stringify([...expected].sort());
 }
