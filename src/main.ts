@@ -1,5 +1,6 @@
-import { MarkdownView, Plugin } from 'obsidian';
+import { MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
 import { RIBBON_ICON, VIEW_TYPE_LIST } from './constants';
+import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
 import { PrinceListView } from './view/list-view';
@@ -8,6 +9,24 @@ export default class PrinceListsPlugin extends Plugin {
 	onload() {
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf));
 		registerAutoSwitch(this);
+
+		this.addCommand({
+			id: 'new-list',
+			name: 'New list',
+			callback: () => void this.newListWhereNotesGo(),
+		});
+		this.addRibbonIcon(RIBBON_ICON, 'New list', () => void this.newListWhereNotesGo());
+		this.registerEvent(
+			this.app.workspace.on('file-menu', (menu, file) => {
+				if (!(file instanceof TFolder)) return;
+				menu.addItem((item) =>
+					item
+						.setTitle('New list')
+						.setIcon(RIBBON_ICON)
+						.onClick(() => void this.newList(file)),
+				);
+			}),
+		);
 
 		// "Open as list" reads getViewData, the editor's text, here and in `file-menu` below. Saves
 		// wait 2 seconds, so the inherited `data` may still hold a frontmatter the user just deleted.
@@ -48,5 +67,19 @@ export default class PrinceListsPlugin extends Plugin {
 				);
 			}),
 		);
+	}
+
+	private newListWhereNotesGo(): Promise<void> {
+		const active = this.app.workspace.getActiveFile();
+		return this.newList(this.app.fileManager.getNewFileParent(active?.path ?? ''));
+	}
+
+	private async newList(folder: TFolder): Promise<void> {
+		try {
+			await createList(this.app, folder);
+		} catch (error) {
+			console.error('PrinceLists: could not create the list', error);
+			new Notice("Couldn't create the list.");
+		}
 	}
 }
