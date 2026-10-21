@@ -288,16 +288,20 @@ block such as `<div>x</div>` would swallow the first item: CommonMark continues 
 until a blank line.
 
 A note the editor warns about for an unclosed block still saves, with no check of what follows, so
-nothing typed is lost **(owner, 2026-10-21)**. While the block is open, the items and headings
-below stay hidden, or, where a fence or comment further down closes the block, the text after that
-line reads differently, as when a fenced block's checkbox lines become items. They are never lost:
-saving changes only the note's own lines, and closing the block brings them back as they were,
-unless the save that closes it also makes the note take them in, as a list item in the note does
-with an indented first item. Nothing is deleted then either, and leaving the field and coming back
-shows those lines in the note. The save that closes the block skips the check as well **(call)**. This is the one exception to
-refusing an edit that changes how the rest reads (see "Content the plugin leaves alone"). Any other
-note that would change what follows is refused **(call)**, as when a first item indented to a list
-item's content column would join that item.
+nothing typed is lost **(owner, 2026-10-21)**. Saving changes only the note's own lines, so what
+follows is never lost:
+
+- **While the block stays open,** the items and headings below are hidden. Where a fence or comment
+  further down closes the block, the text after that line reads differently instead, as when a
+  fenced block's checkbox lines become items.
+- **The save that closes the block** skips the check as well **(call)**. It brings them back as they
+  were, unless it also makes the note take them in, as a list item in the note does with an
+  indented first item. Nothing is deleted then either, and leaving the field and coming back shows
+  those lines in the note.
+
+This is the one exception to refusing an edit that changes how the rest reads (see "Content the
+plugin leaves alone"). Any other note that would change what follows is refused **(call)**, as when
+a first item indented to a list item's content column would join that item.
 
 Each save replaces exactly the lines the editor's previous save wrote, not the list note as the file
 now parses **(call)**. Typing can change how the note's own lines parse: a `-` under text makes a

@@ -12,20 +12,24 @@ export function getListNote(lines: readonly Line[], model: ListModel): string {
 }
 
 // `note` is the range of lines the editor's previous save wrote, or the model's list note when the
-// field takes focus; the range this save writes comes back for the next keystroke. Re-parsing can't
-// stand in for it: a note that opens a block, or turns its last line into a setext underline,
-// changes where the parse ends the list note, and replacing that range would delete or repeat lines.
-// The note's blocks are replaced by the new note's, which may include a heading or an item: the
-// editor warns about those before it saves (spec, "The list note").
+// field takes focus; the range this save writes comes back for the next keystroke. The caller passes
+// that range, mapped with mapLine after an outside change. Re-parsing can't stand in for it: a note
+// that opens a block, or turns its last line into a setext underline, changes where the parse ends
+// the list note, and replacing that range would delete or repeat lines. A range that isn't in these
+// lines throws for the same reason. The note's blocks are replaced by the new note's, which may
+// include a heading or an item: the editor warns about those before it saves (spec, "The list note").
 export function setListNote(
 	lines: readonly Line[],
 	model: ListModel,
 	note: { start: number; end: number },
 	markdown: string,
 ): { lines: Line[]; note: { start: number; end: number } } {
+	const { start, end } = note;
+	if (!(model.contentStart <= start && start <= end && end <= lines.length)) {
+		throw new Error('The list note range is not in these lines; seed it again from the model');
+	}
 	const eol = dominantEol(lines);
 	const written = typedLines(markdown).map((text) => ({ text, eol }));
-	const { start, end } = note;
 	const next = lines[end];
 	// Always, not only where the check below would need it (spec, "The list note"): a note that ends in
 	// an HTML block such as <div> would take in the item.

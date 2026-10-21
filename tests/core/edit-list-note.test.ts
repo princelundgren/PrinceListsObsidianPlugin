@@ -88,6 +88,22 @@ describe('setListNote', () => {
 		expect(() => setListNote(lines, model, model.listNote, markdown)).toThrow(UnsafeEditError);
 		expect(joinLines(lines)).toBe(text);
 	});
+	test('refuses a range that is not in the lines, or starts above the content', () => {
+		const text = `${FRONTMATTER}Note\n\n- [ ] a\n`;
+		const { lines, model } = list(text);
+		for (const note of [
+			{ start: 2, end: 4 },
+			{ start: 4, end: 3 },
+			{ start: 3, end: 7 },
+			{ start: -1, end: 0 },
+		]) {
+			expect(() => setListNote(lines, model, note, 'x'), JSON.stringify(note)).toThrow(
+				'The list note range is not in these lines; seed it again from the model',
+			);
+		}
+		expect(joinLines(lines)).toBe(text);
+		expect(joinLines(setListNote(lines, model, { start: 6, end: 6 }, '').lines)).toBe(text);
+	});
 	test('writing back what getListNote reads leaves the file byte-identical, but for the blank line', () => {
 		for (const text of [...Object.values(JOINING_CASES), ...FIXTURES.map(readFixture)]) {
 			const { lines, model } = list(text);
