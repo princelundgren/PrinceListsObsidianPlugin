@@ -1,0 +1,2 @@
+# The fixtures must keep their exact bytes, whatever a clone's core.autocrlf says.
+tests/fixtures/** -text
