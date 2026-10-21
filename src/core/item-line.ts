@@ -48,7 +48,8 @@ const ONE_MARK_PATTERN = new RegExp(MARK_SOURCE, 'g');
 const MARK_TIME_PATTERN = new RegExp(
 	`^(?:✔${VS16} +(\\d{4})-(\\d{2})-(\\d{2})(?: (\\d{2}):(\\d{2}))?|✅${VS16} *(\\d{4})-(\\d{2})-(\\d{2}))$`,
 );
-const DONE_DATE_FIELD = new RegExp(` *✅${VS16} *\\d{4}-\\d{2}-\\d{2}`, 'g');
+export const DONE_DATE_PATTERN = new RegExp(` *✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
+const DONE_DATE_FIELD = new RegExp(DONE_DATE_PATTERN, 'g');
 const REPEAT_FIELD = new RegExp(`🔁${VS16} *[a-zA-Z0-9, !]+`);
 
 export function parseItemLine(text: string): ItemLineParts | null {
