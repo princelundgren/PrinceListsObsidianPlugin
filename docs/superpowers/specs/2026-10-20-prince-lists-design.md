@@ -193,8 +193,10 @@ These are wanted later, roughly in this order. The file format already leaves ro
 - **Open source (owner, 2026-10-20).** `princelundgren/PrinceListsObsidianPlugin` is open source
   under the MIT license.
   - It goes to Obsidian's community directory after the first release.
-  - An agent will give every new issue and pull request a first pass. That automation has a
-    separate design, not yet written. The owner always merges and makes releases.
+  - An agent gives every pull request from a branch in this repository a first pass, as the
+    [pull request review design](2026-10-20-pr-review-agent-design.md) describes. A fork's pull
+    request gets the owner's review instead **(owner, 2026-10-20)**. Issues get a first pass
+    later, under a design not yet written. The owner always merges and makes releases.
 - **Privacy (owner, 2026-10-20).** No telemetry of any kind. The plugin makes no network requests
   unless one is agreed on in an issue first, and any network use is disclosed in the README, as
   Obsidian's developer policies require.

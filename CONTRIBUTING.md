@@ -45,6 +45,9 @@ request that breaks one won't be merged; to change a rule, open an issue first.
   it to a file and run `node scripts/check-docs.mjs --pr-title="<title>" --pr-body-file <file>`.
 - **Your commits don't need to be signed.** The maintainer squash-merges pull requests, and GitHub
   signs the merged commit.
+- **Claude gives pull requests from branches in this repository an automated first review.** It
+  comments, but it doesn't approve or merge. Pull requests from forks are reviewed by the
+  maintainer.
 
 ### Development setup
 
