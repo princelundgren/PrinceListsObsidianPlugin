@@ -199,7 +199,8 @@ These are wanted later, roughly in this order. The file format already leaves ro
     later, under a design not yet written. The owner always merges and makes releases.
 - **Privacy (owner, 2026-10-20).** No telemetry of any kind. The plugin makes no network requests
   unless one is agreed on in an issue first, and any network use is disclosed in the README, as
-  Obsidian's developer policies require.
+  Obsidian's developer policies require. Rendered notes show a picture linked from the web, because
+  Obsidian's renderer loads it, as in any note, and the README says so **(owner, 2026-10-21)**.
 
 ## Words used here
 
