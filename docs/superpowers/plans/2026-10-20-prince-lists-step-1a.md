@@ -536,9 +536,10 @@ test("lineIndexAt maps a character offset to its line", () => {
     lines, so untouched content at the end of a section counts. For an unnamed section with no
     items, it is `listNote.end`.
   - `notesIndent` is the leading whitespace of the first non-blank notes line when that line
-    reaches the item's content column. Otherwise, when the item has no notes or that line is a
-    lazy line (indented less than the content column), it is `"\t"` if the content column is 4 or
-    less, and that many spaces if it is wider. The content column is where `[` starts, counting a
+    reaches the item's content column but not 4 columns past it. Otherwise, when the item has no
+    notes, that line is a lazy line (indented less than the content column) or it is indented code
+    (4 or more columns past it), it is `"\t"` if the content column is 4 or less, and that many
+    spaces if it is wider. The content column is where `[` starts, counting a
     tab as a move to the next multiple of 4. So `100. [ ] x` gets five spaces and `100.\t[ ] x`
     eight, because a tab only reaches column 4.
   - `sections[0]` is always the unnamed top section, with `headingLine: null`, even when it's
@@ -604,13 +605,19 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Files:**
 - Create: `src/core/edit-items.ts`, `src/core/guard.ts`, `tests/core/edit-items.test.ts`,
-  `tests/core/guard.test.ts`
-- Modify: `src/core/lines.ts`, `tests/core/lines.test.ts`
+  `tests/core/move-item.test.ts`, `tests/core/edit-helpers.ts`, `tests/core/guard.test.ts`
+- Modify: `src/core/lines.ts`, `tests/core/lines.test.ts`, `src/core/parse.ts` (export `columnOf`
+  and `isBlank`, add `topLevelBlocks`, and the `notesIndent` rule for notes that open with
+  indented code), `tests/core/parse.test.ts`
 
 **Interfaces:**
-- Consumes: `Line`, `splitLines`, `joinLines` and `dominantEol` (Task 1); `parseItemLine`,
+- Consumes, in `edit-items.ts`: `Line`, `splitLines` and `dominantEol` (Task 1); `parseItemLine`,
   `isDoneStatus`, `tickLine`, `untickLine`, `setTitle` and `isRepeating` (Task 4); `ItemBlock`,
-  `Section`, `ListModel` and `parseList` (Task 6).
+  `Section` and `ListModel` (Task 6), and `columnOf`, `isBlank` and `topLevelBlocks`, which this
+  task exports from or adds to Task 6's `parse.ts`. The tests also use `joinLines`, `parseList`
+  and `maskBlocks`.
+- Produces, in `src/core/parse.ts`: `topLevelBlocks(lines, contentStart): Block[]`, every top-level
+  block with each list split into its items, as `{ type, start, end }`. `parseList` builds on it.
 - Produces, in `src/core/lines.ts`:
   `spliceLines(lines: readonly Line[], start: number, deleteCount: number, insert: readonly Line[]): Line[]`.
   It splices, then sets the endings at the end of the file as the Global Constraints' "Writing to
@@ -620,16 +627,20 @@ every file stays under about 300 lines and each pull request stays reviewable.
   edited item's `titleLine` (just after it for notes), or at the `titleLine` an insert returns:
   every line before the run stays where it was, and every line after it shifts by the change in
   length. Apart from that run, only the endings at the end of the file can change, which moves no
-  line. Task 9 relies on this.
+  line. Task 9 relies on this. Every top-level block the edit doesn't touch, the list note's
+  included, must keep its type and source text; `topLevelBlocks` before and after decides. If it
+  doesn't, the run ends with one empty line. If it still doesn't, the edit throws
+  `UnsafeEditError` and changes nothing. A title with a line break throws an `Error`.
   - `toggleItem(lines, item: ItemBlock, now: Date): Line[]`, which throws `RepeatingItemError`
     when it would tick a 🔁 line.
   - `insertItem(lines, model, after: ItemBlock | null, title: string): { lines: Line[]; titleLine: number }`.
     With `after === null`, the item goes first in the list: it's inserted at the line of the first
     item or heading after the list note, or at the end of the file when there is none.
   - `insertItemInSection(lines, model, section: Section, title: string): { lines: Line[]; titleLine: number }`,
-    which adds the item as the first under that heading. For the unnamed top section it goes where
+    which adds the item as the first under that heading. In a named section without items it goes
+    at the section's `endLine`, after its content. For the unnamed top section it goes where
     `insertItem` puts it with `after === null`.
-  - `deleteItem(lines, item): Line[]`. It removes the item's lines and, when the item sits
+  - `deleteItem(lines, model, item): Line[]`. It removes the item's lines and, when the item sits
     between two gaps, the gap after it, so no double blank line is left.
   - `moveItem(lines, model, item, to: { after: ItemBlock } | { firstIn: Section }): Line[]`.
     `{ firstIn }` puts the item where `insertItemInSection` would put a new one.
@@ -637,11 +648,13 @@ every file stays under about 300 lines and each pull request stays reviewable.
     from each notes line, counting columns with a tab moving to the next multiple of 4, so a tab
     and 4 spaces strip alike. A tab that crosses that width leaves its remaining columns as
     spaces, as CommonMark does. It removes all leading whitespace from a lazy line.
-  - `setItemNotes(lines, item, markdown: string): Line[]`. It drops trailing blank lines from
+  - `setItemNotes(lines, model, item, markdown: string): Line[]`. It drops trailing blank lines from
     `markdown` first, because the editor writes on every keystroke: an Enter at the end would
     otherwise leave a stray blank line outside the item.
   - `setItemTitle(lines, item, title: string): Line[]`
   - `class RepeatingItemError extends Error`
+  - `class UnsafeEditError extends Error`, thrown by the inserts, `deleteItem`, `setItemNotes` and
+    `moveItem`
 - Produces, in `src/core/guard.ts`:
   - `guardedApply(current: string, expected: string, next: string): string`, which returns `next`
     when `current === expected`, and `current` otherwise.
@@ -697,18 +710,30 @@ every file stays under about 300 lines and each pull request stays reviewable.
     `- [ ] a\n\n\tnote\n\n\tmore\n`: the bytes change, but under commonmark the item holds the
     same blocks before and after (`paragraph`, `paragraph`, `paragraph`).
   - an NFD title survives `insertItem`
-  - `moveItem` never adds or loses a line: across 20 random moves, the sorted texts of
-    `splitLines(joinLines(result))` equal those before, on `example.md`, on `example.md` with
-    its final newline removed, and on `top-level-untouched.md`
+  - an insert, delete or move that one empty line can't make safe throws `UnsafeEditError`, as for
+    `- [ ] z\n1. [ ] a\n\n   ```\n   x\n   ```\n  Text\n`, where `  Text` would become z's notes
+  - `moveItem` never adds or loses a non-blank line, and every untouched block, heading and item
+    keeps its text, for every move on every fixture and on cases where text could join an item.
+    Across 20 random moves on `example.md`, on `example.md` with its final newline removed, and
+    on `top-level-untouched.md`, where nothing can join, it adds or loses no line at all.
+  - inserts, deletes and notes written back keep every other item, heading and untouched block
+    as it parsed; notes written back render the same HTML when they follow a blank line
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
   - Every edit splices whole `Line` objects with `spliceLines`, which sets the endings at the end
     of the file. Only LF and CRLF count as a file's ending, as in the spec, so a file that uses
     a lone CR gets LF on new lines. Say so in a comment at `spliceLines`.
   - **In `moveItem`, only items change order.** Blank-line gaps and untouched blocks stay in their
-    slots, as in the table's `moveItem` rows. When an item moves to another section, a gap in the
-    section it leaves that no longer sits between two items moves to the end of that section, and
-    the moved item is inserted without a gap. An untouched block that the move leaves outside a
-    pair of items stays where it is.
+    slots, as in the table's `moveItem` rows. When an item moves to another section, it is
+    inserted without a gap. In the section it leaves, the gap after it moves to the end of that
+    section when it no longer sits directly between two items, or when a gap also comes before the
+    item, so no double blank line is left between items; when only blank lines follow the item in
+    its section, both gaps end up at its end. The gap before the item stays: moved away, untouched
+    text after the item would become a lazy line of the item above. An untouched block that the
+    move leaves outside a pair of items stays where it is. Where a boundary the move makes would
+    let the text below join the block above, the move adds one empty line there, and checks again,
+    since one can uncover the next. If no changed block points at a boundary, as when a block joins
+    or vanishes into a link reference definition, it writes one at every boundary it made. If the
+    blocks still differ, it throws `UnsafeEditError`.
   - Notes are written with a blank line between the title and the notes. They are indented with
     the item's `notesIndent`, and their blank lines are written empty.
 - [ ] **Step 3: Commit** with the message "Edit items by replacing only the lines that change".
@@ -798,15 +823,16 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Interfaces:**
 - Consumes: `parseList(splitLines(view.text), contentStartLine(view.text))`, `parseItemLine`,
-  `isArchived`, `toggleItem`, `RepeatingItemError`, `joinLines` and `guardedApply`.
+  `isArchived`, `toggleItem`, `RepeatingItemError`, `UnsafeEditError`, `joinLines` and
+  `guardedApply`.
 - Produces:
-  - `writeAction(view: PrinceListView, next: string, expected = view.text, refusedNotice = "This list changed elsewhere. Try again."): Promise<boolean>`,
+  - `writeAction(view: PrinceListView, next: string, expected = view.text, refusedNotice: string | null = "This list changed elsewhere. Try again."): Promise<boolean>`,
     in `src/view/write.ts`. It first awaits `view.save()` (`TextFileView.save`, public since
     0.10.12) so pending typing is on disk, then runs
     `vault.process(file, cur => guardedApply(cur, expected, next))`. Inside that callback, once
     the guard accepts, it sets `view.text = next`, so `setViewData`'s early return holds whatever
-    the timing of Obsidian's modify echo. It shows a `Notice` reading `refusedNotice` when the
-    guard refused.
+    the timing of Obsidian's modify echo. When the guard refused, it shows a `Notice` reading
+    `refusedNotice`, unless that is `null`.
 
 - [ ] **Step 1: Implement the rendering** that the spec's "Layout" describes:
   - the title (the basename)
@@ -826,7 +852,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
   changes"), and a redraw then would tear down a field that has focus.
 - [ ] **Step 2: Make the checkbox tick.** A click calls `writeAction(view, joinLines(toggleItem(...)))`,
   using `new Date()`. On `RepeatingItemError` it shows a `Notice` reading "Repeating items can't be
-  ticked here yet." The click never opens a card.
+  ticked here yet." The click never opens a card. Later edits (Tasks 9 to 11) that throw
+  `UnsafeEditError` write nothing and show a `Notice` reading "This list's layout can't take that
+  change. Make it with Open as Markdown."
 - [ ] **Step 3: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 4: Check it by hand in the test vault on the Mac and the iPhone.**
   1. `example.md` matches the spec's "Layout" section.
@@ -859,7 +887,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Interfaces:**
 - Consumes: `getItemNotes`, `setItemNotes`, `setItemTitle`, `getListNote`, `setListNote`,
-  `listNoteWouldRestructure`, `listNoteUnclosedBlock`, `deleteItem`, `mapLine` and `writeAction`.
+  `listNoteWouldRestructure`, `listNoteUnclosedBlock`, `mapLine` and `writeAction`.
 - Produces:
   - `renderNotes(view: PrinceListView, el: HTMLElement, markdown: string): Component`, in
     `src/view/notes.ts`.
@@ -899,11 +927,16 @@ every file stays under about 300 lines and each pull request stays reviewable.
     hides the items below it." (spec, "The list note").
   - **The list title:** renamed with `fileManager.renameFile` on Enter or blur. If the name is
     taken, show the `Notice` "A note with that name already exists." and keep the old name.
-  - **Empty items:** remove an item with `deleteItem` only when this card created it ("+", Enter,
-    "New item" or "New item below"), its title is still empty, it has no notes, and the user
-    closed the card in the view: Escape, a click elsewhere, "+", Enter or a drag start. Never
-    remove one from `setViewData`, `onClose` or a file switch, which would be a write on close or
-    on an outside change.
+  - **Empty items:** remove an item only when this card created it ("+", Enter, "New item" or "New
+    item below"), its title is still empty, it has no notes, and the user closed the card in the
+    view: Escape, a click elsewhere, "+", Enter or a drag start. Remove it by restoring the text
+    from before the insert, `writeAction(view, textBeforeInsert, textAfterInsert)`, which applies
+    `guardedApply(current, textAfterInsert, textBeforeInsert)`: `deleteItem` would leave behind
+    an empty line the insert wrote. Pass `refusedNotice` as `null`: if the guard refuses, because
+    the file changed outside the view while the card was open, fall back to `deleteItem` on the
+    current text, with no `Notice`. If that throws `UnsafeEditError`, the empty item stays and the
+    usual unsafe-edit `Notice` shows (Task 8). Never remove one from `setViewData`, `onClose` or a
+    file switch, which would be a write on close or on an outside change.
   - **An empty list:** shows a gray "Notes" placeholder.
   - **Keys:** Escape closes the card.
   - **`getViewData()` includes text being typed.** Apply each keystroke to `this.text`, so

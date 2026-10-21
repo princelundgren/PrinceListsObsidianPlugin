@@ -9,7 +9,8 @@ export interface ItemBlock {
 	endLine: number;
 	/**
 	 * The indent new or rewritten notes take: the notes' own when it reaches the content column, where
-	 * the title's `[` starts. Otherwise a tab when that column is 4 or less, else that many spaces.
+	 * the title's `[` starts, but not 4 columns past it. Otherwise a tab when that column is 4 or less,
+	 * else that many spaces.
 	 */
 	notesIndent: string;
 }
@@ -20,6 +21,14 @@ export interface Section {
 	items: ItemBlock[];
 	/** Ends where the next section starts, so untouched content after its last item counts. */
 	endLine: number;
+}
+
+/** A top-level CommonMark block, or one item of a top-level list. */
+export interface Block {
+	/** commonmark's node type, such as `paragraph`, `heading` or `item`. */
+	type: string;
+	start: number;
+	end: number;
 }
 
 export interface ListModel {
@@ -54,24 +63,31 @@ export function maskBlocks(
 	return { text, unclosedStart: unclosedStart(new Parser().parse(text), masked, contentStart) };
 }
 
-export function parseList(lines: readonly Line[], contentStart: number): ListModel {
+export function topLevelBlocks(lines: readonly Line[], contentStart: number): Block[] {
 	const doc = new Parser().parse(joinLines(maskLines(lines, contentStart)));
+	return [...topLevelParts(doc)].map((node) => {
+		const start = contentStart + node.sourcepos[0][0] - 1;
+		const end = trimBlankEnd(lines, start + 1, Math.min(lines.length, contentStart + node.sourcepos[1][0]));
+		return { type: node.type, start, end };
+	});
+}
+
+export function parseList(lines: readonly Line[], contentStart: number): ListModel {
 	const sections: Section[] = [{ headingLine: null, items: [], endLine: contentStart }];
 	const untouched: ListModel['untouched'] = [];
 	// Before the first heading or item, everything is part of the list note.
 	let firstHeadingOrItem: number | null = null;
 	let covered = contentStart;
 
-	for (const node of topLevelParts(doc)) {
-		const nodeStart = contentStart + node.sourcepos[0][0] - 1;
-		const end = trimBlankEnd(lines, nodeStart + 1, Math.min(lines.length, contentStart + node.sourcepos[1][0]));
-		const start = node.type === 'heading' ? headingContentStart(lines, nodeStart, end) : nodeStart;
+	for (const block of topLevelBlocks(lines, contentStart)) {
+		const { type, end } = block;
+		const start = type === 'heading' ? headingContentStart(lines, block.start, end) : block.start;
 		// Non-blank lines no node covers, such as link reference definitions that commonmark drops from
 		// the tree, are untouched content too.
 		if (firstHeadingOrItem !== null) untouched.push(...nonBlankRuns(lines, covered, start));
 		covered = end;
-		const parts = node.type === 'item' ? parseItemLine((lines[start] as Line).text) : null;
-		if (node.type === 'heading') {
+		const parts = type === 'item' ? parseItemLine((lines[start] as Line).text) : null;
+		if (type === 'heading') {
 			sections.push({ headingLine: start, items: [], endLine: start });
 		} else if (parts) {
 			const notesIndent = indentForNotes(lines, start, end, columnOf(parts.before.slice(0, -1)));
@@ -174,13 +190,15 @@ function indentForNotes(lines: readonly Line[], titleLine: number, endLine: numb
 	const firstNote = lines.slice(titleLine + 1, endLine).find((line) => !isBlank(line.text));
 	const indent = firstNote ? (/^[ \t]*/.exec(firstNote.text) as RegExpExecArray)[0] : '';
 	// A lazy line, indented less than the content column, can't lend its indent: written back after
-	// the blank line below the title, it would leave the item.
-	if (firstNote && columnOf(indent) >= contentColumn) return indent;
+	// the blank line below the title, it would leave the item. Nor can indented code, 4 columns or
+	// more past it: every note written with that indent would become code.
+	const column = columnOf(indent);
+	if (firstNote && column >= contentColumn && column < contentColumn + 4) return indent;
 	return contentColumn <= 4 ? '\t' : ' '.repeat(contentColumn);
 }
 
 // The column after `prefix`, with a tab moving to the next multiple of 4, as in CommonMark.
-function columnOf(prefix: string): number {
+export function columnOf(prefix: string): number {
 	let column = 0;
 	for (const char of prefix) column = char === '\t' ? column + 4 - (column % 4) : column + 1;
 	return column;
@@ -202,7 +220,7 @@ function nonBlankRuns(lines: readonly Line[], start: number, end: number): ListM
 	return runs;
 }
 
-function isBlank(text: string): boolean {
+export function isBlank(text: string): boolean {
 	return /^[ \t]*$/.test(text);
 }
 
