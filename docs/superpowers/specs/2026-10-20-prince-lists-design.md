@@ -671,17 +671,28 @@ From here on the document is for the builder.
 - **Leave `canAcceptExtension` at its default of `false` (observed).** Returning `true` would open
   every note clicked from a list pane in the list view.
 - **The view implements** `getViewType`, `getViewData`, `setViewData` and `clear`.
-- **Switching on `file-open(file)`:**
-  - Take `workspace.getActiveViewOfType(MarkdownView)` and require `view.file === file`. The event
-    also fires for embeds, canvas nodes and keyboard navigation in the file explorer (its doc: "The
-    file could be in a new leaf, an existing leaf, or an embed").
+- **Switching on `file-open` and `active-leaf-change` (call),** through one guarded check:
+  - Take `workspace.getActiveViewOfType(MarkdownView)`. On `file-open(file)`, require
+    `view.file === file`: the event also fires for embeds, canvas nodes and keyboard navigation in
+    the file explorer (its doc: "The file could be in a new leaf, an existing leaf, or an embed").
   - Skip any leaf in a `WeakSet<WorkspaceLeaf>` of panes where the user chose Markdown.
-  - Detect the marker from the view's text with `getFrontMatterInfo` and `parseYaml`.
-    `getFileCache` returns `null` for a file that isn't cached yet, such as one Sync or an agent
-    just wrote.
+  - Detect the marker from the view's loaded text, `TextFileView.data`, with `getFrontMatterInfo`
+    and `parseYaml`. Not from `getFileCache`: it returns `null` for a file that isn't cached yet,
+    such as one Sync or an agent just wrote.
   - Then call `leaf.setViewState({ type: <list view type>, state: { file: file.path } })`.
-- **Don't switch on `active-leaf-change`.** It fires on every file load in the active leaf, so it
-  would push a pane straight back after "Open as Markdown" (observed).
+- **Why both events:**
+  - **Documented:** `file-open` is "Triggered when the active file changes", `active-leaf-change`
+    is "Triggered when the active leaf changes", and `TextFileView.data` is the view's "In-memory
+    data".
+  - **Observed in 1.14.4:** a switch made while the leaf is still loading its note is ignored. A
+    note opening in the same tab has its text loaded when `file-open` fires. A new tab doesn't: it
+    fires `active-leaf-change` once before its text loads and once after. So the first event that
+    finds the text loaded switches. Reading the file instead, with `vault.cachedRead`, doesn't
+    help, because the switch would still run during the load.
+- **`active-leaf-change` fires on every file load in the active leaf (observed).** Without the
+  `WeakSet`, it would push a pane straight back after "Open as Markdown". After the pane switches
+  to Markdown by itself because the marker was removed, the marker is gone, so nothing switches it
+  back.
 - **Back history:**
   - `setViewState` records a history entry when the view type changes, so Back would land on the
     same note as Markdown (observed).
@@ -811,9 +822,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   falls back without the owner's decision.
 - **The marker (call):** it is read from the note's text, as for every list ("Opening and
   switching views"). So it doesn't matter whether the metadata cache covers outside notes.
-- **Opening (call):** the same switch on `file-open` and `setViewState` with `file.path`. The check
-  is that it opens the note in the list view and restores it after a restart. Proposed fallback:
-  outside notes open as Markdown, like ordinary notes.
+- **Opening (call):** the same switch on `file-open` and `active-leaf-change`, and `setViewState`
+  with `file.path`. The check is that it opens the note in the list view and restores it after a
+  restart. Proposed fallback: outside notes open as Markdown, like ordinary notes.
 - **Rendering (call):** `MarkdownRenderer.render` with the note's `file.path`, as for any list.
   Obsidian resolves an outside note's picture embeds and links from the note's own folder (1.14
   changelog). The check is that the same happens in a card. Proposed fallback: outside notes open
@@ -941,6 +952,7 @@ Checked 2026-10-20.
   - `registerExtensions(['md'])` throwing
   - `canAcceptExtension` defaulting to `false`
   - when `file-open` and `active-leaf-change` fire
+  - a `setViewState` made while a leaf is still loading its note being ignored
   - `setViewState` history entries
   - `TextFileView` reloading and merging on outside changes
   - `MarkdownRenderer` needing a Component

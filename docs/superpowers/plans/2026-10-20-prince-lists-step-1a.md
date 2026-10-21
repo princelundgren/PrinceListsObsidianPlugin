@@ -294,11 +294,13 @@ test("lineIndexAt maps a character offset to its line", () => {
     Implementation notes, "Opening and switching views").
 - [ ] **Step 4: Implement `registerAutoSwitch`** exactly as the spec's Implementation notes,
   "Opening and switching views", describe it:
-  - Listen to `file-open`.
-  - Require `getActiveViewOfType(MarkdownView)` and `view.file === file`.
-  - Skip leaves in a module-level `WeakSet<WorkspaceLeaf>` named `markdownChosen`.
-  - Test `isListText(view.data)`.
-  - Call `openAsList`.
+  - Listen to `file-open` and `active-leaf-change`, and run one guarded check on both:
+    - `getActiveViewOfType(MarkdownView)` shows the file (on `file-open`, `view.file === file`);
+    - its leaf isn't in a module-level `WeakSet<WorkspaceLeaf>` named `markdownChosen`;
+    - `isListText(view.data)`.
+  - Then call `openAsList`. The first event that finds the text loaded switches. A switch made
+    while the leaf is still loading is ignored, and a new tab fires `active-leaf-change` once before
+    its text loads and once after (observed in 1.14.4).
   - `openAsMarkdown` adds the leaf to `markdownChosen`. `openAsList` removes it.
 - [ ] **Step 5: Wire up the view in `main.ts`.**
   - Call `registerView(VIEW_TYPE_LIST, …)` and `registerAutoSwitch`.
@@ -336,7 +338,11 @@ test("lineIndexAt maps a character offset to its line", () => {
   11. After "Open as Markdown", "Open as list" is offered in the pane's ⋯ menu and in the command
       palette, opens the list view, and the pane stays a list after switching tabs and back.
       Right-clicking a link to `Spike list.md` offers no "Open as list".
-- [ ] **Step 8: Repeat checks 1, 2, 4 and 5 on the iPhone.**
+  12. Cmd+click `Spike list` in the file explorer, and Cmd+click the link in `Link test`, a note
+      that links to `Spike list` (in Source mode, Cmd+Shift+click). Each opens a new tab in the
+      list view.
+- [ ] **Step 8: Repeat checks 1, 2, 4, 5 and 12 on the iPhone.** For check 12, open each in a new
+  tab from its long-press menu. If the phone offers no way to do that, record it.
 - [ ] **Step 9: Check a note from outside the vault on the Mac** (spec, Implementation notes,
   "Notes outside the vault").
   - First check the installer: Settings → General shows the installer version, with a notice when

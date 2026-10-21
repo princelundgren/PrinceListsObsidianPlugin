@@ -69,10 +69,14 @@ princelists: true
     palette, opens the list view, and the pane stays a list after switching tabs and back.
     Right-clicking a link to `Spike list.md` offers no "Open as list".
     - **Result:**
+12. Cmd+click `Spike list` in the file explorer, and Cmd+click the link in `Link test`, a note that
+    links to `Spike list` (in Source mode, Cmd+Shift+click). Each opens a new tab in the list view.
+    - **Result, file explorer:**
+    - **Result, link:**
 
 ## Step 8: the iPhone
 
-Repeat checks 1, 2, 4 and 5 from Step 7, numbered as there.
+Repeat checks 1, 2, 4, 5 and 12 from Step 7, numbered as there.
 
 - **Check 1:** opening it from the file explorer shows the placeholder.
   - **Result:**
@@ -83,6 +87,11 @@ Repeat checks 1, 2, 4 and 5 from Step 7, numbered as there.
 - **Check 5:** after "Open as Markdown", switching to another tab and back leaves this pane as
   Markdown.
   - **Result:**
+- **Check 12:** opening it in a new tab from the long-press menu, in the file explorer and on the
+  link in `Link test`, shows the placeholder. If the phone offers no way to open a new tab there,
+  record that.
+  - **Result, file explorer:**
+  - **Result, link:**
 
 ## Step 9: a note from outside the vault, on the Mac
 
