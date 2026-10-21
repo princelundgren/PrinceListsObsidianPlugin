@@ -605,7 +605,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Files:**
 - Create: `src/core/edit-items.ts`, `src/core/guard.ts`, `tests/core/edit-items.test.ts`,
-  `tests/core/move-item.test.ts`, `tests/core/edit-helpers.ts`, `tests/core/guard.test.ts`
+  `tests/core/move-item.test.ts`, `tests/core/edit-timing.test.ts`, `tests/core/edit-helpers.ts`,
+  `tests/core/guard.test.ts`
 - Modify: `src/core/lines.ts`, `tests/core/lines.test.ts`, `src/core/parse.ts` (export `columnOf`
   and `isBlank`, add `topLevelBlocks`, and the `notesIndent` rule for notes that open with
   indented code), `tests/core/parse.test.ts`
@@ -886,8 +887,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
 - Modify: `src/view/list-view.ts`, `src/view/render-list.ts`, `styles.css`
 
 **Interfaces:**
-- Consumes: `getItemNotes`, `setItemNotes`, `setItemTitle`, `getListNote`, `setListNote`,
-  `listNoteWouldRestructure`, `listNoteUnclosedBlock`, `mapLine` and `writeAction`.
+- Consumes: `getItemNotes`, `setItemNotes`, `setItemTitle`, `deleteItem`, `UnsafeEditError`,
+  `getListNote`, `setListNote`, `listNoteWouldRestructure`, `listNoteUnclosedBlock`, `mapLine` and
+  `writeAction`.
 - Produces:
   - `renderNotes(view: PrinceListView, el: HTMLElement, markdown: string): Component`, in
     `src/view/notes.ts`.
@@ -986,7 +988,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Interfaces:**
 - Consumes: `insertItem`, `insertItemInSection`, `insertHeading`, `deleteItem`, `deleteHeading`,
-  `setHeadingText`, `mapLine`, `writeAction` and `openCard`.
+  `UnsafeEditError`, `setHeadingText`, `mapLine`, `writeAction` and `openCard`.
 - Produces: `itemMenu(view, item, menu: Menu): void` and `headingMenu(view, section, menu: Menu): void`.
   Each fills an Obsidian `Menu` with the spec's actions and labels. "Delete" and "Delete heading"
   call `setWarning(true)`, so they show in red (spec, "Item actions").
@@ -1075,7 +1077,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
 - Modify: `src/view/render-list.ts`, `styles.css`
 
 **Interfaces:**
-- Consumes: `moveItem` and `writeAction`.
+- Consumes: `moveItem`, `UnsafeEditError` and `writeAction`.
 - Produces: `enableMouseDrag(view: PrinceListView, listEl: HTMLElement): void`. It is enabled only
   when `Platform.isDesktop`.
 
