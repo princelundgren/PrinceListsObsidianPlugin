@@ -6,12 +6,15 @@ export interface LineRange {
 	end: number;
 }
 
+/** One of the view's own edits, which the line-based state follows. */
+export type OwnEdit = RunEdit | MoveEdit;
+
 /**
- * One of the view's own edits, as the view learns it from the edit it called: the run starts at the
+ * An edit of one run of lines, as the view learns it from the edit it called: the run starts at the
  * item's `titleLine`, the section's `headingLine`, the list note's `start`, or the line an insert
  * returns. `delta` is the change in the number of lines.
  */
-export interface OwnEdit {
+export interface RunEdit {
 	start: number;
 	delta: number;
 	/**
@@ -26,16 +29,32 @@ export interface OwnEdit {
 	retitle?: (line: string) => string;
 }
 
-// A write that moves no line. It starts past every line, so it leaves the list note's range too.
-export const NO_LINES_MOVED: OwnEdit = { start: Number.POSITIVE_INFINITY, delta: 0, kind: 'change' };
+/**
+ * A drag's move, which changes lines in two places: `moved[i]` is the line that line `i` went to, and
+ * `start` is the first line that moved.
+ */
+export interface MoveEdit {
+	start: number;
+	kind: 'move';
+	moved: readonly number[];
+}
 
-export function ownEdit(start: number, before: string, after: string, kind: OwnEdit['kind']): OwnEdit {
+// A write that moves no line. It starts past every line, so it leaves the list note's range too.
+export const NO_LINES_MOVED: RunEdit = { start: Number.POSITIVE_INFINITY, delta: 0, kind: 'change' };
+
+export function ownEdit(start: number, before: string, after: string, kind: RunEdit['kind']): RunEdit {
 	return { start, delta: splitLines(after).length - splitLines(before).length, kind };
+}
+
+export function moveEdit(moved: readonly number[]): MoveEdit {
+	const start = moved.findIndex((to, from) => to !== from);
+	return { start: start === -1 ? Number.POSITIVE_INFINITY : start, kind: 'move', moved };
 }
 
 // For the view's own edits only. mapLine, for outside changes, compares lines by text, so it can't
 // tell two empty new items apart.
 export function followLine(line: number, edit: OwnEdit): number | null {
+	if (edit.kind === 'move') return edit.moved[line] ?? null;
 	if (line < edit.start) return line;
 	if (line === edit.start && edit.kind === 'change') return line;
 	if (line === edit.start && edit.kind === 'delete') return null;

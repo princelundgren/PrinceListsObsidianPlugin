@@ -53,7 +53,7 @@ export function registerFieldEvents(view: PrinceListView): void {
 
 // Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of
 // this window's classes.
-function targetOf(evt: UIEvent): HTMLElement | null {
+export function targetOf(evt: UIEvent): HTMLElement | null {
 	const node = evt.targetNode;
 	return node?.instanceOf(HTMLElement) ? node : null;
 }

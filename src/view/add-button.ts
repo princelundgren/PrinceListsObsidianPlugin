@@ -56,7 +56,7 @@ export function addItem(view: PrinceListView, place: ItemPlace): void {
 }
 
 // The place at its item's or heading's line as the view's edits have moved it, or null once it's gone.
-function followPlace(place: ItemPlace, line: number | null): ItemPlace | null {
+export function followPlace(place: ItemPlace, line: number | null): ItemPlace | null {
 	if (place === 'first') return place;
 	if (line === null) return null;
 	return 'after' in place ? { after: line } : { firstUnder: line };

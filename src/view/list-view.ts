@@ -10,6 +10,7 @@ import { openAsMarkdown } from '../obsidian/switch';
 import { buildNewItemButton } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
 import { fitHeight } from './dom';
+import { enableMouseDrag } from './drag-mouse';
 import { registerFieldEvents } from './events';
 import { rereadListNote, type ListNoteSession, type ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
@@ -108,6 +109,7 @@ export class PrinceListView extends TextFileView {
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
 		registerFieldEvents(this);
+		enableMouseDrag(this, this.contentEl);
 		this.newItemButton = buildNewItemButton(this);
 	}
 
@@ -217,7 +219,7 @@ export class PrinceListView extends TextFileView {
 	}
 
 	private shiftLines(edit: OwnEdit): void {
-		if (edit.delta === 0 && edit.kind !== 'delete') return;
+		if (edit.kind === 'change' && edit.delta === 0) return;
 		for (const el of this.contentEl.querySelectorAll(`[${LINE_ATTR}]`)) {
 			setLine(el, followLine(lineOf(el) as number, edit));
 		}

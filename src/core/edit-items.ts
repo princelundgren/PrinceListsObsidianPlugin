@@ -7,7 +7,7 @@ import { columnOf, isBlank, type ItemBlock, type ListModel, type Section } from 
 // Callers of the item edits import it from here.
 export { UnsafeEditError };
 
-type MoveTarget = { after: ItemBlock } | { firstIn: Section };
+export type MoveTarget = { after: ItemBlock } | { firstIn: Section };
 
 export class RepeatingItemError extends Error {
 	constructor() {
@@ -55,19 +55,29 @@ export function deleteItem(lines: readonly Line[], model: ListModel, item: ItemB
 }
 
 export function moveItem(lines: readonly Line[], model: ListModel, item: ItemBlock, to: MoveTarget): Line[] {
-	if ('after' in to && to.after.titleLine === item.titleLine) return lines.slice();
+	return moveItemWithLineMap(lines, model, item, to).lines;
+}
+
+// moveItem, and `moved[i]`, the line that line `i` went to.
+export function moveItemWithLineMap(
+	lines: readonly Line[],
+	model: ListModel,
+	item: ItemBlock,
+	to: MoveTarget,
+): { lines: Line[]; moved: number[] } {
+	if ('after' in to && to.after.titleLine === item.titleLine) return { lines: lines.slice(), moved: range(0, lines.length) };
 	const from = sectionOf(model, item);
 	const target = 'after' in to ? sectionOf(model, to.after) : to.firstIn;
 	const order =
 		from.headingLine === target.headingLine
 			? reorderInSection(lines.length, from, item, to)
 			: moveAcross(lines, from, item, 'after' in to ? to.after.endLine : firstLineIn(lines, model, target));
-	const moved = order.map((i) => lines[i] as Line);
+	const reordered = order.map((i) => lines[i] as Line);
 	const before = blockKeys(lines, model.contentStart).map((b) => b.key);
 	// A move keeps every line, so the boundaries it makes are where two non-blank lines that weren't
-	// neighbors meet. Each index is that of the lower line in `moved`.
+	// neighbors meet. Each index is that of the lower line in `reordered`.
 	const boundaries = order.flatMap((was, at) =>
-		at > 0 && was !== (order[at - 1] as number) + 1 && !isBlankAt(moved, at - 1) && !isBlankAt(moved, at) ? [at] : [],
+		at > 0 && was !== (order[at - 1] as number) + 1 && !isBlankAt(reordered, at - 1) && !isBlankAt(reordered, at) ? [at] : [],
 	);
 	const eol = dominantEol(lines);
 	const separated = (blankAt: ReadonlySet<number>) =>
@@ -75,7 +85,7 @@ export function moveItem(lines: readonly Line[], model: ListModel, item: ItemBlo
 			lines,
 			0,
 			lines.length,
-			moved.flatMap((line, at) => (blankAt.has(at) ? [{ text: '', eol }, line] : [line])),
+			reordered.flatMap((line, at) => (blankAt.has(at) ? [{ text: '', eol }, line] : [line])),
 		);
 	// An empty line goes at each boundary inside a block that no longer parses as it did, pass after
 	// pass, since one can uncover the next join.
@@ -83,7 +93,7 @@ export function moveItem(lines: readonly Line[], model: ListModel, item: ItemBlo
 	for (let pass = 0; pass <= boundaries.length; pass++) {
 		const result = separated(blankAt);
 		const after = blockKeys(result, model.contentStart);
-		if (sameBlocks(after, before)) return result;
+		if (sameBlocks(after, before)) return { lines: result, moved: newIndexes(order, blankAt) };
 		const changed = surplus(after, before);
 		const shifted = (at: number) => at + [...blankAt].filter((b) => b <= at).length;
 		const next = boundaries.filter((at) => !blankAt.has(at) && changed.some((b) => b.start < shifted(at) && shifted(at) < b.end));
@@ -92,8 +102,9 @@ export function moveItem(lines: readonly Line[], model: ListModel, item: ItemBlo
 	}
 	// A definition belongs to no block, so a join with one, or a block that vanishes into one, points
 	// at no boundary. An empty line at every boundary covers those.
-	const result = separated(new Set(boundaries));
-	if (sameBlocks(blockKeys(result, model.contentStart), before)) return result;
+	const everyBoundary = new Set(boundaries);
+	const result = separated(everyBoundary);
+	if (sameBlocks(blockKeys(result, model.contentStart), before)) return { lines: result, moved: newIndexes(order, everyBoundary) };
 	throw new UnsafeEditError();
 }
 
@@ -212,6 +223,17 @@ function gapThatMoves(lines: readonly Line[], section: Section, item: ItemBlock)
 	if (isBlankAt(lines, item.titleLine - 1)) return after;
 	const previousIsAdjacent = section.items[k - 1]?.endLine === item.titleLine;
 	return section.items[k + 1]?.titleLine === after.end && !previousIsAdjacent ? after : null;
+}
+
+// The line each line went to: its place in `order`, plus the empty lines written before it.
+function newIndexes(order: readonly number[], blankAt: ReadonlySet<number>): number[] {
+	const moved: number[] = [];
+	let blanks = 0;
+	order.forEach((was, at) => {
+		if (blankAt.has(at)) blanks++;
+		moved[was] = at + blanks;
+	});
+	return moved;
 }
 
 function range(start: number, end: number): number[] {
