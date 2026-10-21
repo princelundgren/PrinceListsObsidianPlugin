@@ -916,6 +916,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
   - **The card:** clicking a row (not its checkbox) opens it, and clicking empty space closes it.
     It shows the same checkbox.
   - **The title:** editing it calls `setItemTitle`, with typing saved through `requestSave`. The
+    field replaces each line break in typed or pasted text with a space before calling it, since a
+    title with a line break throws. The
     field keeps the title line as it was when it took focus, and each keystroke calls
     `setItemTitle` on the current lines with that saved line put back, which gives
     `setTitle(thatLine, typed)`. Starting from the current line instead would read a typed

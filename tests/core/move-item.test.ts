@@ -13,6 +13,11 @@ const move = (text: string, n: number, to: Target) => {
 };
 
 describe('moveItem', () => {
+	test('an item from an older model throws a clear error, not a TypeError', () => {
+		const { lines, model, item } = list('- [ ] a\n- [ ] b\n');
+		const stale = { ...item(0), titleLine: 7, endLine: 8 };
+		expect(() => moveItem(lines, model, stale, { after: item(1) })).toThrow('not in this model');
+	});
 	test.each<[string, number, Target, string]>([
 		['- [ ] a\n\n\tn\n\n- [ ] b\n', 0, { after: 1 }, '- [ ] b\n\n- [ ] a\n\n\tn\n'],
 		['## G\n- [ ] a\n\n- [ ] b\n## K\n- [ ] c\n', 0, { after: 2 }, '## G\n- [ ] b\n\n## K\n- [ ] c\n- [ ] a\n'],

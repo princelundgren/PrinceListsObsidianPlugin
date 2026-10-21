@@ -210,7 +210,9 @@ function firstLineIn(lines: readonly Line[], model: ListModel, section: Section)
 }
 
 function sectionOf(model: ListModel, item: ItemBlock): Section {
-	return model.sections.find((s) => s.items.some((i) => i.titleLine === item.titleLine)) as Section;
+	const section = model.sections.find((s) => s.items.some((i) => i.titleLine === item.titleLine));
+	if (!section) throw new Error('The item is not in this model; parse the current lines again');
+	return section;
 }
 
 // Within a section the items trade slots, and every gap and untouched block stays in its own.
