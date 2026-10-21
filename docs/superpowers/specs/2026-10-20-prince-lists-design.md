@@ -838,13 +838,15 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   vault. Proposed fallback: an outside note's title can't be edited, and it's renamed outside
   Obsidian.
 - **Telling an outside note apart (call):** only the fallbacks need it.
-  - Use `vault.getAbstractFileByPath(file.path) !== file`. That method finds a file "inside the
-    vault" (since 0.11.11). Task 2's spike checks that it doesn't return an outside note.
-  - `file instanceof TExternalFile` would mean raising `minAppVersion` to 1.14.4, the owner's
-    call. `TExternalFile` is `@since 1.14.4`, so it's not in the API before that, and where the
-    class is missing at runtime, `instanceof` throws a `TypeError`. The
-    `obsidianmd/no-unsupported-api` lint rule doesn't check `instanceof`, so it wouldn't catch
-    that (tested with `eslint-plugin-obsidianmd` 0.4.2 on 2026-10-20).
+  - `vault.getAbstractFileByPath(file.path)` can't do it. Its doc says it finds a file "inside the
+    vault" (since 0.11.11), but spike 1 found that it returns the outside note too (observed in
+    1.14.4).
+  - The only documented way is `file instanceof TExternalFile`. It needs `minAppVersion` 1.14.4,
+    and raising it is the owner's call if a later fallback needs it. `TExternalFile` is
+    `@since 1.14.4`, so it's not in the API before that, and where the class is missing at
+    runtime, `instanceof` throws a `TypeError`. The `obsidianmd/no-unsupported-api` lint rule
+    doesn't check `instanceof`, so it wouldn't catch that (tested with `eslint-plugin-obsidianmd`
+    0.4.2 on 2026-10-20).
 - **Outside notes leave `minAppVersion` at 1.5.7:** nothing here uses a newer API.
 
 ## Testing and owner checkpoints
@@ -905,7 +907,8 @@ Checked 2026-10-20.
     - `Vault.createBinary`, `Vault.process` (1.1.0) and `Vault.on('modify')`
     - `TExternalFile` (1.14.4): "Represents a file that is outside the Vault. Can be used with the
       vault API just like any other file."
-    - `Vault.getAbstractFileByPath` (0.11.11), which gets "a file or folder inside the vault"
+    - `Vault.getAbstractFileByPath` (0.11.11), which gets "a file or folder inside the vault",
+      though it returns a note from outside the vault too (observed in 1.14.4)
   - settings: `getSettingDefinitions` (1.13.0), `onExternalSettingsChange` (1.5.7)
   - the minimum version: the `@since` tags decide it. The newest among the APIs step one uses is
     1.5.7, for `getFrontMatterInfo` (and `FileManager.getAvailablePathForAttachment` in 1b). The
@@ -953,6 +956,7 @@ Checked 2026-10-20.
   - `canAcceptExtension` defaulting to `false`
   - when `file-open` and `active-leaf-change` fire
   - a `setViewState` made while a leaf is still loading its note being ignored
+  - `Vault.getAbstractFileByPath` returning a note from outside the vault
   - `setViewState` history entries
   - `TextFileView` reloading and merging on outside changes
   - `MarkdownRenderer` needing a Component
