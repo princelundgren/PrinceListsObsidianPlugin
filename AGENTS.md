@@ -38,6 +38,7 @@ this project.
   - An edit replaces only the lines it concerns. Every byte outside those lines stays as it was.
   - It keeps the file's line endings and whether it ends with a newline. A line that moves off
     the end takes the file's usual ending, and the new last line takes the old last line's ending.
+    In a file without a final newline, empty lines an edit would leave at the end go.
   - Never call `String.prototype.normalize` in `src/`. Tests may, to build NFD input.
   - Never re-serialize the frontmatter: no `fileManager.processFrontMatter`.
 - **No background writes.** Write a file only in response to a user action: in the view, or a

@@ -34,12 +34,17 @@ export function dominantEol(lines: readonly Line[]): '\n' | '\r\n' {
 // is last now. The old last line, if it moved off the end, takes dominantEol. Only LF and CRLF count
 // there, so in a file that uses lone CRs it takes LF, as new lines do. Lines are found by identity,
 // so an edit that moves lines must pass the same Line objects in `insert`.
+// In a file without a final newline, empty lines the edit leaves at the end go (spec, "Editing never
+// rebuilds the file"): the last of them would write nothing, so the line before it would end the file
+// with a newline. They only separate blocks, so nothing parses differently.
 export function spliceLines(lines: readonly Line[], start: number, deleteCount: number, insert: readonly Line[]): Line[] {
 	const result = lines.slice();
 	result.splice(start, deleteCount, ...insert);
 	const oldLast = lines[lines.length - 1];
+	if (!oldLast || result[result.length - 1] === oldLast) return result;
+	if (oldLast.eol === '') while (result.length > 0 && (result[result.length - 1] as Line).text === '') result.pop();
 	const newLast = result[result.length - 1];
-	if (!oldLast || !newLast || newLast === oldLast) return result;
+	if (!newLast) return result;
 	const moved = result.indexOf(oldLast);
 	if (moved !== -1) result[moved] = { text: oldLast.text, eol: dominantEol(lines) };
 	result[result.length - 1] = { text: newLast.text, eol: oldLast.eol };

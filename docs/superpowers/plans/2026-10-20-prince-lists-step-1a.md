@@ -60,7 +60,8 @@ first. This plan cites its sections by heading.
 - **Writing to files:**
   - Never rebuild the file. An edit replaces whole lines and keeps the file's line endings and
     its final-newline state. A line that moves off the end of the file takes `dominantEol`, and
-    the line that becomes last takes the old last line's ending.
+    the line that becomes last takes the old last line's ending. In a file without a final
+    newline, empty lines an edit would leave at the end go (Task 11b).
   - Never call `String.prototype.normalize` in `src/`. Tests may, to build NFD input.
   - No background writes. Write only in response to a user action (in the view, or a command,
     ribbon icon or menu item such as New list), and never on open, close or a timer.
@@ -1330,6 +1331,15 @@ every file stays under about 300 lines and each pull request stays reviewable.
   5. With "Show archived" off, dragging past a hidden item leaves that item where it was in the
      file.
 - [ ] **Step 4: Commit** with the message "Drag items with the mouse on the Mac".
+
+### Task 11b: Keep a missing final newline when an edit leaves an empty line last
+
+Task 11's review found that a move or a delete could leave an empty line last in a file without a
+final newline, which then ended with one. `spliceLines` now drops empty lines an edit leaves at
+the end of such a file, so every edit keeps the rule. A whitespace-only last line writes its
+spaces, so it stays. A move's line map gives a dropped line
+`null`, as a deleted line has. Tests: `tests/core/final-newline.test.ts`, and the new
+`spliceLines` cases in `tests/core/lines.test.ts`.
 
 ### Task 12: Create lists
 

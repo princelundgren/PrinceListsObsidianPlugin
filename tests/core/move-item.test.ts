@@ -110,7 +110,7 @@ describe('moveItem', () => {
 			}
 		}
 	});
-	test('moveItemWithLineMap gives the line each line went to, and only empty lines it wrote are new', () => {
+	test('moveItemWithLineMap gives the line each line went to, or none for an empty line dropped, and only empty lines it wrote are new', () => {
 		for (const text of [...Object.values(JOINING_CASES), ...FIXTURES.map(readFixture)]) {
 			const { lines, model, items } = list(text);
 			const targets = [...items.map((it) => ({ after: it })), ...model.sections.map((s) => ({ firstIn: s }))];
@@ -118,10 +118,13 @@ describe('moveItem', () => {
 				for (const to of targets) {
 					const result = moveItemWithLineMap(lines, model, it, to);
 					expect(result.lines).toEqual(moveItem(lines, model, it, to));
-					expect(result.moved.map((at) => result.lines[at]?.text)).toEqual(lines.map((line) => line.text));
-					const reached = new Set(result.moved);
-					expect(reached.size).toBe(lines.length);
-					expect(result.lines.filter((line, at) => !reached.has(at) && line.text !== '')).toEqual([]);
+					result.moved.forEach((at, i) => {
+						if (at === null) expect((lines[i] as Line).text).toBe('');
+						else expect(result.lines[at]?.text).toBe((lines[i] as Line).text);
+					});
+					const reached = result.moved.filter((at) => at !== null);
+					expect(new Set(reached).size).toBe(reached.length);
+					expect(result.lines.filter((line, at) => !reached.includes(at) && line.text !== '')).toEqual([]);
 				}
 			}
 		}

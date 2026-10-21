@@ -459,6 +459,9 @@ stays, and the blank line stays with it.
   rebuilds the file from its own picture of the list.
 - **An edit replaces only the whole lines it concerns.** It keeps the file's line endings (LF or
   CRLF) and whether the file ends with a newline, and it applies no Unicode normalization.
+  - In a file that doesn't end with a newline, an edit leaves no empty line last **(call)**. Empty
+    lines it would leave at the end go, so the new last line keeps the missing newline. They only
+    separate blocks, so nothing parses differently.
   - It adds one empty line where the text below would otherwise join the block above **(call)**:
     after a new item or rewritten notes, or in place of a deleted item or heading. When that isn't
     enough, the edit is refused. See "Content the plugin leaves alone".
