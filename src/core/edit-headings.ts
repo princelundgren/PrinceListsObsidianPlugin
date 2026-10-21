@@ -68,7 +68,7 @@ function findHeading(lines: readonly Line[], model: ListModel, section: Section)
 // the indent and # run, the spaces before the content, and any closing sequence with the spaces
 // around it. `after` is empty or starts with a space or tab, so an empty heading's closing sequence,
 // as in `## #`, matches that pattern too.
-function splitAtx(text: string): { open: string; gap: string; content: string; close: string } | null {
+export function splitAtx(text: string): { open: string; gap: string; content: string; close: string } | null {
 	const open = ATX_OPENING.exec(text)?.[0];
 	if (open === undefined) return null;
 	const after = text.slice(open.length);

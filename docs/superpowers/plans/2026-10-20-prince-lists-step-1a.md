@@ -908,8 +908,10 @@ every file stays under about 300 lines and each pull request stays reviewable.
 ### Task 8: Draw the list, tick items and hide archived ones
 
 **Files:**
-- Create: `src/view/render-list.ts`, `src/view/write.ts`
-- Modify: `src/view/list-view.ts`, `styles.css`
+- Create: `src/view/render-list.ts`, `src/view/write.ts`, `src/core/display.ts`,
+  `src/core/queue.ts`, `tests/core/display.test.ts`, `tests/core/queue.test.ts`
+- Modify: `src/view/list-view.ts`, `styles.css`, `src/core/edit-headings.ts` (exports `splitAtx`
+  for the heading text)
 
 **Interfaces:**
 - Consumes: `parseList(splitLines(view.text), contentStartLine(view.text))`, `parseItemLine`,
@@ -923,6 +925,10 @@ every file stays under about 300 lines and each pull request stays reviewable.
     the guard accepts, it sets `view.text = next`, so `setViewData`'s early return holds whatever
     the timing of Obsidian's modify echo. When the guard refused, it shows a `Notice` reading
     `refusedNotice`, unless that is `null`.
+  - `tryEdit(edit: () => Line[]): Line[] | null`, in `src/view/write.ts`. It returns the edit's
+    lines, or `null` when the edit throws `RepeatingItemError` or `UnsafeEditError`, after showing
+    that error's `Notice` (Step 2). Any other error is thrown. Later tasks call their edits through
+    it, so every refused edit shows the same notice.
 
 - [ ] **Step 1: Implement the rendering** that the spec's "Layout" describes:
   - the title (the basename)
@@ -932,6 +938,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
     or tail shown
   - a done item: ticked and grayed, with no strikethrough
   - archived items left out unless "Show archived" is on
+  - content the plugin leaves alone, such as paragraphs, tables and code between items, in its
+    place as gray plain text, like the list note (spec, "Content the plugin leaves alone")
   - "Show archived" as a toggle in `onPaneMenu`. It's a field of the view that starts off, and
     `setViewData` turns it off when `clear` is true, which means the view is opening a different
     file (`TextFileView.setViewData`). Keep it out of the view's `getState` and out of local
@@ -939,12 +947,17 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
   Re-render whenever `setViewData` runs, except that it returns early when `clear` is false and
   `data === this.text`. The view's own writes come back that way (spec, "Saving and outside
-  changes"), and a redraw then would tear down a field that has focus.
+  changes"), and a redraw then would tear down a field that has focus. A redraw keeps the scroll
+  position, and a different file (`clear` true) opens at the top.
 - [ ] **Step 2: Make the checkbox tick.** A click calls `writeAction(view, joinLines(toggleItem(...)))`,
-  using `new Date()`. On `RepeatingItemError` it shows a `Notice` reading "Repeating items can't be
-  ticked here yet." The click never opens a card. Later edits (Tasks 9 to 11) that throw
-  `UnsafeEditError` write nothing and show a `Notice` reading "This list's layout can't take that
-  change. Make it with Open as Markdown."
+  using `new Date()`. Once the write lands, only the clicked row changes, its checkbox and its done
+  class, so focus and the scroll position stay. Taps queue (`serialQueue`): each waits for the
+  previous one's write, then parses the current text, so two quick taps on one box tick and then
+  untick it. A queued tap whose row a redraw removed is dropped, since lines may have moved. On
+  `RepeatingItemError` it shows a `Notice` reading "Repeating items can't be ticked here yet." The
+  click never opens a card. Later edits (Tasks 9 to 11) that throw `UnsafeEditError` write nothing
+  and show a `Notice` reading "This list's layout can't take that change. Make it in Markdown
+  instead."
 - [ ] **Step 3: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 4: Check it by hand in the test vault on the Mac and the iPhone.**
   1. `example.md` matches the spec's "Layout" section.
@@ -967,6 +980,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
      it's built.
   10. For this check only, log when `writeAction` sets `view.text` and when `setViewData` runs
       after a tick, and don't commit the logging. Record the order once in the pull request.
+  11. Double-tap a box: it ticks and then unticks, with no "changed elsewhere" notice and no
+      flicker. Tap two boxes quickly: both tick.
 - [ ] **Step 5: Commit** with the message "Draw lists, tick items and hide archived ones".
 
 ### Task 9: The card, editing, and outside changes
@@ -977,8 +992,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Interfaces:**
 - Consumes: `getItemNotes`, `setItemNotes`, `setItemTitle`, `deleteItem`, `UnsafeEditError`,
-  `getListNote`, `setListNote`, `listNoteWouldRestructure`, `listNoteUnclosedBlock`, `mapLine` and
-  `writeAction`.
+  `getListNote`, `setListNote`, `listNoteWouldRestructure`, `listNoteUnclosedBlock`, `mapLine`,
+  `writeAction` and `tryEdit`.
 - Produces:
   - `renderNotes(view: PrinceListView, el: HTMLElement, markdown: string): Component`, in
     `src/view/notes.ts`.
@@ -998,12 +1013,17 @@ every file stays under about 300 lines and each pull request stays reviewable.
     so a tap on a row doesn't open the iPhone keyboard. `view.selected` holds the `titleLine` of
     the open item, or `null`. A line number is used because a new item's `ItemBlock` doesn't
     exist until the list is re-parsed.
+  - **A row's `data-line`:** never trust it from an earlier render. Task 8's tick moves no line,
+    but after an edit that moves lines, redraw before any row's `data-line` is used again.
   - `PrinceListView.focusListTitle(): void`, which puts the cursor in the list title field.
 
 - [ ] **Step 1: Build the card and editing** as the spec's "Ticking", "Editing" and "Selecting
   and adding" sections describe:
-  - **The card:** clicking a row (not its checkbox) opens it, and clicking empty space closes it.
-    It shows the same checkbox.
+  - **The card:** clicking a row (not its checkbox or a link in it) opens it, and clicking empty
+    space closes it. It shows the same checkbox.
+  - **Row titles and headings (owner, 2026-10-21):** rendered as Markdown through `renderNotes`,
+    in place of Task 8's plain text (spec, "Layout"). A click on a link in a row opens the link
+    only: it doesn't tick the item or open the card.
   - **The title:** editing it calls `setItemTitle`, with typing saved through `requestSave`. The
     field replaces each line break in typed or pasted text with a space before calling it, since a
     title with a line break throws. The
@@ -1066,7 +1086,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
     - Deleting the selected item closes its card. A drag closes any open card before it calls
       `moveItem` (Task 11), so a move never has a `selected` line to follow.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
-- [ ] **Step 3: Check it by hand on the Mac.**
+- [ ] **Step 3: Check it by hand on the Mac,** and check 11 on the iPhone.
   1. A picture embed and a link render in a card, and the link opens. Right-clicking the link
      shows Obsidian's link menu.
   2. Typing notes containing `- one` and `---` keeps the file valid: re-open it, and it's one item.
@@ -1081,6 +1101,10 @@ every file stays under about 300 lines and each pull request stays reviewable.
      outside the vault.
   8. Typing `buy #milk2` into an item's title leaves `#milk2` in the file's line once.
   9. Typing in a card of the generated 500-item list (Task 8, check 7) shows no lag.
+  10. Bold text and a link in an item title and in a heading render as Markdown. Clicking the
+      link opens it, without ticking the item or opening its card.
+  11. On the iPhone, the generated 500-item list (Task 8, check 7) still opens and scrolls
+      without visible lag, now with rendered titles and headings.
 
   If check 6 or 7 fails, stop and record it in the pull request with the spec's proposed
   fallback. The owner decides before it's built.
@@ -1094,16 +1118,16 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Interfaces:**
 - Consumes: `insertItem`, `insertItemInSection`, `insertHeading`, `deleteItem`, `deleteHeading`,
-  `UnsafeEditError`, `setHeadingText`, `mapLine`, `writeAction` and `openCard`.
+  `UnsafeEditError`, `setHeadingText`, `mapLine`, `writeAction`, `tryEdit` and `openCard`.
 - Produces: `itemMenu(view, item, menu: Menu): void` and `headingMenu(view, section, menu: Menu): void`.
   Each fills an Obsidian `Menu` with the spec's actions and labels. "Delete" and "Delete heading"
   call `setWarning(true)`, so they show in red (spec, "Item actions").
 
 - [ ] **Step 1: Build adding, menus and Undo:**
   - **The floating "+":** a round button at the bottom right, placed outside the scrolling element
-    and drawn with `setIcon(el, "plus")`, with the accessible name (`aria-label`) "New item". It
-    calls `insertItem` after the selected item, or with `null`, then
-    `openCard(view, titleLine, true)`, which puts the cursor in the title.
+    (the view's `contentEl`, Task 8) and drawn with `setIcon(el, "plus")`, with the accessible
+    name (`aria-label`) "New item". It calls `insertItem` after the selected item, or with `null`,
+    then `openCard(view, titleLine, true)`, which puts the cursor in the title.
   - **Enter in an item's title** inserts the next item below it and opens it the same way.
   - **New item below and New item,** in `itemMenu` and `headingMenu`, insert with `insertItem`
     after the item or `insertItemInSection` first in the section, then
@@ -1183,7 +1207,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
 - Modify: `src/view/render-list.ts`, `styles.css`
 
 **Interfaces:**
-- Consumes: `moveItem`, `UnsafeEditError` and `writeAction`.
+- Consumes: `moveItem`, `UnsafeEditError`, `writeAction` and `tryEdit`.
 - Produces: `enableMouseDrag(view: PrinceListView, listEl: HTMLElement): void`. It is enabled only
   when `Platform.isDesktop`.
 
