@@ -16,8 +16,21 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 
 - **Automatic review (owner, 2026-10-20).** `claude-code-review.yml` runs when a pull request from a
   branch in this repository is opened, pushed to, reopened or marked ready for review. Claude
-  reviews it against `AGENTS.md`, the main design and the plan task it implements, then posts an
-  inline comment for each finding and one summary comment.
+  posts an inline comment for each issue and one summary comment.
+  - **The prompt is GitHub Docs' "Review code" prompt file (owner, 2026-10-21),** kept generic:
+    security, performance, code quality, architecture and design, and testing and documentation.
+    The owner's additions: it reads `AGENTS.md` first for the rules, and it checks drift from the
+    documentation under `docs/`.
+  - **Left out on purpose (owner, 2026-10-21):** the earlier prompt's lines asking for confident
+    findings only, no nits the linters catch, and the rule or design section each finding breaks.
+    The owner revisits that after a few real reviews, so a review shouldn't ask to restore them.
+  - Issues are 🔴 critical (fix before merge) or 🟡 suggestions, each with line references, the
+    problem, a suggested fix with code, and the reason. The summary adds one line on what's done
+    well **(owner, 2026-10-21)**.
+  - The prompt is used under CC BY 4.0
+    ([source](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files/review-code),
+    [license](https://creativecommons.org/licenses/by/4.0/)). The workflow's comment above it lists
+    what was changed.
   - Drafts are skipped. A person's new push cancels a review that is still running.
 - **`@claude` on demand (owner, 2026-10-20).** `claude.yml` runs when a comment on an issue, or on
   a pull request from a branch in this repository, mentions `@claude`. Claude answers in a comment.
@@ -124,6 +137,10 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 - **Bounded runs (call).** Each workflow sets `--max-turns` and a job timeout. A run that reaches
   the turn limit ends with an error, possibly before the review's summary is posted. A person's
   new push cancels a review that is still running.
+  - The review allows 50 turns, `@claude` 30. This prompt's first run took 8 turns on an 86-line
+    workflow change; the earlier, narrower prompt took 13 on a 598-line code change. This one
+    covers five review areas and checks all of `docs/` for drift, so 50 leaves room for a large
+    change, and the 20-minute job timeout still bounds a run.
 
 ## Before going public
 
