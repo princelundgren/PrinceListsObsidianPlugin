@@ -4,6 +4,7 @@ import { itemRow } from '../core/display';
 import { toggleItem } from '../core/edit-items';
 import { joinLines, splitLines, type Line } from '../core/lines';
 import { parseList } from '../core/parse';
+import { serialQueue } from '../core/queue';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openAsMarkdown } from '../obsidian/switch';
 import { CHECKBOX_CLASS, ITEM_CLASS, renderList, showDone } from './render-list';
@@ -20,6 +21,9 @@ export class PrinceListView extends TextFileView {
 	// Off each time a list opens: clear() turns it off, and it stays out of getState and local
 	// storage, so nothing restores it (spec, "Done and archived").
 	showArchived = false;
+	// Each tap waits for the one before it to write, then edits the text as that write left it, so
+	// two quick taps on one box tick and untick it, and taps on two rows both land.
+	private readonly queueTap = serialQueue((error) => console.error(error));
 
 	getViewType(): string {
 		return VIEW_TYPE_LIST;
@@ -62,10 +66,10 @@ export class PrinceListView extends TextFileView {
 				if (this.file) void openAsMarkdown(this.leaf, this.file);
 				return;
 			}
-			// The box shows what the file holds: it changes once the write lands.
+			// The box shows what the file holds: it changes once the write lands, not while a tap waits.
 			evt.preventDefault();
 			const row = target.closest<HTMLElement>(`.${ITEM_CLASS}`);
-			if (row) void this.toggle(row);
+			if (row) void this.queueTap(() => this.toggle(row));
 		});
 	}
 
@@ -109,6 +113,9 @@ export class PrinceListView extends TextFileView {
 	// Parsed from `text`, which the write's guard expects, not taken from the last render: an earlier
 	// tick may have changed `text` since, and an edit of the older lines would undo it.
 	private async toggle(row: HTMLElement): Promise<void> {
+		// A redraw while this tap waited, as for an outside change, may have moved lines. Ticking the
+		// wrong item is worse than dropping the tap.
+		if (!row.isConnected) return;
 		const titleLine = Number(row.dataset.line);
 		const lines = splitLines(this.text);
 		const items = parseList(lines, contentStartLine(this.text)).sections.flatMap((section) => section.items);

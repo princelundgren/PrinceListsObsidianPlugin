@@ -909,7 +909,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Files:**
 - Create: `src/view/render-list.ts`, `src/view/write.ts`, `src/core/display.ts`,
-  `tests/core/display.test.ts`
+  `src/core/queue.ts`, `tests/core/display.test.ts`, `tests/core/queue.test.ts`
 - Modify: `src/view/list-view.ts`, `styles.css`, `src/core/edit-headings.ts` (exports `splitAtx`
   for the heading text)
 
@@ -951,10 +951,13 @@ every file stays under about 300 lines and each pull request stays reviewable.
   position, and a different file (`clear` true) opens at the top.
 - [ ] **Step 2: Make the checkbox tick.** A click calls `writeAction(view, joinLines(toggleItem(...)))`,
   using `new Date()`. Once the write lands, only the clicked row changes, its checkbox and its done
-  class, so focus and the scroll position stay. On `RepeatingItemError` it shows a `Notice` reading
-  "Repeating items can't be ticked here yet." The click never opens a card. Later edits (Tasks 9 to
-  11) that throw `UnsafeEditError` write nothing and show a `Notice` reading "This list's layout
-  can't take that change. Make it in Markdown instead."
+  class, so focus and the scroll position stay. Taps queue (`serialQueue`): each waits for the
+  previous one's write, then parses the current text, so two quick taps on one box tick and then
+  untick it. A queued tap whose row a redraw removed is dropped, since lines may have moved. On
+  `RepeatingItemError` it shows a `Notice` reading "Repeating items can't be ticked here yet." The
+  click never opens a card. Later edits (Tasks 9 to 11) that throw `UnsafeEditError` write nothing
+  and show a `Notice` reading "This list's layout can't take that change. Make it in Markdown
+  instead."
 - [ ] **Step 3: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 4: Check it by hand in the test vault on the Mac and the iPhone.**
   1. `example.md` matches the spec's "Layout" section.
@@ -977,6 +980,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
      it's built.
   10. For this check only, log when `writeAction` sets `view.text` and when `setViewData` runs
       after a tick, and don't commit the logging. Record the order once in the pull request.
+  11. Double-tap a box: it ticks and then unticks, with no "changed elsewhere" notice and no
+      flicker. Tap two boxes quickly: both tick.
 - [ ] **Step 5: Commit** with the message "Draw lists, tick items and hide archived ones".
 
 ### Task 9: The card, editing, and outside changes
