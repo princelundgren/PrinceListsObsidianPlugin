@@ -44,7 +44,9 @@ this project.
   command, ribbon icon or menu item such as New list. Never write on open, close or a timer.
 - **No telemetry of any kind, and no network requests** unless one is agreed on in an issue first
   (the design's privacy rule). Obsidian's developer policies require any network use to be
-  disclosed in the README.
+  disclosed in the README. A picture linked from the web in a rendered note loads through
+  Obsidian's renderer, as in any note; that is decided and disclosed in the README (the design's
+  privacy rule).
 - **It must work on mobile:** no Node.js or Electron APIs in `src/`.
 - **Styling:** use only Obsidian's CSS variables and its built-in icons (`setIcon`, Lucide). Never
   hard-code colors.

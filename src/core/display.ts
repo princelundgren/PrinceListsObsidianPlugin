@@ -46,7 +46,7 @@ export function visibleSections(
 		const shown: ListRow[] = items.flatMap(({ titleLine }) => {
 			const { text } = lines[titleLine] as Line;
 			const row = itemRow(text, titleLine);
-			return row.done && !showArchived && isArchived(text, now) ? [] : [row];
+			return isShown(row, text, now, showArchived) ? [row] : [];
 		});
 		for (const block of model.untouched) {
 			if (block.start < start || block.start >= end) continue;
@@ -58,6 +58,23 @@ export function visibleSections(
 			rows: shown.sort((a, b) => firstLine(a) - firstLine(b)),
 		};
 	});
+}
+
+// A done item is hidden once it is archived, unless "Show archived" is on.
+export function isShown(row: ItemRow, text: string, now: Date, showArchived: boolean): boolean {
+	return !(row.done && !showArchived && isArchived(text, now));
+}
+
+// Leaves out the headings and rows whose first line is in `range`: while the list note's field has
+// focus, its carried range is still the note being typed, even where the file now parses a heading or
+// an item there, until the field loses focus and the list is drawn again.
+export function withoutRange(sections: SectionRows[], range: { start: number; end: number } | null): SectionRows[] {
+	if (!range) return sections;
+	const inRange = (line: number) => line >= range.start && line < range.end;
+	return sections.map(({ heading, rows }) => ({
+		heading: heading && !inRange(heading.line) ? heading : null,
+		rows: rows.filter((row) => !inRange(firstLine(row))),
+	}));
 }
 
 export function itemRow(text: string, titleLine: number): ItemRow {

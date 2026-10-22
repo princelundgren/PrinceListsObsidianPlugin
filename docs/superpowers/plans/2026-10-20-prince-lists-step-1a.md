@@ -987,8 +987,10 @@ every file stays under about 300 lines and each pull request stays reviewable.
 ### Task 9: The card, editing, and outside changes
 
 **Files:**
-- Create: `src/view/card.ts`, `src/view/notes.ts`
-- Modify: `src/view/list-view.ts`, `src/view/render-list.ts`, `styles.css`
+- Create: `src/view/card.ts`, `src/view/notes.ts`, `src/view/fields.ts`, `src/view/events.ts`,
+  `src/view/dom.ts`, and in `src/core/`: `editing.ts` (the view's text, `selected` and the typing
+  sessions), `follow.ts`, `title-field.ts`, `empty-item.ts`, `inline.ts` and `action-write.ts`
+- Modify: `src/view/list-view.ts`, `src/view/render-list.ts`, `src/view/write.ts`, `styles.css`
 
 **Interfaces:**
 - Consumes: `getItemNotes`, `setItemNotes`, `setItemTitle`, `deleteItem`, `UnsafeEditError`,
@@ -1000,21 +1002,36 @@ every file stays under about 300 lines and each pull request stays reviewable.
     - It calls `MarkdownRenderer.render(app, markdown, el, file.path, child)` with a fresh child
       `Component`, added through `view.addChild`. The caller passes the child to `removeChild` on
       re-render or close.
-    - It delegates `a.internal-link` clicks to `workspace.openLinkText(href, file.path, Keymap.isModEvent(evt))`.
-    - When `Platform.isDesktop`, it delegates `contextmenu` on `a.internal-link` too: a new `Menu`,
-      filled by `workspace.handleLinkContextMenu(menu, href, file.path)` and shown with
-      `menu.showAtMouseEvent(evt)` (spec, "Rendering notes in the card"). On the iPhone it adds
+    - `a.internal-link` clicks go to `workspace.openLinkText(linktext, file.path, Keymap.isModEvent(evt))`,
+      where `linktext` is the link's `data-href`, or its `href` when it has none, as Kanban reads
+      it: a Markdown-style link's `href` can be URL-encoded.
+    - When `Platform.isDesktop`, `contextmenu` on `a.internal-link` opens a new `Menu`, filled by
+      `workspace.handleLinkContextMenu(menu, linktext, file.path)` and shown with
+      `menu.showAtMouseEvent(evt)` (spec, "Rendering notes in the card"). On the iPhone there is
       no link menu.
+    - Both are delegated once on the view's `contentEl` for every rendered block, not per
+      `renderNotes` call: every row title renders through it, and a listener per call would put
+      one on each row.
     - It triggers no `hover-link` event. Page previews wait until Obsidian documents that event's
       payload (spec, "Not in step one").
-    - It disables `.task-list-item-checkbox`.
-  - `openCard(view, titleLine: number, focusTitle = false): void` and `closeCard(view): void`, in
-    `src/view/card.ts`. `openCard` puts the cursor in the title only when `focusTitle` is true,
-    so a tap on a row doesn't open the iPhone keyboard. `view.selected` holds the `titleLine` of
-    the open item, or `null`. A line number is used because a new item's `ItemBlock` doesn't
-    exist until the list is re-parsed.
-  - **A row's `data-line`:** never trust it from an earlier render. Task 8's tick moves no line,
-    but after an edit that moves lines, redraw before any row's `data-line` is used again.
+    - It disables `.task-list-item-checkbox`, and the view's click listener cancels clicks on one,
+      for an embed that renders more of them later.
+  - `openCard(view, titleLine: number, focusTitle = false, inserted?: { textBefore, textAfter }): void`
+    and `closeCard(view): void`, in `src/view/card.ts`. `openCard` puts the cursor in the title
+    only when `focusTitle` is true, so a tap on a row doesn't open the iPhone keyboard; otherwise
+    the card itself takes focus, so Escape reaches it. A card opened on an item its own insert
+    created passes `inserted`, the text on either side of the insert, which allows the empty-item
+    removal below. `closeCard` queues that removal on `view.enqueue`, the view's write queue.
+    `view.selected` holds the `titleLine` of the open item, or `null`. A line number is used
+    because a new item's `ItemBlock` doesn't exist until the list is re-parsed.
+  - `writeAction(view, next, expected?, refusedNotice?, edit?: OwnEdit)`: a write that moves lines
+    passes its `edit` (`ownEdit(start, before, after, kind)` in `src/core/follow.ts`), so
+    `selected` and every row's line follow it.
+  - **A row's line, in `data-princelists-line`:** the plugin's own attribute, because Markdown that
+    Obsidian renders carries its own `data-line`. Never trust it from an earlier render. Task 8's
+    tick moves no line. After an edit that moves lines, the view shifts every row's line with the
+    edit, by the same rule as `selected`, or draws the list again, before any is used again. Shifting
+    in place keeps a redraw from replacing the element a click is landing on.
   - `PrinceListView.focusListTitle(): void`, which puts the cursor in the list title field.
 
 - [ ] **Step 1: Build the card and editing** as the spec's "Ticking", "Editing" and "Selecting
@@ -1031,7 +1048,10 @@ every file stays under about 300 lines and each pull request stays reviewable.
     `setItemTitle` on the current lines with that saved line put back, which gives
     `setTitle(thatLine, typed)`. Starting from the current line instead would read a typed
     `#tag`, `📅 date` or ` ^id` as tail and copy it on every keystroke. The field refreshes the
-    saved line only when an outside change lands, or the view's own write changes that line.
+    saved line only when something other than the field changed that line. A line that is still
+    what the field wrote keeps the saved line, or the next keystroke would copy a typed `#tag`. One
+    of the view's own writes to the line, such as a tick, is made to the saved line too (its
+    `OwnEdit.retitle`), for the same reason.
   - **Notes:** rendered with `renderNotes`, and switched to a `<textarea>` of `getItemNotes` on
     click. They're saved with `setItemNotes` through `requestSave`, passing the item's
     `notesIndent` as the textarea had it when it took focus, not the one each re-parse gives.
@@ -1044,34 +1064,65 @@ every file stays under about 300 lines and each pull request stays reviewable.
     hides the items below it." (spec, "The list note"). Such a note still saves, so typing is
     never lost, and the items below stay hidden while the block is open.
     - **The note's range:** when the field takes focus, the view seeds the range `setListNote`
-      takes from `model.listNote`. Each save passes the range the previous one returned, and the
-      view carries the range across its own writes as it does `selected`: an edit whose run starts
-      after the range leaves it, and the range's own saves replace it.
+      takes from `model.listNote`. Each save passes the range the previous one returned: the note's
+      own lines. The session also carries the blank line its last save wrote under the note, and
+      the next save replaces that line with the note too while it is still blank and directly under
+      the note, so a note typed and erased again leaves none behind. A line another device added
+      between the two keeps it: the next save writes a new blank line instead, or, when the added
+      line joins the note's paragraph, is refused. The view carries the range, and that line,
+      across its own writes as it does `selected`: an edit whose run starts after the range leaves
+      it, and the range's own saves replace it.
+    - **While the field has focus,** a redraw draws no row or heading for lines inside the range.
+      They are still the note being typed, even where the file now parses an item there, and a
+      row acted on would write a typed `- [ ] y` twice. When the field loses focus after such a
+      redraw, the whole list is drawn again, as after a warning.
     - **An outside change** maps the range with `mapLine`: its `start`, and its last line,
-      `end - 1`, when it isn't empty. When either maps to `null`, the field re-reads
+      `end - 1`, when it isn't empty. An empty range is a position, not a line, so it maps
+      through the line before it: the line at its start is the first item's, and an item added
+      above that one goes after the note. When either maps to `null`, the field re-reads
       `getListNote` from the new text and seeds the range again from its model. A change inside
       the range that leaves both ends in place is overwritten by the next keystroke, as typing
       wins in any focused field.
   - **The list title:** renamed with `fileManager.renameFile` on Enter or blur. If the name is
-    taken, show the `Notice` "A note with that name already exists." and keep the old name.
+    taken, show the `Notice` "A note with that name already exists." and keep the old name. A
+    name with `/` or `\` would move the list to another folder, so it shows "A list name can't
+    contain / or \." and keeps the old name. Escape puts the old name back. A rename that fails
+    shows "The list couldn't be renamed." and keeps the old name.
   - **Empty items:** remove an item only when this card created it ("+", Enter, "New item" or "New
     item below"), its title is still empty, it has no notes, and the user closed the card in the
     view: Escape, a click elsewhere, "+", Enter or a drag start. Remove it by restoring the text
     from before the insert, `writeAction(view, textBeforeInsert, textAfterInsert)`, which applies
     `guardedApply(current, textAfterInsert, textBeforeInsert)`: `deleteItem` would leave behind
-    an empty line the insert wrote. Pass `refusedNotice` as `null`: if the guard refuses, because
-    the file changed outside the view while the card was open, fall back to `deleteItem` on the
-    current text, with no `Notice`. If that throws `UnsafeEditError`, the empty item stays and the
+    an empty line the insert wrote. The restore is tried only while the view's text is still
+    `textAfterInsert`; otherwise it goes straight to the fallback. Pass `refusedNotice` as `null`:
+    if the guard refuses, because the file changed outside the view while the card was open, or
+    typing landed while the write waited, fall back to `deleteItem` on the current text, with no
+    `Notice`. If that throws `UnsafeEditError`, the empty item stays and the
     usual unsafe-edit `Notice` shows (Task 8). Never remove one from `setViewData`, `onClose` or a
     file switch, which would be a write on close or on an outside change.
-  - **An empty list:** shows a gray "Notes" placeholder.
-  - **Keys:** Escape closes the card.
+  - **An empty list note:** shows a gray "Notes" placeholder to click, in any list, so a note can
+    be added from the view. An empty item's notes in the card show the same placeholder.
+  - **Accessible names:** the list title, an item's title and the notes fields are "List title",
+    "Title" and "Notes".
+  - **Keys:** Escape closes the card. Enter in an item's title writes no line break (Task 10 adds
+    the next item there).
+  - **Typing during a one-off write is never lost.** A write refuses, with no `Notice`, when the
+    view's text changed while it waited (`guardedWrite` in `src/core/action-write.ts`). A queued
+    tick then runs once more on the new text.
+  - **A queued tick's line follows the view's own edits,** even when a redraw replaced its row. An
+    outside change while it waits drops it, with the `Notice` "This list changed elsewhere. Try
+    again.": a silent drop would look like a lost tick. A tick still queued when another file
+    loads in the view, or the view closes, is dropped silently.
   - **`getViewData()` includes text being typed.** Apply each keystroke to `this.text`, so
     Obsidian's own merge on outside changes covers it.
   - **`setViewData(_, false)`** re-renders, but keeps any field that has focus: an item title,
     the notes, the list note or the list title. It updates that field only after blur, except the
     list note's re-read when its range can't be mapped (see above). It moves
     `selected` with `mapLine`, and closes the card after blur when that returns `null`.
+    `mapLine` finds one changed run, so one outside change to lines both above and below the item
+    returns `null` too (call): the card says the list changed elsewhere and closes after blur, and
+    the typing up to that change is in the file. Until then the card keeps what it shows, and its
+    fields are read-only, so typing that would go nowhere doesn't look saved.
   - **`selected` follows the view's own writes too.** The view knows which lines each of its own
     edits replaced. A `selected` line before them stays, one after them shifts by the change in
     length, and an edit to the selected item's own lines (typing in it, ticking it) leaves
@@ -1101,8 +1152,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
      outside the vault.
   8. Typing `buy #milk2` into an item's title leaves `#milk2` in the file's line once.
   9. Typing in a card of the generated 500-item list (Task 8, check 7) shows no lag.
-  10. Bold text and a link in an item title and in a heading render as Markdown. Clicking the
-      link opens it, without ticking the item or opening its card.
+  10. Bold text, a link, a `#tag` and an external link in an item title and in a heading render
+      as Markdown. Clicking the link opens it, without ticking the item or opening its card. A
+      click on the tag or the external link doesn't tick the item or open its card either.
   11. On the iPhone, the generated 500-item list (Task 8, check 7) still opens and scrolls
       without visible lag, now with rendered titles and headings.
 
@@ -1119,6 +1171,9 @@ every file stays under about 300 lines and each pull request stays reviewable.
 **Interfaces:**
 - Consumes: `insertItem`, `insertItemInSection`, `insertHeading`, `deleteItem`, `deleteHeading`,
   `UnsafeEditError`, `setHeadingText`, `mapLine`, `writeAction`, `tryEdit` and `openCard`.
+  - Each insert passes its texts to `openCard` as `inserted`, so the empty-item removal (Task 9)
+    applies, and each write that moves lines passes its `edit` to `writeAction` (Task 9's
+    interfaces). Writes queue behind `closeCard`'s removal on `view.enqueue`.
 - Produces: `itemMenu(view, item, menu: Menu): void` and `headingMenu(view, section, menu: Menu): void`.
   Each fills an Obsidian `Menu` with the spec's actions and labels. "Delete" and "Delete heading"
   call `setWarning(true)`, so they show in red (spec, "Item actions").

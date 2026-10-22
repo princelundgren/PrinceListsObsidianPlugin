@@ -46,10 +46,19 @@ Stuff for the new apartment.
 
 The full format is in the [design](docs/superpowers/specs/2026-10-20-prince-lists-design.md#file-format).
 
+## Syncing
+
+If you edit the same list on two devices within a few seconds of each other, Obsidian Sync's
+automatic merge can lose a change, as it can in any note. If that takes text you were typing in an
+item, PrinceLists offers to copy it. Sync's "Create conflict file" setting avoids silent merges; the
+conflict copies show up as extra lists.
+
 ## Privacy
 
 PrinceLists works only on notes you open in Obsidian: in your vault, or on the Mac a note opened
-from outside it. It makes no network requests, collects no data, and needs no account.
+from outside it. It makes no network requests of its own, collects no data, and needs no account.
+A list's notes are rendered by Obsidian, so a picture from the web in them loads as it does in any
+note.
 
 ## Contributing
 
