@@ -220,9 +220,9 @@ test("lineIndexAt maps a character offset to its line", () => {
     `formatStamp` and the archived rule, is tested at an offset from UTC with daylight saving
     time.
   - Pull requests run it, so it follows the read-only pattern of the docs check's
-    `.github/workflows/docs.yml`, not the release workflow's: `permissions: contents: read`,
-    `actions/checkout@v7` with `persist-credentials: false`, and `actions/setup-node@v7` with
-    `node-version: 26` and no `cache`.
+    `.github/workflows/docs.yml`: `permissions: contents: read`, `actions/checkout` with
+    `persist-credentials: false`, and `actions/setup-node` with `node-version: 26` and no `cache`,
+    each pinned to its v7 release's commit SHA.
   - In `CONTRIBUTING.md`, replace "For now it checks the docs and the pull request's title and
     description; the plugin's lint, build and tests join it with the project scaffold." with "It
     runs the plugin's lint, build and tests, and checks the docs and the pull request's title and
