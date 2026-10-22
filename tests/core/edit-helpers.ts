@@ -87,7 +87,8 @@ function sourceBlocks(text: string): { block: string; start: number; end: number
 }
 
 // An edit replaces one run of lines: the lines before it keep their text, and the lines after it
-// shift. Only the endings at the end of the file can change, which spliceLines' own tests cover.
+// shift. Only the endings at the end of the file can change, and, in a file without a final newline,
+// empty lines left at the end go, which spliceLines' own tests cover.
 export function expectLinesBeforeKept(before: readonly Line[], after: readonly Line[], runStart: number) {
 	expect(after.slice(0, runStart).map((line) => line.text)).toEqual(before.slice(0, runStart).map((line) => line.text));
 }

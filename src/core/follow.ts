@@ -30,13 +30,13 @@ export interface RunEdit {
 }
 
 /**
- * A drag's move, which changes lines in two places: `moved[i]` is the line that line `i` went to, and
- * `start` is the first line that moved.
+ * A drag's move, which changes lines in two places: `moved[i]` is the line that line `i` went to, or
+ * null for an empty line it dropped, and `start` is the first line that moved.
  */
 export interface MoveEdit {
 	start: number;
 	kind: 'move';
-	moved: readonly number[];
+	moved: readonly (number | null)[];
 }
 
 // A write that moves no line. It starts past every line, so it leaves the list note's range too.
@@ -46,7 +46,7 @@ export function ownEdit(start: number, before: string, after: string, kind: RunE
 	return { start, delta: splitLines(after).length - splitLines(before).length, kind };
 }
 
-export function moveEdit(moved: readonly number[]): MoveEdit {
+export function moveEdit(moved: readonly (number | null)[]): MoveEdit {
 	const start = moved.findIndex((to, from) => to !== from);
 	return { start: start === -1 ? Number.POSITIVE_INFINITY : start, kind: 'move', moved };
 }

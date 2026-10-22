@@ -47,3 +47,14 @@ test('spliceLines ends a line that moves off the end of a CRLF file with CRLF, a
 	expect(joinLines(spliceLines(splitLines('a\rb'), 2, 0, [{ text: 'c', eol: '\n' }]))).toBe('a\rb\nc');
 	expect(joinLines(spliceLines(splitLines('a\nb\n'), 2, 0, [{ text: 'c', eol: '\n' }]))).toBe('a\nb\nc\n');
 });
+test('in a file without a final newline, spliceLines drops the empty lines an edit leaves at the end', () => {
+	expect(joinLines(spliceLines(splitLines('a\n\nb'), 2, 1, []))).toBe('a');
+	expect(joinLines(spliceLines(splitLines('a\r\n\r\nb'), 2, 1, []))).toBe('a');
+	expect(joinLines(spliceLines(splitLines('a\n\n\n\tb'), 3, 1, []))).toBe('a');
+	expect(joinLines(spliceLines(splitLines('a\nb'), 2, 0, [{ text: '', eol: '\n' }]))).toBe('a\nb');
+});
+test('spliceLines keeps a whitespace-only last line, which writes its spaces, and empty last lines in a file that ends with a newline', () => {
+	expect(joinLines(spliceLines(splitLines('a\n\n \n\tb'), 3, 1, []))).toBe('a\n\n ');
+	expect(joinLines(spliceLines(splitLines('a\nb\n  '), 0, 1, [{ text: 'c', eol: '\n' }]))).toBe('c\nb\n  ');
+	expect(joinLines(spliceLines(splitLines('a\n\nb\n'), 2, 1, []))).toBe('a\n\n');
+});
