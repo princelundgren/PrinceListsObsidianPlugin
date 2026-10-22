@@ -42,7 +42,7 @@ function offerUndo(view: PrinceListView, file: TFile, undo: PlannedDelete['undo'
 	fragment.createSpan({ text: message });
 	const button = fragment.createEl('button', { cls: 'princelists-undo', text: 'Undo' });
 	new Notice(fragment, 6000);
-	// The notice's own button, which goes with the notice.
+	// Not delegated or registered: the notice isn't in the view, and this listener goes with its button.
 	button.addEventListener('click', () => void view.enqueue(() => undoDelete(view, file, undo)), { once: true });
 }
 

@@ -70,6 +70,7 @@ export function headingFieldBlur(view: PrinceListView, target: HTMLElement): voi
 
 function commit(view: PrinceListView, field: HeadingField, keepIfRefused: boolean): void {
 	const name = field.el.value;
+	// Decided now, so a refused name can keep the field open; closeField plans the write again later.
 	const save = saveHeadingName(view.text, contentStartLine(view.text), field, name);
 	tell(save);
 	if (save.kind === 'refused' && keepIfRefused) return;
