@@ -32,7 +32,7 @@ interface MouseDrag {
 // dragend then never comes. The next drag start in any list pane ends it.
 let current: MouseDrag | null = null;
 
-// Dragging rows with the mouse, on the Mac only (spec, "Dragging"). `listEl` holds every row and
+// Dragging rows with the mouse, on desktop only (spec, "Dragging"). `listEl` holds every row and
 // heading, and takes one listener per drag event. Each acts only on a drag that started in it.
 export function enableMouseDrag(view: PrinceListView, listEl: HTMLElement): void {
 	if (!ROWS_DRAG) return;
