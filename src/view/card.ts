@@ -4,6 +4,7 @@ import { UnsafeEditError } from '../core/edit-check';
 import { isEmptyItem, planRemoval, type InsertedItem, type Removal } from '../core/empty-item';
 import type { TrackedLine } from '../core/editing';
 import { parseItemLine } from '../core/item-line';
+import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
 import { fitHeight } from './dom';
@@ -11,7 +12,7 @@ import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
 import { renderNotes } from './notes';
 import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, setLine, showDone } from './render-list';
-import { CHANGED_ELSEWHERE_NOTICE, UNSAFE_EDIT_NOTICE, writeAction } from './write';
+import { CHANGED_ELSEWHERE_NOTICE, LOST_TYPING_NOTICE, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
 export const CARD_CLASS = 'princelists-card';
 export const CARD_TITLE_CLASS = 'princelists-card-title';
@@ -154,16 +155,39 @@ export function notesBlur(view: PrinceListView, editor: HTMLTextAreaElement): vo
 
 // An outside change took the card's item. A card with focus stays until it loses it, so the field
 // isn't torn down mid-word, but its typing has nowhere to go any more: the notice says so, and its
-// fields take no more typing.
+// fields take no more typing. Typing that the change dropped from the file can be copied.
 export function cardLost(view: PrinceListView, card: Card, line: number): void {
-	if (card.el.contains(card.el.doc.activeElement)) {
+	const focused = card.el.doc.activeElement;
+	if (card.el.contains(focused)) {
 		card.lostAt = line;
 		setLine(card.el, null);
 		for (const field of card.el.querySelectorAll('textarea')) field.readOnly = true;
-		new Notice(CHANGED_ELSEWHERE_NOTICE);
+		const typed = focused?.instanceOf(HTMLTextAreaElement) ? focused.value : '';
+		if (missingTyping(view.text, typed)) noticeWithCopy(card.el.win, typed);
+		else new Notice(CHANGED_ELSEWHERE_NOTICE);
 	} else {
 		dismissCard(view);
 	}
+}
+
+// Obsidian hides a notice on any click, so the whole message copies, not only the button.
+function noticeWithCopy(win: Window, typed: string): void {
+	const message = createFragment((fragment) => {
+		const content = fragment.createDiv();
+		content.createEl('p', { text: LOST_TYPING_NOTICE });
+		content.createEl('button', { text: 'Copy text' });
+		content.addEventListener(
+			'click',
+			() => {
+				win.navigator.clipboard.writeText(typed).then(
+					() => new Notice('Copied.'),
+					() => new Notice("Couldn't copy the text."),
+				);
+			},
+			{ once: true },
+		);
+	});
+	new Notice(message, 0);
 }
 
 function showNotes(view: PrinceListView, card: Card, area: HTMLElement): void {

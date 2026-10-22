@@ -711,8 +711,13 @@ needs no code.
   | drags an item | adds a note to it | the note lands under a neighboring item |
 
   - The parser tolerates all of this.
+  - Edits to the same list on two devices within one Sync cycle (about 10 s) can lose a change.
+    Sync's merge reads a write made from an older copy as a deletion, and applies it. Obsidian's
+    own editor loses text in the same way. Typing in an open card is covered by "Copy text" (see
+    "Saving and outside changes"); a change made in the list itself is not.
   - Since Obsidian 1.9.7, Sync's Conflict resolution setting can create a conflict file instead of
     merging. The setting is per device (same help page).
+  - Conflict files show up as extra lists.
   - File recovery is the backstop.
 - **Undo (1b, call):**
   - Cmd+Z and Cmd+Shift+Z step through the plugin's own edits, using the same guarded write.
@@ -860,7 +865,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 - **`setViewData(_, false)` updates the model** without rebuilding an editor that has focus.
 - **An outside change that edits lines both above and below the item being typed in (call)** loses
   track of the item, since the line mapping finds a single changed run. The card says the list
-  changed elsewhere and closes once it loses focus. What was typed until then is in the file.
+  changed elsewhere and closes once it loses focus. What was typed until then is usually in the
+  file. When a line of the focused field's text isn't, the notice instead offers "Copy text", which
+  copies the field's text, and stays until dismissed (owner, 2026-10-22).
 
 ### Rendering notes in the card
 
