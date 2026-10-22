@@ -261,8 +261,9 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
     A pasted picture is named `Pasted image YYYYMMDDHHmmss.<ext>` in local time, as Obsidian names
     its own, with the extension from its MIME type: `image/png` gives `png`, `image/jpeg` `jpg`, and
     `image/<x>` gives `<x>` for the other extensions above, `image/svg+xml` giving `svg`. A dropped
-    picture keeps its own name when its extension, compared without case, is in the list **(call)**.
-    `null` for anything else.
+    picture keeps its own name when its extension, compared without case, is in the list **(call)**,
+    with each `#`, `^`, `|`, `[` and `]` replaced by `-`: in a link they would start a heading, a
+    block, an alias or the brackets. `null` for anything else.
   - `appendOnOwnLine(notes: string, text: string): string`: `text` after `notes`, on a line of its
     own.
 - Produces: `registerPictureEvents(view: PrinceListView): void`, in `src/view/pictures.ts`.
@@ -276,6 +277,7 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
 | `pictureName({name: "image.jpeg", type: "image/jpeg"}, true, now)` | `"Pasted image 20261022143005.jpg"` |
 | `pictureName({name: "x.svg", type: "image/svg+xml"}, true, now)` | `"Pasted image 20261022143005.svg"` |
 | `pictureName({name: "IMG_0042.JPG", type: "image/jpeg"}, false, now)` | `"IMG_0042.JPG"` |
+| `pictureName({name: "Plan [v2] #3.png", type: "image/png"}, false, now)` | `"Plan -v2- -3.png"` |
 | `pictureName({name: "IMG_0042.HEIC", type: "image/heic"}, false, now)` | `null` |
 | `pictureName({name: "image.heic", type: "image/heic"}, true, now)` | `null` |
 | `pictureName({name: "notes.pdf", type: "application/pdf"}, false, now)` | `null` |
@@ -296,7 +298,8 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
     Obsidian doesn't also act on the file. Any other drag is left alone, so the card isn't a drop
     target for it. The row drag's listeners ignore a file drag already, since it lacks their type.
   - **Adding them:** a picture with no `pictureName` shows "Obsidian can't show that kind of
-    picture, so it wasn't added." For each of the others,
+    picture, so it wasn't added." The others are saved one at a time, so only one is held in memory
+    at once. For each,
     `getAvailablePathForAttachment(name, file.path)`, then
     `vault.createBinary(path, await picture.arrayBuffer())`, then the link
     `"!" + fileManager.generateMarkdownLink(created, file.path)`, where `file` is the list's file.
@@ -446,8 +449,9 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
   - **When the key's target** (`evt.targetNode`) is a `textarea`, an `input` other than a checkbox,
     or content-editable, it returns `true`, so that field's own undo runs **(call)**. That covers
     the view's own fields and Obsidian's under the same scope, such as the pane's title.
-  - **On an empty new item's open card,** undo closes the card, which removes the item: that is the
-    undo of adding it.
+  - **On an empty new item's open card,** with focus outside its title, undo closes the card, which
+    removes the item: that is the undo of adding it. With the cursor in the title, the rule above
+    gives Cmd+Z to the field.
   - **Otherwise** it queues on `view.enqueue`: it takes `history.undo(view.text)` or
     `history.redo(view.text)`, does nothing when that is `null`, and writes it with
     `writeAction(view, step.next, view.text, notice, step.edit)`, where `notice` is "This list
