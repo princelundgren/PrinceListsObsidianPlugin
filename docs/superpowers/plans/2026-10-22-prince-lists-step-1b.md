@@ -290,11 +290,11 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
     whose `type` starts with `image/`, cancel the paste and add its pictures. Otherwise leave it
     alone, so text pastes as text. A pasted picture in the card's title does nothing, as now
     **(call)**.
-  - **`dragover` and `drop`** inside the open card, when `dataTransfer.types` includes `Files`:
-    `dragover` cancels the event so a drop is allowed. `drop` cancels it and stops it, so Obsidian
-    doesn't also act on the file, but only when a file's `type` starts with `image/`; otherwise it
-    returns and leaves the event alone. The row drag's listeners ignore a file drag already, since
-    it lacks their type.
+  - **`dragover` and `drop`** inside the open card, only when one of `dataTransfer.items` has
+    `kind` `"file"` and a `type` starting with `image/`, which a page can read during a drag:
+    `dragover` cancels the event so a drop is allowed, and `drop` cancels it and stops it, so
+    Obsidian doesn't also act on the file. Any other drag is left alone, so the card isn't a drop
+    target for it. The row drag's listeners ignore a file drag already, since it lacks their type.
   - **Adding them:** a picture with no `pictureName` shows "Obsidian can't show that kind of
     picture, so it wasn't added." For each of the others,
     `getAvailablePathForAttachment(name, file.path)`, then
@@ -322,7 +322,8 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
   2. With Settings → Files and links → "Use [[Wikilinks]]" off, the link is a Markdown link.
   3. Drag a `.jpg` from the Finder onto an open card whose notes aren't being edited. The notes
      editor opens, and the link goes on a line of its own at the end. Obsidian opens nothing else.
-  4. Dropping a PDF on the card adds nothing to the notes.
+  4. Dropping a PDF on the card adds nothing to the notes, and Obsidian does with it what it does
+     with a PDF dropped elsewhere in the list pane: record what that is.
   5. Pasting text into the notes still pastes the text.
   6. With a list from outside the vault (design, "Notes outside the vault"), paste a picture and
      record where it was saved and whether it shows. If it fails, stop and record it with this
@@ -361,7 +362,10 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
     with `delta` the change in the number of lines and `kind` `"insert"` when it grows, `"delete"`
     when it shrinks, and `"change"` otherwise
   - `class EditHistory`. A step is a text before and after one edit, and a move's map. The steps
-    form a chain: each one's `before` is the `after` of the step below it.
+    form a chain: each one's `before` is the `after` of the step below it, the same string, so each
+    text is held once. Whole texts keep an undo a plain guarded write of an earlier text
+    **(call)**; the cost is at most `HISTORY_LIMIT` copies of the list, about 10 MB for a
+    50,000-character list at 2 bytes a character.
     - **The chain rule:** when there is a top step and a write's or keystroke's `before` isn't its
       `after`, both stacks are cleared first, so an undo never jumps over a change it doesn't know.
     - `wrote(before: string, after: string, edit: OwnEdit): void`, for each own write that landed:
