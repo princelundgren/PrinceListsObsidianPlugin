@@ -123,7 +123,8 @@ Only the maintainer releases.
    then run `npm version patch|minor|major --no-git-tag-version`. That updates `package.json`,
    `package-lock.json`, `manifest.json` and `versions.json`.
 2. **Tag after the merge.** Tag that commit on `main` with exactly the version (`x.y.z`, no `v`)
-   and push the tag. The release workflow builds a draft release with an attestation.
+   and push the tag. The release workflow waits for the maintainer's approval in the `release`
+   environment, then builds a draft release with an attestation.
 3. **Publish.** The maintainer reviews the draft and publishes it.
 
 Agents never push to `main`, merge pull requests, push tags or publish releases.
