@@ -1176,7 +1176,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
 
 **Interfaces:**
 - Consumes: `insertItem`, `insertItemInSection`, `insertHeading`, `deleteItem`, `deleteHeading`,
-  `UnsafeEditError`, `setHeadingText`, `mapLine`, `writeAction`, `tryEdit` and `openCard`.
+  `UnsafeEditError`, `setHeadingText`, `writeAction`, `tryEdit` and `openCard`.
   - Each insert passes its texts to `openCard` as `inserted`, so the empty-item removal (Task 9)
     applies, and each write that moves lines passes its `edit` to `writeAction` (Task 9's
     interfaces). Writes queue behind `closeCard`'s removal on `view.enqueue`.
@@ -1223,11 +1223,11 @@ every file stays under about 300 lines and each pull request stays reviewable.
     that `setHeadingText` refuses shows "That name can't be used for this heading." and keeps the
     field open; Escape then removes the empty heading.
   - **The heading field survives outside changes.** `setViewData(_, false)` keeps a focused
-    heading field, as it keeps the fields of Task 9. On save, map the heading's line with
-    `mapLine` from the lines the field opened on to the current ones, and rename the section
-    whose heading is on that line. When `mapLine` returns `null`, or no section's heading is on
-    that line, cancel, write nothing and show the `Notice` "This list changed elsewhere. Try
-    again."
+    heading field, as it keeps the fields of Task 9. The field tracks its heading's line from when
+    it opens until its write has run, as a queued tap does, so the line follows the view's own
+    edits and each outside change in turn. On save, rename the section whose heading is on that
+    line. When the line is gone, or no section's heading is on it, cancel, write nothing and show
+    the `Notice` "This list changed elsewhere. Try again."
   - **Delete with Undo:** after `deleteItem` or `deleteHeading`, show a `Notice` for 6 s holding
     an "Undo" button. The button calls `writeAction(view, before, after, refused)`, where `before`
     is the text from before the delete, `after` the text right after it, and `refused` is "This
@@ -1250,7 +1250,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
       refused Undo shows its notice, typing that landed while it wrote included.
     - **The heading field** has the accessible name "Heading". On blur, a refused name shows the
       notice and closes the field, and a new heading then goes again. A redraw keeps the field in
-      place of its heading, by its line as mapped with `mapLine`.
+      place of its heading, by its tracked line, or where it opened once that line is gone.
     - **The "+" sits on the view's `containerEl`,** which the plugin's own class makes
       `position: relative`. It keeps above the iPhone's floating navbar with Obsidian's
       undocumented `--view-bottom-spacing` (design, "Touch on the iPhone"). Space under the last

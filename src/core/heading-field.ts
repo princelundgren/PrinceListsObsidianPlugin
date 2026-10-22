@@ -1,14 +1,13 @@
 import { headingText } from './display';
 import { deleteHeading, setHeadingText } from './edit-headings';
+import type { TrackedLine } from './editing';
 import { ownEdit, type OwnEdit } from './follow';
-import { mapLine } from './guard';
 import { joinLines, splitLines, type Line } from './lines';
 import { parseList, type ListModel, type Section } from './parse';
 
-/** What the heading field opened on: the lines, its heading's line among them, and the heading's raw content. */
+/** The heading field: its heading's line, tracked since the field opened, and the heading's raw content then. */
 export interface HeadingFieldStart {
-	lines: readonly Line[];
-	line: number;
+	heading: TrackedLine;
 	before: string;
 }
 
@@ -23,9 +22,9 @@ export type HeadingSave =
 	| { kind: 'refused' }
 	| { kind: 'write'; next: string; line: number; edit: OwnEdit };
 
-// Rename heading and a new heading's name (spec, "Item actions"). The heading's line is mapped from the
-// lines the field opened on, so an outside change while it was open is allowed for, unless it changed
-// that line.
+// Rename heading and a new heading's name (spec, "Item actions"). The heading's line follows the view's
+// own edits and each outside change while the field is open, so those are allowed for, unless one
+// changed that line.
 export function saveHeadingName(text: string, contentStart: number, field: HeadingFieldStart, typed: string): HeadingSave {
 	const name = typed.trim();
 	if (name === '' || name === field.before) return { kind: 'none' };
@@ -52,9 +51,9 @@ function findHeading(
 	contentStart: number,
 	field: HeadingFieldStart,
 ): { lines: Line[]; model: ListModel; section: Section; line: number } | null {
-	const lines = splitLines(text);
-	const line = mapLine(field.lines, lines, field.line);
+	const line = field.heading.line;
 	if (line === null) return null;
+	const lines = splitLines(text);
 	const model = parseList(lines, contentStart);
 	const section = model.sections.find((s) => s.headingLine === line);
 	return section ? { lines, model, section, line } : null;

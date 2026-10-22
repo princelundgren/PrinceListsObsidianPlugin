@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { headingText } from '../../src/core/display';
 import { UnsafeEditError } from '../../src/core/edit-check';
+import { ListEditing } from '../../src/core/editing';
 import { planHeadingRemoval, saveHeadingName } from '../../src/core/heading-field';
 import { planHeadingInsert } from '../../src/core/list-actions';
 import { splitLines } from '../../src/core/lines';
@@ -8,10 +9,14 @@ import { contentStartOf, crlf, FIXTURES, JOINING_CASES, list, readFixture } from
 
 const start = (text: string) => contentStartOf(splitLines(text));
 
-// The field as it opens on the heading at `line` of `text`.
-const fieldOn = (text: string, line: number) => {
-	const lines = splitLines(text);
-	return { lines, line, before: headingText(lines, line) };
+// The field as it opens on the heading at `line` of `text`, its line followed through `changes` from
+// outside, one at a time, as the view follows it.
+const fieldOn = (text: string, line: number, ...changes: string[]) => {
+	const editing = new ListEditing(start);
+	editing.text = text;
+	const heading = editing.track(line);
+	for (const change of changes) editing.outsideChange(change);
+	return { heading, before: headingText(splitLines(text), line) };
 };
 
 const save = (text: string, field: ReturnType<typeof fieldOn>, typed: string) => saveHeadingName(text, start(text), field, typed);
@@ -62,17 +67,24 @@ describe('saveHeadingName', () => {
 	});
 	test('finds the heading after an outside change elsewhere moved it', () => {
 		const text = '## G\n- [ ] a\n## H\n- [ ] b\n';
-		const field = fieldOn(text, 2);
 		const now = '## G\n- [ ] new\n- [ ] a\n## H\n- [ ] b\n';
-		const saved = save(now, field, 'Hall');
+		const saved = save(now, fieldOn(text, 2, now), 'Hall');
 		expect(saved.kind === 'write' && saved.next).toBe('## G\n- [ ] new\n- [ ] a\n## Hall\n- [ ] b\n');
+	});
+	test('finds the heading after two outside changes, one above it and one below it', () => {
+		const text = '- [ ] a\n- [ ] b\n## Old\n- [ ] c\n- [ ] d\n';
+		const above = text.replace('- [ ] a', '- [ ] a2');
+		const below = above.replace('- [ ] d', '- [ ] d2');
+		const saved = save(below, fieldOn(text, 2, above, below), 'New');
+		expect(saved.kind === 'write' && saved.next).toBe('- [ ] a2\n- [ ] b\n## New\n- [ ] c\n- [ ] d2\n');
 	});
 	test("is lost when an outside change took the heading's line, or left no heading on it", () => {
 		const text = '## G\n- [ ] a\n## H\n- [ ] b\n';
-		const field = fieldOn(text, 2);
-		expect(save('## G\n- [ ] a\n## Hall\n- [ ] b\n', field, 'Kitchen')).toEqual({ kind: 'lost' });
+		const renamed = '## G\n- [ ] a\n## Hall\n- [ ] b\n';
+		expect(save(renamed, fieldOn(text, 2, renamed), 'Kitchen')).toEqual({ kind: 'lost' });
 		// The fence turns the rest into code, so the line maps but holds no heading.
-		expect(save('```\n## G\n- [ ] a\n## H\n- [ ] b\n', field, 'Kitchen')).toEqual({ kind: 'lost' });
+		const fenced = '```\n## G\n- [ ] a\n## H\n- [ ] b\n';
+		expect(save(fenced, fieldOn(text, 2, fenced), 'Kitchen')).toEqual({ kind: 'lost' });
 	});
 });
 
@@ -110,16 +122,23 @@ describe('planHeadingRemoval', () => {
 	});
 	test('removes it from the current text after an outside change elsewhere', () => {
 		const text = '- [ ] a\n##\n- [ ] b\n';
-		const field = fieldOn(text, 1);
-		expect(planHeadingRemoval('- [ ] new\n- [ ] a\n##\n- [ ] b\n', 0, field)?.next).toBe('- [ ] new\n- [ ] a\n- [ ] b\n');
+		const now = '- [ ] new\n- [ ] a\n##\n- [ ] b\n';
+		expect(planHeadingRemoval(now, 0, fieldOn(text, 1, now))?.next).toBe('- [ ] new\n- [ ] a\n- [ ] b\n');
+	});
+	test('removes it after two outside changes, one above it and one below it', () => {
+		const text = '- [ ] a\n##\n- [ ] c\n';
+		const above = text.replace('- [ ] a', '- [ ] a2');
+		const below = above.replace('- [ ] c', '- [ ] c2');
+		expect(planHeadingRemoval(below, 0, fieldOn(text, 1, above, below))?.next).toBe('- [ ] a2\n- [ ] c2\n');
 	});
 	test('null when the heading has a name now, or its line is gone', () => {
 		const text = '- [ ] a\n##\n- [ ] b\n';
-		const field = fieldOn(text, 1);
-		expect(planHeadingRemoval('- [ ] a\n## Named\n- [ ] b\n', 0, field)).toBeNull();
-		expect(planHeadingRemoval('- [ ] a\n- [ ] b\n', 0, field)).toBeNull();
-		// mapLine finds the line, but it holds a name: a field opened on a named heading never removes it.
-		const named = '- [ ] a\n## H\n- [ ] b\n';
-		expect(planHeadingRemoval(named, 0, fieldOn(named, 1))).toBeNull();
+		const named = '- [ ] a\n## Named\n- [ ] b\n';
+		expect(planHeadingRemoval(named, 0, fieldOn(text, 1, named))).toBeNull();
+		const gone = '- [ ] a\n- [ ] b\n';
+		expect(planHeadingRemoval(gone, 0, fieldOn(text, 1, gone))).toBeNull();
+		// The heading is on the line, but it holds a name: a field opened on a named heading never removes it.
+		const withName = '- [ ] a\n## H\n- [ ] b\n';
+		expect(planHeadingRemoval(withName, 0, fieldOn(withName, 1))).toBeNull();
 	});
 });

@@ -1,6 +1,6 @@
 import { Notice } from 'obsidian';
 import { NO_LINES_MOVED, type OwnEdit } from '../core/follow';
-import { guardedWrite } from '../core/action-write';
+import { guardedWrite, planAndWrite } from '../core/action-write';
 import type { TrackedLine } from '../core/editing';
 import { RepeatingItemError, UnsafeEditError } from '../core/edit-items';
 import type { PrinceListView } from './list-view';
@@ -60,20 +60,22 @@ export function enqueueAt(view: PrinceListView, line: number | null, task: (pend
 	});
 }
 
-// Works an action out on the view's text and writes it. Typing that lands while it writes refuses it,
-// and it runs once more on the new text, as a tick does. Resolves to what was written, or null.
-export async function writePlanned<T extends { next: string; edit: OwnEdit }>(
+// planAndWrite, for the file the view shows now.
+export function writePlanned<T extends { next: string; edit: OwnEdit }>(
 	view: PrinceListView,
 	plan: (text: string) => T | null,
 ): Promise<T | null> {
-	for (let attempt = 0; attempt < 2; attempt++) {
-		const text = view.text;
-		const planned = tryEdit(() => plan(text));
-		if (!planned) return null;
-		if (await writeAction(view, planned.next, text, undefined, planned.edit)) return planned;
-		if (view.text === text) return null;
-	}
-	return null;
+	const file = view.file;
+	return planAndWrite(
+		{
+			get text() {
+				return view.text;
+			},
+			sameFile: () => view.file === file,
+			write: (planned, expected) => writeAction(view, planned.next, expected, undefined, planned.edit),
+		},
+		(text) => tryEdit(() => plan(text)),
+	);
 }
 
 // What the edit returns, or null when the core refused the edit, which writes nothing and says why.
