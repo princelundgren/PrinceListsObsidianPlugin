@@ -47,10 +47,9 @@ jobs:
                       exit 1
                   fi
 
-            # Unlike the review, this keeps checkout's credential while the repository is private:
-            # the action's branch setup fetches with it before the action sets its own, which is this
-            # same job token.
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
             # The action's CI-log tool writes job logs here, and --add-dir below needs the folder
             # to exist when Claude starts.

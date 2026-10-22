@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-21
+verified: 2026-10-22
 governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
 ---
 
@@ -120,9 +120,9 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 - **The job token is readable.** In both workflows the action writes the job's token into the
   checkout's git configuration, in the origin URL, whatever checkout's `persist-credentials` says.
   Claude can read it there. That's accepted: the token can't push, and it expires with the job.
-  So `persist-credentials: false` is tidiness, not a control. The review sets it. `claude.yml`
-  doesn't while the repository is private, because the action fetches branches before it sets
-  the token.
+  So `persist-credentials: false` is tidiness, not a control. Both workflows set it; `claude.yml`
+  could only once the repository was public, because while it was private the action's branch
+  setup fetched with checkout's credential before setting its own.
 - **Accepted: the summary filter.** The review reads earlier comments by `github-actions` that
   start with "## Claude review". `@claude`'s comments come from the same account, so an injected
   `@claude` could plant one. That would need `@claude` to be injected first, which already reaches
@@ -142,13 +142,18 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     covers five review areas and checks all of `docs/` for drift, so 50 leaves room for a large
     change, and the 20-minute job timeout still bounds a run.
 
-## Before going public
+## Since going public (2026-10-22)
 
-- **A ruleset for `main`.** Until one protects `main`, nothing on GitHub's side stops a push there.
-- **A ruleset for tags** that covers creating, updating and deleting them, since a pushed tag
-  starts the release workflow.
+- **A ruleset for `main`** requires a pull request, squash merges, resolved review threads, the
+  `ci` and `docs` checks on an up-to-date branch, and signed commits, and blocks force pushes and
+  deletion. It has no bypass.
+- **A ruleset for tags** covers creating, updating and deleting them, since a pushed tag starts
+  the release workflow. Only the repository admin role bypasses it.
 - **`persist-credentials: false` in `claude.yml`,** for tidiness only (see "The job token is
-  readable"). Once the repository is public, the action's branch setup can fetch without it.
+  readable").
+- **Actions** allow only GitHub's own actions, `anthropics/claude-code-action` and the
+  `oven-sh/setup-bun` it uses, each pinned to a full commit SHA. Runs from outside contributors'
+  fork pull requests wait for approval.
 
 ## Verified on the first runs (2026-10-21)
 
