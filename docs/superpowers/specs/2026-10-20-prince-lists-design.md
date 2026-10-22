@@ -542,10 +542,13 @@ stays, and the blank line stays with it.
   `✔` marks collapse to the earliest and a leftover `✔` on an open line is dropped (see
   Completion).
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
-  not on every keystroke. The rename uses `fileManager.renameFile`, which updates links according
-  to the user's link settings. Escape puts the old name back. If a note with the new name already
-  exists, a message says so and the old name stays. So does a name with `/` or `\`, which would
-  move the list to another folder.
+  not on every keystroke. Switching to another window or app doesn't leave the field. The rename
+  uses `fileManager.renameFile`, which updates links according to the user's link settings. Escape
+  puts the old name back. If another note in the list's folder has the new name, compared without
+  regard to case as macOS and iOS disks compare names, a message says so and the old name stays.
+  So does a name with `/` or `\`, which would move the list to another folder. A note outside the
+  vault has no folder in the vault (observed in 1.14.4), so for one the name counts as taken only
+  when Obsidian finds a file at exactly the new path.
 - **The list note and item notes (call):**
   - Both show as rendered Markdown. Clicking into one switches to a plain-text editor of the raw
     Markdown, without the item's indent.
@@ -600,10 +603,10 @@ stays, and the blank line stays with it.
     join the item as a lazy line, and a setext heading spans more than one line.
   - **Rename heading (owner, 2026-10-20)** edits the heading text in place. It keeps the
     heading's level, pressing Enter or leaving the field saves, Escape cancels, and an empty name
-    keeps the old one **(call)**. A name that wouldn't come back as this heading, at its level and
-    with exactly that text, isn't written, and a message says so **(call)**: for example one
-    starting with `- [ ]` under a `===` underline, an underline such as `===` itself, or one ending
-    in ` #`.
+    keeps the old one **(call)**. Switching to another window or app doesn't leave the field
+    **(call)**. A name that wouldn't come back as this heading, at its level and with exactly that
+    text, isn't written, and a message says so **(call)**: for example one starting with `- [ ]`
+    under a `===` underline, an underline such as `===` itself, or one ending in ` #`.
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
@@ -616,6 +619,10 @@ stays, and the blank line stays with it.
 - **New heading below (owner, 2026-10-20)** adds an empty heading at that point and opens the
   same field as Rename heading, with the cursor in it. Escape, or an empty name, removes the
   heading again.
+  - **Accepted cost (owner, 2026-10-22):** a field left open while the user is in another app
+    keeps its name until they come back. If its pane is closed meanwhile, nothing is written, since
+    closing never writes, so an empty new heading stays in the file, as it does when the pane is
+    closed with the field open.
 - **A new heading inserted below an item takes the items after it (call).** This is the same as
   typing that heading into the raw file at that point.
 - **Undoing a delete (call):** after Delete or Delete heading, a message with an **Undo** button
@@ -706,6 +713,10 @@ needs no code.
     out without that typing **(call)**. A tick then runs again on the new text, and the removal of
     an empty new item deletes it from the current text.
   - The write is guarded: it is applied only if the file's text is still what the view expects.
+  - A write that fails shows "Couldn't save the change to this list." and isn't tried again. A view
+    that still holds the change, with nothing typed since, reads the file again, as after an outside
+    change, so it shows what the file holds. Typing since then stays in the view, and its own save
+    writes it with the change, so the change can still reach the file.
 - **The file is the only copy of the truth.** When the file changes from outside (Sync or an agent),
   the view redraws from it.
   - An editor that has focus isn't torn down.
@@ -880,8 +891,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 - **An outside change that edits lines both above and below the item being typed in (call)** loses
   track of the item, since the line mapping finds a single changed run. The card says the list
   changed elsewhere and closes once it loses focus. What was typed until then is usually in the
-  file. When a line of the focused field's text isn't, the notice instead offers "Copy text", which
-  copies the field's text, and stays until dismissed (owner, 2026-10-22).
+  file. When it isn't, the notice instead offers "Copy text", which copies the field's text, and
+  stays until dismissed (owner, 2026-10-22). Typed notes count as in the file only as whole lines,
+  and a typed title only as an item's title **(call)**.
 
 ### Rendering notes in the card
 

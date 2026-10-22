@@ -1,6 +1,6 @@
 import { Notice } from 'obsidian';
 import { NO_LINES_MOVED, type OwnEdit } from '../core/follow';
-import { guardedWrite, planAndWrite } from '../core/action-write';
+import { guardedWrite, planAndWrite, type WriteResult } from '../core/action-write';
 import type { TrackedLine } from '../core/editing';
 import { RepeatingItemError, UnsafeEditError } from '../core/edit-items';
 import type { PrinceListView } from './list-view';
@@ -9,18 +9,20 @@ export const UNSAFE_EDIT_NOTICE = "This list's layout can't take that change. Ma
 export const CHANGED_ELSEWHERE_NOTICE = 'This list changed elsewhere. Try again.';
 export const LOST_TYPING_NOTICE = 'This list changed elsewhere, and your typing in this item may not be in it.';
 
-// A one-off action's write, through guardedWrite. Resolves to whether the file now holds `next`. A
-// write that moves lines passes its `edit`, so the view's line-based state follows it. Typing that
-// landed while it waited refuses it with no notice: the caller runs the action again on the new text.
+// A one-off action's write, through guardedWrite. `written`: the file now holds `next`. A write that
+// moves lines passes its `edit`, so the view's line-based state follows it. Typing that landed while
+// it waited refuses it with no notice: the caller runs the action again on the new text. A write that
+// fails says so, and the view reads the file again if it still holds the text it took; the caller
+// doesn't run it again.
 export async function writeAction(
 	view: PrinceListView,
 	next: string,
 	expected = view.text,
 	refusedNotice: string | null = CHANGED_ELSEWHERE_NOTICE,
 	edit: OwnEdit = NO_LINES_MOVED,
-): Promise<boolean> {
+): Promise<WriteResult> {
 	const file = view.file;
-	if (!file) return false;
+	if (!file) return 'refused';
 	const outcome = await guardedWrite(
 		{
 			get text() {
@@ -30,12 +32,20 @@ export async function writeAction(
 			process: (fn) => view.app.vault.process(file, fn),
 			sameFile: () => view.file === file,
 			took: (text) => view.applyOwnText(text, edit),
+			reread: async () => {
+				const text = await view.app.vault.read(file);
+				if (!view.viewClosed && view.file === file) view.setViewData(text, false);
+			},
 		},
 		next,
 		expected,
-	);
+	).catch((error: unknown) => {
+		console.error(error);
+		new Notice("Couldn't save the change to this list.");
+		return 'failed' as const;
+	});
 	if (outcome === 'refused' && refusedNotice !== null) new Notice(refusedNotice);
-	return outcome === 'written';
+	return outcome === 'typed' ? 'refused' : outcome;
 }
 
 // Runs an action on the view's write queue. `line`, its item or heading, follows the view's own edits

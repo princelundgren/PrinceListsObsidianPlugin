@@ -1,5 +1,6 @@
 import { Notice, type TFile } from 'obsidian';
 import { getListNote, listNoteUnclosedBlock, listNoteWouldRestructure } from '../core/edit-list-note';
+import { nameTaken } from '../core/file-name';
 import type { Line } from '../core/lines';
 import type { ListModel } from '../core/parse';
 import { oneLineTitle } from '../core/title-field';
@@ -35,8 +36,10 @@ export function buildListTitle(view: PrinceListView, parent: HTMLElement): HTMLT
 	return field;
 }
 
-// The field took focus: what it renames, and the name to compare with when it loses focus.
+// The field took focus: what it renames, and the name to compare with when it loses focus. Focus that
+// comes back from another window finds the session still open, and keeps it.
 export function beginListTitle(view: PrinceListView, field: HTMLTextAreaElement): void {
+	if (view.listTitle) return;
 	view.listTitle = view.file ? { file: view.file, before: field.value } : null;
 }
 
@@ -67,6 +70,8 @@ export function commitListTitle(view: PrinceListView, field: HTMLTextAreaElement
 }
 
 async function renameList(view: PrinceListView, file: TFile, field: HTMLTextAreaElement, typed: string): Promise<void> {
+	// Like any queued action, moot once the view closed or shows another file.
+	if (view.viewClosed || view.file !== file) return;
 	const name = oneLineTitle(typed).trim();
 	const keepName = (notice?: string) => {
 		if (notice) new Notice(notice);
@@ -77,9 +82,9 @@ async function renameList(view: PrinceListView, file: TFile, field: HTMLTextArea
 	if (/[\\/]/.test(name)) return keepName("A list name can't contain / or \\.");
 	// In the list's own folder, which keeps a note from outside the vault where it is (spec, "Notes
 	// outside the vault").
-	const path = `${file.path.slice(0, file.path.length - file.name.length)}${name}.${file.extension}`;
-	const taken = view.app.vault.getAbstractFileByPath(path);
-	if (taken && taken !== file) return keepName('A note with that name already exists.');
+	const fileName = `${name}.${file.extension}`;
+	const path = `${file.path.slice(0, file.path.length - file.name.length)}${fileName}`;
+	if (isTaken(view, file, fileName, path)) return keepName('A note with that name already exists.');
 	try {
 		// Updates links as the user's settings say. The view's title follows through onRename.
 		await view.app.fileManager.renameFile(file, path);
@@ -87,6 +92,14 @@ async function renameList(view: PrinceListView, file: TFile, field: HTMLTextArea
 		console.error(error);
 		keepName("The list couldn't be renamed.");
 	}
+}
+
+// Another note in the list's folder has the name. A note outside the vault has no parent (observed in
+// 1.14.4), so for one, only a file Obsidian finds at that exact path counts.
+function isTaken(view: PrinceListView, file: TFile, fileName: string, path: string): boolean {
+	if (file.parent) return nameTaken(file.parent.children.map((child) => child.name), file.name, fileName);
+	const other = view.app.vault.getAbstractFileByPath(path);
+	return other !== null && other !== file;
 }
 
 // The list note as rendered Markdown, or, while it is empty, a gray "Notes" to click to add one.
