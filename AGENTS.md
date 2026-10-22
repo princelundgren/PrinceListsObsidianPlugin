@@ -18,7 +18,7 @@ this project.
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
   - The plans in `docs/superpowers/plans/` give the tasks, with exact interfaces and tests. The
-    current one is [step 1a](docs/superpowers/plans/2026-10-20-prince-lists-step-1a.md). Implement a
+    current one is [step 1b](docs/superpowers/plans/2026-10-22-prince-lists-step-1b.md). Implement a
     task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.
 

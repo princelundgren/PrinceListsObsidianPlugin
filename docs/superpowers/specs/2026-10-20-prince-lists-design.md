@@ -558,8 +558,13 @@ stays, and the blank line stays with it.
   - Pictures show from 1a on.
   - Pasting or dropping a picture into a card comes in 1b. In 1a you add a picture through "Open
     as Markdown".
+  - Only a card takes pictures, not the list note **(owner, 2026-10-22)**: a picture goes in the
+    list note through "Open as Markdown".
   - In 1b a pasted picture is saved with `fileManager.getAvailablePathForAttachment` and
-    `vault.createBinary`, following the vault's attachment settings, and inserted as `![[name]]`.
+    `vault.createBinary`, following the vault's attachment settings.
+  - Its link is `!` and `fileManager.generateMarkdownLink`, so it follows the vault's link
+    settings; with Obsidian's defaults that's `![[name]]` **(owner, 2026-10-22)**. A plain
+    `![[name]]` could show the wrong picture when two files share a name.
 
 ### Selecting and adding
 
@@ -755,6 +760,8 @@ needs no code.
   - File recovery is the backstop.
 - **Undo (1b, call):**
   - Cmd+Z and Cmd+Shift+Z step through the plugin's own edits, using the same guarded write.
+  - They're keys only, with no Undo or Redo command **(owner, 2026-10-22)**, so without a keyboard
+    the iPhone's only undo stays the Undo button after a delete.
   - The history is cleared when the file changes from outside, so undo never throws away someone
     else's change.
   - In 1a, the only undo is the Undo button shown after a delete.
@@ -1104,6 +1111,8 @@ Checked 2026-10-20.
     - `FileManager.renameFile`, which updates links "depending on the user's preferences"
     - `FileManager.getNewFileParent` (1.1.13) and `FileManager.getAvailablePathForAttachment`
       (1.5.7)
+    - `FileManager.generateMarkdownLink` (0.12.0), which generates a link "based on the user's
+      preferences" (checked 2026-10-22)
     - `Vault.createBinary`, `Vault.process` (1.1.0) and `Vault.on('modify')`
     - `TExternalFile` (1.14.4): "Represents a file that is outside the Vault. Can be used with the
       vault API just like any other file."
