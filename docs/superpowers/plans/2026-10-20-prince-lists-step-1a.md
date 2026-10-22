@@ -1356,7 +1356,8 @@ spaces, so it stays. A move's line map gives a dropped line
     whose `<name>.md` isn't in `existing`.
   - `createList(app: App, folder: TFolder): Promise<TFile>`, in `src/obsidian/create-list.ts`. It
     writes `---\n${MARKER_KEY}: true\n---\n`, which is `---\nprincelists: true\n---\n`, and opens
-    the file with `openAsList(leaf, file)` on `leaf = app.workspace.getLeaf(false)`. Once that
+    the file with `openAsList(leaf, file)` on `leaf = app.workspace.getLeaf('tab')`, a new tab, as
+    Obsidian's own New note opens one (seen in 1.14.4). Once that
     resolves, it checks `leaf.view instanceof PrinceListView` and calls
     `leaf.view.focusListTitle()`.
 
