@@ -95,7 +95,9 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
   its `scrollTop` to 0. The delegated listeners stay on `contentEl`, which holds it. `contentEl`
   gets the class `princelists-content`.
 - [ ] **Step 2: Style it.** `.princelists-content` gets `position: relative`, and
-  `.princelists-scroll` gets `position: absolute; inset: 0; overflow-y: auto; padding: inherit`.
+  `.princelists-scroll` gets `position: absolute; inset: 0; overflow-y: auto; padding: inherit;
+  box-sizing: border-box`. Obsidian 1.14.4 sets `border-box` on every element already; the rule
+  says it again, since inherited padding on a `content-box` scroller would overflow `contentEl`.
   - The scroller fills `contentEl`'s padding box and takes its padding, so the Mac's scrollbar stays
     at the pane's edge and the list sits where it did.
   - `contentEl` then holds nothing in its flow, so it never scrolls, whatever Obsidian's stylesheet
@@ -115,8 +117,8 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
   5. On the iPhone, after "+", the keyboard leaves the new item's title in view.
   6. `example.md` looks the same as in `0.1.0` on both devices: compare screenshots of the two
      builds.
-  7. In the Mac's developer tools, `contentEl`'s computed `position` is `relative`, and its
-     `scrollHeight` equals its `clientHeight`.
+  7. In the Mac's developer tools, `contentEl`'s computed `position` is `relative`, its
+     `scrollHeight` equals its `clientHeight`, and so does the scroller's `offsetHeight`.
 - [ ] **Step 5: Update the design.** In "Touch on the iPhone", say the list scrolls in an element of
   its own, so nothing relies on Obsidian's undocumented `overflow` on `.view-content`.
 - [ ] **Step 6: Commit** with the message "Give the list a scrolling element of its own".
@@ -308,8 +310,10 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
   - **Where the links go,** once every picture is saved, joined with line breaks, while the card
     open at the paste or drop is still open on its item (`view.card` is that card, and its `lostAt`
     is `null`):
-    - **The notes editor that was open is still in the document:** the links replace its selection
-      (`setRangeText(text, start, end, "end")`).
+    - **The notes editor that was open is still in the document:** the links go in at its cursor
+      as it is when the last picture is saved, after any selection, so nothing typed meanwhile is
+      replaced (`setRangeText(text, end, end, "end")`, with `end` its `selectionEnd` then)
+      **(call)**.
     - **Otherwise,** when the notes weren't being edited or the editor closed while the pictures
       saved: `editNotes` opens it, and the links go at the end with `appendOnOwnLine`.
     - Then `notesInput(view, editor)` saves them as typing is saved, so the view's line-based state,
@@ -328,7 +332,9 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
   4. Dropping a PDF on the card adds nothing to the notes, and Obsidian does with it what it does
      with a PDF dropped elsewhere in the list pane: record what that is.
   5. Pasting text into the notes still pastes the text.
-  6. With a list from outside the vault (design, "Notes outside the vault"), paste a picture and
+  6. Paste a large picture and type a few characters at once: none of them is lost, and the link
+     goes in where the cursor is when it lands.
+  7. With a list from outside the vault (design, "Notes outside the vault"), paste a picture and
      record where it was saved and whether it shows. If it fails, stop and record it with this
      proposed fallback: pictures can't be pasted into a list from outside the vault. The owner
      decides before it's built.
