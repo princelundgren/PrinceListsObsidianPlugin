@@ -1,8 +1,7 @@
 # Spike 1: opening a list note in the list view
 
-Plan step 1a, Task 2, Steps 7 to 10. Every check passed on the final build. Check 5's second part
-came with a later change and is still to run. The maintainer saw no flash on the Mac or the
-iPhone.
+Plan step 1a, Task 2, Steps 7 to 10. Every check passed on the final build. The maintainer saw no
+flash on the Mac or the iPhone.
 
 The Mac checks, Steps 7 and 9, ran in the test vault through Obsidian's own command-line interface
 (`obsidian eval`, with `dev:cdp` for real clicks and keys). "Restart" in checks 6 and 10 was
