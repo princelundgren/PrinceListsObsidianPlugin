@@ -2,8 +2,9 @@
 
 Todo lists for Obsidian, kept as plain Markdown notes.
 
-> **Work in progress.** There's nothing to install yet. The design is approved and the first part
-> is about to be built. You can follow along in the
+> **Work in progress.** The first part, 1a, is built and checked on the Mac and the iPhone. Next is
+> a two-week trial with a real list, while 1b adds dragging on the iPhone, pasting pictures and
+> Cmd+Z undo. You can follow along in the
 > [design](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and the pull requests.
 
 ## What it does
@@ -17,6 +18,20 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 - **It's built for the Mac and the iPhone.** Use the floating "+" to add items. On the Mac,
   right-click for actions and drag items with the mouse. On the iPhone, item actions are in the ⋯
   button on an open item, and tapping a heading opens its menu. Other devices aren't tested.
+
+## Installing
+
+PrinceLists isn't in Obsidian's community plugins yet, so it's installed by hand from a release,
+starting with `0.1.0`:
+
+1. Download `main.js`, `manifest.json` and `styles.css` from the
+   [releases page](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases).
+2. Put them in `<vault>/.obsidian/plugins/princelists/`, where `<vault>` is your vault's folder.
+3. In Obsidian, open Settings → Community plugins, turn on community plugins if Restricted mode is
+   on, and enable PrinceLists under Installed plugins.
+
+To get it on the iPhone through Obsidian Sync, turn on Sync's "Active community plugin list" and
+"Installed community plugin list".
 
 ## How a list is stored
 

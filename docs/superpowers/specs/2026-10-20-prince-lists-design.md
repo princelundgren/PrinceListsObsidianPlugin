@@ -1,5 +1,6 @@
 ---
 status: building
+verified: 2026-10-22
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -32,8 +33,8 @@ and data safety, and owner's advocate. Their findings are folded in.
   item is that item's notes, and notes can hold any Markdown, pictures included.
 - **Ticking an item** grays it out where it is. Twenty-four hours later it is **archived** and
   hidden, and "Show archived" brings archived items back.
-- **Lists open in the list view.** The plain note may flash for a moment first. That gets tested
-  first, and the owner decides whether it is acceptable.
+- **Lists open in the list view.** The plain note shows for about 10 ms first, which the owner
+  couldn't see on the Mac or the iPhone.
 - **A note from outside the vault** with the marker, opened in Obsidian on the Mac, is a list too.
 - **On the Mac,** you right-click for actions and drag with the mouse.
 - **On the iPhone,** you tap to open an item and hold-and-move to drag it. Item actions sit in a
@@ -233,10 +234,9 @@ These are wanted later, roughly in this order. The file format already leaves ro
   - Obsidian's 1.14 changelog lists this for desktop, and opening such a file needs Obsidian's
     latest installer. Whether the iPhone app can open one is unverified, so the plan checks it on
     the Mac only.
-  - Whether the plugin can do everything with such a note that it does with a vault note is
-    unverified. Each part is checked during the build. A part that fails is recorded with the
-    fallback that "Notes outside the vault" in the implementation notes proposes, and the owner
-    decides at the checkpoint of the task where it fails.
+  - On the Mac, the plugin does everything with such a note that it does with a vault note:
+    opening, rendering, writing, renaming and links all work, so none of the fallbacks in "Notes
+    outside the vault" was needed.
 
 ## File format
 
@@ -492,9 +492,10 @@ stays, and the blank line stays with it.
   opened and switches that pane to the list view. It does this with documented APIs only.
 - **Not the Kanban way:** Kanban, the best-known plugin with its own view for notes, monkey-patches
   Obsidian's internals for this, which is off the table.
-- **The cost is a possible flash.** The normal editor may show for a moment before the switch. The
-  first build task is a spike to see how that looks. If it is bad, the owner decides, and the
-  plugin doesn't fall back to patching.
+- **The cost is a short flash.** The normal editor shows for about 10 ms before the switch, under
+  one frame at 60 Hz. The owner couldn't see it on the Mac or the iPhone **(owner, 2026-10-21)**
+  ([spike 1](../notes/2026-10-21-spike-open.md)). Even if it showed, the plugin wouldn't fall back
+  to patching.
 - **"Open as Markdown" and "Open as list"** are in the pane's ⋯ menu and are also commands.
   Choosing Markdown holds for that note in that pane until it is switched back or Obsidian
   restarts **(owner, 2026-10-21)**. Another list opened in the same pane still opens as a list,
@@ -583,8 +584,8 @@ stays, and the blank line stays with it.
     Closing the list, switching files or a change from outside never removes an item, and an item
     that existed before the card opened is never removed this way.
 - **An empty list note (call)** shows as a gray "Notes" placeholder under the title, in any list,
-  so a note can be added from the view. In an empty new list, pressing Enter in the title starts
-  the first item.
+  so a note can be added from the view. In any list without items, new or not, pressing Enter in
+  the title saves the name and starts the first item.
 - **Hidden archived items don't count for positions (call):**
   - New items, drops and new headings go directly after the visible row above them, before any
     hidden rows that follow it.
@@ -669,8 +670,8 @@ stays, and the blank line stays with it.
 **Creating a list has three routes (owner):**
 
 - Right-click a folder in the file explorer and choose New list (`workspace.on('file-menu')`). The
-  list is created in that folder. On the iPhone this is a long-press on the folder, which needs
-  confirming on the device.
+  list is created in that folder. On the iPhone this is a long-press on the folder, confirmed on
+  the device in the 1a checks.
 - The "New list" command. It's in the command palette on the Mac and the iPhone, and you can give
   it a hotkey under Settings → Hotkeys. The plugin sets no default hotkey, because Obsidian's
   plugin guidelines advise against it.
@@ -681,9 +682,10 @@ stays, and the blank line stays with it.
 - From the command or the ribbon, a list goes where Obsidian puts new notes:
   `fileManager.getNewFileParent(<active file path>)`, which follows the "Default location for new
   notes" setting.
-- The new file is called `Untitled list.md`, with a number added if that name is taken. It holds
-  only the marker.
-- It opens straight into the list view with its title ready to type.
+- The new file is called `Untitled list.md`, with a number added if that name is taken, compared
+  without regard to case as macOS and iOS disks compare names. It holds only the marker.
+- It opens in a new tab, as Obsidian's own New note does (observed in 1.14.4), straight into the
+  list view with its title selected, so typing replaces it.
 
 **Renaming, moving and deleting** are done with Obsidian's own file explorer. Moving a list to
 another folder changes its area. An open list view follows a rename or move made elsewhere
@@ -710,8 +712,12 @@ needs no code.
   - Before a one-off action writes, the view first saves pending typing (`TextFileView.save`), so
     the file already holds the typing and the guard doesn't refuse the write.
   - Typing that lands while an action waits to write makes it write nothing, since it was worked
-    out without that typing **(call)**. A tick then runs again on the new text, and the removal of
-    an empty new item deletes it from the current text.
+    out without that typing **(call)**. The action then runs once more on the new text: a tick, a
+    drag, a delete, a new item or heading, or a heading's name. The removal of an empty new item
+    deletes it from the current text instead.
+    - If typing refuses it a second time, the action is dropped with no message **(call)**: the
+      tick or move simply didn't happen, which the list shows, and a message mid-typing would only
+      interrupt.
   - The write is guarded: it is applied only if the file's text is still what the view expects.
   - A write that fails shows "Couldn't save the change to this list." and isn't tried again. A view
     that still holds the change, with nothing typed since, reads the file again, as after an outside
@@ -740,6 +746,9 @@ needs no code.
     Sync's merge reads a write made from an older copy as a deletion, and applies it. Obsidian's
     own editor loses text in the same way. Typing in an open card is covered by "Copy text" (see
     "Saving and outside changes"); a change made in the list itself is not.
+  - The first row was checked on two devices in the 1a checks, with Sync paused on both: both
+    marks were kept, with no conflict file, the view showed one done item, and the next untick
+    removed both marks.
   - Since Obsidian 1.9.7, Sync's Conflict resolution setting can create a conflict file instead of
     merging. The setting is per device (same help page).
   - Conflict files show up as extra lists.
@@ -799,11 +808,20 @@ From here on the document is for the builder.
 - **Don't reuse the names Obsidian's view classes use at runtime** for a field or method of the
   view: a field initializer runs after `super()` and replaces Obsidian's own member. A field named
   `titleEl` broke opening a list. These are undocumented, read from the 1.14.4 app bundle:
-  `ItemView`'s `headerEl`, `titleEl`, `titleContainerEl`, `titleParentEl`, `actionsEl`,
-  `backButtonEl`, `forwardButtonEl`, `moreOptionsButtonEl`, `leftSidebarToggleEl` and
-  `canDropAnywhere`; `EditableFileView`'s `fileBeingRenamed`; `TextFileView`'s `dirty`,
-  `isPlaintext`, `lastSavedData`, `saving` and `saveAgain`; and the methods `loadFile`, `setData`,
-  `saveImmediately`, `onModify`, `updateNavButtons`, `handleDrop` and `onTitleBlur`.
+  - `Component`: `_loaded`, `_events`, `_children` and `registerScopeEvent`
+  - `View`: `onHeaderMenu`, `getSideTooltipPlacement`, `handleCut`, `handleCopy` and
+    `handlePaste`
+  - `ItemView`: `headerEl`, `titleEl`, `titleContainerEl`, `titleParentEl`, `actionsEl`,
+    `backButtonEl`, `forwardButtonEl`, `moreOptionsButtonEl`, `leftSidebarToggleEl`,
+    `canDropAnywhere`, `onMoreOptions`, `onMoreOptionsMenu`, `onGroupChange` and `onTabMenu`
+  - `FileView`: `syncState`, `receiveSyncState`, `renderBreadcrumbs`, `createBreadcrumb` and
+    `onDelete`
+  - `EditableFileView`: `fileBeingRenamed`, `saveTitle`, `onTitleFocus`, `onTitleChange`,
+    `onTitlePaste` and `onTitleKeydown`
+  - `TextFileView`: `dirty`, `isPlaintext`, `lastSavedData`, `saving`, `saveAgain` and
+    `loadFileInternal`
+  - and the methods `loadFile`, `setData`, `saveImmediately`, `onModify`, `updateNavButtons`,
+    `handleDrop` and `onTitleBlur`
 - **The view implements** `getViewType`, `getViewData`, `setViewData` and `clear`.
 - **Switching on `file-open` and `active-leaf-change` (call),** through one guarded check:
   - Take `workspace.getActiveViewOfType(MarkdownView)`. On `file-open(file)`, require
@@ -917,23 +935,26 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 ### Touch on the iPhone
 
 - **iOS WebKit fires no `contextmenu` event** (MDN compat data). Obsidian makes one itself on iOS
-  after an 800 ms still hold (not yet confirmed on a device).
-  - Because holding only ever drags, item rows must not open a menu. Cancel `contextmenu` on rows, in the capture
-    phase, while a finger is down.
+  after a still hold, 800 ms by its code. A device confirmed the event (its haptic comes with it);
+  the 800 ms wasn't measured.
+  - Because holding only ever drags, item rows must not open a menu, and a heading opens its menu
+    on a tap. So on the iPhone, cancel `contextmenu` on rows and headings, in the capture phase.
+  - On the iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
+    ([1a checks](../notes/2026-10-22-1a-checks.md)).
   - After a canceled hold, the next click is swallowed, as spike 2 does after a lift: WebKit still
     sends one when the finger lifts. The next `touchstart` clears the flag.
   - Obsidian's own haptic on a hold can't be turned off (no documented API), and it is accepted.
 - **Dragging uses Pointer Events with a hold timer.** Kanban uses 500 ms, canceled if the finger
   moves more than 5 px first. Spike 2 confirmed both values on the iPhone, with the rows'
   `-webkit-user-select: none` and `-webkit-touch-callout: none`: the maintainer keeps 500 ms
-  (`docs/superpowers/notes/2026-10-21-spike-touch.md`). The 800 ms `contextmenu` above is still
-  unconfirmed.
+  (`docs/superpowers/notes/2026-10-21-spike-touch.md`).
   - Once a drag is armed, a non-passive `touchmove` handler calls `preventDefault` to stop
     scrolling.
   - Kanban's `src/dnd/managers/DragManager.ts` is the reference.
   - Obsidian's own drag manager isn't public.
-- **A long-press on a folder in the iPhone file explorer should reach `file-menu`,** with source
-  `file-explorer-context-menu`. Nobody has seen it on a device yet: confirm it on the iPhone.
+- **A long-press on a folder in the iPhone file explorer reaches `file-menu`,** with source
+  `file-explorer-context-menu`, so it offers "New list" (confirmed on the device in the 1a
+  checks).
 - **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
@@ -975,6 +996,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   "can be used with the vault API just like any other file". Nothing more is documented, so each
   point below is checked on the Mac before it is relied on: opening in plan Task 2's spike,
   writing and opening from a second vault in Task 8, and rendering and renaming in Task 9.
+- **The result:** every check passed in 1.14.4, including another app's edit showing in the view,
+  so none of the fallbacks below was needed.
 - **The installer:** opening a file from outside the vault "requires the latest installer" (1.14
   changelog). Check that first, so an old installer isn't mistaken for a failure of the plugin.
 - **A fallback below is a proposal.** When a check fails, the builder records it with its
@@ -1014,7 +1037,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 ## Testing and owner checkpoints
 
 - **Manual testing uses a test vault on the Mac and an iPhone.**
-- **The owner runs the manual checks.** Only someone holding the iPhone can do the iPhone ones.
+- **Many manual checks run scripted:** through Obsidian's CLI on the Mac, and through Safari's Web
+  Inspector on the iPhone, with synthetic touch. The owner checks by hand what needs a finger or
+  an eye, such as holds, scrolling, the keyboard and the flash.
 - **Spikes come first, and each one stops for the owner:**
   1. The flash when a list opens.
   2. Hold-to-drag on the iPhone: it must not break scrolling or trigger Obsidian's long-press
@@ -1024,19 +1049,35 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   Kanban installed. Kanban patches how notes open, so check that the two plugins don't fight.
 - **Check a Sync conflict once:** edit the same list on both devices while offline, then compare
   the result with the table above.
+- **The last two ran in the 1a checks** ([notes](../notes/2026-10-22-1a-checks.md)). Their results
+  are under risk 5 below and under the Sync conflict table above.
 
 ## Risks to check during the build
 
+Each has a result from 1a's spikes and checks.
+
 1. **The flash** when a list opens.
+   - **Result:** about 10 ms, which the owner couldn't see on the Mac or the iPhone.
 2. **Back history:** whether `result.history = false` really keeps the extra entry out.
+   - **Result:** it does, in 1.14.4, with one stop after the pane switches to Markdown by itself.
 3. **The iPhone gesture:** hold-to-drag, scrolling, and Obsidian's long-press menu all start the
    same way.
+   - **Result:** a hold opens no menu and selects no text, and its tap is swallowed. Spike 2's
+     drag kept scrolling working. Obsidian's haptic stays (see "Touch on the iPhone").
 4. **Obsidian's parser vs. CommonMark** for the tested cases, in reading view: the title becoming
    a heading, lazy lines, and the odd markers.
+   - **Result:** in all ten fixtures, reading view shows as many items as the plugin parses, on the
+     Mac and the iPhone, with notes inside their items. The title that becomes a heading renders as
+     CommonMark has it.
 5. **Kanban's patch** interfering with the plugin's switch to the list view.
+   - **Result:** with Tasks and Kanban on, lists still open as lists from every route tried, and
+     Back still works.
 6. **The `✔` glyph** may show as an emoji on some systems. That's harmless, but check it reads
    well.
+   - **Result:** on the Mac it reads as a text check mark in reading view. The iPhone wasn't
+     recorded.
 7. **Notes outside the vault:** whether opening, rendering, writing and renaming work for them.
+   - **Result:** on the Mac, all of them work, and so do links.
 
 ## Left to the builder
 
@@ -1119,9 +1160,10 @@ Checked 2026-10-20.
   - `setViewState` history entries
   - `TextFileView` reloading and merging on outside changes
   - `MarkdownRenderer` needing a Component
-- **Not yet confirmed on a device:** the iOS `contextmenu` after an 800 ms hold, a folder
-  long-press on the iPhone reaching `file-menu`, and how a note from outside the vault behaves
-  (opening, rendering, writing, renaming, and edits from another app).
+- **Not yet measured on a device:** the 800 ms of the iOS `contextmenu` hold; 1a confirmed the
+  event itself. 1a also confirmed a folder long-press on the iPhone reaching `file-menu`, and, on
+  the Mac, how a note from outside the vault behaves (opening, rendering, writing, renaming, and
+  edits from another app).
 - **`eslint-plugin-obsidianmd`** 0.4.2, tested 2026-10-20: `no-unsupported-api` reads the
   project's own `obsidian.d.ts` and flags a member whose `@since` is newer than `minAppVersion`,
   unless a `requireApiVersion` check guards it. It doesn't check `instanceof`.
