@@ -900,6 +900,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   after an 800 ms still hold (not yet confirmed on a device).
   - Because holding only ever drags, item rows must not open a menu. Cancel `contextmenu` on rows, in the capture
     phase, while a finger is down.
+  - After a canceled hold, the next click is swallowed, as spike 2 does after a lift: WebKit still
+    sends one when the finger lifts. The next `touchstart` clears the flag.
+  - Obsidian's own haptic on a hold can't be turned off (no documented API), and it is accepted.
 - **Dragging uses Pointer Events with a hold timer.** Kanban uses 500 ms, canceled if the finger
   moves more than 5 px first. Spike 2 confirmed both values on the iPhone, with the rows'
   `-webkit-user-select: none` and `-webkit-touch-callout: none`: the maintainer keeps 500 ms

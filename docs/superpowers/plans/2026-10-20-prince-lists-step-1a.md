@@ -1201,7 +1201,8 @@ every file stays under about 300 lines and each pull request stays reviewable.
     handler returns early when the event's target is inside `a.internal-link`.
   - **No long-press menu on the iPhone:** Obsidian fires `contextmenu` after an 800 ms hold (not
     yet confirmed on a device; spec, "Touch on the iPhone"), so on the iPhone `contextmenu` on
-    rows and headings is canceled in the capture phase, as Task 3's notes record.
+    rows and headings is canceled in the capture phase, as Task 3's notes record. The click that
+    ends the hold is swallowed (a `swallowNextClick` flag on the view, cleared on the next `touchstart`).
   - **Tapping a heading on the iPhone** (`Platform.isMobile`) opens `headingMenu` through
     `menu.showAtMouseEvent(evt)` on the tap's `click` event (spec, "Item actions").
   - **The card's ⋯ button,** with the accessible name (`aria-label`) "Item actions", opens

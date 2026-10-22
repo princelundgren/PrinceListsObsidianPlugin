@@ -43,7 +43,12 @@ export function registerFieldEvents(view: PrinceListView): void {
 	view.registerDomEvent(contentEl, 'focusout', (evt) => onFocusOut(view, evt));
 	if (Platform.isDesktop) view.registerDomEvent(contentEl, 'contextmenu', (evt) => onContextMenu(view, evt));
 	// In the capture phase, so it is stopped before it reaches a row or bubbles up from one.
-	if (Platform.isMobile) view.registerDomEvent(contentEl, 'contextmenu', onHoldMenu, { capture: true });
+	if (Platform.isMobile) {
+		view.registerDomEvent(contentEl, 'contextmenu', (evt) => onHoldMenu(view, evt), { capture: true });
+		view.registerDomEvent(contentEl, 'click', (evt) => swallowClick(view, evt), { capture: true });
+		// A hold that sent no click must not eat a later tap.
+		view.registerDomEvent(contentEl, 'touchstart', () => (view.swallowNextClick = false), { capture: true });
+	}
 }
 
 // Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of
@@ -102,9 +107,16 @@ function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
 	if (target && !handleLinkMenu(view, evt, target)) showContextMenu(view, evt, target);
 }
 
-function onHoldMenu(evt: MouseEvent): void {
+function onHoldMenu(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
-	if (target) cancelHoldMenu(evt, target);
+	if (target) cancelHoldMenu(view, evt, target);
+}
+
+function swallowClick(view: PrinceListView, evt: MouseEvent): void {
+	if (!view.swallowNextClick) return;
+	view.swallowNextClick = false;
+	evt.preventDefault();
+	evt.stopPropagation();
 }
 
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found

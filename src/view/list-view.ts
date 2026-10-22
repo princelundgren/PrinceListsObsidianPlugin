@@ -46,6 +46,8 @@ export class PrinceListView extends TextFileView {
 	rowsHeldBack = false;
 	/** Set once the view closes, so a tap still queued then does nothing. */
 	viewClosed = false;
+	/** Set when a hold on a row or heading was canceled, so the click that ends it opens nothing. */
+	swallowNextClick = false;
 
 	get text(): string {
 		return this.editing.text;

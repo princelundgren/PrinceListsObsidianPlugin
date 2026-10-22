@@ -74,11 +74,13 @@ export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: H
 }
 
 // Obsidian makes a contextmenu on the iPhone after a still hold, and holding a row or a heading opens no
-// menu (spec, "Touch on the iPhone"). The view's listener cancels it in the capture phase.
-export function cancelHoldMenu(evt: MouseEvent, target: HTMLElement): void {
+// menu (spec, "Touch on the iPhone"). The view's listener cancels it in the capture phase. WebKit
+// still sends a click when the finger lifts, which the view swallows.
+export function cancelHoldMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
 	if (target.closest('textarea') || !target.closest(`.${ITEM_CLASS}, .${HEADING_CLASS}`)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
+	view.swallowNextClick = true;
 }
 
 // A tap on a heading on the iPhone. True when it opened the heading's menu.
