@@ -1054,7 +1054,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Risks to check during the build
 
-Each has a result from 1a's spikes and checks.
+Each has a result from 1a's spikes and checks, except the `✔` glyph on the iPhone.
 
 1. **The flash** when a list opens.
    - **Result:** about 10 ms, which the owner couldn't see on the Mac or the iPhone.
@@ -1074,8 +1074,8 @@ Each has a result from 1a's spikes and checks.
      Back still works.
 6. **The `✔` glyph** may show as an emoji on some systems. That's harmless, but check it reads
    well.
-   - **Result:** on the Mac it reads as a text check mark in reading view. The iPhone wasn't
-     recorded.
+   - **Result:** on the Mac it reads as a text check mark in reading view. On the iPhone it is
+     still to check.
 7. **Notes outside the vault:** whether opening, rendering, writing and renaming work for them.
    - **Result:** on the Mac, all of them work, and so do links.
 

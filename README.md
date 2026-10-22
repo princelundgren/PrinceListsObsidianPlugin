@@ -22,7 +22,7 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 ## Installing
 
 PrinceLists isn't in Obsidian's community plugins yet, so it's installed by hand from a release,
-starting with `0.1.0`:
+starting with `0.1.0` once it's published:
 
 1. Download `main.js`, `manifest.json` and `styles.css` from the
    [releases page](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases).
