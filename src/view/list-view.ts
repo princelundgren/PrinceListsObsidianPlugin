@@ -1,4 +1,4 @@
-import { type Component, type Menu, Notice, TextFileView, type TFile, type ViewStateResult } from 'obsidian';
+import { type Component, type Menu, Notice, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
@@ -49,6 +49,15 @@ export class PrinceListView extends TextFileView {
 	viewClosed = false;
 	/** Set when a hold on a row or heading was canceled, so the click that ends it opens nothing. */
 	swallowNextClick = false;
+	// The list scrolls here, not in contentEl, so nothing relies on Obsidian's stylesheet scrolling
+	// `.view-content`. Not `scrollEl`: that may be a name Obsidian's views use at runtime.
+	readonly listScrollEl: HTMLElement;
+
+	constructor(leaf: WorkspaceLeaf) {
+		super(leaf);
+		this.contentEl.addClass('princelists-content');
+		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+	}
 
 	get text(): string {
 		return this.editing.text;
@@ -101,9 +110,9 @@ export class PrinceListView extends TextFileView {
 		this.showArchived = false;
 		this.outsideChanges++;
 		// Nothing of the old file stays, not even a field with focus, which render() would keep.
-		this.contentEl.empty();
+		this.listScrollEl.empty();
 		// A different file opens at the top; render() keeps the scroll position otherwise.
-		this.contentEl.scrollTop = 0;
+		this.listScrollEl.scrollTop = 0;
 	}
 
 	protected async onOpen(): Promise<void> {
