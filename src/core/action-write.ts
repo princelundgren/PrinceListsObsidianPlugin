@@ -42,3 +42,30 @@ export async function guardedWrite(target: WriteTarget, next: string, expected: 
 	});
 	return outcome;
 }
+
+/** The view as an action that works its write out on the view's text sees it. */
+export interface PlanTarget<T> {
+	/** The view's text now, typing included. */
+	readonly text: string;
+	/** Whether the view still shows the file it showed when the action started. */
+	sameFile(): boolean;
+	/** Writes what was planned, through guardedWrite. Resolves to whether the file now holds it. */
+	write(planned: T, expected: string): Promise<boolean>;
+}
+
+// Works an action out on the view's text and writes it. Typing that lands while it writes refuses it,
+// and it runs once more on the new text, as a tick does. Resolves to what was written, or null. Once
+// the view shows another file, it is null even when the write landed: what the caller does with it,
+// such as opening a card on its line, would act on that other file.
+export async function planAndWrite<T>(target: PlanTarget<T>, plan: (text: string) => T | null): Promise<T | null> {
+	for (let attempt = 0; attempt < 2; attempt++) {
+		const text = target.text;
+		const planned = plan(text);
+		if (!planned) return null;
+		const written = await target.write(planned, text);
+		if (!target.sameFile()) return null;
+		if (written) return planned;
+		if (target.text === text) return null;
+	}
+	return null;
+}

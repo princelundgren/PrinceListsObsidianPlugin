@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { guardedWrite, type WriteTarget } from '../../src/core/action-write';
+import { guardedWrite, planAndWrite, type PlanTarget, type WriteTarget } from '../../src/core/action-write';
 
 // A view and its file. `typeDuring` runs inside the write's awaits, as a keystroke landing then would.
 function target(text: string, disk = text, typeDuring: { save?: () => void; process?: () => void } = {}) {
@@ -59,5 +59,46 @@ describe('guardedWrite', () => {
 		const { state, io } = target('a\n', 'a\n', { save: () => ((state.sameFile = false), (state.view = 'other file\n')) });
 		expect(await guardedWrite(io, 'b\n', 'a\n')).toBe('written');
 		expect(state).toMatchObject({ view: 'other file\n', disk: 'b\n' });
+	});
+});
+
+// A view whose write runs `during` first, as an outside event landing while it writes would, then
+// resolves to `written`. `plans` records the text each plan was worked out on.
+function planned(text: string, written: boolean, during: (state: { view: string; sameFile: boolean }) => void = () => {}) {
+	const state = { view: text, sameFile: true, plans: [] as string[] };
+	const io: PlanTarget<string> = {
+		get text() {
+			return state.view;
+		},
+		sameFile: () => state.sameFile,
+		write: async () => {
+			during(state);
+			return written;
+		},
+	};
+	const plan = (current: string) => {
+		state.plans.push(current);
+		return `${current}+`;
+	};
+	return { state, io, plan };
+}
+
+describe('planAndWrite', () => {
+	test('typing that refuses the write runs the action once more, on the new text', async () => {
+		const { state, io, plan } = planned('a\n', false, (s) => (s.view = 'ab\n'));
+		expect(await planAndWrite(io, plan)).toBeNull();
+		expect(state.plans).toEqual(['a\n', 'ab\n']);
+	});
+
+	// Such as opening a card on its line: that line is in the other file now.
+	test('a write that lands after the view moved to another file resolves to null, so nothing acts on that file', async () => {
+		const { io, plan } = planned('a\n', true, (s) => ((s.sameFile = false), (s.view = 'other file\n')));
+		expect(await planAndWrite(io, plan)).toBeNull();
+	});
+
+	test("a write refused after the view moved to another file isn't worked out again on that file's text", async () => {
+		const { state, io, plan } = planned('a\n', false, (s) => ((s.sameFile = false), (s.view = 'other file\n')));
+		expect(await planAndWrite(io, plan)).toBeNull();
+		expect(state.plans).toEqual(['a\n']);
 	});
 });
