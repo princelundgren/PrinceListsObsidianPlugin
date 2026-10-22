@@ -182,11 +182,14 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 	const card = view.card;
 	const inCard = card?.el.contains(target) ?? false;
 	if (target.instanceOf(HTMLTextAreaElement)) {
+		// Moving to another window or app doesn't leave the list title or the heading field: they keep
+		// focus, which comes back to them on return, and commit when they lose it in the window.
+		const inWindow = target.doc.hasFocus();
 		if (inCard && target.hasClass(CARD_TITLE_CLASS)) cardTitleBlur(view, target);
 		else if (inCard && target.hasClass(NOTES_EDITOR_CLASS)) notesBlur(view, target);
 		else if (target.hasClass(NOTE_EDITOR_CLASS)) closeListNote(view, focusing);
-		else if (target.hasClass(TITLE_CLASS)) commitListTitle(view, target);
-		else if (target.hasClass(HEADING_FIELD_CLASS)) headingFieldBlur(view, target);
+		else if (target.hasClass(TITLE_CLASS) && inWindow) commitListTitle(view, target);
+		else if (target.hasClass(HEADING_FIELD_CLASS) && inWindow) headingFieldBlur(view, target);
 	}
 	// A card whose item an outside change took closes once focus leaves it.
 	if (card && inCard && card.lostAt !== null && !card.el.contains(focusing)) dismissCard(view);

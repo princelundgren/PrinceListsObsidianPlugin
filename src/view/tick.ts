@@ -49,7 +49,8 @@ async function tick(view: PrinceListView, row: HTMLElement, pending: { line: num
 		if (!edited) return;
 		// A title field with focus makes the same tick to the line it saved (syncTitleField).
 		const edit: OwnEdit = { start: titleLine, delta: 0, kind: 'change', retitle: (line) => toggleLine(line, now) };
-		if (await writeAction(view, joinLines(edited), text, undefined, edit)) {
+		const result = await writeAction(view, joinLines(edited), text, undefined, edit);
+		if (result === 'written') {
 			// Obsidian's echo of this write returns early in setViewData, so the row is updated here. A
 			// tick moves no line, so the row still stands for this item. A redraw during the write,
 			// such as "Show archived", drew from the text before the tick, so the view redraws again.
@@ -57,7 +58,8 @@ async function tick(view: PrinceListView, row: HTMLElement, pending: { line: num
 			else view.render();
 			return;
 		}
-		// Refused: once more on the new text if typing landed while it wrote.
-		if (view.text === text) return;
+		// Refused: once more on the new text if typing landed while it wrote. A write that failed isn't
+		// run again: typing since may have kept the tick in the view, and a second tick would undo it.
+		if (result === 'failed' || view.text === text) return;
 	}
 }

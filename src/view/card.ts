@@ -174,7 +174,7 @@ export function cardLost(view: PrinceListView, card: Card, line: number): void {
 		setLine(card.el, null);
 		for (const field of card.el.querySelectorAll('textarea')) field.readOnly = true;
 		const typed = focused?.instanceOf(HTMLTextAreaElement) ? focused.value : '';
-		if (missingTyping(view.text, typed)) noticeWithCopy(card.el.win, typed);
+		if (missingTyping(view.text, typed, focused?.hasClass(CARD_TITLE_CLASS) ? 'title' : 'notes')) noticeWithCopy(card.el.win, typed);
 		else new Notice(CHANGED_ELSEWHERE_NOTICE);
 	} else {
 		dismissCard(view);
@@ -241,7 +241,8 @@ function isEmptyAt(view: PrinceListView, line: number): boolean {
 }
 
 // Restores the text from before the insert, or, once the file changed, deletes the item from the
-// current text, with no notice for a write refused on the way (spec, "Selecting and adding").
+// current text, with no notice for a write refused on the way (spec, "Selecting and adding"). A write
+// that failed has said so, and isn't tried again.
 async function removeEmptyItem(view: PrinceListView, file: TFile, pending: TrackedLine, inserted: InsertedItem): Promise<void> {
 	const plan = (restore: boolean): Removal | null => {
 		if (view.file !== file || pending.line === null) return null;
@@ -257,7 +258,7 @@ async function removeEmptyItem(view: PrinceListView, file: TFile, pending: Track
 	const write = (removal: Removal) => writeAction(view, removal.next, removal.expected, null, removal.edit);
 	try {
 		const first = plan(true);
-		if (!first || (await write(first))) return;
+		if (!first || (await write(first)) !== 'refused') return;
 		// A refused restore, or typing since the plan, falls back to deleting the item from the text as
 		// it now is. A refused delete with nothing typed since was the file changing elsewhere.
 		const restoreTried = first.expected === inserted.textAfter;

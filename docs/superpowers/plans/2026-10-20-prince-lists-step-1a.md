@@ -919,13 +919,16 @@ every file stays under about 300 lines and each pull request stays reviewable.
   `isArchived`, `toggleItem`, `RepeatingItemError`, `UnsafeEditError`, `joinLines` and
   `guardedApply`.
 - Produces:
-  - `writeAction(view: PrinceListView, next: string, expected = view.text, refusedNotice: string | null = "This list changed elsewhere. Try again."): Promise<boolean>`,
+  - `writeAction(view: PrinceListView, next: string, expected = view.text, refusedNotice: string | null = "This list changed elsewhere. Try again."): Promise<'written' | 'refused' | 'failed'>`,
     in `src/view/write.ts`. It first awaits `view.save()` (`TextFileView.save`, public since
     0.10.12) so pending typing is on disk, then runs
     `vault.process(file, cur => guardedApply(cur, expected, next))`. Inside that callback, once
     the guard accepts, it sets `view.text = next`, so `setViewData`'s early return holds whatever
     the timing of Obsidian's modify echo. When the guard refused, it shows a `Notice` reading
-    `refusedNotice`, unless that is `null`.
+    `refusedNotice`, unless that is `null`. When the write fails, it shows "Couldn't save the change
+    to this list." and, if the view still holds the `next` it took, reads the file into the view
+    again with `vault.read` and `setViewData(_, false)`. Typing since then stays, and its own save
+    writes it with `next`. A caller doesn't run a failed write again.
   - `tryEdit(edit: () => Line[]): Line[] | null`, in `src/view/write.ts`. It returns the edit's
     lines, or `null` when the edit throws `RepeatingItemError` or `UnsafeEditError`, after showing
     that error's `Notice` (Step 2). Any other error is thrown. Later tasks call their edits through
@@ -1084,11 +1087,15 @@ every file stays under about 300 lines and each pull request stays reviewable.
       `getListNote` from the new text and seeds the range again from its model. A change inside
       the range that leaves both ends in place is overwritten by the next keystroke, as typing
       wins in any focused field.
-  - **The list title:** renamed with `fileManager.renameFile` on Enter or blur. If the name is
-    taken, show the `Notice` "A note with that name already exists." and keep the old name. A
-    name with `/` or `\` would move the list to another folder, so it shows "A list name can't
-    contain / or \." and keeps the old name. Escape puts the old name back. A rename that fails
-    shows "The list couldn't be renamed." and keeps the old name.
+  - **The list title:** renamed with `fileManager.renameFile` on Enter or blur, but not on the blur
+    of a switch to another window, when `document.hasFocus()` is false. If another file in the
+    list's folder has the name, compared without regard to case, or, for a note outside the vault,
+    which has no `parent`, `getAbstractFileByPath` finds a file at the new path, show the `Notice`
+    "A note with that name already exists." and keep the old name. A name with `/` or `\` would
+    move the list to another folder, so it shows "A list name can't contain / or \." and keeps the
+    old name. Escape puts the old name back. A rename that fails shows "The list couldn't be
+    renamed." and keeps the old name. A rename still queued when the view closes or shows another
+    file does nothing.
   - **Empty items:** remove an item only when this card created it ("+", Enter, "New item" or "New
     item below"), its title is still empty, it has no notes, and the user closed the card in the
     view: Escape, a click elsewhere, Enter, a drag start, or a Task 10 menu choice that adds an
@@ -1210,9 +1217,10 @@ every file stays under about 300 lines and each pull request stays reviewable.
     `itemMenu` through `menu.showAtPosition`, on both platforms.
   - **Rename heading:** in `headingMenu`, it opens an inline editor: a text field in place of the
     heading row, holding the heading's raw content (a setext heading's content lines joined with
-    spaces). Taps inside the field don't open the heading menu. Enter or blur trims the name, then
-    saves with `writeAction(view, joinLines(setHeadingText(...)))`. Escape cancels, and the blur
-    that follows doesn't save. An empty (after trimming) or unchanged name writes nothing. When
+    spaces). Taps inside the field don't open the heading menu. Enter or blur (not the blur of a
+    switch to another window, as for the list title) trims the name, then saves with
+    `writeAction(view, joinLines(setHeadingText(...)))`. Escape cancels, and the blur that follows
+    doesn't save. An empty (after trimming) or unchanged name writes nothing. When
     `setHeadingText` returns `null`, or its result wouldn't read back as the trimmed name (a setext
     heading named `===` reads as an empty one), show a `Notice` reading "That name can't be used
     for this heading." and write nothing.
