@@ -158,7 +158,8 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
     takes the drop line off `marked`, shows it for `drop`, and returns the element that now shows it
 - Produces: `enableTouchDrag(view: PrinceListView): void`, in `src/view/drag-touch.ts`, called from
   `onOpen` only when `Platform.isMobile`. It also adds a zero-height element with the class
-  `princelists-visible-bottom` to `containerEl`, styled `position: absolute; left: 0; right: 0;
+  `princelists-visible-bottom` to `containerEl`, which the plugin's own `princelists-view` class
+  makes `position: relative` for the "+", styled `position: absolute; left: 0; right: 0;
   bottom: var(--view-bottom-spacing, 0px)`. Its top is where the list stops being visible: on the
   iPhone the list runs under the floating navbar, whose height Obsidian 1.14.4 puts in
   `--view-bottom-spacing`, as the "+" relies on (design, "Touch on the iPhone").
@@ -312,8 +313,8 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
     is `null`):
     - **The notes editor that was open is still in the document:** the links go in at its cursor
       as it is when the last picture is saved, after any selection, so nothing typed meanwhile is
-      replaced (`setRangeText(text, end, end, "end")`, with `end` its `selectionEnd` then)
-      **(call)**.
+      replaced (`setRangeText(text, end, end, "end")`, with `end` its `selectionEnd` then). With
+      the cursor mid-line, the link goes inside the line **(call)**.
     - **Otherwise,** when the notes weren't being edited or the editor closed while the pictures
       saved: `editNotes` opens it, and the links go at the end with `appendOnOwnLine`.
     - Then `notesInput(view, editor)` saves them as typing is saved, so the view's line-based state,
@@ -333,7 +334,7 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
      with a PDF dropped elsewhere in the list pane: record what that is.
   5. Pasting text into the notes still pastes the text.
   6. Paste a large picture and type a few characters at once: none of them is lost, and the link
-     goes in where the cursor is when it lands.
+     goes in where the cursor is when it lands. With the cursor mid-line, it goes inside the line.
   7. With a list from outside the vault (design, "Notes outside the vault"), paste a picture and
      record where it was saved and whether it shows. If it fails, stop and record it with this
      proposed fallback: pictures can't be pasted into a list from outside the vault. The owner
