@@ -1,5 +1,3 @@
-import { mapLine } from '../core/guard';
-import type { Line } from '../core/lines';
 import { isListText } from '../obsidian/marker';
 import { dismissCard, redrawCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
@@ -27,7 +25,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		else view.listNoteEl = buildListNote(view, fresh, lines, model);
 		const card = placeCard(view, kept);
 		if (card?.keeps) slot = card.el;
-		const field = placeField(view, kept, lines);
+		const field = placeField(view, kept);
 		if (field?.keeps) slot = field.el;
 		view.rowsHeldBack = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field);
 		// Room to scroll the last row clear of the floating "+".
@@ -63,13 +61,12 @@ function placeCard(view: PrinceListView, kept: HTMLElement | null): (CardPlace &
 }
 
 // Where a redraw puts the heading field: a slot for the field that keeps focus, or the field itself,
-// in place of its heading as mapped from the lines it opened on. Its heading gone, it stays near where
-// it was until it closes and says so.
-function placeField(view: PrinceListView, kept: HTMLElement | null, lines: readonly Line[]): (FieldPlace & { keeps: boolean }) | null {
+// in place of its heading. Its heading gone, it stays where it opened until it closes and says so.
+function placeField(view: PrinceListView, kept: HTMLElement | null): (FieldPlace & { keeps: boolean }) | null {
 	const field = view.headingField;
 	if (!field) return null;
 	const keeps = kept === field.el;
-	return { el: keeps ? createDiv() : field.el, line: mapLine(field.lines, lines, field.line) ?? field.line, keeps };
+	return { el: keeps ? createDiv() : field.el, line: field.heading.line ?? field.openedAt, keeps };
 }
 
 function keptElement(view: PrinceListView, focusing: Element | null): HTMLElement | null {
