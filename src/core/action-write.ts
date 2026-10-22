@@ -53,7 +53,13 @@ export async function guardedWrite(target: WriteTarget, next: string, expected: 
 			return result;
 		});
 	} catch (error) {
-		if (taken && target.text === next) await target.reread();
+		if (taken && target.text === next) {
+			try {
+				await target.reread();
+			} catch (readError) {
+				throw new AggregateError([error, readError], 'The write failed, and so did reading the file again.');
+			}
+		}
 		throw error;
 	}
 	return outcome;

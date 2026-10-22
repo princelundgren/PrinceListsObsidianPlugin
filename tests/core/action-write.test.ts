@@ -88,6 +88,22 @@ describe('guardedWrite', () => {
 		}
 	});
 
+	test('a re-read that fails too keeps the write error, with the read error beside it', async () => {
+		const { state, io } = target('a\n');
+		const writeError = new Error('disk full');
+		const readError = new Error('read failed');
+		io.process = async (fn) => {
+			fn(state.disk);
+			throw writeError;
+		};
+		io.reread = async () => {
+			throw readError;
+		};
+		const thrown = await guardedWrite(io, 'b\n', 'a\n').catch((error: unknown) => error);
+		expect(thrown).toBeInstanceOf(AggregateError);
+		expect((thrown as AggregateError).errors).toEqual([writeError, readError]);
+	});
+
 	test('typing that lands after the view took the text, before the write fails, stays for its own save', async () => {
 		const { state, io } = target('a\n');
 		io.process = async (fn) => {
