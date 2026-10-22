@@ -564,12 +564,16 @@ stays, and the blank line stays with it.
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.
   - Enter in a title adds another item below it, and Escape closes the card.
+  - In a new item whose title is still empty, Enter closes the card instead, which removes the
+    item, so a second Enter ends a run of new items. "+" and New item below keep it, with the
+    cursor back in its title. Delete closes the card, which removes the item as a cancel, with no
+    Undo **(call)**.
   - A new item is removed again if you close its card while its title is still empty and it has
     no notes **(call)**. Removing it restores the text from before it was added, so an empty line
     the insert wrote goes too. If the file changed outside the view while the card was open, the
     item is deleted from the current text instead, without a message **(call)**. If even that would
     change how the rest reads, the empty item stays and the view says so. Closing means Escape, a
-    click elsewhere, "+", Enter or starting a drag.
+    click elsewhere, Enter, starting a drag, a menu choice that adds an item, or Delete on it.
     Closing the list, switching files or a change from outside never removes an item, and an item
     that existed before the card opened is never removed this way.
 - **An empty list note (call)** shows as a gray "Notes" placeholder under the title, in any list,
@@ -595,7 +599,8 @@ stays, and the blank line stays with it.
     heading's level, pressing Enter or leaving the field saves, Escape cancels, and an empty name
     keeps the old one **(call)**. A name that wouldn't come back as this heading, at its level and
     with exactly that text, isn't written, and a message says so **(call)**: for example one
-    starting with `- [ ]` under a `===` underline, or one ending in ` #`.
+    starting with `- [ ]` under a `===` underline, an underline such as `===` itself, or one ending
+    in ` #`.
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
@@ -610,8 +615,9 @@ stays, and the blank line stays with it.
   heading again.
 - **A new heading inserted below an item takes the items after it (call).** This is the same as
   typing that heading into the raw file at that point.
-- **Undoing a delete (call):** after a delete, a message with an **Undo** button shows for a few
-  seconds. Obsidian's File recovery core plugin, when enabled, is the backstop.
+- **Undoing a delete (call):** after Delete or Delete heading, a message with an **Undo** button
+  shows for a few seconds. Removing an empty new item or heading is a cancel, with no Undo.
+  Obsidian's File recovery core plugin, when enabled, is the backstop.
 - **Delete and Delete heading show in red (owner, 2026-10-20)** in every menu that has them,
   through `MenuItem.setWarning(true)`. The red comes from the `is-warning` class, so with Settings →
   Appearance → Native menus on, the Mac's right-click menus may not show it (obsidian.md/help,
@@ -894,6 +900,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   after an 800 ms still hold (not yet confirmed on a device).
   - Because holding only ever drags, item rows must not open a menu. Cancel `contextmenu` on rows, in the capture
     phase, while a finger is down.
+  - After a canceled hold, the next click is swallowed, as spike 2 does after a lift: WebKit still
+    sends one when the finger lifts. The next `touchstart` clears the flag.
+  - Obsidian's own haptic on a hold can't be turned off (no documented API), and it is accepted.
 - **Dragging uses Pointer Events with a hold timer.** Kanban uses 500 ms, canceled if the finger
   moves more than 5 px first. Spike 2 confirmed both values on the iPhone, with the rows'
   `-webkit-user-select: none` and `-webkit-touch-callout: none`: the maintainer keeps 500 ms
@@ -907,6 +916,10 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `file-explorer-context-menu`. Nobody has seen it on a device yet: confirm it on the iPhone.
 - **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
+  - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
+  - It keeps above the iPhone's floating navbar with Obsidian's `--view-bottom-spacing`, as Bases
+    does **(call)**. The variable is undocumented, read from 1.14.4's `app.css`, and unset on the
+    Mac. If Obsidian drops it, the "+" sits lower on the iPhone, under the floating navbar.
 
 ### Where `✔` goes
 

@@ -1,5 +1,8 @@
+import { Platform } from 'obsidian';
 import { openAsMarkdown } from '../obsidian/switch';
+import { addItem, addItemBelowCard, hasNoItems } from './add-button';
 import {
+	CARD_ACTIONS_CLASS,
 	CARD_NOTES_CLASS,
 	CARD_TITLE_CLASS,
 	cardTitleBlur,
@@ -23,8 +26,10 @@ import {
 	TITLE_CLASS,
 	typeListNote,
 } from './fields';
+import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
-import { handleLinkClick } from './notes';
+import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
+import { handleLinkClick, handleLinkMenu } from './notes';
 import { CHECKBOX_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
 import { queueTick } from './tick';
 
@@ -36,6 +41,14 @@ export function registerFieldEvents(view: PrinceListView): void {
 	view.registerDomEvent(contentEl, 'keydown', (evt) => onKeyDown(view, evt));
 	view.registerDomEvent(contentEl, 'focusin', (evt) => onFocusIn(view, evt));
 	view.registerDomEvent(contentEl, 'focusout', (evt) => onFocusOut(view, evt));
+	if (Platform.isDesktop) view.registerDomEvent(contentEl, 'contextmenu', (evt) => onContextMenu(view, evt));
+	// In the capture phase, so it is stopped before it reaches a row or bubbles up from one.
+	if (Platform.isMobile) {
+		view.registerDomEvent(contentEl, 'contextmenu', (evt) => onHoldMenu(view, evt), { capture: true });
+		view.registerDomEvent(contentEl, 'click', (evt) => swallowClick(view, evt), { capture: true });
+		// A hold that sent no click must not eat a later tap.
+		view.registerDomEvent(contentEl, 'touchstart', () => (view.swallowNextClick = false), { capture: true });
+	}
 }
 
 // Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of
@@ -68,6 +81,11 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (view.card?.el.contains(target)) {
+		const actions = target.closest<HTMLElement>(`.${CARD_ACTIONS_CLASS}`);
+		if (actions) {
+			showCardMenu(view, actions);
+			return;
+		}
 		const notes = target.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
 		if (notes) editNotes(view, notes);
 		return;
@@ -80,7 +98,25 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	closeCard(view);
+	if (Platform.isMobile && showHeadingMenu(view, evt, target)) return;
 	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view);
+}
+
+function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
+	const target = targetOf(evt);
+	if (target && !handleLinkMenu(view, evt, target)) showContextMenu(view, evt, target);
+}
+
+function onHoldMenu(view: PrinceListView, evt: MouseEvent): void {
+	const target = targetOf(evt);
+	if (target) cancelHoldMenu(view, evt, target);
+}
+
+function swallowClick(view: PrinceListView, evt: MouseEvent): void {
+	if (!view.swallowNextClick) return;
+	view.swallowNextClick = false;
+	evt.preventDefault();
+	evt.stopPropagation();
 }
 
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
@@ -91,7 +127,7 @@ function onInput(view: PrinceListView, evt: Event): void {
 	if (target.hasClass(CARD_TITLE_CLASS)) cardTitleInput(view, target);
 	else if (target.hasClass(NOTES_EDITOR_CLASS)) notesInput(view, target);
 	else if (target.hasClass(NOTE_EDITOR_CLASS)) typeListNote(view);
-	else if (target.hasClass(TITLE_CLASS)) keepOneLine(target);
+	else if (target.hasClass(TITLE_CLASS) || target.hasClass(HEADING_FIELD_CLASS)) keepOneLine(target);
 }
 
 function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
@@ -102,18 +138,28 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 		if (view.card?.el.contains(target)) {
 			evt.preventDefault();
 			closeCard(view);
+		} else if (target.hasClass(HEADING_FIELD_CLASS)) {
+			evt.preventDefault();
+			headingFieldKey(view, target, 'Escape');
 		} else if (target.instanceOf(HTMLTextAreaElement) && target.hasClass(TITLE_CLASS)) {
 			// Cancels: the blur that follows finds the name unchanged.
 			target.value = view.listTitle?.before ?? target.value;
 			target.blur();
 		}
 	} else if (evt.key === 'Enter') {
-		// A title is one line, so Enter writes no line break.
+		// A title or heading is one line, so Enter writes no line break.
 		if (target.hasClass(CARD_TITLE_CLASS)) {
 			evt.preventDefault();
+			addItemBelowCard(view);
+		} else if (target.hasClass(HEADING_FIELD_CLASS)) {
+			evt.preventDefault();
+			headingFieldKey(view, target, 'Enter');
 		} else if (target.hasClass(TITLE_CLASS)) {
 			evt.preventDefault();
+			const firstItem = hasNoItems(view);
+			// Renames, and the first item waits for that on the write queue.
 			target.blur();
+			if (firstItem) addItem(view, 'first');
 		}
 	}
 }
@@ -140,6 +186,7 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 		else if (inCard && target.hasClass(NOTES_EDITOR_CLASS)) notesBlur(view, target);
 		else if (target.hasClass(NOTE_EDITOR_CLASS)) closeListNote(view, focusing);
 		else if (target.hasClass(TITLE_CLASS)) commitListTitle(view, target);
+		else if (target.hasClass(HEADING_FIELD_CLASS)) headingFieldBlur(view, target);
 	}
 	// A card whose item an outside change took closes once focus leaves it.
 	if (card && inCard && card.lostAt !== null && !card.el.contains(focusing)) dismissCard(view);

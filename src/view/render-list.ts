@@ -9,6 +9,7 @@ import { renderInline } from './notes';
 export const ITEM_CLASS = 'princelists-item';
 export const CHECKBOX_CLASS = 'princelists-checkbox';
 export const ITEMS_CLASS = 'princelists-items';
+export const HEADING_CLASS = 'princelists-heading';
 export const OPEN_AS_MARKDOWN_CLASS = 'princelists-open-as-markdown';
 // A row's or heading's first line. The plugin's own name: Markdown that Obsidian renders carries its
 // own `data-line` attributes, which the view must not read or shift.
@@ -33,6 +34,12 @@ export interface CardPlace {
 	replaces: boolean;
 }
 
+/** Where the open heading field goes: in place of the heading at `line`, or before the first row after it. */
+export interface FieldPlace {
+	el: HTMLElement;
+	line: number;
+}
+
 // Draws the sections under `el`. Each row and heading carries its first line in LINE_ATTR for the
 // view's delegated listeners, so they get no listeners of their own. The view keeps every LINE_ATTR
 // true to its text between redraws (PrinceListView.applyOwnText). Rendered titles and headings record
@@ -46,8 +53,10 @@ export function renderList(
 	card: CardPlace | null,
 	blocks: Map<HTMLElement, Component>,
 	skip: LineRange | null,
+	field: FieldPlace | null,
 ): boolean {
 	let placed = card === null;
+	let fieldPlaced = field === null;
 	let list: HTMLUListElement | null = null;
 	const items = () => (list ??= el.createEl('ul', { cls: ITEMS_CLASS }));
 	// The card sits in a list too, so a redraw that keeps it finds it at the same depth.
@@ -57,19 +66,24 @@ export function renderList(
 		items().append(card.el);
 		return isItem && line === card.line && card.replaces;
 	};
+	// The heading field sits where a heading does, outside the lists.
+	const placeField = (line: number, isHeading: boolean): boolean => {
+		if (fieldPlaced || !field || line < field.line) return false;
+		fieldPlaced = true;
+		el.append(field.el);
+		list = null;
+		return isHeading && line === field.line;
+	};
 	const sections = visibleSections(lines, model, new Date(), view.showArchived);
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {
 		if (section.heading) {
 			placeCard(section.heading.line, false);
-			const heading = el.createDiv({
-				cls: 'princelists-heading',
-				attr: { role: 'heading', 'aria-level': 2, [LINE_ATTR]: section.heading.line },
-			});
-			record(blocks, heading, renderInline(view, heading, section.heading.text));
+			if (!placeField(section.heading.line, true)) el.append(buildHeading(view, section.heading, blocks));
 			list = null;
 		}
 		for (const row of section.rows) {
+			placeField(row.kind === 'item' ? row.titleLine : row.start, false);
 			if (row.kind === 'untouched') {
 				placeCard(row.start, false);
 				// Plain text, as content the plugin leaves alone (spec, "Content the plugin leaves
@@ -83,7 +97,14 @@ export function renderList(
 		}
 	}
 	if (!placed && card) items().append(card.el);
+	if (!fieldPlaced && field) el.append(field.el);
 	return drawnCount(shown) < drawnCount(sections);
+}
+
+export function buildHeading(view: PrinceListView, heading: { line: number; text: string }, blocks: Map<HTMLElement, Component>): HTMLElement {
+	const el = createDiv({ cls: HEADING_CLASS, attr: { role: 'heading', 'aria-level': 2, [LINE_ATTR]: heading.line } });
+	record(blocks, el, renderInline(view, el, heading.text));
+	return el;
 }
 
 function drawnCount(sections: SectionRows[]): number {

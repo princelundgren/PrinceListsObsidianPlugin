@@ -1,4 +1,4 @@
-import { Notice, type Component, type TFile } from 'obsidian';
+import { Notice, setIcon, type Component, type TFile } from 'obsidian';
 import { isShown, itemRow, type ItemRow } from '../core/display';
 import { UnsafeEditError } from '../core/edit-check';
 import { isEmptyItem, planRemoval, type InsertedItem, type Removal } from '../core/empty-item';
@@ -18,6 +18,7 @@ export const CARD_CLASS = 'princelists-card';
 export const CARD_TITLE_CLASS = 'princelists-card-title';
 export const CARD_NOTES_CLASS = 'princelists-card-notes';
 export const NOTES_EDITOR_CLASS = 'princelists-card-notes-editor';
+export const CARD_ACTIONS_CLASS = 'princelists-card-actions';
 
 export interface Card {
 	el: HTMLElement;
@@ -56,9 +57,9 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 	else card.el.focus({ preventScroll: true });
 }
 
-// The user closed the card in the view: Escape, a click elsewhere, "+", Enter or a drag start. An
-// empty item the card created goes again (spec, "Selecting and adding"), through the view's write
-// queue, so an action queued after this one sees the list without it.
+// The user closed the card in the view, in one of the ways the spec lists ("Selecting and adding"). An
+// empty item the card created goes again, through the view's write queue, so an action queued after
+// this one sees the list without it.
 export function closeCard(view: PrinceListView): void {
 	const card = view.card;
 	if (!card) return;
@@ -78,6 +79,16 @@ export function closeCard(view: PrinceListView): void {
 	} else {
 		card.el.remove();
 	}
+}
+
+// Whether the open card is on `line` and holds an empty item its own insert added, which closing the
+// card removes.
+export function isNewEmptyItem(view: PrinceListView, line: number | null = view.selected): boolean {
+	return view.card?.inserted != null && line !== null && line === view.selected && isEmptyAt(view, line);
+}
+
+export function focusCardTitle(view: PrinceListView): void {
+	view.card?.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`)?.focus();
 }
 
 // Closes it without removing anything: its item is gone, or the view is about to draw from scratch.
@@ -213,6 +224,8 @@ function createCardElement(): HTMLElement {
 	const body = el.createDiv({ cls: 'princelists-card-body' });
 	body.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, 'aria-label': 'Title' } });
 	body.createDiv({ cls: CARD_NOTES_CLASS });
+	const actions = el.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
+	setIcon(actions, 'more-horizontal');
 	return el;
 }
 

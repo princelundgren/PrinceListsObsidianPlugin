@@ -18,9 +18,10 @@ textarea.princelists-field {
 	overflow: hidden;
 }
 
-/* The titles read as titles even while they have focus. */
+/* The titles read as titles even while they have focus, and so does a heading being renamed. */
 textarea.princelists-title:focus,
-textarea.princelists-card-title:focus {
+textarea.princelists-card-title:focus,
+textarea.princelists-heading-field:focus {
 	box-shadow: none;
 }
 
@@ -95,6 +96,15 @@ textarea.princelists-list-note-editor {
 	color: var(--checklist-done-color);
 }
 
+/* A hold on a row or heading selects nothing and shows no callout, as in spike 2 (spec, "Touch on
+   the iPhone"). The open card is a row too, and its text stays selectable. */
+.princelists-item:not(.princelists-card),
+.princelists-heading {
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-touch-callout: none;
+}
+
 /* A rendered title or heading is one paragraph, laid out as the line it replaces. */
 .princelists-item-title p,
 .princelists-heading p {
@@ -149,4 +159,65 @@ textarea.princelists-list-note-editor {
 	margin-top: var(--size-4-1);
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
+}
+
+/* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on the iPhone". */
+.princelists-view {
+	position: relative;
+}
+
+button.princelists-new-item {
+	--icon-size: var(--icon-l);
+	position: absolute;
+	right: var(--size-4-4);
+	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px));
+	width: var(--size-4-12);
+	height: var(--size-4-12);
+	padding: 0;
+	border-radius: 50%;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	box-shadow: var(--shadow-s);
+}
+
+@media (hover: hover) {
+	button.princelists-new-item:hover {
+		background-color: var(--interactive-accent-hover);
+	}
+}
+
+/* Room below the last row, so it can scroll clear of the "+". */
+.princelists-end {
+	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px));
+}
+
+/* The card's ⋯, an icon on the card's own background. */
+button.princelists-card-actions {
+	flex: none;
+	height: auto;
+	padding: var(--size-2-2);
+	border-radius: var(--clickable-icon-radius);
+	background-color: transparent;
+	box-shadow: none;
+	color: var(--icon-color);
+}
+
+@media (hover: hover) {
+	button.princelists-card-actions:hover {
+		background-color: var(--background-modifier-hover);
+		box-shadow: none;
+		color: var(--icon-color-hover);
+	}
+}
+
+/* Rename heading's field reads as the heading it edits. */
+textarea.princelists-heading-field {
+	margin: var(--size-4-4) 0 var(--size-4-1);
+	padding-bottom: var(--size-4-1);
+	border-bottom: var(--border-width) solid var(--background-modifier-border);
+	font-weight: var(--font-bold);
+}
+
+.princelists-undo {
+	margin-inline-start: var(--size-4-2);
 }
