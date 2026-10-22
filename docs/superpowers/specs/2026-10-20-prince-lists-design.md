@@ -630,6 +630,11 @@ stays, and the blank line stays with it.
   - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
     item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
     drag, a click reopens the card.
+  - **The drop line (call)** shows under the visible item the dragged item will follow, or under a
+    heading for the first place in its section, or above the first row for the top of the list.
+    It passes over content the plugin leaves alone, since a drag changes only the order of items.
+    Dropped where it already shows, the item stays as it is in the file.
+  - **A link or picture in a title drags as itself (call),** as in any note, not the row.
 - **iPhone (1b, owner):**
   - Hold an item and then move to drag it.
   - Holding an item row never opens a menu.

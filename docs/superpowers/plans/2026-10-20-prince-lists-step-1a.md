@@ -1286,17 +1286,34 @@ every file stays under about 300 lines and each pull request stays reviewable.
 ### Task 11: Dragging with the mouse
 
 **Files:**
-- Create: `src/view/drag-mouse.ts`
-- Modify: `src/view/render-list.ts`, `styles.css`
+- Create: `src/view/drag-mouse.ts`, and `src/core/drop.ts` (where a drop puts the item) with
+  `tests/core/drop.test.ts`
+- Modify: `src/core/edit-items.ts`, `src/core/follow.ts`, `src/core/list-actions.ts`,
+  `src/core/editing.ts`, `src/view/render-list.ts`, `src/view/list-view.ts`,
+  `src/view/events.ts`, `src/view/add-button.ts`, `styles.css`
 
 **Interfaces:**
 - Consumes: `moveItem`, `UnsafeEditError`, `writeAction` and `tryEdit`.
 - Produces: `enableMouseDrag(view: PrinceListView, listEl: HTMLElement): void`. It is enabled only
   when `Platform.isDesktop`.
+- Produces, in `src/core/`:
+  - `moveItemWithLineMap(lines, model, item, to): { lines: Line[]; moved: number[] }`: `moveItem`,
+    and `moved[i]`, the line that line `i` went to.
+  - `OwnEdit` becomes `RunEdit | MoveEdit`. A move changes lines in two places, so one run can't
+    describe it: `moveEdit(moved)` gives `{ start, kind: 'move', moved }`, and `followLine` reads
+    `moved`. `selected`, the typing sessions, tracked lines and every row's line follow it.
+  - `planItemMove(text, contentStart, titleLine, place: ItemPlace): PlannedMove | null`, like the
+    other plans. null when the item or the place is gone, or when the move changes nothing.
+  - `dropAt(shown: ShownRow[], dragged, over: { line, below }): Drop | null`: the place and where
+    its drop line shows, for the pointer over a shown row or heading.
 
 - [ ] **Step 1: Implement HTML5 drag on rows.** It shows a drop line between visible rows and
-  calls `moveItem` with `{ after: <the visible item above the line> }`, or `{ firstIn: <section> }`
-  directly under a heading. Hidden archived rows never move (spec, "Selecting and adding").
+  moves the item as `moveItem` does, with `{ after: <the visible item above the line> }`, or
+  `{ firstIn: <section> }` directly under a heading. Hidden archived rows never move (spec,
+  "Selecting and adding").
+  - **The drop line (call)** shows under the item or heading the drop follows, as the design's
+    "Dragging" says, and passes over untouched rows. Untouched rows carry their line too, so the
+    view reads every shown row from the list in order.
   - **A drag closes the open card first (call).** When a drag starts, the view closes any open
     card, and with it `selected`, before it calls `moveItem`. Pending typing is saved by
     `writeAction` as usual. The cost: after a drag, a click reopens the card.

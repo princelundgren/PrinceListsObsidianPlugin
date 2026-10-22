@@ -2,7 +2,7 @@ import { UnsafeEditError } from './edit-check';
 import { getItemNotes, setItemNotes } from './edit-items';
 import { isBlankAt } from './edit-lines';
 import { getListNote, setListNote } from './edit-list-note';
-import { followLine, followRange, mapRange, ownEdit, type LineRange, type OwnEdit } from './follow';
+import { followLine, followRange, mapRange, ownEdit, type LineRange, type OwnEdit, type RunEdit } from './follow';
 import { mapLine } from './guard';
 import { parseItemLine } from './item-line';
 import { joinLines, splitLines, type Line } from './lines';
@@ -201,7 +201,7 @@ export class ListEditing {
 		}
 	}
 
-	private apply(next: string, start: number, kind: OwnEdit['kind'], from?: object): OwnEdit {
+	private apply(next: string, start: number, kind: RunEdit['kind'], from?: object): OwnEdit {
 		const edit = ownEdit(start, this.text, next, kind);
 		this.follow(next, edit, from);
 		return edit;
@@ -213,7 +213,7 @@ export class ListEditing {
 		for (const tracked of this.tracked) tracked.line = tracked.line === null ? null : followLine(tracked.line, edit);
 		const selected = this.selected;
 		this.selected = selected === null ? null : followLine(selected, edit);
-		this.afterMove(splitLines(next), edit.start === selected ? edit.retitle : undefined);
+		this.afterMove(splitLines(next), edit.kind !== 'move' && edit.start === selected ? edit.retitle : undefined);
 		if (this.note && this.note !== from) {
 			const { separator } = this.note;
 			this.note.separator = separator === null ? null : followLine(separator, edit);

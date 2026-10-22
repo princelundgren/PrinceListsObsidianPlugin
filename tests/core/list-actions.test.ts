@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { UnsafeEditError } from '../../src/core/edit-check';
 import { followLine, type OwnEdit } from '../../src/core/follow';
 import { headingText } from '../../src/core/display';
-import { planHeadingDelete, planHeadingInsert, planItemDelete, planItemInsert, type ItemPlace } from '../../src/core/list-actions';
+import { planHeadingDelete, planHeadingInsert, planItemDelete, planItemInsert, planItemMove, type ItemPlace } from '../../src/core/list-actions';
 import { splitLines } from '../../src/core/lines';
 import { contentStartOf, crlf, FIXTURES, JOINING_CASES, list, readFixture, REFUSED_CASES } from './edit-helpers';
 
@@ -189,6 +189,54 @@ describe('planHeadingDelete', () => {
 				expect(list(planned.next).items.length, name).toBe(list(text).items.length);
 				expectFollowed(text, planned.next, planned.edit, headingLine);
 				expectFollowed(planned.next, text, planned.undo.edit);
+			}
+		}
+	});
+});
+
+describe('planItemMove', () => {
+	const text = '- [ ] a\n\n\tnotes\n- [ ] b\n## H\n- [ ] c\n';
+	test('moves the item with its notes after an item, first under a heading, or first in the list', () => {
+		expect(planItemMove(text, 0, 0, { after: 3 })?.next).toBe('- [ ] b\n- [ ] a\n\n\tnotes\n## H\n- [ ] c\n');
+		expect(planItemMove(text, 0, 0, { firstUnder: 4 })?.next).toBe('- [ ] b\n## H\n- [ ] a\n\n\tnotes\n- [ ] c\n');
+		expect(planItemMove(text, 0, 5, 'first')?.next).toBe('- [ ] c\n- [ ] a\n\n\tnotes\n- [ ] b\n## H\n');
+	});
+	test('its edit takes every line to where it went, and leaves the lines before the move', () => {
+		const planned = planItemMove(text, 0, 5, { after: 0 });
+		expect(planned?.next).toBe('- [ ] a\n\n\tnotes\n- [ ] c\n- [ ] b\n## H\n');
+		expect(planned?.edit).toEqual({ start: 3, kind: 'move', moved: [0, 1, 2, 4, 5, 3] });
+	});
+	test('a drop past a hidden done item leaves it in its place among the other items', () => {
+		const hidden = '- [ ] a\n- [x] h ✔ 2026-01-01 10:00\n- [ ] b\n';
+		expect(planItemMove(hidden, 0, 0, { after: 2 })?.next).toBe('- [x] h ✔ 2026-01-01 10:00\n- [ ] b\n- [ ] a\n');
+		expect(planItemMove(hidden, 0, 2, 'first')?.next).toBe('- [ ] b\n- [ ] a\n- [x] h ✔ 2026-01-01 10:00\n');
+	});
+	test('null when the item or the place is gone, or when the move changes nothing', () => {
+		expect(planItemMove(text, 0, 4, { after: 0 })).toBeNull();
+		expect(planItemMove(text, 0, 0, { after: 4 })).toBeNull();
+		expect(planItemMove(text, 0, 0, { firstUnder: 3 })).toBeNull();
+		expect(planItemMove(text, 0, 0, { after: 0 })).toBeNull();
+		expect(planItemMove(text, 0, 3, { after: 0 })).toBeNull();
+		expect(planItemMove(text, 0, 0, 'first')).toBeNull();
+	});
+	test('refuses a move that would change how the rest reads', () => {
+		expect(() => planItemMove(REFUSED_CASES.widerColumnMove, 0, 1, { after: 3 })).toThrow(UnsafeEditError);
+	});
+	test('for every item and place, every line follows the move, or it is refused or changes nothing', () => {
+		for (const [name, text] of Object.entries(ALL_CASES)) {
+			const { model, items } = list(text);
+			const places: ItemPlace[] = [
+				'first',
+				...items.map((item) => ({ after: item.titleLine })),
+				...model.sections.flatMap((s) => (s.headingLine === null ? [] : [{ firstUnder: s.headingLine }])),
+			];
+			for (const item of items) {
+				for (const place of places) {
+					const planned = refusedOrRun(() => planItemMove(text, start(text), item.titleLine, place));
+					if (planned === 'refused' || !planned) continue;
+					expect(planned.next, `${name} ${item.titleLine} ${JSON.stringify(place)}`).not.toBe(text);
+					expectFollowed(text, planned.next, planned.edit);
+				}
 			}
 		}
 	});

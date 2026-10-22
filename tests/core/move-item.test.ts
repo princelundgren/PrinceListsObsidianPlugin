@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { UnsafeEditError, moveItem } from '../../src/core/edit-items';
+import { UnsafeEditError, moveItem, moveItemWithLineMap } from '../../src/core/edit-items';
 import { joinLines, splitLines, type Line } from '../../src/core/lines';
 import type { ItemBlock, Section } from '../../src/core/parse';
 import { FIXTURES, JOINING_CASES, REFUSED_CASES, crlf, expectRestKept, list, readFixture } from './edit-helpers';
@@ -107,6 +107,22 @@ describe('moveItem', () => {
 			const targets = [...items.map((it) => ({ after: it })), ...model.sections.map((s) => ({ firstIn: s }))];
 			for (const it of items) {
 				for (const to of targets) expectRestKept(text, joinLines(moveItem(lines, model, it, to)));
+			}
+		}
+	});
+	test('moveItemWithLineMap gives the line each line went to, and only empty lines it wrote are new', () => {
+		for (const text of [...Object.values(JOINING_CASES), ...FIXTURES.map(readFixture)]) {
+			const { lines, model, items } = list(text);
+			const targets = [...items.map((it) => ({ after: it })), ...model.sections.map((s) => ({ firstIn: s }))];
+			for (const it of items) {
+				for (const to of targets) {
+					const result = moveItemWithLineMap(lines, model, it, to);
+					expect(result.lines).toEqual(moveItem(lines, model, it, to));
+					expect(result.moved.map((at) => result.lines[at]?.text)).toEqual(lines.map((line) => line.text));
+					const reached = new Set(result.moved);
+					expect(reached.size).toBe(lines.length);
+					expect(result.lines.filter((line, at) => !reached.has(at) && line.text !== '')).toEqual([]);
+				}
 			}
 		}
 	});

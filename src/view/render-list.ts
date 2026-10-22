@@ -1,4 +1,4 @@
-import type { Component } from 'obsidian';
+import { Platform, type Component } from 'obsidian';
 import { visibleSections, withoutRange, type ItemRow, type SectionRows } from '../core/display';
 import type { LineRange } from '../core/follow';
 import type { Line } from '../core/lines';
@@ -14,6 +14,9 @@ export const OPEN_AS_MARKDOWN_CLASS = 'princelists-open-as-markdown';
 // A row's or heading's first line. The plugin's own name: Markdown that Obsidian renders carries its
 // own `data-line` attributes, which the view must not read or shift.
 export const LINE_ATTR = 'data-princelists-line';
+// Rows drag with the mouse on desktop only (enableMouseDrag). On the iPhone, a hold on a row is kept
+// for the touch drag (1b).
+export const ROWS_DRAG = Platform.isDesktop;
 
 export function lineOf(el: Element): number | null {
 	const line = el.getAttr(LINE_ATTR);
@@ -88,7 +91,7 @@ export function renderList(
 				placeCard(row.start, false);
 				// Plain text, as content the plugin leaves alone (spec, "Content the plugin leaves
 				// alone").
-				el.createDiv({ cls: 'princelists-untouched', text: row.text });
+				el.createDiv({ cls: 'princelists-untouched', text: row.text, attr: { [LINE_ATTR]: row.start } });
 				list = null;
 				continue;
 			}
@@ -113,6 +116,7 @@ function drawnCount(sections: SectionRows[]): number {
 
 export function buildRow(view: PrinceListView, row: ItemRow, blocks: Map<HTMLElement, Component>): HTMLLIElement {
 	const rowEl = createEl('li', { cls: ITEM_CLASS, attr: { [LINE_ATTR]: row.titleLine } });
+	if (ROWS_DRAG) rowEl.draggable = true;
 	rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox', attr: { 'aria-label': row.label } });
 	const title = rowEl.createDiv({ cls: 'princelists-item-title' });
 	record(blocks, rowEl, renderInline(view, title, row.title));

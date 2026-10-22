@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { visibleSections, withoutRange } from '../../src/core/display';
 import { ListEditing, type Typed } from '../../src/core/editing';
 import { NO_LINES_MOVED, ownEdit } from '../../src/core/follow';
+import { planItemMove, type PlannedMove } from '../../src/core/list-actions';
 import { toggleLine } from '../../src/core/item-line';
 import { splitLines } from '../../src/core/lines';
 import { contentStartOf, list } from './edit-helpers';
@@ -34,6 +35,18 @@ describe('the title field across a typing session', () => {
 		const results = typeEach((v) => state.typeTitle(v), ['bu', 'buy', 'buy ', 'buy #', 'buy #milk', 'buy #milk2']);
 		expect(results.every(saved)).toBe(true);
 		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n- [ ] buy #milk2 #home\n- [ ] c\n`);
+	});
+
+	test("a drag's move of the item moves the selection, and typing lands on the moved line", () => {
+		const state = editing(text);
+		state.open(4);
+		state.focusTitle();
+		state.typeTitle('buy');
+		const moved = planItemMove(state.text, 3, 4, { after: 5 }) as PlannedMove;
+		state.applyOwn(moved.next, moved.edit);
+		expect(state.selected).toBe(5);
+		state.typeTitle('buy #milk');
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n- [ ] c\n- [ ] buy #milk #home\n`);
 	});
 
 	test('an outside change above the item moves the selection, and typing lands in the same item', () => {

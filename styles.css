@@ -105,6 +105,16 @@ textarea.princelists-list-note-editor {
 	-webkit-touch-callout: none;
 }
 
+/* The drop line while a row is dragged: under the row or heading the item will follow, or above the
+   first row for the top of the list. Drawn inside the element, so nothing moves. */
+.princelists-drop-below {
+	box-shadow: inset 0 calc(-1 * var(--size-2-1)) 0 var(--interactive-accent);
+}
+
+.princelists-drop-above {
+	box-shadow: inset 0 var(--size-2-1) 0 var(--interactive-accent);
+}
+
 /* A rendered title or heading is one paragraph, laid out as the line it replaces. */
 .princelists-item-title p,
 .princelists-heading p {

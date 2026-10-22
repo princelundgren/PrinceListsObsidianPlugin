@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { NO_LINES_MOVED, followLine, followRange, mapRange, ownEdit, type OwnEdit } from '../../src/core/follow';
+import { NO_LINES_MOVED, followLine, followRange, mapRange, moveEdit, ownEdit, type OwnEdit } from '../../src/core/follow';
 import { deleteItem, insertItem, setItemNotes, toggleItem } from '../../src/core/edit-items';
 import { setListNote } from '../../src/core/edit-list-note';
 import { joinLines, splitLines } from '../../src/core/lines';
@@ -150,6 +150,22 @@ describe('mapRange', () => {
 		// One change spans the frontmatter's closing line and a new note, so where the note starts is unknown.
 		const both = splitLines(`---\nprincelists: true\ntags: x\n---\nNote\n\n- [ ] a\n`);
 		expect(mapRange(bare, both, { start: 3, end: 3 })).toBeNull();
+	});
+});
+
+describe('moveEdit', () => {
+	// Line 1 moved to the end, and an empty line went in before it.
+	const edit = moveEdit([0, 4, 1, 2]);
+
+	test('starts at the first line that moved', () => {
+		expect(edit).toEqual({ start: 1, kind: 'move', moved: [0, 4, 1, 2] });
+		expect(moveEdit([0, 1, 2]).start).toBe(Number.POSITIVE_INFINITY);
+	});
+	test('followLine takes every line to where it went, the moved line too', () => {
+		expect([0, 1, 2, 3].map((line) => followLine(line, edit))).toEqual([0, 4, 1, 2]);
+	});
+	test('leaves the list note range before it', () => {
+		expect(followRange({ start: 0, end: 1 }, edit)).toEqual({ start: 0, end: 1 });
 	});
 });
 

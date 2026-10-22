@@ -1,11 +1,14 @@
 import { deleteHeading, insertHeading } from './edit-headings';
-import { deleteItem, insertItem, insertItemInSection } from './edit-items';
+import { deleteItem, insertItem, insertItemInSection, moveItemWithLineMap, type MoveTarget } from './edit-items';
 import type { InsertedItem } from './empty-item';
-import { ownEdit, type OwnEdit } from './follow';
+import { moveEdit, ownEdit, type OwnEdit } from './follow';
 import { joinLines, splitLines, type Line } from './lines';
 import { itemAt, parseList, type ListModel, type Section } from './parse';
 
-/** Where a new item goes: after the item whose title is on a line, first under the heading on a line, or first in the list. */
+/**
+ * Where a new or dragged item goes: after the item whose title is on a line, first under the heading
+ * on a line, or first in the list.
+ */
 export type ItemPlace = { after: number } | { firstUnder: number } | 'first';
 
 /** Where a new heading goes: after the item whose title is on a line, or after the section whose heading is on a line. */
@@ -17,6 +20,11 @@ export interface PlannedInsert {
 	line: number;
 	edit: OwnEdit;
 	inserted: InsertedItem;
+}
+
+export interface PlannedMove {
+	next: string;
+	edit: OwnEdit;
 }
 
 export interface PlannedDelete {
@@ -74,6 +82,18 @@ export function planHeadingDelete(text: string, contentStart: number, headingLin
 	return section ? deletePlan(text, deleteHeading(lines, model, section), headingLine) : null;
 }
 
+// A drop. null when the item or the place is gone, or when the move would change nothing; throws
+// UnsafeEditError as moveItem does.
+export function planItemMove(text: string, contentStart: number, titleLine: number, place: ItemPlace): PlannedMove | null {
+	const { lines, model } = parse(text, contentStart);
+	const item = itemAt(model, titleLine);
+	const target = moveTarget(model, place);
+	if (!item || !target) return null;
+	const moved = moveItemWithLineMap(lines, model, item, target);
+	const next = joinLines(moved.lines);
+	return next === text ? null : { next, edit: moveEdit(moved.moved) };
+}
+
 function parse(text: string, contentStart: number): { lines: Line[]; model: ListModel } {
 	const lines = splitLines(text);
 	return { lines, model: parseList(lines, contentStart) };
@@ -81,6 +101,16 @@ function parse(text: string, contentStart: number): { lines: Line[]; model: List
 
 function sectionAt(model: ListModel, headingLine: number): Section | undefined {
 	return model.sections.find((section) => section.headingLine === headingLine);
+}
+
+function moveTarget(model: ListModel, place: ItemPlace): MoveTarget | null {
+	if (place === 'first') return { firstIn: model.sections[0] as Section };
+	if ('after' in place) {
+		const item = itemAt(model, place.after);
+		return item ? { after: item } : null;
+	}
+	const section = sectionAt(model, place.firstUnder);
+	return section ? { firstIn: section } : null;
 }
 
 function insertPlan(text: string, lines: readonly Line[], line: number): PlannedInsert {
