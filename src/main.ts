@@ -19,10 +19,10 @@ export default class PrinceListsPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'new-list',
-			name: 'New list',
+			name: 'Create new list',
 			callback: () => void this.newListWhereNotesGo(),
 		});
-		this.addRibbonIcon(RIBBON_ICON, 'New list', () => void this.newListWhereNotesGo());
+		this.addRibbonIcon(RIBBON_ICON, 'Create new list', () => void this.newListWhereNotesGo());
 		this.addCommand({
 			id: 'open-schedule',
 			name: 'Open schedule',

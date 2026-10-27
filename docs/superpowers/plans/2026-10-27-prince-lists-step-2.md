@@ -728,7 +728,7 @@ manual check runs there, never in a vault with real notes.
   - `groupSchedule(items: readonly ScheduledItem[], today: string): { group: ScheduleGroup; items:
     ScheduledItem[] }[]`: the groups in order, empty ones left out, each sorted by day, then
     `listName` with `localeCompare`, then `order`
-- Produces: `VIEW_TYPE_SCHEDULE = 'princelists-schedule'` and `SCHEDULE_ICON = 'calendar'`;
+- Produces: `VIEW_TYPE_SCHEDULE = 'princelists-schedule'` and `SCHEDULE_ICON = 'calendar-clock'`;
   `class ScheduleView extends ItemView implements MarkdownHost` with `refresh(): Promise<void>`.
 
 - [ ] **Step 1: Write the failing tests** in `tests/core/schedule.test.ts`, with `now = new
@@ -742,7 +742,7 @@ manual check runs there, never in a vault with real notes.
   - `groupSchedule` puts `Groceries` before `Home` on the same day, keeps file order within a list,
     and leaves out an empty `tomorrow`.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
-- [ ] **Step 3: Build `ScheduleView`.** `getDisplayText` is "Schedule", `getIcon` `calendar`.
+- [ ] **Step 3: Build `ScheduleView`.** `getDisplayText` is "Schedule", `getIcon` `calendar-clock`.
   - **Finding lists:** `vault.getMarkdownFiles()` filtered on `isMarkerValue(getFileCache(file)?.
     frontmatter)`, each read with `vault.cachedRead`, and `scheduledItems` per file with
     `contentStartLine(text)`. It keeps each list's items by path.
@@ -755,7 +755,7 @@ manual check runs there, never in a vault with real notes.
     cache `changed` for a file that is or was a list replaces that file's items from the event's
     `data` and redraws. A vault `rename` or `delete` of one does the same. All through
     `registerEvent`; no timer.
-  - **Opening:** the "Open schedule" command and a `calendar` ribbon icon reuse a leaf of the type
+  - **Opening:** the "Open schedule" command and a `calendar-clock` ribbon icon reuse a leaf of the type
     if there is one, with `setActiveLeaf(leaf, {focus: true})`; else `getLeaf('tab').setViewState
     ({type: VIEW_TYPE_SCHEDULE, active: true})`.
 - [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.

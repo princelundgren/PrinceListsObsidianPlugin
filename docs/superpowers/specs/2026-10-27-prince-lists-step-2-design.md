@@ -219,8 +219,9 @@ current todo app. Step one's own "Done when" doesn't change.
 - **On a row (call):** the calendar icon and a short day at the row's end: "Today", "Tomorrow", a
   weekday for the rest of the next seven days, or else the date in the locale's short form through
   Obsidian's `moment`, which follows the language set in Obsidian. A past day shows its date.
-- **The Schedule view** is a view of its own, opened with an "Open schedule" command and a
-  calendar ribbon icon **(call)**. It gathers, from every list in the vault, the items with a When
+- **The Schedule view** is a view of its own, opened with an "Open schedule" command and a ribbon
+  icon **(call)**. The icon is Lucide's `calendar-clock`, not `calendar`, which the Daily notes
+  core plugin's ribbon button uses **(owner, 2026-10-27)**. It gathers, from every list in the vault, the items with a When
   that are open or done but not yet archived.
 - **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
   ribbon hidden or doesn't know the command.
@@ -341,8 +342,8 @@ These go into step one's "Not in step one" list:
 - **A "New list" button on Obsidian's New tab screen (owner, 2026-10-27),** back from "Not wanted
   at all". Obsidian documents no API for that screen: `obsidian.d.ts` 1.14.4 has nothing for it,
   and plugins that add buttons there change Obsidian's own DOM, which this project's rules forbid.
-  It waits until Obsidian documents a route. Until then, New list is on the ribbon, in the command
-  palette (with any hotkey you give it) and in a folder's menu.
+  It waits until Obsidian documents a route. Until then, a list is created from the ribbon, the
+  command palette (with any hotkey you give it) or a folder's menu.
 - **A command that inserts a list into a note,** instead of typing the code block.
 
 ## Risks to check during the build
