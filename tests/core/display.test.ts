@@ -15,7 +15,7 @@ const sectionsOf = (
 	return visibleSections(lines, model, now, { showArchived, query, keepLine, collapsed });
 };
 
-const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false) => ({
+const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false, when: string | null = null) => ({
 	kind: 'item',
 	titleLine,
 	title,
@@ -23,6 +23,7 @@ const row = (titleLine: number, title: string, done = false, label = title, arch
 	done,
 	archived,
 	starred,
+	when,
 });
 const untouched = (start: number, text: string) => ({ kind: 'untouched', start, text });
 
@@ -33,7 +34,7 @@ describe('visibleSections', () => {
 			{ heading: null, rows: [row(5, 'item before any heading')], collapsed: false },
 			{
 				heading: { line: 7, text: 'Kitchen' },
-				rows: [row(8, 'cutting board'), row(9, 'freezer storage boxes'), row(17, 'glass jars 1 l', true)],
+				rows: [row(8, 'cutting board'), row(9, 'freezer storage boxes', false, 'freezer storage boxes', false, false, '2026-10-21'), row(17, 'glass jars 1 l', true)],
 				collapsed: false,
 			},
 			{ heading: { line: 19, text: 'Living room' }, rows: [row(20, 'balcony chair')], collapsed: false },

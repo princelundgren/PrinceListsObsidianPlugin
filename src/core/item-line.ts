@@ -40,7 +40,7 @@ const TRAILING_FIELDS = [
 ].map((source) => new RegExp(source));
 
 const ITEM_PATTERN = /^(\s*(?:[-*+]|\d+[.)])[ \t]+\[)([^\]])(\] )(.*)$/;
-const BLOCK_ID_PATTERN = / \^[A-Za-z0-9-]+$/;
+export const BLOCK_ID_PATTERN = / \^[A-Za-z0-9-]+$/;
 const MARK_SOURCE = `✔${VS16} +\\d{4}-\\d{2}-\\d{2}(?: \\d{2}:\\d{2})?`;
 export const MARK_PATTERN = new RegExp(MARK_SOURCE);
 const MARKS_PATTERN = new RegExp(`(?: +${MARK_SOURCE})+$`);

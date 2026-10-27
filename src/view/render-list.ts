@@ -3,11 +3,12 @@ import { visibleSections, withoutRange, type ItemRow, type SectionRows } from '.
 import type { LineRange } from '../core/follow';
 import type { Line } from '../core/lines';
 import type { ListModel } from '../core/parse';
+import { dayOf } from '../core/when';
 import { addCollapseArrow } from './collapse';
 import { addHiddenLabel } from './dom';
 import type { PrinceListView } from './list-view';
 import { renderInline } from './notes';
-import { addStar } from './row-marks';
+import { addStar, addWhen } from './row-marks';
 
 export const ITEM_CLASS = 'princelists-item';
 export const CHECKBOX_CLASS = 'princelists-checkbox';
@@ -129,6 +130,7 @@ export function buildRow(view: PrinceListView, row: ItemRow, blocks: Map<HTMLEle
 	const title = rowEl.createDiv({ cls: 'princelists-item-title' });
 	record(blocks, rowEl, renderInline(view, title, row.title));
 	if (row.starred) addStar(rowEl);
+	if (row.when !== null) addWhen(rowEl, row.when, dayOf(new Date()));
 	showDone(rowEl, row);
 	return rowEl;
 }

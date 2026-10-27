@@ -5,6 +5,7 @@ import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
 import type { Line } from './lines';
 import type { ItemBlock, ListModel } from './parse';
 import { splitStar } from './star';
+import { whenOf } from './when';
 
 export interface ItemRow {
 	kind: 'item';
@@ -16,6 +17,8 @@ export interface ItemRow {
 	/** Done more than 24 hours ago, so hidden unless "Show archived" is on. */
 	archived: boolean;
 	starred: boolean;
+	/** The item's When, `YYYY-MM-DD`, or null. */
+	when: string | null;
 }
 
 /** A block the plugin leaves alone, such as a paragraph, table or code block, as its raw lines. */
@@ -112,7 +115,7 @@ export function itemRow(text: string, titleLine: number, now: Date): ItemRow {
 	const { plain, star } = splitStar(parts.title);
 	const label = plain === '' ? (parts.marks + parts.tail).trim() : plain;
 	const done = isDoneStatus(parts.status);
-	return { kind: 'item', titleLine, title: plain, label, done, archived: done && isArchived(text, now), starred: star !== '' };
+	return { kind: 'item', titleLine, title: plain, label, done, archived: done && isArchived(text, now), starred: star !== '', when: whenOf(text) };
 }
 
 function firstLine(row: ListRow): number {

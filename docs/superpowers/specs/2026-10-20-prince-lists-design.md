@@ -418,7 +418,8 @@ stays, and the blank line stays with it.
 ### Dates (owner: the Tasks emoji format)
 
 - **Reserved now, used later** (step two writes ⏳ as an item's When):
-  - ⏳ scheduled, the day you plan to do it
+  - ⏳ scheduled, the day you plan to do it. In step two it is the item's When, set in the card's
+    When row (step two's design, "When").
   - 📅 due, a deadline
   - 🛫 start
   - 🔁 repeat
@@ -522,7 +523,8 @@ stays, and the blank line stays with it.
 - **While filtering,** Cmd+F's field shows below the list note (step two's design, "Cmd+F").
 - **Headings** are bold, with a thin rule below. In step two, an arrow left of each collapses its
   section (step two's design, "Collapsing a heading").
-- **Items** show a checkbox and a title, one per line.
+- **Items** show a checkbox and a title, one per line. In step two a row also shows its star and
+  its When.
 - **Item titles and headings are rendered as Markdown (owner, 2026-10-21),** with Obsidian's own
   rendering, as in any note: bold is bold, and links can be clicked. A click on a link in a row
   opens the link. It doesn't tick the item or open the card.
@@ -554,6 +556,7 @@ stays, and the blank line stays with it.
   you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was, except that doubled
   `✔` marks collapse to the earliest and a leftover `✔` on an open line is dropped (see
   Completion). Step two hides an item's star too, and saving puts it back once.
+- **An item's When (step two):** the card's When row, under the title, sets or clears it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
   not on every keystroke. Switching to another window or app doesn't leave the field. The rename
   uses `fileManager.renameFile`, which updates links according to the user's link settings. Escape

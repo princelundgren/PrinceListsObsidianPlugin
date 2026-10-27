@@ -306,6 +306,64 @@ textarea.princelists-heading-field {
 	fill: currentColor;
 }
 
+.princelists-when {
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: var(--size-2-1);
+	height: calc(var(--line-height-normal) * 1em);
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.princelists-when-icon {
+	display: flex;
+	--icon-size: var(--icon-xs);
+}
+
+.princelists-card-when {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+}
+
+/* The date input lies over the button, invisible, so a click or tap opens its picker. */
+.princelists-when-picker {
+	position: relative;
+}
+
+.princelists-when-button {
+	display: flex;
+	align-items: center;
+	gap: var(--size-2-1);
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.princelists-when-empty {
+	color: var(--text-faint);
+}
+
+/* Two classes, to outrank Obsidian's own `input[type="date"]` rule. */
+.princelists-when-picker > .princelists-when-input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.princelists-when-clear {
+	height: auto;
+	padding: 0 var(--size-2-1);
+	background: none;
+	border: none;
+	box-shadow: none;
+	color: var(--text-faint);
+	--icon-size: var(--icon-xs);
+}
+
 /* The hint sits centered in the space below the list note. */
 .princelists-sizer.princelists-is-empty {
 	display: flex;
