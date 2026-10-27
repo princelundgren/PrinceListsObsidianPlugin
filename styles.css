@@ -519,10 +519,17 @@ button.princelists-collapse {
 	color: var(--text-muted);
 }
 
+/* The list's name goes under the title, so it doesn't read as part of it. */
+.princelists-schedule-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
 .princelists-schedule-list {
-	flex: none;
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
+	overflow-wrap: break-word;
 }
 
 .princelists-schedule-empty {
