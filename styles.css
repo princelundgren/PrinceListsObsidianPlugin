@@ -376,16 +376,6 @@ button.princelists-card-star.is-starred svg {
 	cursor: pointer;
 }
 
-button.princelists-when-clear {
-	height: auto;
-	padding: 0 var(--size-2-1);
-	background: none;
-	border: none;
-	box-shadow: none;
-	color: var(--text-faint);
-	--icon-size: var(--icon-xs);
-}
-
 /* The hint sits centered in the space below the list note. */
 .princelists-sizer.princelists-is-empty {
 	display: flex;
