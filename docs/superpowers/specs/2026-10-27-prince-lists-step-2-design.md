@@ -203,8 +203,12 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day, except
   for today's items in Today.
 - **Ticking works in place.** A repeating item (🔁) shows the same message as in its list instead
-  of ticking. A click on a row opens its list with that item's card open **(call)**. Rows can't
-  be dragged: their order comes from the days.
+  of ticking. A tick is worked out on the text the view last read, so a list changed since then
+  shows "This list changed elsewhere. Try again." and writes nothing. Rows can't be dragged: their
+  order comes from the days.
+- **A click on a row,** away from a link, opens its list with that item's card open **(call)**: in
+  a tab whose list view already shows that list, else in a new tab. The card opens only while the
+  item's line still reads as the view showed it, so an edit since then opens the list with no card.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
   metadata cache's `changed` event and the vault's `rename` and `delete`. Like a list, it runs no
   timer, so a view left open over midnight moves its items when it next gets focus.
