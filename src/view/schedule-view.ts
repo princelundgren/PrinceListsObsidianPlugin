@@ -1,4 +1,4 @@
-import { ItemView, Notice, TFile, type CachedMetadata, type Component, type TAbstractFile } from 'obsidian';
+import { ItemView, Notice, Platform, TFile, type CachedMetadata, type Component, type TAbstractFile } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
@@ -25,6 +25,8 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	later: 'Later',
 };
 
+const SCHEDULE_ABOUT = 'Every item with a When, from all your lists, by day. To plan an item, open it in its list and pick a day with the calendar icon on its card.';
+
 // A list as the view last read it: a tick is worked out on that text.
 interface ReadList {
 	text: string;
@@ -41,6 +43,8 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	private readonly updatedPaths = new Set<string>();
 	private refreshes = 0;
 	private blocks: Component[] = [];
+	// Its own scrolling element, as a list's, so the page takes the list's margins.
+	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
 
 	getViewType(): string {
 		return VIEW_TYPE_SCHEDULE;
@@ -55,7 +59,8 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	}
 
 	async onOpen(): Promise<void> {
-		this.contentEl.addClass('princelists-schedule');
+		this.contentEl.addClass('princelists-content', 'princelists-schedule');
+		this.contentEl.toggleClass('princelists-is-mobile', Platform.isMobile);
 		const { workspace, metadataCache, vault } = this.app;
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) void this.refresh();
@@ -165,10 +170,12 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	}
 
 	private draw(): void {
-		const scroll = this.contentEl.scrollTop;
+		const scroll = this.scrollEl.scrollTop;
 		this.removeBlocks();
-		this.contentEl.empty();
-		const sizer = this.contentEl.createDiv({ cls: 'princelists-sizer' });
+		this.scrollEl.empty();
+		const sizer = this.scrollEl.createDiv({ cls: 'princelists-sizer' });
+		sizer.createDiv({ cls: 'princelists-schedule-title', text: 'Schedule', attr: { role: 'heading', 'aria-level': 1 } });
+		sizer.createDiv({ cls: 'princelists-schedule-about', text: SCHEDULE_ABOUT });
 		const today = dayOf(new Date());
 		const groups = groupSchedule([...this.lists.values()].flatMap((list) => list.items), today);
 		if (groups.length === 0) sizer.createDiv({ cls: 'princelists-schedule-empty', text: 'No items have a When.' });
@@ -177,7 +184,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 			const list = sizer.createEl('ul', { cls: ITEMS_CLASS });
 			for (const item of items) list.append(this.buildRow(item, group === 'today' && item.day === today ? null : today));
 		}
-		this.contentEl.scrollTop = scroll;
+		this.scrollEl.scrollTop = scroll;
 	}
 
 	// `today` is null for an item whose day goes without saying: today's, in Today.

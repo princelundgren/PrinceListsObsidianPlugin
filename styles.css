@@ -436,6 +436,26 @@ button.princelists-collapse {
 	opacity: 1;
 }
 
+/* Room below the last row, so it can scroll clear of mobile's navigation bar. */
+.princelists-is-mobile.princelists-schedule .princelists-scroll {
+	padding-bottom: calc(var(--size-4-8) + var(--view-bottom-spacing, 0px));
+}
+
+/* The list's title style, so the Schedule reads as a page beside the lists. */
+.princelists-schedule-title {
+	margin: 0 0 var(--size-4-2);
+	font-family: var(--inline-title-font);
+	font-size: var(--inline-title-size);
+	font-weight: var(--inline-title-weight);
+	line-height: var(--inline-title-line-height);
+	color: var(--inline-title-color);
+}
+
+.princelists-schedule-about {
+	margin-bottom: var(--size-4-4);
+	color: var(--text-muted);
+}
+
 .princelists-schedule-list {
 	flex: none;
 	color: var(--text-muted);
