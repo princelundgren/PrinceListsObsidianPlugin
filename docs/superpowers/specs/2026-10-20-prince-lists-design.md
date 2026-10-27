@@ -882,14 +882,18 @@ needs no code.
   - The Undo button after a delete and Cmd+Z take the same step back, and Cmd+Shift+Z deletes again.
     Once Cmd+Z has taken the delete back, the button does nothing while the list is as Cmd+Z left
     it.
-  - In a field, Cmd+Z is left to the browser's text undo, not the list's history. That doesn't take
-    back the link to a picture pasted into the notes, since the browser doesn't count the plugin's
-    insert as typing; Cmd+Z after leaving the field does (the 1b plan, Task 4, check 10).
-  - That undo changes only the field with focus. The browser keeps one text history for the whole
-    page, so once the field has nothing left to undo, Cmd+Z does nothing rather than reach typing in
-    another field, which nothing would save.
-  - The history holds 100 steps, and only the list's text: undoing a picture's link leaves the
-    picture's file.
+  - In a card's title and notes, Cmd+Z and Cmd+Shift+Z step through that field's own history, not
+    the list's **(owner, 2026-10-27)**. The browser drops a field's undo once a script changes its
+    text, as a pasted picture's link does, so the field keeps its own while it has focus: a run of
+    typing in one place is one step, and each change the plugin makes is another. Once the field has
+    nothing left to undo, Cmd+Z does nothing. Leaving the field, or the window, closes it and ends
+    its history; Cmd+Z after that steps through the list's history, as before.
+  - Other fields, such as the list's title and note, keep the browser's text undo. It changes only
+    the field with focus. The browser keeps one text history for the whole page, so once the field
+    has nothing left to undo, Cmd+Z does nothing rather than reach typing in another field, which
+    nothing would save.
+  - The list's history holds 100 steps, and only the list's text: undoing a picture's link leaves
+    the picture's file.
   - In 1a, the only undo is the Undo button shown after a delete.
 
 ## Technical approach

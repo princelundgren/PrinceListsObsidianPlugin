@@ -33,6 +33,7 @@ import {
 	typeListNote,
 } from './fields';
 import { filterBlur, filterInput, filterKeyDown } from './filter';
+import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
@@ -46,7 +47,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
-	view.registerDomEvent(contentEl, 'beforeinput', (evt) => keepUndoInFocusedField(view, evt));
+	view.registerDomEvent(contentEl, 'beforeinput', (evt) => onBeforeInput(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
 	view.registerDomEvent(contentEl, 'keydown', (evt) => onKeyDown(view, evt));
@@ -151,12 +152,21 @@ function swallowClick(view: PrinceListView, evt: MouseEvent): void {
 	evt.stopPropagation();
 }
 
-// The page has one undo history, so Cmd+Z in one field can reach typing in a field without focus,
-// which nothing would save. That undo's beforeinput targets the other field while focus is still in
-// this one (observed in Obsidian 1.14.4 on macOS); focus moves only with its input event.
-function keepUndoInFocusedField(view: PrinceListView, evt: InputEvent): void {
+// A card field undoes from its own history. Elsewhere the page has one undo history, so Cmd+Z in one
+// field can reach typing in a field without focus, which nothing would save. That undo's beforeinput
+// targets the other field while focus is still in this one (observed in Obsidian 1.14.4 on macOS);
+// focus moves only with its input event.
+function onBeforeInput(view: PrinceListView, evt: InputEvent): void {
+	const focused = view.contentEl.doc.activeElement;
+	const field = focused?.instanceOf(HTMLTextAreaElement) ? focused : null;
 	const isHistory = evt.inputType === 'historyUndo' || evt.inputType === 'historyRedo';
-	if (isHistory && evt.target !== view.contentEl.doc.activeElement) evt.preventDefault();
+	if (!isHistory) {
+		if (field && evt.target === field) beforeFieldInput(field, evt.inputType);
+	} else if (field && stepField(field, evt.inputType === 'historyUndo' ? 'undo' : 'redo')) {
+		evt.preventDefault();
+	} else if (evt.target !== focused) {
+		evt.preventDefault();
+	}
 }
 
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
@@ -172,6 +182,7 @@ function onInput(view: PrinceListView, evt: Event): void {
 	else if (target.hasClass(NOTES_EDITOR_CLASS)) notesInput(view, target);
 	else if (target.hasClass(NOTE_EDITOR_CLASS)) typeListNote(view);
 	else if (target.hasClass(TITLE_CLASS) || target.hasClass(HEADING_FIELD_CLASS)) keepOneLine(target);
+	afterFieldInput(target);
 }
 
 function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
@@ -216,6 +227,7 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 function onFocusIn(view: PrinceListView, evt: FocusEvent): void {
 	const target = evt.targetNode;
 	if (!target?.instanceOf(HTMLTextAreaElement)) return;
+	if (view.card?.el.contains(target)) startFieldHistory(target);
 	if (target.hasClass(CARD_TITLE_CLASS) && view.card?.el.contains(target)) view.editing.focusTitle();
 	else if (target.hasClass(TITLE_CLASS)) beginListTitle(view, target);
 }
@@ -235,6 +247,7 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 	const card = view.card;
 	const inCard = card?.el.contains(target) ?? false;
 	if (target.instanceOf(HTMLTextAreaElement)) {
+		endFieldHistory(target);
 		// Moving to another window or app doesn't leave the list title or the heading field: they keep
 		// focus, which comes back to them on return, and commit when they lose it in the window.
 		const inWindow = target.doc.hasFocus();
