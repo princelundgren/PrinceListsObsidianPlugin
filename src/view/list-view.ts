@@ -1,4 +1,4 @@
-import { type Component, type Menu, Notice, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
+import { type Component, type Menu, Notice, Platform, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
@@ -11,6 +11,7 @@ import { buildNewItemButton } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
 import { fitHeight } from './dom';
 import { enableMouseDrag } from './drag-mouse';
+import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
 import { rereadListNote, type ListNoteSession, type ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
@@ -119,6 +120,7 @@ export class PrinceListView extends TextFileView {
 		await super.onOpen();
 		registerFieldEvents(this);
 		enableMouseDrag(this, this.contentEl);
+		if (Platform.isMobile) enableTouchDrag(this);
 		this.newItemButton = buildNewItemButton(this);
 	}
 
