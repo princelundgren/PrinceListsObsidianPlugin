@@ -17,11 +17,11 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 - **Ticking an item** grays it out where it is. Twenty-four hours later it's archived and hidden,
   and the checkbox icon in the pane's header, or "Show archived" in its ⋯ menu, brings archived
   items back.
-- **It's built for desktop and mobile.** Use the floating "+" to add items. On desktop,
-  right-click for actions and drag items with the mouse. On mobile, hold an item for half a
-  second and drag it; item actions are in the ⋯ button on an open item, and tapping a heading
-  opens its menu. It has been checked on macOS and an iPhone so far, not yet on Windows, Linux,
-  Android or an iPad.
+- **It's built for desktop and mobile.** Use the "+" in the pane's header to add items, or on
+  mobile the floating "+" too. On desktop, right-click for actions and drag items with the mouse.
+  On mobile, hold an item for half a second and drag it; item actions are in the ⋯ button on an
+  open item, and tapping a heading opens its menu. It has been checked on macOS and an iPhone so
+  far, not yet on Windows, Linux, Android or an iPad.
 - **Pictures:** paste or drop one into an open item's notes. It's saved where Obsidian saves
   attachments, and the notes link to it.
 - **Cmd+Z and Cmd+Shift+Z** (Ctrl+Z and Ctrl+Shift+Z on Windows and Linux) undo and redo the
