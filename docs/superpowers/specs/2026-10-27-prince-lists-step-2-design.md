@@ -271,12 +271,13 @@ current todo app. Step one's own "Done when" doesn't change.
 ### Collapsing a heading (owner)
 
 - **An arrow left of a heading collapses and expands its section,** in the margin as Obsidian's
-  own fold arrows are: Lucide's `chevron-down` while open, `chevron-right` while collapsed
-  **(call)**. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
+  own fold arrows are, and drawn as they are (owner, 2026-10-27): Obsidian's `right-triangle`
+  icon in `--collapse-icon-color`, turned to point right and in `--collapse-icon-color-collapsed`
+  while collapsed. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
   on the iPhone.
 - **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. The
-  iPhone has no hover, so there it always shows. Its accessible name is "Collapse" or "Expand"
-  **(call)**.
+  iPhone has no hover, so there it always shows. It shows no tooltip: its accessible name is
+  "Collapse section", with `aria-expanded` saying whether the section is open **(call)**.
 - **Collapsed, the section's rows hide;** the heading stays. The items before the first heading
   have no heading, so they can't collapse. The open card's item still shows in a collapsed
   section, so a card never vanishes under its heading **(call)**.

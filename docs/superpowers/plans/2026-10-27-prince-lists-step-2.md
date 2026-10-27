@@ -78,7 +78,7 @@ manual check runs there, never in a vault with real notes.
   - "Couldn't turn {name} into a list.", where `{name}` is the note's name **(call)**.
   - "Press Cmd+Enter or + to add an item", "Press Ctrl+Enter or + to add an item" and "Tap + to add
     an item".
-  - The collapse arrow's `aria-label` "Collapse" or "Expand".
+  - The collapse arrow's hidden label "Collapse section", with `aria-expanded`.
   - The filter field's placeholder "Find in list"; the card's gray "When"; the clear button's
     `aria-label` "Remove the day"; the day labels "Today" and "Tomorrow".
   - The Schedule view's title "Schedule", its groups "Today", "Tomorrow", "Coming week", "Next
@@ -555,8 +555,8 @@ manual check runs there, never in a vault with real notes.
 - Produces, on `PrinceListView`: `collapsed: CollapsedHeadings`, which `clear()` empties, so every
   heading is open each time a list opens.
 - Produces, in `src/view/collapse.ts`: `addCollapseArrow(headingEl: HTMLElement, collapsed:
-  boolean): void`, a `button` with the class `princelists-collapse`, `setIcon` `chevron-down` or
-  `chevron-right`, and the `aria-label` "Collapse" or "Expand"; and `expandFor(view:
+  boolean): void`, a `button` with the class `princelists-collapse`, `setIcon` `right-triangle`,
+  the hidden label "Collapse section" and `aria-expanded`; and `expandFor(view:
   PrinceListView, place: ItemPlace): void`, which expands the section the place's line is in.
 
 - [ ] **Step 1: Write the failing tests.** In `tests/core/collapsed.test.ts`, on
