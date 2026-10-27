@@ -15,6 +15,7 @@ import {
 	notesInput,
 	openCard,
 } from './card';
+import { clearWhen, whenChange, whenClick, WHEN_CLEAR_CLASS, WHEN_INPUT_CLASS } from './card-when';
 import { checklistClick } from './checklist';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
@@ -44,6 +45,7 @@ export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
+	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
 	view.registerDomEvent(contentEl, 'keydown', (evt) => onKeyDown(view, evt));
 	view.registerDomEvent(contentEl, 'focusin', (evt) => onFocusIn(view, evt));
 	view.registerDomEvent(contentEl, 'focusout', (evt) => onFocusOut(view, evt));
@@ -58,6 +60,11 @@ export function registerFieldEvents(view: PrinceListView): void {
 	}
 }
 
+function onChange(view: PrinceListView, evt: Event): void {
+	const input = view.card?.el.querySelector<HTMLInputElement>(`.${WHEN_INPUT_CLASS}`);
+	if (input && evt.target === input) whenChange(view, input);
+}
+
 function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
 	if (!target) return;
@@ -70,6 +77,14 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (handleLinkClick(view, evt, target)) return;
+	if (target.closest(`.${WHEN_CLEAR_CLASS}`)) {
+		clearWhen(view);
+		return;
+	}
+	if (target.instanceOf(HTMLInputElement) && target.hasClass(WHEN_INPUT_CLASS)) {
+		whenClick(target);
+		return;
+	}
 	if (target.closest(`.${OPEN_AS_MARKDOWN_CLASS}`)) {
 		if (view.file) void openAsMarkdown(view.leaf, view.file);
 		return;

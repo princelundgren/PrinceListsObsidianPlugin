@@ -8,6 +8,7 @@ import { parseItemLine } from '../core/item-line';
 import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
+import { buildWhenRow, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
@@ -116,6 +117,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 		setLine(card.el, row.titleLine);
 		card.el.querySelector(`.${HIDDEN_LABEL_CLASS}`)?.setText(row.label);
 		showDone(card.el, row);
+		showWhen(card, row.when);
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	const focused = card.el.doc.activeElement;
@@ -228,6 +230,7 @@ function createCardElement(): HTMLElement {
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
 	body.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
+	buildWhenRow(body);
 	body.createDiv({ cls: CARD_NOTES_CLASS });
 	const actions = el.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');

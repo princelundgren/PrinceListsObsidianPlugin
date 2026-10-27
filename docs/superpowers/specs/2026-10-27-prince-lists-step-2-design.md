@@ -44,8 +44,8 @@ current todo app. Step one's own "Done when" doesn't change.
 - **In the view it never shows as `⏳`:** a row shows Lucide's `calendar` icon and the day
   (owner: the icon, not the hourglass).
 - **Setting a When (call)** on an item that has one replaces its date in place. A new one goes at
-  the end of the trailing Tasks fields, before a block ID (` ^id`) and trailing whitespace if the
-  line has them. Clearing it removes the field and the space before it.
+  the end of the trailing Tasks fields and tags, so after any tags, before a block ID (` ^id`)
+  and trailing whitespace if the line has them. Clearing it removes the field and the space before it.
 - **Several scheduled fields on one line (call),** for example after a Sync merge: the view shows
   the earliest, and setting or clearing a When replaces them all.
 - **A day, no time:** Tasks' format has none.
