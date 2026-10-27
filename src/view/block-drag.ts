@@ -94,7 +94,7 @@ function queueBlockMove(block: ListBlock, line: number, place: ItemPlace): void 
 			const from = item.line;
 			const text = block.editing.text;
 			const moved = tryEdit(() => planItemMove(text, contentStartLine(text), from, to));
-			if (moved && (await block.write(moved.next, text, moved.edit)) === 'written' && !block.field) block.draw();
+			if (moved && (await block.write(moved.next, text, moved.edit)) === 'written' && !block.field) block.drawIfChanged();
 		} finally {
 			block.editing.untrack(item);
 			if (anchor) block.editing.untrack(anchor);
