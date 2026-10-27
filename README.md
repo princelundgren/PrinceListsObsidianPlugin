@@ -2,9 +2,9 @@
 
 Todo lists for Obsidian, kept as plain Markdown notes.
 
-> **Work in progress.** The first part, 1a, is built and checked on the Mac and the iPhone. Next is
-> a two-week trial with a real list, while 1b adds dragging on the iPhone, pasting pictures and
-> Cmd+Z undo. You can follow along in the
+> **Work in progress.** Step one's two parts are built and checked on the Mac and the iPhone: 1a
+> in `0.1.0`, and 1b, which adds dragging on the iPhone, pictures in cards and Cmd+Z undo, in
+> `0.2.0`. A two-week trial with a real list comes next. You can follow along in the
 > [design](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and the pull requests.
 
 ## What it does
@@ -16,13 +16,17 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 - **Ticking an item** grays it out where it is. Twenty-four hours later it's archived and hidden,
   and "Show archived" brings archived items back.
 - **It's built for the Mac and the iPhone.** Use the floating "+" to add items. On the Mac,
-  right-click for actions and drag items with the mouse. On the iPhone, item actions are in the ⋯
-  button on an open item, and tapping a heading opens its menu. Other devices aren't tested.
+  right-click for actions and drag items with the mouse. On the iPhone, hold an item for half a
+  second and drag it; item actions are in the ⋯ button on an open item, and tapping a heading
+  opens its menu. Other devices aren't tested.
+- **Pictures:** paste or drop one into an open item's notes. It's saved where Obsidian saves
+  attachments, and the notes link to it.
+- **Cmd+Z and Cmd+Shift+Z** undo and redo the list's own edits on the Mac. After a delete, an Undo
+  button brings the item back on any device.
 
 ## Installing
 
-PrinceLists isn't in Obsidian's community plugins yet, so it's installed by hand from a release,
-starting with `0.1.0` once it's published:
+PrinceLists isn't in Obsidian's community plugins yet, so it's installed by hand from a release:
 
 1. Download `main.js`, `manifest.json` and `styles.css` from the
    [releases page](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases).
