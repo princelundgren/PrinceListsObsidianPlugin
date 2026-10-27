@@ -339,9 +339,12 @@ textarea.princelists-heading-field {
 	gap: var(--size-4-1);
 }
 
-/* The date input lies over the button, invisible, so a click or tap opens its picker. */
+/* The date input lies over the button, invisible, so a click or tap opens its picker. Safari on iOS
+   keeps a date input at least its native width, so the picker clips it to the button's box and it
+   can't catch taps meant for the star beside it. */
 .princelists-when-picker {
 	position: relative;
+	overflow: hidden;
 }
 
 .princelists-when-button {
