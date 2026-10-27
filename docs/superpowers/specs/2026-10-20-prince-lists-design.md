@@ -524,6 +524,8 @@ stays, and the blank line stays with it.
   and the rendered notes.
   - Notes use Obsidian's own Markdown rendering, so pictures, links and embeds look the way they
     do in any note.
+  - **Empty notes show a gray "Notes" three lines tall (owner, 2026-10-27),** and the notes field
+    is at least that tall while it's being typed in, so it's easy to tap.
   - Links in a card can be clicked.
   - On the Mac, right-clicking an internal link in a card shows Obsidian's own link menu
     **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**.
@@ -603,6 +605,13 @@ stays, and the blank line stays with it.
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
   the list scrolls, on the Mac and the iPhone. Its accessible name is "New item" **(call)**.
+  - **On desktop it sits 32 px higher (owner, 2026-10-27),** clear of Obsidian's status bar, which
+    floats over the bottom right of the window. The iPhone and iPad have no status bar there.
+    Obsidian documents no variable for the bar's height, so the lift is fixed on purpose:
+    `--size-4-8`, a step of Obsidian's spacing scale, a little more than the 27 to 31 px the bar
+    measured in 1.14.5. Measuring the bar would mean reading Obsidian's own DOM. A theme with a
+    taller bar can still touch the "+"'s lower edge, and with the bar hidden the "+" sits a little
+    higher than it must.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.
