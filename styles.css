@@ -373,7 +373,7 @@ button.princelists-card-star.is-starred svg {
 	cursor: pointer;
 }
 
-.princelists-when-clear {
+button.princelists-when-clear {
 	height: auto;
 	padding: 0 var(--size-2-1);
 	background: none;
