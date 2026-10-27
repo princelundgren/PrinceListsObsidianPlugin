@@ -151,8 +151,6 @@ function swallowClick(view: PrinceListView, evt: MouseEvent): void {
 	evt.stopPropagation();
 }
 
-// The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
-// among the view's own few textareas.
 // The page has one undo history, so Cmd+Z in one field can reach typing in a field without focus,
 // which nothing would save.
 function keepUndoInFocusedField(view: PrinceListView, evt: InputEvent): void {
@@ -160,6 +158,8 @@ function keepUndoInFocusedField(view: PrinceListView, evt: InputEvent): void {
 	if (isHistory && evt.target !== view.contentEl.doc.activeElement) evt.preventDefault();
 }
 
+// The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
+// among the view's own few textareas.
 function onInput(view: PrinceListView, evt: Event): void {
 	if (view.filterEl && evt.target === view.filterEl) {
 		filterInput(view);
