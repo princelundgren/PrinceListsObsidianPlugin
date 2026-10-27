@@ -1044,7 +1044,12 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `file-explorer-context-menu`, so it offers "New list" (confirmed on the device in the 1a
   checks).
 - **The list scrolls in an element of its own,** inside the view's `contentEl`, so nothing relies on
-  Obsidian's undocumented `overflow` on `.view-content`. It fills `contentEl` and takes its padding.
+  Obsidian's undocumented `overflow` on `.view-content`. It fills `contentEl`.
+- **The list is laid out as a Markdown view is (owner, 2026-10-27):** the scrolling element takes
+  the documented `--file-margins` as its padding, and what it holds sits centered at the documented
+  `--file-line-width`, so titles and rows line up with a note's. That's always the readable line
+  width: no documented API reads Obsidian's "Readable line length" setting, so with it off a
+  note fills the pane while a list doesn't.
 - **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
