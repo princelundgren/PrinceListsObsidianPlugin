@@ -289,6 +289,12 @@ These go into step one's "Not in step one" list:
    metadata cache reports the marker, before the note switches to the list view.
 7. **The Schedule view on a large vault:** it reads only the lists' files, and stays quick with a
    few hundred lists.
+8. **A heading on the iPhone:** a hold-and-move drags it, and a tap still opens the heading menu,
+   with neither firing the other.
+9. **Moving a section, byte for byte:** a setext heading moved under a paragraph gets its empty
+   line or is refused, never joining the paragraph. A section moved off the end of a file without
+   a final newline takes the file's usual line ending, and the new last line takes the old last
+   line's, as AGENTS.md requires. Moving it back gives the original bytes.
 
 ## Order (call)
 
