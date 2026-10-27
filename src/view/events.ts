@@ -17,7 +17,7 @@ import {
 	openCard,
 } from './card';
 import { toggleCardStar } from './card-star';
-import { clearWhen, whenChange, whenClick, WHEN_CLEAR_CLASS, WHEN_INPUT_CLASS } from './card-when';
+import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { checklistClick } from './checklist';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
@@ -79,10 +79,6 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (handleLinkClick(view.app, view.sourcePath, evt, target)) return;
-	if (target.closest(`.${WHEN_CLEAR_CLASS}`)) {
-		clearWhen(view);
-		return;
-	}
 	if (target.instanceOf(HTMLInputElement) && target.hasClass(WHEN_INPUT_CLASS)) {
 		whenClick(target);
 		return;

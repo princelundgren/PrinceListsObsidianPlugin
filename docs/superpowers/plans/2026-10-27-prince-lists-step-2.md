@@ -79,8 +79,8 @@ manual check runs there, never in a vault with real notes.
   - "Press Cmd+Enter or + to add an item", "Press Ctrl+Enter or + to add an item" and "Tap + to add
     an item".
   - The collapse arrow's hidden label "Collapse section", with `aria-expanded`.
-  - The filter field's placeholder "Find in list"; the date input's `aria-label` "When"; the clear button's
-    `aria-label` "Remove the day"; the day labels "Today" and "Tomorrow".
+  - The filter field's placeholder "Find in list"; the date input's `aria-label` "When"; the day labels
+    "Today" and "Tomorrow".
   - The Schedule view's title "Schedule", its groups "Today", "Tomorrow", "Next 7 days" and
     "Later" (owner, 2026-10-27), and "No items have a When." when every group is empty **(call)**.
   - In a block: the button "New item", the trash button's `aria-label` "Delete item", and the gray
@@ -660,14 +660,14 @@ manual check runs there, never in a vault with real notes.
   the star: a button with the class `princelists-when-button` showing `addWhen`'s content, or the
   `calendar` icon; an `input
   type="date"` laid over the button at its size with `opacity: 0`, so a click or tap lands on the
-  input itself; and a clear button with the `x` icon and the `aria-label` "Remove the day", shown
-  only with a When. `refreshCard` calls `showWhen`.
+  input itself. There is no clear button (owner, 2026-10-27): the picker's own Clear or Reset
+  removes the day. `refreshCard` calls `showWhen`.
   - On the iPhone the tap on the input opens its picker; Safari on iOS has no `showPicker()`
     **(call)**. On desktop, where Chromium opens a date input's picker from its own calendar icon,
     a click on the input also calls `input.showPicker()` when `Platform.isDesktopApp`.
   - A delegated `change` listener on `contentEl` sends the input to `whenChange`, which queues
     `queueLineEdit(view, selected, (l) => setWhen(l, input.value || null))`: an empty value, which
-    the iPhone's picker gives on Reset, clears it. The clear button does the same with `null`.
+    the picker gives on Clear or Reset, clears it.
 - [ ] **Step 5: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 6: Check it by hand on the Mac and the iPhone.**
   1. **Design risk 5:** a click on the When on the Mac, and a tap on the iPhone, land on the transparent
