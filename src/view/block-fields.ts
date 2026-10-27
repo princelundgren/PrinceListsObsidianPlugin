@@ -145,7 +145,7 @@ export function deleteBlockItem(block: ListBlock, titleLine: number): void {
 	});
 }
 
-// Right-click on the Mac. The delete waits for the choice, so it goes only if the text is still what
+// Right-click on desktop. The delete waits for the choice, so it goes only if the text is still what
 // the menu opened on.
 export function showBlockItemMenu(block: ListBlock, evt: MouseEvent, titleLine: number): void {
 	const seen = block.editing.text;

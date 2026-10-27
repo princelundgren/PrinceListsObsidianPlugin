@@ -55,7 +55,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	listScrollEl.scrollTop = scrollTop;
 }
 
-// An iPad with a keyboard still reads "Tap": a phone or tablet usually has none.
+// A tablet with a keyboard still reads "Tap": a phone or tablet usually has none.
 function emptyHint(): string {
 	if (Platform.isMobile) return 'Tap + to add an item';
 	return Platform.isMacOS ? 'Press Cmd+Enter or + to add an item' : 'Press Ctrl+Enter or + to add an item';

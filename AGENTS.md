@@ -9,7 +9,8 @@ this project.
 
 - **An Obsidian community plugin** that shows plain Markdown notes as todo lists. It's written in
   TypeScript and bundled to `main.js`, which Obsidian loads.
-- **Targets:** Obsidian on macOS and on the iPhone. `isDesktopOnly` is `false`.
+- **Targets:** Obsidian on desktop and mobile: macOS, Windows, Linux, iOS, iPadOS and Android.
+  `isDesktopOnly` is `false`. Hands-on checks have run on macOS and an iPhone so far.
 - **Release artifacts:** `main.js`, `manifest.json` and `styles.css`.
 - **Read before working:**
   - [The design](docs/superpowers/specs/2026-10-20-prince-lists-design.md) says what the plugin does

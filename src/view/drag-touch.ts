@@ -44,7 +44,7 @@ interface Press {
 	lift: Lift | null;
 }
 
-// Dragging items and headings with a finger, on the iPhone only (spec, "Dragging" and "Touch on the iPhone"). The
+// Dragging items and headings with a finger, on mobile only (spec, "Dragging" and "Touch on mobile"). The
 // listeners are registered once and read the press, instead of being added for each drag. The view's
 // capture-phase contextmenu cancel and click swallow (registerFieldEvents) serve this drag too. Without
 // edgeScroll, as in a note, whose scroller is Obsidian's, nothing scrolls at the edges.

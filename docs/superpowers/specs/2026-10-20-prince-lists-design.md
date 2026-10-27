@@ -22,6 +22,8 @@ later.
   narrower tag wins: a sentence's tag overrides its bullet's, and a bullet's overrides the
   heading's, the label's or an enclosing bullet's.
 
+**Keys:** Cmd in this design means Obsidian's `Mod` key, which is Ctrl on Windows and Linux.
+
 Three independent reviewers checked this document on 2026-10-20: Obsidian platform, file format
 and data safety, and owner's advocate. Their findings are folded in.
 
@@ -34,13 +36,13 @@ and data safety, and owner's advocate. Their findings are folded in.
 - **Ticking an item** grays it out where it is. Twenty-four hours later it is **archived** and
   hidden, and "Show archived" brings archived items back.
 - **Lists open in the list view.** The plain note shows for about 10 ms first, which the owner
-  couldn't see on the Mac or the iPhone.
-- **A note from outside the vault** with the marker, opened in Obsidian on the Mac, is a list too.
-- **On the Mac,** you right-click for actions and drag with the mouse.
-- **On the iPhone,** you tap to open an item and hold-and-move to drag it. Item actions sit in a
-  ⋯ button on the open card, and tapping a heading opens the heading menu.
-- **It is built in two parts.** 1a is the Mac plus the iPhone basics. 1b adds dragging on the
-  iPhone, pasting pictures into a card, and Cmd+Z undo.
+  couldn't see on macOS or an iPhone.
+- **A note from outside the vault** with the marker, opened in Obsidian on desktop, is a list too.
+- **On desktop,** you right-click for actions and drag with the mouse.
+- **On mobile,** you tap to open an item and hold-and-move to drag it. Item actions sit in a ⋯
+  button on the open card, and tapping a heading opens the heading menu.
+- **It is built in two parts.** 1a is desktop plus the mobile basics. 1b adds dragging on mobile,
+  pasting pictures into a card, and Cmd+Z undo.
 - **Step one is done** when one real list has lived only in Obsidian for two weeks.
 - **Dates use the Tasks plugin's format,** so other tools can still read your lists. Ticking writes
   `✔` with the date and time. Tasks sees the item as done, but not when.
@@ -74,22 +76,26 @@ and data safety, and owner's advocate. Their findings are folded in.
    - items that open into a card with notes
    - adding, editing, ticking, moving and deleting items
    - done items that disappear after a day
-3. **Run on the Mac and the iPhone (owner).** iPad and Android aren't targets.
+3. **Run on desktop and mobile (owner, 2026-10-27):** every platform Obsidian runs on, macOS,
+   Windows, Linux, iOS, iPadOS and Android. Obsidian runs on all of them, and the code depends only
+   on whether it runs on desktop or mobile, through Obsidian's `Platform`. This replaces the first
+   targets, the Mac and the iPhone (2026-10-20). Hands-on checks have run on macOS and an iPhone
+   so far; Windows, Linux, Android and the iPad aren't checked yet.
 
 **Two parts (owner):**
 
 - **1a:**
-  - Everything on the Mac: the view, ticking, adding, editing, right-click actions, mouse
+  - Everything on desktop: the view, ticking, adding, editing, right-click actions, mouse
     dragging, and creating lists.
-  - The iPhone basics: open, tick, add, edit, the card's ⋯ actions and the heading menu.
+  - The mobile basics: open, tick, add, edit, the card's ⋯ actions and the heading menu.
   - Pictures already show in 1a.
 - **1b:**
-  - Dragging on the iPhone.
+  - Dragging on mobile.
   - Pasting or dropping pictures into a card.
   - The Cmd+Z undo history.
 
 **Done when (owner):** one real list, moved in from another todo app, has lived only in Obsidian
-for two weeks, on the Mac and the iPhone, without going back to the other app for it. The two
+for two weeks, on desktop and mobile, without going back to the other app for it. The two
 weeks may start once 1a is in use, but step one isn't done until 1b has shipped too **(call)**.
 This finish line is what keeps step one from growing into a standalone app.
 
@@ -124,12 +130,12 @@ These are wanted later, roughly in this order. The file format already leaves ro
   - repeating items, a trash, IDs on single items, and sorting modes
 - **Quick capture from outside Obsidian.** A plugin can't hear a global hotkey. The documented
   route is an `obsidian://` handler (`registerObsidianProtocolHandler`) that Raycast, Shortcuts
-  or an iPhone Shortcut can call.
+  or a phone's shortcut can call.
 - **A command for the Obsidian CLI (owner, 2026-10-20).** `Plugin.registerCliHandler` (since
   1.12.2) adds a command to Obsidian's command-line tool, for example to add an item to a list
   from a script.
   - The CLI needs the Obsidian app running (Obsidian Help, "Obsidian CLI").
-  - Whether it does anything on the iPhone is unverified.
+  - Whether it does anything on mobile is unverified.
   - Using it means raising `minAppVersion` to at least 1.12.2.
 - **Importing from other todo apps.** Another app's lists could come in through its export or an
   integration; whether headings and notes survive is unverified.
@@ -148,7 +154,7 @@ These are wanted later, roughly in this order. The file format already leaves ro
 - **Page previews of links in a card (owner, 2026-10-20).** A preview on hover needs the
   `hover-link` event. `obsidian.d.ts` names it only in the docs of `registerHoverLinkSource` and
   `HoverLinkSource`, with no payload type, so previews wait until Obsidian documents the payload.
-  Links in a card still open, and on the Mac they still get Obsidian's link menu.
+  Links in a card still open, and on desktop they still get Obsidian's link menu.
 
 **Not possible through the official API.** These limits matter for replacing a standalone todo app:
 
@@ -178,7 +184,7 @@ These are wanted later, roughly in this order. The file format already leaves ro
 - **Lists shared across vaults.** The plugin builds nothing to share a list between vaults.
   - **A note from outside the vault is allowed in any vault (owner, 2026-10-20).** Opened from two
     vaults' windows, it works as a list in each. Nothing is built for this.
-- **A long-press menu on item rows on the iPhone.** The owner chose: holding only ever drags.
+- **A long-press menu on item rows on mobile.** The owner chose: holding only ever drags.
 
 ## Constraints
 
@@ -192,8 +198,8 @@ These are wanted later, roughly in this order. The file format already leaves ro
   - The exception is a note from outside the vault that Obsidian opens in that vault's window (see
     "What a list is").
   - It must work alongside the Tasks and Kanban plugins in the same vault.
-- **Sync.** Obsidian Sync can carry a vault between the Mac and the iPhone, and agents may also
-  edit notes in a vault. So a list file can change while it is open in the view.
+- **Sync.** Obsidian Sync can carry a vault between devices, and agents may also edit notes in a
+  vault. So a list file can change while it is open in the view.
 - **Open source (owner, 2026-10-20).** `princelundgren/PrinceListsObsidianPlugin` is open source
   under the MIT license.
   - It goes to Obsidian's community directory after the first release.
@@ -236,9 +242,9 @@ These are wanted later, roughly in this order. The file format already leaves ro
   Such a note with `princelists: true` behaves like any list note, except that pictures can't be
   added to it (see "Editing", Pictures).
   - Obsidian's 1.14 changelog lists this for desktop, and opening such a file needs Obsidian's
-    latest installer. Whether the iPhone app can open one is unverified, so the plan checks it on
-    the Mac only.
-  - On the Mac, the plugin does everything with such a note that it does with a vault note, except
+    latest installer. Whether the mobile app can open one is unverified, so the plan checks it on
+    desktop only.
+  - On desktop, the plugin does everything with such a note that it does with a vault note, except
     add pictures: opening, rendering, writing, renaming and links all work, so none of the
     fallbacks in "Notes outside the vault" was needed.
 
@@ -499,7 +505,7 @@ stays, and the blank line stays with it.
 - **Not the Kanban way:** Kanban, the best-known plugin with its own view for notes, monkey-patches
   Obsidian's internals for this, which is off the table.
 - **The cost is a short flash.** The normal editor shows for about 10 ms before the switch, under
-  one frame at 60 Hz. The owner couldn't see it on the Mac or the iPhone **(owner, 2026-10-21)**
+  one frame at 60 Hz. The owner couldn't see it on macOS or an iPhone **(owner, 2026-10-21)**
   ([spike 1](../notes/2026-10-21-spike-open.md)). Even if it showed, the plugin wouldn't fall back
   to patching.
 - **"Open as Markdown" and "Open as list"** are in the pane's ⋯ menu and are also commands.
@@ -542,9 +548,9 @@ stays, and the blank line stays with it.
   - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
     typed in reads as its text, as a title does.
   - Links in a card can be clicked.
-  - On the Mac, right-clicking an internal link in a card shows Obsidian's own link menu
+  - On desktop, right-clicking an internal link in a card shows Obsidian's own link menu
     **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**.
-  - On the iPhone there is no right-click. A tap opens the link, and there is no link menu,
+  - On mobile there is no right-click. A tap opens the link, and there is no link menu,
     because the plugin opens no menu on a long-press **(call)**.
 
 ### Ticking
@@ -621,9 +627,10 @@ stays, and the blank line stays with it.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
-  the list scrolls, on the Mac and the iPhone. Its accessible name is "New item" **(call)**.
+  the list scrolls, on desktop and mobile. Its accessible name is "New item" **(call)**.
   - **On desktop it sits 32 px higher (owner, 2026-10-27),** clear of Obsidian's status bar, which
-    floats over the bottom right of the window. The iPhone and iPad have no status bar there.
+    floats over the bottom right of the window. Mobile has no status bar (`addStatusBarItem`:
+    "Not available on mobile").
     Obsidian documents no variable for the bar's height, so the lift is fixed on purpose:
     `--size-4-8`, a step of Obsidian's spacing scale, a little more than the 27 to 31 px the bar
     measured in 1.14.5. Measuring the bar would mean reading Obsidian's own DOM. A theme with a
@@ -636,7 +643,7 @@ stays, and the blank line stays with it.
   - The new item opens with the cursor in its title.
   - **Enter in a title closes the card (owner, 2026-10-27),** as Escape does, so typing a new
     item's name and pressing Enter finishes it. Shift+Enter adds another item below it instead, so
-    a run of items can still be typed in one go. On the iPhone, "+" adds each next item.
+    a run of items can still be typed in one go. On mobile, "+" adds each next item.
   - In a new item whose title is still empty, Shift+Enter closes the card instead, which removes the
     item, so a second Shift+Enter ends a run of new items. "+" and New item below keep it, with the
     cursor back in its title. Delete closes the card, which removes the item as a cancel, with no
@@ -662,7 +669,7 @@ stays, and the blank line stays with it.
 
 ### Item actions (owner)
 
-- **On the Mac, right-click an item** for New item below, New heading below and Delete
+- **On desktop, right-click an item** for New item below, New heading below and Delete
   **(call)**. Delete removes the item and its notes. Step two's star is a button on the open card,
   not an entry here **(owner, 2026-10-27)**.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
@@ -679,10 +686,10 @@ stays, and the blank line stays with it.
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
-- **On both the Mac and the iPhone,** the open card has a ⋯ button with the same item actions. On
-  the iPhone this is the only way to reach them **(owner)**. The button's accessible name is "Item
+- **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On
+  mobile this is the only way to reach them **(owner)**. The button's accessible name is "Item
   actions" **(call)**.
-- **On the iPhone, tapping a heading opens the heading menu:** New item, New heading below, Rename
+- **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading and Delete heading **(owner, 2026-10-20)**. It's a tap, not a long-press, so there is
   still no long-press menu. With a card open, the tap only closes the card ("Selecting and
   adding").
@@ -700,14 +707,14 @@ stays, and the blank line stays with it.
   Obsidian's File recovery core plugin, when enabled, is the backstop.
 - **Delete and Delete heading show in red (owner, 2026-10-20)** in every menu that has them,
   through `MenuItem.setWarning(true)`. The red comes from the `is-warning` class, so with Settings →
-  Appearance → Native menus on, the Mac's right-click menus may not show it (obsidian.md/help,
+  Appearance → Native menus on, the desktop right-click menus may not show it (obsidian.md/help,
   Settings: native menus "will not be affected by your theme").
 
 ### Dragging (owner)
 
-- **Mac (1a):** drag items with the mouse, within and between sections. An item's notes move with
-  it. In step two, headings drag too, each with its whole section (step two's design, "Dragging a
-  heading").
+- **Desktop (1a):** drag items with the mouse, within and between sections. An item's notes move
+  with it. In step two, headings drag too, each with its whole section (step two's design,
+  "Dragging a heading").
   - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
     item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
     drag, a click reopens the card.
@@ -716,15 +723,15 @@ stays, and the blank line stays with it.
     It passes over content the plugin leaves alone, since a drag changes only the order of items.
     Dropped where it already shows, the item stays as it is in the file.
   - **A link or picture in a title drags as itself (call),** as in any note, not the row.
-- **iPhone (1b, owner):**
+- **Mobile (1b, owner):**
   - Hold an item and then move to drag it.
   - Holding an item row never opens a menu.
   - A swipe without a hold scrolls the list.
-  - **The drop line works as on the Mac (call).** A move drops where it shows, and an item
+  - **The drop line works as on desktop (call).** A move drops where it shows, and an item
     dropped over its own place stays as it is in the file.
   - **A hold anywhere on an item row drags it (call),** its checkbox and any link in its title
     included, but not the open card. A tap on a link still opens it. A hold closes any open card
-    first, as on the Mac.
+    first, as on desktop.
   - **The list scrolls at its edges while dragging (call),** so an item can go further than one
     screen. It starts only once the finger has moved more than 5 px since the lift, so a row
     held still at an edge doesn't scroll the list **(owner, 2026-10-27)**.
@@ -741,7 +748,7 @@ stays, and the blank line stays with it.
 - **"Show archived" in the pane's ⋯ menu (call; archived is the owner's word)** shows archived
   items again, gray, in place.
   - **It's also a ticked-checkbox icon in the pane's header (owner, 2026-10-27),** because the ⋯
-    menu alone was hard to find on the iPhone. The icon is the same shape as the list's own
+    menu alone was hard to find on mobile. The icon is the same shape as the list's own
     checkboxes, so it reads as done items; an eye was tried first and read as unrelated to them.
     It toggles the same setting as the menu item, is blue while archived items show, as their
     checkboxes are, and its tooltip then says "Hide archived". It shows only on a list.
@@ -758,9 +765,9 @@ stays, and the blank line stays with it.
 **Creating a list has three routes (owner):**
 
 - Right-click a folder in the file explorer and choose New list (`workspace.on('file-menu')`). The
-  list is created in that folder. On the iPhone this is a long-press on the folder, confirmed on
-  the device in the 1a checks.
-- The "New list" command. It's in the command palette on the Mac and the iPhone, and you can give
+  list is created in that folder. On mobile this is a long-press on the folder, confirmed on an
+  iPhone in the 1a checks; Android isn't checked.
+- The "New list" command. It's in the command palette on desktop and mobile, and you can give
   it a hotkey under Settings → Hotkeys. The plugin sets no default hotkey, because Obsidian's
   plugin guidelines advise against it.
 - The "New list" icon in the ribbon (`addRibbonIcon`).
@@ -847,7 +854,7 @@ needs no code.
 - **Undo (1b, call):**
   - Cmd+Z and Cmd+Shift+Z step through the plugin's own edits, using the same guarded write.
   - They're keys only, with no Undo or Redo command **(owner, 2026-10-22)**, so without a keyboard
-    the iPhone's only undo stays the Undo button after a delete.
+    the only undo on mobile stays the Undo button after a delete.
   - The history is cleared when the file changes from outside, so undo never throws away someone
     else's change.
   - Typing in a field makes one step for each time the field has focus. A write of the view's
@@ -907,12 +914,12 @@ From here on the document is for the builder.
   "Heading", "Notes"), seen only while it's empty, and a checkbox from a hidden copy of its item's
   title.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
-  `@since` tag in `obsidian.d.ts`. Every device must run at least that version, the iPhone
+  `@since` tag in `obsidian.d.ts`. Every device must run at least that version, mobile
   included. For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts").
 - **Installing:** copy `main.js`, `manifest.json` and `styles.css` into
   `<vault>/.obsidian/plugins/princelists/`. The folder name must match the ID, or
   `onExternalSettingsChange` and similar methods aren't called (Manifest docs). Obsidian Sync takes
-  the plugin to the iPhone if that vault syncs installed community plugins.
+  the plugin to the other devices if that vault syncs installed community plugins.
 
 ## Implementation notes
 
@@ -1042,7 +1049,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     or its `href` when it has none: a Markdown-style link's `href` can be URL-encoded.
   - No page previews on hover **(owner, 2026-10-20)**. They would need the `hover-link` event,
     and Obsidian documents no payload for it, so they wait until it does (see "Not in step one").
-  - On the Mac (`Platform.isDesktop`), handle `contextmenu` on `a.internal-link`: create a `Menu`,
+  - On desktop (`Platform.isDesktop`), handle `contextmenu` on `a.internal-link`: create a `Menu`,
     let `workspace.handleLinkContextMenu(menu, linktext, file.path)` fill it, and show it with
     `menu.showAtMouseEvent(evt)`. The method returns a `boolean` whose meaning isn't documented,
     so don't depend on it.
@@ -1051,20 +1058,20 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   notes, in number and in each ticked state; a box in a callout, an embed or a `%%` comment puts
   them out of step, and then every box stays disabled.
 
-### Touch on the iPhone
+### Touch on mobile
 
 - **iOS WebKit fires no `contextmenu` event** (MDN compat data). Obsidian makes one itself on iOS
   after a still hold, 800 ms by its code. A device confirmed the event (its haptic comes with it);
-  the 800 ms wasn't measured.
+  the 800 ms wasn't measured. A hold on Android isn't checked.
   - Because holding only ever drags, item rows must not open a menu, and a heading opens its menu
-    on a tap. So on the iPhone, cancel `contextmenu` on rows and headings, in the capture phase.
-  - On the iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
+    on a tap. So on mobile, cancel `contextmenu` on rows and headings, in the capture phase.
+  - On an iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
     ([1a checks](../notes/2026-10-22-1a-checks.md)).
   - After a canceled hold, the next click is swallowed, as spike 2 does after a lift: WebKit still
     sends one when the finger lifts. The next `touchstart` clears the flag.
   - Obsidian's own haptic on a hold can't be turned off (no documented API), and it is accepted.
 - **Dragging uses Pointer Events with a hold timer.** Kanban uses 500 ms, canceled if the finger
-  moves more than 5 px first. Spike 2 confirmed both values on the iPhone, with the rows'
+  moves more than 5 px first. Spike 2 confirmed both values on an iPhone, with the rows'
   `-webkit-user-select: none` and `-webkit-touch-callout: none`: the maintainer keeps 500 ms
   (`docs/superpowers/notes/2026-10-21-spike-touch.md`).
   - Once a row is lifted, a non-passive `touchmove` handler calls `preventDefault` to stop
@@ -1073,7 +1080,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     visible, and speeds up linearly to 12 px a frame at the edge and beyond.
   - Kanban's `src/dnd/managers/DragManager.ts` is the reference.
   - Obsidian's own drag manager isn't public.
-- **A long-press on a folder in the iPhone file explorer reaches `file-menu`,** with source
+- **A long-press on a folder in the mobile file explorer reaches `file-menu`,** with source
   `file-explorer-context-menu`, so it offers "New list" (confirmed on the device in the 1a
   checks).
 - **The list scrolls in an element of its own,** inside the view's `contentEl`, so nothing relies on
@@ -1086,9 +1093,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 - **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
-  - It keeps above the iPhone's floating navbar with Obsidian's `--view-bottom-spacing`, as Bases
-    does **(call)**. The variable is undocumented, read from 1.14.4's `app.css`, and unset on the
-    Mac. If Obsidian drops it, the "+" sits lower on the iPhone, under the floating navbar, and the
+  - It keeps above mobile's floating navbar with Obsidian's `--view-bottom-spacing`, as Bases
+    does **(call)**. The variable is undocumented, read from 1.14.4's `app.css`, and unset on
+    desktop. If Obsidian drops it, the "+" sits lower on mobile, under the floating navbar, and the
     edge scroll, its second user, takes the bottom of the view for the bottom of what is visible,
     so dragging toward the navbar scrolls late.
 
@@ -1124,7 +1131,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 - **What the API says:** such a note is a `TExternalFile`, a `TFile` subclass (since 1.14.4) that
   "can be used with the vault API just like any other file". Nothing more is documented, so each
-  point below is checked on the Mac before it is relied on: opening in plan Task 2's spike,
+  point below is checked on desktop before it is relied on: opening in plan Task 2's spike,
   writing and opening from a second vault in Task 8, and rendering and renaming in Task 9.
 - **The result:** every check passed in 1.14.4, including another app's edit showing in the view,
   so none of the fallbacks below was needed.
@@ -1169,13 +1176,14 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Testing and owner checkpoints
 
-- **Manual testing uses a test vault on the Mac and an iPhone.**
-- **Many manual checks run scripted:** through Obsidian's CLI on the Mac, and through Safari's Web
-  Inspector on the iPhone, with synthetic touch. The owner checks by hand what needs a finger or
-  an eye, such as holds, scrolling, the keyboard and the flash.
+- **Manual testing uses a test vault on desktop and mobile,** so far macOS and an iPhone. Windows,
+  Linux, Android and the iPad aren't checked yet.
+- **Many manual checks run scripted:** through Obsidian's CLI on desktop, and through the mobile
+  browser engine's web inspector (Safari's, for the iPhone), with synthetic touch. The owner checks
+  by hand what needs a finger or an eye, such as holds, scrolling, the keyboard and the flash.
 - **Spikes come first, and each one stops for the owner:**
   1. The flash when a list opens.
-  2. Hold-to-drag on the iPhone: it must not break scrolling or trigger Obsidian's long-press
+  2. Hold-to-drag on mobile: it must not break scrolling or trigger Obsidian's long-press
      menu. The owner sets the pass bar.
 - **Then 1a, then 1b.**
 - **Before installing in a vault with real notes,** test once in the test vault with Tasks and
@@ -1187,30 +1195,30 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Risks to check during the build
 
-Each has a result from 1a's spikes and checks, and 1b's for the `✔` glyph on the iPhone.
+Each has a result from 1a's spikes and checks, and 1b's for the `✔` glyph on an iPhone.
 
 1. **The flash** when a list opens.
-   - **Result:** about 10 ms, which the owner couldn't see on the Mac or the iPhone.
+   - **Result:** about 10 ms, which the owner couldn't see on macOS or an iPhone.
 2. **Back history:** whether `result.history = false` really keeps the extra entry out.
    - **Result:** it does, in 1.14.4, with one stop after the pane switches to Markdown by itself.
-3. **The iPhone gesture:** hold-to-drag, scrolling, and Obsidian's long-press menu all start the
+3. **The mobile gesture:** hold-to-drag, scrolling, and Obsidian's long-press menu all start the
    same way.
    - **Result:** a hold opens no menu and selects no text, and its tap is swallowed. Spike 2's
-     drag kept scrolling working. Obsidian's haptic stays (see "Touch on the iPhone").
+     drag kept scrolling working. Obsidian's haptic stays (see "Touch on mobile").
 4. **Obsidian's parser vs. CommonMark** for the tested cases, in reading view: the title becoming
    a heading, lazy lines, and the odd markers.
-   - **Result:** in all ten fixtures, reading view shows as many items as the plugin parses, on the
-     Mac and the iPhone, with notes inside their items. The title that becomes a heading renders as
+   - **Result:** in all ten fixtures, reading view shows as many items as the plugin parses, on
+     macOS and an iPhone, with notes inside their items. The title that becomes a heading renders as
      CommonMark has it.
 5. **Kanban's patch** interfering with the plugin's switch to the list view.
    - **Result:** with Tasks and Kanban on, lists still open as lists from every route tried, and
      Back still works.
 6. **The `✔` glyph** may show as an emoji on some systems. That's harmless, but check it reads
    well.
-   - **Result:** on the Mac it reads as a text check mark in reading view. On the iPhone it shows
-     as Apple's gray check mark, which reads well (1b checks).
+   - **Result:** on macOS it reads as a text check mark in reading view. On an iPhone it shows as
+     Apple's gray check mark, which reads well (1b checks).
 7. **Notes outside the vault:** whether opening, rendering, writing and renaming work for them.
-   - **Result:** on the Mac, all of them work, and so do links.
+   - **Result:** on macOS, all of them work, and so do links.
 
 ## Left to the builder
 
@@ -1300,13 +1308,13 @@ Checked 2026-10-20.
   - `TextFileView` reloading and merging on outside changes
   - `MarkdownRenderer` needing a Component
   - `file.parent` being `null` for a note outside the vault
-  - the `--view-bottom-spacing` CSS variable, set on the iPhone and unset on the Mac
+  - the `--view-bottom-spacing` CSS variable, set on an iPhone and unset on macOS
   - iOS (1.14.5) showing a drag's types only as `Files` until the drop
   - Obsidian's own `dragover` listener making a drop a move unless the view sets `dropEffect`
   - the browser not counting the plugin's `setRangeText` insert as typing for its undo
 - **Not yet measured on a device:** the 800 ms of the iOS `contextmenu` hold; 1a confirmed the
-  event itself. 1a also confirmed a folder long-press on the iPhone reaching `file-menu`, and, on
-  the Mac, how a note from outside the vault behaves (opening, rendering, writing, renaming, and
+  event itself. 1a also confirmed a folder long-press on an iPhone reaching `file-menu`, and, on
+  macOS, how a note from outside the vault behaves (opening, rendering, writing, renaming, and
   edits from another app).
 - **`eslint-plugin-obsidianmd`** 0.4.2, tested 2026-10-20: `no-unsupported-api` reads the
   project's own `obsidian.d.ts` and flags a member whose `@since` is newer than `minAppVersion`,

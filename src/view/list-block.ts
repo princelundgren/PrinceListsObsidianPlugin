@@ -248,7 +248,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		if (this.field && evt.target === this.field.el) closeBlockField(this, true);
 	}
 
-	// On the Mac only: the iPhone has the field's trash button.
+	// On desktop only: mobile has the field's trash button.
 	private onContextMenu(evt: MouseEvent): void {
 		const target = targetOf(evt);
 		if (!target || handleLinkMenu(this.app, this.file?.path ?? this.notePath, evt, target)) return;

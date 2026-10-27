@@ -36,8 +36,12 @@ body:
     attributes:
       label: Device
       options:
-        - Mac
+        - macOS
+        - Windows
+        - Linux
         - iPhone
+        - iPad
+        - Android
         - Other (say which under "Anything else?")
     validations:
       required: true

@@ -25,8 +25,8 @@ In your report, please include:
 - **What's wrong:** a clear description of the issue and its impact.
 - **How to reproduce it:** the steps, and a sample list note with your personal content removed.
   A screen recording helps.
-- **Versions:** the PrinceLists version, the Obsidian version, and the device you saw it on (Mac,
-  iPhone, or other).
+- **Versions:** the PrinceLists version, the Obsidian version, and the device you saw it on
+  (macOS, Windows, Linux, iPhone, iPad, Android, or other).
 - **A fix:** any suggested fix or mitigation, if you have one.
 
 ## What counts
