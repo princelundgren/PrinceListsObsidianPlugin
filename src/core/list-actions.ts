@@ -115,7 +115,7 @@ function moveTarget(model: ListModel, place: ItemPlace): MoveTarget | null {
 
 function insertPlan(text: string, lines: readonly Line[], line: number): PlannedInsert {
 	const next = joinLines(lines);
-	return { next, line, edit: ownEdit(line, text, next, 'insert'), inserted: { textBefore: text, textAfter: next } };
+	return { next, line, edit: { ...ownEdit(line, text, next, 'insert'), history: 'new' }, inserted: { textBefore: text, textAfter: next } };
 }
 
 // Both run from the line where the deleted lines started.
@@ -124,6 +124,6 @@ function deletePlan(text: string, lines: readonly Line[], start: number): Planne
 	return {
 		next,
 		edit: ownEdit(start, text, next, 'delete'),
-		undo: { next: text, expected: next, edit: ownEdit(start, next, text, 'insert') },
+		undo: { next: text, expected: next, edit: { ...ownEdit(start, next, text, 'insert'), history: 'undo' } },
 	};
 }

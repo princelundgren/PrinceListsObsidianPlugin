@@ -42,5 +42,5 @@ export function planRemoval(
 	const item = itemAt(model, titleLine);
 	if (!item || !isEmptyItem(lines, item)) return null;
 	const next = restore && text === inserted.textAfter ? inserted.textBefore : joinLines(deleteItem(lines, model, item));
-	return { next, expected: text, edit: ownEdit(titleLine, text, next, 'delete') };
+	return { next, expected: text, edit: { ...ownEdit(titleLine, text, next, 'delete'), history: 'cancel' } };
 }

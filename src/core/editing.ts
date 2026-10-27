@@ -4,6 +4,7 @@ import { isBlankAt } from './edit-lines';
 import { getListNote, setListNote } from './edit-list-note';
 import { followLine, followRange, mapRange, ownEdit, type LineRange, type OwnEdit, type RunEdit } from './follow';
 import { mapLine } from './guard';
+import { EditHistory } from './history';
 import { parseItemLine } from './item-line';
 import { joinLines, splitLines, type Line } from './lines';
 import { itemAt, parseList, type ItemBlock, type ListModel } from './parse';
@@ -28,8 +29,10 @@ export class ListEditing {
 	text = '';
 	/** The titleLine of the item whose card is open, or null. */
 	selected: number | null = null;
+	readonly history = new EditHistory();
 	private readonly tracked = new Set<TrackedLine>();
-	private title: TitleField | null = null;
+	// `field` changes with every keystroke; the object around it is the typing session.
+	private title: { field: TitleField } | null = null;
 	private notes: { indent: string; refused: boolean } | null = null;
 	// `separator`: the blank line this session's last save wrote right under the note, or null.
 	private note: { range: LineRange; separator: number | null; refused: boolean } | null = null;
@@ -43,6 +46,7 @@ export class ListEditing {
 		this.tracked.clear();
 		this.endCard();
 		this.note = null;
+		this.history.clear();
 	}
 
 	open(titleLine: number): void {
@@ -77,7 +81,7 @@ export class ListEditing {
 
 	focusTitle(): void {
 		const line = this.selected === null ? undefined : splitLines(this.text)[this.selected];
-		this.title = line ? startTitleField(line.text) : null;
+		this.title = line ? { field: startTitleField(line.text) } : null;
 	}
 
 	blurTitle(): void {
@@ -86,10 +90,11 @@ export class ListEditing {
 
 	typeTitle(typed: string): Typed {
 		const found = this.selectedItem();
-		if (!found || !this.title) return { lost: true };
-		const result = typeTitle(found.lines, found.item, this.title, typed);
-		this.title = result.field;
-		return { edit: this.apply(joinLines(result.lines), found.item.titleLine, 'change') };
+		const session = this.title;
+		if (!found || !session) return { lost: true };
+		const result = typeTitle(found.lines, found.item, session.field, typed);
+		session.field = result.field;
+		return { edit: this.apply(joinLines(result.lines), found.item.titleLine, 'change', session) };
 	}
 
 	// The notes the textarea opens with. The indent is the one every save uses until it closes, since
@@ -112,7 +117,7 @@ export class ListEditing {
 		const { lines, model, item } = found;
 		return this.refusable(session, () => {
 			const next = joinLines(setItemNotes(lines, model, item, markdown, session.indent));
-			return { edit: this.apply(next, item.titleLine, 'change') };
+			return { edit: this.apply(next, item.titleLine, 'change', session) };
 		});
 	}
 
@@ -158,6 +163,7 @@ export class ListEditing {
 
 	// One of the view's own one-off writes landed, such as a tick or a removal.
 	applyOwn(next: string, edit: OwnEdit): void {
+		this.history.wrote(this.text, next, edit);
 		this.follow(next, edit);
 	}
 
@@ -168,6 +174,7 @@ export class ListEditing {
 		const oldLines = splitLines(this.text);
 		const newLines = splitLines(next);
 		this.text = next;
+		this.history.clear();
 		const map = (line: number | null) => (line === null ? null : mapLine(oldLines, newLines, line));
 		for (const tracked of this.tracked) tracked.line = map(tracked.line);
 		const hadSelected = this.selected !== null;
@@ -201,13 +208,14 @@ export class ListEditing {
 		}
 	}
 
-	private apply(next: string, start: number, kind: RunEdit['kind'], from?: object): OwnEdit {
+	private apply(next: string, start: number, kind: RunEdit['kind'], session: object): OwnEdit {
 		const edit = ownEdit(start, this.text, next, kind);
-		this.follow(next, edit, from);
+		this.history.typed(session, this.text, next, edit);
+		this.follow(next, edit, session);
 		return edit;
 	}
 
-	// The list note's own saves replace its range instead, so `from` skips it.
+	// The list note's own saves replace its range instead, so `from`, the keystroke's session, skips it.
 	private follow(next: string, edit: OwnEdit, from?: object): void {
 		this.text = next;
 		for (const tracked of this.tracked) tracked.line = tracked.line === null ? null : followLine(tracked.line, edit);
@@ -231,7 +239,7 @@ export class ListEditing {
 			this.selected = null;
 			this.endCard();
 		} else if (this.title) {
-			this.title = syncTitleField(this.title, line.text, retitle);
+			this.title.field = syncTitleField(this.title.field, line.text, retitle);
 		}
 	}
 

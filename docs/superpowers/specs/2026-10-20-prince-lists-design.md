@@ -804,6 +804,22 @@ needs no code.
     the iPhone's only undo stays the Undo button after a delete.
   - The history is cleared when the file changes from outside, so undo never throws away someone
     else's change.
+  - Typing in a field makes one step for each time the field has focus.
+  - A new item's first edit, such as its title, or a new heading's name, with nothing between,
+    joins the step that added it: one Cmd+Z takes the item or heading away, and Cmd+Shift+Z brings
+    it back as it was. A new item or heading undone while still empty can't be redone, since it
+    would come back empty.
+  - Closing an empty new item or heading is a cancel, which leaves no step. A cancel that can't take
+    its insert back exactly, such as after another edit to the list, clears the history, so neither
+    an undo nor a redo brings back an empty item or heading with nothing left to close it.
+  - Cmd+Z on an empty new item's open card, with focus outside its fields, closes the card, which
+    removes the item.
+  - The Undo button after a delete and Cmd+Z take the same step back, and Cmd+Shift+Z deletes again.
+  - In a field, Cmd+Z is left to the browser's text undo, not the list's history. That doesn't take
+    back the link to a picture pasted into the notes, since the browser doesn't count the plugin's
+    insert as typing; Cmd+Z after leaving the field does (1b check 10).
+  - The history holds 100 steps, and only the list's text: undoing a picture's link leaves the
+    picture's file.
   - In 1a, the only undo is the Undo button shown after a delete.
 
 ## Technical approach
@@ -1149,6 +1165,9 @@ Checked 2026-10-20.
   - views: `ItemView`, `FileView.canAcceptExtension`, `TextFileView` ("by default, this view only
     saves when it's closing"; `requestSave` waits 2 seconds), `View.onPaneMenu`, `ViewStateResult`
     ("Set this to `true` … recorded in the navigation history")
+  - keys: `View.scope` (1.5.7), "to register hotkeys for when the view is in focus", and
+    `Scope.register`, where `Mod` "translates to `Meta` on macOS" and a handler may "return `false`
+    to automatically preventDefault" (checked 2026-10-27)
   - menus and events: `Menu.showAtMouseEvent`; `Workspace.on('file-menu' | 'file-open')`, where
     `file-open` "could be in a new leaf, an existing leaf, or an embed"; `Plugin.addRibbonIcon`;
     `Workspace.openLinkText`; `MenuItem.setWarning` (0.15.0), which turns the item's "title and

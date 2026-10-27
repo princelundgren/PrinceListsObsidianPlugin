@@ -43,7 +43,7 @@ export function planHeadingRemoval(text: string, contentStart: number, field: He
 	const found = findHeading(text, contentStart, field);
 	if (!found || headingText(found.lines, found.line) !== '') return null;
 	const next = joinLines(deleteHeading(found.lines, found.model, found.section));
-	return { next, edit: ownEdit(found.line, text, next, 'delete') };
+	return { next, edit: { ...ownEdit(found.line, text, next, 'delete'), history: 'cancel' } };
 }
 
 function findHeading(

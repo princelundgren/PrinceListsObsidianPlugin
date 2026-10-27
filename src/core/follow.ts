@@ -10,6 +10,13 @@ export interface LineRange {
 export type OwnEdit = RunEdit | MoveEdit;
 
 /**
+ * How an edit stands to the undo history: `new` adds an empty item or heading, whose first typing or
+ * name joins its step; `cancel` removes one again; `undo` and `redo` step through the history. An
+ * edit without one is an ordinary action.
+ */
+export type HistoryMark = 'new' | 'cancel' | 'undo' | 'redo';
+
+/**
  * An edit of one run of lines, as the view learns it from the edit it called: the run starts at the
  * item's `titleLine`, the section's `headingLine`, the list note's `start`, or the line an insert
  * returns. `delta` is the change in the number of lines.
@@ -27,6 +34,7 @@ export interface RunEdit {
 	 * line, so a title field can make it to the line it saved (see syncTitleField).
 	 */
 	retitle?: (line: string) => string;
+	history?: HistoryMark;
 }
 
 /**
@@ -37,6 +45,7 @@ export interface MoveEdit {
 	start: number;
 	kind: 'move';
 	moved: readonly (number | null)[];
+	history?: HistoryMark;
 }
 
 // A write that moves no line. It starts past every line, so it leaves the list note's range too.
