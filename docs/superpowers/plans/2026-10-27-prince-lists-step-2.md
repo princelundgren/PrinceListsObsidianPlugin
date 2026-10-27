@@ -52,7 +52,9 @@ manual check runs there, never in a vault with real notes.
   `obsidian.d.ts` 1.14.4: `registerMarkdownCodeBlockProcessor` and `Vault.cachedRead` are `@since
   0.9.7`, `Editor.replaceRange` 0.11.11, `TextFileView.save` 0.10.12, `Keymap.isModifier` 0.12.17
   and `setActiveLeaf(leaf, {focus})` 0.16.3. `MarkdownRenderChild`, `MetadataCache.on('changed')`,
-  `moment` and `parseYaml` carry no `@since`. Not allowed: `TExternalFile` (1.14.4) and
+  `moment` and `parseYaml` carry no `@since`; nor does `getLinkpath`. `getFrontMatterInfo` is
+  1.5.7, `MetadataCache.getFirstLinkpathDest` 0.15.3 and `Platform.isDesktopApp` 0.12.2; `Scope`
+  and `Menu` are already used in step one. Not allowed: `TExternalFile` (1.14.4) and
   `Workspace.revealLeaf` (1.7.2).
 - **Never `fileManager.processFrontMatter`** and never re-serialize YAML: "Turn into list" writes
   one line.
@@ -68,11 +70,12 @@ manual check runs there, never in a vault with real notes.
 - **Styling:** icons are Lucide's `star`, `calendar`, `chevron-down` and `chevron-right` through
   `setIcon`; the star is `--color-yellow`, the hint and the collapse arrow `--text-faint`. No
   hard-coded colors.
-- **Interface text** added in step two is exactly this:
+- **Interface text** added in step two is this, worded exactly:
   - Commands and menu items: "Turn into list", "Find in list", "Open schedule", "Add star",
     "Remove star", "Delete".
   - "The note's properties can't be read, so it wasn't turned into a list."
   - "The note's princelists property runs over several lines, so it wasn't turned into a list."
+  - "Couldn't turn {name} into a list.", where `{name}` is the note's name **(call)**.
   - "Press Cmd+Enter or + to add an item", "Press Ctrl+Enter or + to add an item" and "Tap + to add
     an item".
   - The collapse arrow's `aria-label` "Collapse" or "Expand".
@@ -84,19 +87,22 @@ manual check runs there, never in a vault with real notes.
     lines "This block needs a link to a list, such as [[Groceries]].", "[[{link}]] doesn't lead to
     a note.", "[[{link}]] isn't a list." and "[[{link}]] is this note, so it can't show here."
     **(call)**, where `{link}` is the link as written.
+  - Writes from the Schedule view or a block: "Couldn't save the change to this list.", "This list
+    changed elsewhere. Try again.", "Repeating items can't be ticked here yet." and the Undo
+    message "Item deleted.".
 
 ## Review Focus
 
-1. **The same list open in a list view with typing not yet saved, while a block or the Schedule
-   view writes to it.** Nothing typed is lost, and the list view follows the change.
-2. **Cmd+Z in the list view after a block or the Schedule view wrote to the same list.** Undo never
-   writes back a text from before that write.
-3. **A list renamed, moved or deleted while a write from the Schedule view or a block waits.**
-   Nothing is written to another file, and no error is thrown.
-4. **A card whose notes hold a callout, an embed or a code fence with checkboxes, on the iPhone as
-   well as the Mac.** No tick lands on another line.
-5. **"Turn into list" from an editor with typing not yet saved, on the iPhone.** The typing and the
-   marker both reach the file, and the note opens as a list.
+- **The same list open in a list view with typing not yet saved, while a block or the Schedule
+  view writes to it.** Nothing typed is lost, and the list view follows the change.
+- **Cmd+Z in the list view after a block or the Schedule view wrote to the same list.** Undo never
+  writes back a text from before that write.
+- **A list renamed, moved or deleted while a write from the Schedule view or a block waits.**
+  Nothing is written to another file, and no error is thrown.
+- **A card whose notes hold a callout, an embed or a code fence with checkboxes, on the iPhone as
+  well as the Mac.** No tick lands on another line.
+- **"Turn into list" from an editor with typing not yet saved, on the iPhone.** The typing and the
+  marker both reach the file, and the note opens as a list.
 
 ---
 
@@ -165,9 +171,11 @@ manual check runs there, never in a vault with real notes.
   - **Opening:** before writing, it listens for `metadataCache.on('changed')` on that file through
     `plugin.registerEvent`, and decides on the event's `data`, the text the cache was built from.
     `isListText(data)` opens the note with `openAsList` in the editor's leaf, or
-    `workspace.getLeaf(false)` without one. A `data` that isn't a list ends the wait only once the
-    write has finished (`save` or `process` resolved); before that it may be an earlier save
-    **(call)**. Either way it `offref`s the listener.
+    `workspace.getLeaf(false)` without one. A `data` without the marker is ignored, since it may
+    come from an earlier save **(call)**. The wait also ends, with no note opened, when the write or
+    `save` throws (it shows "Couldn't turn {name} into a list."), when the file is deleted or
+    renamed (`vault.on('delete')`, `vault.on('rename')`), or when a newer "Turn into list" starts,
+    since only one wait is kept **(call)**. Each way it `offref`s every listener it registered.
 - [ ] **Step 4: Register it in `src/main.ts`:** the command `turn-into-list` with a
   `checkCallback` on the active `MarkdownView`'s file, true when `canTurnIntoList` and
   `!isListText(view.getViewData())`; and a `file-menu` item for a `TFile` that `canTurnIntoList`
