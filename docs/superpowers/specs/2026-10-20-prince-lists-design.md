@@ -629,16 +629,12 @@ stays, and the blank line stays with it.
   its card and selects it. Clicking empty space closes the card and clears the selection.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks.
-- **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
-  the list scrolls, on desktop and mobile. Its accessible name is "New item" **(call)**.
-  - **On desktop it sits 32 px higher (owner, 2026-10-27),** clear of Obsidian's status bar, which
-    floats over the bottom right of the window. Mobile has no status bar (`addStatusBarItem`:
-    "Not available on mobile").
-    Obsidian documents no variable for the bar's height, so the lift is fixed on purpose:
-    `--size-4-8`, a step of Obsidian's spacing scale, a little more than the 27 to 31 px the bar
-    measured in 1.14.5. Measuring the bar would mean reading Obsidian's own DOM. A theme with a
-    taller bar can still touch the "+"'s lower edge, and with the bar hidden the "+" sits a little
-    higher than it must.
+- **A "+" in the pane's header (owner, 2026-10-27)** adds an item, on desktop and mobile, beside the
+  show-archived icon. It's a view action (`addAction`) named "New item" **(call)**.
+- **The floating "+" button (owner)** sits at the bottom right of the list pane, on mobile only
+  **(owner, 2026-10-27)**, under the thumb. It stays put while the list scrolls. Its accessible name
+  is "New item" **(call)**. Desktop has only the header's "+": the floating one, filled with the
+  accent color, drew the eye more than the list.
   - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
     fields included. An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
@@ -1093,7 +1089,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `--file-line-width`, so titles and rows line up with a note's. That's always the readable line
   width: no documented API reads Obsidian's "Readable line length" setting, so with it off a
   note fills the pane while a list doesn't.
-- **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
+- **Put mobile's floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
   - It keeps above mobile's floating navbar with Obsidian's `--view-bottom-spacing`, as Bases
