@@ -107,7 +107,7 @@ export function buildListNote(view: PrinceListView, parent: HTMLElement, lines: 
 	const area = parent.createDiv({ cls: NOTE_CLASS });
 	const note = getListNote(lines, model);
 	if (note === '') area.createDiv({ cls: 'princelists-placeholder', text: 'Notes' });
-	else view.blocks.set(area, renderNotes(view, area.createDiv({ cls: 'princelists-list-note-text' }), note));
+	else view.blocks.set(area, renderNotes(view, view.sourcePath, area.createDiv({ cls: 'princelists-list-note-text' }), note));
 	return area;
 }
 

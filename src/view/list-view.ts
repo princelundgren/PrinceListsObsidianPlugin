@@ -41,6 +41,8 @@ export class PrinceListView extends TextFileView {
 	/** Cmd+F's query, or null while its field is closed. Like showArchived, nothing restores it. */
 	filter: string | null = null;
 	readonly collapsed = new CollapsedHeadings(this.editing);
+	readonly dragsRows = true;
+	readonly dragsHeadings = true;
 	filterEl: HTMLInputElement | null = null;
 	newItemButton: HTMLButtonElement | null = null;
 	private archivedButton: HTMLElement | null = null;
@@ -77,6 +79,11 @@ export class PrinceListView extends TextFileView {
 
 	get text(): string {
 		return this.editing.text;
+	}
+
+	/** The path links and embeds in the list resolve from. */
+	get sourcePath(): string {
+		return this.file?.path ?? '';
 	}
 
 	/** The titleLine of the item whose card is open, or null. */

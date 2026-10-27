@@ -76,7 +76,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		view.render();
 		return;
 	}
-	if (handleLinkClick(view, evt, target)) return;
+	if (handleLinkClick(view.app, view.sourcePath, evt, target)) return;
 	if (target.closest(`.${WHEN_CLEAR_CLASS}`)) {
 		clearWhen(view);
 		return;
@@ -133,7 +133,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
-	if (target && !handleLinkMenu(view, evt, target)) showContextMenu(view, evt, target);
+	if (target && !handleLinkMenu(view.app, view.sourcePath, evt, target)) showContextMenu(view, evt, target);
 }
 
 function onHoldMenu(view: PrinceListView, evt: MouseEvent): void {
