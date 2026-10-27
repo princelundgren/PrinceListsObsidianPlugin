@@ -305,3 +305,18 @@ textarea.princelists-heading-field {
 .princelists-star svg {
 	fill: currentColor;
 }
+
+/* The hint sits centered in the space below the list note. */
+.princelists-sizer.princelists-is-empty {
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
+}
+
+.princelists-empty-hint {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-faint);
+}

@@ -1,4 +1,6 @@
+import { Platform } from 'obsidian';
 import { isListText } from '../obsidian/marker';
+import { hasNoItems } from './add-button';
 import { dismissCard, redrawCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
 import { buildListNote, buildListTitle } from './fields';
@@ -11,6 +13,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	const { contentEl, listScrollEl, listSizerEl } = view;
 	const { scrollTop } = listScrollEl;
 	const kept = keptElement(view, focusing);
+	const isEmpty = hasNoItems(view);
 	for (const block of view.blocks.values()) view.removeChild(block);
 	view.blocks.clear();
 	const fresh = createDiv();
@@ -26,6 +29,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		const field = placeField(view, kept);
 		if (field?.keeps) slot = field.el;
 		view.rowsHeldBack = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field);
+		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint() });
 		// Room to scroll the last row clear of the floating "+".
 		fresh.createDiv({ cls: 'princelists-end' });
 	} else {
@@ -38,10 +42,17 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		fresh.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
 	}
 	replaceKeeping(listSizerEl, fresh, kept, slot);
+	listSizerEl.toggleClass('princelists-is-empty', isEmpty);
 	view.newItemButton?.toggle(isListText(view.text));
 	if (view.card && kept === view.card.el) refreshCard(view, view.card);
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);
 	listScrollEl.scrollTop = scrollTop;
+}
+
+// An iPad with a keyboard still reads "Tap": a phone or tablet usually has none.
+function emptyHint(): string {
+	if (Platform.isMobile) return 'Tap + to add an item';
+	return Platform.isMacOS ? 'Press Cmd+Enter or + to add an item' : 'Press Ctrl+Enter or + to add an item';
 }
 
 // Where a redraw puts the card: a slot for the card that keeps focus, or the card drawn again.

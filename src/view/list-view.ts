@@ -13,11 +13,11 @@ import { fitHeight } from './dom';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
+import { registerListKeys } from './keys';
 import { rereadListNote, type ListNoteSession, type ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
-import { registerUndoKeys } from './undo';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
 // canAcceptExtension stays at its default of false: true would open every note clicked from a
@@ -67,7 +67,7 @@ export class PrinceListView extends TextFileView {
 		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
 		this.listSizerEl = this.listScrollEl.createDiv({ cls: 'princelists-sizer' });
 		// Here, so the scope is in place before the view first takes focus.
-		registerUndoKeys(this);
+		registerListKeys(this);
 	}
 
 	get text(): string {

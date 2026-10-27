@@ -1,4 +1,3 @@
-import { Scope } from 'obsidian';
 import type { HistoryWrite } from '../core/history';
 import { closeCard, isNewEmptyItem } from './card';
 import { targetOf } from './dom';
@@ -8,13 +7,7 @@ import { enqueueAt, writeAction } from './write';
 // Cmd+Z and Cmd+Shift+Z while the view has focus (spec, "Saving, outside changes, sync conflicts,
 // undo"). Each returns false, so Obsidian cancels the key's default, or true to leave the key to a
 // field.
-export function registerUndoKeys(view: PrinceListView): void {
-	view.scope = new Scope(view.app.scope);
-	view.scope.register(['Mod'], 'z', (evt) => undoKey(view, evt));
-	view.scope.register(['Mod', 'Shift'], 'z', (evt) => redoKey(view, evt));
-}
-
-function undoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
+export function undoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
 	if (isInField(evt)) return true;
 	// Closing the card removes the item, which is the undo of adding it.
 	if (isNewEmptyItem(view)) closeCard(view);
@@ -22,7 +15,7 @@ function undoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
 	return false;
 }
 
-function redoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
+export function redoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
 	if (isInField(evt)) return true;
 	writeStep(view, (text) => view.editing.history.redo(text), "This list changed elsewhere, so it can't be redone.");
 	return false;
