@@ -42,3 +42,13 @@ test('isStarred reads the star on an item line only', () => {
 	expect(isStarred('- [ ] a')).toBe(false);
 	expect(isStarred('## a ⭐')).toBe(false);
 });
+
+test('a starred item whose title is cleared stays starred', () => {
+	const title = keepStar('milk ⭐', '');
+	expect(title).toBe(' ⭐');
+	expect(isStarred(`- [ ] ${title}`)).toBe(true);
+});
+
+test('a star before trailing spaces still counts', () => {
+	expect(isStarred('- [ ] milk ⭐ ')).toBe(true);
+});
