@@ -74,6 +74,14 @@ describe('EditHistory', () => {
 		expect(history.undo(t2)?.next).toBe(t0);
 	});
 
+	test('a keystroke that changes nothing keeps the redo stack', () => {
+		const history = new EditHistory();
+		history.wrote(t0, t1, tick);
+		history.wrote(t1, t0, { ...textEdit(t1, t0), history: 'undo' });
+		history.typed(s, t0, t0, textEdit(t0, t0));
+		expect(history.redo(t0)?.next).toBe(t1);
+	});
+
 	test('a cancel that takes its insert back leaves no step', () => {
 		const history = new EditHistory();
 		history.wrote(t2, t0, textEdit(t2, t0));

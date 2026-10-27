@@ -64,7 +64,7 @@ export class EditHistory {
 
 	typed(session: object, before: string, after: string, edit: OwnEdit): void {
 		this.keepChain(before);
-		this.redoSteps.length = 0;
+		if (after !== before) this.redoSteps.length = 0;
 		const top = this.top();
 		if (top && joins(top, edit)) {
 			top.session = session;
