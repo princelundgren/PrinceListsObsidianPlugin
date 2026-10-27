@@ -134,5 +134,5 @@ function showHeading(view: PrinceListView, field: HeadingField, line: number | n
 		view.render();
 		return;
 	}
-	field.el.replaceWith(buildHeading(view, { line: at, text: headingText(lines, at) }, view.blocks));
+	field.el.replaceWith(buildHeading(view, view.file?.path ?? '', { line: at, text: headingText(lines, at) }, view.blocks));
 }

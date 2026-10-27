@@ -41,6 +41,8 @@ export class PrinceListView extends TextFileView {
 	/** Cmd+F's query, or null while its field is closed. Like showArchived, nothing restores it. */
 	filter: string | null = null;
 	readonly collapsed = new CollapsedHeadings(this.editing);
+	readonly dragsRows = true;
+	readonly dragsHeadings = true;
 	filterEl: HTMLInputElement | null = null;
 	newItemButton: HTMLButtonElement | null = null;
 	private archivedButton: HTMLElement | null = null;

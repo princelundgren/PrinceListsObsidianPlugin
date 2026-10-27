@@ -7,7 +7,7 @@ import { dayOf } from '../core/when';
 import { addCollapseArrow } from './collapse';
 import { addHiddenLabel } from './dom';
 import type { PrinceListView } from './list-view';
-import { renderInline } from './notes';
+import { renderInline, type MarkdownHost } from './notes';
 import { addStar, addWhen } from './row-marks';
 
 export const ITEM_CLASS = 'princelists-item';
@@ -21,6 +21,13 @@ export const LINE_ATTR = 'data-princelists-line';
 // Rows drag with the mouse on desktop only (enableMouseDrag). On the iPhone, a hold on a row is kept
 // for the touch drag (1b).
 export const ROWS_DRAG = Platform.isDesktop;
+
+// A view or block that draws rows. `readonly` only stops buildRow writing the flags: a host may
+// change them between draws.
+export interface RowHost extends MarkdownHost {
+	readonly dragsRows: boolean;
+	readonly dragsHeadings: boolean;
+}
 
 export function lineOf(el: Element): number | null {
 	const line = el.getAttr(LINE_ATTR);
@@ -81,13 +88,14 @@ export function renderList(
 		list = null;
 		return isHeading && line === field.line;
 	};
+	const sourcePath = view.file?.path ?? '';
 	const sections = visibleSections(lines, model, new Date(), { showArchived: view.showArchived, query: view.filter ?? '', keepLine: view.selected, collapsed: view.collapsed.lines() });
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {
 		if (section.heading) {
 			placeCard(section.heading.line, false);
 			if (!placeField(section.heading.line, true)) {
-				const headingEl = buildHeading(view, section.heading, blocks);
+				const headingEl = buildHeading(view, sourcePath, section.heading, blocks);
 				addCollapseArrow(headingEl, section.collapsed);
 				el.append(headingEl);
 			}
@@ -104,7 +112,7 @@ export function renderList(
 				continue;
 			}
 			if (placeCard(row.titleLine, true)) continue;
-			items().append(buildRow(view, row, blocks));
+			items().append(buildRow(view, sourcePath, row, blocks));
 		}
 	}
 	if (!placed && card) items().append(card.el);
@@ -112,10 +120,15 @@ export function renderList(
 	return drawnCount(shown) < drawnCount(sections);
 }
 
-export function buildHeading(view: PrinceListView, heading: { line: number; text: string }, blocks: Map<HTMLElement, Component>): HTMLElement {
+export function buildHeading(
+	host: RowHost,
+	sourcePath: string,
+	heading: { line: number; text: string },
+	blocks: Map<HTMLElement, Component>,
+): HTMLElement {
 	const el = createDiv({ cls: HEADING_CLASS, attr: { role: 'heading', 'aria-level': 2, [LINE_ATTR]: heading.line } });
-	if (ROWS_DRAG) el.draggable = true;
-	record(blocks, el, renderInline(view, el, heading.text));
+	if (ROWS_DRAG && host.dragsHeadings) el.draggable = true;
+	record(blocks, el, renderInline(host, sourcePath, el, heading.text));
 	return el;
 }
 
@@ -123,12 +136,12 @@ function drawnCount(sections: SectionRows[]): number {
 	return sections.reduce((count, { heading, rows }) => count + (heading ? 1 : 0) + rows.length, 0);
 }
 
-export function buildRow(view: PrinceListView, row: ItemRow, blocks: Map<HTMLElement, Component>): HTMLLIElement {
+export function buildRow(host: RowHost, sourcePath: string, row: ItemRow, blocks: Map<HTMLElement, Component>): HTMLLIElement {
 	const rowEl = createEl('li', { cls: ITEM_CLASS, attr: { [LINE_ATTR]: row.titleLine } });
-	if (ROWS_DRAG) rowEl.draggable = true;
+	if (ROWS_DRAG && host.dragsRows) rowEl.draggable = true;
 	addHiddenLabel(rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), row.label);
 	const title = rowEl.createDiv({ cls: 'princelists-item-title' });
-	record(blocks, rowEl, renderInline(view, title, row.title));
+	record(blocks, rowEl, renderInline(host, sourcePath, title, row.title));
 	if (row.starred) addStar(rowEl);
 	if (row.when !== null) addWhen(rowEl, row.when, dayOf(new Date()));
 	showDone(rowEl, row);
