@@ -823,7 +823,7 @@ needs no code.
     it.
   - In a field, Cmd+Z is left to the browser's text undo, not the list's history. That doesn't take
     back the link to a picture pasted into the notes, since the browser doesn't count the plugin's
-    insert as typing; Cmd+Z after leaving the field does (1b check 10).
+    insert as typing; Cmd+Z after leaving the field does (the 1b plan, Task 4, check 10).
   - The history holds 100 steps, and only the list's text: undoing a picture's link leaves the
     picture's file.
   - In 1a, the only undo is the Undo button shown after a delete.
