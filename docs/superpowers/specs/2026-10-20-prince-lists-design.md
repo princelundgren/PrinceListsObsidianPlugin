@@ -526,6 +526,8 @@ stays, and the blank line stays with it.
     do in any note.
   - **Empty notes show a gray "Notes" three lines tall (owner, 2026-10-27),** and the notes field
     is at least that tall while it's being typed in, so it's easy to tap.
+  - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
+    typed in reads as its text, as a title does.
   - Links in a card can be clicked.
   - On the Mac, right-clicking an internal link in a card shows Obsidian's own link menu
     **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**.
