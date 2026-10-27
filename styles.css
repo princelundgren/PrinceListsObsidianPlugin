@@ -157,6 +157,11 @@ textarea.princelists-list-note-editor {
 	box-shadow: var(--shadow-s);
 }
 
+/* Mobile's dark page is black, where the shadow can't show. */
+.theme-dark .princelists-is-mobile .princelists-item.princelists-card {
+	background-color: var(--background-secondary);
+}
+
 /* It takes focus so that Escape reaches it; being raised already shows that it is open. */
 .princelists-card:focus {
 	outline: none;
