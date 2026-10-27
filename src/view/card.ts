@@ -9,6 +9,7 @@ import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
 import { buildWhenPicker, showWhen } from './card-when';
+import { caretAtClick } from './click-caret';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
@@ -143,17 +144,20 @@ export function cardTitleBlur(view: PrinceListView, field: HTMLTextAreaElement):
 	fitHeight(field);
 }
 
-export function editNotes(view: PrinceListView, area: HTMLElement): void {
+// A click puts the caret where it was; without one, such as for a pasted picture, it goes at the end.
+export function editNotes(view: PrinceListView, area: HTMLElement, click?: MouseEvent): void {
 	const card = view.card;
 	if (!card || area.querySelector(`.${NOTES_EDITOR_CLASS}`)) return;
 	const notes = view.editing.openNotes();
 	if (notes === null) return;
+	const caret = click ? caretAtClick(area, click, notes) : notes.length;
 	if (card.notes) view.removeChild(card.notes);
 	card.notes = null;
 	area.empty();
 	const editor = area.createEl('textarea', { cls: [FIELD_CLASS, NOTES_EDITOR_CLASS], attr: { placeholder: 'Notes' } });
 	editor.value = notes;
 	editor.focus();
+	editor.setSelectionRange(caret, caret);
 	fitHeight(editor);
 }
 

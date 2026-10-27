@@ -582,6 +582,14 @@ stays, and the blank line stays with it.
 - **The list note and item notes (call):**
   - Both show as rendered Markdown. Clicking into one switches to a plain-text editor of the raw
     Markdown, without the item's indent.
+  - **Where the caret goes (owner, 2026-10-27):** on the character clicked, wherever the rendered
+    text matches the Markdown. On a link, a picture or another part the rendering draws or hides,
+    at the end of that source line. A click on a link still follows it. The rendered notes show a
+    text cursor.
+  - Where the browser has no `caretPositionFromPoint` (Chromium before 128, Safari and iOS before
+    26.2), a click goes to the end of the first line of the clicked paragraph or list item **(call)**.
+    The older `caretRangeFromPoint` would tell the character, but it's deprecated, and Obsidian's
+    lint rules don't allow deprecated APIs.
   - Leaving the editor renders the text again, and saving puts the indent back.
 - **Pictures (owner):**
   - Pictures show from 1a on.

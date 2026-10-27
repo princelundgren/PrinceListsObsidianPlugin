@@ -115,7 +115,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 			return;
 		}
 		const notes = target.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-		if (notes) editNotes(view, notes);
+		if (notes) editNotes(view, notes, evt);
 		return;
 	}
 	// Anything else is a click elsewhere, which only closes an open card (spec, "Selecting and adding").
@@ -130,7 +130,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (Platform.isMobile && showHeadingMenu(view, evt, target)) return;
-	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view);
+	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view, evt);
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
