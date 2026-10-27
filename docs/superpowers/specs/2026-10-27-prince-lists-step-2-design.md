@@ -181,7 +181,7 @@ current todo app. Step one's own "Done when" doesn't change.
 
 - **A "Turn into list" command,** available while the active note is a Markdown note in the vault
   without the marker. The note's file menu (right-click in the file explorer, or a long-press on
-  the iPhone) has it too **(call)**.
+  mobile) has it too **(call)**.
 - **It writes the marker** as "What's written in the file" says, then opens the note as a list.
   - **The write path (call):** when the note is open in a Markdown editor, the view is saved first
     (`TextFileView.save`), so typing not yet saved isn't lost. The line then goes in with

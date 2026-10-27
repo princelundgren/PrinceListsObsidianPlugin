@@ -73,7 +73,7 @@ export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: H
 	menu.showAtMouseEvent(evt);
 }
 
-// Obsidian makes a contextmenu on the iPhone after a still hold, and holding a row or a heading opens no
+// Obsidian makes a contextmenu on mobile after a still hold, and holding a row or a heading opens no
 // menu (spec, "Touch on mobile"). The view's listener cancels it in the capture phase. WebKit
 // still sends a click when the finger lifts, which the view swallows.
 export function cancelHoldMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {

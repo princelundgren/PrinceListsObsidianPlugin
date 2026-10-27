@@ -41,7 +41,7 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 	};
 }
 
-// Its top is where the list stops being visible: the iPhone's floating navbar covers the bottom of the
+// Its top is where the list stops being visible: mobile's floating navbar covers the bottom of the
 // view, and Obsidian puts its height in --view-bottom-spacing.
 function visibleBottom(view: PrinceListView): HTMLElement {
 	return view.containerEl.createDiv({ cls: 'princelists-visible-bottom' });
