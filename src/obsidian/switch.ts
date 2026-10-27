@@ -61,7 +61,8 @@ export async function editInMarkdown(workspace: Workspace, file: TFile, line: nu
 	await openAsMarkdown(leaf, file);
 	if (!(leaf.view instanceof MarkdownView)) return;
 	const { editor } = leaf.view;
-	const at = { line, ch: editor.getLine(line).length };
+	const caretLine = Math.min(line, editor.lastLine());
+	const at = { line: caretLine, ch: editor.getLine(caretLine).length };
 	workspace.setActiveLeaf(leaf, { focus: true });
 	editor.setCursor(at);
 	editor.scrollIntoView({ from: at, to: at }, true);
