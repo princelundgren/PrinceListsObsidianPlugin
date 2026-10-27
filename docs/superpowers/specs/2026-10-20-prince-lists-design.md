@@ -114,14 +114,14 @@ These are wanted later, roughly in this order. The file format already leaves ro
 
 - **[Step two](2026-10-27-prince-lists-step-2-design.md) (owner, 2026-10-27)** takes on what the
   owner needs before moving in: ticking checklists, Cmd+F, showing a list inside another note,
-  "Turn into list", a When day with a Schedule view, and starring an item.
+  "Turn into list", a When day with a Schedule view, starring an item, and dragging a heading to
+  move its whole section.
 - **Views across lists:** a sidebar with views such as Inbox, Today, Upcoming and Done, grouped
   by area. An area is a list's folder. A Favorites view gathers starred items **(owner,
   2026-10-27)**.
 - **Dates and tags:** a deadline on items, plus tags and tag filters.
 - **Smaller item features:**
   - repeating items, a trash, IDs on single items, and sorting modes
-  - dragging a heading to move its whole section
 - **Quick capture from outside Obsidian.** A plugin can't hear a global hotkey. The documented
   route is an `obsidian://` handler (`registerObsidianProtocolHandler`) that Raycast, Shortcuts
   or an iPhone Shortcut can call.
