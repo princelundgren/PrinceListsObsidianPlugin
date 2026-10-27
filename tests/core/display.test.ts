@@ -173,6 +173,11 @@ describe('visibleSections, filtered', () => {
 		});
 	});
 
+	test('keeps the item on keepLine hidden while it is archived and archived items are hidden', () => {
+		expect(sectionsOf(text, now, false, '', 9)[2]).toEqual({ heading: { line: 8, text: 'Old' }, rows: [] });
+		expect(sectionsOf(text, now, false, 'rake', 9)[2]).toEqual({ heading: null, rows: [] });
+	});
+
 	test('shows the item on keepLine without matching, and its heading', () => {
 		expect(sectionsOf(text, now, false, 'milk', 7)[1]).toEqual({ heading: { line: 6, text: 'Garden' }, rows: [row(7, 'Rake')] });
 	});

@@ -55,9 +55,9 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 		const end = model.sections[i + 1]?.headingLine ?? lines.length;
 		const shown: ListRow[] = items.flatMap((item) => {
 			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now);
+			if (!isShown(row, filter.showArchived)) return [];
 			const kept = item.titleLine === filter.keepLine;
-			if (!kept && !isShown(row, filter.showArchived)) return [];
-			return kept || !filtering || itemMatches(lines, item, row, filter.query) ? [row] : [];
+			return !filtering || kept || itemMatches(lines, item, row, filter.query) ? [row] : [];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
 		if (filtering) return { heading: shown.length > 0 ? heading : null, rows: shown };

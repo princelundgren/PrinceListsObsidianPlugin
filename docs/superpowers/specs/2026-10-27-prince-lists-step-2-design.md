@@ -118,8 +118,7 @@ current todo app. Step one's own "Done when" doesn't change.
   can't match.
 - **Archived items are searched only while "Show archived" is on.**
 - **Escape in the field ends the filter** and shows every row again, and so does leaving the field
-  while it's empty. Like "Show
-  archived", it isn't remembered **(call)**.
+  while it's empty. Like "Show archived", it isn't remembered **(call)**.
 - **Everything else works while filtering (call):** ticking, cards, dragging and adding. A drop
   goes after the visible row above it, as it does past hidden archived rows. A new item, or an item
   whose card is open, stays shown while its card is open even if it doesn't match.
