@@ -540,6 +540,10 @@ stays, and the blank line stays with it.
   that draws it, inside its own views only, as Obsidian's web viewer does.
 - **Clicking an item** (not a link in its title) opens it into a raised card that shows the title
   and the rendered notes.
+  - **In dark mode the card takes Obsidian's secondary background (owner, 2026-10-27),** on
+    desktop and mobile. A card in the page's own color, raised only by its shadow, can hardly be
+    seen on a dark page, and on mobile's black one not at all. In light mode it keeps the page's
+    color.
   - Notes use Obsidian's own Markdown rendering, so pictures, links and embeds look the way they
     do in any note.
   - **A card's notes are at least three lines tall (owner, 2026-10-27),** empty or not, and so is
@@ -579,6 +583,14 @@ stays, and the blank line stays with it.
 - **The list note and item notes (call):**
   - Both show as rendered Markdown. Clicking into one switches to a plain-text editor of the raw
     Markdown, without the item's indent.
+  - **Where the caret goes (owner, 2026-10-27):** on the character clicked, wherever the rendered
+    text matches the Markdown. On a link, a picture or another part the rendering draws or hides,
+    at the end of that source line. A click on a link still follows it. The rendered notes show a
+    text cursor.
+  - Where the browser has no `caretPositionFromPoint` (Chromium before 128, Safari and iOS before
+    26.2), a click goes to the end of the first line of the clicked paragraph or list item **(call)**.
+    The older `caretRangeFromPoint` would tell the character, but it's deprecated, and Obsidian's
+    lint rules don't allow deprecated APIs.
   - Leaving the editor renders the text again, and saving puts the indent back.
 - **Pictures (owner):**
   - Pictures show from 1a on.
@@ -626,16 +638,12 @@ stays, and the blank line stays with it.
   its card and selects it. Clicking empty space closes the card and clears the selection.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks.
-- **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
-  the list scrolls, on desktop and mobile. Its accessible name is "New item" **(call)**.
-  - **On desktop it sits 32 px higher (owner, 2026-10-27),** clear of Obsidian's status bar, which
-    floats over the bottom right of the window. Mobile has no status bar (`addStatusBarItem`:
-    "Not available on mobile").
-    Obsidian documents no variable for the bar's height, so the lift is fixed on purpose:
-    `--size-4-8`, a step of Obsidian's spacing scale, a little more than the 27 to 31 px the bar
-    measured in 1.14.5. Measuring the bar would mean reading Obsidian's own DOM. A theme with a
-    taller bar can still touch the "+"'s lower edge, and with the bar hidden the "+" sits a little
-    higher than it must.
+- **A "+" in the pane's header (owner, 2026-10-27)** adds an item, on desktop and mobile, beside the
+  show-archived icon. It's a view action (`addAction`) named "New item" **(call)**.
+- **The floating "+" button (owner)** sits at the bottom right of the list pane, on mobile only
+  **(owner, 2026-10-27)**, under the thumb. It stays put while the list scrolls. Its accessible name
+  is "New item" **(call)**. Desktop has only the header's "+": the floating one, filled with the
+  accent color, drew the eye more than the list.
   - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
     fields included. An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
@@ -875,6 +883,9 @@ needs no code.
   - In a field, Cmd+Z is left to the browser's text undo, not the list's history. That doesn't take
     back the link to a picture pasted into the notes, since the browser doesn't count the plugin's
     insert as typing; Cmd+Z after leaving the field does (the 1b plan, Task 4, check 10).
+  - That undo changes only the field with focus. The browser keeps one text history for the whole
+    page, so once the field has nothing left to undo, Cmd+Z does nothing rather than reach typing in
+    another field, which nothing would save.
   - The history holds 100 steps, and only the list's text: undoing a picture's link leaves the
     picture's file.
   - In 1a, the only undo is the Undo button shown after a delete.
@@ -1090,7 +1101,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `--file-line-width`, so titles and rows line up with a note's. That's always the readable line
   width: no documented API reads Obsidian's "Readable line length" setting, so with it off a
   note fills the pane while a list doesn't.
-- **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
+- **Put mobile's floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
   - It keeps above mobile's floating navbar with Obsidian's `--view-bottom-spacing`, as Bases

@@ -4,6 +4,7 @@ import { nameTaken } from '../core/file-name';
 import type { Line } from '../core/lines';
 import type { ListModel } from '../core/parse';
 import { oneLineTitle } from '../core/title-field';
+import { caretAtClick } from './click-caret';
 import { fitHeight } from './dom';
 import type { PrinceListView } from './list-view';
 import { renderNotes } from './notes';
@@ -111,16 +112,18 @@ export function buildListNote(view: PrinceListView, parent: HTMLElement, lines: 
 	return area;
 }
 
-export function openListNote(view: PrinceListView): void {
+export function openListNote(view: PrinceListView, click: MouseEvent): void {
 	const area = view.listNoteEl;
 	if (!area || view.listNote) return;
+	const note = view.editing.openListNote();
+	const caret = caretAtClick(area, click, note);
 	view.dropBlock(area);
 	area.empty();
 	const editor = area.createEl('textarea', {
 		cls: [FIELD_CLASS, NOTE_EDITOR_CLASS],
 		attr: { placeholder: 'Notes' },
 	});
-	editor.value = view.editing.openListNote();
+	editor.value = note;
 	const warnings = {
 		restructure: area.createDiv({
 			cls: 'princelists-field-warning',
@@ -131,6 +134,7 @@ export function openListNote(view: PrinceListView): void {
 	view.listNote = { editor, warnings, warned: false };
 	showWarnings(view.listNote);
 	editor.focus();
+	editor.setSelectionRange(caret, caret);
 	fitHeight(editor);
 }
 

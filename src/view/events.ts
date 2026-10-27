@@ -46,6 +46,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
+	view.registerDomEvent(contentEl, 'beforeinput', (evt) => keepUndoInFocusedField(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
 	view.registerDomEvent(contentEl, 'keydown', (evt) => onKeyDown(view, evt));
@@ -115,7 +116,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 			return;
 		}
 		const notes = target.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-		if (notes) editNotes(view, notes);
+		if (notes) editNotes(view, notes, evt);
 		return;
 	}
 	// Anything else is a click elsewhere, which only closes an open card (spec, "Selecting and adding").
@@ -130,7 +131,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (Platform.isMobile && showHeadingMenu(view, evt, target)) return;
-	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view);
+	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view, evt);
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
@@ -148,6 +149,14 @@ function swallowClick(view: PrinceListView, evt: MouseEvent): void {
 	view.swallowNextClick = false;
 	evt.preventDefault();
 	evt.stopPropagation();
+}
+
+// The page has one undo history, so Cmd+Z in one field can reach typing in a field without focus,
+// which nothing would save. That undo's beforeinput targets the other field while focus is still in
+// this one (observed in Obsidian 1.14.4 on macOS); focus moves only with its input event.
+function keepUndoInFocusedField(view: PrinceListView, evt: InputEvent): void {
+	const isHistory = evt.inputType === 'historyUndo' || evt.inputType === 'historyRedo';
+	if (isHistory && evt.target !== view.contentEl.doc.activeElement) evt.preventDefault();
 }
 
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found

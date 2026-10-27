@@ -1,8 +1,11 @@
 /* PrinceLists styles. */
 
 /* Every field reads as the text it edits: no frame, and as tall as its text (fitHeight). The class
-   and the element together outrank Obsidian's own textarea rule. */
+   and the element together outrank Obsidian's own textarea rule. Its hover rule can outrank them on
+   some platforms, so the field clears the colors that rule paints with. */
 textarea.princelists-field {
+	--background-modifier-form-field: transparent;
+	--background-modifier-form-field-hover: transparent;
 	display: block;
 	width: 100%;
 	min-height: 0;
@@ -157,6 +160,11 @@ textarea.princelists-list-note-editor {
 	box-shadow: var(--shadow-s);
 }
 
+/* A dark page barely shows the shadow, and mobile's black one not at all. */
+.theme-dark .princelists-item.princelists-card {
+	background-color: var(--background-secondary);
+}
+
 /* It takes focus so that Escape reaches it; being raised already shows that it is open. */
 .princelists-card:focus {
 	outline: none;
@@ -177,6 +185,12 @@ textarea.princelists-list-note-editor {
 
 .princelists-placeholder {
 	color: var(--text-faint);
+	cursor: text;
+}
+
+/* A click in the rendered notes opens the editor there. */
+.princelists-list-note-text,
+.princelists-card-notes {
 	cursor: text;
 }
 
@@ -217,12 +231,6 @@ textarea.princelists-card-notes-editor {
 	position: relative;
 }
 
-/* On desktop, Obsidian's status bar floats over the pane's bottom right, and Obsidian documents no
-   variable for its height (spec, "Selecting and adding"). */
-.princelists-view.princelists-has-status-bar {
-	--princelists-status-bar-room: var(--size-4-8);
-}
-
 /* Its top is where the list stops being visible (spec, "Touch on mobile"). */
 .princelists-visible-bottom {
 	position: absolute;
@@ -236,7 +244,7 @@ button.princelists-new-item {
 	--icon-size: var(--icon-l);
 	position: absolute;
 	right: var(--size-4-4);
-	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
+	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px));
 	width: var(--size-4-12);
 	height: var(--size-4-12);
 	padding: 0;
@@ -257,9 +265,9 @@ button.princelists-new-item {
 	}
 }
 
-/* Room below the last row, so it can scroll clear of the "+". */
-.princelists-end {
-	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
+/* Room below the last row, so it can scroll clear of mobile's "+". */
+.princelists-is-mobile .princelists-end {
+	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px));
 }
 
 /* The card's When, star and ⋯, on the title's first line. */
