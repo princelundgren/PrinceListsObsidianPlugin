@@ -422,3 +422,28 @@ textarea.princelists-heading-field {
 .princelists-block-message {
 	color: var(--text-muted);
 }
+
+/* A block's title field, with its trash button at the end. */
+.princelists-block-field {
+	flex: 1 1 auto;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--size-4-2);
+	min-width: 0;
+}
+
+button.princelists-block-trash {
+	flex: none;
+	height: auto;
+	padding: var(--size-2-2);
+	background-color: transparent;
+	box-shadow: none;
+	color: var(--icon-color);
+}
+
+button.princelists-block-new-item {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
+	margin-top: var(--size-4-2);
+}
