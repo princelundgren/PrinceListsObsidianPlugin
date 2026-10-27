@@ -677,8 +677,8 @@ stays, and the blank line stays with it.
 
 ### Item actions (owner)
 
-- **On desktop, right-click an item** for New item below, New heading below and Delete
-  **(call)**. Delete removes the item and its notes. Step two's star is a button on the open card,
+- **On desktop, right-click an item** for New item below, New heading below, Edit in Markdown
+  (step two) and Delete **(call)**. Delete removes the item and its notes. Step two's star is a button on the open card,
   not an entry here **(owner, 2026-10-27)**.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading and Delete heading.

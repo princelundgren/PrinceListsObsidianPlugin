@@ -54,3 +54,17 @@ export async function openAsMarkdown(leaf: WorkspaceLeaf, file: TFile): Promise<
 	markdownChosen.set(leaf, files.add(file));
 	await leaf.setViewState({ type: VIEW_TYPE_MARKDOWN, state: { file: file.path } });
 }
+
+// Beside the list, with the caret at the end of `line`, where Markdown's own editing tools work.
+export async function editInMarkdown(workspace: Workspace, file: TFile, line: number): Promise<void> {
+	const leaf = workspace.getLeaf('split');
+	await openAsMarkdown(leaf, file);
+	if (!(leaf.view instanceof MarkdownView)) return;
+	const { editor } = leaf.view;
+	const at = { line, ch: editor.getLine(line).length };
+	workspace.setActiveLeaf(leaf, { focus: true });
+	editor.setCursor(at);
+	editor.scrollIntoView({ from: at, to: at }, true);
+	// Making the leaf active doesn't focus its editor on mobile.
+	editor.focus();
+}
