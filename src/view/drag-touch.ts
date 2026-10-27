@@ -2,7 +2,7 @@ import { dropAt, type Drop } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { edgeStep, HOLD_MS, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../core/touch-drag';
 import { CARD_CLASS, closeCard } from './card';
-import { targetOf } from './events';
+import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { markDrop, queueMove, shownRows } from './move';
 import { ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';

@@ -15,6 +15,7 @@ import {
 	notesInput,
 	openCard,
 } from './card';
+import { targetOf } from './dom';
 import {
 	beginListTitle,
 	closeListNote,
@@ -51,13 +52,6 @@ export function registerFieldEvents(view: PrinceListView): void {
 		// A hold that sent no click must not eat a later tap.
 		view.registerDomEvent(contentEl, 'touchstart', () => (view.swallowNextClick = false), { capture: true });
 	}
-}
-
-// Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of
-// this window's classes.
-export function targetOf(evt: UIEvent): HTMLElement | null {
-	const node = evt.targetNode;
-	return node?.instanceOf(HTMLElement) ? node : null;
 }
 
 function onClick(view: PrinceListView, evt: MouseEvent): void {

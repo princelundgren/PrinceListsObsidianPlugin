@@ -1,7 +1,7 @@
 import { Notice } from 'obsidian';
 import { appendOnOwnLine, pictureName } from '../core/picture';
 import { CARD_NOTES_CLASS, editNotes, NOTES_EDITOR_CLASS, notesInput, type Card } from './card';
-import { targetOf } from './events';
+import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";

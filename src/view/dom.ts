@@ -30,3 +30,10 @@ export function fitHeight(textarea: HTMLTextAreaElement): void {
 	textarea.setCssProps({ height: 'auto' });
 	textarea.setCssProps({ height: `${textarea.scrollHeight}px` });
 }
+
+// Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of
+// this window's classes.
+export function targetOf(evt: UIEvent): HTMLElement | null {
+	const node = evt.targetNode;
+	return node?.instanceOf(HTMLElement) ? node : null;
+}
