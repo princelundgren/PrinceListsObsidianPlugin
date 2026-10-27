@@ -451,6 +451,16 @@ button.princelists-collapse {
 	color: var(--text-faint);
 }
 
+/* In Live Preview the block sits in the editor's editable text, where the pointer would otherwise be
+   a text cursor over the rows. Its title field keeps the text cursor. */
+.princelists-block {
+	cursor: default;
+}
+
+.princelists-block textarea {
+	cursor: text;
+}
+
 .princelists-block-message {
 	color: var(--text-muted);
 }
