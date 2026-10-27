@@ -1,24 +1,25 @@
-import { dropAt, type Drop } from '../core/drop';
+import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { edgeStep, HOLD_MS, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../core/touch-drag';
 import { CARD_CLASS, closeCard } from './card';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
-import { markDrop, queueMove, shownRows } from './move';
-import { ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
+import { aimDrop, markDrop, queueDrop, shownRows, type RowDrop } from './move';
+import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 
 const LIFTED_CLASS = 'princelists-lifted';
 const LIFT_OFFSET = '--princelists-lift';
 
 interface Lift {
-	/** The dragged item's title line. It follows edits that land during the drag. */
+	/** The dragged item's title line, or heading's line. It follows edits that land during the drag. */
 	item: TrackedLine;
+	kind: ShownRow['kind'];
 	/** Every row and heading with its extent at the lift, in the scroller's content coordinates. */
 	boxes: { el: HTMLElement; top: number; bottom: number }[];
 	scrollAtLift: number;
 	/** How far the finger sits below the row's own slot, because the scroller couldn't absorb all of a closed card's shift. */
 	shift: number;
-	drop: Drop | null;
+	drop: RowDrop | null;
 	/** The row or heading that shows the drop line. */
 	marked: HTMLElement | null;
 	frame: number | null;
@@ -42,7 +43,7 @@ interface Press {
 	lift: Lift | null;
 }
 
-// Dragging items with a finger, on the iPhone only (spec, "Dragging" and "Touch on the iPhone"). The
+// Dragging items and headings with a finger, on the iPhone only (spec, "Dragging" and "Touch on the iPhone"). The
 // listeners are registered once and read the press, instead of being added for each drag. The view's
 // capture-phase contextmenu cancel and click swallow (registerFieldEvents) serve this drag too.
 export function enableTouchDrag(view: PrinceListView): void {
@@ -84,7 +85,7 @@ export function enableTouchDrag(view: PrinceListView): void {
 		const boxes: RowBox[] = lift.boxes.map(({ el, top, bottom }) => ({ line: lineOf(el) as number, top, bottom }));
 		const y = current.y - lift.shift - listScrollEl.getBoundingClientRect().top + listScrollEl.scrollTop;
 		const over = line === null ? null : overRow(boxes, y);
-		lift.drop = line === null || !over ? null : dropAt(shownRows(listScrollEl), line, over);
+		lift.drop = line === null || !over ? null : aimDrop(shownRows(listScrollEl), { line, kind: lift.kind }, over);
 		lift.marked = markDrop(listScrollEl, lift.marked, lift.drop);
 	};
 
@@ -121,7 +122,8 @@ export function enableTouchDrag(view: PrinceListView): void {
 			const rect = el.getBoundingClientRect();
 			return { el, top: rect.top - scrollerTop + listScrollEl.scrollTop, bottom: rect.bottom - scrollerTop + listScrollEl.scrollTop };
 		});
-		current.lift = { item: view.editing.track(line), boxes, scrollAtLift: listScrollEl.scrollTop, shift, drop: null, marked: null, frame: null, fromX: current.x, fromY: current.y, armed: false };
+		const kind = current.row.hasClass(HEADING_CLASS) ? 'heading' : 'item';
+		current.lift = { item: view.editing.track(line), kind, boxes, scrollAtLift: listScrollEl.scrollTop, shift, drop: null, marked: null, frame: null, fromX: current.x, fromY: current.y, armed: false };
 		current.row.addClass(LIFTED_CLASS);
 		// The release of a lifted press is never a tap.
 		view.swallowNextClick = true;
@@ -132,7 +134,8 @@ export function enableTouchDrag(view: PrinceListView): void {
 		if (evt.pointerType !== 'touch' || !evt.isPrimary) return;
 		// A press whose release never reached the view is over.
 		endPress();
-		const row = targetOf(evt)?.closest<HTMLElement>(`.${ITEM_CLASS}`);
+		// A heading lifts alone; its rows stay until the drop redraws.
+		const row = targetOf(evt)?.closest<HTMLElement>(`.${ITEM_CLASS}, .${HEADING_CLASS}`);
 		if (!row || row.hasClass(CARD_CLASS)) return;
 		const started: Press = { pointerId: evt.pointerId, row, startX: evt.clientX, startY: evt.clientY, x: evt.clientX, y: evt.clientY, timer: null, lift: null };
 		started.timer = window.setTimeout(() => lift(started), HOLD_MS);
@@ -159,7 +162,7 @@ export function enableTouchDrag(view: PrinceListView): void {
 		const stillThere = press.row.isConnected;
 		endPress();
 		// A redraw since the last move means the drop's lines may be stale.
-		if (drop && line !== null && line !== undefined && stillThere) queueMove(view, line, drop.place);
+		if (drop && line !== null && line !== undefined && stillThere) queueDrop(view, line, drop);
 	});
 	view.registerDomEvent(contentEl, 'pointercancel', (evt) => {
 		if (press?.pointerId === evt.pointerId) endPress();
