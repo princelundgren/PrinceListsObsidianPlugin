@@ -528,6 +528,10 @@ stays, and the blank line stays with it.
 - **Item titles and headings are rendered as Markdown (owner, 2026-10-21),** with Obsidian's own
   rendering, as in any note: bold is bold, and links can be clicked. A click on a link in a row
   opens the link. It doesn't tick the item or open the card.
+- **Web links show without Obsidian's external-link icon (owner, 2026-10-27),** in titles, notes,
+  the list note, the Schedule view and a list inside another note, as Live Preview shows a bare
+  URL. No CSS variable controls the icon, so the plugin's styles turn off the background image
+  that draws it, inside its own views only, as Obsidian's web viewer does.
 - **Clicking an item** (not a link in its title) opens it into a raised card that shows the title
   and the rendered notes.
   - Notes use Obsidian's own Markdown rendering, so pictures, links and embeds look the way they
