@@ -160,8 +160,8 @@ textarea.princelists-list-note-editor {
 	box-shadow: var(--shadow-s);
 }
 
-/* Mobile's dark page is black, where the shadow can't show. */
-.theme-dark .princelists-is-mobile .princelists-item.princelists-card {
+/* A dark page barely shows the shadow, and mobile's black one not at all. */
+.theme-dark .princelists-item.princelists-card {
 	background-color: var(--background-secondary);
 }
 
