@@ -13,13 +13,14 @@ this project.
 - **Release artifacts:** `main.js`, `manifest.json` and `styles.css`.
 - **Read before working:**
   - [The design](docs/superpowers/specs/2026-10-20-prince-lists-design.md) says what the plugin does
-    and why.
+    and why, and [step two's design](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md)
+    adds what step two builds.
     - Decisions marked **(owner)** are the maintainer's. Don't change one without an issue the
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
   - The plans in `docs/superpowers/plans/` give the tasks, with exact interfaces and tests. The
-    current one is [step 1b](docs/superpowers/plans/2026-10-22-prince-lists-step-1b.md). Implement a
-    task as written, one task per pull request.
+    current one is [step two](docs/superpowers/plans/2026-10-27-prince-lists-step-2.md). Implement
+    a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.
 
 ## Rules that are never broken
