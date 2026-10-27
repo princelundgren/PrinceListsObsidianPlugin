@@ -247,4 +247,5 @@ These go into step one's "Not in step one" list:
 
 Smallest first, each feature its own group of plan tasks that can be released alone: Turn into
 list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, When on rows and in the
-card, the Schedule view, then lists inside other notes. No API here is newer than 1.5.7, the current `minAppVersion`.
+card, the Schedule view, then lists inside other notes. No API here is newer than 1.5.7, the
+current `minAppVersion`.
