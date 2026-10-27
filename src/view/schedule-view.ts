@@ -21,8 +21,7 @@ import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	today: 'Today',
 	tomorrow: 'Tomorrow',
-	week: 'Coming week',
-	month: 'Next month',
+	week: 'Next 7 days',
 	later: 'Later',
 };
 

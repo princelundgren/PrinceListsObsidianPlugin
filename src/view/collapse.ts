@@ -1,14 +1,17 @@
 import { setIcon } from 'obsidian';
 import { sectionHeadingOf } from '../core/collapsed';
 import type { ItemPlace } from '../core/list-actions';
+import { addHiddenLabel } from './dom';
 import type { PrinceListView } from './list-view';
 
 export const COLLAPSE_CLASS = 'princelists-collapse';
 const COLLAPSED_HEADING_CLASS = 'princelists-is-collapsed';
 
 export function addCollapseArrow(headingEl: HTMLElement, collapsed: boolean): void {
-	const arrow = headingEl.createEl('button', { cls: COLLAPSE_CLASS, attr: { 'aria-label': collapsed ? 'Expand' : 'Collapse' } });
-	setIcon(arrow, collapsed ? 'chevron-right' : 'chevron-down');
+	// Named by a hidden label, not aria-label, which Obsidian would show as a tooltip.
+	const arrow = headingEl.createEl('button', { cls: COLLAPSE_CLASS, attr: { 'aria-expanded': String(!collapsed) } });
+	setIcon(arrow, 'right-triangle');
+	addHiddenLabel(arrow, 'Collapse section');
 	headingEl.toggleClass(COLLAPSED_HEADING_CLASS, collapsed);
 }
 

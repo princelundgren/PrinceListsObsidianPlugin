@@ -7,13 +7,12 @@ import { fillWhen } from './row-marks';
 
 export const WHEN_INPUT_CLASS = 'princelists-when-input';
 export const WHEN_CLEAR_CLASS = 'princelists-when-clear';
-const WHEN_ROW_CLASS = 'princelists-card-when';
 const WHEN_BUTTON_CLASS = 'princelists-when-button';
 
 // The date input lies over the button at its size, invisible, so a click or tap lands on the input
 // and opens the platform's own date picker.
-export function buildWhenRow(body: HTMLElement): void {
-	const row = body.createDiv({ cls: WHEN_ROW_CLASS });
+export function buildWhenPicker(tools: HTMLElement): void {
+	const row = tools.createDiv({ cls: 'princelists-card-when' });
 	const picker = row.createDiv({ cls: 'princelists-when-picker' });
 	picker.createDiv({ cls: WHEN_BUTTON_CLASS });
 	picker.createEl('input', { cls: WHEN_INPUT_CLASS, type: 'date', attr: { 'aria-label': 'When' } });
@@ -28,7 +27,7 @@ export function showWhen(card: Card, day: string | null): void {
 	if (!button || !input || !clear) return;
 	if (day === null) {
 		button.empty();
-		button.createSpan({ cls: 'princelists-when-empty', text: 'When' });
+		setIcon(button, 'calendar');
 	} else {
 		fillWhen(button, day, dayOf(new Date()));
 	}

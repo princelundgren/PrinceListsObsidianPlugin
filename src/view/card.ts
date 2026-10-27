@@ -8,7 +8,7 @@ import { parseItemLine } from '../core/item-line';
 import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
-import { buildWhenRow, showWhen } from './card-when';
+import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
@@ -21,6 +21,7 @@ export const CARD_TITLE_CLASS = 'princelists-card-title';
 export const CARD_NOTES_CLASS = 'princelists-card-notes';
 export const NOTES_EDITOR_CLASS = 'princelists-card-notes-editor';
 export const CARD_ACTIONS_CLASS = 'princelists-card-actions';
+export const CARD_STAR_CLASS = 'princelists-card-star';
 
 export interface Card {
 	el: HTMLElement;
@@ -118,6 +119,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 		card.el.querySelector(`.${HIDDEN_LABEL_CLASS}`)?.setText(row.label);
 		showDone(card.el, row);
 		showWhen(card, row.when);
+		showStar(card.el, row.starred);
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	const focused = card.el.doc.activeElement;
@@ -230,11 +232,19 @@ function createCardElement(): HTMLElement {
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
 	body.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
-	buildWhenRow(body);
 	body.createDiv({ cls: CARD_NOTES_CLASS });
-	const actions = el.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
+	const tools = el.createDiv({ cls: 'princelists-card-tools' });
+	buildWhenPicker(tools);
+	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
+	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
 	return el;
+}
+
+function showStar(cardEl: HTMLElement, starred: boolean): void {
+	const star = cardEl.querySelector(`.${CARD_STAR_CLASS}`);
+	star?.toggleClass('is-starred', starred);
+	star?.setAttribute('aria-label', starred ? 'Remove star' : 'Add star');
 }
 
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {

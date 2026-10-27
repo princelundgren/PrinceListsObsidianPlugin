@@ -418,8 +418,8 @@ stays, and the blank line stays with it.
 ### Dates (owner: the Tasks emoji format)
 
 - **Reserved now, used later** (step two writes ⏳ as an item's When):
-  - ⏳ scheduled, the day you plan to do it. In step two it is the item's When, set in the card's
-    When row (step two's design, "When").
+  - ⏳ scheduled, the day you plan to do it. In step two it is the item's When, set from the
+    card's calendar icon (step two's design, "When").
   - 📅 due, a deadline
   - 🛫 start
   - 🔁 repeat
@@ -560,7 +560,8 @@ stays, and the blank line stays with it.
   you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was, except that doubled
   `✔` marks collapse to the earliest and a leftover `✔` on an open line is dropped (see
   Completion). Step two hides an item's star too, and saving puts it back once.
-- **An item's When (step two):** the card's When row, under the title, sets or clears it.
+- **An item's When (step two):** the calendar icon at the card's top right sets it, and the clear
+  button beside the day removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
   not on every keystroke. Switching to another window or app doesn't leave the field. The rename
   uses `fileManager.renameFile`, which updates links according to the user's link settings. Escape
@@ -662,8 +663,8 @@ stays, and the blank line stays with it.
 ### Item actions (owner)
 
 - **On the Mac, right-click an item** for New item below, New heading below and Delete
-  **(call)**. Delete removes the item and its notes. Step two adds "Add star" or "Remove star"
-  before Delete.
+  **(call)**. Delete removes the item and its notes. Step two's star is a button on the open card,
+  not an entry here **(owner, 2026-10-27)**.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading and Delete heading.
   - New item adds one as the first item under the heading. In a section without items, it goes
