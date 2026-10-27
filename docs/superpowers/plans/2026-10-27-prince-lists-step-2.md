@@ -184,7 +184,7 @@ manual check runs there, never in a vault with real notes.
 - [ ] **Step 6: Check it by hand on the Mac, then the iPhone.**
   1. A note with frontmatter and one without each become lists and open as lists. `git diff` on a
      copy shows one or three added lines and nothing else.
-  2. **Risk 6:** type a line into an open note and run the command within 2 seconds. The typed line
+  2. **Design risk 6:** type a line into an open note and run the command within 2 seconds. The typed line
      and the marker are both in the file, and the note opens as a list only after the cache has
      the marker. If it switches early or loses the line, stop and raise it in the pull request.
   3. A CRLF note turned into a list from an open editor: record whether the file keeps CRLF. If the
@@ -374,7 +374,7 @@ manual check runs there, never in a vault with real notes.
   `view.render()`.
 - [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 5: Check it by hand on the Mac and the iPhone.**
-  1. **Risk 1:** in cards built from step one's fixtures, plus nested and numbered checklists,
+  1. **Design risk 1:** in cards built from step one's fixtures, plus nested and numbered checklists,
      every box ticks its own line: compare `git diff` after each. If any box ticks another line,
      stop and raise it.
   2. Cmd+Z unticks it again.
@@ -428,7 +428,7 @@ manual check runs there, never in a vault with real notes.
   - The "Find in list" command (`find-in-list`) has a `checkCallback` on the active list view.
 - [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 5: Check it by hand on the Mac and the iPhone.**
-  1. **Risk 2:** Cmd+F with the list focused opens the field, not Obsidian's search, on the Mac and
+  1. **Design risk 2:** Cmd+F with the list focused opens the field, not Obsidian's search, on the Mac and
      on an iPhone with a keyboard. If Obsidian's wins, stop and raise it.
   2. Cmd+F in a Markdown note still opens Obsidian's search.
   3. Typing hides rows as the design says; Escape shows every row.
@@ -667,7 +667,7 @@ manual check runs there, never in a vault with real notes.
     the iPhone's picker gives on Reset, clears it. The clear button does the same with `null`.
 - [ ] **Step 5: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 6: Check it by hand on the Mac and the iPhone.**
-  1. **Risk 5:** a click on the When on the Mac, and a tap on the iPhone, land on the transparent
+  1. **Design risk 5:** a click on the When on the Mac, and a tap on the iPhone, land on the transparent
      date input and open a date picker, and choosing a day writes ` ⏳ YYYY-MM-DD`. If either opens
      nothing or returns another format, stop and raise it.
   2. Changing the day replaces the date in place; clearing removes the field and its space only.
@@ -759,7 +759,7 @@ manual check runs there, never in a vault with real notes.
   1. Items with a When from three lists appear in the right groups, in the right order, with the
      list's name and the day. Overdue items show their date in Today.
   2. Setting a When in a list, ticking, renaming or deleting a list updates the open view.
-  3. **Risk 7:** in a test vault with 300 generated lists of 30 items each, opening the view and
+  3. **Design risk 7:** in a test vault with 300 generated lists of 30 items each, opening the view and
      updating it after an edit feel quick, and only the lists' files are read (count the
      `cachedRead` calls in the developer tools). If it's slow, stop and raise it.
 - [ ] **Step 6: Commit** with the message "Show a Schedule view".
@@ -859,10 +859,10 @@ manual check runs there, never in a vault with real notes.
   4. Each gray line shows for its case.
   5. With the list open in a list view in another pane, a tick in the block shows there. With
      typing not yet saved in that view's card, the typing survives.
-  6. **Risk 3:** rename the list. Record whether Obsidian updates the `[[link]]` in the block. If
+  6. **Design risk 3:** rename the list. Record whether Obsidian updates the `[[link]]` in the block. If
      it doesn't, the block shows "doesn't lead to a note"; raise it for the owner to accept or
      change the format. Nothing may fix it in the background.
-  7. **Risk 4, clicks:** a tick or a link click in Live Preview doesn't move the cursor into the
+  7. **Design risk 4, clicks:** a tick or a link click in Live Preview doesn't move the cursor into the
      block's source. If it does, stop and raise it.
   8. Rename and then delete the list right after a tick in the block: no other file changes, and
      the block shows its gray line.
@@ -917,7 +917,7 @@ manual check runs there, never in a vault with real notes.
      leaving it empty adds nothing.
   3. The trash button deletes on both devices, and Undo brings the item back. Right-click Delete
      on the Mac does the same.
-  4. **Risk 4, typing:** typing in the field in Live Preview stays in the field and never reaches
+  4. **Design risk 4, typing:** typing in the field in Live Preview stays in the field and never reaches
      the note's source. If it doesn't, stop and raise it.
   5. Cmd+Z in the list view doesn't undo a block's edit.
 - [ ] **Step 6: Update the design** with the calls this task made: the field's trash button
@@ -970,7 +970,7 @@ manual check runs there, never in a vault with real notes.
   1. Drag within a section and into another, with the mouse and with hold-and-move. The drop line
      shows where the item lands, and notes move with it. Headings don't drag.
   2. A swipe on the block scrolls the note; holding a row opens no menu.
-  3. **Risk 4, drags:** in Live Preview, a drag and a drop stay in the block and insert nothing
+  3. **Design risk 4, drags:** in Live Preview, a drag and a drop stay in the block and insert nothing
      into the note's source. If they don't, stop and raise it.
   4. An open list view of the same file follows the drag.
 - [ ] **Step 3: Update the design:** no edge scroll in a block, and why.
