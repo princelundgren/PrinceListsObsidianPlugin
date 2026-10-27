@@ -81,8 +81,8 @@ current todo app. Step one's own "Done when" doesn't change.
 - **The YAML is read from the text being edited (call)** with `parseYaml`, as the marker is read,
   not from the metadata cache, which can lag the file.
 - **A `princelists:` line already there** with another single-line value, such as `false`, is
-  replaced. The key may be quoted or have spaces before its colon. If its value runs over several lines, the command changes nothing and says so
-  **(call)**.
+  replaced. The key may be quoted or have spaces before its colon. If its value runs over several
+  lines, the command changes nothing and says so **(call)**.
 - **Without frontmatter:** `---`, `princelists: true` and `---` go before the first line, with the
   file's usual line ending.
 - **Nothing else in the note changes.** `- [ ]` lines become items. Plain bullets stay content the

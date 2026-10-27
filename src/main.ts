@@ -3,14 +3,13 @@ import { RIBBON_ICON, VIEW_TYPE_LIST } from './constants';
 import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
-import { canTurnIntoList, endTurnIntoListWait, turnIntoList } from './obsidian/turn-into-list';
+import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
 import { PrinceListView } from './view/list-view';
 
 export default class PrinceListsPlugin extends Plugin {
 	onload() {
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf));
 		registerAutoSwitch(this);
-		this.register(endTurnIntoListWait);
 
 		this.addCommand({
 			id: 'new-list',

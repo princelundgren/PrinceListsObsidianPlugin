@@ -11,13 +11,8 @@ const REFUSAL_NOTICES: Record<MarkerRefusal['refused'], string> = {
 	'multiline-value': "The note's princelists property runs over several lines, so it wasn't turned into a list.",
 };
 
-// Only one wait is kept: a newer "Turn into list" ends the one before it. Its listeners aren't given
-// to registerEvent, which would keep every ref until unload, so the plugin ends it on unload.
+// Only one wait is kept: a newer "Turn into list" ends the one before it.
 let endWait: (() => void) | null = null;
-
-export function endTurnIntoListWait(): void {
-	endWait?.();
-}
 
 // A note outside the vault has no parent (observed in 1.14.4); `TExternalFile` is newer than
 // minAppVersion, and getAbstractFileByPath returns such a note under its `file:` path.
@@ -86,6 +81,7 @@ function waitForMarker(plugin: Plugin, file: TFile, leaf: WorkspaceLeaf): void {
 	};
 	const listen = (source: { offref(ref: EventRef): void }, ref: EventRef) => {
 		refs.push([source, ref]);
+		plugin.registerEvent(ref);
 	};
 	listen(
 		metadataCache,
