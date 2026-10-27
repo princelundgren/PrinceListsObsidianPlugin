@@ -131,7 +131,10 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	private async tick(item: ScheduledItem): Promise<void> {
 		const list = this.lists.get(item.listPath);
 		const file = this.app.vault.getFileByPath(item.listPath);
-		if (!list || !file) return;
+		if (!list || !file) {
+			new Notice(CHANGED_ELSEWHERE_NOTICE);
+			return;
+		}
 		const lines = splitLines(list.text);
 		const block = itemAt(parseList(lines, contentStartLine(list.text)), item.titleLine);
 		// A change since the row was drawn may have put another item on its line.
@@ -149,7 +152,10 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	// In a tab that already shows the list, else a new one.
 	private async openItem(item: ScheduledItem): Promise<void> {
 		const file = this.app.vault.getFileByPath(item.listPath);
-		if (!file) return;
+		if (!file) {
+			new Notice(CHANGED_ELSEWHERE_NOTICE);
+			return;
+		}
 		const { workspace } = this.app;
 		const shown = workspace.getLeavesOfType(VIEW_TYPE_LIST).find((leaf) => leaf.view instanceof PrinceListView && leaf.view.file === file);
 		const leaf = shown ?? workspace.getLeaf('tab');

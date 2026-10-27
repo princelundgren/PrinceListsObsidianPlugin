@@ -12,7 +12,7 @@ import { serialQueue } from '../core/queue';
 import { WriteEchoes } from '../core/write-echoes';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { blockDragHost, enableBlockDrag } from './block-drag';
-import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, openBlockField, showBlockItemMenu, type BlockField } from './block-fields';
+import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, noticeLostField, openBlockField, showBlockItemMenu, type BlockField } from './block-fields';
 import { targetOf } from './dom';
 import type { RowDragHost } from './drag-host';
 import { handleLinkClick, handleLinkMenu } from './notes';
@@ -181,6 +181,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		if (file === this.file && (file?.path ?? null) === this.shownPath) return;
 		this.file = file;
 		this.shownPath = file?.path ?? null;
+		if (this.field) noticeLostField(this.field);
 		this.field = null;
 		this.echoes = new WriteEchoes();
 		this.editing.reset();
