@@ -408,3 +408,13 @@ textarea.princelists-heading-field {
 .princelists-collapse:focus-visible {
 	opacity: 1;
 }
+
+.princelists-schedule-list {
+	flex: none;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.princelists-schedule-empty {
+	color: var(--text-faint);
+}
