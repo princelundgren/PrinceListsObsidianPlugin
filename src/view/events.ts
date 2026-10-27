@@ -87,14 +87,17 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		if (notes) editNotes(view, notes);
 		return;
 	}
-	// Anything else is a click elsewhere, which closes the card (spec, "Selecting and adding").
+	// Anything else is a click elsewhere, which only closes an open card (spec, "Selecting and adding").
+	if (view.card) {
+		closeCard(view);
+		return;
+	}
 	const row = target.closest(`.${ITEM_CLASS}`);
 	const line = row ? lineOf(row) : null;
 	if (line !== null) {
 		openCard(view, line);
 		return;
 	}
-	closeCard(view);
 	if (Platform.isMobile && showHeadingMenu(view, evt, target)) return;
 	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view);
 }

@@ -599,6 +599,8 @@ stays, and the blank line stays with it.
 
 - **Selecting (call):** clicking an item, anywhere except its checkbox or a link in its title, opens
   its card and selects it. Clicking empty space closes the card and clears the selection.
+  - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
+    another item, a heading or the list note doesn't also open it. A checkbox still only ticks.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
   the list scrolls, on the Mac and the iPhone. Its accessible name is "New item" **(call)**.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
@@ -651,7 +653,8 @@ stays, and the blank line stays with it.
   actions" **(call)**.
 - **On the iPhone, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading and Delete heading **(owner, 2026-10-20)**. It's a tap, not a long-press, so there is
-  still no long-press menu.
+  still no long-press menu. With a card open, the tap only closes the card ("Selecting and
+  adding").
 - **New heading below (owner, 2026-10-20)** adds an empty heading at that point and opens the
   same field as Rename heading, with the cursor in it. Escape, or an empty name, removes the
   heading again.
