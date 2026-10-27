@@ -81,8 +81,8 @@ manual check runs there, never in a vault with real notes.
   - The collapse arrow's hidden label "Collapse section", with `aria-expanded`.
   - The filter field's placeholder "Find in list"; the date input's `aria-label` "When"; the clear button's
     `aria-label` "Remove the day"; the day labels "Today" and "Tomorrow".
-  - The Schedule view's title "Schedule", its groups "Today", "Tomorrow", "Coming week", "Next
-    month" and "Later", and "No items have a When." when every group is empty **(call)**.
+  - The Schedule view's title "Schedule", its groups "Today", "Tomorrow", "Next 7 days" and
+    "Later" (owner, 2026-10-27), and "No items have a When." when every group is empty **(call)**.
   - In a block: the button "New item", the trash button's `aria-label` "Delete item", and the gray
     lines "This block needs a link to a list, such as [[Groceries]].", "[[{link}]] doesn't lead to
     a note.", "[[{link}]] isn't a list." and "[[{link}]] is this note, so it can't show here."
@@ -721,9 +721,9 @@ manual check runs there, never in a vault with real notes.
     the title line's text and `order` the item's place in its list
   - `scheduledItems(text: string, contentStart: number, now: Date, list: { path: string; name:
     string }): ScheduledItem[]`: items with a When that are open, or done and not archived
-  - `type ScheduleGroup = 'today' | 'tomorrow' | 'week' | 'month' | 'later'`
+  - `type ScheduleGroup = 'today' | 'tomorrow' | 'week' | 'later'`
   - `scheduleGroup(day: string, today: string): ScheduleGroup`: today and before; 1 day ahead; 2 to
-    7; 8 to 31; more
+    7; more
   - `groupSchedule(items: readonly ScheduledItem[], today: string): { group: ScheduleGroup; items:
     ScheduledItem[] }[]`: the groups in order, empty ones left out, each sorted by day, then
     `listName` with `localeCompare`, then `order`
@@ -736,8 +736,8 @@ manual check runs there, never in a vault with real notes.
     out one ticked at `2026-10-25 09:00`, one with no When, and an item line inside a fenced block.
     Items under a heading count, with `order` running across sections.
   - `scheduleGroup` with today `2026-10-27`: `2026-10-20` and `2026-10-27` are `today`,
-    `2026-10-28` `tomorrow`, `2026-10-29` and `2026-11-03` `week`, `2026-11-04` and `2026-11-27`
-    `month`, `2026-11-28` `later`. With today `2026-10-31`, `2026-12-01` is `month`.
+    `2026-10-28` `tomorrow`, `2026-10-29` and `2026-11-03` `week`, `2026-11-04` and `2026-12-31`
+    `later`. With today `2026-10-31`, `2026-11-07` is `week` and `2026-11-08` `later`.
   - `groupSchedule` puts `Groceries` before `Home` on the same day, keeps file order within a list,
     and leaves out an empty `tomorrow`.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.

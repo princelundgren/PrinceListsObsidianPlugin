@@ -17,9 +17,9 @@ export interface ScheduledItem {
 	order: number;
 }
 
-export type ScheduleGroup = 'today' | 'tomorrow' | 'week' | 'month' | 'later';
+export type ScheduleGroup = 'today' | 'tomorrow' | 'week' | 'later';
 
-const GROUP_ORDER: readonly ScheduleGroup[] = ['today', 'tomorrow', 'week', 'month', 'later'];
+const GROUP_ORDER: readonly ScheduleGroup[] = ['today', 'tomorrow', 'week', 'later'];
 
 // Items with a When that are open, or done and not yet archived.
 export function scheduledItems(text: string, contentStart: number, now: Date, list: { path: string; name: string }): ScheduledItem[] {
@@ -41,8 +41,7 @@ export function scheduleGroup(day: string, today: string): ScheduleGroup {
 	const days = daysFrom(today, day);
 	if (days <= 0) return 'today';
 	if (days === 1) return 'tomorrow';
-	if (days <= 7) return 'week';
-	return days <= 31 ? 'month' : 'later';
+	return days <= 7 ? 'week' : 'later';
 }
 
 export function groupSchedule(items: readonly ScheduledItem[], today: string): { group: ScheduleGroup; items: ScheduledItem[] }[] {
