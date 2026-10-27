@@ -34,10 +34,12 @@ export function planMarker(text: string, frontmatter: FrontmatterShape | null): 
 	return { start: frontmatter.closingLine, deleteCount: 0, insert: [MARKER_LINE] };
 }
 
+// An indented next line continues any value, a flow list or a quoted string as much as a block. A
+// `- ` line continues only a value left empty.
 function runsOverSeveralLines(value: string, next: string, nextIsInside: boolean): boolean {
 	if (BLOCK_SCALAR.test(value)) return true;
-	if (value.trim() !== '' || !nextIsInside) return false;
-	return /^[ \t]/.test(next) || next.startsWith('- ');
+	if (!nextIsInside) return false;
+	return /^[ \t]/.test(next) || (value.trim() === '' && next.startsWith('- '));
 }
 
 // A line that replaces another keeps that line's ending; new lines take the file's usual one.

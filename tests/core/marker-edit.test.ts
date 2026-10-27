@@ -32,6 +32,9 @@ test.each([
 	'---\nprincelists: >-\n  x\n---\n',
 	'---\nprincelists: |+\n  x\n---\n',
 	'---\nprincelists:\n- x\n---\n',
+	'---\nprincelists: [a,\n  b]\n---\n',
+	'---\nprincelists: "a\n  b"\n---\n',
+	'---\nprincelists: a\n  b\n---\n',
 ])('planMarker refuses a princelists value over several lines in %j', (text) => {
 	expect(turned(text, fm(3))).toEqual({ refused: 'multiline-value' });
 });
