@@ -37,6 +37,9 @@ export class PrinceListView extends TextFileView {
 	listTitleEl: HTMLTextAreaElement | null = null;
 	listNoteEl: HTMLElement | null = null;
 	headingField: HeadingField | null = null;
+	/** Cmd+F's query, or null while its field is closed. Like showArchived, nothing restores it. */
+	filter: string | null = null;
+	filterEl: HTMLInputElement | null = null;
 	newItemButton: HTMLButtonElement | null = null;
 	private archivedButton: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
@@ -119,6 +122,7 @@ export class PrinceListView extends TextFileView {
 		this.endListNote();
 		this.headingField = null;
 		this.showArchived = false;
+		this.filter = null;
 		this.outsideChanges++;
 		// Nothing of the old file stays, not even a field with focus, which render() would keep.
 		this.listSizerEl.empty();

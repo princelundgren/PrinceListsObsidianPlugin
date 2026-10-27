@@ -28,6 +28,7 @@ import {
 	TITLE_CLASS,
 	typeListNote,
 } from './fields';
+import { filterBlur, filterInput, filterKeyDown } from './filter';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
@@ -125,6 +126,10 @@ function swallowClick(view: PrinceListView, evt: MouseEvent): void {
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
 // among the view's own few textareas.
 function onInput(view: PrinceListView, evt: Event): void {
+	if (view.filterEl && evt.target === view.filterEl) {
+		filterInput(view);
+		return;
+	}
 	const target = Array.from(view.contentEl.querySelectorAll('textarea')).find((field) => field === evt.target);
 	if (!target) return;
 	if (target.hasClass(CARD_TITLE_CLASS)) cardTitleInput(view, target);
@@ -138,7 +143,9 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	// A key that confirms an input method's composition isn't the user's Enter or Escape.
 	if (evt.isComposing || !target?.instanceOf(HTMLElement)) return;
 	if (evt.key === 'Escape') {
-		if (view.card?.el.contains(target)) {
+		if (target === view.filterEl) {
+			filterKeyDown(view, evt);
+		} else if (view.card?.el.contains(target)) {
 			evt.preventDefault();
 			closeCard(view);
 		} else if (target.hasClass(HEADING_FIELD_CLASS)) {
@@ -185,6 +192,10 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 	// FocusEvent types it as an EventTarget; between elements it is an Element or null.
 	const related = evt.relatedTarget as Node | null;
 	const focusing = related?.instanceOf(HTMLElement) ? related : null;
+	if (target === view.filterEl) {
+		filterBlur(view);
+		return;
+	}
 	const card = view.card;
 	const inCard = card?.el.contains(target) ?? false;
 	if (target.instanceOf(HTMLTextAreaElement)) {

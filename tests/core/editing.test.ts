@@ -201,7 +201,7 @@ describe('the list note across a typing session', () => {
 		state.typeListNote('Old\n# Typed\n- [ ] y\nmore');
 		const { lines, model } = list(state.text);
 		const drawn = (range: { start: number; end: number } | null) =>
-			withoutRange(visibleSections(lines, model, new Date(2026, 9, 21), false), range).flatMap((section) => [
+			withoutRange(visibleSections(lines, model, new Date(2026, 9, 21), { showArchived: false, query: '', keepLine: null }), range).flatMap((section) => [
 				section.heading?.text ?? null,
 				...section.rows.map((row) => (row.kind === 'item' ? row.title : row.text)),
 			]);

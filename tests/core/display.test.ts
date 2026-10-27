@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { headingText, itemRow, visibleSections } from '../../src/core/display';
+import { headingText, itemRow, matchesQuery, visibleSections } from '../../src/core/display';
 import { tickLine } from '../../src/core/item-line';
 import { list, readFixture } from './edit-helpers';
 
-const sectionsOf = (text: string, now: Date, showArchived: boolean) => {
+const sectionsOf = (text: string, now: Date, showArchived: boolean, query = '', keepLine: number | null = null) => {
 	const { lines, model } = list(text);
-	return visibleSections(lines, model, now, showArchived);
+	return visibleSections(lines, model, now, { showArchived, query, keepLine });
 };
 
 const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false) => ({
@@ -140,4 +140,50 @@ describe('headingText', () => {
 		expect(model.sections[1]?.headingLine).toBe(headingLine);
 		expect(headingText(lines, headingLine)).toBe(expected);
 	});
+});
+
+describe('visibleSections, filtered', () => {
+	const now = new Date(2026, 9, 21, 12, 0);
+	const text = 'Intro\n\n- [ ] Buy milk\n- [ ] Bread\n\n\t**bold** milk\n## Garden\n- [ ] Rake\n## Old\n- [x] milk jug ✔ 2026-10-01 10:00\n';
+
+	test('keeps an item whose title or notes hold the query, ignoring case', () => {
+		expect(sectionsOf(text, now, false, 'MILK')).toEqual([
+			{ heading: null, rows: [row(2, 'Buy milk'), row(3, 'Bread')] },
+			{ heading: null, rows: [] },
+			{ heading: null, rows: [] },
+		]);
+		expect(sectionsOf(text, now, false, '**bold**')[0]?.rows).toEqual([row(3, 'Bread')]);
+	});
+
+	test('shows a heading only while one of its items shows', () => {
+		expect(sectionsOf(text, now, false, 'rake').map((section) => section.heading?.text ?? null)).toEqual([null, 'Garden', null]);
+	});
+
+	test('hides content the plugin leaves alone while the query is not empty', () => {
+		const garden = '## Garden\nA note on rakes\n\n- [ ] Rake\n';
+		expect(sectionsOf(garden, now, false, 'rake')[1]?.rows).toEqual([row(3, 'Rake')]);
+		expect(sectionsOf(garden, now, false, '')[1]?.rows[0]).toEqual(untouched(1, 'A note on rakes'));
+	});
+
+	test('keeps a matching archived item hidden unless archived items are shown', () => {
+		expect(sectionsOf(text, now, false, 'jug')[2]).toEqual({ heading: null, rows: [] });
+		expect(sectionsOf(text, now, true, 'jug')[2]).toEqual({
+			heading: { line: 8, text: 'Old' },
+			rows: [row(9, 'milk jug', true, 'milk jug', true)],
+		});
+	});
+
+	test('keeps the item on keepLine hidden while it is archived and archived items are hidden', () => {
+		expect(sectionsOf(text, now, false, '', 9)[2]).toEqual({ heading: { line: 8, text: 'Old' }, rows: [] });
+		expect(sectionsOf(text, now, false, 'rake', 9)[2]).toEqual({ heading: null, rows: [] });
+	});
+
+	test('shows the item on keepLine without matching, and its heading', () => {
+		expect(sectionsOf(text, now, false, 'milk', 7)[1]).toEqual({ heading: { line: 6, text: 'Garden' }, rows: [row(7, 'Rake')] });
+	});
+});
+
+test('matchesQuery compares without normalizing', () => {
+	expect(matchesQuery('Buy milk', '', 'MILK')).toBe(true);
+	expect(matchesQuery('cafe\u0301', '', 'caf\u00e9')).toBe(false);
 });
