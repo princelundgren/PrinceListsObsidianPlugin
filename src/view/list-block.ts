@@ -32,6 +32,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	file: TFile | null = null;
 	field: BlockField | null = null;
 	swallowNextClick = false;
+	dragging = false;
 	outsideChanges = 0;
 	private readonly rootEl: HTMLElement;
 	private readonly link: string | null;
@@ -118,10 +119,10 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		return blockDragHost(this);
 	}
 
-	// After a field closes, whose title went back in its place: the rows are drawn again only if the
-	// text changed since they were.
+	// After a field closes, whose title went back in its place, or a drag ends: the rows are drawn
+	// again only if the text changed since they were, and never under a drag.
 	drawIfChanged(): void {
-		if (this.editing.text !== this.drawnText) this.draw();
+		if (!this.dragging && this.editing.text !== this.drawnText) this.draw();
 	}
 
 	draw(): void {

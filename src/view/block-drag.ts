@@ -26,8 +26,17 @@ export function blockDragHost(block: ListBlock): RowDragHost {
 			block.swallowNextClick = value;
 		},
 		beforeLift: () => closeBlockField(block, true),
-		track: (line) => block.editing.track(line),
-		untrack: (tracked) => block.editing.untrack(tracked),
+		// A drag holds its row from track to untrack. The block doesn't draw in between, so a field the
+		// lift closed and saved can't end the drag; it draws once the drag is over.
+		track: (line) => {
+			block.dragging = true;
+			return block.editing.track(line);
+		},
+		untrack: (tracked) => {
+			block.editing.untrack(tracked);
+			block.dragging = false;
+			block.drawIfChanged();
+		},
 		drop: (line, drop) => {
 			if ('item' in drop) queueBlockMove(block, line, drop.item.place);
 		},

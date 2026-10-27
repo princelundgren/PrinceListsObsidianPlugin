@@ -50,8 +50,7 @@ export function openBlockField(block: ListBlock, titleLine: number, inserted: In
 }
 
 // Saves the typed title, or not, then removes an item the field's insert added if it's still empty.
-// The title goes back in place of the field at once, and the block draws again once a write lands:
-// drawing when nothing changed would end a drag that closed the field.
+// The title goes back in place of the field at once, and the block draws again once a write lands.
 export function closeBlockField(block: ListBlock, save: boolean): void {
 	const field = block.field;
 	if (!field) return;
