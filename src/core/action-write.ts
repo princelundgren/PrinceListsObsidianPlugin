@@ -25,9 +25,9 @@ export interface WriteTarget {
 // A one-off action's guarded write (spec, "Saving, outside changes, sync conflicts, undo"). Pending
 // typing is saved first, so the guard doesn't refuse over the view's own text. Typing that lands
 // while the action waits makes it write nothing: `next` was computed without it, and taking `next`
-// would drop it. The caller runs the action again on the new text. A write that fails throws, and a
-// view still holding the `next` it took reads the file again. Typing since then stays, and its own
-// save writes it, `next` included.
+// would drop it. The caller runs the action again on the new text, but not an undo or a redo. A
+// write that fails throws, and a view still holding the `next` it took reads the file again. Typing
+// since then stays, and its own save writes it, `next` included.
 export async function guardedWrite(target: WriteTarget, next: string, expected: string): Promise<WriteOutcome> {
 	const textAtStart = target.text;
 	await target.save();

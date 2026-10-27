@@ -79,6 +79,7 @@ async function addPictures(view: PrinceListView, card: Card, files: File[], past
 	const links: string[] = [];
 	const paths: string[] = [];
 	let refused = false;
+	let failed = false;
 	for (const picture of files) {
 		const name = pictureName(picture, pasted, new Date());
 		if (name === null) {
@@ -93,7 +94,8 @@ async function addPictures(view: PrinceListView, card: Card, files: File[], past
 			paths.push(created.path);
 		} catch (error) {
 			console.error(error);
-			new Notice(FAILED_NOTICE);
+			if (!failed) new Notice(FAILED_NOTICE);
+			failed = true;
 		}
 	}
 	if (links.length === 0) return;

@@ -49,7 +49,10 @@ export class PrinceListView extends TextFileView {
 	rowsHeldBack = false;
 	/** Set once the view closes, so a tap still queued then does nothing. */
 	viewClosed = false;
-	/** Set when a hold on a row or heading was canceled, so the click that ends it opens nothing. */
+	/**
+	 * Set by a hold canceled on a row or heading, or a row lifted to drag, so the click that ends it
+	 * opens nothing.
+	 */
 	swallowNextClick = false;
 	// The list scrolls here, not in contentEl, so nothing relies on Obsidian's stylesheet scrolling
 	// `.view-content`. Not `scrollEl`: that may be a name Obsidian's views use at runtime.

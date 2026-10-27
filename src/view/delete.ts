@@ -50,7 +50,10 @@ function offerUndo(view: PrinceListView, file: TFile, undo: PlannedDelete['undo'
 // Any refusal gets this notice rather than writeAction's: trying again can't succeed once the list has
 // changed, and typing that lands while it writes has changed it too. A write that failed has said so.
 async function undoDelete(view: PrinceListView, file: TFile, undo: PlannedDelete['undo']): Promise<void> {
-	const result = !view.viewClosed && view.file === file ? await writeAction(view, undo.next, undo.expected, null, undo.edit) : 'refused';
+	const sameFile = !view.viewClosed && view.file === file;
+	// Cmd+Z already undid the delete.
+	if (sameFile && view.text === undo.next) return;
+	const result = sameFile ? await writeAction(view, undo.next, undo.expected, null, undo.edit) : 'refused';
 	if (result === 'written') view.render();
 	else if (result === 'refused') new Notice("This list changed since the delete, so it can't be undone.");
 }

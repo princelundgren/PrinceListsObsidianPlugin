@@ -11,9 +11,9 @@ export const LOST_TYPING_NOTICE = 'This list changed elsewhere, and your typing 
 
 // A one-off action's write, through guardedWrite. `written`: the file now holds `next`. A write that
 // moves lines passes its `edit`, so the view's line-based state follows it. Typing that landed while
-// it waited refuses it with no notice: the caller runs the action again on the new text. A write that
-// fails says so, and the view reads the file again if it still holds the text it took; the caller
-// doesn't run it again.
+// it waited refuses it with no notice: the caller runs the action again on the new text, but not an
+// undo or a redo. A write that fails says so, and the view reads the file again if it still holds the
+// text it took; the caller doesn't run it again.
 export async function writeAction(
 	view: PrinceListView,
 	next: string,
