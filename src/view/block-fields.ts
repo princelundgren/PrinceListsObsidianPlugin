@@ -1,4 +1,4 @@
-import { Notice, setIcon } from 'obsidian';
+import { Menu, Notice, setIcon } from 'obsidian';
 import type { TrackedLine } from '../core/editing';
 import { planRemoval, type InsertedItem } from '../core/empty-item';
 import { parseItemLine, setTitle } from '../core/item-line';
@@ -133,6 +133,24 @@ export function deleteBlockItem(block: ListBlock, titleLine: number): void {
 			if (!block.field) block.draw();
 		}
 	});
+}
+
+// Right-click on the Mac. The delete waits for the choice, so it goes only if the text is still what
+// the menu opened on.
+export function showBlockItemMenu(block: ListBlock, evt: MouseEvent, titleLine: number): void {
+	const seen = block.editing.text;
+	const menu = new Menu();
+	menu.addItem((item) =>
+		item
+			.setTitle('Delete')
+			.setIcon('trash-2')
+			.setWarning(true)
+			.onClick(() => {
+				if (block.editing.text === seen) deleteBlockItem(block, titleLine);
+				else new Notice(CHANGED_ELSEWHERE_NOTICE);
+			}),
+	);
+	menu.showAtMouseEvent(evt);
 }
 
 async function saveTitle(block: ListBlock, titleLine: number, typed: string): Promise<void> {
