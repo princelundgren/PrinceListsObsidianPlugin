@@ -1,5 +1,5 @@
 import { Component, Keymap, MarkdownRenderer, Menu } from 'obsidian';
-import type { ChecklistLine } from '../core/checklist';
+import { boxesMatchChecklist, type ChecklistLine } from '../core/checklist';
 import { asInline, needsMarkdown } from '../core/inline';
 import type { PrinceListView } from './list-view';
 
@@ -16,15 +16,9 @@ export function renderNotes(view: PrinceListView, el: HTMLElement, markdown: str
 	return renderMarkdown(view, el, markdown, () => false);
 }
 
-// A card's notes, whose boxes tick their lines only while each box lines up with one: a box in a
-// callout, an embed or a `%%` comment would put them out of step, so then none is enabled.
+// A card's notes, whose boxes tick their lines only while each box lines up with one.
 export function renderCardNotes(view: PrinceListView, el: HTMLElement, markdown: string, checklist: readonly ChecklistLine[]): Component {
-	return renderMarkdown(
-		view,
-		el,
-		markdown,
-		(boxes) => boxes.length === checklist.length && boxes.every((box, index) => box.checked === checklist[index]?.ticked),
-	);
+	return renderMarkdown(view, el, markdown, (boxes) => boxesMatchChecklist(boxes.map((box) => box.checked), checklist));
 }
 
 function renderMarkdown(

@@ -27,15 +27,21 @@ export function checklistOf(lines: readonly Line[], item: ItemBlock): ChecklistL
 	return checklist;
 }
 
+// Whether a card's rendered boxes, by their checked state, line up with its checklist. A box in a
+// callout, an embed or a `%%` comment puts them out of step.
+export function boxesMatchChecklist(checked: readonly boolean[], checklist: readonly ChecklistLine[]): boolean {
+	return checked.length === checklist.length && checked.every((ticked, index) => ticked === checklist[index]?.ticked);
+}
+
 export function toggleChecklistLine(text: string): string {
 	const parts = parseItemLine(text);
 	if (!parts) return text;
 	return joinItemLine({ ...parts, status: parts.status === ' ' ? 'x' : ' ' });
 }
 
-// The browser flips a box before its click is handled, and the view cancels that, so the box's state
-// says nothing: the file decides which way the line goes. `lineText` is the line as it was at the click: if it reads differently now, the box no
-// longer stands for it.
+// The browser flips a box before its click is handled, and the view cancels that, so the box's
+// state says nothing: the file decides which way the line goes. `lineText` is the line as it was at
+// the click; if it reads differently now, the box no longer stands for it.
 export function planChecklistTick(
 	text: string,
 	contentStart: number,

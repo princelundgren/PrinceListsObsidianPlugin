@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { checklistOf, planChecklistTick, toggleChecklistLine } from '../../src/core/checklist';
+import { boxesMatchChecklist, checklistOf, planChecklistTick, toggleChecklistLine } from '../../src/core/checklist';
 import { splitLines } from '../../src/core/lines';
 import { parseList, type ItemBlock } from '../../src/core/parse';
 
@@ -48,4 +48,12 @@ test('planChecklistTick gives null when the box no longer matches the file', () 
 	expect(planChecklistTick(TRIP, 0, 0, 1, '\t- [ ] passport')).toBeNull();
 	const added = TRIP.replace('\t- [x] charger', '\t- [ ] socks\n\t- [x] charger');
 	expect(planChecklistTick(added, 0, 0, 1, '\t- [x] charger')).toBeNull();
+});
+
+test('boxesMatchChecklist needs the same number of boxes, each ticked as its line is', () => {
+	const lines = checklist(TRIP);
+	expect(boxesMatchChecklist([false, true, false, true], lines)).toBe(true);
+	expect(boxesMatchChecklist([false, true, false], lines)).toBe(false);
+	expect(boxesMatchChecklist([false, true, false, false], lines)).toBe(false);
+	expect(boxesMatchChecklist([false, true, false, true, false], lines)).toBe(false);
 });
