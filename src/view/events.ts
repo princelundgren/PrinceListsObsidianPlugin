@@ -15,6 +15,7 @@ import {
 	notesInput,
 	openCard,
 } from './card';
+import { checklistClick } from './checklist';
 import { targetOf } from './dom';
 import {
 	beginListTitle,
@@ -30,7 +31,7 @@ import {
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
-import { handleLinkClick, handleLinkMenu } from './notes';
+import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
 import { queueTick } from './tick';
@@ -62,10 +63,12 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		if (view.file) void openAsMarkdown(view.leaf, view.file);
 		return;
 	}
-	// Rendered notes' checkboxes are disabled, but an embed can render more after that. They would
-	// tick on screen and save nothing.
-	if (target.closest('.task-list-item-checkbox')) {
-		evt.preventDefault();
+	const notesBox = target.closest<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR);
+	if (notesBox) {
+		if (notesBox.closest(`.${CARD_NOTES_CLASS}`) && view.card?.el.contains(notesBox)) checklistClick(view, notesBox, evt);
+		// Any other rendered box, in the list note or a title, is disabled, but an embed can render
+		// more after that. They would tick on screen and save nothing.
+		else evt.preventDefault();
 		return;
 	}
 	const box = target.closest(`.${CHECKBOX_CLASS}`);
