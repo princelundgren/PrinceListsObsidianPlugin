@@ -31,6 +31,17 @@ export function fitHeight(textarea: HTMLTextAreaElement): void {
 	textarea.setCssProps({ height: `${textarea.scrollHeight}px` });
 }
 
+export const HIDDEN_LABEL_CLASS = 'princelists-hidden-label';
+let hiddenLabels = 0;
+
+// Names `control` for screen readers from a hidden element just after it. Not aria-label: Obsidian
+// shows every aria-label as a hover tooltip.
+export function addHiddenLabel(control: HTMLElement, text: string): void {
+	const id = `${HIDDEN_LABEL_CLASS}-${++hiddenLabels}`;
+	control.after(createSpan({ cls: HIDDEN_LABEL_CLASS, text, attr: { id, hidden: '' } }));
+	control.setAttr('aria-labelledby', id);
+}
+
 // Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of
 // this window's classes.
 export function targetOf(evt: UIEvent): HTMLElement | null {

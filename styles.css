@@ -18,10 +18,8 @@ textarea.princelists-field {
 	overflow: hidden;
 }
 
-/* The titles read as titles even while they have focus, and so does a heading being renamed. */
-textarea.princelists-title:focus,
-textarea.princelists-card-title:focus,
-textarea.princelists-heading-field:focus {
+/* A field reads as its text even while it has focus, with no ring around it. */
+textarea.princelists-field:focus {
 	box-shadow: none;
 }
 
