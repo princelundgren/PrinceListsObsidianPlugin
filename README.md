@@ -4,7 +4,8 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 
 > **Work in progress.** Step one's two parts are built and checked on the Mac and the iPhone: 1a
 > in `0.1.0`, and 1b, which adds dragging on the iPhone, pictures in cards and Cmd+Z undo, in
-> `0.2.0`. A two-week trial with a real list comes next. You can follow along in the
+> `0.2.0`. `0.3.0` adds small fixes from first use with a real list. A two-week trial with that
+> list comes next. You can follow along in the
 > [design](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and the pull requests.
 
 ## What it does
