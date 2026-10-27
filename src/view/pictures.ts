@@ -2,6 +2,7 @@ import { Notice } from 'obsidian';
 import { appendOnOwnLine, pictureName } from '../core/picture';
 import { CARD_NOTES_CLASS, editNotes, NOTES_EDITOR_CLASS, notesInput, type Card } from './card';
 import { targetOf } from './dom';
+import { changeField } from './field-undo';
 import type { PrinceListView } from './list-view';
 
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";
@@ -109,15 +110,16 @@ async function addPictures(view: PrinceListView, card: Card, files: File[], past
 function insertLinks(view: PrinceListView, card: Card, text: string): void {
 	const area = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
 	if (!area) return;
-	let editor = area.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
-	if (editor) {
-		const end = editor.selectionEnd;
-		editor.setRangeText(text, end, end, 'end');
-	} else {
-		editNotes(view, area);
-		editor = area.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
-		if (!editor) return;
-		editor.value = appendOnOwnLine(editor.value, text);
+	const open = area.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
+	if (open) {
+		const end = open.selectionEnd;
+		changeField(open, () => open.setRangeText(text, end, end, 'end'));
+		notesInput(view, open);
+		return;
 	}
+	editNotes(view, area);
+	const editor = area.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
+	if (!editor) return;
+	changeField(editor, () => (editor.value = appendOnOwnLine(editor.value, text)));
 	notesInput(view, editor);
 }

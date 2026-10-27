@@ -1,6 +1,7 @@
 import type { HistoryWrite } from '../core/history';
 import { closeCard, isNewEmptyItem } from './card';
 import { targetOf } from './dom';
+import { stepField } from './field-undo';
 import type { PrinceListView } from './list-view';
 import { enqueueAt, writeAction } from './write';
 
@@ -8,6 +9,7 @@ import { enqueueAt, writeAction } from './write';
 // undo"). Each returns false, so Obsidian cancels the key's default, or true to leave the key to a
 // field.
 export function undoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
+	if (stepFieldAt(evt, 'undo')) return false;
 	if (isInField(evt)) return true;
 	// Closing the card removes the item, which is the undo of adding it.
 	if (isNewEmptyItem(view)) closeCard(view);
@@ -16,9 +18,15 @@ export function undoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
 }
 
 export function redoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
+	if (stepFieldAt(evt, 'redo')) return false;
 	if (isInField(evt)) return true;
 	writeStep(view, (text) => view.editing.history.redo(text), "This list changed elsewhere, so it can't be redone.");
 	return false;
+}
+
+function stepFieldAt(evt: KeyboardEvent, direction: 'undo' | 'redo'): boolean {
+	const target = targetOf(evt);
+	return target?.instanceOf(HTMLTextAreaElement) === true && stepField(target, direction);
 }
 
 // A field keeps the browser's undo: the view's fields, and Obsidian's under the same scope, such as the pane's title.
