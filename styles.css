@@ -171,6 +171,20 @@ textarea.princelists-list-note-editor {
 	font-size: var(--font-ui-smaller);
 }
 
+/* The list scrolls in an element of its own that fills contentEl, which then holds nothing in its flow
+   and never scrolls, whatever Obsidian's stylesheet gives `.view-content`. */
+.princelists-content {
+	position: relative;
+}
+
+.princelists-scroll {
+	position: absolute;
+	inset: 0;
+	overflow-y: auto;
+	padding: inherit;
+	box-sizing: border-box;
+}
+
 /* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on the iPhone". */
 .princelists-view {
 	position: relative;

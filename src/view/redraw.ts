@@ -8,10 +8,8 @@ import { OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } f
 // Draws everything again from the view's text, except the title, list note, card or heading field that
 // holds focus, or is about to (`focusing`): those stay in place and update after blur.
 export function redraw(view: PrinceListView, focusing: Element | null): void {
-	const { contentEl } = view;
-	// contentEl is what scrolls in Obsidian's CSS as seen in 1.14.4 (not a documented API), so the
-	// floating "+" (Task 10) must sit outside it.
-	const { scrollTop } = contentEl;
+	const { contentEl, listScrollEl } = view;
+	const { scrollTop } = listScrollEl;
 	const kept = keptElement(view, focusing);
 	for (const block of view.blocks.values()) view.removeChild(block);
 	view.blocks.clear();
@@ -39,11 +37,11 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		fresh.createEl('p', { text: "This note isn't a list" });
 		fresh.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
 	}
-	replaceKeeping(contentEl, fresh, kept, slot);
+	replaceKeeping(listScrollEl, fresh, kept, slot);
 	view.newItemButton?.toggle(isListText(view.text));
 	if (view.card && kept === view.card.el) refreshCard(view, view.card);
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);
-	contentEl.scrollTop = scrollTop;
+	listScrollEl.scrollTop = scrollTop;
 }
 
 // Where a redraw puts the card: a slot for the card that keeps focus, or the card drawn again.

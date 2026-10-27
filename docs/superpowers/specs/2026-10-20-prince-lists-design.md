@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-22
+verified: 2026-10-27
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -962,6 +962,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 - **A long-press on a folder in the iPhone file explorer reaches `file-menu`,** with source
   `file-explorer-context-menu`, so it offers "New list" (confirmed on the device in the 1a
   checks).
+- **The list scrolls in an element of its own,** inside the view's `contentEl`, so nothing relies on
+  Obsidian's undocumented `overflow` on `.view-content`. It fills `contentEl` and takes its padding.
 - **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.

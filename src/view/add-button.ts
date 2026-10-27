@@ -5,9 +5,8 @@ import { closeCard, focusCardTitle, isNewEmptyItem, openCard } from './card';
 import type { PrinceListView } from './list-view';
 import { enqueueAt, writePlanned } from './write';
 
-// The floating "+" (spec, "Selecting and adding"). It goes outside contentEl, which is what scrolls
-// (observed in 1.14.4), so it stays put while the list scrolls. The view hides it in a note that isn't
-// a list.
+// The floating "+" (spec, "Selecting and adding"). It goes outside listScrollEl, which is what
+// scrolls, so it stays put while the list scrolls. The view hides it in a note that isn't a list.
 export function buildNewItemButton(view: PrinceListView): HTMLButtonElement {
 	view.containerEl.addClass('princelists-view');
 	const button = view.containerEl.createEl('button', { cls: 'princelists-new-item', attr: { 'aria-label': 'New item' } });
