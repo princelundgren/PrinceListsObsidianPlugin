@@ -88,7 +88,7 @@ export function renderList(
 		list = null;
 		return isHeading && line === field.line;
 	};
-	const sourcePath = view.file?.path ?? '';
+	const sourcePath = view.sourcePath;
 	const sections = visibleSections(lines, model, new Date(), { showArchived: view.showArchived, query: view.filter ?? '', keepLine: view.selected, collapsed: view.collapsed.lines() });
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {

@@ -81,6 +81,11 @@ export class PrinceListView extends TextFileView {
 		return this.editing.text;
 	}
 
+	/** The path links and embeds in the list resolve from. */
+	get sourcePath(): string {
+		return this.file?.path ?? '';
+	}
+
 	/** The titleLine of the item whose card is open, or null. */
 	get selected(): number | null {
 		return this.editing.selected;

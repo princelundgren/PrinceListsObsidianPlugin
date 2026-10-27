@@ -3,13 +3,13 @@ import { boxesMatchChecklist, type ChecklistLine } from '../core/checklist';
 import { asInline, needsMarkdown } from '../core/inline';
 
 const INTERNAL_LINK = 'a.internal-link';
+export const NOTES_CHECKBOX_SELECTOR = '.task-list-item-checkbox';
 
 // What rendering Markdown needs: the app, and a component that each rendered block becomes a child of.
 export interface MarkdownHost {
 	readonly app: App;
 	addChild<T extends Component>(component: T): T;
 }
-export const NOTES_CHECKBOX_SELECTOR = '.task-list-item-checkbox';
 
 // Obsidian's own rendering, so pictures, links and embeds look as they do in any note (spec,
 // "Rendering notes in the card"). Without a Component, embeds don't load and Obsidian logs a leak, so

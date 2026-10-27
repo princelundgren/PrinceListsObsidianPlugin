@@ -77,7 +77,7 @@ export function closeCard(view: PrinceListView): void {
 	}
 	const row = rowAt(view, line);
 	if (row && isShown(row, view.showArchived)) {
-		card.el.replaceWith(buildRow(view, view.file?.path ?? '', row, view.blocks));
+		card.el.replaceWith(buildRow(view, view.sourcePath, row, view.blocks));
 	} else {
 		card.el.remove();
 	}
@@ -215,7 +215,7 @@ function showNotes(view: PrinceListView, card: Card, area: HTMLElement): void {
 	}
 	const { lines, model } = view.parse();
 	const item = view.selected === null ? undefined : itemAt(model, view.selected);
-	card.notes = renderCardNotes(view, view.file?.path ?? '', area, notes, item ? checklistOf(lines, item) : []);
+	card.notes = renderCardNotes(view, view.sourcePath, area, notes, item ? checklistOf(lines, item) : []);
 }
 
 function endCard(view: PrinceListView, card: Card): void {
