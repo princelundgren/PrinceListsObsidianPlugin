@@ -79,7 +79,7 @@ manual check runs there, never in a vault with real notes.
   - "Press Cmd+Enter or + to add an item", "Press Ctrl+Enter or + to add an item" and "Tap + to add
     an item".
   - The collapse arrow's `aria-label` "Collapse" or "Expand".
-  - The filter field's placeholder "Find in list"; the card's gray "When"; the clear button's
+  - The filter field's placeholder "Find in list"; the date input's `aria-label` "When"; the clear button's
     `aria-label` "Remove the day"; the day labels "Today" and "Tomorrow".
   - The Schedule view's title "Schedule", its groups "Today", "Tomorrow", "Coming week", "Next
     month" and "Later", and "No items have a When." when every group is empty **(call)**.
@@ -262,8 +262,9 @@ manual check runs there, never in a vault with real notes.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS. `typeTitle` calls
   `setItemTitle(withSaved, item, keepStar(savedTitle, oneLineTitle(typed)))`.
 - [ ] **Step 3: Build the view.** `buildRow` calls `addStar` after the title when `row.starred`.
-  `itemMenu` adds "Add star" or "Remove star", icon `star`, before "Delete", through `atLine` and
-  `queueLineEdit(view, line, (l) => setStar(l, !starred))`. `.princelists-star` gets `color:
+  The open card has a star button between its When and its ⋯, labeled "Add star" or "Remove star",
+  which calls `queueLineEdit(view, line, (l) => setStar(l, !isStarred(l)))`; the item menu has no
+  star entry (owner). `.princelists-star` gets `color:
   var(--color-yellow)` and `fill: currentColor` on its `svg`, so it reads as set **(call)**.
 - [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 5: Check it by hand on the Mac and the iPhone.**
@@ -654,8 +655,9 @@ manual check runs there, never in a vault with real notes.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
 - [ ] **Step 3: Show it on rows.** `buildRow` calls `addWhen` after the star when `row.when` isn't
   null, with `dayOf(new Date())` as today. The When is `--text-muted`.
-- [ ] **Step 4: Build the card's When row** in `card-when.ts`, under the title: a button with the
-  class `princelists-when-button` showing `addWhen`'s content, or a gray "When"; an `input
+- [ ] **Step 4: Build the card's When picker** in `card-when.ts`, at the card's top right before
+  the star: a button with the class `princelists-when-button` showing `addWhen`'s content, or the
+  `calendar` icon; an `input
   type="date"` laid over the button at its size with `opacity: 0`, so a click or tap lands on the
   input itself; and a clear button with the `x` icon and the `aria-label` "Remove the day", shown
   only with a When. `refreshCard` calls `showWhen`.
@@ -676,7 +678,7 @@ manual check runs there, never in a vault with real notes.
   4. Cmd+Z takes a When back. With Tasks installed, a `scheduled on 2026-10-30` query lists it.
 - [ ] **Step 7: Update the designs.** In the step-two design's "When", record that a new When goes
   after the tags, before the block ID. In step one's, "Dates" says ⏳ is the item's When, set in the
-  card; "Layout" says rows show the star and the When; "Editing" names the card's When row.
+  card; "Layout" says rows show the star and the When; "Editing" names the card's calendar icon.
 - [ ] **Step 8: Commit** with the message "Give an item a When".
 
 ### Task 9: Draw rows for any host

@@ -235,7 +235,7 @@ function createCardElement(): HTMLElement {
 	body.createDiv({ cls: CARD_NOTES_CLASS });
 	const tools = el.createDiv({ cls: 'princelists-card-tools' });
 	buildWhenPicker(tools);
-	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS }), 'star');
+	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
 	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
 	return el;
