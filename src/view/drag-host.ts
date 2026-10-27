@@ -1,4 +1,4 @@
-import type { Component } from 'obsidian';
+import { Platform, type Component } from 'obsidian';
 import type { TrackedLine } from '../core/editing';
 import { closeCard } from './card';
 import type { PrinceListView } from './list-view';
@@ -21,14 +21,12 @@ export interface RowDragHost {
 	drop(line: number, drop: RowDrop): void;
 }
 
+// Only the touch drag scrolls at the edges, so only mobile gets the element that marks the bottom one.
 export function listDragHost(view: PrinceListView): RowDragHost {
-	// Its top is where the list stops being visible: the iPhone's floating navbar covers the bottom
-	// of the view, and Obsidian puts its height in --view-bottom-spacing.
-	const visibleBottomEl = view.containerEl.createDiv({ cls: 'princelists-visible-bottom' });
 	return {
 		component: view,
 		rowsEl: view.listScrollEl,
-		edgeScroll: { scrollEl: view.listScrollEl, visibleBottomEl },
+		edgeScroll: Platform.isMobile ? { scrollEl: view.listScrollEl, visibleBottomEl: visibleBottom(view) } : null,
 		dragsHeadings: true,
 		get swallowNextClick() {
 			return view.swallowNextClick;
@@ -41,4 +39,10 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 		untrack: (tracked) => view.editing.untrack(tracked),
 		drop: (line, drop) => queueDrop(view, line, drop),
 	};
+}
+
+// Its top is where the list stops being visible: the iPhone's floating navbar covers the bottom of the
+// view, and Obsidian puts its height in --view-bottom-spacing.
+function visibleBottom(view: PrinceListView): HTMLElement {
+	return view.containerEl.createDiv({ cls: 'princelists-visible-bottom' });
 }
