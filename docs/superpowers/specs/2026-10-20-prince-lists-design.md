@@ -661,7 +661,8 @@ stays, and the blank line stays with it.
     included, but not the open card. A tap on a link still opens it. A hold closes any open card
     first, as on the Mac.
   - **The list scrolls at its edges while dragging (call),** so an item can go further than one
-    screen.
+    screen. It starts only once the finger has moved more than 5 px since the lift, so a row
+    held still at an edge doesn't scroll the list **(owner, 2026-10-27)**.
   - **A redraw while dragging ends the drag (call),** with nothing written, since the row the
     finger holds is gone: an outside change, or the removal of an empty item that closing the card
     started. The release that follows is swallowed too.

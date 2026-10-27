@@ -22,6 +22,11 @@ interface Lift {
 	/** The row or heading that shows the drop line. */
 	marked: HTMLElement | null;
 	frame: number | null;
+	/** Where the finger was at the lift. */
+	fromX: number;
+	fromY: number;
+	/** Set once the finger has moved past the tolerance since the lift: only then may an edge scroll start. */
+	armed: boolean;
 }
 
 interface Press {
@@ -29,7 +34,8 @@ interface Press {
 	row: HTMLElement;
 	startX: number;
 	startY: number;
-	/** The finger's latest clientY. */
+	/** The finger's latest position. */
+	x: number;
 	y: number;
 	/** The hold's timer, until it fires or the finger moves too far. */
 	timer: number | null;
@@ -88,7 +94,7 @@ export function enableTouchDrag(view: PrinceListView): void {
 
 	const keepScrolling = (current: Press): void => {
 		const lift = current.lift;
-		if (!lift || lift.frame !== null || step(current) === 0) return;
+		if (!lift?.armed || lift.frame !== null || step(current) === 0) return;
 		lift.frame = window.requestAnimationFrame(() => {
 			lift.frame = null;
 			if (current.lift !== lift) return;
@@ -115,7 +121,7 @@ export function enableTouchDrag(view: PrinceListView): void {
 			const rect = el.getBoundingClientRect();
 			return { el, top: rect.top - scrollerTop + listScrollEl.scrollTop, bottom: rect.bottom - scrollerTop + listScrollEl.scrollTop };
 		});
-		current.lift = { item: view.editing.track(line), boxes, scrollAtLift: listScrollEl.scrollTop, shift, drop: null, marked: null, frame: null };
+		current.lift = { item: view.editing.track(line), boxes, scrollAtLift: listScrollEl.scrollTop, shift, drop: null, marked: null, frame: null, fromX: current.x, fromY: current.y, armed: false };
 		current.row.addClass(LIFTED_CLASS);
 		// The release of a lifted press is never a tap.
 		view.swallowNextClick = true;
@@ -128,14 +134,16 @@ export function enableTouchDrag(view: PrinceListView): void {
 		endPress();
 		const row = targetOf(evt)?.closest<HTMLElement>(`.${ITEM_CLASS}`);
 		if (!row || row.hasClass(CARD_CLASS)) return;
-		const started: Press = { pointerId: evt.pointerId, row, startX: evt.clientX, startY: evt.clientY, y: evt.clientY, timer: null, lift: null };
+		const started: Press = { pointerId: evt.pointerId, row, startX: evt.clientX, startY: evt.clientY, x: evt.clientX, y: evt.clientY, timer: null, lift: null };
 		started.timer = window.setTimeout(() => lift(started), HOLD_MS);
 		press = started;
 	});
 	view.registerDomEvent(contentEl, 'pointermove', (evt) => {
 		if (!press || press.pointerId !== evt.pointerId) return;
+		press.x = evt.clientX;
 		press.y = evt.clientY;
 		if (press.lift) {
+			if (Math.hypot(press.x - press.lift.fromX, press.y - press.lift.fromY) > MOVE_TOLERANCE_PX) press.lift.armed = true;
 			update(press);
 			keepScrolling(press);
 		} else if (press.timer !== null && Math.hypot(evt.clientX - press.startX, evt.clientY - press.startY) > MOVE_TOLERANCE_PX) {
