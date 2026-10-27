@@ -145,7 +145,9 @@ current todo app. Step one's own "Done when" doesn't change.
   field: Enter or leaving saves, Escape cancels. A change to the file from elsewhere while the
   field is open waits for it to close before the block draws it **(call)**; the field saves to its
   line as that change moved it, and a line that went shows "This list changed elsewhere. Try
-  again." and writes nothing.
+  again." and writes nothing. Until the block draws again, its other rows may stand on lines the
+  change moved, so a tick, a click, a right-click or a drag on one only closes the field and
+  redraws: it never acts on the item that is now on that line **(call)**.
 - **Adding:** a "New item" button below the rows adds an item where "+" puts one with nothing
   selected, as the list's first item, and opens its title field **(call)**. Shift+Enter adds the
   next one. Leaving a new item with an empty title removes it, as in the list view.

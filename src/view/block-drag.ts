@@ -28,9 +28,10 @@ export function blockDragHost(block: ListBlock): RowDragHost {
 		beforeLift: () => closeBlockField(block, true),
 		// A drag holds its row from track to untrack. The block doesn't draw in between, so a field the
 		// lift closed and saved can't end the drag; it draws once the drag is over.
+		// Out-of-date rows give a line already gone, so the drag ends without a drop.
 		track: (line) => {
 			block.dragging = true;
-			return block.editing.track(line);
+			return block.rowsMatchText() ? block.editing.track(line) : { line: null };
 		},
 		untrack: (tracked) => {
 			block.editing.untrack(tracked);

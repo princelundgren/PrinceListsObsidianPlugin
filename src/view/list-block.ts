@@ -1,4 +1,4 @@
-import { getLinkpath, MarkdownRenderChild, Menu, Notice, Platform, setIcon, type App, type Component, type TFile } from 'obsidian';
+import { getLinkpath, MarkdownRenderChild, Notice, Platform, setIcon, type App, type Component, type TFile } from 'obsidian';
 import { guardedWrite, type WriteResult } from '../core/action-write';
 import { blockLink } from '../core/block-source';
 import { visibleSections } from '../core/display';
@@ -12,7 +12,7 @@ import { serialQueue } from '../core/queue';
 import { WriteEchoes } from '../core/write-echoes';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { blockDragHost, enableBlockDrag } from './block-drag';
-import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, openBlockField, type BlockField } from './block-fields';
+import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, openBlockField, showBlockItemMenu, type BlockField } from './block-fields';
 import { targetOf } from './dom';
 import type { RowDragHost } from './drag-host';
 import { handleLinkClick, handleLinkMenu } from './notes';
@@ -119,6 +119,18 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		return blockDragHost(this);
 	}
 
+	// Rows aren't drawn while a field is open or a drag holds one, so once the text has changed under
+	// them their line attributes are out of date.
+	rowsMatchText(): boolean {
+		return this.editing.text === this.drawnText;
+	}
+
+	// The line of the row holding `target`, or null while the rows are out of date.
+	private rowLine(target: Element): number | null {
+		const rowEl = target.closest(`.${ITEM_CLASS}`);
+		return rowEl && this.rowsMatchText() ? lineOf(rowEl) : null;
+	}
+
 	// After a field closes, whose title went back in its place, or a drag ends: the rows are drawn
 	// again only if the text changed since they were, and never under a drag.
 	drawIfChanged(): void {
@@ -208,8 +220,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 			if (fieldLine !== null && fieldLine !== undefined) deleteBlockItem(this, fieldLine);
 			return;
 		}
-		const rowEl = target.closest(`.${ITEM_CLASS}`);
-		const line = rowEl ? lineOf(rowEl) : null;
+		const line = this.rowLine(target);
 		if (line === null) return;
 		if (target.closest(`.${CHECKBOX_CLASS}`)) {
 			// The box shows the file: the redraw after the write ticks it.
@@ -240,13 +251,10 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private onContextMenu(evt: MouseEvent): void {
 		const target = targetOf(evt);
 		if (!target || handleLinkMenu(this.app, this.file?.path ?? this.notePath, evt, target)) return;
-		const rowEl = target.closest(`.${ITEM_CLASS}`);
-		const line = rowEl ? lineOf(rowEl) : null;
+		const line = this.rowLine(target);
 		if (line === null) return;
 		evt.preventDefault();
-		const menu = new Menu();
-		menu.addItem((item) => item.setTitle('Delete').setIcon('trash-2').setWarning(true).onClick(() => deleteBlockItem(this, line)));
-		menu.showAtMouseEvent(evt);
+		showBlockItemMenu(this, evt, line);
 	}
 
 	// As a tick in the list view: it waits on the block's queue, and its line follows the block's own
