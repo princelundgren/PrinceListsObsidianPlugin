@@ -3,9 +3,16 @@ import { headingText, itemRow, matchesQuery, visibleSections } from '../../src/c
 import { tickLine } from '../../src/core/item-line';
 import { list, readFixture } from './edit-helpers';
 
-const sectionsOf = (text: string, now: Date, showArchived: boolean, query = '', keepLine: number | null = null) => {
+const sectionsOf = (
+	text: string,
+	now: Date,
+	showArchived: boolean,
+	query = '',
+	keepLine: number | null = null,
+	collapsed: ReadonlySet<number> = new Set(),
+) => {
 	const { lines, model } = list(text);
-	return visibleSections(lines, model, now, { showArchived, query, keepLine });
+	return visibleSections(lines, model, now, { showArchived, query, keepLine, collapsed });
 };
 
 const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false) => ({
@@ -23,12 +30,13 @@ describe('visibleSections', () => {
 	test('draws the design example: headings, titles without fields, and a done item in place', () => {
 		const now = new Date(2026, 9, 21, 12, 0);
 		expect(sectionsOf(readFixture('example.md'), now, false)).toEqual([
-			{ heading: null, rows: [row(5, 'item before any heading')] },
+			{ heading: null, rows: [row(5, 'item before any heading')], collapsed: false },
 			{
 				heading: { line: 7, text: 'Kitchen' },
 				rows: [row(8, 'cutting board'), row(9, 'freezer storage boxes'), row(17, 'glass jars 1 l', true)],
+				collapsed: false,
 			},
-			{ heading: { line: 19, text: 'Living room' }, rows: [row(20, 'balcony chair')] },
+			{ heading: { line: 19, text: 'Living room' }, rows: [row(20, 'balcony chair')], collapsed: false },
 		]);
 	});
 
@@ -36,8 +44,8 @@ describe('visibleSections', () => {
 		const text = '## H\n- [ ] a\n- [x] b ✔ 2026-10-20 10:00\n- [x] c ✔ 2026-10-20 10:01\n';
 		const now = new Date(2026, 9, 21, 10, 0);
 		expect(sectionsOf(text, now, false)).toEqual([
-			{ heading: null, rows: [] },
-			{ heading: { line: 0, text: 'H' }, rows: [row(1, 'a'), row(3, 'c', true)] },
+			{ heading: null, rows: [], collapsed: false },
+			{ heading: { line: 0, text: 'H' }, rows: [row(1, 'a'), row(3, 'c', true)], collapsed: false },
 		]);
 		expect(sectionsOf(text, now, true)[1]?.rows).toEqual([row(1, 'a'), row(2, 'b', true, 'b', true), row(3, 'c', true)]);
 	});
@@ -55,9 +63,9 @@ describe('visibleSections', () => {
 	test('keeps a heading whose items are all hidden', () => {
 		const text = '## Done\n- [x] a\n## Open\n- [ ] b\n';
 		expect(sectionsOf(text, new Date(2026, 9, 21), false)).toEqual([
-			{ heading: null, rows: [] },
-			{ heading: { line: 0, text: 'Done' }, rows: [] },
-			{ heading: { line: 2, text: 'Open' }, rows: [row(3, 'b')] },
+			{ heading: null, rows: [], collapsed: false },
+			{ heading: { line: 0, text: 'Done' }, rows: [], collapsed: false },
+			{ heading: { line: 2, text: 'Open' }, rows: [row(3, 'b')], collapsed: false },
 		]);
 	});
 
@@ -85,6 +93,7 @@ describe('visibleSections, content the plugin leaves alone', () => {
 					untouched(22, '- bullet'),
 					row(24, 'last'),
 				],
+				collapsed: false,
 			},
 		]);
 	});
@@ -92,9 +101,9 @@ describe('visibleSections, content the plugin leaves alone', () => {
 	test('keeps a block in its own section, and shows it when the items around it are hidden', () => {
 		const text = '## A\n- [x] old\n\nText under A\n\n## B\nPara\n\n- [ ] b\n';
 		expect(sectionsOf(text, new Date(2026, 9, 21), false)).toEqual([
-			{ heading: null, rows: [] },
-			{ heading: { line: 0, text: 'A' }, rows: [untouched(3, 'Text under A')] },
-			{ heading: { line: 5, text: 'B' }, rows: [untouched(6, 'Para'), row(8, 'b')] },
+			{ heading: null, rows: [], collapsed: false },
+			{ heading: { line: 0, text: 'A' }, rows: [untouched(3, 'Text under A')], collapsed: false },
+			{ heading: { line: 5, text: 'B' }, rows: [untouched(6, 'Para'), row(8, 'b')], collapsed: false },
 		]);
 	});
 });
@@ -148,9 +157,9 @@ describe('visibleSections, filtered', () => {
 
 	test('keeps an item whose title or notes hold the query, ignoring case', () => {
 		expect(sectionsOf(text, now, false, 'MILK')).toEqual([
-			{ heading: null, rows: [row(2, 'Buy milk'), row(3, 'Bread')] },
-			{ heading: null, rows: [] },
-			{ heading: null, rows: [] },
+			{ heading: null, rows: [row(2, 'Buy milk'), row(3, 'Bread')], collapsed: false },
+			{ heading: null, rows: [], collapsed: false },
+			{ heading: null, rows: [], collapsed: false },
 		]);
 		expect(sectionsOf(text, now, false, '**bold**')[0]?.rows).toEqual([row(3, 'Bread')]);
 	});
@@ -166,24 +175,47 @@ describe('visibleSections, filtered', () => {
 	});
 
 	test('keeps a matching archived item hidden unless archived items are shown', () => {
-		expect(sectionsOf(text, now, false, 'jug')[2]).toEqual({ heading: null, rows: [] });
+		expect(sectionsOf(text, now, false, 'jug')[2]).toEqual({ heading: null, rows: [], collapsed: false });
 		expect(sectionsOf(text, now, true, 'jug')[2]).toEqual({
 			heading: { line: 8, text: 'Old' },
 			rows: [row(9, 'milk jug', true, 'milk jug', true)],
+			collapsed: false,
 		});
 	});
 
 	test('keeps the item on keepLine hidden while it is archived and archived items are hidden', () => {
-		expect(sectionsOf(text, now, false, '', 9)[2]).toEqual({ heading: { line: 8, text: 'Old' }, rows: [] });
-		expect(sectionsOf(text, now, false, 'rake', 9)[2]).toEqual({ heading: null, rows: [] });
+		expect(sectionsOf(text, now, false, '', 9)[2]).toEqual({ heading: { line: 8, text: 'Old' }, rows: [], collapsed: false });
+		expect(sectionsOf(text, now, false, 'rake', 9)[2]).toEqual({ heading: null, rows: [], collapsed: false });
 	});
 
 	test('shows the item on keepLine without matching, and its heading', () => {
-		expect(sectionsOf(text, now, false, 'milk', 7)[1]).toEqual({ heading: { line: 6, text: 'Garden' }, rows: [row(7, 'Rake')] });
+		expect(sectionsOf(text, now, false, 'milk', 7)[1]).toEqual({ heading: { line: 6, text: 'Garden' }, rows: [row(7, 'Rake')], collapsed: false });
 	});
 });
 
 test('matchesQuery compares without normalizing', () => {
 	expect(matchesQuery('Buy milk', '', 'MILK')).toBe(true);
 	expect(matchesQuery('cafe\u0301', '', 'caf\u00e9')).toBe(false);
+});
+
+describe('visibleSections, collapsed', () => {
+	const now = new Date(2026, 9, 21, 12, 0);
+	const text = '---\nprincelists: true\n---\n- [ ] a\n## B\n- [ ] b\n## C\n- [ ] c\n';
+	const collapsed = new Set([4]);
+
+	test('a collapsed section shows only its heading; the others show as they are', () => {
+		expect(sectionsOf(text, now, false, '', null, collapsed)).toEqual([
+			{ heading: null, rows: [row(3, 'a')], collapsed: false },
+			{ heading: { line: 4, text: 'B' }, rows: [], collapsed: true },
+			{ heading: { line: 6, text: 'C' }, rows: [row(7, 'c')], collapsed: false },
+		]);
+	});
+
+	test('while filtering, matches in a collapsed section show', () => {
+		expect(sectionsOf(text, now, false, 'b', null, collapsed)[1]).toEqual({ heading: { line: 4, text: 'B' }, rows: [row(5, 'b')], collapsed: true });
+	});
+
+	test("the open card's item shows in a collapsed section", () => {
+		expect(sectionsOf(text, now, false, '', 5, collapsed)[1]?.rows).toEqual([row(5, 'b')]);
+	});
 });

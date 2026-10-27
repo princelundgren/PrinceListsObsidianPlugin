@@ -325,3 +325,28 @@ textarea.princelists-heading-field {
 	width: 100%;
 	margin-block: var(--size-4-2);
 }
+
+/* The collapse arrow sits in the margin left of its heading. */
+.princelists-heading {
+	position: relative;
+}
+
+.princelists-collapse {
+	position: absolute;
+	inset-inline-end: 100%;
+	top: 0;
+	padding: 0 var(--size-2-1);
+	height: auto;
+	background: none;
+	border: none;
+	box-shadow: none;
+	color: var(--text-faint);
+	opacity: 0;
+}
+
+.princelists-heading:hover .princelists-collapse,
+.princelists-heading.princelists-is-collapsed .princelists-collapse,
+.princelists-is-mobile .princelists-collapse,
+.princelists-collapse:focus-visible {
+	opacity: 1;
+}

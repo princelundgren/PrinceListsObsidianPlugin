@@ -2,6 +2,7 @@ import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { edgeStep, HOLD_MS, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../core/touch-drag';
 import { CARD_CLASS, closeCard } from './card';
+import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { aimDrop, markDrop, queueDrop, shownRows, type RowDrop } from './move';
@@ -135,8 +136,9 @@ export function enableTouchDrag(view: PrinceListView): void {
 		// A press whose release never reached the view is over.
 		endPress();
 		// A heading lifts alone; its rows stay until the drop redraws.
-		const row = targetOf(evt)?.closest<HTMLElement>(`.${ITEM_CLASS}, .${HEADING_CLASS}`);
-		if (!row || row.hasClass(CARD_CLASS)) return;
+		const target = targetOf(evt);
+		const row = target?.closest<HTMLElement>(`.${ITEM_CLASS}, .${HEADING_CLASS}`);
+		if (!row || row.hasClass(CARD_CLASS) || target?.closest(`.${COLLAPSE_CLASS}`)) return;
 		const started: Press = { pointerId: evt.pointerId, row, startX: evt.clientX, startY: evt.clientY, x: evt.clientX, y: evt.clientY, timer: null, lift: null };
 		started.timer = window.setTimeout(() => lift(started), HOLD_MS);
 		press = started;

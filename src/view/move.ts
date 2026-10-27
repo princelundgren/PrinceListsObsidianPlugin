@@ -3,6 +3,7 @@ import { dropAt, sectionDropAt, type Drop, type SectionDrop, type ShownRow } fro
 import { planItemMove, planSectionMove, type ItemPlace } from '../core/list-actions';
 import { contentStartLine } from '../obsidian/marker';
 import { followPlace } from './add-button';
+import { expandFor } from './collapse';
 import type { PrinceListView } from './list-view';
 import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, writePlanned } from './write';
@@ -51,6 +52,7 @@ export function queueDrop(view: PrinceListView, line: number, drop: RowDrop): vo
 export function queueMove(view: PrinceListView, line: number, place: ItemPlace): void {
 	const file = view.file;
 	if (!file) return;
+	expandFor(view, place);
 	const item = view.editing.track(line);
 	const anchor = place === 'first' ? null : view.editing.track('after' in place ? place.after : place.firstUnder);
 	void view.enqueue(async () => {
