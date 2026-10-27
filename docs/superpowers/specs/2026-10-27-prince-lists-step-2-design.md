@@ -102,8 +102,9 @@ current todo app. Step one's own "Done when" doesn't change.
   Callouts, embeds, HTML, code fences, `%%` comments and `$$` math can each make them differ, and a
   tick on the wrong line is worse than no tick.
 - **Notes holding `%%` or `$$` anywhere, inside code too, keep every checkbox disabled (call).**
-  Obsidian hides the boxes inside them, and an embed's or a callout's box could make up the count with the same ticked states, so
-  the boxes would line up with the wrong lines without either check noticing.
+  Obsidian hides the boxes inside them, and an embed's or a callout's box could make up the count
+  with the same ticked states, so the boxes would line up with the wrong lines without either check
+  noticing.
 - **Nested checklist lines** tick the same way.
 - **The row shows nothing about a checklist (call).** A progress count wasn't asked for.
 
@@ -145,14 +146,15 @@ current todo app. Step one's own "Done when" doesn't change.
     **(call)**.
 - **Ticking** works as in the list view.
 - **Titles are edited in place (call).** A click on a title, not on a link in it, turns it into a
-  field: Enter or leaving saves, Escape cancels. A change to the file from elsewhere while the
-  field is open waits for it to close before the block draws it **(call)**; the field saves to its
-  line as that change moved it. A line that went writes nothing and shows the list view's message
-  with "Copy text" for what was typed, or "This list changed elsewhere. Try again." for a field
-  emptied by hand; a field left as it opened shows nothing, since nothing is lost **(call)**. The same message shows when the block's link comes to lead to another note, or
-  the list is renamed, while a field is open. Until the block draws again, its other rows may stand on lines the
-  change moved, so a tick, a click, a right-click or a drag on one only closes the field and
-  redraws: it never acts on the item that is now on that line **(call)**.
+  field: Enter or leaving saves, Escape cancels. A change to the file from elsewhere while the field
+  is open waits for it to close before the block draws it **(call)**; the field saves to its line as
+  that change moved it. A line that went writes nothing and shows the list view's message with "Copy
+  text" for what was typed, or "This list changed elsewhere. Try again." for a field emptied by
+  hand; a field left as it opened shows nothing, since nothing is lost **(call)**. The same message
+  shows when the block's link comes to lead to another note, or the list is renamed, while a field
+  is open. Until the block draws again, its other rows may stand on lines the change moved, so a
+  tick, a click, a right-click or a drag on one only closes the field and redraws: it never acts on
+  the item that is now on that line **(call)**.
 - **Adding:** a "New item" button below the rows adds an item where "+" puts one with nothing
   selected, as the list's first item, and opens its title field **(call)**. Shift+Enter adds the
   next one. Leaving a new item with an empty title removes it, as in the list view.

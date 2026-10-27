@@ -11,3 +11,10 @@ export function missingTyping(text: string, typed: string, field: 'title' | 'not
 		.map((line) => line.text.trim())
 		.some((line) => line !== '' && !present.has(line));
 }
+
+// The notice for a field whose line went: copy what was typed, or try again for a field emptied by
+// hand. An untouched field lost nothing.
+export function lostFieldNotice(typed: string, opened: string): 'none' | 'retry' | 'copy' {
+	if (typed === opened) return 'none';
+	return typed.trim() === '' ? 'retry' : 'copy';
+}

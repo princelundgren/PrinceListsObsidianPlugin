@@ -4,6 +4,7 @@ import { planRemoval, type InsertedItem } from '../core/empty-item';
 import { parseItemLine, setTitle } from '../core/item-line';
 import { splitLines } from '../core/lines';
 import { planItemDelete, planItemInsert, planItemLineEdit, type ItemPlace, type PlannedDelete } from '../core/list-actions';
+import { lostFieldNotice } from '../core/missing-typing';
 import { keepStar, splitStar } from '../core/star';
 import { contentStartLine } from '../obsidian/marker';
 import { followPlace } from './add-button';
@@ -77,12 +78,11 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 	});
 }
 
-// A field whose typing can't be saved any more offers it for copying. An untouched field lost nothing.
 export function noticeLostField(field: BlockField): void {
 	const typed = field.el.value;
-	if (typed === field.opened) return;
-	if (typed.trim() === '') new Notice(CHANGED_ELSEWHERE_NOTICE);
-	else showLostTypingNotice(field.el.win, typed);
+	const notice = lostFieldNotice(typed, field.opened);
+	if (notice === 'retry') new Notice(CHANGED_ELSEWHERE_NOTICE);
+	else if (notice === 'copy') showLostTypingNotice(field.el.win, typed);
 }
 
 // Saves an open field, then adds an empty item at `place` and opens its field.
