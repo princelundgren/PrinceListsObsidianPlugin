@@ -8,7 +8,7 @@ import { deleteHeadingAt, deleteItemAt } from './delete';
 import { addHeading, openHeadingField } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
-import { CHANGED_ELSEWHERE_NOTICE, enqueueAt } from './write';
+import { CHANGED_ELSEWHERE_NOTICE, enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
 // The item actions, from a right-click on desktop and the card's ⋯ (spec, "Item actions").
 export function itemMenu(view: PrinceListView, item: ItemBlock, menu: Menu): void {
@@ -135,7 +135,13 @@ function newItemBelow(view: PrinceListView, line: number): void {
 function editItemInMarkdown(view: PrinceListView, line: number): void {
 	const file = view.file;
 	enqueueAt(view, line, async (pending) => {
-		await view.save();
+		try {
+			await view.save();
+		} catch (error) {
+			console.error(error);
+			new Notice(SAVE_FAILED_NOTICE);
+			return;
+		}
 		if (file && pending?.line != null) await editInMarkdown(view.app.workspace, file, pending.line);
 	});
 }
