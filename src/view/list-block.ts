@@ -11,8 +11,10 @@ import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { WriteEchoes } from '../core/write-echoes';
 import { contentStartLine, isListText } from '../obsidian/marker';
+import { blockDragHost, enableBlockDrag } from './block-drag';
 import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, openBlockField, type BlockField } from './block-fields';
 import { targetOf } from './dom';
+import type { RowDragHost } from './drag-host';
 import { handleLinkClick, handleLinkMenu } from './notes';
 import { buildHeading, buildRow, CHECKBOX_CLASS, ITEM_CLASS, ITEMS_CLASS, lineOf, type RowHost } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE, tryEdit } from './write';
@@ -22,13 +24,14 @@ const NEW_ITEM_CLASS = 'princelists-block-new-item';
 // A list drawn inside another note by a `princelists` code block (spec, "A list inside another note").
 // It shows the list's headings and items, not its list note, notes or content the plugin leaves alone.
 export class ListBlock extends MarkdownRenderChild implements RowHost {
-	readonly dragsRows = false;
+	readonly dragsRows = true;
 	readonly dragsHeadings = false;
 	readonly editing = new ListEditing(contentStartLine);
 	readonly enqueue = serialQueue((error) => console.error(error));
 	readonly rowsEl: HTMLElement;
 	file: TFile | null = null;
 	field: BlockField | null = null;
+	swallowNextClick = false;
 	outsideChanges = 0;
 	private readonly rootEl: HTMLElement;
 	private readonly link: string | null;
@@ -36,6 +39,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private echoes = new WriteEchoes();
 	// The path drawn last: a rename that keeps the link's file still redraws its name and link.
 	private shownPath: string | null | undefined;
+	private drawnText: string | null = null;
 
 	constructor(
 		readonly app: App,
@@ -68,6 +72,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 			if (targetOf(evt)?.closest(`.${BLOCK_TRASH_CLASS}`)) evt.preventDefault();
 		});
 		if (Platform.isDesktop) this.registerDomEvent(this.rootEl, 'contextmenu', (evt) => this.onContextMenu(evt));
+		enableBlockDrag(this);
 		void this.resolve();
 	}
 
@@ -109,7 +114,18 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		return outcome === 'written' ? outcome : 'refused';
 	}
 
+	dragHost(): RowDragHost {
+		return blockDragHost(this);
+	}
+
+	// After a field closes, whose title went back in its place: the rows are drawn again only if the
+	// text changed since they were.
+	drawIfChanged(): void {
+		if (this.editing.text !== this.drawnText) this.draw();
+	}
+
 	draw(): void {
+		this.drawnText = this.editing.text;
 		this.removeBlocks();
 		this.rootEl.empty();
 		const { file } = this;

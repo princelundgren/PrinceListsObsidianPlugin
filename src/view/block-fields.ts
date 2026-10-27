@@ -11,7 +11,7 @@ import { showUndoNotice } from './delete';
 import { fitHeight } from './dom';
 import { FIELD_CLASS } from './fields';
 import type { ListBlock } from './list-block';
-import { ITEM_CLASS, LINE_ATTR } from './render-list';
+import { ITEM_CLASS, LINE_ATTR, ROWS_DRAG } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 export const BLOCK_TRASH_CLASS = 'princelists-block-trash';
@@ -40,19 +40,26 @@ export function openBlockField(block: ListBlock, titleLine: number, inserted: In
 	const trash = wrapper.createEl('button', { cls: BLOCK_TRASH_CLASS, attr: { 'aria-label': 'Delete item' } });
 	setIcon(trash, 'trash-2');
 	titleEl.replaceWith(wrapper);
+	// The field is inside its row, so a press in it selects text instead of dragging; the next draw
+	// makes the row draggable again.
+	const rowEl = wrapper.closest<HTMLElement>(`.${ITEM_CLASS}`);
+	if (rowEl) rowEl.draggable = false;
 	block.field = { line: block.editing.track(titleLine), el, titleEl, inserted };
 	fitHeight(el);
 	el.focus();
 }
 
 // Saves the typed title, or not, then removes an item the field's insert added if it's still empty.
-// The title goes back in place of the field at once, and the block draws again once the write lands.
+// The title goes back in place of the field at once, and the block draws again once a write lands:
+// drawing when nothing changed would end a drag that closed the field.
 export function closeBlockField(block: ListBlock, save: boolean): void {
 	const field = block.field;
 	if (!field) return;
 	block.field = null;
 	const typed = field.el.value.replace(/\s*\n\s*/g, ' ');
 	field.el.parentElement?.replaceWith(field.titleEl);
+	const rowEl = field.titleEl.closest<HTMLElement>(`.${ITEM_CLASS}`);
+	if (rowEl) rowEl.draggable = ROWS_DRAG;
 	void block.enqueue(async () => {
 		try {
 			const line = field.line.line;
@@ -64,7 +71,7 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 			if (field.inserted && field.line.line !== null) await removeIfEmpty(block, field.line.line, field.inserted);
 		} finally {
 			block.editing.untrack(field.line);
-			if (!block.field) block.draw();
+			if (!block.field) block.drawIfChanged();
 		}
 	});
 }

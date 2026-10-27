@@ -139,7 +139,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 		// A heading lifts alone; its rows stay until the drop redraws.
 		const target = targetOf(evt);
 		const row = target?.closest<HTMLElement>(host.dragsHeadings ? `.${ITEM_CLASS}, .${HEADING_CLASS}` : `.${ITEM_CLASS}`);
-		if (!row || row.hasClass(CARD_CLASS) || target?.closest(`.${COLLAPSE_CLASS}`)) return;
+		if (!row || row.hasClass(CARD_CLASS) || target?.closest(`.${COLLAPSE_CLASS}`) || target?.closest('textarea')) return;
 		const started: Press = { pointerId: evt.pointerId, row, startX: evt.clientX, startY: evt.clientY, x: evt.clientX, y: evt.clientY, timer: null, lift: null };
 		started.timer = window.setTimeout(() => lift(started), HOLD_MS);
 		press = started;
