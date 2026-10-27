@@ -155,7 +155,12 @@ current todo app. Step one's own "Done when" doesn't change.
   deletes without saving what was typed in the field **(call)**, so Undo brings back the item as
   the file had it.
 - **Dragging** works within the block, within and between sections: with the mouse on the Mac and
-  hold-and-move on the iPhone, with the list view's drop rules.
+  hold-and-move on the iPhone, with the list view's drop rules. Lifting an item closes an open
+  title field and saves it. A hold on an item opens no menu, and a swipe that starts no lift
+  scrolls the note.
+- **No edge scrolling in a block (call):** the block sits in the note's scroller, which is
+  Obsidian's, and the plugin doesn't reach into Obsidian's own elements. A drop beyond what shows
+  needs the list view.
 - **Writes go to the list's file** through the same guarded edits. An open list view of that file
   follows them as a change from outside **(call)**. Cmd+Z doesn't step through edits made in a
   block **(call)**.
