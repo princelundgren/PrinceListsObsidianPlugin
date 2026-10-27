@@ -52,8 +52,12 @@ current todo app. Step one's own "Done when" doesn't change.
 
 - **` ⭐` at the end of the title,** before any `✔` mark and the trailing Tasks fields, so Tasks
   still reads them. Tasks shows the star as part of the item's text.
+- **The order on a line with everything:**
+  `- [x] Buy milk ⭐ ✔ 2026-10-27 18:05 ⏳ 2026-10-30 ^id`. The title, then the star, then the `✔`
+  mark, then the Tasks fields with the When last, then a block ID.
 - **A title ending in a space and `⭐`** (with an optional U+FE0F) is starred **(call)**: `5⭐`
-  isn't. The row hides the emoji and shows Lucide's `star` icon instead.
+  isn't. The title is the text before any `✔` mark and the trailing Tasks fields, as the parser
+  splits the line. The row hides the emoji and shows Lucide's `star` icon instead.
 - **The title field shows the title without its star,** and saving puts ` ⭐` back, so typing can't
   drop the star or add a second one **(call)**.
 - **Removing the star** removes the space, the `⭐` and any U+FE0F after it, and nothing else.
