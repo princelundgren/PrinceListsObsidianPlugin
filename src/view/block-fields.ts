@@ -4,6 +4,7 @@ import { planRemoval, type InsertedItem } from '../core/empty-item';
 import { parseItemLine, setTitle } from '../core/item-line';
 import { splitLines } from '../core/lines';
 import { planItemDelete, planItemInsert, planItemLineEdit, type ItemPlace, type PlannedDelete } from '../core/list-actions';
+import { lostFieldNotice } from '../core/missing-typing';
 import { keepStar, splitStar } from '../core/star';
 import { contentStartLine } from '../obsidian/marker';
 import { followPlace } from './add-button';
@@ -12,7 +13,7 @@ import { fitHeight } from './dom';
 import { FIELD_CLASS } from './fields';
 import type { ListBlock } from './list-block';
 import { ITEM_CLASS, LINE_ATTR, ROWS_DRAG } from './render-list';
-import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
+import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, tryEdit } from './write';
 
 export const BLOCK_TRASH_CLASS = 'princelists-block-trash';
 export const BLOCK_FIELD_CLASS = 'princelists-block-field';
@@ -21,6 +22,8 @@ export const BLOCK_FIELD_CLASS = 'princelists-block-field';
 export interface BlockField {
 	line: TrackedLine;
 	el: HTMLTextAreaElement;
+	/** What the field held when it opened, so an untouched field loses nothing. */
+	opened: string;
 	/** The title the field took the place of, put back when it closes. */
 	titleEl: Element;
 	/** Set when the block's own insert added the item, so closing an empty field removes it again. */
@@ -44,7 +47,7 @@ export function openBlockField(block: ListBlock, titleLine: number, inserted: In
 	// makes the row draggable again.
 	const rowEl = wrapper.closest<HTMLElement>(`.${ITEM_CLASS}`);
 	if (rowEl) rowEl.draggable = false;
-	block.field = { line: block.editing.track(titleLine), el, titleEl, inserted };
+	block.field = { line: block.editing.track(titleLine), el, opened: el.value, titleEl, inserted };
 	fitHeight(el);
 	el.focus();
 }
@@ -63,7 +66,7 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 		try {
 			const line = field.line.line;
 			if (line === null) {
-				if (save) new Notice(CHANGED_ELSEWHERE_NOTICE);
+				if (save) noticeLostField(field);
 				return;
 			}
 			if (save) await saveTitle(block, line, typed);
@@ -73,6 +76,13 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 			if (!block.field) block.drawIfChanged();
 		}
 	});
+}
+
+export function noticeLostField(field: BlockField): void {
+	const typed = field.el.value;
+	const notice = lostFieldNotice(typed, field.opened);
+	if (notice === 'retry') new Notice(CHANGED_ELSEWHERE_NOTICE);
+	else if (notice === 'copy') showLostTypingNotice(field.el.win, typed);
 }
 
 // Saves an open field, then adds an empty item at `place` and opens its field.

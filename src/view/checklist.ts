@@ -19,7 +19,7 @@ export function checklistClick(view: PrinceListView, box: HTMLInputElement, evt:
 	const { lines, model } = view.parse();
 	const item = itemAt(model, titleLine);
 	const checklist = item ? checklistOf(lines, item) : [];
-	if (boxes.length !== checklist.length) {
+	if (!checklist || boxes.length !== checklist.length) {
 		for (const each of boxes) each.disabled = true;
 		return;
 	}

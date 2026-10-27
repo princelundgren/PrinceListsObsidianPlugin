@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { missingTyping } from '../../src/core/missing-typing';
+import { lostFieldNotice, missingTyping } from '../../src/core/missing-typing';
 
 describe('missingTyping', () => {
 	test('is false when the typing is all in the file', () => {
@@ -43,4 +43,13 @@ describe('missingTyping', () => {
 		expect(missingTyping(text, 'first line\nsecond line', 'notes')).toBe(false);
 		expect(missingTyping(text, 'first line\nsecond line!', 'notes')).toBe(true);
 	});
+});
+
+// A field whose line went: an untouched field lost nothing, one emptied by hand has nothing to copy.
+test('lostFieldNotice says which notice a field whose line went shows', () => {
+	expect(lostFieldNotice('milk', 'milk')).toBe('none');
+	expect(lostFieldNotice('', '')).toBe('none');
+	expect(lostFieldNotice('  ', 'milk')).toBe('retry');
+	expect(lostFieldNotice('oat milk', 'milk')).toBe('copy');
+	expect(lostFieldNotice('bread', '')).toBe('copy');
 });

@@ -10,6 +10,26 @@ export const CHANGED_ELSEWHERE_NOTICE = 'This list changed elsewhere. Try again.
 export const SAVE_FAILED_NOTICE = "Couldn't save the change to this list.";
 export const LOST_TYPING_NOTICE = 'This list changed elsewhere, and your typing in this item may not be in it.';
 
+// Obsidian hides a notice on any click, so the whole message copies, not only the button.
+export function showLostTypingNotice(win: Window, typed: string): void {
+	const message = createFragment((fragment) => {
+		const content = fragment.createDiv();
+		content.createEl('p', { text: LOST_TYPING_NOTICE });
+		content.createEl('button', { text: 'Copy text' });
+		content.addEventListener(
+			'click',
+			() => {
+				win.navigator.clipboard.writeText(typed).then(
+					() => new Notice('Copied.'),
+					() => new Notice("Couldn't copy the text."),
+				);
+			},
+			{ once: true },
+		);
+	});
+	new Notice(message, 0);
+}
+
 // A one-off action's write, through guardedWrite. `written`: the file now holds `next`. A write that
 // moves lines passes its `edit`, so the view's line-based state follows it. Typing that landed while
 // it waited refuses it with no notice: the caller runs the action again on the new text, but not an

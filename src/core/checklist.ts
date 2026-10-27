@@ -11,11 +11,14 @@ export interface ChecklistLine {
 }
 
 // The notes as CommonMark reads them, so a fenced line isn't a box. A list item in a blockquote or
-// callout starts with `>`, which parseItemLine doesn't read, so it isn't counted either.
-export function checklistOf(lines: readonly Line[], item: ItemBlock): ChecklistLine[] {
+// callout starts with `>`, which parseItemLine doesn't read, so it isn't counted either. null when
+// the notes hold `%%` or `$$`: Obsidian hides the boxes inside them, and an embed's or a callout's
+// box could make up the count, so no box can be lined up with its line.
+export function checklistOf(lines: readonly Line[], item: ItemBlock): ChecklistLine[] | null {
 	const notesStart = notesStartLine(lines, item);
 	const notes = getItemNotes(lines, item);
 	if (notes === '') return [];
+	if (notes.includes('%%') || notes.includes('$$')) return null;
 	const checklist: ChecklistLine[] = [];
 	const walker = new Parser().parse(notes).walker();
 	for (let event = walker.next(); event; event = walker.next()) {
@@ -29,8 +32,8 @@ export function checklistOf(lines: readonly Line[], item: ItemBlock): ChecklistL
 
 // Whether a card's rendered boxes, by their checked state, line up with its checklist. A box in a
 // callout, an embed or a `%%` comment puts them out of step.
-export function boxesMatchChecklist(checked: readonly boolean[], checklist: readonly ChecklistLine[]): boolean {
-	return checked.length === checklist.length && checked.every((ticked, index) => ticked === checklist[index]?.ticked);
+export function boxesMatchChecklist(checked: readonly boolean[], checklist: readonly ChecklistLine[] | null): boolean {
+	return checklist !== null && checked.length === checklist.length && checked.every((ticked, index) => ticked === checklist[index]?.ticked);
 }
 
 export function toggleChecklistLine(text: string): string {
@@ -52,7 +55,7 @@ export function planChecklistTick(
 	const lines = splitLines(text);
 	const item = itemAt(parseList(lines, contentStart), titleLine);
 	if (!item) return null;
-	const entry = checklistOf(lines, item)[index];
+	const entry = checklistOf(lines, item)?.[index];
 	const line = entry ? lines[entry.line] : undefined;
 	if (!entry || !line || line.text !== lineText) return null;
 	const next = joinLines(spliceLines(lines, entry.line, 1, [{ text: toggleChecklistLine(line.text), eol: line.eol }]));

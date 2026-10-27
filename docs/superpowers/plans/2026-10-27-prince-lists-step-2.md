@@ -332,11 +332,12 @@ manual check runs there, never in a vault with real notes.
 **Interfaces:**
 - Produces, in `src/core/checklist.ts`:
   - `interface ChecklistLine { line: number; ticked: boolean }`
-  - `checklistOf(lines: readonly Line[], item: ItemBlock): ChecklistLine[]`: the item's notes,
+  - `checklistOf(lines: readonly Line[], item: ItemBlock): ChecklistLine[] | null`: the item's notes,
     `getItemNotes`, parsed with commonmark. Each `item` node at any depth whose source line
     `parseItemLine` reads is one, in order. Its file line is that of the first non-blank line after
     the title, where `getItemNotes` starts, plus its offset.
-    A list item in a blockquote or callout doesn't parse, so it isn't counted.
+    A list item in a blockquote or callout doesn't parse, so it isn't counted. Null when the notes
+    hold `%%` or `$$`, so their boxes stay disabled.
   - `toggleChecklistLine(text: string): string`: `x` for a space, a space for anything else, and
     nothing else changes
   - `planChecklistTick(text: string, contentStart: number, titleLine: number, index: number,
@@ -345,7 +346,7 @@ manual check runs there, never in a vault with real notes.
     its state isn't evidence. The edit is `{start: line, delta: 0, kind: 'change'}`. Null when the
     item is gone, or its `index`th line doesn't read `lineText`, the text it had at the click.
 - Produces, in `src/view/notes.ts`: `renderCardNotes(view: PrinceListView, el: HTMLElement,
-  markdown: string, checklist: readonly ChecklistLine[]): Component`. Once rendered, the boxes are
+  markdown: string, checklist: readonly ChecklistLine[] | null): Component`. Once rendered, the boxes are
   enabled only when their count and each ticked state match `checklist`; otherwise all stay
   disabled, as step one does.
 - Produces, in `src/view/checklist.ts`: `checklistClick(view: PrinceListView, box: HTMLInputElement,
