@@ -26,6 +26,7 @@ only documented Obsidian APIs are used.
   week, Next month and Later.
 - **An item can be starred.**
 - **An empty list says how to add an item,** and Cmd+Enter adds one.
+- **Dragging a heading moves its whole section.**
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -210,6 +211,28 @@ current todo app. Step one's own "Done when" doesn't change.
   like Cmd+Z, so it works anywhere in a list that has focus, a card's fields included, and isn't
   a default hotkey **(call)**.
 
+### Dragging a heading (owner)
+
+- **Dragging a heading moves its section:** the heading and every line up to the next heading.
+  That covers its items with their notes, hidden archived items and content the plugin leaves alone.
+- **A section ends at the next heading of any level (call),** as step one's sections do, so
+  dragging a `##` doesn't take a `###` below it along.
+- **It's started as an item drag is:** with the mouse on the Mac, and by holding and then moving
+  on the iPhone, where a tap still opens the heading menu. The drag closes an open card first. A
+  heading whose name field is open doesn't drag **(call)**.
+- **A section drops only between sections (call):** before another heading, or at the end of the
+  list. The drop line shows above the heading it will go before, or under the last row for the
+  end. It never drops above the items before the first heading, which would join the moved
+  section, and that unnamed section has no heading to drag.
+- **The file (call):** the section's lines move as they are, and the move goes through step one's
+  check (`edit-check.ts`): if it would change how the rest of the list reads, such as a moved
+  setext heading joining the paragraph above it, one empty line goes before it, and if that
+  doesn't help, nothing is written and a message says so. The file keeps its line endings and
+  final-newline rules. Dropped where it already is, the section stays as it is in the file.
+- **One Cmd+Z puts it back.** While Cmd+F filters the list, a section moves with its hidden rows.
+- **The edge scrolling and the redraw rule** are step one's for items.
+- **Headings don't drag in a list inside another note (call)** in step two; items do.
+
 ### Star (owner: in its list only)
 
 - **"Add star" and "Remove star"** are in the item menu: right-click on the Mac, and the card's ⋯
@@ -250,6 +273,6 @@ These go into step one's "Not in step one" list:
 ## Order (call)
 
 Smallest first, each feature its own group of plan tasks that can be released alone: Turn into
-list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, When on rows and in the
-card, the Schedule view, then lists inside other notes. No API here is newer than 1.5.7, the
+list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, dragging a heading, When
+on rows and in the card, the Schedule view, then lists inside other notes. No API here is newer than 1.5.7, the
 current `minAppVersion`.
