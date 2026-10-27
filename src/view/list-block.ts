@@ -11,7 +11,7 @@ import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { WriteEchoes } from '../core/write-echoes';
 import { contentStartLine, isListText } from '../obsidian/marker';
-import { addBlockItem, addBlockItemBelow, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, openBlockField, type BlockField } from './block-fields';
+import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, openBlockField, type BlockField } from './block-fields';
 import { targetOf } from './dom';
 import { handleLinkClick, handleLinkMenu } from './notes';
 import { buildHeading, buildRow, CHECKBOX_CLASS, ITEM_CLASS, ITEMS_CLASS, lineOf, type RowHost } from './render-list';
@@ -58,6 +58,11 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerDomEvent(this.rootEl, 'click', (evt) => this.onClick(evt));
 		this.registerDomEvent(this.rootEl, 'keydown', (evt) => this.onKeyDown(evt));
 		this.registerDomEvent(this.rootEl, 'focusout', (evt) => this.onFocusOut(evt));
+		// A press elsewhere in the block keeps the field's focus, and the click closes the field instead:
+		// closing it on the blur redraws the rows before the click reaches the one pressed.
+		this.registerDomEvent(this.rootEl, 'mousedown', (evt) => {
+			if (this.field && targetOf(evt) !== this.field.el) evt.preventDefault();
+		});
 		// The trash button doesn't take focus, so the field stays open until the click deletes.
 		this.registerDomEvent(this.rootEl, 'pointerdown', (evt) => {
 			if (targetOf(evt)?.closest(`.${BLOCK_TRASH_CLASS}`)) evt.preventDefault();
@@ -173,7 +178,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 
 	private onClick(evt: MouseEvent): void {
 		const target = targetOf(evt);
-		if (!target || handleLinkClick(this.app, this.file?.path ?? this.notePath, evt, target)) return;
+		if (!target) return;
+		if (this.field && !target.closest(`.${BLOCK_FIELD_CLASS}`)) closeBlockField(this, true);
+		if (handleLinkClick(this.app, this.file?.path ?? this.notePath, evt, target)) return;
 		if (target.closest(`.${NEW_ITEM_CLASS}`)) {
 			addBlockItem(this, 'first');
 			return;

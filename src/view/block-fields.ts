@@ -21,6 +21,8 @@ export const BLOCK_FIELD_CLASS = 'princelists-block-field';
 export interface BlockField {
 	line: TrackedLine;
 	el: HTMLTextAreaElement;
+	/** The title the field took the place of, put back when it closes. */
+	titleEl: Element;
 	/** Set when the block's own insert added the item, so closing an empty field removes it again. */
 	inserted: InsertedItem | null;
 }
@@ -38,19 +40,19 @@ export function openBlockField(block: ListBlock, titleLine: number, inserted: In
 	const trash = wrapper.createEl('button', { cls: BLOCK_TRASH_CLASS, attr: { 'aria-label': 'Delete item' } });
 	setIcon(trash, 'trash-2');
 	titleEl.replaceWith(wrapper);
-	block.field = { line: block.editing.track(titleLine), el, inserted };
+	block.field = { line: block.editing.track(titleLine), el, titleEl, inserted };
 	fitHeight(el);
 	el.focus();
 }
 
 // Saves the typed title, or not, then removes an item the field's insert added if it's still empty.
-// The block draws again at once, and again once the write lands.
+// The title goes back in place of the field at once, and the block draws again once the write lands.
 export function closeBlockField(block: ListBlock, save: boolean): void {
 	const field = block.field;
 	if (!field) return;
 	block.field = null;
 	const typed = field.el.value.replace(/\s*\n\s*/g, ' ');
-	block.draw();
+	field.el.parentElement?.replaceWith(field.titleEl);
 	void block.enqueue(async () => {
 		try {
 			const line = field.line.line;
