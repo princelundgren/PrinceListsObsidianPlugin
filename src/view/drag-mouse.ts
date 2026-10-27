@@ -1,9 +1,8 @@
 import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
-import { closeCard } from './card';
 import { targetOf } from './dom';
-import type { PrinceListView } from './list-view';
-import { aimDrop, markDrop, queueDrop, shownRows, type RowDrop } from './move';
+import type { RowDragHost } from './drag-host';
+import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
 import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
 
 // Each row's drag carries a type of its own, this one with a random token added. Other drags, such as
@@ -11,8 +10,7 @@ import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './rende
 const DRAG_TYPE = 'application/x-princelists-item';
 
 interface MouseDrag {
-	view: PrinceListView;
-	listEl: HTMLElement;
+	host: RowDragHost;
 	type: string;
 	/** The dragged item's title line, or heading's line. It follows edits that land during the drag. */
 	row: TrackedLine;
@@ -27,25 +25,26 @@ interface MouseDrag {
 // dragend then never comes. The next drag start in any list pane ends it.
 let current: MouseDrag | null = null;
 
-// Dragging rows and headings with the mouse, on desktop only (spec, "Dragging"). `listEl` holds every row and
-// heading, and takes one listener per drag event. Each acts only on a drag that started in it.
-export function enableMouseDrag(view: PrinceListView, listEl: HTMLElement): void {
+// Dragging rows and headings with the mouse, on desktop only (spec, "Dragging"). The host's rowsEl takes
+// one listener per drag event. Each acts only on a drag that started in it.
+export function enableMouseDrag(host: RowDragHost): void {
 	if (!ROWS_DRAG) return;
+	const { component, rowsEl } = host;
 	const ownDrag = (evt: DragEvent) =>
-		current?.listEl === listEl && evt.dataTransfer?.types.includes(current.type) ? current : null;
-	view.registerDomEvent(listEl, 'dragstart', (evt) => {
+		current?.host === host && evt.dataTransfer?.types.includes(current.type) ? current : null;
+	component.registerDomEvent(rowsEl, 'dragstart', (evt) => {
 		endDrag();
-		current = startDrag(view, listEl, evt);
+		current = startDrag(host, evt);
 	});
-	view.registerDomEvent(listEl, 'dragover', (evt) => {
+	component.registerDomEvent(rowsEl, 'dragover', (evt) => {
 		const drag = ownDrag(evt);
 		if (drag) dragOver(drag, evt);
 	});
 	// Fired on leaving the list, and where the pointer is when the drag is canceled.
-	view.registerDomEvent(listEl, 'dragleave', (evt) => {
-		if (current?.listEl === listEl && !listEl.contains(evt.relatedTarget as Node | null)) showDrop(current, null);
+	component.registerDomEvent(rowsEl, 'dragleave', (evt) => {
+		if (current?.host === host && !rowsEl.contains(evt.relatedTarget as Node | null)) showDrop(current, null);
 	});
-	view.registerDomEvent(listEl, 'drop', (evt) => {
+	component.registerDomEvent(rowsEl, 'drop', (evt) => {
 		const drag = ownDrag(evt);
 		if (!drag) return;
 		evt.preventDefault();
@@ -53,35 +52,35 @@ export function enableMouseDrag(view: PrinceListView, listEl: HTMLElement): void
 		const { drop } = drag;
 		const line = drag.row.line;
 		endDrag();
-		if (drop && line !== null) queueDrop(view, line, drop);
+		if (drop && line !== null) host.drop(line, drop);
 	});
-	view.registerDomEvent(listEl, 'dragend', () => {
-		if (current?.listEl === listEl) endDrag();
+	component.registerDomEvent(rowsEl, 'dragend', () => {
+		if (current?.host === host) endDrag();
 	});
-	view.register(() => {
-		if (current?.view === view) endDrag();
+	component.register(() => {
+		if (current?.host === host) endDrag();
 	});
 }
 
 function endDrag(): void {
 	if (!current) return;
-	current.view.editing.untrack(current.row);
+	current.host.untrack(current.row);
 	showDrop(current, null);
 	current = null;
 }
 
 // Only a row or heading itself starts a drag: a link or picture in its title drags as itself. Starting
 // one closes the card the way a click elsewhere does.
-function startDrag(view: PrinceListView, listEl: HTMLElement, evt: DragEvent): MouseDrag | null {
+function startDrag(host: RowDragHost, evt: DragEvent): MouseDrag | null {
 	const row = targetOf(evt);
-	const kind = row?.hasClass(ITEM_CLASS) ? 'item' : row?.hasClass(HEADING_CLASS) ? 'heading' : null;
+	const kind = row?.hasClass(ITEM_CLASS) ? 'item' : host.dragsHeadings && row?.hasClass(HEADING_CLASS) ? 'heading' : null;
 	const line = row && kind ? lineOf(row) : null;
 	if (!kind || line === null || !evt.dataTransfer) return null;
-	closeCard(view);
+	host.beforeLift();
 	const type = `${DRAG_TYPE}-${Math.random().toString(36).slice(2)}`;
 	evt.dataTransfer.setData(type, '');
 	evt.dataTransfer.effectAllowed = 'move';
-	return { view, listEl, type, row: view.editing.track(line), kind, drop: null, marked: null };
+	return { host, type, row: host.track(line), kind, drop: null, marked: null };
 }
 
 function dragOver(drag: MouseDrag, evt: DragEvent): void {
@@ -104,10 +103,10 @@ function aim(drag: MouseDrag, evt: DragEvent): void {
 	if (dragged === null || !over || line === null) return;
 	const { top, height } = over.getBoundingClientRect();
 	const below = evt.clientY > top + height / 2;
-	showDrop(drag, aimDrop(shownRows(drag.listEl), { line: dragged, kind: drag.kind }, { line, below }));
+	showDrop(drag, aimDrop(shownRows(drag.host.rowsEl), { line: dragged, kind: drag.kind }, { line, below }));
 }
 
 function showDrop(drag: MouseDrag, drop: RowDrop | null): void {
-	drag.marked = markDrop(drag.listEl, drag.marked, drop);
+	drag.marked = markDrop(drag.host.rowsEl, drag.marked, drop);
 	drag.drop = drop;
 }
