@@ -26,7 +26,7 @@ only documented Obsidian APIs are used.
   week, Next month and Later.
 - **An item can be starred.**
 - **An empty list says how to add an item,** and Cmd+Enter adds one.
-- **Dragging a heading moves its whole section.**
+- **Dragging a heading moves its whole section,** and an arrow left of a heading collapses it.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -233,6 +233,26 @@ current todo app. Step one's own "Done when" doesn't change.
 - **The edge scrolling and the redraw rule** are step one's for items.
 - **Headings don't drag in a list inside another note (call)** in step two; items do.
 
+### Collapsing a heading (owner)
+
+- **An arrow left of a heading collapses and expands its section,** in the margin as Obsidian's
+  own fold arrows are: Lucide's `chevron-down` while open, `chevron-right` while collapsed
+  **(call)**. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
+  on the iPhone.
+- **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. The
+  iPhone has no hover, so there it always shows. Its accessible name is "Collapse" or "Expand"
+  **(call)**.
+- **Collapsed, the section's rows hide;** the heading stays. The items before the first heading
+  have no heading, so they can't collapse.
+- **It isn't remembered (owner).** Every heading is open each time a list opens, as "Show
+  archived" is off. While the view is open, a collapsed heading stays collapsed through redraws
+  and edits, following its line as a selection does **(call)**. Nothing is written to the file.
+- **Adding into a collapsed section expands it (call):** New item from its heading menu, an item
+  dropped under the heading, or Cmd+Enter with an item in it selected.
+- **A collapsed section drags as any section does.** While Cmd+F filters the list, matches in a
+  collapsed section show, and the section is collapsed again when the filter ends **(call)**.
+- **Not in a list inside another note (call)** in step two.
+
 ### Star (owner: in its list only)
 
 - **"Add star" and "Remove star"** are in the item menu: right-click on the Mac, and the card's ⋯
@@ -273,6 +293,6 @@ These go into step one's "Not in step one" list:
 ## Order (call)
 
 Smallest first, each feature its own group of plan tasks that can be released alone: Turn into
-list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, dragging a heading, When
-on rows and in the card, the Schedule view, then lists inside other notes. No API here is newer than 1.5.7, the
-current `minAppVersion`.
+list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, dragging and collapsing
+headings, When on rows and in the card, the Schedule view, then lists inside other notes. No API
+here is newer than 1.5.7, the current `minAppVersion`.
