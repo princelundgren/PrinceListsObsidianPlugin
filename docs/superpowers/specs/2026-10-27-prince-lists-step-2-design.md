@@ -221,6 +221,8 @@ current todo app. Step one's own "Done when" doesn't change.
 - **The Schedule view** is a view of its own, opened with an "Open schedule" command and a
   calendar ribbon icon **(call)**. It gathers, from every list in the vault, the items with a When
   that are open or done but not yet archived.
+- **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
+  ribbon hidden or doesn't know the command.
 - **Its groups (owner, 2026-10-27):** Today, which includes everything overdue, then Tomorrow,
   Next 7 days and Later. An earlier "Next month", 8 to 31 days ahead, read as the calendar month
   and seemed to leave a gap after the week.
@@ -229,6 +231,9 @@ current todo app. Step one's own "Done when" doesn't change.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day, except
   for today's items in Today.
+- **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
+  its title in a list's title style. A muted line under it says what the page shows and how an item
+  gets a When, for anyone who opens it without knowing.
 - **Ticking works in place.** A repeating item (🔁) shows the same message as in its list instead
   of ticking. A tick is worked out on the text the view last read, so a list changed, renamed or
   deleted since then shows "This list changed elsewhere. Try again." and writes nothing, and so

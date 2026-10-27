@@ -1,5 +1,5 @@
 import { type Component, type Menu, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
-import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
+import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { CollapsedHeadings } from '../core/collapsed';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
@@ -7,6 +7,7 @@ import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { contentStartLine, isListText } from '../obsidian/marker';
+import { openSchedule } from '../obsidian/open-schedule';
 import { openAsMarkdown } from '../obsidian/switch';
 import { buildNewItemButton, newItem } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
@@ -190,6 +191,12 @@ export class PrinceListView extends TextFileView {
 					.onClick(() => this.toggleArchived()),
 			);
 		}
+		menu.addItem((item) =>
+			item
+				.setTitle('Open schedule')
+				.setIcon(SCHEDULE_ICON)
+				.onClick(() => void openSchedule(this.app.workspace)),
+		);
 		menu.addItem((item) =>
 			item
 				.setTitle('Open as Markdown')
