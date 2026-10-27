@@ -170,7 +170,9 @@ current todo app. Step one's own "Done when" doesn't change.
     This follows Obsidian's guideline to prefer the Editor API for the active file. Otherwise it's
     a `vault.process` edit.
   - The note opens as a list once the metadata cache reports the marker for it, not straight after
-    the write.
+    the write. A wait that never sees the marker ends with the next "Turn into list", a failed
+    write, or the note's rename or deletion, and otherwise when the plugin unloads: there's no
+    timer, as everywhere in the plugin **(call)**.
   - **A CRLF note open in an editor is saved with LF line endings,** as Obsidian's editor saves
     any note it changes (observed in 1.14.4). Through `vault.process`, the file keeps CRLF.
 - **Only notes in the vault (call).** A note from outside the vault has no parent folder (observed
