@@ -224,6 +224,11 @@ button.princelists-new-item {
 	box-shadow: var(--shadow-s);
 }
 
+/* The header's archived button while archived items show. */
+.princelists-archived-shown {
+	color: var(--interactive-accent);
+}
+
 @media (hover: hover) {
 	button.princelists-new-item:hover {
 		background-color: var(--interactive-accent-hover);

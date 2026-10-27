@@ -14,8 +14,8 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 - **Headings make sections, and checkboxes are items.** Anything indented under an item is that
   item's notes, and notes can hold any Markdown: links, pictures, bullet lists.
 - **Ticking an item** grays it out where it is. Twenty-four hours later it's archived and hidden,
-  and the eye icon in the pane's header, or "Show archived" in its ⋯ menu, brings archived items
-  back.
+  and the checkbox icon in the pane's header, or "Show archived" in its ⋯ menu, brings archived
+  items back.
 - **It's built for the Mac and the iPhone.** Use the floating "+" to add items. On the Mac,
   right-click for actions and drag items with the mouse. On the iPhone, hold an item for half a
   second and drag it; item actions are in the ⋯ button on an open item, and tapping a heading

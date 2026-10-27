@@ -1,4 +1,4 @@
-import { type Component, type Menu, Notice, Platform, setIcon, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
+import { type Component, type Menu, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
@@ -129,7 +129,7 @@ export class PrinceListView extends TextFileView {
 		enableMouseDrag(this, this.contentEl);
 		if (Platform.isMobile) enableTouchDrag(this);
 		this.newItemButton = buildNewItemButton(this);
-		this.archivedButton = this.addAction('eye', 'Show archived', () => this.toggleArchived());
+		this.archivedButton = this.addAction('square-check-big', 'Show archived', () => this.toggleArchived());
 		this.syncArchivedButton();
 	}
 
@@ -233,12 +233,13 @@ export class PrinceListView extends TextFileView {
 		this.editing.closeListNote();
 	}
 
-	// The header's eye shows only on a list, and says what a click does next.
+	// The header's checkbox shows only on a list, and is lit while archived items show.
 	private syncArchivedButton(): void {
 		const button = this.archivedButton;
 		if (!button) return;
 		button.toggle(isListText(this.text));
-		setIcon(button, this.showArchived ? 'eye-off' : 'eye');
+		button.toggleClass('princelists-archived-shown', this.showArchived);
+		button.setAttribute('aria-pressed', String(this.showArchived));
 		setTooltip(button, this.showArchived ? 'Hide archived' : 'Show archived');
 	}
 
