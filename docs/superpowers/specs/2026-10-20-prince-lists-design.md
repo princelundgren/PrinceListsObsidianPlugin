@@ -36,7 +36,7 @@ and data safety, and owner's advocate. Their findings are folded in.
 - **Ticking an item** grays it out where it is. Twenty-four hours later it is **archived** and
   hidden, and "Show archived" brings archived items back.
 - **Lists open in the list view.** The plain note shows for about 10 ms first, which the owner
-  couldn't see on desktop or mobile.
+  couldn't see on macOS or an iPhone.
 - **A note from outside the vault** with the marker, opened in Obsidian on desktop, is a list too.
 - **On desktop,** you right-click for actions and drag with the mouse.
 - **On mobile,** you tap to open an item and hold-and-move to drag it. Item actions sit in a ⋯
@@ -505,7 +505,7 @@ stays, and the blank line stays with it.
 - **Not the Kanban way:** Kanban, the best-known plugin with its own view for notes, monkey-patches
   Obsidian's internals for this, which is off the table.
 - **The cost is a short flash.** The normal editor shows for about 10 ms before the switch, under
-  one frame at 60 Hz. The owner couldn't see it on desktop or mobile **(owner, 2026-10-21)**
+  one frame at 60 Hz. The owner couldn't see it on macOS or an iPhone **(owner, 2026-10-21)**
   ([spike 1](../notes/2026-10-21-spike-open.md)). Even if it showed, the plugin wouldn't fall back
   to patching.
 - **"Open as Markdown" and "Open as list"** are in the pane's ⋯ menu and are also commands.
@@ -629,7 +629,8 @@ stays, and the blank line stays with it.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane. It stays put while
   the list scrolls, on desktop and mobile. Its accessible name is "New item" **(call)**.
   - **On desktop it sits 32 px higher (owner, 2026-10-27),** clear of Obsidian's status bar, which
-    floats over the bottom right of the window. Mobile has no status bar.
+    floats over the bottom right of the window. Mobile has no status bar (`addStatusBarItem`:
+    "Not available on mobile").
     Obsidian documents no variable for the bar's height, so the lift is fixed on purpose:
     `--size-4-8`, a step of Obsidian's spacing scale, a little more than the 27 to 31 px the bar
     measured in 1.14.5. Measuring the bar would mean reading Obsidian's own DOM. A theme with a
@@ -764,8 +765,8 @@ stays, and the blank line stays with it.
 **Creating a list has three routes (owner):**
 
 - Right-click a folder in the file explorer and choose New list (`workspace.on('file-menu')`). The
-  list is created in that folder. On mobile this is a long-press on the folder, confirmed on a
-  phone in the 1a checks.
+  list is created in that folder. On mobile this is a long-press on the folder, confirmed on an
+  iPhone in the 1a checks; Android isn't checked.
 - The "New list" command. It's in the command palette on desktop and mobile, and you can give
   it a hotkey under Settings → Hotkeys. The plugin sets no default hotkey, because Obsidian's
   plugin guidelines advise against it.
@@ -1064,13 +1065,13 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   the 800 ms wasn't measured. A hold on Android isn't checked.
   - Because holding only ever drags, item rows must not open a menu, and a heading opens its menu
     on a tap. So on mobile, cancel `contextmenu` on rows and headings, in the capture phase.
-  - On mobile, a hold opens no menu and selects no text, and the tap that ends it is swallowed
+  - On an iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
     ([1a checks](../notes/2026-10-22-1a-checks.md)).
   - After a canceled hold, the next click is swallowed, as spike 2 does after a lift: WebKit still
     sends one when the finger lifts. The next `touchstart` clears the flag.
   - Obsidian's own haptic on a hold can't be turned off (no documented API), and it is accepted.
 - **Dragging uses Pointer Events with a hold timer.** Kanban uses 500 ms, canceled if the finger
-  moves more than 5 px first. Spike 2 confirmed both values on mobile, with the rows'
+  moves more than 5 px first. Spike 2 confirmed both values on an iPhone, with the rows'
   `-webkit-user-select: none` and `-webkit-touch-callout: none`: the maintainer keeps 500 ms
   (`docs/superpowers/notes/2026-10-21-spike-touch.md`).
   - Once a row is lifted, a non-passive `touchmove` handler calls `preventDefault` to stop
@@ -1194,10 +1195,10 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Risks to check during the build
 
-Each has a result from 1a's spikes and checks, and 1b's for the `✔` glyph on mobile.
+Each has a result from 1a's spikes and checks, and 1b's for the `✔` glyph on an iPhone.
 
 1. **The flash** when a list opens.
-   - **Result:** about 10 ms, which the owner couldn't see on desktop or mobile.
+   - **Result:** about 10 ms, which the owner couldn't see on macOS or an iPhone.
 2. **Back history:** whether `result.history = false` really keeps the extra entry out.
    - **Result:** it does, in 1.14.4, with one stop after the pane switches to Markdown by itself.
 3. **The mobile gesture:** hold-to-drag, scrolling, and Obsidian's long-press menu all start the
@@ -1207,17 +1208,17 @@ Each has a result from 1a's spikes and checks, and 1b's for the `✔` glyph on m
 4. **Obsidian's parser vs. CommonMark** for the tested cases, in reading view: the title becoming
    a heading, lazy lines, and the odd markers.
    - **Result:** in all ten fixtures, reading view shows as many items as the plugin parses, on
-     desktop and mobile, with notes inside their items. The title that becomes a heading renders as
+     macOS and an iPhone, with notes inside their items. The title that becomes a heading renders as
      CommonMark has it.
 5. **Kanban's patch** interfering with the plugin's switch to the list view.
    - **Result:** with Tasks and Kanban on, lists still open as lists from every route tried, and
      Back still works.
 6. **The `✔` glyph** may show as an emoji on some systems. That's harmless, but check it reads
    well.
-   - **Result:** on desktop it reads as a text check mark in reading view. On mobile (an iPhone) it
-     shows as Apple's gray check mark, which reads well (1b checks).
+   - **Result:** on macOS it reads as a text check mark in reading view. On an iPhone it shows as
+     Apple's gray check mark, which reads well (1b checks).
 7. **Notes outside the vault:** whether opening, rendering, writing and renaming work for them.
-   - **Result:** on desktop, all of them work, and so do links.
+   - **Result:** on macOS, all of them work, and so do links.
 
 ## Left to the builder
 
@@ -1307,13 +1308,13 @@ Checked 2026-10-20.
   - `TextFileView` reloading and merging on outside changes
   - `MarkdownRenderer` needing a Component
   - `file.parent` being `null` for a note outside the vault
-  - the `--view-bottom-spacing` CSS variable, set on mobile and unset on desktop
+  - the `--view-bottom-spacing` CSS variable, set on an iPhone and unset on macOS
   - iOS (1.14.5) showing a drag's types only as `Files` until the drop
   - Obsidian's own `dragover` listener making a drop a move unless the view sets `dropEffect`
   - the browser not counting the plugin's `setRangeText` insert as typing for its undo
 - **Not yet measured on a device:** the 800 ms of the iOS `contextmenu` hold; 1a confirmed the
-  event itself. 1a also confirmed a folder long-press on mobile reaching `file-menu`, and, on
-  desktop, how a note from outside the vault behaves (opening, rendering, writing, renaming, and
+  event itself. 1a also confirmed a folder long-press on an iPhone reaching `file-menu`, and, on
+  macOS, how a note from outside the vault behaves (opening, rendering, writing, renaming, and
   edits from another app).
 - **`eslint-plugin-obsidianmd`** 0.4.2, tested 2026-10-20: `no-unsupported-api` reads the
   project's own `obsidian.d.ts` and flags a member whose `@since` is newer than `minAppVersion`,
