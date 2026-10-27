@@ -43,8 +43,7 @@ current todo app. Step one's own "Done when" doesn't change.
   (owner: the icon, not the hourglass).
 - **Setting a When (call)** on an item that has one replaces its date in place. A new one goes at
   the end of the trailing Tasks fields, before a block ID (` ^id`) and trailing whitespace if the
-  line has them. Clearing it
-  removes the field and the space before it.
+  line has them. Clearing it removes the field and the space before it.
 - **Several scheduled fields on one line (call),** for example after a Sync merge: the view shows
   the earliest, and setting or clearing a When replaces them all.
 - **A day, no time:** Tasks' format has none.
@@ -149,7 +148,8 @@ current todo app. Step one's own "Done when" doesn't change.
   they go when the block does.
 - **A link to no file, or to a note without the marker,** shows a gray line saying so, naming the
   link. So does a block that names the note it's in **(call)**: that note may be open in an editor
-  with typing not yet saved. A note from outside the vault can't be linked, so it can't be shown this way.
+  with typing not yet saved. A note from outside the vault can't be linked, so it can't be shown
+  this way.
 
 ### Turn into list (owner)
 
@@ -186,8 +186,8 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day, except
   for today's items in Today.
 - **Ticking works in place.** A repeating item (🔁) shows the same message as in its list instead
-  of ticking. A click on a row opens its list with that item's card open
-  **(call)**. Rows can't be dragged: their order comes from the days.
+  of ticking. A click on a row opens its list with that item's card open **(call)**. Rows can't
+  be dragged: their order comes from the days.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
   metadata cache's `changed` event and the vault's `rename` and `delete`. Like a list, it runs no
   timer, so a view left open over midnight moves its items when it next gets focus.
@@ -246,5 +246,5 @@ These go into step one's "Not in step one" list:
 ## Order (call)
 
 Smallest first, each feature its own group of plan tasks that can be released alone: Turn into
-list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, When on rows and in the card, the Schedule view, then lists
-inside other notes. No API here is newer than 1.5.7, the current `minAppVersion`.
+list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, When on rows and in the
+card, the Schedule view, then lists inside other notes. No API here is newer than 1.5.7, the current `minAppVersion`.

@@ -412,11 +412,11 @@ stays, and the blank line stays with it.
 ### Checklists (call; the format is reserved now)
 
 - Checkbox lines indented in an item's notes are that item's checklist.
-- In step one they render as disabled checkboxes. Ticking them comes later.
+- In step one they render as disabled checkboxes. Step two makes them tick.
 
 ### Dates (owner: the Tasks emoji format)
 
-- **Reserved now, used later:**
+- **Reserved now, used later** (step two writes ⏳ as an item's When):
   - ⏳ scheduled, the day you plan to do it
   - 📅 due, a deadline
   - 🛫 start
