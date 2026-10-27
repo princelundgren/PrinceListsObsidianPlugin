@@ -1,8 +1,9 @@
-import { MarkdownView, Notice, Plugin, TFolder } from 'obsidian';
+import { MarkdownView, Notice, Plugin, TFile, TFolder } from 'obsidian';
 import { RIBBON_ICON, VIEW_TYPE_LIST } from './constants';
 import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
+import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
 import { PrinceListView } from './view/list-view';
 
 export default class PrinceListsPlugin extends Plugin {
@@ -18,15 +19,33 @@ export default class PrinceListsPlugin extends Plugin {
 		this.addRibbonIcon(RIBBON_ICON, 'New list', () => void this.newListWhereNotesGo());
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu, file) => {
-				if (!(file instanceof TFolder)) return;
-				menu.addItem((item) =>
-					item
-						.setTitle('New list')
-						.setIcon(RIBBON_ICON)
-						.onClick(() => void this.newList(file)),
-				);
+				if (file instanceof TFolder) {
+					menu.addItem((item) =>
+						item
+							.setTitle('New list')
+							.setIcon(RIBBON_ICON)
+							.onClick(() => void this.newList(file)),
+					);
+				} else if (file instanceof TFile && canTurnIntoList(this.app, file)) {
+					menu.addItem((item) =>
+						item
+							.setTitle('Turn into list')
+							.setIcon(RIBBON_ICON)
+							.onClick(() => void turnIntoList(this, file)),
+					);
+				}
 			}),
 		);
+		this.addCommand({
+			id: 'turn-into-list',
+			name: 'Turn into list',
+			checkCallback: (checking) => {
+				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (!view?.file || !canTurnIntoList(this.app, view.file) || isListText(view.getViewData())) return false;
+				if (!checking) void turnIntoList(this, view.file);
+				return true;
+			},
+		});
 
 		// "Open as list" reads getViewData, the editor's text, here and in `file-menu` below. Saves
 		// wait 2 seconds, so the inherited `data` may still hold a frontmatter the user just deleted.
