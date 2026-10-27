@@ -11,7 +11,8 @@ export const NOTES_CHECKBOX_SELECTOR = '.task-list-item-checkbox';
 // each block gets its own child of the view, which the caller removes on re-render or close. Links
 // are handled by handleLinkClick and handleLinkMenu, delegated once on the view.
 export function renderNotes(view: PrinceListView, el: HTMLElement, markdown: string): Component {
-	// They would tick on screen and save nothing.
+	// Notes outside the open card have no checklist, so their boxes stay disabled: they would tick on
+	// screen and save nothing.
 	return renderMarkdown(view, el, markdown, () => false);
 }
 

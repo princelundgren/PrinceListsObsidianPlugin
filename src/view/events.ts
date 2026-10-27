@@ -15,6 +15,7 @@ import {
 	notesInput,
 	openCard,
 } from './card';
+import { checklistClick } from './checklist';
 import { targetOf } from './dom';
 import {
 	beginListTitle,
@@ -33,7 +34,6 @@ import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from '
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
-import { checklistClick } from './checklist';
 import { queueTick } from './tick';
 
 // Delegated listeners on the view's own element, and the picture events' capture listeners on the

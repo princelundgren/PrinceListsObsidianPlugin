@@ -1,9 +1,9 @@
 import { Parser } from 'commonmark';
-import { getItemNotes } from './edit-items';
+import { getItemNotes, notesStartLine } from './edit-items';
 import { joinItemLine, parseItemLine } from './item-line';
 import type { PlannedLineEdit } from './list-actions';
 import { joinLines, spliceLines, splitLines, type Line } from './lines';
-import { isBlank, itemAt, parseList, type ItemBlock } from './parse';
+import { itemAt, parseList, type ItemBlock } from './parse';
 
 export interface ChecklistLine {
 	line: number;
@@ -13,8 +13,7 @@ export interface ChecklistLine {
 // The notes as CommonMark reads them, so a fenced line isn't a box. A list item in a blockquote or
 // callout starts with `>`, which parseItemLine doesn't read, so it isn't counted either.
 export function checklistOf(lines: readonly Line[], item: ItemBlock): ChecklistLine[] {
-	let notesStart = item.titleLine + 1;
-	while (notesStart < item.endLine && isBlank((lines[notesStart] as Line).text)) notesStart++;
+	const notesStart = notesStartLine(lines, item);
 	const notes = getItemNotes(lines, item);
 	if (notes === '') return [];
 	const checklist: ChecklistLine[] = [];
@@ -34,8 +33,8 @@ export function toggleChecklistLine(text: string): string {
 	return joinItemLine({ ...parts, status: parts.status === ' ' ? 'x' : ' ' });
 }
 
-// The box has already flipped by the time its click is handled, so the file decides which way the
-// line goes. `lineText` is the line as it was at the click: if it reads differently now, the box no
+// The browser flips a box before its click is handled, and the view cancels that, so the box's state
+// says nothing: the file decides which way the line goes. `lineText` is the line as it was at the click: if it reads differently now, the box no
 // longer stands for it.
 export function planChecklistTick(
 	text: string,
