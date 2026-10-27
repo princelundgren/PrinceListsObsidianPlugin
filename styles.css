@@ -339,9 +339,12 @@ textarea.princelists-heading-field {
 	gap: var(--size-4-1);
 }
 
-/* The date input lies over the button, invisible, so a click or tap opens its picker. */
+/* The date input lies over the button, invisible, so a click or tap opens its picker. Safari on iOS
+   keeps a date input at least its native width, so the picker clips it to the button's box and it
+   can't catch taps meant for the star beside it. */
 .princelists-when-picker {
 	position: relative;
+	overflow: hidden;
 }
 
 .princelists-when-button {
@@ -371,16 +374,6 @@ button.princelists-card-star.is-starred svg {
 	padding: 0;
 	opacity: 0;
 	cursor: pointer;
-}
-
-button.princelists-when-clear {
-	height: auto;
-	padding: 0 var(--size-2-1);
-	background: none;
-	border: none;
-	box-shadow: none;
-	color: var(--text-faint);
-	--icon-size: var(--icon-xs);
 }
 
 /* The hint sits centered in the space below the list note. */

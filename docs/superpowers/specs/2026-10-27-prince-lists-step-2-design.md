@@ -206,9 +206,11 @@ current todo app. Step one's own "Done when" doesn't change.
 
 - **Setting a When (owner, 2026-10-27):** the card's top right has a calendar icon, before the
   star and the ⋯. Once the item has a When, the day takes the icon's place, after its own calendar
-  icon. Clicking either opens the platform's date picker through an `<input type="date">`;
-  a clear button next to it removes the When **(call)**. Obsidian has no date picker API, and the
-  HTML input gives the iPhone's own picker.
+  icon. Clicking either opens the platform's date picker through an `<input type="date">`.
+  Obsidian has no date picker API, and the HTML input gives each platform's own picker.
+  - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
+    button beside the day: it crowded the card's top right, and every platform's picker can
+    already clear the day.
 - **On a row (call):** the calendar icon and a short day at the row's end: "Today", "Tomorrow", a
   weekday for the rest of the next seven days, or else the date in the locale's short form through
   Obsidian's `moment`, which follows the language set in Obsidian. A past day shows its date.
