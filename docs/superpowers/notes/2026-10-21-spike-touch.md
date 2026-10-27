@@ -17,7 +17,7 @@ built" therefore says enough to rebuild the gesture in 1b without it.
 
 The list view's placeholder showed 40 plain-text rows, "Row 1" to "Row 40". A tap on a row
 showed a notice naming it. A drop reordered the rows in memory only and wrote nothing to the file.
-The design's "Touch on the iPhone" gives the approach, and Kanban's `DragManager.ts` gave ideas,
+The design's "Touch on mobile" gives the approach, and Kanban's `DragManager.ts` gave ideas,
 with no code copied.
 
 ### The listeners
@@ -150,4 +150,4 @@ midpoints.
   and sit in sections around hidden archived rows (design, "Selecting and adding"). None of that
   was tried.
 - **A long-press on a folder in the iPhone file explorer reaching `file-menu`** (design, "Touch on
-  the iPhone") wasn't part of this spike, and it's still unconfirmed.
+  mobile") wasn't part of this spike, and it's still unconfirmed.

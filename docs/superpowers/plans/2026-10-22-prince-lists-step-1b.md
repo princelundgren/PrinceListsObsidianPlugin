@@ -81,7 +81,7 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
 
 **Files:**
 - Modify: `src/view/list-view.ts`, `src/view/redraw.ts`, `src/view/add-button.ts` (its comment),
-  `styles.css`, the design ("Touch on the iPhone")
+  `styles.css`, the design ("Touch on mobile")
 
 **Interfaces:**
 - Produces: `PrinceListView.listScrollEl: HTMLElement`, a `div` with the class `princelists-scroll`
@@ -119,7 +119,7 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
      builds.
   7. In the Mac's developer tools, `contentEl`'s computed `position` is `relative`, its
      `scrollHeight` equals its `clientHeight`, and so does the scroller's `offsetHeight`.
-- [ ] **Step 5: Update the design.** In "Touch on the iPhone", say the list scrolls in an element of
+- [ ] **Step 5: Update the design.** In "Touch on mobile", say the list scrolls in an element of
   its own, so nothing relies on Obsidian's undocumented `overflow` on `.view-content`.
 - [ ] **Step 6: Commit** with the message "Give the list a scrolling element of its own".
 
@@ -129,7 +129,7 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
 - Create: `src/core/touch-drag.ts`, `tests/core/touch-drag.test.ts`, `src/view/drag-touch.ts`,
   `src/view/move.ts`
 - Modify: `src/view/drag-mouse.ts` (what both drags share moves to `move.ts`),
-  `src/view/list-view.ts`, `styles.css`, the design ("Dragging", "Touch on the iPhone")
+  `src/view/list-view.ts`, `styles.css`, the design ("Dragging", "Touch on mobile")
 
 **Interfaces:**
 - Consumes: `dropAt`, `ShownRow` and `Drop` (`src/core/drop.ts`); `ItemPlace` and `planItemMove`;
@@ -162,7 +162,7 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
   makes `position: relative` for the "+", styled `position: absolute; left: 0; right: 0;
   bottom: var(--view-bottom-spacing, 0px)`. Its top is where the list stops being visible: on the
   iPhone the list runs under the floating navbar, whose height Obsidian 1.14.4 puts in
-  `--view-bottom-spacing`, as the "+" relies on (design, "Touch on the iPhone").
+  `--view-bottom-spacing`, as the "+" relies on (design, "Touch on mobile").
 
 - [ ] **Step 1: Write the failing tests** in `tests/core/touch-drag.test.ts`, with
   `boxes = [{line: 0, top: 0, bottom: 40}, {line: 1, top: 40, bottom: 80}, {line: 3, top: 90, bottom: 130}]`:
@@ -242,7 +242,7 @@ of its own before Task 2 scrolls it (spike notes, "Styles").
   speed. Change the constants as the owner asks, and record the values in the pull request.
 - [ ] **Step 8: Update the design.** Under "Dragging", iPhone: the drop line works as on the Mac, a
   hold anywhere on a row drags it, the list scrolls at its edges, and a redraw while dragging ends
-  the drag, each **(call)**. Under "Touch on the iPhone": the final constants, and the edge scroll
+  the drag, each **(call)**. Under "Touch on mobile": the final constants, and the edge scroll
   as a second user of the undocumented `--view-bottom-spacing`, next to the "+", in the line on what
   happens if Obsidian drops it.
 - [ ] **Step 9: Commit** with the message "Drag items on the iPhone".

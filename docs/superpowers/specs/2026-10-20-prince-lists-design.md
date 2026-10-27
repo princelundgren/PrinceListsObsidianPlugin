@@ -1178,8 +1178,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 - **Manual testing uses a test vault on desktop and mobile,** so far macOS and an iPhone. Windows,
   Linux, Android and the iPad aren't checked yet.
 - **Many manual checks run scripted:** through Obsidian's CLI on desktop, and through the mobile
-  browser engine's web inspector (Safari's, for the iPhone), with synthetic touch. The owner checks by hand what needs a finger or
-  an eye, such as holds, scrolling, the keyboard and the flash.
+  browser engine's web inspector (Safari's, for the iPhone), with synthetic touch. The owner checks
+  by hand what needs a finger or an eye, such as holds, scrolling, the keyboard and the flash.
 - **Spikes come first, and each one stops for the owner:**
   1. The flash when a list opens.
   2. Hold-to-drag on mobile: it must not break scrolling or trigger Obsidian's long-press

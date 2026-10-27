@@ -383,7 +383,7 @@ test("lineIndexAt maps a character offset to its line", () => {
 - Create, in a pull request of its own: `docs/superpowers/notes/<date>-spike-touch.md`.
 
 - [ ] **Step 1: Build 40 dummy rows.** On a branch, make the placeholder view render 40 rows. Use
-  the Pointer Events approach in the spec's Implementation notes, "Touch on the iPhone":
+  the Pointer Events approach in the spec's Implementation notes, "Touch on mobile":
   - a 500 ms hold timer, canceled if the finger moves more than 5 px first
   - once a drag is armed, a non-passive `touchmove` handler that calls `preventDefault`
   - a capture-phase `contextmenu` handler on the rows that cancels Obsidian's synthesized
@@ -1208,7 +1208,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
     link in an open card shows only Obsidian's link menu (Task 9), not the item menu: the row
     handler returns early when the event's target is inside `a.internal-link`.
   - **No long-press menu on the iPhone:** Obsidian fires `contextmenu` after an 800 ms hold (not
-    yet confirmed on a device; spec, "Touch on the iPhone"), so on the iPhone `contextmenu` on
+    yet confirmed on a device; spec, "Touch on mobile"), so on the iPhone `contextmenu` on
     rows and headings is canceled in the capture phase, as Task 3's notes record. The click that
     ends the hold is swallowed (a `swallowNextClick` flag on the view, cleared on the next `touchstart`).
   - **Tapping a heading on the iPhone** (`Platform.isMobile`) opens `headingMenu` through
@@ -1261,7 +1261,7 @@ every file stays under about 300 lines and each pull request stays reviewable.
       place of its heading, by its tracked line, or where it opened once that line is gone.
     - **The "+" sits on the view's `containerEl`,** which the plugin's own class makes
       `position: relative`. It keeps above the iPhone's floating navbar with Obsidian's
-      undocumented `--view-bottom-spacing` (design, "Touch on the iPhone"). Space under the last
+      undocumented `--view-bottom-spacing` (design, "Touch on mobile"). Space under the last
       row lets it scroll clear of the "+".
     - **Rows and headings can't be selected or show iOS's callout** (`user-select: none`,
       `-webkit-touch-callout: none`), as in spike 2, so a hold opens nothing. The card, the
