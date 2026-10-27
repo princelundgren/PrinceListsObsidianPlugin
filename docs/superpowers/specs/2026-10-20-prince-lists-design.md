@@ -722,6 +722,8 @@ stays, and the blank line stays with it.
     checkboxes, so it reads as done items; an eye was tried first and read as unrelated to them.
     It toggles the same setting as the menu item, is in the accent color while archived items
     show, and its tooltip then says "Hide archived". It shows only on a list.
+  - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
+    it stands apart from an item ticked in the last day, whose checkbox keeps the accent color.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.

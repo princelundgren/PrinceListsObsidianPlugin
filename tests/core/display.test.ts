@@ -8,12 +8,13 @@ const sectionsOf = (text: string, now: Date, showArchived: boolean) => {
 	return visibleSections(lines, model, now, showArchived);
 };
 
-const row = (titleLine: number, title: string, done = false, label = title) => ({
+const row = (titleLine: number, title: string, done = false, label = title, archived = false) => ({
 	kind: 'item',
 	titleLine,
 	title,
 	label,
 	done,
+	archived,
 });
 const untouched = (start: number, text: string) => ({ kind: 'untouched', start, text });
 
@@ -37,7 +38,7 @@ describe('visibleSections', () => {
 			{ heading: null, rows: [] },
 			{ heading: { line: 0, text: 'H' }, rows: [row(1, 'a'), row(3, 'c', true)] },
 		]);
-		expect(sectionsOf(text, now, true)[1]?.rows).toEqual([row(1, 'a'), row(2, 'b', true), row(3, 'c', true)]);
+		expect(sectionsOf(text, now, true)[1]?.rows).toEqual([row(1, 'a'), row(2, 'b', true, 'b', true), row(3, 'c', true)]);
 	});
 
 	test.each([
@@ -47,7 +48,7 @@ describe('visibleSections', () => {
 	])('hides %s at once', (_, text) => {
 		const now = new Date(2026, 9, 21, 10, 0);
 		expect(sectionsOf(text, now, false)[0]?.rows).toEqual([]);
-		expect(sectionsOf(text, now, true)[0]?.rows).toEqual([row(0, 'a', true)]);
+		expect(sectionsOf(text, now, true)[0]?.rows).toEqual([row(0, 'a', true, 'a', true)]);
 	});
 
 	test('keeps a heading whose items are all hidden', () => {
@@ -99,8 +100,15 @@ describe('visibleSections, content the plugin leaves alone', () => {
 
 describe('itemRow', () => {
 	test('reads the row an item line shows, as the view does after its own tick', () => {
-		const ticked = tickLine('- [ ] a 📅 2026-10-30', new Date(2026, 9, 21, 10, 0));
-		expect(itemRow(ticked, 4)).toEqual(row(4, 'a', true));
+		const now = new Date(2026, 9, 21, 10, 0);
+		const ticked = tickLine('- [ ] a 📅 2026-10-30', now);
+		expect(itemRow(ticked, 4, now)).toEqual(row(4, 'a', true));
+	});
+
+	test('marks a done item archived 24 hours after its tick', () => {
+		const ticked = tickLine('- [ ] a', new Date(2026, 9, 21, 10, 0));
+		expect(itemRow(ticked, 0, new Date(2026, 9, 22, 9, 59)).archived).toBe(false);
+		expect(itemRow(ticked, 0, new Date(2026, 9, 22, 10, 0)).archived).toBe(true);
 	});
 
 	test.each([
@@ -108,7 +116,8 @@ describe('itemRow', () => {
 		['only a tag and a block ID', '- [x] #shop ^abc1', '#shop ^abc1'],
 		['nothing at all', '- [ ] ', ''],
 	])('labels an item with an empty title by the rest of its line: %s', (_, text, label) => {
-		expect(itemRow(text, 0)).toEqual(row(0, '', text.startsWith('- [x]'), label));
+		const done = text.startsWith('- [x]');
+		expect(itemRow(text, 0, new Date(2026, 9, 21))).toEqual(row(0, '', done, label, done));
 	});
 });
 

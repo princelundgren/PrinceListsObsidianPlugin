@@ -120,13 +120,14 @@ export function buildRow(view: PrinceListView, row: ItemRow, blocks: Map<HTMLEle
 	rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox', attr: { 'aria-label': row.label } });
 	const title = rowEl.createDiv({ cls: 'princelists-item-title' });
 	record(blocks, rowEl, renderInline(view, title, row.title));
-	showDone(rowEl, row.done);
+	showDone(rowEl, row);
 	return rowEl;
 }
 
 // Also how the view shows its own tick: in place, so focus and the scroll position stay.
-export function showDone(rowEl: HTMLElement, done: boolean): void {
+export function showDone(rowEl: HTMLElement, { done, archived }: ItemRow): void {
 	rowEl.toggleClass('is-done', done);
+	rowEl.toggleClass('is-archived', archived);
 	(rowEl.querySelector(`.${CHECKBOX_CLASS}`) as HTMLInputElement).checked = done;
 }
 

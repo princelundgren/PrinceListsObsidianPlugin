@@ -74,7 +74,7 @@ export function closeCard(view: PrinceListView): void {
 		return;
 	}
 	const row = rowAt(view, line);
-	if (row && isShown(row, view.lines()[row.titleLine]?.text ?? '', new Date(), view.showArchived)) {
+	if (row && isShown(row, view.showArchived)) {
 		card.el.replaceWith(buildRow(view, row, view.blocks));
 	} else {
 		card.el.remove();
@@ -115,7 +115,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	if (row) {
 		setLine(card.el, row.titleLine);
 		box?.setAttr('aria-label', row.label);
-		showDone(card.el, row.done);
+		showDone(card.el, row);
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	const focused = card.el.doc.activeElement;
@@ -231,7 +231,7 @@ function createCardElement(): HTMLElement {
 
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {
 	const text = line === null ? undefined : view.lines()[line]?.text;
-	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line) : null;
+	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line, new Date()) : null;
 }
 
 function isEmptyAt(view: PrinceListView, line: number): boolean {
