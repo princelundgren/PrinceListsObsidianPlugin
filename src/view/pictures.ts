@@ -32,6 +32,8 @@ function onPaste(view: PrinceListView, evt: ClipboardEvent): void {
 	const card = view.card;
 	const editor = Array.from(view.contentEl.querySelectorAll('textarea')).find((field) => field === evt.target);
 	if (!card || card.lostAt !== null || !editor?.hasClass(NOTES_EDITOR_CLASS) || !card.el.contains(editor)) return;
+	// Spreadsheets and word processors copy a picture of their text along with it; the text wins.
+	if (evt.clipboardData?.getData('text/plain')) return;
 	const pictures = Array.from(evt.clipboardData?.files ?? []).filter((file) => file.type.startsWith('image/'));
 	if (pictures.length === 0) return;
 	evt.preventDefault();

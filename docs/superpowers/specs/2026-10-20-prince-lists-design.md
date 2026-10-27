@@ -569,6 +569,10 @@ stays, and the blank line stays with it.
     `![[name]]` could show the wrong picture when two files share a name.
   - **Pasting (call):** a picture pasted into an open notes editor is saved and linked; text
     pastes as text. A pasted picture in a card's title does nothing.
+  - **Text wins (owner, 2026-10-27):** a paste that holds plain text pastes as text, even when it
+    holds a picture too. Numbers, Excel, Pages and Word copy a picture of the text along with it.
+    A card's notes are plain text, and the text is what was copied; Obsidian's own editor pastes a
+    spreadsheet's text, too. Only a paste with no plain text adds its pictures.
   - **Dropping (call):** a picture file dropped on an open card is saved and linked. Any other drag
     leaves the card alone. Where the platform hides a drag's file kinds until the drop, as iOS does,
     the card accepts any file drag and checks each file when it lands **(owner, 2026-10-27)**.
