@@ -18,10 +18,8 @@ textarea.princelists-field {
 	overflow: hidden;
 }
 
-/* The titles read as titles even while they have focus, and so does a heading being renamed. */
-textarea.princelists-title:focus,
-textarea.princelists-card-title:focus,
-textarea.princelists-heading-field:focus {
+/* A field reads as its text even while it has focus, with no ring around it. */
+textarea.princelists-field:focus {
 	box-shadow: none;
 }
 
@@ -204,8 +202,14 @@ textarea.princelists-card-notes-editor {
 	position: absolute;
 	inset: 0;
 	overflow-y: auto;
-	padding: inherit;
+	padding: var(--file-margins);
 	box-sizing: border-box;
+}
+
+/* Always at the readable line width: no documented API reads Obsidian's setting for it. */
+.princelists-sizer {
+	max-width: var(--file-line-width);
+	margin: 0 auto;
 }
 
 /* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on the iPhone". */

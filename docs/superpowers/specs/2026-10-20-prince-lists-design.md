@@ -526,6 +526,8 @@ stays, and the blank line stays with it.
     do in any note.
   - **Empty notes show a gray "Notes" three lines tall (owner, 2026-10-27),** and the notes field
     is at least that tall while it's being typed in, so it's easy to tap.
+  - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
+    typed in reads as its text, as a title does.
   - Links in a card can be clicked.
   - On the Mac, right-clicking an internal link in a card shows Obsidian's own link menu
     **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**.
@@ -877,6 +879,10 @@ From here on the document is for the builder.
 - **Styling (call):** use only Obsidian's CSS variables and its built-in Lucide icons (`setIcon`),
   so the view follows light and dark mode and any theme. Obsidian's plugin guidelines warn that
   hard-coded styling stops themes and snippets from changing a plugin's look.
+- **Accessible names (call):** only the icon buttons carry `aria-label`, since Obsidian shows every
+  `aria-label` as a hover tooltip. A text field takes its name from a gray placeholder ("Title",
+  "Heading", "Notes"), seen only while it's empty, and a checkbox from a hidden copy of its item's
+  title.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
   `@since` tag in `obsidian.d.ts`. Every device must run at least that version, the iPhone
   included. For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts").
@@ -1046,7 +1052,12 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `file-explorer-context-menu`, so it offers "New list" (confirmed on the device in the 1a
   checks).
 - **The list scrolls in an element of its own,** inside the view's `contentEl`, so nothing relies on
-  Obsidian's undocumented `overflow` on `.view-content`. It fills `contentEl` and takes its padding.
+  Obsidian's undocumented `overflow` on `.view-content`. It fills `contentEl`.
+- **The list is laid out as a Markdown view is (owner, 2026-10-27):** the scrolling element takes
+  the documented `--file-margins` as its padding, and what it holds sits centered at the documented
+  `--file-line-width`, so titles and rows line up with a note's. That's always the readable line
+  width: no documented API reads Obsidian's "Readable line length" setting, so with it off a
+  note fills the pane while a list doesn't.
 - **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.

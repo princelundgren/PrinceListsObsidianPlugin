@@ -30,7 +30,7 @@ export interface ListNoteSession {
 export function buildListTitle(view: PrinceListView, parent: HTMLElement): HTMLTextAreaElement {
 	const field = parent.createEl('textarea', {
 		cls: [FIELD_CLASS, TITLE_CLASS],
-		attr: { rows: 1, spellcheck: 'false', 'aria-label': 'List title' },
+		attr: { rows: 1, spellcheck: 'false', placeholder: 'List title' },
 	});
 	field.value = view.file?.basename ?? '';
 	return field;
@@ -118,7 +118,7 @@ export function openListNote(view: PrinceListView): void {
 	area.empty();
 	const editor = area.createEl('textarea', {
 		cls: [FIELD_CLASS, NOTE_EDITOR_CLASS],
-		attr: { placeholder: 'Notes', 'aria-label': 'Notes' },
+		attr: { placeholder: 'Notes' },
 	});
 	editor.value = view.editing.openListNote();
 	const warnings = {
