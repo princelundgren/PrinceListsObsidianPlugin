@@ -43,8 +43,10 @@ export function addHiddenLabel(control: HTMLElement, text: string): void {
 }
 
 // Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of
-// this window's classes.
+// this window's classes. A click on an icon lands on its svg, so that counts as the HTML element
+// holding it.
 export function targetOf(evt: UIEvent): HTMLElement | null {
-	const node = evt.targetNode;
-	return node?.instanceOf(HTMLElement) ? node : null;
+	let node = evt.targetNode;
+	while (node && !node.instanceOf(HTMLElement)) node = node.parentNode;
+	return node;
 }
