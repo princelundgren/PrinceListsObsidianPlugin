@@ -2,10 +2,10 @@
 
 Todo lists for Obsidian, kept as plain Markdown notes.
 
-> **Work in progress.** Step one's two parts are built and checked on the Mac and the iPhone: 1a
-> in `0.1.0`, and 1b, which adds dragging on the iPhone, pictures in cards and Cmd+Z undo, in
-> `0.2.0`. `0.3.0` adds small fixes from first use with a real list. A two-week trial with that
-> list comes next. You can follow along in the
+> **Work in progress.** Step one's two parts are built and checked on macOS and an iPhone: 1a in
+> `0.1.0`, and 1b, which adds dragging by touch, pictures in cards and Cmd+Z undo (Ctrl+Z on
+> Windows and Linux), in `0.2.0`. `0.3.0` adds small fixes from first use with a real list. A
+> two-week trial with that list comes next. You can follow along in the
 > [design](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and the pull requests.
 
 ## What it does
@@ -17,14 +17,15 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 - **Ticking an item** grays it out where it is. Twenty-four hours later it's archived and hidden,
   and the checkbox icon in the pane's header, or "Show archived" in its ⋯ menu, brings archived
   items back.
-- **It's built for the Mac and the iPhone.** Use the floating "+" to add items. On the Mac,
-  right-click for actions and drag items with the mouse. On the iPhone, hold an item for half a
+- **It's built for desktop and mobile.** Use the floating "+" to add items. On desktop,
+  right-click for actions and drag items with the mouse. On mobile, hold an item for half a
   second and drag it; item actions are in the ⋯ button on an open item, and tapping a heading
-  opens its menu. Other devices aren't tested.
+  opens its menu. It has been checked on macOS and an iPhone so far, not yet on Windows, Linux,
+  Android or an iPad.
 - **Pictures:** paste or drop one into an open item's notes. It's saved where Obsidian saves
   attachments, and the notes link to it.
-- **Cmd+Z and Cmd+Shift+Z** undo and redo the list's own edits on the Mac. After a delete, an Undo
-  button brings the item back on any device.
+- **Cmd+Z and Cmd+Shift+Z** (Ctrl+Z and Ctrl+Shift+Z on Windows and Linux) undo and redo the
+  list's own edits on desktop. After a delete, an Undo button brings the item back on any device.
 
 ## Installing
 
@@ -36,8 +37,8 @@ PrinceLists isn't in Obsidian's community plugins yet, so it's installed by hand
 3. In Obsidian, open Settings → Community plugins, turn on community plugins if Restricted mode is
    on, and enable PrinceLists under Installed plugins.
 
-To get it on the iPhone through Obsidian Sync, turn on Sync's "Active community plugin list" and
-"Installed community plugin list".
+To get it on your other devices through Obsidian Sync, turn on Sync's "Active community plugin
+list" and "Installed community plugin list".
 
 ## How a list is stored
 
@@ -76,10 +77,10 @@ conflict copies show up as extra lists.
 
 ## Privacy
 
-PrinceLists works only on notes you open in Obsidian: in your vault, or on the Mac a note opened
-from outside it. It makes no network requests of its own, collects no data, and needs no account.
-A list's notes are rendered by Obsidian, so a picture from the web in them loads as it does in any
-note.
+PrinceLists works only on notes you open in Obsidian: in your vault, or on desktop a note opened
+from outside it (checked on macOS). It makes no network requests of its own, collects no data, and
+needs no account. A list's notes are rendered by Obsidian, so a picture from the web in them loads
+as it does in any note.
 
 ## Contributing
 

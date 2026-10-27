@@ -8,7 +8,7 @@
 
 ## How was this tested?
 
-<!-- Each command you ran and its result, the manual checks you did (Mac, iPhone), and what you didn't test. -->
+<!-- Each command you ran and its result, the manual checks you did and on which platforms, and what you didn't test. -->
 
 ## Steps to reproduce
 

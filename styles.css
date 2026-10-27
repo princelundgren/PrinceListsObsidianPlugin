@@ -42,7 +42,7 @@ textarea.princelists-title {
 	white-space: pre-wrap;
 }
 
-/* A long URL wraps instead of widening the pane on the iPhone. */
+/* A long URL wraps instead of widening the pane on mobile. */
 .princelists-list-note,
 .princelists-untouched,
 .princelists-heading,
@@ -101,7 +101,7 @@ textarea.princelists-list-note-editor {
 }
 
 /* A hold on a row or heading selects nothing and shows no callout, as in spike 2 (spec, "Touch on
-   the iPhone"). The open card is a row too, and its text stays selectable. */
+   mobile"). The open card is a row too, and its text stays selectable. */
 .princelists-item:not(.princelists-card),
 .princelists-heading {
 	-webkit-user-select: none;
@@ -147,7 +147,7 @@ textarea.princelists-list-note-editor {
 }
 
 /* The open card: raised above the list, in place of its row (spec, "Layout"). Its margins stay inside
-   the pane, so the iPhone gets no sideways scrolling. */
+   the pane, so mobile gets no sideways scrolling. */
 .princelists-item.princelists-card {
 	margin: var(--size-4-2) 0;
 	padding: var(--size-4-2);
@@ -212,7 +212,7 @@ textarea.princelists-card-notes-editor {
 	margin: 0 auto;
 }
 
-/* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on the iPhone". */
+/* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on mobile". */
 .princelists-view {
 	position: relative;
 }
@@ -223,7 +223,7 @@ textarea.princelists-card-notes-editor {
 	--princelists-status-bar-room: var(--size-4-8);
 }
 
-/* Its top is where the list stops being visible (spec, "Touch on the iPhone"). */
+/* Its top is where the list stops being visible (spec, "Touch on mobile"). */
 .princelists-visible-bottom {
 	position: absolute;
 	left: 0;

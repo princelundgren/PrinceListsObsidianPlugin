@@ -37,7 +37,7 @@ export interface Card {
 }
 
 // Opens the item at `titleLine` in place of its row, closing any open card first. The cursor goes in
-// the title only when `focusTitle` is set, so a tap on a row doesn't open the iPhone keyboard; the
+// the title only when `focusTitle` is set, so a tap on a row doesn't open the on-screen keyboard; the
 // card itself takes focus otherwise, so Escape reaches it. A card opened on an item its own insert
 // created passes `inserted`.
 export function openCard(view: PrinceListView, titleLine: number, focusTitle = false, inserted?: InsertedItem): void {

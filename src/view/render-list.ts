@@ -18,7 +18,7 @@ export const OPEN_AS_MARKDOWN_CLASS = 'princelists-open-as-markdown';
 // A row's or heading's first line. The plugin's own name: Markdown that Obsidian renders carries its
 // own `data-line` attributes, which the view must not read or shift.
 export const LINE_ATTR = 'data-princelists-line';
-// Rows drag with the mouse on desktop only (enableMouseDrag). On the iPhone, a hold on a row is kept
+// Rows drag with the mouse on desktop only (enableMouseDrag). On mobile, a hold on a row is kept
 // for the touch drag (1b).
 export const ROWS_DRAG = Platform.isDesktop;
 

@@ -75,7 +75,7 @@ export function handleLinkClick(app: App, sourcePath: string, evt: MouseEvent, t
 	return true;
 }
 
-// For a host's contextmenu listener, on the Mac only: the iPhone has no right-click, and the plugin
+// For a host's contextmenu listener, on desktop only: mobile has no right-click, and the plugin
 // opens no menu on a long-press (spec, "Layout"). True when the right-click was on an internal link,
 // which then shows Obsidian's link menu and no other. No page previews: they wait until Obsidian
 // documents the `hover-link` event's payload (spec, "Not in step one").

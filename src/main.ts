@@ -70,7 +70,7 @@ export default class PrinceListsPlugin extends Plugin {
 				return true;
 			},
 		});
-		// On the iPhone, where Cmd+F needs a keyboard.
+		// On mobile, where Cmd+F needs a keyboard.
 		this.addCommand({
 			id: 'find-in-list',
 			name: 'Find in list',

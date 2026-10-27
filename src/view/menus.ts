@@ -9,7 +9,7 @@ import type { PrinceListView } from './list-view';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE } from './write';
 
-// The item actions, from a right-click on the Mac and the card's ⋯ (spec, "Item actions").
+// The item actions, from a right-click on desktop and the card's ⋯ (spec, "Item actions").
 export function itemMenu(view: PrinceListView, item: ItemBlock, menu: Menu): void {
 	const anchor = trackWhileShown(view, item.titleLine, menu);
 	menu.addItem((entry) =>
@@ -33,7 +33,7 @@ export function itemMenu(view: PrinceListView, item: ItemBlock, menu: Menu): voi
 	);
 }
 
-// The heading actions, from a right-click on the Mac and a tap on the iPhone.
+// The heading actions, from a right-click on desktop and a tap on mobile.
 export function headingMenu(view: PrinceListView, section: Section, menu: Menu): void {
 	if (section.headingLine === null) return;
 	const anchor = trackWhileShown(view, section.headingLine, menu);
@@ -64,7 +64,7 @@ export function headingMenu(view: PrinceListView, section: Section, menu: Menu):
 	);
 }
 
-// A right-click on a row or a heading, on the Mac. A field keeps the menu it has of its own.
+// A right-click on a row or a heading, on desktop. A field keeps the menu it has of its own.
 export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
 	if (target.closest('textarea')) return;
 	const menu = menuAt(view, target);
@@ -74,7 +74,7 @@ export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: H
 }
 
 // Obsidian makes a contextmenu on the iPhone after a still hold, and holding a row or a heading opens no
-// menu (spec, "Touch on the iPhone"). The view's listener cancels it in the capture phase. WebKit
+// menu (spec, "Touch on mobile"). The view's listener cancels it in the capture phase. WebKit
 // still sends a click when the finger lifts, which the view swallows.
 export function cancelHoldMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
 	if (target.closest('textarea') || !target.closest(`.${ITEM_CLASS}, .${HEADING_CLASS}`)) return;
@@ -83,7 +83,7 @@ export function cancelHoldMenu(view: PrinceListView, evt: MouseEvent, target: HT
 	view.swallowNextClick = true;
 }
 
-// A tap on a heading on the iPhone. True when it opened the heading's menu.
+// A tap on a heading on mobile. True when it opened the heading's menu.
 export function showHeadingMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
 	const heading = target.closest<HTMLElement>(`.${HEADING_CLASS}`);
 	const menu = heading ? menuAt(view, heading) : null;
@@ -124,7 +124,7 @@ function newItemBelow(view: PrinceListView, line: number): void {
 	else addItem(view, { after: line });
 }
 
-// The menu's line follows the view's edits while it shows: on the iPhone, the tap that opened it also
+// The menu's line follows the view's edits while it shows: on mobile, the tap that opened it also
 // closed the card, which can remove an empty item above it meanwhile.
 function trackWhileShown(view: PrinceListView, line: number, menu: Menu): TrackedLine {
 	const anchor = view.editing.track(line);

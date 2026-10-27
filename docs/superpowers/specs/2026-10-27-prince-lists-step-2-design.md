@@ -15,6 +15,8 @@ the designer did, and a builder may revisit it. Everything step one decided stil
 included: an edit replaces only the lines it concerns, nothing is written in the background, and
 only documented Obsidian APIs are used.
 
+**Keys:** Cmd in this design means Obsidian's `Mod` key, which is Ctrl on Windows and Linux.
+
 ## At a glance
 
 - **Checklists** in an item's notes can be ticked in its card.
@@ -109,7 +111,7 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Cmd+F, while a list has focus, opens a filter field** at the top of the list, below the list
   note **(call)**. It's registered on the view's own `scope`, as Cmd+Z is, so it applies only
   while the list has focus and isn't a default hotkey. Cmd+F in a Markdown note is untouched.
-- **A "Find in list" command** opens the same field, for the iPhone and for anyone who wants
+- **A "Find in list" command** opens the same field, for mobile and for anyone who wants
   another hotkey. It has no default hotkey **(call)**.
 - **As you type, items whose title or notes don't contain the text hide (call).** The match ignores
   case and compares the text as written, Markdown included, with no Unicode normalization.
@@ -151,13 +153,13 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Adding:** a "New item" button below the rows adds an item where "+" puts one with nothing
   selected, as the list's first item, and opens its title field **(call)**. Shift+Enter adds the
   next one. Leaving a new item with an empty title removes it, as in the list view.
-- **Deleting (call):** a trash button shows at the end of the title field while it's open, on the
-  Mac and the iPhone, since the iPhone has no long-press menu. On the Mac, right-clicking an item
+- **Deleting (call):** a trash button shows at the end of the title field while it's open, on
+  desktop and mobile, since mobile has no long-press menu. On desktop, right-clicking an item
   offers Delete too. Both show the Undo message, as Delete does in the list view. The trash button
   deletes without saving what was typed in the field **(call)**, so Undo brings back the item as
   the file had it.
-- **Dragging** works within the block, within and between sections: with the mouse on the Mac and
-  hold-and-move on the iPhone, with the list view's drop rules. Lifting an item closes an open
+- **Dragging** works within the block, within and between sections: with the mouse on desktop and
+  hold-and-move on mobile, with the list view's drop rules. Lifting an item closes an open
   title field and saves it. A hold on an item opens no menu, and a swipe that starts no lift
   scrolls the note.
 - **No edge scrolling in a block (call):** the block sits in the note's scroller, which is
@@ -238,8 +240,8 @@ current todo app. Step one's own "Done when" doesn't change.
 - **A list with no items shows a gray hint** centered in the space below the list note, in
   `--text-faint`. It goes as soon as the first item is added and comes back if the last one is
   deleted. A list whose items are all archived and hidden doesn't show it **(call)**.
-- **The text:** "Press Cmd+Enter or + to add an item" on the Mac, with Ctrl+Enter on Windows and
-  Linux, and "Tap + to add an item" on the iPhone and iPad, which usually have no keyboard.
+- **The text:** "Press Cmd+Enter or + to add an item" on macOS, with Ctrl+Enter on Windows and
+  Linux, and "Tap + to add an item" on mobile, which usually has no keyboard.
 - **Cmd+Enter adds an item (owner),** the same as "+": below the selected item, or as the list's
   first item when nothing is selected. It's registered on the view's own `scope` as `Mod+Enter`,
   like Cmd+Z, so it works anywhere in a list that has focus, a card's fields included, and isn't
@@ -251,8 +253,8 @@ current todo app. Step one's own "Done when" doesn't change.
   That covers its items with their notes, hidden archived items and content the plugin leaves alone.
 - **A section ends at the next heading of any level (call),** as step one's sections do, so
   dragging a `##` doesn't take a `###` below it along.
-- **It's started as an item drag is:** with the mouse on the Mac, and by holding and then moving
-  on the iPhone, where a tap still opens the heading menu. The drag closes an open card first. A
+- **It's started as an item drag is:** with the mouse on desktop, and by holding and then moving
+  on mobile, where a tap still opens the heading menu. The drag closes an open card first. A
   heading whose name field is open doesn't drag **(call)**.
 - **A section drops only between sections (call):** before another heading, or at the end of the
   list. The drop line shows above the heading it will go before, or under the last row for the
@@ -261,7 +263,7 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Over a row, the section goes before the first heading shown below the gap (call):** the gap is
   under the row in its lower half and above it otherwise, as for an item, and with no heading
   below, it goes to the end.
-- **On the iPhone only the heading lifts (call);** its rows stay in place until the drop redraws
+- **On mobile only the heading lifts (call);** its rows stay in place until the drop redraws
   the list.
 - **The file (call):** the section's lines move as they are, and the move goes through step one's
   check (`edit-check.ts`): if it would change how the rest of the list reads, such as a moved
@@ -278,9 +280,9 @@ current todo app. Step one's own "Done when" doesn't change.
   own fold arrows are, and drawn as they are (owner, 2026-10-27): Obsidian's `right-triangle`
   icon in `--collapse-icon-color`, turned to point right and in `--collapse-icon-color-collapsed`
   while collapsed. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
-  on the iPhone.
-- **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. The
-  iPhone has no hover, so there it always shows. It shows no tooltip: its accessible name is
+  on mobile.
+- **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. Mobile
+  has no hover, so there it always shows. It shows no tooltip: its accessible name is
   "Collapse section", with `aria-expanded` saying whether the section is open **(call)**.
 - **Collapsed, the section's rows hide;** the heading stays. The items before the first heading
   have no heading, so they can't collapse. The open card's item still shows in a collapsed
@@ -318,21 +320,21 @@ These go into step one's "Not in step one" list:
 
 1. **Checklist order:** the checkboxes Obsidian renders in a card's notes match the checkbox lines
    the core parser finds, in order, for step one's fixtures plus nested and mixed checklists.
-2. **Cmd+F on the view's scope** wins over Obsidian's own Cmd+F while a list has focus, on the Mac
-   and on an iPhone with a hardware keyboard.
+2. **Cmd+F on the view's scope** wins over Obsidian's own Cmd+F while a list has focus, on desktop
+   and on mobile with a hardware keyboard.
 3. **Renaming a list:** whether Obsidian updates a `[[link]]` inside a `princelists` code block.
    Links in code blocks usually aren't links to Obsidian, so a block may show "not found" after a
    rename until it's edited. Nothing may fix it in the background, so if it happens, it goes to the
    owner as an accepted cost or a change of format.
 4. **Live Preview:** a click, a drag or typing inside a rendered block stays in the block and
    doesn't move the cursor into its source.
-5. **`<input type="date">`** opens a picker on the Mac and the iPhone, and returns `YYYY-MM-DD`.
+5. **`<input type="date">`** opens a picker on desktop and mobile, and returns `YYYY-MM-DD`.
 6. **Turn into list from an open editor:** the save and the line reach the file, and the metadata
    cache reports the marker, before the note switches to the list view. Found: an editor edit inside
    the frontmatter is dropped while the properties show, so the line goes in through the vault.
 7. **The Schedule view on a large vault:** it reads only the lists' files, and stays quick with a
    few hundred lists.
-8. **A heading on the iPhone:** a hold-and-move drags it, and a tap still opens the heading menu,
+8. **A heading on mobile:** a hold-and-move drags it, and a tap still opens the heading menu,
    with neither firing the other.
 9. **Moving a section, byte for byte:** a setext heading moved under a paragraph gets its empty
    line or is refused, never joining the paragraph. A section moved off the end of a file without
