@@ -112,12 +112,14 @@ This finish line is what keeps step one from growing into a standalone app.
 
 These are wanted later, roughly in this order. The file format already leaves room for them.
 
+- **[Step two](2026-10-27-prince-lists-step-2-design.md) (owner, 2026-10-27)** takes on what the
+  owner needs before moving in: ticking checklists, Cmd+F, showing a list inside another note,
+  "Turn into list", a When day with a Schedule view, and starring an item.
 - **Views across lists:** a sidebar with views such as Inbox, Today, Upcoming and Done, grouped
-  by area. An area is a list's folder.
-- **Dates and tags:** setting dates on items (a scheduled day and a deadline), plus tags and tag
-  filters.
+  by area. An area is a list's folder. A Favorites view gathers starred items **(owner,
+  2026-10-27)**.
+- **Dates and tags:** a deadline on items, plus tags and tag filters.
 - **Smaller item features:**
-  - checklists inside an item's notes that can be ticked
   - repeating items, a trash, IDs on single items, and sorting modes
   - dragging a heading to move its whole section
 - **Quick capture from outside Obsidian.** A plugin can't hear a global hotkey. The documented
@@ -132,9 +134,12 @@ These are wanted later, roughly in this order. The file format already leaves ro
 - **Importing from other todo apps.** Another app's lists could come in through its export or an
   integration; whether headings and notes survive is unverified.
 - **Moving old archived items** into an archive note.
-- **A "turn this note into a list" command.**
-- **Showing lists inside other notes.** A list, or later Today, could appear inside another note
-  such as a daily note, using `registerMarkdownCodeBlockProcessor`.
+- **A command that inserts a list into a note,** instead of typing step two's `princelists` code
+  block.
+- **A "New list" button on Obsidian's New tab screen (owner, 2026-10-27).** It waits until
+  Obsidian documents a route: there is no API for that screen, and adding a button there means
+  changing Obsidian's own DOM. Until then, New list is on the ribbon, in the command palette and in
+  a folder's menu.
 - **Tidier display in plain Markdown.** Making `✔` and dates look tidy when a list is opened as
   plain Markdown or embedded, using `registerMarkdownPostProcessor` for the reading view or
   `registerEditorExtension` for the editor.
@@ -170,8 +175,6 @@ These are wanted later, roughly in this order. The file format already leaves ro
 
 **Not wanted at all:**
 
-- **A "New list" button on Obsidian's New tab screen.** Obsidian gives plugins no API for that
-  screen, and the owner chose official routes only.
 - **Lists shared across vaults.** The plugin builds nothing to share a list between vaults.
   - **A note from outside the vault is allowed in any vault (owner, 2026-10-20).** Opened from two
     vaults' windows, it works as a list in each. Nothing is built for this.
@@ -409,11 +412,11 @@ stays, and the blank line stays with it.
 ### Checklists (call; the format is reserved now)
 
 - Checkbox lines indented in an item's notes are that item's checklist.
-- In step one they render as disabled checkboxes. Ticking them comes later.
+- In step one they render as disabled checkboxes. Step two makes them tick.
 
 ### Dates (owner: the Tasks emoji format)
 
-- **Reserved now, used later:**
+- **Reserved now, used later** (step two writes ⏳ as an item's When):
   - ⏳ scheduled, the day you plan to do it
   - 📅 due, a deadline
   - 🛫 start
