@@ -111,9 +111,15 @@ export function moveItemWithLineMap(
 	throw new UnsafeEditError();
 }
 
-export function getItemNotes(lines: readonly Line[], item: ItemBlock): string {
+// The first line of the item's notes, past the blank lines after its title, or its endLine.
+export function notesStartLine(lines: readonly Line[], item: ItemBlock): number {
 	let start = item.titleLine + 1;
 	while (start < item.endLine && isBlank((lines[start] as Line).text)) start++;
+	return start;
+}
+
+export function getItemNotes(lines: readonly Line[], item: ItemBlock): string {
+	const start = notesStartLine(lines, item);
 	const width = columnOf(item.notesIndent);
 	return lines
 		.slice(start, item.endLine)
