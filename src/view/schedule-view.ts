@@ -19,7 +19,10 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 
 // Every list's items with a When, by day (spec, "When and the Schedule view").
 export class ScheduleView extends ItemView implements MarkdownHost {
-	private readonly listItems = new Map<string, ScheduledItem[]>();
+	private listItems = new Map<string, ScheduledItem[]>();
+	// Paths an event updated while a refresh was reading, which its older reads must not overwrite.
+	private readonly updatedPaths = new Set<string>();
+	private refreshes = 0;
 	private blocks: Component[] = [];
 
 	getViewType(): string {
@@ -37,10 +40,12 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	async onOpen(): Promise<void> {
 		this.contentEl.addClass('princelists-schedule');
 		const { workspace, metadataCache, vault } = this.app;
-		this.registerEvent(workspace.on('active-leaf-change', (leaf) => leaf === this.leaf && void this.refresh()));
+		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
+			if (leaf === this.leaf) void this.refresh();
+		}));
 		this.registerEvent(metadataCache.on('changed', (file, data, cache) => this.listChanged(file, data, cache)));
 		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
-		this.registerEvent(vault.on('delete', (file) => this.listItems.delete(file.path) && this.draw()));
+		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
 		await this.refresh();
 	}
 
@@ -49,21 +54,30 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	}
 
 	async refresh(): Promise<void> {
+		const refresh = ++this.refreshes;
+		this.updatedPaths.clear();
 		const { vault, metadataCache } = this.app;
 		const lists = vault.getMarkdownFiles().filter((file) => isList(metadataCache.getFileCache(file)));
 		const read = await Promise.all(lists.map(async (file) => [file.path, itemsOf(file, await vault.cachedRead(file))] as const));
-		this.listItems.clear();
-		for (const [path, items] of read) this.listItems.set(path, items);
+		if (refresh !== this.refreshes) return;
+		const listItems = new Map(read.filter(([path]) => !this.updatedPaths.has(path)));
+		for (const path of this.updatedPaths) {
+			const items = this.listItems.get(path);
+			if (items) listItems.set(path, items);
+		}
+		this.listItems = listItems;
 		this.draw();
 	}
 
 	private listChanged(file: TFile, text: string, cache: CachedMetadata): void {
+		this.updatedPaths.add(file.path);
 		if (isList(cache)) this.listItems.set(file.path, itemsOf(file, text));
 		else if (!this.listItems.delete(file.path)) return;
 		this.draw();
 	}
 
 	private async listRenamed(file: TAbstractFile, oldPath: string): Promise<void> {
+		this.updatedPaths.add(oldPath).add(file.path);
 		const wasList = this.listItems.delete(oldPath);
 		if (file instanceof TFile && isList(this.app.metadataCache.getFileCache(file))) {
 			this.listItems.set(file.path, itemsOf(file, await this.app.vault.cachedRead(file)));
@@ -71,6 +85,11 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 			return;
 		}
 		this.draw();
+	}
+
+	private listDeleted(path: string): void {
+		this.updatedPaths.add(path);
+		if (this.listItems.delete(path)) this.draw();
 	}
 
 	private draw(): void {
