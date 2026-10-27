@@ -244,7 +244,7 @@ button.princelists-new-item {
 
 /* The header's archived button while archived items show. */
 .princelists-archived-shown {
-	color: var(--interactive-accent);
+	color: var(--color-blue);
 }
 
 @media (hover: hover) {
