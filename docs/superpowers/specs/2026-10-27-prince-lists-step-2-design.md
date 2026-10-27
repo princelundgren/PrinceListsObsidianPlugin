@@ -79,10 +79,10 @@ current todo app. Step one's own "Done when" doesn't change.
   single value or broken YAML), adding a line would leave it invalid, so the command changes
   nothing and says so. Empty frontmatter, or one holding only comments, counts as a mapping.
 - **The YAML is read from the text being edited (call)** with `parseYaml`, as the marker is read,
-  not from the metadata cache, which lags an editor's unsaved text.
+  not from the metadata cache, which can lag the file.
 - **A `princelists:` line already there** with another single-line value, such as `false`, is
-  replaced. If its value runs over several lines, the command changes nothing and says so
-  **(call)**.
+  replaced. The key may be quoted or have spaces before its colon. If its value runs over several
+  lines, the command changes nothing and says so **(call)**.
 - **Without frontmatter:** `---`, `princelists: true` and `---` go before the first line, with the
   file's usual line ending.
 - **Nothing else in the note changes.** `- [ ]` lines become items. Plain bullets stay content the
@@ -165,16 +165,17 @@ current todo app. Step one's own "Done when" doesn't change.
   without the marker. The note's file menu (right-click in the file explorer, or a long-press on
   the iPhone) has it too **(call)**.
 - **It writes the marker** as "What's written in the file" says, then opens the note as a list.
-  - **The write path (call):** when the note is open in a Markdown editor, the line goes in through
-    that editor, and the view is saved (`TextFileView.save`), so typing not yet saved isn't lost.
-    This follows Obsidian's guideline to prefer the Editor API for the active file. Otherwise it's
-    a `vault.process` edit.
+  - **The write path (call):** when the note is open in a Markdown editor, the view is saved first
+    (`TextFileView.save`), so typing not yet saved isn't lost. The line then goes in with
+    `vault.process`. Not through the editor, against Obsidian's guideline to prefer the Editor API
+    for the active file: while the editor shows the note's properties, it drops an edit inside the
+    frontmatter (observed in 1.14.4), so a `princelists: false` line stayed as it was.
   - The note opens as a list once the metadata cache reports the marker for it, not straight after
     the write. A wait that never sees the marker ends with the next "Turn into list", a failed
     write, or the note's rename or deletion, and otherwise when the plugin unloads: there's no
     timer, as everywhere in the plugin **(call)**.
   - **A CRLF note open in an editor is saved with LF line endings,** as Obsidian's editor saves
-    any note it changes (observed in 1.14.4). Through `vault.process`, the file keeps CRLF.
+    any note (observed in 1.14.4). A note that isn't open keeps CRLF.
 - **Only notes in the vault (call).** A note from outside the vault has no parent folder (observed
   in 1.14.4), which is how it's told apart, as step one does for pictures.
 - **Undoing it (call):** open the note as Markdown and remove the line. No command reverses it in
@@ -294,8 +295,9 @@ These go into step one's "Not in step one" list:
 4. **Live Preview:** a click, a drag or typing inside a rendered block stays in the block and
    doesn't move the cursor into its source.
 5. **`<input type="date">`** opens a picker on the Mac and the iPhone, and returns `YYYY-MM-DD`.
-6. **Turn into list from an open editor:** the editor's line and its save reach the file, and the
-   metadata cache reports the marker, before the note switches to the list view.
+6. **Turn into list from an open editor:** the save and the line reach the file, and the metadata
+   cache reports the marker, before the note switches to the list view. Found: an editor edit inside
+   the frontmatter is dropped while the properties show, so the line goes in through the vault.
 7. **The Schedule view on a large vault:** it reads only the lists' files, and stays quick with a
    few hundred lists.
 8. **A heading on the iPhone:** a hold-and-move drags it, and a tap still opens the heading menu,
