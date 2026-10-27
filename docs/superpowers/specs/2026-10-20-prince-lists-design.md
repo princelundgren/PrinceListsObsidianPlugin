@@ -230,13 +230,14 @@ These are wanted later, roughly in this order. The file format already leaves ro
   belongs to "Shopping" **(owner)**. Nothing about areas is written into the file.
 - **A note from outside the vault is a list too (owner, 2026-10-20).** Since Obsidian 1.14, the
   desktop app can open a Markdown file that isn't in the vault, in the current vault's window.
-  Such a note with `princelists: true` behaves like any list note.
+  Such a note with `princelists: true` behaves like any list note, except that pictures can't be
+  added to it (see "Editing", Pictures).
   - Obsidian's 1.14 changelog lists this for desktop, and opening such a file needs Obsidian's
     latest installer. Whether the iPhone app can open one is unverified, so the plan checks it on
     the Mac only.
-  - On the Mac, the plugin does everything with such a note that it does with a vault note:
-    opening, rendering, writing, renaming and links all work, so none of the fallbacks in "Notes
-    outside the vault" was needed.
+  - On the Mac, the plugin does everything with such a note that it does with a vault note, except
+    add pictures: opening, rendering, writing, renaming and links all work, so none of the
+    fallbacks in "Notes outside the vault" was needed.
 
 ## File format
 
@@ -560,11 +561,35 @@ stays, and the blank line stays with it.
     as Markdown".
   - Only a card takes pictures, not the list note **(owner, 2026-10-22)**: a picture goes in the
     list note through "Open as Markdown".
-  - In 1b a pasted picture is saved with `fileManager.getAvailablePathForAttachment` and
-    `vault.createBinary`, following the vault's attachment settings.
+  - In 1b a pasted or dropped picture is saved with
+    `fileManager.getAvailablePathForAttachment` and `vault.createBinary`, following the vault's
+    attachment settings.
   - Its link is `!` and `fileManager.generateMarkdownLink`, so it follows the vault's link
     settings; with Obsidian's defaults that's `![[name]]` **(owner, 2026-10-22)**. A plain
     `![[name]]` could show the wrong picture when two files share a name.
+  - **Pasting (call):** a picture pasted into an open notes editor is saved and linked; text
+    pastes as text. A pasted picture in a card's title does nothing.
+  - **Dropping (call):** a picture file dropped on an open card is saved and linked. Any other drag
+    leaves the card alone. Where the platform hides a drag's file kinds until the drop, as iOS does,
+    the card accepts any file drag and checks each file when it lands **(owner, 2026-10-27)**.
+  - **Names (call):** a pasted picture is named `Pasted image YYYYMMDDHHmmss.<ext>` in local time,
+    as Obsidian names its own. A dropped one keeps its name, with `#`, `^`, `|`, `[` and `]`
+    replaced by `-`, since in a link they start a heading, a block, an alias or the brackets.
+  - **Refused formats (call):** only the formats Obsidian shows are added: avif, bmp, gif, jpeg,
+    jpg, png, svg and webp. Others, such as HEIC, would be linked but not shown, so a notice says
+    they weren't added.
+  - **Where the links go (call):** when a notes editor is open once the last picture is saved
+    (including one opened meanwhile), the links go in at its cursor as it is then, so typing
+    meanwhile isn't replaced, inside the line when the cursor is mid-line. With no editor open,
+    including one that closed meanwhile, the editor opens and the links go on a line of their own at
+    the end. They save as typing does.
+  - **A card that closed or lost its item first (call):** nothing is inserted, and a notice gives
+    the saved path.
+  - **A picture dragged from inside Obsidian (call)** isn't added: dropping a rendered picture back
+    on the card would save a second copy.
+  - **A list outside the vault takes no pictures (owner, 2026-10-27):** a paste or drop saves
+    nothing and shows "Pictures can't be added to a list outside the vault." The link wouldn't
+    resolve from a note outside the vault.
 
 ### Selecting and adding
 
@@ -1046,7 +1071,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   Obsidian.
   - Seen in 1.14.4: the file is renamed in its own folder, and then its tab closes. Obsidian's own
     Markdown view does the same when an outside note is renamed.
-- **Telling an outside note apart (call):** only the fallbacks need it.
+- **Telling an outside note apart (call):** the fallbacks would need it, and the picture refusal
+  does.
   - `vault.getAbstractFileByPath(file.path)` can't do it. Its doc says it finds a file "inside the
     vault" (since 0.11.11), but spike 1 found that it returns the outside note too (observed in
     1.14.4).
@@ -1056,6 +1082,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     runtime, `instanceof` throws a `TypeError`. The `obsidianmd/no-unsupported-api` lint rule
     doesn't check `instanceof`, so it wouldn't catch that (tested with `eslint-plugin-obsidianmd`
     0.4.2 on 2026-10-20).
+  - The picture refusal tells them apart by `file.parent === null` instead, observed in 1.14.4 as
+    the rename check does **(call)**: `TExternalFile` is newer than `minAppVersion` 1.5.7.
 - **Outside notes leave `minAppVersion` at 1.5.7:** nothing here uses a newer API.
 
 ## Testing and owner checkpoints
