@@ -447,3 +447,12 @@ button.princelists-block-new-item {
 	gap: var(--size-4-1);
 	margin-top: var(--size-4-2);
 }
+
+/* Web links without Obsidian's external-link icon, as Live Preview shows a bare URL. No CSS variable
+   controls the icon; Obsidian's web viewer turns it off the same way. */
+.princelists-content .external-link,
+.princelists-schedule .external-link,
+.princelists-block .external-link {
+	background-image: none;
+	padding-right: 0;
+}
