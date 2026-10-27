@@ -1,4 +1,4 @@
-import { Platform, setIcon } from 'obsidian';
+import { setIcon } from 'obsidian';
 import { planItemInsert, type ItemPlace } from '../core/list-actions';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { closeCard, focusCardTitle, isNewEmptyItem, openCard } from './card';
@@ -6,11 +6,10 @@ import { expandFor } from './collapse';
 import type { PrinceListView } from './list-view';
 import { enqueueAt, writePlanned } from './write';
 
-// The floating "+" (spec, "Selecting and adding"). It goes outside listScrollEl, which is what
+// Mobile's floating "+" (spec, "Selecting and adding"). It goes outside listScrollEl, which is what
 // scrolls, so it stays put while the list scrolls. The view hides it in a note that isn't a list.
 export function buildNewItemButton(view: PrinceListView): HTMLButtonElement {
 	view.containerEl.addClass('princelists-view');
-	view.containerEl.toggleClass('princelists-has-status-bar', !Platform.isMobile);
 	const button = view.containerEl.createEl('button', { cls: 'princelists-new-item', attr: { 'aria-label': 'New item' } });
 	setIcon(button, 'plus');
 	view.registerDomEvent(button, 'click', () => newItem(view));
