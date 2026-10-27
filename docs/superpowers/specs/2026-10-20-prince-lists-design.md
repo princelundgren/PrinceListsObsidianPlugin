@@ -614,7 +614,8 @@ stays, and the blank line stays with it.
     the insert wrote goes too. If the file changed outside the view while the card was open, the
     item is deleted from the current text instead, without a message **(call)**. If even that would
     change how the rest reads, the empty item stays and the view says so. Closing means Escape, a
-    click elsewhere, Enter, starting a drag, a menu choice that adds an item, or Delete on it.
+    click elsewhere, Enter, starting a drag, a menu choice that adds an item, Delete on it, or
+    Cmd+Z with focus outside its fields.
     Closing the list, switching files or a change from outside never removes an item, and an item
     that existed before the card opened is never removed this way.
 - **An empty list note (call)** shows as a gray "Notes" placeholder under the title, in any list,
@@ -751,15 +752,16 @@ needs no code.
 
 - **Saving (call):**
   - Typing saves through `requestSave`, which waits 2 seconds.
-  - One-off actions write at once with `vault.process`: tick, drag, delete, new item, new heading
-    and rename heading. Obsidian's docs recommend `vault.process` "to avoid unintentional loss of
-    data".
+  - One-off actions write at once with `vault.process`: tick, drag, delete, new item, new heading,
+    rename heading, undo and redo. Obsidian's docs recommend `vault.process` "to avoid
+    unintentional loss of data".
   - Before a one-off action writes, the view first saves pending typing (`TextFileView.save`), so
     the file already holds the typing and the guard doesn't refuse the write.
   - Typing that lands while an action waits to write makes it write nothing, since it was worked
     out without that typing **(call)**. The action then runs once more on the new text: a tick, a
     drag, a delete, a new item or heading, or a heading's name. The removal of an empty new item
-    deletes it from the current text instead.
+    deletes it from the current text instead. An undo or redo isn't run again: it does nothing, and
+    the typing is the newest step **(call)**.
     - If typing refuses it a second time, the action is dropped with no message **(call)**: the
       tick or move simply didn't happen, which the list shows, and a message mid-typing would only
       interrupt.
@@ -804,7 +806,9 @@ needs no code.
     the iPhone's only undo stays the Undo button after a delete.
   - The history is cleared when the file changes from outside, so undo never throws away someone
     else's change.
-  - Typing in a field makes one step for each time the field has focus.
+  - Typing in a field makes one step for each time the field has focus. A write of the view's
+    own or an undo between keystrokes starts a new step, and typing that ends where it began
+    leaves none.
   - A new item's first edit, such as its title, or a new heading's name, with nothing between,
     joins the step that added it: one Cmd+Z takes the item or heading away, and Cmd+Shift+Z brings
     it back as it was. A new item or heading undone while still empty can't be redone, since it
@@ -815,6 +819,8 @@ needs no code.
   - Cmd+Z on an empty new item's open card, with focus outside its fields, closes the card, which
     removes the item.
   - The Undo button after a delete and Cmd+Z take the same step back, and Cmd+Shift+Z deletes again.
+    Once Cmd+Z has taken the delete back, the button does nothing while the list is as Cmd+Z left
+    it.
   - In a field, Cmd+Z is left to the browser's text undo, not the list's history. That doesn't take
     back the link to a picture pasted into the notes, since the browser doesn't count the plugin's
     insert as typing; Cmd+Z after leaving the field does (1b check 10).
@@ -1011,7 +1017,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   moves more than 5 px first. Spike 2 confirmed both values on the iPhone, with the rows'
   `-webkit-user-select: none` and `-webkit-touch-callout: none`: the maintainer keeps 500 ms
   (`docs/superpowers/notes/2026-10-21-spike-touch.md`).
-  - Once a drag is armed, a non-passive `touchmove` handler calls `preventDefault` to stop
+  - Once a row is lifted, a non-passive `touchmove` handler calls `preventDefault` to stop
     scrolling.
   - **The edge scroll (call)** starts 56 px from the top of the list or from where it stops being
     visible, and speeds up linearly to 12 px a frame at the edge and beyond.
@@ -1126,7 +1132,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Risks to check during the build
 
-Each has a result from 1a's spikes and checks, except the `✔` glyph on the iPhone.
+Each has a result from 1a's spikes and checks, and 1b's for the `✔` glyph on the iPhone.
 
 1. **The flash** when a list opens.
    - **Result:** about 10 ms, which the owner couldn't see on the Mac or the iPhone.
@@ -1146,8 +1152,8 @@ Each has a result from 1a's spikes and checks, except the `✔` glyph on the iPh
      Back still works.
 6. **The `✔` glyph** may show as an emoji on some systems. That's harmless, but check it reads
    well.
-   - **Result:** on the Mac it reads as a text check mark in reading view. On the iPhone it is
-     still to check.
+   - **Result:** on the Mac it reads as a text check mark in reading view. On the iPhone it shows
+     as Apple's gray check mark, which reads well (1b checks).
 7. **Notes outside the vault:** whether opening, rendering, writing and renaming work for them.
    - **Result:** on the Mac, all of them work, and so do links.
 
@@ -1188,12 +1194,13 @@ Checked 2026-10-20.
       though it returns a note from outside the vault too (observed in 1.14.4)
   - settings: `getSettingDefinitions` (1.13.0), `onExternalSettingsChange` (1.5.7)
   - the minimum version: the `@since` tags decide it. The newest among the APIs step one uses is
-    1.5.7, for `getFrontMatterInfo` (and `FileManager.getAvailablePathForAttachment` in 1b). The
-    others are older or untagged, and every untagged one is already in the 1.5.7 `obsidian`
-    package. With `minAppVersion` 1.5.7, the `obsidianmd/no-unsupported-api` rule passes a file
-    that calls each of these APIs, and at 1.5.6 it flags the two 1.5.7 ones. `MenuItem.setWarning`
-    and `Workspace.handleLinkContextMenu` carry older tags but first appear in the package at
-    1.10.0. Nothing has been tried on an Obsidian older than 1.14.4.
+    1.5.7, for `getFrontMatterInfo` (and `FileManager.getAvailablePathForAttachment` and
+    `View.scope` in 1b). The others are older or untagged, and every untagged one is already in
+    the 1.5.7 `obsidian` package. With `minAppVersion` 1.5.7, the `obsidianmd/no-unsupported-api`
+    rule passes a file that calls each of these APIs, and at 1.5.6 it flags the three 1.5.7 ones
+    (checked again 2026-10-27). `MenuItem.setWarning` and `Workspace.handleLinkContextMenu` carry
+    older tags but first appear in the package at 1.10.0. Nothing has been tried on an Obsidian
+    older than 1.14.4.
   - extensions: `registerBasesView` (1.10.0), `registerEditorExtension` (0.12.8),
     `registerMarkdownCodeBlockProcessor`, `registerMarkdownPostProcessor`,
     `registerObsidianProtocolHandler`, `Plugin.registerCliHandler` (1.12.2)
@@ -1237,6 +1244,11 @@ Checked 2026-10-20.
   - `setViewState` history entries
   - `TextFileView` reloading and merging on outside changes
   - `MarkdownRenderer` needing a Component
+  - `file.parent` being `null` for a note outside the vault
+  - the `--view-bottom-spacing` CSS variable, set on the iPhone and unset on the Mac
+  - iOS (1.14.5) showing a drag's types only as `Files` until the drop
+  - Obsidian's own `dragover` listener making a drop a move unless the view sets `dropEffect`
+  - the browser not counting the plugin's `setRangeText` insert as typing for its undo
 - **Not yet measured on a device:** the 800 ms of the iOS `contextmenu` hold; 1a confirmed the
   event itself. 1a also confirmed a folder long-press on the iPhone reaching `file-menu`, and, on
   the Mac, how a note from outside the vault behaves (opening, rendering, writing, renaming, and
