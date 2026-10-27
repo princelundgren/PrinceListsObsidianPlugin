@@ -15,7 +15,8 @@ export interface MarkerEdit {
 export type MarkerRefusal = { refused: 'not-a-mapping' | 'multiline-value' };
 
 const MARKER_LINE = `${MARKER_KEY}: true`;
-const KEY_LINE = new RegExp(`^${MARKER_KEY}:(.*)$`);
+// The key as YAML may write it: plain or quoted, with spaces before the colon.
+const KEY_LINE = new RegExp(`^(?:${MARKER_KEY}|"${MARKER_KEY}"|'${MARKER_KEY}')[ \\t]*:(.*)$`);
 // A block scalar header such as `|`, `>-`, `|+` or `|2`, optionally followed by a comment.
 const BLOCK_SCALAR = /^\s*[|>][-+0-9]*\s*(#.*)?$/;
 

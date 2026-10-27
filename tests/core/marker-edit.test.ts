@@ -18,6 +18,9 @@ test.each([
 	['Body', null, '---\nprincelists: true\n---\nBody'],
 	['', null, '---\nprincelists: true\n---\n'],
 	['---\nprincelists:\ntitle: A\n---\n', fm(3), '---\nprincelists: true\ntitle: A\n---\n'],
+	['---\n"princelists": false\n---\n', fm(2), '---\nprincelists: true\n---\n'],
+	["---\n'princelists': false\n---\n", fm(2), '---\nprincelists: true\n---\n'],
+	['---\nprincelists : false\n---\n', fm(2), '---\nprincelists: true\n---\n'],
 ])('planMarker turns %j into a list', (text, frontmatter, expected) => {
 	expect(turned(text, frontmatter)).toBe(expected);
 });
