@@ -1,6 +1,6 @@
 import { Notice } from 'obsidian';
-import type { Drop, ShownRow } from '../core/drop';
-import { planItemMove, type ItemPlace } from '../core/list-actions';
+import { dropAt, sectionDropAt, type Drop, type SectionDrop, type ShownRow } from '../core/drop';
+import { planItemMove, planSectionMove, type ItemPlace } from '../core/list-actions';
 import { contentStartLine } from '../obsidian/marker';
 import { followPlace } from './add-button';
 import type { PrinceListView } from './list-view';
@@ -18,13 +18,32 @@ export function shownRows(listEl: HTMLElement): ShownRow[] {
 	}));
 }
 
+/** A dragged item's drop, or a dragged heading's, which moves its whole section. */
+export type RowDrop = { item: Drop } | { section: SectionDrop };
+
+export function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { line: number; below: boolean }): RowDrop | null {
+	if (dragged.kind === 'heading') {
+		const section = sectionDropAt(shown, dragged.line, over);
+		return section && { section };
+	}
+	const item = dropAt(shown, dragged.line, over);
+	return item && { item };
+}
+
 // Takes the drop line off `marked` and shows it for `drop`. Returns the element that shows it now.
-export function markDrop(listEl: HTMLElement, marked: HTMLElement | null, drop: Drop | null): HTMLElement | null {
+export function markDrop(listEl: HTMLElement, marked: HTMLElement | null, drop: RowDrop | null): HTMLElement | null {
 	marked?.removeClass(DROP_ABOVE, DROP_BELOW);
 	if (!drop) return null;
-	const next = listEl.querySelector<HTMLElement>(`[${LINE_ATTR}="${drop.line}"]`);
-	next?.addClass(drop.above ? DROP_ABOVE : DROP_BELOW);
+	const { line, above } = 'item' in drop ? drop.item : drop.section;
+	const next = listEl.querySelector<HTMLElement>(`[${LINE_ATTR}="${line}"]`);
+	next?.addClass(above ? DROP_ABOVE : DROP_BELOW);
 	return next;
+}
+
+// `line` is the dragged row's: an item's title line, or a heading's.
+export function queueDrop(view: PrinceListView, line: number, drop: RowDrop): void {
+	if ('item' in drop) queueMove(view, line, drop.item.place);
+	else queueSectionMove(view, line, drop.section.before);
 }
 
 // The move waits on the view's write queue, and its item and place follow the edits that land before
@@ -49,6 +68,30 @@ export function queueMove(view: PrinceListView, line: number, place: ItemPlace):
 			if (moved) view.render();
 		} finally {
 			view.editing.untrack(item);
+			if (anchor) view.editing.untrack(anchor);
+		}
+	});
+}
+
+// As queueMove: the heading and the one the section goes before follow the edits that land first.
+export function queueSectionMove(view: PrinceListView, headingLine: number, before: number | null): void {
+	const file = view.file;
+	if (!file) return;
+	const heading = view.editing.track(headingLine);
+	const anchor = before === null ? null : view.editing.track(before);
+	void view.enqueue(async () => {
+		try {
+			if (view.viewClosed || view.file !== file) return;
+			if (heading.line === null || anchor?.line === null) {
+				new Notice(CHANGED_ELSEWHERE_NOTICE);
+				return;
+			}
+			const moved = await writePlanned(view, (text) =>
+				heading.line === null ? null : planSectionMove(text, contentStartLine(text), heading.line, anchor?.line ?? null),
+			);
+			if (moved) view.render();
+		} finally {
+			view.editing.untrack(heading);
 			if (anchor) view.editing.untrack(anchor);
 		}
 	});

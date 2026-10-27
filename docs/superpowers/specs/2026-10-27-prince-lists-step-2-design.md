@@ -234,6 +234,11 @@ current todo app. Step one's own "Done when" doesn't change.
   list. The drop line shows above the heading it will go before, or under the last row for the
   end. It never drops above the items before the first heading, which would join the moved
   section, and that unnamed section has no heading to drag.
+- **Over a row, the section goes before the first heading shown below the gap (call):** the gap is
+  under the row in its lower half and above it otherwise, as for an item, and with no heading
+  below, it goes to the end.
+- **On the iPhone only the heading lifts (call);** its rows stay in place until the drop redraws
+  the list.
 - **The file (call):** the section's lines move as they are, and the move goes through step one's
   check (`edit-check.ts`): if it would change how the rest of the list reads, such as a moved
   setext heading joining the paragraph above it, one empty line goes before it, and if that

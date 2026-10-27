@@ -696,7 +696,8 @@ stays, and the blank line stays with it.
 ### Dragging (owner)
 
 - **Mac (1a):** drag items with the mouse, within and between sections. An item's notes move with
-  it.
+  it. In step two, headings drag too, each with its whole section (step two's design, "Dragging a
+  heading").
   - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
     item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
     drag, a click reopens the card.

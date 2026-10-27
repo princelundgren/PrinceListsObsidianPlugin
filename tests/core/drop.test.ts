@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { dropAt, type ShownRow } from '../../src/core/drop';
+import { dropAt, sectionDropAt, type ShownRow } from '../../src/core/drop';
 
 const heading = (line: number): ShownRow => ({ kind: 'heading', line });
 const item = (line: number): ShownRow => ({ kind: 'item', line });
@@ -57,5 +57,28 @@ describe('dropAt', () => {
 	test("null over a line that isn't shown, or for an item that isn't", () => {
 		expect(dropAt(shown, 5, lower(9))).toBeNull();
 		expect(dropAt(shown, 9, lower(2))).toBeNull();
+	});
+});
+
+describe('sectionDropAt', () => {
+	// Items before any heading, then sections 2 and 4, and text at the end.
+	const shown = [item(1), heading(2), item(3), heading(4), item(5), untouched(6)];
+
+	test('the section goes before the first heading at or after the gap', () => {
+		expect(sectionDropAt(shown, 4, upper(2))).toEqual({ before: 2, line: 2, above: true });
+		expect(sectionDropAt(shown, 4, lower(1))).toEqual({ before: 2, line: 2, above: true });
+	});
+	test('never above the items before the first heading', () => {
+		expect(sectionDropAt(shown, 4, upper(1))).toEqual({ before: 2, line: 2, above: true });
+	});
+	test('past the last heading, the section goes to the end, with the line under the last row', () => {
+		expect(sectionDropAt(shown, 2, lower(6))).toEqual({ before: null, line: 6, above: false });
+	});
+	test('a drop where the section already is gives null', () => {
+		expect(sectionDropAt(shown, 2, upper(4))).toBeNull();
+		expect(sectionDropAt(shown, 2, lower(3))).toBeNull();
+		expect(sectionDropAt(shown, 2, upper(2))).toBeNull();
+		expect(sectionDropAt(shown, 4, upper(3))).toBeNull();
+		expect(sectionDropAt(shown, 4, lower(5))).toBeNull();
 	});
 });

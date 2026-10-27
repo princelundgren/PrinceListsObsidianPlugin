@@ -108,6 +108,7 @@ export function renderList(
 
 export function buildHeading(view: PrinceListView, heading: { line: number; text: string }, blocks: Map<HTMLElement, Component>): HTMLElement {
 	const el = createDiv({ cls: HEADING_CLASS, attr: { role: 'heading', 'aria-level': 2, [LINE_ATTR]: heading.line } });
+	if (ROWS_DRAG) el.draggable = true;
 	record(blocks, el, renderInline(view, el, heading.text));
 	return el;
 }

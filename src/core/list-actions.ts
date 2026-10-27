@@ -3,6 +3,7 @@ import { deleteItem, insertItem, insertItemInSection, moveItemWithLineMap, type 
 import type { InsertedItem } from './empty-item';
 import { moveEdit, ownEdit, type OwnEdit } from './follow';
 import { joinLines, spliceLines, splitLines, type Line } from './lines';
+import { moveSectionWithLineMap } from './move-section';
 import { itemAt, parseList, type ListModel, type Section } from './parse';
 
 /**
@@ -95,6 +96,19 @@ export function planItemMove(text: string, contentStart: number, titleLine: numb
 	const target = moveTarget(model, place);
 	if (!item || !target) return null;
 	const moved = moveItemWithLineMap(lines, model, item, target);
+	const next = joinLines(moved.lines);
+	return next === text ? null : { next, edit: moveEdit(moved.moved) };
+}
+
+// null when either heading is gone, or the section would stay where it is. Throws UnsafeEditError as
+// the move does.
+export function planSectionMove(text: string, contentStart: number, headingLine: number, before: number | null): PlannedMove | null {
+	const { lines, model } = parse(text, contentStart);
+	const sectionAt = (line: number) => model.sections.find((section) => section.headingLine === line);
+	const section = sectionAt(headingLine);
+	const target = before === null ? null : sectionAt(before);
+	if (!section || target === undefined) return null;
+	const moved = moveSectionWithLineMap(lines, model, section, target);
 	const next = joinLines(moved.lines);
 	return next === text ? null : { next, edit: moveEdit(moved.moved) };
 }
