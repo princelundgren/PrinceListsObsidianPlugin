@@ -5,6 +5,7 @@ import { isListText } from './obsidian/marker';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
 import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
 import { openFilter } from './view/filter';
+import { ListBlock } from './view/list-block';
 import { PrinceListView } from './view/list-view';
 import { ScheduleView } from './view/schedule-view';
 
@@ -12,6 +13,7 @@ export default class PrinceListsPlugin extends Plugin {
 	onload() {
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf));
 		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf));
+		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) => ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath)));
 		registerAutoSwitch(this);
 
 		this.addCommand({

@@ -418,3 +418,7 @@ textarea.princelists-heading-field {
 .princelists-schedule-empty {
 	color: var(--text-faint);
 }
+
+.princelists-block-message {
+	color: var(--text-muted);
+}

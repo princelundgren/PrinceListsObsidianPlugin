@@ -136,8 +136,8 @@ current todo app. Step one's own "Done when" doesn't change.
   It renders through `registerMarkdownCodeBlockProcessor` (since 0.9.7), in reading view and Live
   Preview. The block is typed by hand in step two **(call)**.
 - **It shows (owner):** the list's name as a link to it, its headings, and its items as rows with
-  a checkbox, the rendered title, the star and the When. The list note and the items' notes don't
-  show, and there are no cards.
+  a checkbox, the rendered title, the star and the When. The list note, the items' notes and
+  content the plugin leaves alone don't show **(call)**, and there are no cards.
   - Done items stay gray until archived. Archived items are hidden, with no "Show archived"
     **(call)**.
 - **Ticking** works as in the list view.
