@@ -17,8 +17,10 @@ export function buildNewItemButton(view: PrinceListView): HTMLButtonElement {
 }
 
 // Below the selected item, or first in the list. An empty item the open card added stays as the new
-// one: "+" closes the card, which would remove it, only for the new item to take its place.
-function newItem(view: PrinceListView): void {
+// one: "+" closes the card, which would remove it, only for the new item to take its place. The view
+// can show a note whose marker went, where nothing is added.
+export function newItem(view: PrinceListView): void {
+	if (!isListText(view.text)) return;
 	if (isNewEmptyItem(view)) {
 		focusCardTitle(view);
 		return;

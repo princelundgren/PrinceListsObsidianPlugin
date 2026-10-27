@@ -618,6 +618,8 @@ stays, and the blank line stays with it.
     measured in 1.14.5. Measuring the bar would mean reading Obsidian's own DOM. A theme with a
     taller bar can still touch the "+"'s lower edge, and with the bar hidden the "+" sits a little
     higher than it must.
+  - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
+    fields included. An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.

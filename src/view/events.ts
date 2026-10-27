@@ -1,4 +1,4 @@
-import { Platform } from 'obsidian';
+import { Keymap, Platform } from 'obsidian';
 import { openAsMarkdown } from '../obsidian/switch';
 import { addItem, addItemBelowCard, hasNoItems } from './add-button';
 import {
@@ -147,6 +147,8 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 			target.blur();
 		}
 	} else if (evt.key === 'Enter') {
+		// Cmd+Enter is the view's own key, which adds an item, so it doesn't also close a card.
+		if (Keymap.isModifier(evt, 'Mod')) return;
 		// A title or heading is one line, so Enter writes no line break.
 		if (target.hasClass(CARD_TITLE_CLASS)) {
 			evt.preventDefault();
