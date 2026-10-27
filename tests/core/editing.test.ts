@@ -24,6 +24,12 @@ function typeEach(type: (value: string) => Typed, values: readonly string[]): Ty
 	return values.map((value) => type(value));
 }
 
+test('selectedTitle leaves out the star', () => {
+	const state = editing(`${FRONTMATTER}- [ ] milk ⭐\n`);
+	state.open(3);
+	expect(state.selectedTitle()).toBe('milk');
+});
+
 describe('the title field across a typing session', () => {
 	const text = `${FRONTMATTER}- [ ] a\n- [ ] b #home\n- [ ] c\n`;
 

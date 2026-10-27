@@ -8,13 +8,14 @@ const sectionsOf = (text: string, now: Date, showArchived: boolean) => {
 	return visibleSections(lines, model, now, showArchived);
 };
 
-const row = (titleLine: number, title: string, done = false, label = title, archived = false) => ({
+const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false) => ({
 	kind: 'item',
 	titleLine,
 	title,
 	label,
 	done,
 	archived,
+	starred,
 });
 const untouched = (start: number, text: string) => ({ kind: 'untouched', start, text });
 
@@ -99,6 +100,10 @@ describe('visibleSections, content the plugin leaves alone', () => {
 });
 
 describe('itemRow', () => {
+	test('shows a starred title without its star', () => {
+		expect(itemRow('- [ ] milk ⭐', 0, new Date())).toEqual(row(0, 'milk', false, 'milk', false, true));
+	});
+
 	test('reads the row an item line shows, as the view does after its own tick', () => {
 		const now = new Date(2026, 9, 21, 10, 0);
 		const ticked = tickLine('- [ ] a 📅 2026-10-30', now);

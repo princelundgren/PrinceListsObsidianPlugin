@@ -1,11 +1,13 @@
 import { Menu, Notice } from 'obsidian';
 import type { TrackedLine } from '../core/editing';
 import { itemAt, type ItemBlock, type Section } from '../core/parse';
+import { isStarred, setStar } from '../core/star';
 import { addItem } from './add-button';
 import { focusCardTitle, isNewEmptyItem } from './card';
 import { deleteHeadingAt, deleteItemAt } from './delete';
 import { addHeading, openHeadingField } from './heading-field';
 import type { PrinceListView } from './list-view';
+import { queueLineEdit } from './line-edit';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE } from './write';
 
@@ -23,6 +25,13 @@ export function itemMenu(view: PrinceListView, item: ItemBlock, menu: Menu): voi
 			.setTitle('New heading below')
 			.setIcon('heading')
 			.onClick(atLine(anchor, (line) => addHeading(view, { afterItem: line }))),
+	);
+	const starred = isStarred(view.parse().lines[item.titleLine]?.text ?? '');
+	menu.addItem((entry) =>
+		entry
+			.setTitle(starred ? 'Remove star' : 'Add star')
+			.setIcon('star')
+			.onClick(atLine(anchor, (line) => queueLineEdit(view, line, (text) => setStar(text, !starred)))),
 	);
 	menu.addItem((entry) =>
 		entry

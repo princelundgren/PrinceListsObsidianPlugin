@@ -9,6 +9,7 @@ import { parseItemLine } from './item-line';
 import { joinLines, splitLines, type Line } from './lines';
 import { itemAt, parseList, type ItemBlock, type ListModel } from './parse';
 import { startTitleField, syncTitleField, typeTitle, type TitleField } from './title-field';
+import { splitStar } from './star';
 
 /**
  * What a keystroke did. A refused one wrote nothing, and the field keeps its text for the next
@@ -71,7 +72,7 @@ export class ListEditing {
 
 	selectedTitle(): string {
 		const line = this.selected === null ? undefined : splitLines(this.text)[this.selected];
-		return (line && parseItemLine(line.text)?.title) ?? '';
+		return splitStar((line && parseItemLine(line.text)?.title) ?? '').plain;
 	}
 
 	selectedNotes(): string {

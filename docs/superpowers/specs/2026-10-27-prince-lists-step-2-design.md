@@ -1,6 +1,7 @@
 ---
-status: draft
+status: building
 verified: 2026-10-27
+governs: [src/**, styles.css, manifest.json]
 ---
 
 # PrinceLists for Obsidian: step two, ready to move in

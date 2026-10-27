@@ -292,3 +292,16 @@ textarea.princelists-heading-field {
 .princelists-undo {
 	margin-inline-start: var(--size-4-2);
 }
+
+/* On the title's first line, as the checkbox is. Filled, so it reads as set, not as a button. */
+.princelists-star {
+	flex: none;
+	display: flex;
+	align-items: center;
+	height: calc(var(--line-height-normal) * 1em);
+	color: var(--color-yellow);
+}
+
+.princelists-star svg {
+	fill: currentColor;
+}

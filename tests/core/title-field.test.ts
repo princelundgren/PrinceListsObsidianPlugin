@@ -48,6 +48,11 @@ describe('typeTitle across a typing session', () => {
 		expect(joinLines(typed.lines)).toBe('- [ ] one two\n');
 	});
 
+	test('a starred item keeps its star before its mark and fields', () => {
+		const text = '- [x] milk ⭐ ✔ 2026-10-27 18:05 ⏳ 2026-10-30\n';
+		expect(typeChars(text, 0, 'oat milk').line).toBe('- [x] oat milk ⭐ ✔ 2026-10-27 18:05 ⏳ 2026-10-30');
+	});
+
 	test('a done item keeps its mark after the typed title', () => {
 		const text = '- [x] old ✔ 2026-10-20 09:00 #home\n';
 		expect(typeChars(text, 0, 'new').line).toBe('- [x] new ✔ 2026-10-20 09:00 #home');
