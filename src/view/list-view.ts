@@ -17,6 +17,7 @@ import { rereadListNote, type ListNoteSession, type ListTitleSession } from './f
 import type { HeadingField } from './heading-field';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
+import { registerUndoKeys } from './undo';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
 // canAcceptExtension stays at its default of false: true would open every note clicked from a
@@ -58,6 +59,8 @@ export class PrinceListView extends TextFileView {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
 		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+		// Here, so the scope is in place before the view first takes focus.
+		registerUndoKeys(this);
 	}
 
 	get text(): string {

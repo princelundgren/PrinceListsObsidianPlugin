@@ -3,7 +3,9 @@ import { headingText } from '../../src/core/display';
 import { UnsafeEditError } from '../../src/core/edit-check';
 import { ListEditing } from '../../src/core/editing';
 import { planHeadingRemoval, saveHeadingName } from '../../src/core/heading-field';
-import { planHeadingInsert } from '../../src/core/list-actions';
+import { ownEdit, type OwnEdit } from '../../src/core/follow';
+import { EditHistory } from '../../src/core/history';
+import { planHeadingInsert, type PlannedInsert } from '../../src/core/list-actions';
 import { splitLines } from '../../src/core/lines';
 import { contentStartOf, crlf, FIXTURES, JOINING_CASES, list, readFixture } from './edit-helpers';
 
@@ -115,10 +117,52 @@ describe('planHeadingRemoval', () => {
 					if (!inserted) continue;
 					const removal = planHeadingRemoval(inserted.next, start(text), fieldOn(inserted.next, inserted.line));
 					expect(removal?.next, `${name} ${JSON.stringify(place)}`).toBe(text);
-					expect(removal?.edit, `${name} ${JSON.stringify(place)}`).toEqual({ start: inserted.line, delta: -1, kind: 'delete' });
+					expect(removal?.edit, `${name} ${JSON.stringify(place)}`).toEqual({ start: inserted.line, delta: -1, kind: 'delete', history: 'cancel' });
 				}
 			}
 		}
+	});
+	test('a cancel: after an item or after a section, it takes the insert back exactly, so it leaves no step', () => {
+		const text = '- [ ] a\n## H\n- [ ] b\n';
+		for (const place of [{ afterItem: 0 }, { afterSection: 1 }]) {
+			const inserted = planHeadingInsert(text, 0, place) as PlannedInsert;
+			const history = new EditHistory();
+			history.wrote('- [ ] a\n## H\n', text, ownEdit(2, '- [ ] a\n## H\n', text, 'insert'));
+			history.wrote(text, inserted.next, inserted.edit);
+			const removal = planHeadingRemoval(inserted.next, 0, fieldOn(inserted.next, inserted.line));
+			expect(removal?.next, JSON.stringify(place)).toBe(text);
+			expect(removal?.edit.history, JSON.stringify(place)).toBe('cancel');
+			history.wrote(inserted.next, text, (removal as { edit: OwnEdit }).edit);
+			expect(history.undo(text)?.next, JSON.stringify(place)).toBe('- [ ] a\n## H\n');
+		}
+	});
+	test('undo and redo never leave an empty new heading without its field, once it is named', () => {
+		const text = '- [ ] a\n## H\n- [ ] b\n';
+		const state = new ListEditing(start);
+		state.text = '- [ ] a\n## H\n';
+		state.applyOwn(text, ownEdit(2, state.text, text, 'insert'));
+		const inserted = planHeadingInsert(state.text, 0, { afterItem: 0 }) as PlannedInsert;
+		state.applyOwn(inserted.next, inserted.edit);
+		const field = { heading: state.track(inserted.line), before: '' };
+		const saved = saveHeadingName(state.text, 0, field, 'Kitchen');
+		if (saved.kind !== 'write') throw new Error(`expected a write, got ${saved.kind}`);
+		state.applyOwn(saved.next, saved.edit);
+		const named = state.text;
+		const hasEmptyHeading = () => {
+			const { lines, model } = list(state.text);
+			return model.sections.some((s) => s.headingLine !== null && headingText(lines, s.headingLine) === '');
+		};
+		const step = (write: { next: string; edit: OwnEdit } | null) => {
+			expect(write).not.toBeNull();
+			state.applyOwn((write as { next: string }).next, (write as { edit: OwnEdit }).edit);
+			expect(hasEmptyHeading(), state.text).toBe(false);
+		};
+		step(state.history.undo(state.text));
+		expect(state.text).toBe(text);
+		step(state.history.undo(state.text));
+		step(state.history.redo(state.text));
+		step(state.history.redo(state.text));
+		expect(state.text).toBe(named);
 	});
 	test('removes it from the current text after an outside change elsewhere', () => {
 		const text = '- [ ] a\n##\n- [ ] b\n';

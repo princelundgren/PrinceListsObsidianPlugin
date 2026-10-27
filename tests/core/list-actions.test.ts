@@ -2,7 +2,16 @@ import { describe, expect, test } from 'vitest';
 import { UnsafeEditError } from '../../src/core/edit-check';
 import { followLine, type OwnEdit } from '../../src/core/follow';
 import { headingText } from '../../src/core/display';
-import { planHeadingDelete, planHeadingInsert, planItemDelete, planItemInsert, planItemMove, type ItemPlace } from '../../src/core/list-actions';
+import { EditHistory } from '../../src/core/history';
+import {
+	planHeadingDelete,
+	planHeadingInsert,
+	planItemDelete,
+	planItemInsert,
+	planItemMove,
+	type ItemPlace,
+	type PlannedDelete,
+} from '../../src/core/list-actions';
 import { splitLines } from '../../src/core/lines';
 import { contentStartOf, crlf, FIXTURES, JOINING_CASES, list, readFixture, REFUSED_CASES } from './edit-helpers';
 
@@ -55,7 +64,7 @@ describe('planItemInsert', () => {
 		expect(planned?.next).toBe(`${FRONTMATTER}Note\n\n- [ ] \n- [ ] a\n## H\n- [ ] b\n`);
 		expect(planned?.line).toBe(5);
 		expect(planned?.inserted).toEqual({ textBefore: text, textAfter: planned?.next });
-		expect(planned?.edit).toEqual({ start: 5, delta: 1, kind: 'insert' });
+		expect(planned?.edit).toEqual({ start: 5, delta: 1, kind: 'insert', history: 'new' });
 	});
 	test('first in a list without items goes before the first heading, or at the end', () => {
 		expect(planItemInsert(`${FRONTMATTER}## H\n`, 3, 'first')?.next).toBe(`${FRONTMATTER}- [ ] \n## H\n`);
@@ -111,7 +120,7 @@ describe('planHeadingInsert', () => {
 		const planned = planHeadingInsert(text, 0, { afterItem: 0 });
 		expect(planned?.next).toBe('- [ ] a\n##\n- [ ] b\n');
 		expect(planned?.line).toBe(1);
-		expect(planned?.edit).toEqual({ start: 1, delta: 1, kind: 'insert' });
+		expect(planned?.edit).toEqual({ start: 1, delta: 1, kind: 'insert', history: 'new' });
 	});
 	test("after a section, it goes after the section's hidden rows and content", () => {
 		const text = '## G\n- [ ] a\n- [x] b ✔ 2026-01-01 10:00\n\nText\n\n## K\n';
@@ -150,7 +159,15 @@ describe('planItemDelete', () => {
 		const planned = planItemDelete(text, 0, 0);
 		expect(planned?.next).toBe('- [ ] b\n');
 		expect(planned?.edit).toEqual({ start: 0, delta: -3, kind: 'delete' });
-		expect(planned?.undo).toEqual({ next: text, expected: '- [ ] b\n', edit: { start: 0, delta: 3, kind: 'insert' } });
+		expect(planned?.undo).toEqual({ next: text, expected: '- [ ] b\n', edit: { start: 0, delta: 3, kind: 'insert', history: 'undo' } });
+	});
+	test('its Undo is an undo, so the history can redo the delete', () => {
+		const text = '- [ ] a\n- [ ] b\n';
+		const planned = planItemDelete(text, 0, 0) as PlannedDelete;
+		const history = new EditHistory();
+		history.wrote(text, planned.next, planned.edit);
+		history.wrote(planned.next, planned.undo.next, planned.undo.edit);
+		expect(history.redo(text)?.next).toBe(planned.next);
 	});
 	test('null when no item is on the line any more', () => {
 		expect(planItemDelete('## H\n- [ ] a\n', 0, 0)).toBeNull();
@@ -174,7 +191,7 @@ describe('planHeadingDelete', () => {
 		const text = '- [ ] a\n## H\n- [ ] b\n';
 		const planned = planHeadingDelete(text, 0, 1);
 		expect(planned?.next).toBe('- [ ] a\n- [ ] b\n');
-		expect(planned?.undo).toEqual({ next: text, expected: '- [ ] a\n- [ ] b\n', edit: { start: 1, delta: 1, kind: 'insert' } });
+		expect(planned?.undo).toEqual({ next: text, expected: '- [ ] a\n- [ ] b\n', edit: { start: 1, delta: 1, kind: 'insert', history: 'undo' } });
 	});
 	test('null when no heading is on the line any more', () => {
 		expect(planHeadingDelete('## H\n- [ ] a\n', 0, 1)).toBeNull();

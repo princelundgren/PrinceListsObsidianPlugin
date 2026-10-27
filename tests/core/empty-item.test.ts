@@ -2,7 +2,9 @@ import { describe, expect, test } from 'vitest';
 import { UnsafeEditError } from '../../src/core/edit-check';
 import { insertItem, setItemNotes, toggleItem } from '../../src/core/edit-items';
 import { ListEditing } from '../../src/core/editing';
-import { isEmptyItem, planRemoval } from '../../src/core/empty-item';
+import { isEmptyItem, planRemoval, type Removal } from '../../src/core/empty-item';
+import { ownEdit } from '../../src/core/follow';
+import { EditHistory, textEdit } from '../../src/core/history';
 import { joinLines, splitLines } from '../../src/core/lines';
 import { contentStartOf, list } from './edit-helpers';
 
@@ -43,7 +45,7 @@ describe('planRemoval', () => {
 		const removal = plan(inserted.textAfter, titleLine, inserted);
 		expect(removal?.next).toBe(text);
 		expect(removal?.expected).toBe(inserted.textAfter);
-		expect(removal?.edit).toEqual({ start: titleLine, delta: -2, kind: 'delete' });
+		expect(removal?.edit).toEqual({ start: titleLine, delta: -2, kind: 'delete', history: 'cancel' });
 	});
 
 	test('deletes the item from the current text when something else changed since', () => {
@@ -54,7 +56,7 @@ describe('planRemoval', () => {
 		const removal = plan(ticked, titleLine, inserted);
 		expect(removal?.next).toBe(`${FRONTMATTER}- [ ] a\n- [x] b ✔ 2026-10-21 09:00\n`);
 		expect(removal?.expected).toBe(ticked);
-		expect(removal?.edit).toEqual({ start: titleLine, delta: -1, kind: 'delete' });
+		expect(removal?.edit).toEqual({ start: titleLine, delta: -1, kind: 'delete', history: 'cancel' });
 	});
 
 	test('deletes rather than restores when told to, after the restore was refused', () => {
@@ -76,6 +78,26 @@ describe('planRemoval', () => {
 		const text = `${FRONTMATTER}- [ ] a\n`;
 		const { inserted } = insertEmpty(text, 0);
 		expect(plan(inserted.textAfter, 2, inserted)).toBeNull();
+	});
+
+	test('a removal that restores the text leaves no step, and one from a changed text clears the history', () => {
+		const text = `${FRONTMATTER}- [ ] a\n- [ ] b\n`;
+		const { titleLine, inserted } = insertEmpty(text, 0);
+		const history = new EditHistory();
+		history.wrote(`${FRONTMATTER}- [ ] a\n`, text, ownEdit(4, `${FRONTMATTER}- [ ] a\n`, text, 'insert'));
+		history.wrote(text, inserted.textAfter, ownEdit(titleLine, text, inserted.textAfter, 'insert'));
+		const restore = plan(inserted.textAfter, titleLine, inserted) as Removal;
+		history.wrote(inserted.textAfter, restore.next, restore.edit);
+		expect(history.undo(text)?.next).toBe(`${FRONTMATTER}- [ ] a\n`);
+
+		// The list note typed since: the item is deleted from the text with the note in it.
+		history.wrote(text, inserted.textAfter, ownEdit(titleLine, text, inserted.textAfter, 'insert'));
+		const noted = `${FRONTMATTER}Note\n\n- [ ] a\n- [ ] \n- [ ] b\n`;
+		history.typed({}, inserted.textAfter, noted, textEdit(inserted.textAfter, noted));
+		const removal = plan(noted, titleLine + 2, inserted) as Removal;
+		expect(removal.next).toBe(`${FRONTMATTER}Note\n\n- [ ] a\n- [ ] b\n`);
+		history.wrote(noted, removal.next, removal.edit);
+		expect(history.undo(removal.next)).toBeNull();
 	});
 
 	test('throws when deleting it would change how the rest reads', () => {
