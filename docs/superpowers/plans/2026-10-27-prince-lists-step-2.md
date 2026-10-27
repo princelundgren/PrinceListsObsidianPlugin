@@ -71,8 +71,8 @@ manual check runs there, never in a vault with real notes.
   `setIcon`; the star is `--color-yellow`, the hint and the collapse arrow `--text-faint`. No
   hard-coded colors.
 - **Interface text** added in step two is this, worded exactly:
-  - Commands and menu items: "Turn into list", "Find in list", "Open schedule", "Add star",
-    "Remove star", "Delete".
+  - Commands and menu items: "Turn into list", "Find in list", "Open schedule", "Delete".
+  - The card's star button's `aria-label`: "Add star" or "Remove star".
   - "The note's properties can't be read, so it wasn't turned into a list."
   - "The note's princelists property runs over several lines, so it wasn't turned into a list."
   - "Couldn't turn {name} into a list.", where `{name}` is the note's name **(call)**.
@@ -274,7 +274,8 @@ manual check runs there, never in a vault with real notes.
   3. With Tasks installed, a query still lists a starred done item with its ⏳ date, and shows ⭐
      in its description.
 - [ ] **Step 6: Update step one's design.** In "Editing", the title field hides the star too and
-  puts it back on save; in "Item actions", add "Add star" and "Remove star".
+  puts it back on save; "Item actions" says the star is a button on the open card, not a menu
+  entry.
 - [ ] **Step 7: Commit** with the message "Star an item".
 
 ### Task 3: Hint at adding to an empty list, and add with Cmd+Enter
@@ -626,7 +627,7 @@ manual check runs there, never in a vault with real notes.
   "Tomorrow", `moment(day, 'YYYY-MM-DD').format('dddd')`, or `.format('ll')` **(call)**; and
   `addWhen(rowEl: HTMLElement, day: string, today: string): void`, a span with the class
   `princelists-when` holding the `calendar` icon and the label.
-- Produces, in `src/view/card-when.ts`: `buildWhenRow(body: HTMLElement): void`, `showWhen(card:
+- Produces, in `src/view/card-when.ts`: `buildWhenPicker(tools: HTMLElement): void`, `showWhen(card:
   Card, day: string | null): void` and `whenChange(view, input: HTMLInputElement): void`.
 
 - [ ] **Step 1: Write the failing tests** in `tests/core/when.test.ts`, with today `2026-10-27`:
