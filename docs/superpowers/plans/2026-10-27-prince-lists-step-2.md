@@ -1102,8 +1102,8 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
   with an empty line inside, a callout holding a list, a nested numbered and checklist list, a
   `$$` block with an empty line inside and a link definition: the pieces, the item pieces (none
   from the callout), `pieceText` of a nested item, every `nextItemMarker` example above, each
-  `pieceEnter` kind, including an empty nested item inside the field and one opened alone, and `neighborPiece` into a parent and a first
-  child.
+  `pieceEnter` kind, including an empty nested item inside the field and one opened alone, and
+  `neighborPiece` into a parent and a first child.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
 - [ ] **Step 3: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 4: Commit** with the message "Split notes into pieces".
@@ -1165,8 +1165,9 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
     string; start: number }, checklist: readonly ChecklistLine[] | null, open: LineRange | null):
     Component`: `start` is the notes' first file line (`notesStartLine`), and every range here and
     in the tags is in file lines. Each piece is rendered into its own `.princelists-note-piece`,
-    tagged with its range, its boxes enabled against the checklist lines inside that range only. Below them a `.princelists-notes-end` strip
-    to click; with no notes, the "Notes" placeholder instead. The open range isn't drawn.
+    tagged with its range, its boxes enabled against the checklist lines inside that range only.
+    Below them a `.princelists-notes-end` strip to click; with no notes, the "Notes" placeholder
+    instead. The open range isn't drawn.
   - `openPieceAt(view: PrinceListView, area: HTMLElement, click: MouseEvent): void`: the clicked
     piece by its tag, or, in a list piece whose drawn `li` count equals `itemPieces`' count, the
     clicked `li`'s item. A tag that isn't among the current pieces draws the notes again and opens

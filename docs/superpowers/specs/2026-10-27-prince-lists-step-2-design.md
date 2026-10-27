@@ -400,8 +400,9 @@ renderer, and only the part you click becomes a plain-text field.
   **(call)**.
 - **Saving changes only the open block's lines,** which take the file's usual line ending; the
   rest of the notes keeps every byte, so a change another device made to another block stays
-  **(call)**. The item's indent is put back, as before. An outside change that takes the block's own lines leaves the field unable to save, with
-  the same notice and copy button as a card whose item went.
+  **(call)**. The item's indent is put back, as before. An outside change that takes the block's
+  own lines leaves the field unable to save, with the same notice and copy button as a card whose
+  item went.
 - **Leaving the field draws the notes again;** clicking another block moves the field there. The
   format bar, Cmd+B, Cmd+I and Cmd+K, a pasted picture and the field's own Undo all act on the open
   block. A picture dropped on drawn notes goes in a new block at the end **(call)**.
