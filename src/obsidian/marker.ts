@@ -1,5 +1,6 @@
 import { type FrontMatterInfo, getFrontMatterInfo, parseYaml } from 'obsidian';
-import { isMarkerValue, lineAfterFrontmatter, opensWithFrontmatter } from '../core/frontmatter';
+import { isMarkerValue, isYamlMapping, lineAfterFrontmatter, opensWithFrontmatter } from '../core/frontmatter';
+import type { FrontmatterShape } from '../core/marker-edit';
 
 // Read from the text, not the metadata cache: getFileCache returns null for a file that isn't
 // cached yet, such as one Sync just wrote.
@@ -22,4 +23,15 @@ export function isListText(text: string): boolean {
 export function contentStartLine(text: string): number {
 	const info = leadingFrontmatter(text);
 	return info ? lineAfterFrontmatter(text, info.contentStart) : 0;
+}
+
+export function readFrontmatter(text: string): FrontmatterShape | null {
+	const info = leadingFrontmatter(text);
+	if (!info) return null;
+	const closingLine = lineAfterFrontmatter(text, info.contentStart) - 1;
+	try {
+		return { closingLine, isMapping: isYamlMapping(parseYaml(info.frontmatter)) };
+	} catch {
+		return { closingLine, isMapping: false };
+	}
 }
