@@ -1,4 +1,4 @@
-import { moveEdit, type MoveEdit, type OwnEdit, type RunEdit } from './follow';
+import { moveEdit, ownEdit, type MoveEdit, type OwnEdit, type RunEdit } from './follow';
 import { splitLines } from './lines';
 
 export const HISTORY_LIMIT = 100;
@@ -9,13 +9,14 @@ export interface HistoryWrite {
 	edit: OwnEdit;
 }
 
-// `move`: a drag's map, which its undo turns around. `session`: the typing session whose keystrokes
-// make this step, or null. `joinLine`: the line of the empty item or heading this step added, until
-// the first edit of that line joins the step.
+// `edit`: the edit the action that made this step wrote, which its undo turns around, or null for a
+// typing session's. `session`: the typing session whose keystrokes make this step, or null.
+// `joinLine`: the line of the empty item or heading this step added, until the first edit of that
+// line joins the step.
 interface Step {
 	before: string;
 	after: string;
-	move: MoveEdit | null;
+	edit: OwnEdit | null;
 	session: object | null;
 	joinLine: number | null;
 }
@@ -58,7 +59,7 @@ export class EditHistory {
 			top.joinLine = null;
 		} else {
 			const joinLine = edit.history === 'new' ? edit.start : null;
-			this.push({ before, after, move: edit.kind === 'move' ? edit : null, session: null, joinLine });
+			this.push({ before, after, edit: unmarked(edit), session: null, joinLine });
 		}
 	}
 
@@ -71,7 +72,7 @@ export class EditHistory {
 			top.joinLine = null;
 		}
 		if (top?.session !== session) {
-			if (after !== before) this.push({ before, after, move: null, session, joinLine: null });
+			if (after !== before) this.push({ before, after, edit: null, session, joinLine: null });
 			return;
 		}
 		top.after = after;
@@ -81,14 +82,14 @@ export class EditHistory {
 	undo(text: string): HistoryWrite | null {
 		const step = this.top();
 		if (step?.after !== text) return null;
-		const edit = step.move ? moveEdit(movedBack(step.move, step.after)) : textEdit(step.after, step.before);
+		const edit = step.edit ? inverse(step.edit, step.after, step.before) : textEdit(step.after, step.before);
 		return { next: step.before, edit: { ...edit, history: 'undo' } };
 	}
 
 	redo(text: string): HistoryWrite | null {
 		const step = this.redoSteps[this.redoSteps.length - 1];
 		if (step?.before !== text) return null;
-		const edit = step.move ?? textEdit(step.before, step.after);
+		const edit = step.edit ?? textEdit(step.before, step.after);
 		return { next: step.after, edit: { ...edit, history: 'redo' } };
 	}
 
@@ -126,6 +127,19 @@ export class EditHistory {
 // The first edit of a new empty item's or heading's line, such as its title or name.
 function joins(step: Step, edit: OwnEdit): boolean {
 	return step.joinLine !== null && edit.kind === 'change' && edit.start === step.joinLine;
+}
+
+// Without its history mark, and without `retitle`: an undo or redo writes the whole text.
+function unmarked(edit: OwnEdit): OwnEdit {
+	if (edit.kind === 'move') return { start: edit.start, kind: 'move', moved: edit.moved };
+	return { start: edit.start, delta: edit.delta, kind: edit.kind };
+}
+
+// The edit that takes `after` back to `before`, the text `edit` started from.
+function inverse(edit: OwnEdit, after: string, before: string): OwnEdit {
+	if (edit.kind === 'move') return moveEdit(movedBack(edit, after));
+	const kind = edit.kind === 'insert' ? 'delete' : edit.kind === 'delete' ? 'insert' : 'change';
+	return ownEdit(edit.start, after, before, kind);
 }
 
 // For each line after the move, the line it came from; null for a line the move added.

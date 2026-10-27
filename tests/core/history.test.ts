@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { followLine, moveEdit, ownEdit, type OwnEdit } from '../../src/core/follow';
 import { EditHistory, HISTORY_LIMIT, textEdit } from '../../src/core/history';
-import { planItemMove, type PlannedMove } from '../../src/core/list-actions';
+import { planItemDelete, planItemMove, type PlannedDelete, type PlannedMove } from '../../src/core/list-actions';
 
 const t0 = '- [ ] a\n- [ ] b\n';
 const t1 = '- [x] a ✔ 2026-10-22 09:00\n- [ ] b\n';
@@ -152,6 +152,19 @@ describe('EditHistory', () => {
 		expect(history.redo(t1)).toBeNull();
 	});
 
+	test("an action's undo and redo keep its own edit, so a line follows the right copy of a duplicate item", () => {
+		const text = '- [ ] Milk\n\tnote\n- [ ] Milk\n- [ ] X\n';
+		const deleted = planItemDelete(text, 0, 0) as PlannedDelete;
+		expect(deleted.next).toBe('- [ ] Milk\n- [ ] X\n');
+		const history = new EditHistory();
+		history.wrote(text, deleted.next, deleted.edit);
+		const undo = history.undo(deleted.next) as { next: string; edit: OwnEdit };
+		expect(undo).toEqual({ next: text, edit: { start: 0, delta: 2, kind: 'insert', history: 'undo' } });
+		expect(followLine(0, undo.edit)).toBe(2);
+		history.wrote(deleted.next, text, undo.edit);
+		expect(history.redo(text)).toEqual({ next: deleted.next, edit: { start: 0, delta: -2, kind: 'delete', history: 'redo' } });
+	});
+
 	describe('a new item or heading', () => {
 		// t0 with an empty item added at line 1, then its title typed.
 		const added = '- [ ] a\n- [ ] \n- [ ] b\n';
@@ -197,6 +210,20 @@ describe('EditHistory', () => {
 			const both = '- [x] a ✔ 2026-10-22 09:00\n- [ ] milk\n- [ ] b\n';
 			between.typed(s, ticked, both, typing(ticked, both));
 			expect(between.undo(both)?.next).toBe(ticked);
+		});
+
+		test('its undo removes its own line, though a copy of it follows', () => {
+			const before = '- [ ] a\n- [ ] a\n';
+			const empty = '- [ ] a\n- [ ] \n- [ ] a\n';
+			const copy = '- [ ] a\n- [ ] a\n- [ ] a\n';
+			const history = new EditHistory();
+			history.wrote(before, empty, { ...ownEdit(1, before, empty, 'insert'), history: 'new' });
+			history.typed(s, empty, copy, ownEdit(1, empty, copy, 'change'));
+			const undo = history.undo(copy) as { next: string; edit: OwnEdit };
+			expect(undo).toEqual({ next: before, edit: { start: 1, delta: -1, kind: 'delete', history: 'undo' } });
+			expect(followLine(1, undo.edit)).toBeNull();
+			history.wrote(copy, before, undo.edit);
+			expect(history.redo(before)).toEqual({ next: copy, edit: { start: 1, delta: 1, kind: 'insert', history: 'redo' } });
 		});
 
 		test("one nothing joined can't be redone once undone, since it would come back empty", () => {
