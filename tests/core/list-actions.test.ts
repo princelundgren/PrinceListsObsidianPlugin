@@ -8,6 +8,7 @@ import {
 	planHeadingInsert,
 	planItemDelete,
 	planItemInsert,
+	planItemLineEdit,
 	planItemMove,
 	type ItemPlace,
 	type PlannedDelete,
@@ -256,5 +257,21 @@ describe('planItemMove', () => {
 				}
 			}
 		}
+	});
+});
+
+describe('planItemLineEdit', () => {
+	const text = `${FRONTMATTER}## H\n- [ ] a\n`;
+
+	test('changes the item line and marks the edit so a title field follows it', () => {
+		const star = (line: string) => `${line} ⭐`;
+		const planned = planItemLineEdit(text, start(text), 4, star);
+		expect(planned?.next).toBe(`${FRONTMATTER}## H\n- [ ] a ⭐\n`);
+		expect(planned?.edit).toEqual({ start: 4, delta: 0, kind: 'change', retitle: star });
+	});
+
+	test('is null on a heading and for a change that changes nothing', () => {
+		expect(planItemLineEdit(text, start(text), 3, (line) => `${line} ⭐`)).toBeNull();
+		expect(planItemLineEdit(text, start(text), 4, (line) => line)).toBeNull();
 	});
 });

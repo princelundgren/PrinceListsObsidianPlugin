@@ -2,7 +2,7 @@ import { deleteHeading, insertHeading } from './edit-headings';
 import { deleteItem, insertItem, insertItemInSection, moveItemWithLineMap, type MoveTarget } from './edit-items';
 import type { InsertedItem } from './empty-item';
 import { moveEdit, ownEdit, type OwnEdit } from './follow';
-import { joinLines, splitLines, type Line } from './lines';
+import { joinLines, spliceLines, splitLines, type Line } from './lines';
 import { itemAt, parseList, type ListModel, type Section } from './parse';
 
 /**
@@ -23,6 +23,11 @@ export interface PlannedInsert {
 }
 
 export interface PlannedMove {
+	next: string;
+	edit: OwnEdit;
+}
+
+export interface PlannedLineEdit {
 	next: string;
 	edit: OwnEdit;
 }
@@ -92,6 +97,23 @@ export function planItemMove(text: string, contentStart: number, titleLine: numb
 	const moved = moveItemWithLineMap(lines, model, item, target);
 	const next = joinLines(moved.lines);
 	return next === text ? null : { next, edit: moveEdit(moved.moved) };
+}
+
+// A change to one item's title line, such as a star. The edit carries `change` as its `retitle`, so a
+// title field with focus makes the same change to its saved line.
+export function planItemLineEdit(
+	text: string,
+	contentStart: number,
+	titleLine: number,
+	change: (line: string) => string,
+): PlannedLineEdit | null {
+	const { lines, model } = parse(text, contentStart);
+	const line = lines[titleLine];
+	if (!line || !itemAt(model, titleLine)) return null;
+	const changed = change(line.text);
+	if (changed === line.text) return null;
+	const next = joinLines(spliceLines(lines, titleLine, 1, [{ text: changed, eol: line.eol }]));
+	return { next, edit: { start: titleLine, delta: 0, kind: 'change', retitle: change } };
 }
 
 function parse(text: string, contentStart: number): { lines: Line[]; model: ListModel } {

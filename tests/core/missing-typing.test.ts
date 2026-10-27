@@ -10,6 +10,10 @@ describe('missingTyping', () => {
 		expect(missingTyping('- [ ] fix\n\tmeasu befo\n', 'measure the counter twice befo', 'notes')).toBe(true);
 	});
 
+	test('finds a typed title on a starred item', () => {
+		expect(missingTyping('- [ ] milk ⭐\n', 'milk', 'title')).toBe(false);
+	});
+
 	test('is false for an empty or blank field', () => {
 		expect(missingTyping('- [ ] fix\n', '', 'notes')).toBe(false);
 		expect(missingTyping('- [ ] fix\n', '  \n\t\n', 'notes')).toBe(false);
