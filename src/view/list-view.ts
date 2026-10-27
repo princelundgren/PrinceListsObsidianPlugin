@@ -11,6 +11,7 @@ import { openAsMarkdown } from '../obsidian/switch';
 import { buildNewItemButton } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
 import { fitHeight } from './dom';
+import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
@@ -145,8 +146,9 @@ export class PrinceListView extends TextFileView {
 		registerFieldEvents(this);
 		// The collapse arrows always show where there's no hover.
 		this.contentEl.toggleClass('princelists-is-mobile', Platform.isMobile);
-		enableMouseDrag(this, this.contentEl);
-		if (Platform.isMobile) enableTouchDrag(this);
+		const dragHost = listDragHost(this);
+		enableMouseDrag(dragHost);
+		if (Platform.isMobile) enableTouchDrag(dragHost);
 		this.newItemButton = buildNewItemButton(this);
 		this.archivedButton = this.addAction('square-check-big', 'Show archived', () => this.toggleArchived());
 		this.syncArchivedButton();
