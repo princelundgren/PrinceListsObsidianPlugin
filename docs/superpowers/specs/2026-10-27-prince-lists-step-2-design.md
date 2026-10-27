@@ -23,8 +23,8 @@ only documented Obsidian APIs are used.
   block. Its items can be ticked, added, deleted and dragged there, without cards.
 - **"Turn into list"** adds the marker to the note you're in.
 - **An item can have a When,** the day you plan to do it, shown with a calendar icon. A Schedule
-  view gathers every list's items with a When: Today, with anything overdue, then Tomorrow, Coming
-  week, Next month and Later.
+  view gathers every list's items with a When: Today, with anything overdue, then Tomorrow, Next
+  7 days and Later.
 - **An item can be starred.**
 - **An empty list says how to add an item,** and Cmd+Enter adds one.
 - **Dragging a heading moves its whole section,** and an arrow left of a heading collapses it.
@@ -209,10 +209,11 @@ current todo app. Step one's own "Done when" doesn't change.
 - **The Schedule view** is a view of its own, opened with an "Open schedule" command and a
   calendar ribbon icon **(call)**. It gathers, from every list in the vault, the items with a When
   that are open or done but not yet archived.
-- **Its groups (owner):** Today, which includes everything overdue, then Tomorrow, Coming week,
-  Next month and Later.
-  - The ranges **(call)**: Coming week is two to seven days ahead, Next month 8 to 31 days ahead,
-    and Later anything after that. An empty group is hidden.
+- **Its groups (owner, 2026-10-27):** Today, which includes everything overdue, then Tomorrow,
+  Next 7 days and Later. An earlier "Next month", 8 to 31 days ahead, read as the calendar month
+  and seemed to leave a gap after the week.
+  - The ranges **(call)**: Next 7 days is two to seven days ahead, and Later anything after that.
+    An empty group is hidden.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day, except
   for today's items in Today.
