@@ -262,8 +262,18 @@ button.princelists-new-item {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The card's ⋯, an icon on the card's own background. */
-button.princelists-card-actions {
+/* The card's When, star and ⋯, on the title's first line. */
+.princelists-card-tools {
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: var(--size-2-1);
+}
+
+/* Icons on the card's own background. */
+button.princelists-card-actions,
+button.princelists-card-star,
+.princelists-when-button {
 	flex: none;
 	height: auto;
 	padding: var(--size-2-2);
@@ -274,7 +284,9 @@ button.princelists-card-actions {
 }
 
 @media (hover: hover) {
-	button.princelists-card-actions:hover {
+	button.princelists-card-actions:hover,
+	button.princelists-card-star:hover,
+	.princelists-when-picker:hover .princelists-when-button {
 		background-color: var(--background-modifier-hover);
 		box-shadow: none;
 		color: var(--icon-color-hover);
@@ -336,25 +348,32 @@ textarea.princelists-heading-field {
 	display: flex;
 	align-items: center;
 	gap: var(--size-2-1);
-	color: var(--text-muted);
 	font-size: var(--font-ui-small);
 }
 
-.princelists-when-empty {
-	color: var(--text-faint);
+/* Filled, as the row's star. */
+button.princelists-card-star.is-starred {
+	color: var(--color-yellow);
+}
+
+button.princelists-card-star.is-starred svg {
+	fill: currentColor;
 }
 
 /* Two classes, to outrank Obsidian's own `input[type="date"]` rule. */
 .princelists-when-picker > .princelists-when-input {
 	position: absolute;
 	inset: 0;
+	box-sizing: border-box;
 	width: 100%;
+	min-width: 0;
 	height: 100%;
+	padding: 0;
 	opacity: 0;
 	cursor: pointer;
 }
 
-.princelists-when-clear {
+button.princelists-when-clear {
 	height: auto;
 	padding: 0 var(--size-2-1);
 	background: none;

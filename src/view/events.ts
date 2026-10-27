@@ -3,6 +3,7 @@ import { openAsMarkdown } from '../obsidian/switch';
 import { addItem, addItemBelowCard, hasNoItems } from './add-button';
 import {
 	CARD_ACTIONS_CLASS,
+	CARD_STAR_CLASS,
 	CARD_NOTES_CLASS,
 	CARD_TITLE_CLASS,
 	cardTitleBlur,
@@ -15,6 +16,7 @@ import {
 	notesInput,
 	openCard,
 } from './card';
+import { toggleCardStar } from './card-star';
 import { clearWhen, whenChange, whenClick, WHEN_CLEAR_CLASS, WHEN_INPUT_CLASS } from './card-when';
 import { checklistClick } from './checklist';
 import { COLLAPSE_CLASS } from './collapse';
@@ -107,6 +109,10 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (view.card?.el.contains(target)) {
+		if (target.closest(`.${CARD_STAR_CLASS}`)) {
+			toggleCardStar(view);
+			return;
+		}
 		const actions = target.closest<HTMLElement>(`.${CARD_ACTIONS_CLASS}`);
 		if (actions) {
 			showCardMenu(view, actions);
