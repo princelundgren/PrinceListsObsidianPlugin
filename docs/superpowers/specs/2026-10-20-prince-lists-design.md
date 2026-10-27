@@ -892,8 +892,8 @@ needs no code.
     the field with focus. The browser keeps one text history for the whole page, so once the field
     has nothing left to undo, Cmd+Z does nothing rather than reach typing in another field, which
     nothing would save.
-  - The list's history holds 100 steps, and only the list's text: undoing a picture's link leaves
-    the picture's file.
+  - The list's history and a card field's each hold 100 steps, and only text: undoing a picture's
+    link leaves the picture's file.
   - In 1a, the only undo is the Undo button shown after a delete.
 
 ## Technical approach

@@ -1,3 +1,5 @@
+import { HISTORY_LIMIT } from './history';
+
 /** A text field's text and selection. */
 export interface FieldState {
 	value: string;
@@ -30,10 +32,14 @@ export class FieldHistory {
 	}
 
 	changed(before: FieldState, after: FieldState, kind: string): void {
+		this.pending = null;
 		if (before.value === after.value) return;
 		this.redoSteps.length = 0;
 		const joins = this.last !== null && this.last.kind === kind && RUNS.has(kind) && sameState(this.last.after, before);
-		if (!joins) this.undoSteps.push(before);
+		if (!joins) {
+			this.undoSteps.push(before);
+			if (this.undoSteps.length > HISTORY_LIMIT) this.undoSteps.shift();
+		}
 		this.last = { kind, after };
 	}
 

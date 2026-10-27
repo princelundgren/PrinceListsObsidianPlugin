@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { FieldHistory, type FieldState } from '../../src/core/field-history';
+import { HISTORY_LIMIT } from '../../src/core/history';
 
 // A field holding `value` with the caret at its end.
 function at(value: string): FieldState {
@@ -63,6 +64,27 @@ describe('FieldHistory', () => {
 		history.willChange(at('a'), 'insertText');
 		history.didChange(at('ab'));
 		expect(history.undo(at('ab'))).toEqual(at('a'));
+	});
+
+	test('keeps as many steps as the list history, dropping the oldest', () => {
+		const history = new FieldHistory();
+		for (let i = 0; i <= HISTORY_LIMIT; i++) history.changed(at(String(i)), at(String(i + 1)), 'script');
+		let state: FieldState | null = at(String(HISTORY_LIMIT + 1));
+		let undone = 0;
+		while ((state = history.undo(state ?? at(''))) !== null) {
+			undone++;
+			expect(state).toEqual(at(String(HISTORY_LIMIT + 1 - undone)));
+		}
+		expect(undone).toBe(HISTORY_LIMIT);
+	});
+
+	test('records a change the view makes as one step, even after an announced change that never happened', () => {
+		const history = new FieldHistory();
+		history.willChange(at(''), 'deleteContentBackward');
+		history.changed(at(''), at('**a**'), 'script');
+		history.didChange(at('**a**'));
+		expect(history.undo(at('**a**'))).toEqual(at(''));
+		expect(history.undo(at(''))).toBeNull();
 	});
 
 	test('forgets a change that was announced but never happened', () => {
