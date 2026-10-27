@@ -1,13 +1,21 @@
 import { ItemView, TFile, type CachedMetadata, type Component, type TAbstractFile } from 'obsidian';
-import { SCHEDULE_ICON, VIEW_TYPE_SCHEDULE } from '../constants';
+import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
+import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
+import { joinLines, splitLines } from '../core/lines';
+import { itemAt, parseList } from '../core/parse';
 import { groupSchedule, scheduledItems, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import { dayOf } from '../core/when';
+import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine } from '../obsidian/marker';
-import { addHiddenLabel } from './dom';
-import { renderInline, type MarkdownHost } from './notes';
+import { openAsList } from '../obsidian/switch';
+import { addHiddenLabel, targetOf } from './dom';
+import { PrinceListView } from './list-view';
+import { handleLinkClick, renderInline, type MarkdownHost } from './notes';
+import { openItem } from './open-item';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS } from './render-list';
 import { addStar, addWhen } from './row-marks';
+import { tryEdit } from './write';
 
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	today: 'Today',
@@ -17,9 +25,16 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	later: 'Later',
 };
 
+// A list as the view last read it: a tick is worked out on that text.
+interface ReadList {
+	text: string;
+	items: ScheduledItem[];
+}
+
 // Every list's items with a When, by day (spec, "When and the Schedule view").
 export class ScheduleView extends ItemView implements MarkdownHost {
-	private listItems = new Map<string, ScheduledItem[]>();
+	private lists = new Map<string, ReadList>();
+	private readonly rows = new WeakMap<Element, ScheduledItem>();
 	// Paths an event updated while a refresh was reading, which its older reads must not overwrite.
 	private readonly updatedPaths = new Set<string>();
 	private refreshes = 0;
@@ -46,6 +61,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		this.registerEvent(metadataCache.on('changed', (file, data, cache) => this.listChanged(file, data, cache)));
 		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
+		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
 		await this.refresh();
 	}
 
@@ -57,30 +73,34 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		const refresh = ++this.refreshes;
 		this.updatedPaths.clear();
 		const { vault, metadataCache } = this.app;
-		const lists = vault.getMarkdownFiles().filter((file) => isList(metadataCache.getFileCache(file)));
-		const read = await Promise.all(lists.map(async (file) => [file.path, itemsOf(file, await vault.cachedRead(file))] as const));
+		const files = vault.getMarkdownFiles().filter((file) => isList(metadataCache.getFileCache(file)));
+		const read = await Promise.all(files.map(async (file) => [file.path, readList(file, await vault.cachedRead(file))] as const));
 		if (refresh !== this.refreshes) return;
-		const listItems = new Map(read.filter(([path]) => !this.updatedPaths.has(path)));
+		const lists = new Map(read.filter(([path]) => !this.updatedPaths.has(path)));
 		for (const path of this.updatedPaths) {
-			const items = this.listItems.get(path);
-			if (items) listItems.set(path, items);
+			const list = this.lists.get(path);
+			if (list) lists.set(path, list);
 		}
-		this.listItems = listItems;
+		this.lists = lists;
 		this.draw();
 	}
 
 	private listChanged(file: TFile, text: string, cache: CachedMetadata): void {
+		if (isList(cache)) this.listRead(file, text);
+		else this.listDeleted(file.path);
+	}
+
+	private listRead(file: TFile, text: string): void {
 		this.updatedPaths.add(file.path);
-		if (isList(cache)) this.listItems.set(file.path, itemsOf(file, text));
-		else if (!this.listItems.delete(file.path)) return;
+		this.lists.set(file.path, readList(file, text));
 		this.draw();
 	}
 
 	private async listRenamed(file: TAbstractFile, oldPath: string): Promise<void> {
 		this.updatedPaths.add(oldPath).add(file.path);
-		const wasList = this.listItems.delete(oldPath);
+		const wasList = this.lists.delete(oldPath);
 		if (file instanceof TFile && isList(this.app.metadataCache.getFileCache(file))) {
-			this.listItems.set(file.path, itemsOf(file, await this.app.vault.cachedRead(file)));
+			this.lists.set(file.path, readList(file, await this.app.vault.cachedRead(file)));
 		} else if (!wasList) {
 			return;
 		}
@@ -89,7 +109,47 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 
 	private listDeleted(path: string): void {
 		this.updatedPaths.add(path);
-		if (this.listItems.delete(path)) this.draw();
+		if (this.lists.delete(path)) this.draw();
+	}
+
+	private onClick(evt: MouseEvent): void {
+		const target = targetOf(evt);
+		const rowEl = target?.closest(`.${ITEM_CLASS}`);
+		const item = rowEl && this.rows.get(rowEl);
+		if (!target || !item || handleLinkClick(this.app, item.listPath, evt, target)) return;
+		if (target.closest(`.${CHECKBOX_CLASS}`)) {
+			// The box shows the file: the redraw after the write ticks it.
+			evt.preventDefault();
+			void this.tick(item);
+		} else {
+			void this.openItem(item);
+		}
+	}
+
+	private async tick(item: ScheduledItem): Promise<void> {
+		const list = this.lists.get(item.listPath);
+		const file = this.app.vault.getFileByPath(item.listPath);
+		if (!list || !file) return;
+		const lines = splitLines(list.text);
+		const block = itemAt(parseList(lines, contentStartLine(list.text)), item.titleLine);
+		if (!block) return;
+		const edited = tryEdit(() => toggleItem(lines, block, new Date()));
+		if (!edited) return;
+		const next = joinLines(edited);
+		// Taken at once, so a second tick in this list before the metadata cache catches up builds on it.
+		if ((await editListFile(this.app, file, list.text, next)) === 'written') this.listRead(file, next);
+	}
+
+	// In a tab that already shows the list, else a new one.
+	private async openItem(item: ScheduledItem): Promise<void> {
+		const file = this.app.vault.getFileByPath(item.listPath);
+		if (!file) return;
+		const { workspace } = this.app;
+		const shown = workspace.getLeavesOfType(VIEW_TYPE_LIST).find((leaf) => leaf.view instanceof PrinceListView && leaf.view.file === file);
+		const leaf = shown ?? workspace.getLeaf('tab');
+		if (!shown) await openAsList(leaf, file);
+		workspace.setActiveLeaf(leaf, { focus: true });
+		if (leaf.view instanceof PrinceListView && leaf.view.file === file) openItem(leaf.view, item.titleLine, item.line);
 	}
 
 	private draw(): void {
@@ -98,7 +158,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		this.contentEl.empty();
 		const sizer = this.contentEl.createDiv({ cls: 'princelists-sizer' });
 		const today = dayOf(new Date());
-		const groups = groupSchedule([...this.listItems.values()].flat(), today);
+		const groups = groupSchedule([...this.lists.values()].flatMap((list) => list.items), today);
 		if (groups.length === 0) sizer.createDiv({ cls: 'princelists-schedule-empty', text: 'No items have a When.' });
 		for (const { group, items } of groups) {
 			sizer.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
@@ -114,13 +174,13 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		rowEl.toggleClass('is-done', item.done);
 		const box = rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' });
 		box.checked = item.done;
-		box.disabled = true;
 		addHiddenLabel(box, item.title);
 		const block = renderInline(this, item.listPath, rowEl.createDiv({ cls: 'princelists-item-title' }), item.title);
 		if (block) this.blocks.push(block);
 		if (item.starred) addStar(rowEl);
 		rowEl.createSpan({ cls: 'princelists-schedule-list', text: item.listName });
 		if (today !== null) addWhen(rowEl, item.day, today);
+		this.rows.set(rowEl, item);
 		return rowEl;
 	}
 
@@ -134,6 +194,6 @@ function isList(cache: CachedMetadata | null): boolean {
 	return isMarkerValue(cache?.frontmatter);
 }
 
-function itemsOf(file: TFile, text: string): ScheduledItem[] {
-	return scheduledItems(text, contentStartLine(text), new Date(), { path: file.path, name: file.basename });
+function readList(file: TFile, text: string): ReadList {
+	return { text, items: scheduledItems(text, contentStartLine(text), new Date(), { path: file.path, name: file.basename }) };
 }

@@ -7,6 +7,7 @@ import type { PrinceListView } from './list-view';
 
 export const UNSAFE_EDIT_NOTICE = "This list's layout can't take that change. Make it in Markdown instead.";
 export const CHANGED_ELSEWHERE_NOTICE = 'This list changed elsewhere. Try again.';
+export const SAVE_FAILED_NOTICE = "Couldn't save the change to this list.";
 export const LOST_TYPING_NOTICE = 'This list changed elsewhere, and your typing in this item may not be in it.';
 
 // A one-off action's write, through guardedWrite. `written`: the file now holds `next`. A write that
@@ -41,7 +42,7 @@ export async function writeAction(
 		expected,
 	).catch((error: unknown) => {
 		console.error(error);
-		new Notice("Couldn't save the change to this list.");
+		new Notice(SAVE_FAILED_NOTICE);
 		return 'failed' as const;
 	});
 	if (outcome === 'refused' && refusedNotice !== null) new Notice(refusedNotice);
