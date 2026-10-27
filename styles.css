@@ -180,8 +180,8 @@ textarea.princelists-list-note-editor {
 	cursor: text;
 }
 
-/* Empty notes are three lines tall, so they are easy to tap. */
-.princelists-card .princelists-placeholder,
+/* A card's notes are at least three lines tall, empty or not, so they are easy to tap. */
+.princelists-card-notes,
 textarea.princelists-card-notes-editor {
 	min-height: calc(3em * var(--line-height-normal));
 }

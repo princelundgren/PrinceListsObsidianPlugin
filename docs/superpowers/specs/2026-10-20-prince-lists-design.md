@@ -524,8 +524,9 @@ stays, and the blank line stays with it.
   and the rendered notes.
   - Notes use Obsidian's own Markdown rendering, so pictures, links and embeds look the way they
     do in any note.
-  - **Empty notes show a gray "Notes" three lines tall (owner, 2026-10-27),** and the notes field
-    is at least that tall while it's being typed in, so it's easy to tap.
+  - **A card's notes are at least three lines tall (owner, 2026-10-27),** empty or not, and so is
+    the notes field while it's being typed in, so it's easy to tap. Empty notes show a gray
+    "Notes".
   - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
     typed in reads as its text, as a title does.
   - Links in a card can be clicked.
