@@ -79,7 +79,7 @@ export function renderList(
 		list = null;
 		return isHeading && line === field.line;
 	};
-	const sections = visibleSections(lines, model, new Date(), view.showArchived);
+	const sections = visibleSections(lines, model, new Date(), { showArchived: view.showArchived, query: view.filter ?? '', keepLine: view.selected });
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {
 		if (section.heading) {

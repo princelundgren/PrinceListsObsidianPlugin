@@ -4,6 +4,7 @@ import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
 import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
+import { openFilter } from './view/filter';
 import { PrinceListView } from './view/list-view';
 
 export default class PrinceListsPlugin extends Plugin {
@@ -56,6 +57,17 @@ export default class PrinceListsPlugin extends Plugin {
 				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (!view?.file || !isListText(view.getViewData())) return false;
 				if (!checking) void openAsList(view.leaf, view.file);
+				return true;
+			},
+		});
+		// On the iPhone, where Cmd+F needs a keyboard.
+		this.addCommand({
+			id: 'find-in-list',
+			name: 'Find in list',
+			checkCallback: (checking) => {
+				const view = this.app.workspace.getActiveViewOfType(PrinceListView);
+				if (!view?.file || !isListText(view.text)) return false;
+				if (!checking) openFilter(view);
 				return true;
 			},
 		});

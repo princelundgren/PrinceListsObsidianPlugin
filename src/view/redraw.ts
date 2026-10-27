@@ -4,6 +4,7 @@ import { hasNoItems } from './add-button';
 import { dismissCard, redrawCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
 import { buildListNote, buildListTitle } from './fields';
+import { buildFilterField } from './filter';
 import type { PrinceListView } from './list-view';
 import { OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
 
@@ -24,6 +25,9 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		const { lines, model } = view.parse();
 		if (kept && kept === view.listNoteEl) slot = fresh.createDiv();
 		else view.listNoteEl = buildListNote(view, fresh, lines, model);
+		if (view.filter === null) view.filterEl = null;
+		else if (kept && kept === view.filterEl) slot = fresh.createDiv();
+		else view.filterEl = buildFilterField(view, fresh);
 		const card = placeCard(view, kept);
 		if (card?.keeps) slot = card.el;
 		const field = placeField(view, kept);
@@ -37,6 +41,8 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		view.endListNote();
 		view.headingField = null;
 		view.listNoteEl = null;
+		view.filter = null;
+		view.filterEl = null;
 		view.rowsHeldBack = false;
 		fresh.createEl('p', { text: "This note isn't a list" });
 		fresh.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
@@ -83,5 +89,5 @@ function keptElement(view: PrinceListView, focusing: Element | null): HTMLElemen
 	if (!focused || !view.contentEl.contains(focused)) return null;
 	// A link in the rendered note can hold focus too; only the note's editor keeps it.
 	const note = view.listNote ? view.listNoteEl : null;
-	return [view.listTitleEl, note, view.card?.el, view.headingField?.el].find((el) => el?.contains(focused)) ?? null;
+	return [view.listTitleEl, note, view.filterEl, view.card?.el, view.headingField?.el].find((el) => el?.contains(focused)) ?? null;
 }

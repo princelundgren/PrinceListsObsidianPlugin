@@ -1,8 +1,9 @@
 import { isArchived } from './archive';
 import { splitAtx } from './edit-headings';
+import { getItemNotes } from './edit-items';
 import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
 import type { Line } from './lines';
-import type { ListModel } from './parse';
+import type { ItemBlock, ListModel } from './parse';
 import { splitStar } from './star';
 
 export interface ItemRow {
@@ -33,35 +34,50 @@ export interface SectionRows {
 	rows: ListRow[];
 }
 
+export interface RowFilter {
+	showArchived: boolean;
+	/** What Cmd+F's field holds; '' filters nothing. */
+	query: string;
+	/** The open card's item, which shows whether or not it matches. */
+	keepLine: number | null;
+}
+
 const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 
 // Every heading stays, even when all of its items are hidden, and so does content the plugin leaves
-// alone. Archived is worked out from `now` on each redraw, never written down (spec, "Done and
-// archived").
-export function visibleSections(
-	lines: readonly Line[],
-	model: ListModel,
-	now: Date,
-	showArchived: boolean,
-): SectionRows[] {
+// alone, except while a query filters the list: then only the items that match show, and a heading
+// only while one of its items does. Archived is worked out from `now` on each redraw, never written
+// down (spec, "Done and archived").
+export function visibleSections(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter): SectionRows[] {
+	const filtering = filter.query !== '';
 	return model.sections.map(({ headingLine, items }, i) => {
 		const start = headingLine ?? model.contentStart;
 		const end = model.sections[i + 1]?.headingLine ?? lines.length;
-		const shown: ListRow[] = items.flatMap(({ titleLine }) => {
-			const { text } = lines[titleLine] as Line;
-			const row = itemRow(text, titleLine, now);
-			return isShown(row, showArchived) ? [row] : [];
+		const shown: ListRow[] = items.flatMap((item) => {
+			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now);
+			const kept = item.titleLine === filter.keepLine;
+			if (!kept && !isShown(row, filter.showArchived)) return [];
+			return kept || !filtering || itemMatches(lines, item, row, filter.query) ? [row] : [];
 		});
+		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
+		if (filtering) return { heading: shown.length > 0 ? heading : null, rows: shown };
 		for (const block of model.untouched) {
 			if (block.start < start || block.start >= end) continue;
 			const text = lines.slice(block.start, block.end).map((line) => line.text).join('\n');
 			shown.push({ kind: 'untouched', start: block.start, text });
 		}
-		return {
-			heading: headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) },
-			rows: shown.sort((a, b) => firstLine(a) - firstLine(b)),
-		};
+		return { heading, rows: shown.sort((a, b) => firstLine(a) - firstLine(b)) };
 	});
+}
+
+// As typed: no Unicode normalization, and Markdown matched as written.
+export function matchesQuery(title: string, notes: string, query: string): boolean {
+	const lowered = query.toLowerCase();
+	return title.toLowerCase().includes(lowered) || notes.toLowerCase().includes(lowered);
+}
+
+function itemMatches(lines: readonly Line[], item: ItemBlock, row: ItemRow, query: string): boolean {
+	return matchesQuery(row.title, getItemNotes(lines, item), query);
 }
 
 // A done item is hidden once it is archived, unless "Show archived" is on.

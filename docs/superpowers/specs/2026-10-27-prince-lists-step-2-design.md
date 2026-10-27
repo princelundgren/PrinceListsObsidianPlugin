@@ -114,8 +114,11 @@ current todo app. Step one's own "Done when" doesn't change.
 - **As you type, items whose title or notes don't contain the text hide (call).** The match ignores
   case and compares the text as written, Markdown included, with no Unicode normalization.
 - **A heading shows while one of its items shows (call).** Headings themselves aren't searched.
+- **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and
+  can't match.
 - **Archived items are searched only while "Show archived" is on.**
-- **Escape in the field, or emptying it, ends the filter** and shows every row again. Like "Show
+- **Escape in the field ends the filter** and shows every row again, and so does leaving the field
+  while it's empty. Like "Show
   archived", it isn't remembered **(call)**.
 - **Everything else works while filtering (call):** ticking, cards, dragging and adding. A drop
   goes after the visible row above it, as it does past hidden archived rows. A new item, or an item
