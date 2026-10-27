@@ -8,7 +8,7 @@ import { OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } f
 // Draws everything again from the view's text, except the title, list note, card or heading field that
 // holds focus, or is about to (`focusing`): those stay in place and update after blur.
 export function redraw(view: PrinceListView, focusing: Element | null): void {
-	const { contentEl, listScrollEl } = view;
+	const { contentEl, listScrollEl, listSizerEl } = view;
 	const { scrollTop } = listScrollEl;
 	const kept = keptElement(view, focusing);
 	for (const block of view.blocks.values()) view.removeChild(block);
@@ -37,7 +37,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		fresh.createEl('p', { text: "This note isn't a list" });
 		fresh.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
 	}
-	replaceKeeping(listScrollEl, fresh, kept, slot);
+	replaceKeeping(listSizerEl, fresh, kept, slot);
 	view.newItemButton?.toggle(isListText(view.text));
 	if (view.card && kept === view.card.el) refreshCard(view, view.card);
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);

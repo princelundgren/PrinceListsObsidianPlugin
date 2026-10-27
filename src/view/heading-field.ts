@@ -39,7 +39,7 @@ export function addHeading(view: PrinceListView, place: HeadingPlace): void {
 export function openHeadingField(view: PrinceListView, line: number, isNew = false): void {
 	// A field still open saves as on any blur.
 	view.headingField?.el.blur();
-	const el = createEl('textarea', { cls: [FIELD_CLASS, HEADING_FIELD_CLASS], attr: { rows: 1, 'aria-label': 'Heading' } });
+	const el = createEl('textarea', { cls: [FIELD_CLASS, HEADING_FIELD_CLASS], attr: { rows: 1, placeholder: 'Heading' } });
 	const before = headingText(view.lines(), line);
 	const field: HeadingField = { el, heading: view.editing.track(line), openedAt: line, before, isNew };
 	el.value = field.before;
