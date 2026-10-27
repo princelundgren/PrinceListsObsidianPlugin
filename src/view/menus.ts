@@ -134,6 +134,7 @@ function newItemBelow(view: PrinceListView, line: number): void {
 // Typing waits 2 seconds to be saved, so it is saved first for the Markdown to show it.
 function editItemInMarkdown(view: PrinceListView, line: number): void {
 	const file = view.file;
+	if (!file) return;
 	enqueueAt(view, line, async (pending) => {
 		try {
 			await view.save();
@@ -142,7 +143,7 @@ function editItemInMarkdown(view: PrinceListView, line: number): void {
 			new Notice(SAVE_FAILED_NOTICE);
 			return;
 		}
-		if (file && pending?.line != null) await editInMarkdown(view.app.workspace, file, pending.line);
+		if (pending?.line != null) await editInMarkdown(view.app.workspace, file, pending.line);
 	});
 }
 
