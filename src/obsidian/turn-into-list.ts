@@ -27,7 +27,10 @@ export async function turnIntoList(plugin: Plugin, file: TFile): Promise<void> {
 	waitForMarker(plugin, file, leaf);
 	let outcome: Outcome;
 	try {
-		outcome = view ? await writeThroughEditor(view) : await writeThroughVault(plugin.app, file);
+		// Typing not yet saved goes to disk first. Obsidian drops an editor edit inside the
+		// frontmatter while it shows the properties, so the marker never goes in through the editor.
+		await view?.save();
+		outcome = await writeThroughVault(plugin.app, file);
 	} catch (error) {
 		endWait?.();
 		console.error(`PrinceLists: could not turn ${file.path} into a list`, error);
@@ -51,16 +54,6 @@ function markdownViewShowing(app: App, file: TFile): MarkdownView | null {
 
 function planFor(text: string) {
 	return isListText(text) ? ('already-a-list' as const) : planMarker(text, readFrontmatter(text));
-}
-
-// The editor holds typing not yet saved, so the line goes in through it and the view is saved.
-async function writeThroughEditor(view: MarkdownView): Promise<Outcome> {
-	const plan = planFor(view.editor.getValue());
-	if (plan === 'already-a-list' || 'refused' in plan) return plan;
-	const replacement = plan.insert.map((line) => line + '\n').join('');
-	view.editor.replaceRange(replacement, { line: plan.start, ch: 0 }, { line: plan.start + plan.deleteCount, ch: 0 });
-	await view.save();
-	return 'written';
 }
 
 async function writeThroughVault(app: App, file: TFile): Promise<Outcome> {
