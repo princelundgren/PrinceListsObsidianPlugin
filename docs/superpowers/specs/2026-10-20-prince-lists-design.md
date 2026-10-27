@@ -760,6 +760,8 @@ stays, and the blank line stays with it.
 - It opens in a new tab, as Obsidian's own New note does (observed in 1.14.4), straight into the
   list view with its title selected, so typing replaces it.
 
+**An existing note becomes a list** with "Turn into list" (step two), which adds the marker to it.
+
 **Renaming, moving and deleting** are done with Obsidian's own file explorer. Moving a list to
 another folder changes its area. An open list view follows a rename or move made elsewhere
 **(call)**.

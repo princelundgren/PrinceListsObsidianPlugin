@@ -17,3 +17,8 @@ export function opensWithFrontmatter(text: string, from: number): boolean {
 export function lineAfterFrontmatter(text: string, contentStart: number): number {
 	return lineIndexAt(text, contentStart - 1) + 1;
 }
+
+// Empty frontmatter, or frontmatter holding only comments, parses to null, and a key can go in it.
+export function isYamlMapping(yaml: unknown): boolean {
+	return yaml === null || (typeof yaml === 'object' && !Array.isArray(yaml));
+}

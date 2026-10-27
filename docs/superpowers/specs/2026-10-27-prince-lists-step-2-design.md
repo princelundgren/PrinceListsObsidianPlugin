@@ -1,6 +1,7 @@
 ---
-status: draft
+status: building
 verified: 2026-10-27
+governs: [src/**, styles.css, manifest.json]
 ---
 
 # PrinceLists for Obsidian: step two, ready to move in
@@ -74,9 +75,11 @@ current todo app. Step one's own "Done when" doesn't change.
 
 - **With frontmatter** (`getFrontMatterInfo`, at byte 0): `princelists: true` goes in as the last
   line before the closing `---`. The YAML is never re-serialized.
-- **Only into frontmatter that is a mapping (call).** If the metadata cache reads no object from
-  frontmatter that's there (a list, a single value or broken YAML), adding a line would leave it
-  invalid, so the command changes nothing and says so.
+- **Only into frontmatter that is a mapping (call).** If the YAML isn't an object (a list, a
+  single value or broken YAML), adding a line would leave it invalid, so the command changes
+  nothing and says so. Empty frontmatter, or one holding only comments, counts as a mapping.
+- **The YAML is read from the text being edited (call)** with `parseYaml`, as the marker is read,
+  not from the metadata cache, which lags an editor's unsaved text.
 - **A `princelists:` line already there** with another single-line value, such as `false`, is
   replaced. If its value runs over several lines, the command changes nothing and says so
   **(call)**.
@@ -167,7 +170,13 @@ current todo app. Step one's own "Done when" doesn't change.
     This follows Obsidian's guideline to prefer the Editor API for the active file. Otherwise it's
     a `vault.process` edit.
   - The note opens as a list once the metadata cache reports the marker for it, not straight after
-    the write.
+    the write. A wait that never sees the marker ends with the next "Turn into list", a failed
+    write, or the note's rename or deletion, and otherwise when the plugin unloads: there's no
+    timer, as everywhere in the plugin **(call)**.
+  - **A CRLF note open in an editor is saved with LF line endings,** as Obsidian's editor saves
+    any note it changes (observed in 1.14.4). Through `vault.process`, the file keeps CRLF.
+- **Only notes in the vault (call).** A note from outside the vault has no parent folder (observed
+  in 1.14.4), which is how it's told apart, as step one does for pictures.
 - **Undoing it (call):** open the note as Markdown and remove the line. No command reverses it in
   step two.
 
