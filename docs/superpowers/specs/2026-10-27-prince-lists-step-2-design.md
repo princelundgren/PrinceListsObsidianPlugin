@@ -219,9 +219,10 @@ current todo app. Step one's own "Done when" doesn't change.
   weekday for the rest of the next seven days, or else the date in the locale's short form through
   Obsidian's `moment`, which follows the language set in Obsidian. A past day shows its date.
 - **The Schedule view** is a view of its own, opened with an "Open schedule" command and a
-  calendar ribbon icon **(call)**, and from "Open schedule" in a list's ⋯ menu, for anyone who
-  keeps the ribbon hidden **(owner, 2026-10-27)**. It gathers, from every list in the vault, the items with a When
+  calendar ribbon icon **(call)**. It gathers, from every list in the vault, the items with a When
   that are open or done but not yet archived.
+- **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
+  ribbon hidden or doesn't know the command.
 - **Its groups (owner, 2026-10-27):** Today, which includes everything overdue, then Tomorrow,
   Next 7 days and Later. An earlier "Next month", 8 to 31 days ahead, read as the calendar month
   and seemed to leave a gap after the week.
