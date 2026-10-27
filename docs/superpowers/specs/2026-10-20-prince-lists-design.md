@@ -520,7 +520,8 @@ stays, and the blank line stays with it.
 - **The title** is at the top, with the list note under it in gray. Step one has no icon beside
   the title **(call)**.
 - **While filtering,** Cmd+F's field shows below the list note (step two's design, "Cmd+F").
-- **Headings** are bold, with a thin rule below.
+- **Headings** are bold, with a thin rule below. In step two, an arrow left of each collapses its
+  section (step two's design, "Collapsing a heading").
 - **Items** show a checkbox and a title, one per line.
 - **Item titles and headings are rendered as Markdown (owner, 2026-10-21),** with Obsidian's own
   rendering, as in any note: bold is bold, and links can be clicked. A click on a link in a row

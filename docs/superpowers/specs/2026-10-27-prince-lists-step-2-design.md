@@ -260,7 +260,8 @@ current todo app. Step one's own "Done when" doesn't change.
   iPhone has no hover, so there it always shows. Its accessible name is "Collapse" or "Expand"
   **(call)**.
 - **Collapsed, the section's rows hide;** the heading stays. The items before the first heading
-  have no heading, so they can't collapse.
+  have no heading, so they can't collapse. The open card's item still shows in a collapsed
+  section, so a card never vanishes under its heading **(call)**.
 - **It isn't remembered (owner).** Every heading is open each time a list opens, as "Show
   archived" is off. While the view is open, a collapsed heading stays collapsed through redraws
   and edits, following its line as a selection does **(call)**. Nothing is written to the file.

@@ -1,5 +1,6 @@
 import { type Component, type Menu, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
+import { CollapsedHeadings } from '../core/collapsed';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
 import { splitLines, type Line } from '../core/lines';
@@ -39,6 +40,7 @@ export class PrinceListView extends TextFileView {
 	headingField: HeadingField | null = null;
 	/** Cmd+F's query, or null while its field is closed. Like showArchived, nothing restores it. */
 	filter: string | null = null;
+	readonly collapsed = new CollapsedHeadings(this.editing);
 	filterEl: HTMLInputElement | null = null;
 	newItemButton: HTMLButtonElement | null = null;
 	private archivedButton: HTMLElement | null = null;
@@ -123,6 +125,7 @@ export class PrinceListView extends TextFileView {
 		this.headingField = null;
 		this.showArchived = false;
 		this.filter = null;
+		this.collapsed.clear();
 		this.outsideChanges++;
 		// Nothing of the old file stays, not even a field with focus, which render() would keep.
 		this.listSizerEl.empty();
@@ -133,6 +136,8 @@ export class PrinceListView extends TextFileView {
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
 		registerFieldEvents(this);
+		// The collapse arrows always show where there's no hover.
+		this.contentEl.toggleClass('princelists-is-mobile', Platform.isMobile);
 		enableMouseDrag(this, this.contentEl);
 		if (Platform.isMobile) enableTouchDrag(this);
 		this.newItemButton = buildNewItemButton(this);

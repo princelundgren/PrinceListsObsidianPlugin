@@ -2,6 +2,7 @@ import { Platform, setIcon } from 'obsidian';
 import { planItemInsert, type ItemPlace } from '../core/list-actions';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { closeCard, focusCardTitle, isNewEmptyItem, openCard } from './card';
+import { expandFor } from './collapse';
 import type { PrinceListView } from './list-view';
 import { enqueueAt, writePlanned } from './write';
 
@@ -47,6 +48,7 @@ export function hasNoItems(view: PrinceListView): boolean {
 // The insert queues behind the removal of an empty item that closing the card may start.
 export function addItem(view: PrinceListView, place: ItemPlace): void {
 	closeCard(view);
+	expandFor(view, place);
 	const anchor = place === 'first' ? null : 'after' in place ? place.after : place.firstUnder;
 	enqueueAt(view, anchor, async (pending) => {
 		const added = await writePlanned(view, (text) => {

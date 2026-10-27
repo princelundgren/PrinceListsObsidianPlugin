@@ -16,6 +16,7 @@ import {
 	openCard,
 } from './card';
 import { checklistClick } from './checklist';
+import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import {
 	beginListTitle,
@@ -34,7 +35,7 @@ import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
 import { registerPictureEvents } from './pictures';
-import { CHECKBOX_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
+import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
 import { queueTick } from './tick';
 
 // Delegated listeners on the view's own element, and the picture events' capture listeners on the
@@ -59,7 +60,16 @@ export function registerFieldEvents(view: PrinceListView): void {
 
 function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
-	if (!target || handleLinkClick(view, evt, target)) return;
+	if (!target) return;
+	const arrow = target.closest<HTMLElement>(`.${COLLAPSE_CLASS}`);
+	if (arrow) {
+		const heading = arrow.closest(`.${HEADING_CLASS}`);
+		const line = heading ? lineOf(heading) : null;
+		if (line !== null) view.collapsed.toggle(line);
+		view.render();
+		return;
+	}
+	if (handleLinkClick(view, evt, target)) return;
 	if (target.closest(`.${OPEN_AS_MARKDOWN_CLASS}`)) {
 		if (view.file) void openAsMarkdown(view.leaf, view.file);
 		return;

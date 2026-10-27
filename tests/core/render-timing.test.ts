@@ -34,7 +34,7 @@ test("the core's part of a redraw of 500 items takes under 50 ms, and 50 of the 
 	let rendered = 0;
 	const ms = fastest(() => {
 		const lines = splitLines(text);
-		const sections = visibleSections(lines, parseList(lines, 3), new Date(2026, 9, 21), { showArchived: false, query: '', keepLine: null });
+		const sections = visibleSections(lines, parseList(lines, 3), new Date(2026, 9, 21), { showArchived: false, query: '', keepLine: null, collapsed: new Set() });
 		rendered = sections.flatMap((s) => [s.heading?.text ?? '', ...s.rows.map((r) => (r.kind === 'item' ? r.title : ''))]).filter(needsMarkdown).length;
 	});
 	expect(rendered).toBe(50);

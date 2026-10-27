@@ -3,6 +3,7 @@ import { visibleSections, withoutRange, type ItemRow, type SectionRows } from '.
 import type { LineRange } from '../core/follow';
 import type { Line } from '../core/lines';
 import type { ListModel } from '../core/parse';
+import { addCollapseArrow } from './collapse';
 import { addHiddenLabel } from './dom';
 import type { PrinceListView } from './list-view';
 import { renderInline } from './notes';
@@ -79,12 +80,16 @@ export function renderList(
 		list = null;
 		return isHeading && line === field.line;
 	};
-	const sections = visibleSections(lines, model, new Date(), { showArchived: view.showArchived, query: view.filter ?? '', keepLine: view.selected });
+	const sections = visibleSections(lines, model, new Date(), { showArchived: view.showArchived, query: view.filter ?? '', keepLine: view.selected, collapsed: view.collapsed.lines() });
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {
 		if (section.heading) {
 			placeCard(section.heading.line, false);
-			if (!placeField(section.heading.line, true)) el.append(buildHeading(view, section.heading, blocks));
+			if (!placeField(section.heading.line, true)) {
+				const headingEl = buildHeading(view, section.heading, blocks);
+				addCollapseArrow(headingEl, section.collapsed);
+				el.append(headingEl);
+			}
 			list = null;
 		}
 		for (const row of section.rows) {

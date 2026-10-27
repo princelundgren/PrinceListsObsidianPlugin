@@ -32,41 +32,49 @@ export interface SectionRows {
 	heading: { line: number; text: string } | null;
 	/** In file order. */
 	rows: ListRow[];
+	/** The heading is collapsed, whether or not a filter shows rows under it. */
+	collapsed: boolean;
 }
 
 export interface RowFilter {
 	showArchived: boolean;
 	/** What Cmd+F's field holds; '' filters nothing. */
 	query: string;
-	/** The open card's item, which shows whether or not it matches. */
+	/** The open card's item, which shows whether or not it matches or its section is collapsed. */
 	keepLine: number | null;
+	/** The heading lines whose sections show only the heading while nothing filters the list. */
+	collapsed: ReadonlySet<number>;
 }
 
 const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 
 // Every heading stays, even when all of its items are hidden, and so does content the plugin leaves
 // alone, except while a query filters the list: then only the items that match show, and a heading
-// only while one of its items does. Archived is worked out from `now` on each redraw, never written
+// only while one of its items does. A collapsed section shows only its heading, unless a query
+// filters the list. Archived is worked out from `now` on each redraw, never written
 // down (spec, "Done and archived").
 export function visibleSections(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter): SectionRows[] {
 	const filtering = filter.query !== '';
 	return model.sections.map(({ headingLine, items }, i) => {
 		const start = headingLine ?? model.contentStart;
 		const end = model.sections[i + 1]?.headingLine ?? lines.length;
+		const collapsed = headingLine !== null && filter.collapsed.has(headingLine);
 		const shown: ListRow[] = items.flatMap((item) => {
 			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now);
 			if (!isShown(row, filter.showArchived)) return [];
-			const kept = item.titleLine === filter.keepLine;
-			return !filtering || kept || itemMatches(lines, item, row, filter.query) ? [row] : [];
+			if (item.titleLine === filter.keepLine) return [row];
+			if (filtering) return itemMatches(lines, item, row, filter.query) ? [row] : [];
+			return collapsed ? [] : [row];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
-		if (filtering) return { heading: shown.length > 0 ? heading : null, rows: shown };
+		if (filtering) return { heading: shown.length > 0 ? heading : null, rows: shown, collapsed };
+		if (collapsed) return { heading, rows: shown, collapsed };
 		for (const block of model.untouched) {
 			if (block.start < start || block.start >= end) continue;
 			const text = lines.slice(block.start, block.end).map((line) => line.text).join('\n');
 			shown.push({ kind: 'untouched', start: block.start, text });
 		}
-		return { heading, rows: shown.sort((a, b) => firstLine(a) - firstLine(b)) };
+		return { heading, rows: shown.sort((a, b) => firstLine(a) - firstLine(b)), collapsed };
 	});
 }
 
@@ -91,9 +99,10 @@ export function isShown(row: ItemRow, showArchived: boolean): boolean {
 export function withoutRange(sections: SectionRows[], range: { start: number; end: number } | null): SectionRows[] {
 	if (!range) return sections;
 	const inRange = (line: number) => line >= range.start && line < range.end;
-	return sections.map(({ heading, rows }) => ({
+	return sections.map(({ heading, rows, collapsed }) => ({
 		heading: heading && !inRange(heading.line) ? heading : null,
 		rows: rows.filter((row) => !inRange(firstLine(row))),
+		collapsed,
 	}));
 }
 
