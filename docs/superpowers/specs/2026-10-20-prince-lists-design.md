@@ -724,8 +724,10 @@ stays, and the blank line stays with it.
   - **It's also a ticked-checkbox icon in the pane's header (owner, 2026-10-27),** because the ⋯
     menu alone was hard to find on the iPhone. The icon is the same shape as the list's own
     checkboxes, so it reads as done items; an eye was tried first and read as unrelated to them.
-    It toggles the same setting as the menu item, is in the accent color while archived items
-    show, and its tooltip then says "Hide archived". It shows only on a list.
+    It toggles the same setting as the menu item, is blue while archived items show, as their
+    checkboxes are, and its tooltip then says "Hide archived". It shows only on a list.
+  - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
+    it stands apart from an item ticked in the last day, whose checkbox keeps the accent color.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.

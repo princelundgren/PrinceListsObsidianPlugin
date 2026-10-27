@@ -54,7 +54,7 @@ async function tick(view: PrinceListView, row: HTMLElement, pending: { line: num
 			// Obsidian's echo of this write returns early in setViewData, so the row is updated here. A
 			// tick moves no line, so the row still stands for this item. A redraw during the write,
 			// such as "Show archived", drew from the text before the tick, so the view redraws again.
-			if (row.isConnected && lineOf(row) === titleLine) showDone(row, itemRow((edited[titleLine] as Line).text, titleLine).done);
+			if (row.isConnected && lineOf(row) === titleLine) showDone(row, itemRow((edited[titleLine] as Line).text, titleLine, now));
 			else view.render();
 			return;
 		}

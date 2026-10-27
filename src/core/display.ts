@@ -11,6 +11,8 @@ export interface ItemRow {
 	/** The checkbox's accessible name: the title, or the rest of the line when the title is empty. */
 	label: string;
 	done: boolean;
+	/** Done more than 24 hours ago, so hidden unless "Show archived" is on. */
+	archived: boolean;
 }
 
 /** A block the plugin leaves alone, such as a paragraph, table or code block, as its raw lines. */
@@ -45,8 +47,8 @@ export function visibleSections(
 		const end = model.sections[i + 1]?.headingLine ?? lines.length;
 		const shown: ListRow[] = items.flatMap(({ titleLine }) => {
 			const { text } = lines[titleLine] as Line;
-			const row = itemRow(text, titleLine);
-			return isShown(row, text, now, showArchived) ? [row] : [];
+			const row = itemRow(text, titleLine, now);
+			return isShown(row, showArchived) ? [row] : [];
 		});
 		for (const block of model.untouched) {
 			if (block.start < start || block.start >= end) continue;
@@ -61,8 +63,8 @@ export function visibleSections(
 }
 
 // A done item is hidden once it is archived, unless "Show archived" is on.
-export function isShown(row: ItemRow, text: string, now: Date, showArchived: boolean): boolean {
-	return !(row.done && !showArchived && isArchived(text, now));
+export function isShown(row: ItemRow, showArchived: boolean): boolean {
+	return showArchived || !row.archived;
 }
 
 // Leaves out the headings and rows whose first line is in `range`: while the list note's field has
@@ -77,11 +79,12 @@ export function withoutRange(sections: SectionRows[], range: { start: number; en
 	}));
 }
 
-export function itemRow(text: string, titleLine: number): ItemRow {
+export function itemRow(text: string, titleLine: number, now: Date): ItemRow {
 	// parseList makes an item only of a line parseItemLine reads.
 	const parts = parseItemLine(text) as ItemLineParts;
 	const label = parts.title === '' ? (parts.marks + parts.tail).trim() : parts.title;
-	return { kind: 'item', titleLine, title: parts.title, label, done: isDoneStatus(parts.status) };
+	const done = isDoneStatus(parts.status);
+	return { kind: 'item', titleLine, title: parts.title, label, done, archived: done && isArchived(text, now) };
 }
 
 function firstLine(row: ListRow): number {
