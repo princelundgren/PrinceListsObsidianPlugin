@@ -71,18 +71,18 @@ manual check runs there, never in a vault with real notes.
   `setIcon`; the star is `--color-yellow`, the hint and the collapse arrow `--text-faint`. No
   hard-coded colors.
 - **Interface text** added in step two is this, worded exactly:
-  - Commands and menu items: "Turn into list", "Find in list", "Open schedule", "Add star",
-    "Remove star", "Delete".
+  - Commands and menu items: "Turn into list", "Find in list", "Open schedule", "Delete".
+  - The card's star button's `aria-label`: "Add star" or "Remove star".
   - "The note's properties can't be read, so it wasn't turned into a list."
   - "The note's princelists property runs over several lines, so it wasn't turned into a list."
   - "Couldn't turn {name} into a list.", where `{name}` is the note's name **(call)**.
   - "Press Cmd+Enter or + to add an item", "Press Ctrl+Enter or + to add an item" and "Tap + to add
     an item".
   - The collapse arrow's hidden label "Collapse section", with `aria-expanded`.
-  - The filter field's placeholder "Find in list"; the card's gray "When"; the clear button's
+  - The filter field's placeholder "Find in list"; the date input's `aria-label` "When"; the clear button's
     `aria-label` "Remove the day"; the day labels "Today" and "Tomorrow".
-  - The Schedule view's title "Schedule", its groups "Today", "Tomorrow", "Coming week", "Next
-    month" and "Later", and "No items have a When." when every group is empty **(call)**.
+  - The Schedule view's title "Schedule", its groups "Today", "Tomorrow", "Next 7 days" and
+    "Later" (owner, 2026-10-27), and "No items have a When." when every group is empty **(call)**.
   - In a block: the button "New item", the trash button's `aria-label` "Delete item", and the gray
     lines "This block needs a link to a list, such as [[Groceries]].", "[[{link}]] doesn't lead to
     a note.", "[[{link}]] isn't a list." and "[[{link}]] is this note, so it can't show here."
@@ -262,8 +262,9 @@ manual check runs there, never in a vault with real notes.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS. `typeTitle` calls
   `setItemTitle(withSaved, item, keepStar(savedTitle, oneLineTitle(typed)))`.
 - [ ] **Step 3: Build the view.** `buildRow` calls `addStar` after the title when `row.starred`.
-  `itemMenu` adds "Add star" or "Remove star", icon `star`, before "Delete", through `atLine` and
-  `queueLineEdit(view, line, (l) => setStar(l, !starred))`. `.princelists-star` gets `color:
+  The open card has a star button between its When and its ⋯, labeled "Add star" or "Remove star",
+  which calls `queueLineEdit(view, line, (l) => setStar(l, !isStarred(l)))`; the item menu has no
+  star entry (owner). `.princelists-star` gets `color:
   var(--color-yellow)` and `fill: currentColor` on its `svg`, so it reads as set **(call)**.
 - [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
 - [ ] **Step 5: Check it by hand on the Mac and the iPhone.**
@@ -273,7 +274,8 @@ manual check runs there, never in a vault with real notes.
   3. With Tasks installed, a query still lists a starred done item with its ⏳ date, and shows ⭐
      in its description.
 - [ ] **Step 6: Update step one's design.** In "Editing", the title field hides the star too and
-  puts it back on save; in "Item actions", add "Add star" and "Remove star".
+  puts it back on save; "Item actions" says the star is a button on the open card, not a menu
+  entry.
 - [ ] **Step 7: Commit** with the message "Star an item".
 
 ### Task 3: Hint at adding to an empty list, and add with Cmd+Enter
@@ -625,7 +627,7 @@ manual check runs there, never in a vault with real notes.
   "Tomorrow", `moment(day, 'YYYY-MM-DD').format('dddd')`, or `.format('ll')` **(call)**; and
   `addWhen(rowEl: HTMLElement, day: string, today: string): void`, a span with the class
   `princelists-when` holding the `calendar` icon and the label.
-- Produces, in `src/view/card-when.ts`: `buildWhenRow(body: HTMLElement): void`, `showWhen(card:
+- Produces, in `src/view/card-when.ts`: `buildWhenPicker(tools: HTMLElement): void`, `showWhen(card:
   Card, day: string | null): void` and `whenChange(view, input: HTMLInputElement): void`.
 
 - [ ] **Step 1: Write the failing tests** in `tests/core/when.test.ts`, with today `2026-10-27`:
@@ -654,8 +656,9 @@ manual check runs there, never in a vault with real notes.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
 - [ ] **Step 3: Show it on rows.** `buildRow` calls `addWhen` after the star when `row.when` isn't
   null, with `dayOf(new Date())` as today. The When is `--text-muted`.
-- [ ] **Step 4: Build the card's When row** in `card-when.ts`, under the title: a button with the
-  class `princelists-when-button` showing `addWhen`'s content, or a gray "When"; an `input
+- [ ] **Step 4: Build the card's When picker** in `card-when.ts`, at the card's top right before
+  the star: a button with the class `princelists-when-button` showing `addWhen`'s content, or the
+  `calendar` icon; an `input
   type="date"` laid over the button at its size with `opacity: 0`, so a click or tap lands on the
   input itself; and a clear button with the `x` icon and the `aria-label` "Remove the day", shown
   only with a When. `refreshCard` calls `showWhen`.
@@ -676,7 +679,7 @@ manual check runs there, never in a vault with real notes.
   4. Cmd+Z takes a When back. With Tasks installed, a `scheduled on 2026-10-30` query lists it.
 - [ ] **Step 7: Update the designs.** In the step-two design's "When", record that a new When goes
   after the tags, before the block ID. In step one's, "Dates" says ⏳ is the item's When, set in the
-  card; "Layout" says rows show the star and the When; "Editing" names the card's When row.
+  card; "Layout" says rows show the star and the When; "Editing" names the card's calendar icon.
 - [ ] **Step 8: Commit** with the message "Give an item a When".
 
 ### Task 9: Draw rows for any host
@@ -718,9 +721,9 @@ manual check runs there, never in a vault with real notes.
     the title line's text and `order` the item's place in its list
   - `scheduledItems(text: string, contentStart: number, now: Date, list: { path: string; name:
     string }): ScheduledItem[]`: items with a When that are open, or done and not archived
-  - `type ScheduleGroup = 'today' | 'tomorrow' | 'week' | 'month' | 'later'`
+  - `type ScheduleGroup = 'today' | 'tomorrow' | 'week' | 'later'`
   - `scheduleGroup(day: string, today: string): ScheduleGroup`: today and before; 1 day ahead; 2 to
-    7; 8 to 31; more
+    7; more
   - `groupSchedule(items: readonly ScheduledItem[], today: string): { group: ScheduleGroup; items:
     ScheduledItem[] }[]`: the groups in order, empty ones left out, each sorted by day, then
     `listName` with `localeCompare`, then `order`
@@ -733,8 +736,8 @@ manual check runs there, never in a vault with real notes.
     out one ticked at `2026-10-25 09:00`, one with no When, and an item line inside a fenced block.
     Items under a heading count, with `order` running across sections.
   - `scheduleGroup` with today `2026-10-27`: `2026-10-20` and `2026-10-27` are `today`,
-    `2026-10-28` `tomorrow`, `2026-10-29` and `2026-11-03` `week`, `2026-11-04` and `2026-11-27`
-    `month`, `2026-11-28` `later`. With today `2026-10-31`, `2026-12-01` is `month`.
+    `2026-10-28` `tomorrow`, `2026-10-29` and `2026-11-03` `week`, `2026-11-04` and `2026-12-31`
+    `later`. With today `2026-10-31`, `2026-11-07` is `week` and `2026-11-08` `later`.
   - `groupSchedule` puts `Groceries` before `Home` on the same day, keeps file order within a list,
     and leaves out an empty `tomorrow`.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.

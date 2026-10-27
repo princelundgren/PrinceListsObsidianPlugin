@@ -38,14 +38,14 @@ describe('scheduleGroup', () => {
 		['2026-10-28', 'tomorrow'],
 		['2026-10-29', 'week'],
 		['2026-11-03', 'week'],
-		['2026-11-04', 'month'],
-		['2026-11-27', 'month'],
-		['2026-11-28', 'later'],
+		['2026-11-04', 'later'],
+		['2026-12-31', 'later'],
 	])('%s from 2026-10-27 is %s', (day, group) => {
 		expect(scheduleGroup(day, '2026-10-27')).toBe(group);
 	});
-	test('counts 31 days across a month end', () => {
-		expect(scheduleGroup('2026-12-01', '2026-10-31')).toBe('month');
+	test('counts seven days across a month end', () => {
+		expect(scheduleGroup('2026-11-07', '2026-10-31')).toBe('week');
+		expect(scheduleGroup('2026-11-08', '2026-10-31')).toBe('later');
 	});
 });
 
