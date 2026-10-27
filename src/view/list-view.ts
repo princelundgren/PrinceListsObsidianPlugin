@@ -8,7 +8,7 @@ import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openAsMarkdown } from '../obsidian/switch';
-import { buildNewItemButton } from './add-button';
+import { buildNewItemButton, newItem } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
 import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
@@ -46,6 +46,7 @@ export class PrinceListView extends TextFileView {
 	readonly dragsHeadings = true;
 	filterEl: HTMLInputElement | null = null;
 	newItemButton: HTMLButtonElement | null = null;
+	newItemAction: HTMLElement | null = null;
 	private archivedButton: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
 	readonly blocks = new Map<HTMLElement, Component>();
@@ -149,7 +150,8 @@ export class PrinceListView extends TextFileView {
 		const dragHost = listDragHost(this);
 		enableMouseDrag(dragHost);
 		if (Platform.isMobile) enableTouchDrag(dragHost);
-		this.newItemButton = buildNewItemButton(this);
+		if (Platform.isMobile) this.newItemButton = buildNewItemButton(this);
+		this.newItemAction = this.addAction('plus', 'New item', () => newItem(this));
 		this.archivedButton = this.addAction('square-check-big', 'Show archived', () => this.toggleArchived());
 		this.syncArchivedButton();
 	}
