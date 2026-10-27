@@ -8,3 +8,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # The types match the oldest Node.js the scripts support (AGENTS.md), as in Obsidian's sample plugin.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
