@@ -142,20 +142,27 @@ current todo app. Step one's own "Done when" doesn't change.
     **(call)**.
 - **Ticking** works as in the list view.
 - **Titles are edited in place (call).** A click on a title, not on a link in it, turns it into a
-  field: Enter or leaving saves, Escape cancels.
+  field: Enter or leaving saves, Escape cancels. A change to the file from elsewhere while the
+  field is open waits for it to close before the block draws it **(call)**; the field saves to its
+  line as that change moved it, and a line that went shows "This list changed elsewhere. Try
+  again." and writes nothing.
 - **Adding:** a "New item" button below the rows adds an item where "+" puts one with nothing
   selected, as the list's first item, and opens its title field **(call)**. Shift+Enter adds the
   next one. Leaving a new item with an empty title removes it, as in the list view.
 - **Deleting (call):** a trash button shows at the end of the title field while it's open, on the
   Mac and the iPhone, since the iPhone has no long-press menu. On the Mac, right-clicking an item
-  offers Delete too. Both show the Undo message, as Delete does in the list view.
+  offers Delete too. Both show the Undo message, as Delete does in the list view. The trash button
+  deletes without saving what was typed in the field **(call)**, so Undo brings back the item as
+  the file had it.
 - **Dragging** works within the block, within and between sections: with the mouse on the Mac and
   hold-and-move on the iPhone, with the list view's drop rules.
 - **Writes go to the list's file** through the same guarded edits. An open list view of that file
   follows them as a change from outside **(call)**. Cmd+Z doesn't step through edits made in a
   block **(call)**.
 - **It redraws when the list file changes.** Its listeners belong to a `MarkdownRenderChild`, so
-  they go when the block does.
+  they go when the block does. The metadata cache reports each of the block's own writes, sometimes
+  only after a later one has landed; a late report is the block's own write, not a change from
+  outside.
 - **A link to no file, or to a note without the marker,** shows a gray line saying so, naming the
   link. So does a block that names the note it's in **(call)**: that note may be open in an editor
   with typing not yet saved. A note from outside the vault can't be linked, so it can't be shown

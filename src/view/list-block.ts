@@ -1,4 +1,4 @@
-import { getLinkpath, MarkdownRenderChild, Notice, type App, type Component, type TFile } from 'obsidian';
+import { getLinkpath, MarkdownRenderChild, Menu, Notice, Platform, setIcon, type App, type Component, type TFile } from 'obsidian';
 import { guardedWrite, type WriteResult } from '../core/action-write';
 import { blockLink } from '../core/block-source';
 import { visibleSections } from '../core/display';
@@ -9,11 +9,15 @@ import { toggleLine } from '../core/item-line';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import { WriteEchoes } from '../core/write-echoes';
 import { contentStartLine, isListText } from '../obsidian/marker';
+import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, openBlockField, type BlockField } from './block-fields';
 import { targetOf } from './dom';
-import { handleLinkClick } from './notes';
+import { handleLinkClick, handleLinkMenu } from './notes';
 import { buildHeading, buildRow, CHECKBOX_CLASS, ITEM_CLASS, ITEMS_CLASS, lineOf, type RowHost } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE, tryEdit } from './write';
+
+const NEW_ITEM_CLASS = 'princelists-block-new-item';
 
 // A list drawn inside another note by a `princelists` code block (spec, "A list inside another note").
 // It shows the list's headings and items, not its list note, notes or content the plugin leaves alone.
@@ -24,10 +28,12 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	readonly enqueue = serialQueue((error) => console.error(error));
 	readonly rowsEl: HTMLElement;
 	file: TFile | null = null;
+	field: BlockField | null = null;
 	outsideChanges = 0;
 	private readonly rootEl: HTMLElement;
 	private readonly link: string | null;
 	private readonly blocks = new Map<HTMLElement, Component>();
+	private echoes = new WriteEchoes();
 	// The path drawn last: a rename that keeps the link's file still redraws its name and link.
 	private shownPath: string | null | undefined;
 
@@ -50,6 +56,18 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
 		this.registerDomEvent(this.rootEl, 'click', (evt) => this.onClick(evt));
+		this.registerDomEvent(this.rootEl, 'keydown', (evt) => this.onKeyDown(evt));
+		this.registerDomEvent(this.rootEl, 'focusout', (evt) => this.onFocusOut(evt));
+		// A press elsewhere in the block keeps the field's focus, and the click closes the field instead:
+		// closing it on the blur redraws the rows before the click reaches the one pressed.
+		this.registerDomEvent(this.rootEl, 'mousedown', (evt) => {
+			if (this.field && targetOf(evt) !== this.field.el) evt.preventDefault();
+		});
+		// The trash button doesn't take focus, so the field stays open until the click deletes.
+		this.registerDomEvent(this.rootEl, 'pointerdown', (evt) => {
+			if (targetOf(evt)?.closest(`.${BLOCK_TRASH_CLASS}`)) evt.preventDefault();
+		});
+		if (Platform.isDesktop) this.registerDomEvent(this.rootEl, 'contextmenu', (evt) => this.onContextMenu(evt));
 		void this.resolve();
 	}
 
@@ -70,7 +88,10 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 				save: async () => {},
 				process: (fn) => this.app.vault.process(file, fn),
 				sameFile: () => this.file === file,
-				took: (text) => editing.applyOwn(text, edit),
+				took: (text) => {
+					this.echoes.wrote(text);
+					editing.applyOwn(text, edit);
+				},
 				reread: async () => {
 					const text = await this.app.vault.read(file);
 					if (this.file === file) this.takeOutsideChange(text);
@@ -112,6 +133,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 				list.append(buildRow(this, file.path, row, this.blocks));
 			}
 		}
+		const button = this.rootEl.createEl('button', { cls: NEW_ITEM_CLASS });
+		setIcon(button.createSpan({ cls: 'princelists-block-new-item-icon' }), 'plus');
+		button.createSpan({ text: 'New item' });
 	}
 
 	// The gray line in place of the rows, or null when there are rows to draw.
@@ -128,6 +152,8 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		if (file === this.file && (file?.path ?? null) === this.shownPath) return;
 		this.file = file;
 		this.shownPath = file?.path ?? null;
+		this.field = null;
+		this.echoes = new WriteEchoes();
 		this.editing.reset();
 		this.outsideChanges++;
 		const text = file && file.extension === 'md' && file.path !== this.notePath ? await this.app.vault.cachedRead(file) : '';
@@ -137,25 +163,73 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 
 	private fileChanged(file: TFile, data: string): void {
-		if (file !== this.file || file.path === this.notePath || data === this.editing.text) return;
+		if (file !== this.file || file.path === this.notePath) return;
+		if (this.echoes.isEcho(data) || data === this.editing.text) return;
 		this.takeOutsideChange(data);
 	}
 
+	// An open field stays as it is **(call)**: it saves to its line as the change moved it, and the block
+	// draws the change when it closes.
 	private takeOutsideChange(text: string): void {
 		this.outsideChanges++;
 		this.editing.outsideChange(text);
-		this.draw();
+		if (!this.field) this.draw();
 	}
 
 	private onClick(evt: MouseEvent): void {
 		const target = targetOf(evt);
-		if (!target || handleLinkClick(this.app, this.file?.path ?? this.notePath, evt, target)) return;
-		if (!target.closest(`.${CHECKBOX_CLASS}`)) return;
-		// The box shows the file: the redraw after the write ticks it.
-		evt.preventDefault();
+		if (!target) return;
+		if (this.field && !target.closest(`.${BLOCK_FIELD_CLASS}`)) closeBlockField(this, true);
+		if (handleLinkClick(this.app, this.file?.path ?? this.notePath, evt, target)) return;
+		if (target.closest(`.${NEW_ITEM_CLASS}`)) {
+			addBlockItem(this, 'first');
+			return;
+		}
+		// The field's own line: rows aren't drawn again while it's open, so theirs may be out of date.
+		const fieldLine = this.field?.line.line;
+		if (target.closest(`.${BLOCK_TRASH_CLASS}`)) {
+			if (fieldLine !== null && fieldLine !== undefined) deleteBlockItem(this, fieldLine);
+			return;
+		}
 		const rowEl = target.closest(`.${ITEM_CLASS}`);
 		const line = rowEl ? lineOf(rowEl) : null;
-		if (line !== null) this.queueTick(line);
+		if (line === null) return;
+		if (target.closest(`.${CHECKBOX_CLASS}`)) {
+			// The box shows the file: the redraw after the write ticks it.
+			evt.preventDefault();
+			this.queueTick(line);
+		} else if (target.closest('.princelists-item-title')) {
+			openBlockField(this, line, null);
+		}
+	}
+
+	private onKeyDown(evt: KeyboardEvent): void {
+		if (!this.field || evt.target !== this.field.el || evt.isComposing) return;
+		if (evt.key === 'Escape') {
+			evt.preventDefault();
+			closeBlockField(this, false);
+		} else if (evt.key === 'Enter') {
+			evt.preventDefault();
+			if (evt.shiftKey) addBlockItemBelow(this);
+			else closeBlockField(this, true);
+		}
+	}
+
+	private onFocusOut(evt: FocusEvent): void {
+		if (this.field && evt.target === this.field.el) closeBlockField(this, true);
+	}
+
+	// On the Mac only: the iPhone has the field's trash button.
+	private onContextMenu(evt: MouseEvent): void {
+		const target = targetOf(evt);
+		if (!target || handleLinkMenu(this.app, this.file?.path ?? this.notePath, evt, target)) return;
+		const rowEl = target.closest(`.${ITEM_CLASS}`);
+		const line = rowEl ? lineOf(rowEl) : null;
+		if (line === null) return;
+		evt.preventDefault();
+		const menu = new Menu();
+		menu.addItem((item) => item.setTitle('Delete').setIcon('trash-2').setWarning(true).onClick(() => deleteBlockItem(this, line)));
+		menu.showAtMouseEvent(evt);
 	}
 
 	// As a tick in the list view: it waits on the block's queue, and its line follows the block's own
@@ -180,7 +254,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 				const edited = tryEdit(() => toggleItem(lines, item, now));
 				if (!edited) return;
 				await this.write(joinLines(edited), text, { start: titleLine, delta: 0, kind: 'change', retitle: (title) => toggleLine(title, now) });
-				this.draw();
+				if (!this.field) this.draw();
 			} finally {
 				this.editing.untrack(pending);
 			}

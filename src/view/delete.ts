@@ -35,15 +35,19 @@ function deleteWithUndo(
 	});
 }
 
+function offerUndo(view: PrinceListView, file: TFile, undo: PlannedDelete['undo'], message: string): void {
+	showUndoNotice(message, () => void view.enqueue(() => undoDelete(view, file, undo)));
+}
+
 // A notice with an Undo button for a few seconds (spec, "Item actions"). Built in a fragment, since
 // Notice.messageEl is newer than minAppVersion.
-function offerUndo(view: PrinceListView, file: TFile, undo: PlannedDelete['undo'], message: string): void {
+export function showUndoNotice(message: string, onUndo: () => void): void {
 	const fragment = createFragment();
 	fragment.createSpan({ text: message });
 	const button = fragment.createEl('button', { cls: 'princelists-undo', text: 'Undo' });
 	new Notice(fragment, 6000);
-	// Not delegated or registered: the notice isn't in the view, and this listener goes with its button.
-	button.addEventListener('click', () => void view.enqueue(() => undoDelete(view, file, undo)), { once: true });
+	// Not delegated or registered: the notice isn't in a view, and this listener goes with its button.
+	button.addEventListener('click', onUndo, { once: true });
 }
 
 // Writes the text from before the delete back, only while the file still holds what the delete left.
