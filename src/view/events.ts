@@ -46,6 +46,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
+	view.registerDomEvent(contentEl, 'beforeinput', (evt) => keepUndoInFocusedField(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
 	view.registerDomEvent(contentEl, 'keydown', (evt) => onKeyDown(view, evt));
@@ -152,6 +153,13 @@ function swallowClick(view: PrinceListView, evt: MouseEvent): void {
 
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
 // among the view's own few textareas.
+// The page has one undo history, so Cmd+Z in one field can reach typing in a field without focus,
+// which nothing would save.
+function keepUndoInFocusedField(view: PrinceListView, evt: InputEvent): void {
+	const isHistory = evt.inputType === 'historyUndo' || evt.inputType === 'historyRedo';
+	if (isHistory && evt.target !== view.contentEl.doc.activeElement) evt.preventDefault();
+}
+
 function onInput(view: PrinceListView, evt: Event): void {
 	if (view.filterEl && evt.target === view.filterEl) {
 		filterInput(view);
