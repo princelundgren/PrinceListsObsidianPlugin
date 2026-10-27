@@ -150,7 +150,8 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 		// A title or heading is one line, so Enter writes no line break.
 		if (target.hasClass(CARD_TITLE_CLASS)) {
 			evt.preventDefault();
-			addItemBelowCard(view);
+			if (evt.shiftKey) addItemBelowCard(view);
+			else closeCard(view);
 		} else if (target.hasClass(HEADING_FIELD_CLASS)) {
 			evt.preventDefault();
 			headingFieldKey(view, target, 'Enter');
