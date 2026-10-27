@@ -15,6 +15,7 @@ import {
 	notesInput,
 	openCard,
 } from './card';
+import { targetOf } from './dom';
 import {
 	beginListTitle,
 	closeListNote,
@@ -30,6 +31,7 @@ import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './headin
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
 import { handleLinkClick, handleLinkMenu } from './notes';
+import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
 import { queueTick } from './tick';
 
@@ -41,6 +43,7 @@ export function registerFieldEvents(view: PrinceListView): void {
 	view.registerDomEvent(contentEl, 'keydown', (evt) => onKeyDown(view, evt));
 	view.registerDomEvent(contentEl, 'focusin', (evt) => onFocusIn(view, evt));
 	view.registerDomEvent(contentEl, 'focusout', (evt) => onFocusOut(view, evt));
+	registerPictureEvents(view);
 	if (Platform.isDesktop) view.registerDomEvent(contentEl, 'contextmenu', (evt) => onContextMenu(view, evt));
 	// In the capture phase, so it is stopped before it reaches a row or bubbles up from one.
 	if (Platform.isMobile) {
@@ -49,13 +52,6 @@ export function registerFieldEvents(view: PrinceListView): void {
 		// A hold that sent no click must not eat a later tap.
 		view.registerDomEvent(contentEl, 'touchstart', () => (view.swallowNextClick = false), { capture: true });
 	}
-}
-
-// Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of
-// this window's classes.
-export function targetOf(evt: UIEvent): HTMLElement | null {
-	const node = evt.targetNode;
-	return node?.instanceOf(HTMLElement) ? node : null;
 }
 
 function onClick(view: PrinceListView, evt: MouseEvent): void {

@@ -1,7 +1,7 @@
 import { dropAt, type Drop } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { closeCard } from './card';
-import { targetOf } from './events';
+import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { markDrop, queueMove, shownRows } from './move';
 import { ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
