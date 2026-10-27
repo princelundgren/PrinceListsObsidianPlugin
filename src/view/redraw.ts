@@ -34,7 +34,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		if (field?.keeps) slot = field.el;
 		view.rowsHeldBack = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field);
 		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint() });
-		// Room to scroll the last row clear of the floating "+".
+		// Room to scroll the last row clear of mobile's floating "+".
 		fresh.createDiv({ cls: 'princelists-end' });
 	} else {
 		dismissCard(view);
@@ -49,7 +49,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	}
 	replaceKeeping(listSizerEl, fresh, kept, slot);
 	listSizerEl.toggleClass('princelists-is-empty', isEmpty);
-	view.newItemButton?.toggle(isListText(view.text));
+	for (const button of [view.newItemButton, view.newItemAction]) button?.toggle(isListText(view.text));
 	if (view.card && kept === view.card.el) refreshCard(view, view.card);
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);
 	listScrollEl.scrollTop = scrollTop;
