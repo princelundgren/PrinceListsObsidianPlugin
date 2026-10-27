@@ -617,7 +617,7 @@ stays, and the blank line stays with it.
   - The new item opens with the cursor in its title.
   - **Enter in a title closes the card (owner, 2026-10-27),** as Escape does, so typing a new
     item's name and pressing Enter finishes it. Shift+Enter adds another item below it instead, so
-    a run of items can still be typed in one go.
+    a run of items can still be typed in one go. On the iPhone, "+" adds each next item.
   - In a new item whose title is still empty, Shift+Enter closes the card instead, which removes the
     item, so a second Shift+Enter ends a run of new items. "+" and New item below keep it, with the
     cursor back in its title. Delete closes the card, which removes the item as a cancel, with no
