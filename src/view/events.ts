@@ -35,7 +35,8 @@ import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
 import { queueTick } from './tick';
 
-// One delegated listener per event type on the view's own element, which goes away with the view.
+// Delegated listeners on the view's own element, and the picture events' capture listeners on the
+// document; all go away with the view.
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
