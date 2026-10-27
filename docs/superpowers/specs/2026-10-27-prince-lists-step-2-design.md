@@ -42,6 +42,8 @@ current todo app. Step one's own "Done when" doesn't change.
 
 ### When (owner)
 
+- **The interface calls it the date (owner, 2026-10-28):** "When" is this design's name for it, and
+  no text in the view, a label or the Schedule says "When".
 - **Written as Tasks' scheduled date,** ` ⏳ YYYY-MM-DD`, among the title line's trailing Tasks
   fields, so Tasks and its queries read it as scheduled. Tasks also accepts `⌛`; the plugin reads
   both and writes `⏳` **(call)**.
