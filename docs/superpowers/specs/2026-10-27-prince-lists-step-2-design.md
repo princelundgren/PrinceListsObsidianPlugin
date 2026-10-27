@@ -294,7 +294,8 @@ These go into step one's "Not in step one" list:
 9. **Moving a section, byte for byte:** a setext heading moved under a paragraph gets its empty
    line or is refused, never joining the paragraph. A section moved off the end of a file without
    a final newline takes the file's usual line ending, and the new last line takes the old last
-   line's, as AGENTS.md requires. Moving it back gives the original bytes.
+   line's, as AGENTS.md requires. Moving it back gives the original bytes when no empty line was
+   added.
 
 ## Order (call)
 
