@@ -1,15 +1,17 @@
 import { MarkdownView, Notice, Plugin, TFile, TFolder } from 'obsidian';
-import { RIBBON_ICON, VIEW_TYPE_LIST } from './constants';
+import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
 import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
 import { openFilter } from './view/filter';
 import { PrinceListView } from './view/list-view';
+import { ScheduleView } from './view/schedule-view';
 
 export default class PrinceListsPlugin extends Plugin {
 	onload() {
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf));
+		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf));
 		registerAutoSwitch(this);
 
 		this.addCommand({
@@ -18,6 +20,12 @@ export default class PrinceListsPlugin extends Plugin {
 			callback: () => void this.newListWhereNotesGo(),
 		});
 		this.addRibbonIcon(RIBBON_ICON, 'New list', () => void this.newListWhereNotesGo());
+		this.addCommand({
+			id: 'open-schedule',
+			name: 'Open schedule',
+			callback: () => void this.openSchedule(),
+		});
+		this.addRibbonIcon(SCHEDULE_ICON, 'Open schedule', () => void this.openSchedule());
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu, file) => {
 				if (file instanceof TFolder) {
@@ -98,6 +106,13 @@ export default class PrinceListsPlugin extends Plugin {
 				);
 			}),
 		);
+	}
+
+	private async openSchedule(): Promise<void> {
+		const { workspace } = this.app;
+		const open = workspace.getLeavesOfType(VIEW_TYPE_SCHEDULE)[0];
+		if (open) workspace.setActiveLeaf(open, { focus: true });
+		else await workspace.getLeaf('tab').setViewState({ type: VIEW_TYPE_SCHEDULE, active: true });
 	}
 
 	private newListWhereNotesGo(): Promise<void> {
