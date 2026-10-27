@@ -27,7 +27,7 @@ export function renderCardNotes(
 	sourcePath: string,
 	el: HTMLElement,
 	markdown: string,
-	checklist: readonly ChecklistLine[],
+	checklist: readonly ChecklistLine[] | null,
 ): Component {
 	return renderMarkdown(host, sourcePath, el, markdown, (boxes) => boxesMatchChecklist(boxes.map((box) => box.checked), checklist));
 }

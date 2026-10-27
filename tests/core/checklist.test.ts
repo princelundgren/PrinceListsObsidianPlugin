@@ -20,9 +20,17 @@ test('checklistOf finds every checkbox line in the notes, nested and numbered to
 	]);
 });
 
-test('checklistOf leaves out fenced and quoted lines, but counts one in a %% comment', () => {
-	const text = TRIP + '\n\t```\n\t- [ ] x\n\t```\n\n\t> - [ ] y\n\n\t%%\n\t- [ ] z\n\t%%\n';
-	expect(checklist(text).map((entry) => entry.line)).toEqual([3, 4, 5, 6, 15]);
+test('checklistOf leaves out fenced and quoted lines', () => {
+	const text = TRIP + '\n\t```\n\t- [ ] x\n\t```\n\n\t> - [ ] y\n';
+	expect(checklist(text)?.map((entry) => entry.line)).toEqual([3, 4, 5, 6]);
+});
+
+// Obsidian doesn't render a box inside `%%` or `$$`, and an embed's box could take its place.
+test('checklistOf gives null when a %% comment or $$ math is in the notes', () => {
+	expect(checklist(TRIP + '\n\t%%\n\t- [ ] hidden\n\t%%\n\n\t![[Other]]\n')).toBeNull();
+	expect(checklist(TRIP + '\n\t$$\n\t- [ ] x\n\t$$\n')).toBeNull();
+	expect(planChecklistTick(TRIP + '\n\t%% note %%\n', 0, 0, 0, '\t- [ ] passport')).toBeNull();
+	expect(boxesMatchChecklist([], null)).toBe(false);
 });
 
 test('toggleChecklistLine flips only the box', () => {

@@ -101,6 +101,9 @@ current todo app. Step one's own "Done when" doesn't change.
   the number of rendered checkboxes or any of their ticked states differs from the parsed lines.
   Callouts, embeds, HTML, code fences, `%%` comments and `$$` math can each make them differ, and a
   tick on the wrong line is worse than no tick.
+- **Notes holding `%%` or `$$` keep every checkbox disabled (call).** Obsidian hides the boxes inside
+  them, and an embed's or a callout's box could make up the count with the same ticked states, so
+  the boxes would line up with the wrong lines without either check noticing.
 - **Nested checklist lines** tick the same way.
 - **The row shows nothing about a checklist (call).** A progress count wasn't asked for.
 
@@ -144,8 +147,10 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Titles are edited in place (call).** A click on a title, not on a link in it, turns it into a
   field: Enter or leaving saves, Escape cancels. A change to the file from elsewhere while the
   field is open waits for it to close before the block draws it **(call)**; the field saves to its
-  line as that change moved it, and a line that went shows "This list changed elsewhere. Try
-  again." and writes nothing. Until the block draws again, its other rows may stand on lines the
+  line as that change moved it. A line that went writes nothing and shows the list view's message
+  with "Copy text" for what was typed, or "This list changed elsewhere. Try again." for an empty
+  field **(call)**. The same message shows when the block's link comes to lead to another note, or
+  the list is renamed, while a field is open. Until the block draws again, its other rows may stand on lines the
   change moved, so a tick, a click, a right-click or a drag on one only closes the field and
   redraws: it never acts on the item that is now on that line **(call)**.
 - **Adding:** a "New item" button below the rows adds an item where "+" puts one with nothing
@@ -219,8 +224,9 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day, except
   for today's items in Today.
 - **Ticking works in place.** A repeating item (🔁) shows the same message as in its list instead
-  of ticking. A tick is worked out on the text the view last read, so a list changed since then
-  shows "This list changed elsewhere. Try again." and writes nothing. Rows can't be dragged: their
+  of ticking. A tick is worked out on the text the view last read, so a list changed, renamed or
+  deleted since then shows "This list changed elsewhere. Try again." and writes nothing, and so
+  does a click that opens a list that's gone. Rows can't be dragged: their
   order comes from the days.
 - **A click on a row,** away from a link, opens its list with that item's card open **(call)**: in
   a tab whose list view already shows that list, else in a new tab. The card opens only while the

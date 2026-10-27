@@ -12,7 +12,7 @@ import { fitHeight } from './dom';
 import { FIELD_CLASS } from './fields';
 import type { ListBlock } from './list-block';
 import { ITEM_CLASS, LINE_ATTR, ROWS_DRAG } from './render-list';
-import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
+import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, tryEdit } from './write';
 
 export const BLOCK_TRASH_CLASS = 'princelists-block-trash';
 export const BLOCK_FIELD_CLASS = 'princelists-block-field';
@@ -63,7 +63,7 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 		try {
 			const line = field.line.line;
 			if (line === null) {
-				if (save) new Notice(CHANGED_ELSEWHERE_NOTICE);
+				if (save) noticeLostField(field.el.win, typed);
 				return;
 			}
 			if (save) await saveTitle(block, line, typed);
@@ -73,6 +73,12 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 			if (!block.field) block.drawIfChanged();
 		}
 	});
+}
+
+// A field whose typing can't be saved any more offers it for copying, unless it's empty.
+export function noticeLostField(win: Window, typed: string): void {
+	if (typed.trim() === '') new Notice(CHANGED_ELSEWHERE_NOTICE);
+	else showLostTypingNotice(win, typed);
 }
 
 // Saves an open field, then adds an empty item at `place` and opens its field.
