@@ -25,7 +25,7 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	later: 'Later',
 };
 
-const SCHEDULE_ABOUT = 'Every item with a When, from all your lists, by day. To plan an item, open it in its list and pick a day with the calendar icon on its card.';
+const SCHEDULE_ABOUT = 'Every item with a date, from all your lists, by day. To plan an item, open it in its list and pick a day with the calendar icon on its card.';
 
 // A list as the view last read it: a tick is worked out on that text.
 interface ReadList {
@@ -178,7 +178,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		sizer.createDiv({ cls: 'princelists-schedule-about', text: SCHEDULE_ABOUT });
 		const today = dayOf(new Date());
 		const groups = groupSchedule([...this.lists.values()].flatMap((list) => list.items), today);
-		if (groups.length === 0) sizer.createDiv({ cls: 'princelists-schedule-empty', text: 'No items have a When.' });
+		if (groups.length === 0) sizer.createDiv({ cls: 'princelists-schedule-empty', text: 'No items have a date.' });
 		for (const { group, items } of groups) {
 			sizer.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
 			const list = sizer.createEl('ul', { cls: ITEMS_CLASS });
