@@ -34,6 +34,7 @@ import {
 } from './fields';
 import { filterBlur, filterInput, filterKeyDown } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
+import { barActionAt, FORMAT_BAR_CLASS, runBarAction } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
@@ -47,6 +48,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
+	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepNotesFocused(evt));
 	view.registerDomEvent(contentEl, 'beforeinput', (evt) => onBeforeInput(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
@@ -107,6 +109,12 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (view.card?.el.contains(target)) {
+		const action = barActionAt(target);
+		if (action) {
+			const editor = view.card.el.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
+			if (editor) runBarAction(editor, action);
+			return;
+		}
 		if (target.closest(`.${CARD_STAR_CLASS}`)) {
 			toggleCardStar(view);
 			return;
@@ -133,6 +141,12 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	}
 	if (Platform.isMobile && showHeadingMenu(view, evt, target)) return;
 	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view, evt);
+}
+
+// A press anywhere on the format bar, between its buttons too, would take focus from the notes
+// editor, which closes it.
+function keepNotesFocused(evt: MouseEvent): void {
+	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {

@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-27
+verified: 2026-10-28
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -864,7 +864,8 @@ needs no code.
 - **Undo (1b, call):**
   - Cmd+Z and Cmd+Shift+Z step through the plugin's own edits, using the same guarded write.
   - They're keys only, with no Undo or Redo command **(owner, 2026-10-22)**, so without a keyboard
-    the only undo on mobile stays the Undo button after a delete.
+    the list's only undo on mobile stays the Undo button after a delete. A card's notes have the
+    format bar's Undo and Redo (step two, "Formatting in a card").
   - The history is cleared when the file changes from outside, so undo never throws away someone
     else's change.
   - Typing in a field makes one step for each time the field has focus. A write of the view's
