@@ -1,6 +1,7 @@
 import { Scope } from 'obsidian';
 import { isListText } from '../obsidian/marker';
 import { newItem } from './add-button';
+import { openFilter } from './filter';
 import type { PrinceListView } from './list-view';
 import { redoKey, undoKey } from './undo';
 
@@ -13,6 +14,12 @@ export function registerListKeys(view: PrinceListView): void {
 	view.scope.register(['Mod'], 'Enter', () => {
 		if (!isListText(view.text)) return true;
 		newItem(view);
+		return false;
+	});
+	// Only while the list has focus: elsewhere Cmd+F stays Obsidian's search.
+	view.scope.register(['Mod'], 'f', () => {
+		if (!isListText(view.text)) return true;
+		openFilter(view);
 		return false;
 	});
 }

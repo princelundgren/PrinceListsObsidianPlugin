@@ -320,3 +320,8 @@ textarea.princelists-heading-field {
 	justify-content: center;
 	color: var(--text-faint);
 }
+
+.princelists-filter {
+	width: 100%;
+	margin-block: var(--size-4-2);
+}
