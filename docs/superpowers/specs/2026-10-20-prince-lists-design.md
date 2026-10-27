@@ -875,6 +875,10 @@ From here on the document is for the builder.
 - **Styling (call):** use only Obsidian's CSS variables and its built-in Lucide icons (`setIcon`),
   so the view follows light and dark mode and any theme. Obsidian's plugin guidelines warn that
   hard-coded styling stops themes and snippets from changing a plugin's look.
+- **Accessible names (call):** only the icon buttons carry `aria-label`, since Obsidian shows every
+  `aria-label` as a hover tooltip. A text field takes its name from a gray placeholder ("Title",
+  "Heading", "Notes"), seen only while it's empty, and a checkbox from a hidden copy of its item's
+  title.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
   `@since` tag in `obsidian.d.ts`. Every device must run at least that version, the iPhone
   included. For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts").
