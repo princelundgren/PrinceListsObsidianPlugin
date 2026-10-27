@@ -1,9 +1,10 @@
-import { ItemView, TFile, type CachedMetadata, type Component, type TAbstractFile } from 'obsidian';
+import { ItemView, Notice, TFile, type CachedMetadata, type Component, type TAbstractFile } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
+import { serialQueue } from '../core/queue';
 import { groupSchedule, scheduledItems, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import { dayOf } from '../core/when';
 import { editListFile } from '../obsidian/file-edit';
@@ -15,7 +16,7 @@ import { handleLinkClick, renderInline, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS } from './render-list';
 import { addStar, addWhen } from './row-marks';
-import { tryEdit } from './write';
+import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	today: 'Today',
@@ -35,6 +36,8 @@ interface ReadList {
 export class ScheduleView extends ItemView implements MarkdownHost {
 	private lists = new Map<string, ReadList>();
 	private readonly rows = new WeakMap<Element, ScheduledItem>();
+	// Ticks run in turn, so each is worked out on the text the one before it wrote.
+	private readonly enqueue = serialQueue((error) => console.error(error));
 	// Paths an event updated while a refresh was reading, which its older reads must not overwrite.
 	private readonly updatedPaths = new Set<string>();
 	private refreshes = 0;
@@ -120,7 +123,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		if (target.closest(`.${CHECKBOX_CLASS}`)) {
 			// The box shows the file: the redraw after the write ticks it.
 			evt.preventDefault();
-			void this.tick(item);
+			void this.enqueue(() => this.tick(item));
 		} else {
 			void this.openItem(item);
 		}
@@ -132,11 +135,15 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		if (!list || !file) return;
 		const lines = splitLines(list.text);
 		const block = itemAt(parseList(lines, contentStartLine(list.text)), item.titleLine);
-		if (!block) return;
+		// A change since the row was drawn may have put another item on its line.
+		if (!block || lines[item.titleLine]?.text !== item.line) {
+			new Notice(CHANGED_ELSEWHERE_NOTICE);
+			return;
+		}
 		const edited = tryEdit(() => toggleItem(lines, block, new Date()));
 		if (!edited) return;
 		const next = joinLines(edited);
-		// Taken at once, so a second tick in this list before the metadata cache catches up builds on it.
+		// Taken at once, so the next tick in this list builds on it before the metadata cache catches up.
 		if ((await editListFile(this.app, file, list.text, next)) === 'written') this.listRead(file, next);
 	}
 
