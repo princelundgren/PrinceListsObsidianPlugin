@@ -540,6 +540,9 @@ stays, and the blank line stays with it.
   that draws it, inside its own views only, as Obsidian's web viewer does.
 - **Clicking an item** (not a link in its title) opens it into a raised card that shows the title
   and the rendered notes.
+  - **On mobile in dark mode the card takes Obsidian's secondary background (owner,
+    2026-10-27).** The page is black there, so a card in the page's own color, raised only by its
+    shadow, can hardly be seen. Desktop keeps the page's color.
   - Notes use Obsidian's own Markdown rendering, so pictures, links and embeds look the way they
     do in any note.
   - **A card's notes are at least three lines tall (owner, 2026-10-27),** empty or not, and so is
