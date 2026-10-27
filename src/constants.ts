@@ -6,4 +6,4 @@ export const RIBBON_ICON = 'list-checks';
 export const VIEW_TYPE_MARKDOWN = 'markdown';
 
 export const VIEW_TYPE_SCHEDULE = 'princelists-schedule';
-export const SCHEDULE_ICON = 'calendar';
+export const SCHEDULE_ICON = 'calendar-clock';

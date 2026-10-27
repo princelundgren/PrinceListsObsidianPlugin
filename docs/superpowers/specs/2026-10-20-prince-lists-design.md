@@ -144,8 +144,8 @@ These are wanted later, roughly in this order. The file format already leaves ro
   block.
 - **A "New list" button on Obsidian's New tab screen (owner, 2026-10-27).** It waits until
   Obsidian documents a route: there is no API for that screen, and adding a button there means
-  changing Obsidian's own DOM. Until then, New list is on the ribbon, in the command palette and in
-  a folder's menu.
+  changing Obsidian's own DOM. Until then, a list is created from the ribbon, the command palette
+  or a folder's menu.
 - **Tidier display in plain Markdown.** Making `✔` and dates look tidy when a list is opened as
   plain Markdown or embedded, using `registerMarkdownPostProcessor` for the reading view or
   `registerEditorExtension` for the editor.
@@ -772,13 +772,15 @@ stays, and the blank line stays with it.
 
 **Creating a list has three routes (owner):**
 
-- Right-click a folder in the file explorer and choose New list (`workspace.on('file-menu')`). The
-  list is created in that folder. On mobile this is a long-press on the folder, confirmed on an
-  iPhone in the 1a checks; Android isn't checked.
-- The "New list" command. It's in the command palette on desktop and mobile, and you can give
+- Right-click a folder in the file explorer and choose New list (`workspace.on('file-menu')`),
+  named as Obsidian's own entries there are, such as New note and New canvas. The list is created
+  in that folder. On mobile this is a long-press on the folder, confirmed on an iPhone in the 1a
+  checks; Android isn't checked.
+- The "Create new list" command, named as Obsidian's own are, such as "Create new canvas"
+  **(owner, 2026-10-27)**. It's in the command palette on desktop and mobile, and you can give
   it a hotkey under Settings → Hotkeys. The plugin sets no default hotkey, because Obsidian's
   plugin guidelines advise against it.
-- The "New list" icon in the ribbon (`addRibbonIcon`).
+- The "Create new list" icon in the ribbon (`addRibbonIcon`).
 
 **Where a new list goes (call):**
 
