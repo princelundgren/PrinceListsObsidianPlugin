@@ -705,6 +705,9 @@ stays, and the blank line stays with it.
   Nothing in the file changes when an item becomes archived.
 - **"Show archived" in the pane's ⋯ menu (call; archived is the owner's word)** shows archived
   items again, gray, in place.
+  - **It's also an eye icon in the pane's header (owner, 2026-10-27),** because the ⋯ menu alone
+    was hard to find on the iPhone. The eye, and "Hide archived" with the eye crossed out while
+    they show, toggle the same setting as the menu item. It shows only on a list.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.

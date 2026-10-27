@@ -1,4 +1,4 @@
-import { type Component, type Menu, Notice, Platform, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
+import { type Component, type Menu, Notice, Platform, setIcon, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
@@ -38,6 +38,7 @@ export class PrinceListView extends TextFileView {
 	listNoteEl: HTMLElement | null = null;
 	headingField: HeadingField | null = null;
 	newItemButton: HTMLButtonElement | null = null;
+	private archivedButton: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
 	readonly blocks = new Map<HTMLElement, Component>();
 	// One-off writes wait for the one before to land, then edit the text as it left it, so two quick
@@ -128,6 +129,8 @@ export class PrinceListView extends TextFileView {
 		enableMouseDrag(this, this.contentEl);
 		if (Platform.isMobile) enableTouchDrag(this);
 		this.newItemButton = buildNewItemButton(this);
+		this.archivedButton = this.addAction('eye', 'Show archived', () => this.toggleArchived());
+		this.syncArchivedButton();
 	}
 
 	protected async onClose(): Promise<void> {
@@ -161,10 +164,7 @@ export class PrinceListView extends TextFileView {
 					.setTitle('Show archived')
 					.setIcon('archive')
 					.setChecked(this.showArchived)
-					.onClick(() => {
-						this.showArchived = !this.showArchived;
-						this.render();
-					}),
+					.onClick(() => this.toggleArchived()),
 			);
 		}
 		menu.addItem((item) =>
@@ -220,11 +220,26 @@ export class PrinceListView extends TextFileView {
 	// focus, or about to (`focusing`): those stay in place and update after blur.
 	render(focusing: Element | null = null): void {
 		redraw(this, focusing);
+		this.syncArchivedButton();
+	}
+
+	private toggleArchived(): void {
+		this.showArchived = !this.showArchived;
+		this.render();
 	}
 
 	endListNote(): void {
 		this.listNote = null;
 		this.editing.closeListNote();
+	}
+
+	// The header's eye shows only on a list, and says what a click does next.
+	private syncArchivedButton(): void {
+		const button = this.archivedButton;
+		if (!button) return;
+		button.toggle(isListText(this.text));
+		setIcon(button, this.showArchived ? 'eye-off' : 'eye');
+		setTooltip(button, this.showArchived ? 'Hide archived' : 'Show archived');
 	}
 
 	private outsideChange(data: string): void {
