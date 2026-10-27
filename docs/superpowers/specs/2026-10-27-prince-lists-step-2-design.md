@@ -32,6 +32,10 @@ only documented Obsidian APIs are used.
 - **Dragging a heading moves its whole section,** and an arrow left of a heading collapses it.
 - **Formatting in a card:** Cmd+B, Cmd+I and Cmd+K, a format bar under the notes, and "Edit in
   Markdown", which opens the list as Markdown at the item.
+- **Notes edit one block at a time:** a card's notes and the list note stay drawn as in a note, and
+  only the paragraph, table or list item you click shows its Markdown.
+- **Right-click menus:** a heading's menu gains "Edit in Markdown", and the list's background has a
+  menu of its own on desktop.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -340,9 +344,10 @@ put its editor in a plugin's view.
 - **Cmd+B, Cmd+I and Cmd+K** in a card's title and notes make the selection bold, italic or a
   link, as in a note, and Cmd+B or Cmd+I again takes it off **(call)**. They're registered on the
   view's own `scope`, as Cmd+Z is, and anywhere else the key stays Obsidian's.
-- **A format bar under the notes** while they're edited: Undo and Redo; Bold, Italic, Inline code
-  and Link; Bulleted list, Numbered list and Checklist; Code block and Table. A press keeps focus
-  in the notes, so the phone's keyboard stays up.
+- **A format bar under the notes** while they're edited, right under the open block: Undo and
+  Redo; Bold, Italic, Strikethrough, Underline, Inline code and Link; Bulleted list, Numbered
+  list and Checklist; Code block and Table. A press keeps focus in the notes, so the phone's
+  keyboard stays up.
   - On a narrow card, such as a phone's, whole groups wrap to a second row, so every button stays
     in sight, with no menu to open **(call)**.
   - The list buttons turn each selected line that isn't blank into an item of that kind, or back
@@ -350,12 +355,81 @@ put its editor in a plugin's view.
     marker, to type after.
   - A selection that takes in its markers, as a drag does, counts as the text inside them, so
     Bold, Italic or Inline code again takes them off.
+  - Strikethrough wraps the selection in `~~`, as Obsidian writes it. Markdown has no underline,
+    so Underline wraps it in HTML's `<u>` and `</u>` **(owner, 2026-10-28)**. Both take their
+    marks off again, as Bold does. No key is added for them **(call)**.
   - The buttons can't be reached with Tab, which would leave the notes and close them **(call)**.
   - Table puts a two-column table in place of a blank line, or below the caret's line, a blank
     line apart from the text around it, with its first header selected.
   - Undo and Redo step through the field's own history (step one's "Undo (1b, call)").
 - **A table and code in a card's notes are drawn as in a note,** with Obsidian's documented table
   and code variables: Obsidian's own style for them applies only inside its views.
+
+### Editing notes a block at a time (owner, 2026-10-28)
+
+Clicking a card's notes or the list note switched the whole text to its Markdown, so a table
+showed its pipes and a checklist its brackets: a step down from a note. Obsidian documents no way
+to put its own editor, with Live Preview, in a plugin's view. So the notes stay drawn by Obsidian's
+renderer, and only the part you click becomes a plain-text field.
+
+- **A block is drawn on its own:** a paragraph, a heading, a table, a code block, a quote or
+  callout, a list, or HTML, as CommonMark splits the notes. Clicking one puts its Markdown in a
+  field in its place, the caret where you clicked (step one's rules), and the rest stays drawn.
+- **A list item opens alone,** with the items nested under it **(owner)**; the rest of its list
+  stays drawn. The nth drawn item is the nth item CommonMark finds outside quotes and callouts, as
+  with checkboxes. When the two counts differ, as an embed or a callout holding a list makes them,
+  the whole list opens **(call)**.
+- **Checkboxes tick as in a note (owner):** a click turns `[ ]` into `[x]` and back, saved at once,
+  with no `✔` date ("Ticking checklists"). That works while another block is open too.
+- **Keys, as in a note (owner):**
+  - Enter at the end of a list item's line starts a new item after it, at its indent and of its
+    kind: a checklist's starts unticked, a numbered one counts on. When that line ends the open
+    field, the item you left is drawn and the new one opens on its own.
+  - Enter on an empty nested item moves it one level out; on an empty top-level item it ends the
+    list: the item goes, and an empty block opens below the list.
+  - Elsewhere, Enter adds a line in the field, and Shift+Enter always does **(call)**. An empty
+    line splits the block in two once you leave it.
+  - Up with the caret at the very start of the field moves into the block above, at its end, and
+    Down at the very end into the block below, at its start **(call)**: a field can't tell which
+    wrapped line the caret is on. From an item's first child, Up goes to the item itself.
+  - Backspace in an empty field removes that block and moves to the end of the block above
+    **(call)**. Joining two blocks that hold text is done in "Edit in Markdown" **(call)**.
+  - Enter that confirms a word in an input method, such as a Japanese keyboard's, only confirms it.
+- **Clicking below the last block opens an empty block at the end (owner),** as clicking empty
+  notes did. Once it holds text it's saved after an empty line, so it stays a block of its own
+  **(call)**.
+- **Saving changes only the open block's lines,** which take the file's usual line ending; the
+  rest of the notes keeps every byte, so a change another device made to another block stays
+  **(call)**. The item's indent is put back, as before. An outside change that takes the block's own lines leaves the field unable to save, with
+  the same notice and copy button as a card whose item went.
+- **Leaving the field draws the notes again;** clicking another block moves the field there. The
+  format bar, Cmd+B, Cmd+I and Cmd+K, a pasted picture and the field's own Undo all act on the open
+  block. A picture dropped on drawn notes goes in a new block at the end **(call)**.
+- **The list note works the same (owner, 2026-10-28),** format bar and keys included **(call)**,
+  with its own rules kept: what would turn it into a heading or an item warns before it saves,
+  checked on the whole note as it would be saved, and it takes no pictures.
+- **What this costs (call):**
+  - The open block is plain Markdown: an open table shows its pipes.
+  - A reference-style link or a footnote whose definition is in another block shows as typed,
+    since each block is drawn alone.
+  - `$$` math or a `%%` comment with empty lines inside is one block from its opening to its close,
+    so it isn't drawn in pieces.
+
+### Right-click menus (owner, 2026-10-28)
+
+- **The heading menu gains "Edit in Markdown",** with the caret at the end of the heading's line,
+  on desktop and on mobile.
+- **Right-clicking the list's background on desktop** opens the list menu: New item, New heading,
+  Edit in Markdown, Show archived and Open schedule. The background is anywhere a click lands on
+  no row, heading, field or link, the drawn list note included.
+  - New item and New heading go at the end of the section the click is in: under the nearest
+    heading above it, or in the part before the first heading **(owner)**. New item goes after the
+    section's last item, before any text below it that isn't an item, which an item can't follow
+    without joining it **(call)**.
+  - Edit in Markdown puts the caret at the end of that section's last line **(call)**.
+  - Show archived and Open schedule do what they do in the pane's ⋯ menu.
+  - Mobile has no background menu: the plugin opens no menu on a long-press (step one, "Touch on
+    mobile").
 
 ## Still later
 
@@ -394,10 +468,15 @@ These go into step one's "Not in step one" list:
    a final newline takes the file's usual line ending, and the new last line takes the old last
    line's, as AGENTS.md requires. Moving it back gives the original bytes when no empty line was
    added.
+10. **Editing a list item alone:** the nth drawn list item of a block is the nth item CommonMark
+    finds outside quotes and callouts, for nested, numbered and mixed lists, as risk 1 checks.
+11. **`<u>`** draws underlined in a card's notes.
+12. **Lucide's `strikethrough` and `underline` icons** exist in Obsidian 1.5.7.
 
 ## Order (call)
 
 Smallest first, each feature its own group of plan tasks that can be released alone: Turn into
 list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, dragging and collapsing
-headings, When on rows and in the card, the Schedule view, then lists inside other notes. No API
-here is newer than 1.5.7, the current `minAppVersion`.
+headings, When on rows and in the card, the Schedule view, then lists inside other notes. Then,
+before 0.4.0 **(owner, 2026-10-28)**: the two new format buttons, the right-click menus, and
+editing notes a block at a time. No API here is newer than 1.5.7, the current `minAppVersion`.
