@@ -18,10 +18,8 @@ textarea.princelists-field {
 	overflow: hidden;
 }
 
-/* The titles read as titles even while they have focus, and so does a heading being renamed. */
-textarea.princelists-title:focus,
-textarea.princelists-card-title:focus,
-textarea.princelists-heading-field:focus {
+/* A field reads as its text even while it has focus, with no ring around it. */
+textarea.princelists-field:focus {
 	box-shadow: none;
 }
 
@@ -89,6 +87,12 @@ textarea.princelists-list-note-editor {
 	flex: none;
 	margin: calc((var(--line-height-normal) * 1em - var(--checkbox-size)) / 2) 0 0;
 	font-size: inherit;
+}
+
+/* An archived item's checkbox is blue, to tell it from one ticked in the last day. */
+.princelists-item.is-archived .princelists-checkbox {
+	--checkbox-color: var(--color-blue);
+	--checkbox-color-hover: var(--color-blue);
 }
 
 /* Gray in place, with no strikethrough (spec, "Ticking"). */
@@ -198,8 +202,14 @@ textarea.princelists-card-notes-editor {
 	position: absolute;
 	inset: 0;
 	overflow-y: auto;
-	padding: inherit;
+	padding: var(--file-margins);
 	box-sizing: border-box;
+}
+
+/* Always at the readable line width: no documented API reads Obsidian's setting for it. */
+.princelists-sizer {
+	max-width: var(--file-line-width);
+	margin: 0 auto;
 }
 
 /* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on the iPhone". */
@@ -238,7 +248,7 @@ button.princelists-new-item {
 
 /* The header's archived button while archived items show. */
 .princelists-archived-shown {
-	color: var(--interactive-accent);
+	color: var(--color-blue);
 }
 
 @media (hover: hover) {

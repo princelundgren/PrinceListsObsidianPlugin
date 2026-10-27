@@ -27,8 +27,8 @@ function newItem(view: PrinceListView): void {
 	addItem(view, selected === null ? 'first' : { after: selected });
 }
 
-// Enter in an open card's title. On an empty item the card added, it only closes the card, which
-// removes the item, so a second Enter ends a run of new items.
+// Shift+Enter in an open card's title. On an empty item the card added, it only closes the card,
+// which removes the item, so a second Shift+Enter ends a run of new items.
 export function addItemBelowCard(view: PrinceListView): void {
 	const selected = view.selected;
 	if (selected === null) return;

@@ -7,7 +7,7 @@ import { parseItemLine } from '../core/item-line';
 import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
-import { fitHeight } from './dom';
+import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
 import { renderNotes } from './notes';
@@ -74,7 +74,7 @@ export function closeCard(view: PrinceListView): void {
 		return;
 	}
 	const row = rowAt(view, line);
-	if (row && isShown(row, view.lines()[row.titleLine]?.text ?? '', new Date(), view.showArchived)) {
+	if (row && isShown(row, view.showArchived)) {
 		card.el.replaceWith(buildRow(view, row, view.blocks));
 	} else {
 		card.el.remove();
@@ -111,11 +111,10 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	// A lost card has no item to read: it keeps what it shows until it closes.
 	if (card.lostAt !== null) return;
 	const row = rowAt(view, view.editing.selected);
-	const box = card.el.querySelector<HTMLInputElement>(`.${CHECKBOX_CLASS}`);
 	if (row) {
 		setLine(card.el, row.titleLine);
-		box?.setAttr('aria-label', row.label);
-		showDone(card.el, row.done);
+		card.el.querySelector(`.${HIDDEN_LABEL_CLASS}`)?.setText(row.label);
+		showDone(card.el, row);
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	const focused = card.el.doc.activeElement;
@@ -147,7 +146,7 @@ export function editNotes(view: PrinceListView, area: HTMLElement): void {
 	if (card.notes) view.removeChild(card.notes);
 	card.notes = null;
 	area.empty();
-	const editor = area.createEl('textarea', { cls: [FIELD_CLASS, NOTES_EDITOR_CLASS], attr: { placeholder: 'Notes', 'aria-label': 'Notes' } });
+	const editor = area.createEl('textarea', { cls: [FIELD_CLASS, NOTES_EDITOR_CLASS], attr: { placeholder: 'Notes' } });
 	editor.value = notes;
 	editor.focus();
 	fitHeight(editor);
@@ -220,9 +219,9 @@ function endCard(view: PrinceListView, card: Card): void {
 
 function createCardElement(): HTMLElement {
 	const el = createEl('li', { cls: [ITEM_CLASS, CARD_CLASS], attr: { tabindex: -1 } });
-	el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' });
+	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
-	body.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, 'aria-label': 'Title' } });
+	body.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	body.createDiv({ cls: CARD_NOTES_CLASS });
 	const actions = el.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
@@ -231,7 +230,7 @@ function createCardElement(): HTMLElement {
 
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {
 	const text = line === null ? undefined : view.lines()[line]?.text;
-	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line) : null;
+	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line, new Date()) : null;
 }
 
 function isEmptyAt(view: PrinceListView, line: number): boolean {

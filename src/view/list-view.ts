@@ -58,11 +58,14 @@ export class PrinceListView extends TextFileView {
 	// The list scrolls here, not in contentEl, so nothing relies on Obsidian's stylesheet scrolling
 	// `.view-content`. Not `scrollEl`: that may be a name Obsidian's views use at runtime.
 	readonly listScrollEl: HTMLElement;
+	/** What the view draws, at Obsidian's readable line width, as a Markdown view's sizer. */
+	readonly listSizerEl: HTMLElement;
 
 	constructor(leaf: WorkspaceLeaf) {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
 		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+		this.listSizerEl = this.listScrollEl.createDiv({ cls: 'princelists-sizer' });
 		// Here, so the scope is in place before the view first takes focus.
 		registerUndoKeys(this);
 	}
@@ -118,7 +121,7 @@ export class PrinceListView extends TextFileView {
 		this.showArchived = false;
 		this.outsideChanges++;
 		// Nothing of the old file stays, not even a field with focus, which render() would keep.
-		this.listScrollEl.empty();
+		this.listSizerEl.empty();
 		// A different file opens at the top; render() keeps the scroll position otherwise.
 		this.listScrollEl.scrollTop = 0;
 	}

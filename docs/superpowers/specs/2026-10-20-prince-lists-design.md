@@ -526,6 +526,8 @@ stays, and the blank line stays with it.
     do in any note.
   - **Empty notes show a gray "Notes" three lines tall (owner, 2026-10-27),** and the notes field
     is at least that tall while it's being typed in, so it's easy to tap.
+  - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
+    typed in reads as its text, as a title does.
   - Links in a card can be clicked.
   - On the Mac, right-clicking an internal link in a card shows Obsidian's own link menu
     **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**.
@@ -615,9 +617,11 @@ stays, and the blank line stays with it.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.
-  - Enter in a title adds another item below it, and Escape closes the card.
-  - In a new item whose title is still empty, Enter closes the card instead, which removes the
-    item, so a second Enter ends a run of new items. "+" and New item below keep it, with the
+  - **Enter in a title closes the card (owner, 2026-10-27),** as Escape does, so typing a new
+    item's name and pressing Enter finishes it. Shift+Enter adds another item below it instead, so
+    a run of items can still be typed in one go. On the iPhone, "+" adds each next item.
+  - In a new item whose title is still empty, Shift+Enter closes the card instead, which removes the
+    item, so a second Shift+Enter ends a run of new items. "+" and New item below keep it, with the
     cursor back in its title. Delete closes the card, which removes the item as a cancel, with no
     Undo **(call)**.
   - A new item is removed again if you close its card while its title is still empty and it has
@@ -720,8 +724,10 @@ stays, and the blank line stays with it.
   - **It's also a ticked-checkbox icon in the pane's header (owner, 2026-10-27),** because the ⋯
     menu alone was hard to find on the iPhone. The icon is the same shape as the list's own
     checkboxes, so it reads as done items; an eye was tried first and read as unrelated to them.
-    It toggles the same setting as the menu item, is in the accent color while archived items
-    show, and its tooltip then says "Hide archived". It shows only on a list.
+    It toggles the same setting as the menu item, is blue while archived items show, as their
+    checkboxes are, and its tooltip then says "Hide archived". It shows only on a list.
+  - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
+    it stands apart from an item ticked in the last day, whose checkbox keeps the accent color.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.
@@ -875,6 +881,10 @@ From here on the document is for the builder.
 - **Styling (call):** use only Obsidian's CSS variables and its built-in Lucide icons (`setIcon`),
   so the view follows light and dark mode and any theme. Obsidian's plugin guidelines warn that
   hard-coded styling stops themes and snippets from changing a plugin's look.
+- **Accessible names (call):** only the icon buttons carry `aria-label`, since Obsidian shows every
+  `aria-label` as a hover tooltip. A text field takes its name from a gray placeholder ("Title",
+  "Heading", "Notes"), seen only while it's empty, and a checkbox from a hidden copy of its item's
+  title.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
   `@since` tag in `obsidian.d.ts`. Every device must run at least that version, the iPhone
   included. For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts").
@@ -1044,7 +1054,12 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `file-explorer-context-menu`, so it offers "New list" (confirmed on the device in the 1a
   checks).
 - **The list scrolls in an element of its own,** inside the view's `contentEl`, so nothing relies on
-  Obsidian's undocumented `overflow` on `.view-content`. It fills `contentEl` and takes its padding.
+  Obsidian's undocumented `overflow` on `.view-content`. It fills `contentEl`.
+- **The list is laid out as a Markdown view is (owner, 2026-10-27):** the scrolling element takes
+  the documented `--file-margins` as its padding, and what it holds sits centered at the documented
+  `--file-line-width`, so titles and rows line up with a note's. That's always the readable line
+  width: no documented API reads Obsidian's "Readable line length" setting, so with it off a
+  note fills the pane while a list doesn't.
 - **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
