@@ -235,7 +235,8 @@ current todo app. Step one's own "Done when" doesn't change.
     An empty group is hidden.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day, except
-  for today's items in Today.
+  for today's items in Today. The list's name is smaller, on a line under the title, so it doesn't
+  read as part of it **(owner, 2026-10-28)**.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
   its title in a list's title style. A muted line under it says what the page shows and how an item
   gets a When, for anyone who opens it without knowing.
