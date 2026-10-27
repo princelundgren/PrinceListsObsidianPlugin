@@ -550,7 +550,7 @@ stays, and the blank line stays with it.
 - **Item titles (call):** edit them in the open card. Everything after the title is hidden while
   you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was, except that doubled
   `✔` marks collapse to the earliest and a leftover `✔` on an open line is dropped (see
-  Completion).
+  Completion). Step two hides an item's star too, and saving puts it back once.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
   not on every keystroke. Switching to another window or app doesn't leave the field. The rename
   uses `fileManager.renameFile`, which updates links according to the user's link settings. Escape
@@ -652,7 +652,8 @@ stays, and the blank line stays with it.
 ### Item actions (owner)
 
 - **On the Mac, right-click an item** for New item below, New heading below and Delete
-  **(call)**. Delete removes the item and its notes.
+  **(call)**. Delete removes the item and its notes. Step two adds "Add star" or "Remove star"
+  before Delete.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading and Delete heading.
   - New item adds one as the first item under the heading. In a section without items, it goes
@@ -761,6 +762,8 @@ stays, and the blank line stays with it.
   without regard to case as macOS and iOS disks compare names. It holds only the marker.
 - It opens in a new tab, as Obsidian's own New note does (observed in 1.14.4), straight into the
   list view with its title selected, so typing replaces it.
+
+**An existing note becomes a list** with "Turn into list" (step two), which adds the marker to it.
 
 **Renaming, moving and deleting** are done with Obsidian's own file explorer. Moving a list to
 another folder changes its area. An open list view follows a rename or move made elsewhere

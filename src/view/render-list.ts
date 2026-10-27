@@ -6,6 +6,7 @@ import type { ListModel } from '../core/parse';
 import { addHiddenLabel } from './dom';
 import type { PrinceListView } from './list-view';
 import { renderInline } from './notes';
+import { addStar } from './row-marks';
 
 export const ITEM_CLASS = 'princelists-item';
 export const CHECKBOX_CLASS = 'princelists-checkbox';
@@ -121,6 +122,7 @@ export function buildRow(view: PrinceListView, row: ItemRow, blocks: Map<HTMLEle
 	addHiddenLabel(rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), row.label);
 	const title = rowEl.createDiv({ cls: 'princelists-item-title' });
 	record(blocks, rowEl, renderInline(view, title, row.title));
+	if (row.starred) addStar(rowEl);
 	showDone(rowEl, row);
 	return rowEl;
 }

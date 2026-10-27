@@ -3,6 +3,7 @@ import { splitAtx } from './edit-headings';
 import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
 import type { Line } from './lines';
 import type { ListModel } from './parse';
+import { splitStar } from './star';
 
 export interface ItemRow {
 	kind: 'item';
@@ -13,6 +14,7 @@ export interface ItemRow {
 	done: boolean;
 	/** Done more than 24 hours ago, so hidden unless "Show archived" is on. */
 	archived: boolean;
+	starred: boolean;
 }
 
 /** A block the plugin leaves alone, such as a paragraph, table or code block, as its raw lines. */
@@ -82,9 +84,10 @@ export function withoutRange(sections: SectionRows[], range: { start: number; en
 export function itemRow(text: string, titleLine: number, now: Date): ItemRow {
 	// parseList makes an item only of a line parseItemLine reads.
 	const parts = parseItemLine(text) as ItemLineParts;
-	const label = parts.title === '' ? (parts.marks + parts.tail).trim() : parts.title;
+	const { plain, star } = splitStar(parts.title);
+	const label = plain === '' ? (parts.marks + parts.tail).trim() : plain;
 	const done = isDoneStatus(parts.status);
-	return { kind: 'item', titleLine, title: parts.title, label, done, archived: done && isArchived(text, now) };
+	return { kind: 'item', titleLine, title: plain, label, done, archived: done && isArchived(text, now), starred: star !== '' };
 }
 
 function firstLine(row: ListRow): number {

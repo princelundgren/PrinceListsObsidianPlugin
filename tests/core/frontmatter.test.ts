@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { isMarkerValue, lineAfterFrontmatter, opensWithFrontmatter } from '../../src/core/frontmatter';
+import { isMarkerValue, isYamlMapping, lineAfterFrontmatter, opensWithFrontmatter } from '../../src/core/frontmatter';
 
 test('isMarkerValue accepts only the YAML boolean true', () => {
 	expect(isMarkerValue({ princelists: true })).toBe(true);
@@ -38,4 +38,9 @@ test('lineAfterFrontmatter is the line count when the file is only frontmatter',
 			expect(lineAfterFrontmatter(text, contentStart)).toBe(3);
 		}
 	}
+});
+
+test('isYamlMapping accepts an object, or null for empty frontmatter, and nothing else', () => {
+	for (const yaml of [{}, { a: 1 }, null]) expect(isYamlMapping(yaml)).toBe(true);
+	for (const yaml of [['a'], 'x', 5, undefined]) expect(isYamlMapping(yaml)).toBe(false);
 });
