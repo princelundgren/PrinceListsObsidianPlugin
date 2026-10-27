@@ -30,6 +30,7 @@ only documented Obsidian APIs are used.
 - **An item can be starred.**
 - **An empty list says how to add an item,** and Cmd+Enter adds one.
 - **Dragging a heading moves its whole section,** and an arrow left of a heading collapses it.
+- **Formatting in a card:** "Edit in Markdown" opens the list as Markdown at the item.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -316,6 +317,21 @@ current todo app. Step one's own "Done when" doesn't change.
   The item menu has no star entry **(owner)**, so the star is set only from the open card.
 - **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
   show: a list, the Schedule view and a list inside another note.
+
+### Formatting in a card (owner, 2026-10-27)
+
+A card's title and notes are plain text fields, so Editing Toolbar and Obsidian's own formatting
+commands, which act on the active Markdown editor, don't reach them. Obsidian documents no way to
+put its editor in a plugin's view.
+
+- **"Edit in Markdown"** in the item menu opens the list as Markdown beside it, through the same
+  path as "Open as Markdown", with the caret at the end of the item's title line and the editor
+  focused. There, Editing Toolbar, Obsidian's commands and its mobile toolbar work.
+  - Typing still waiting for the save is saved first, so the Markdown shows it.
+  - It opens in a split (`getLeaf('split')`). A phone has no splits, and Obsidian opens a new tab
+    there (observed on Android).
+  - It opens in the view Obsidian's settings give new tabs, editing by default: Obsidian documents
+    no way for a plugin to pick the mode.
 
 ## Still later
 
