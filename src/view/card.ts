@@ -12,6 +12,7 @@ import { buildWhenPicker, showWhen } from './card-when';
 import { caretAtClick } from './click-caret';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
+import { buildFormatBar } from './format';
 import type { PrinceListView } from './list-view';
 import { renderCardNotes } from './notes';
 import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, setLine, showDone } from './render-list';
@@ -156,6 +157,7 @@ export function editNotes(view: PrinceListView, area: HTMLElement, click?: Mouse
 	area.empty();
 	const editor = area.createEl('textarea', { cls: [FIELD_CLASS, NOTES_EDITOR_CLASS], attr: { placeholder: 'Notes' } });
 	editor.value = notes;
+	buildFormatBar(area);
 	editor.focus();
 	editor.setSelectionRange(caret, caret);
 	fitHeight(editor);

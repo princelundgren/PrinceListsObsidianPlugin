@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-27
+verified: 2026-10-28
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -30,7 +30,8 @@ only documented Obsidian APIs are used.
 - **An item can be starred.**
 - **An empty list says how to add an item,** and Cmd+Enter adds one.
 - **Dragging a heading moves its whole section,** and an arrow left of a heading collapses it.
-- **Formatting in a card:** "Edit in Markdown" opens the list as Markdown at the item.
+- **Formatting in a card:** Cmd+B, Cmd+I and Cmd+K, a format bar under the notes, and "Edit in
+  Markdown", which opens the list as Markdown at the item.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -333,6 +334,25 @@ put its editor in a plugin's view.
     there (observed on Android).
   - It opens in the view Obsidian's settings give new tabs, editing by default: Obsidian documents
     no way for a plugin to pick the mode.
+- **Cmd+B, Cmd+I and Cmd+K** in a card's title and notes make the selection bold, italic or a
+  link, as in a note, and Cmd+B or Cmd+I again takes it off **(call)**. They're registered on the
+  view's own `scope`, as Cmd+Z is, and anywhere else the key stays Obsidian's.
+- **A format bar under the notes** while they're edited: Undo and Redo; Bold, Italic, Inline code
+  and Link; Bulleted list, Numbered list and Checklist; Code block and Table. A press keeps focus
+  in the notes, so the phone's keyboard stays up.
+  - On a narrow card, such as a phone's, whole groups wrap to a second row, so every button stays
+    in sight, with no menu to open **(call)**.
+  - The list buttons turn each selected line that isn't blank into an item of that kind, or back
+    into a plain line when every one already is one **(call)**. A caret on a blank line gets the
+    marker, to type after.
+  - A selection that takes in its markers, as a drag does, counts as the text inside them, so
+    Bold, Italic or Inline code again takes them off.
+  - The buttons can't be reached with Tab, which would leave the notes and close them **(call)**.
+  - Table puts a two-column table in place of a blank line, or below the caret's line, a blank
+    line apart from the text around it, with its first header selected.
+  - Undo and Redo step through the field's own history (step one's "Undo (1b, call)").
+- **A table and code in a card's notes are drawn as in a note,** with Obsidian's documented table
+  and code variables: Obsidian's own style for them applies only inside its views.
 
 ## Still later
 

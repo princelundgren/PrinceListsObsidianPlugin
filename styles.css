@@ -194,6 +194,46 @@ textarea.princelists-list-note-editor {
 	cursor: text;
 }
 
+/* A table in rendered notes, drawn as in a note: Obsidian's own table rules apply only inside its
+   views. */
+.princelists-card-notes table {
+	border-collapse: collapse;
+	margin-block: var(--size-4-2);
+}
+
+.princelists-card-notes th,
+.princelists-card-notes td {
+	padding: var(--size-2-2) var(--size-4-2);
+	border: var(--table-border-width) solid var(--table-border-color);
+}
+
+.princelists-card-notes th {
+	border: var(--table-header-border-width) solid var(--table-header-border-color);
+	font-weight: var(--table-header-weight);
+}
+
+/* Obsidian styles code only inside its own views, so a card's notes take its documented code
+   variables. */
+.princelists-card-notes code {
+	padding: var(--size-2-1) var(--size-4-1);
+	border-radius: var(--radius-s);
+	background: var(--code-background);
+	color: var(--code-normal);
+	font-size: var(--code-size);
+}
+
+.princelists-card-notes pre {
+	padding: var(--size-4-2) var(--size-4-3);
+	border-radius: var(--radius-s);
+	background: var(--code-background);
+	white-space: var(--code-white-space);
+	overflow-x: auto;
+}
+
+.princelists-card-notes pre code {
+	padding: 0;
+}
+
 /* A card's notes are at least three lines tall, empty or not, so they are easy to tap. */
 .princelists-card-notes,
 textarea.princelists-card-notes-editor {
@@ -278,9 +318,25 @@ button.princelists-new-item {
 	gap: var(--size-2-1);
 }
 
+/* Under the notes editor while it's open. On a narrow card, such as a phone's, whole groups move to
+   a second row, so every button stays in sight. */
+.princelists-format-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-2-1) var(--size-4-3);
+	margin-top: var(--size-4-1);
+}
+
+.princelists-format-group {
+	flex: none;
+	display: flex;
+	gap: var(--size-2-1);
+}
+
 /* Icons on the card's own background. */
 button.princelists-card-actions,
 button.princelists-card-star,
+.princelists-format-bar button,
 .princelists-when-button {
 	flex: none;
 	height: auto;
@@ -294,6 +350,7 @@ button.princelists-card-star,
 @media (hover: hover) {
 	button.princelists-card-actions:hover,
 	button.princelists-card-star:hover,
+	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button {
 		background-color: var(--background-modifier-hover);
 		box-shadow: none;
