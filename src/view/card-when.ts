@@ -14,7 +14,7 @@ export function buildWhenPicker(tools: HTMLElement): void {
 	const row = tools.createDiv({ cls: 'princelists-card-when' });
 	const picker = row.createDiv({ cls: 'princelists-when-picker' });
 	picker.createDiv({ cls: WHEN_BUTTON_CLASS });
-	picker.createEl('input', { cls: WHEN_INPUT_CLASS, type: 'date', attr: { 'aria-label': 'When' } });
+	picker.createEl('input', { cls: WHEN_INPUT_CLASS, type: 'date', attr: { 'aria-label': 'Date' } });
 }
 
 export function showWhen(card: Card, day: string | null): void {

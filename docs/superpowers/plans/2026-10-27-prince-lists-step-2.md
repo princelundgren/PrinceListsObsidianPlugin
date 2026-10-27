@@ -79,10 +79,10 @@ manual check runs there, never in a vault with real notes.
   - "Press Cmd+Enter or + to add an item", "Press Ctrl+Enter or + to add an item" and "Tap + to add
     an item".
   - The collapse arrow's hidden label "Collapse section", with `aria-expanded`.
-  - The filter field's placeholder "Find in list"; the date input's `aria-label` "When"; the day labels
+  - The filter field's placeholder "Find in list"; the date input's `aria-label` "Date"; the day labels
     "Today" and "Tomorrow".
   - The Schedule view's title "Schedule", its groups "Today", "Tomorrow", "Next 7 days" and
-    "Later" (owner, 2026-10-27), and "No items have a When." when every group is empty **(call)**.
+    "Later" (owner, 2026-10-27), and "No items have a date." when every group is empty **(call)**.
   - In a block: the button "New item", the trash button's `aria-label` "Delete item", and the gray
     lines "This block needs a link to a list, such as [[Groceries]].", "[[{link}]] doesn't lead to
     a note.", "[[{link}]] isn't a list." and "[[{link}]] is this note, so it can't show here."
