@@ -152,7 +152,8 @@ function swallowClick(view: PrinceListView, evt: MouseEvent): void {
 }
 
 // The page has one undo history, so Cmd+Z in one field can reach typing in a field without focus,
-// which nothing would save.
+// which nothing would save. That undo's beforeinput targets the other field while focus is still in
+// this one (observed in Obsidian 1.14.4 on macOS); focus moves only with its input event.
 function keepUndoInFocusedField(view: PrinceListView, evt: InputEvent): void {
 	const isHistory = evt.inputType === 'historyUndo' || evt.inputType === 'historyRedo';
 	if (isHistory && evt.target !== view.contentEl.doc.activeElement) evt.preventDefault();
