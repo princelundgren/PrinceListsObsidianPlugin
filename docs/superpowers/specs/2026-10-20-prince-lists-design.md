@@ -115,7 +115,7 @@ These are wanted later, roughly in this order. The file format already leaves ro
 - **[Step two](2026-10-27-prince-lists-step-2-design.md) (owner, 2026-10-27)** takes on what the
   owner needs before moving in: ticking checklists, Cmd+F, showing a list inside another note,
   "Turn into list", a When day with a Schedule view, starring an item, and dragging a heading to
-  move its whole section.
+  move its whole section or collapsing it.
 - **Views across lists:** a sidebar with views such as Inbox, Today, Upcoming and Done, grouped
   by area. An area is a list's folder. A Favorites view gathers starred items **(owner,
   2026-10-27)**.
