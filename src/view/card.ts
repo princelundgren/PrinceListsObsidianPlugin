@@ -1,4 +1,5 @@
 import { Notice, setIcon, type Component, type TFile } from 'obsidian';
+import { checklistOf } from '../core/checklist';
 import { isShown, itemRow, type ItemRow } from '../core/display';
 import { UnsafeEditError } from '../core/edit-check';
 import { isEmptyItem, planRemoval, type InsertedItem, type Removal } from '../core/empty-item';
@@ -10,7 +11,7 @@ import { contentStartLine } from '../obsidian/marker';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
-import { renderNotes } from './notes';
+import { renderCardNotes } from './notes';
 import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, LOST_TYPING_NOTICE, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
@@ -206,8 +207,13 @@ function showNotes(view: PrinceListView, card: Card, area: HTMLElement): void {
 	area.empty();
 	const notes = view.editing.selectedNotes();
 	// Something to click when there are no notes yet.
-	if (notes === '') area.createDiv({ cls: 'princelists-placeholder', text: 'Notes' });
-	else card.notes = renderNotes(view, area, notes);
+	if (notes === '') {
+		area.createDiv({ cls: 'princelists-placeholder', text: 'Notes' });
+		return;
+	}
+	const { lines, model } = view.parse();
+	const item = view.selected === null ? undefined : itemAt(model, view.selected);
+	card.notes = renderCardNotes(view, area, notes, item ? checklistOf(lines, item) : []);
 }
 
 function endCard(view: PrinceListView, card: Card): void {

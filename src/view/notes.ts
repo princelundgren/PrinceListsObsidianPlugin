@@ -1,19 +1,43 @@
 import { Component, Keymap, MarkdownRenderer, Menu } from 'obsidian';
+import type { ChecklistLine } from '../core/checklist';
 import { asInline, needsMarkdown } from '../core/inline';
 import type { PrinceListView } from './list-view';
 
 const INTERNAL_LINK = 'a.internal-link';
+export const NOTES_CHECKBOX_SELECTOR = '.task-list-item-checkbox';
 
 // Obsidian's own rendering, so pictures, links and embeds look as they do in any note (spec,
 // "Rendering notes in the card"). Without a Component, embeds don't load and Obsidian logs a leak, so
 // each block gets its own child of the view, which the caller removes on re-render or close. Links
 // are handled by handleLinkClick and handleLinkMenu, delegated once on the view.
 export function renderNotes(view: PrinceListView, el: HTMLElement, markdown: string): Component {
+	// They would tick on screen and save nothing.
+	return renderMarkdown(view, el, markdown, () => false);
+}
+
+// A card's notes, whose boxes tick their lines only while each box lines up with one: a box in a
+// callout, an embed or a `%%` comment would put them out of step, so then none is enabled.
+export function renderCardNotes(view: PrinceListView, el: HTMLElement, markdown: string, checklist: readonly ChecklistLine[]): Component {
+	return renderMarkdown(
+		view,
+		el,
+		markdown,
+		(boxes) => boxes.length === checklist.length && boxes.every((box, index) => box.checked === checklist[index]?.ticked),
+	);
+}
+
+function renderMarkdown(
+	view: PrinceListView,
+	el: HTMLElement,
+	markdown: string,
+	boxesEnabled: (boxes: HTMLInputElement[]) => boolean,
+): Component {
 	const child = view.addChild(new Component());
 	MarkdownRenderer.render(view.app, markdown, el, view.file?.path ?? '', child).then(
 		() => {
-			// They would tick on screen and save nothing.
-			for (const box of el.querySelectorAll<HTMLInputElement>('.task-list-item-checkbox')) box.disabled = true;
+			const boxes = Array.from(el.querySelectorAll<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR));
+			const enabled = boxesEnabled(boxes);
+			for (const box of boxes) box.disabled = !enabled;
 		},
 		(error: unknown) => console.error(error),
 	);

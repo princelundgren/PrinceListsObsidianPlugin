@@ -412,7 +412,8 @@ stays, and the blank line stays with it.
 ### Checklists (call; the format is reserved now)
 
 - Checkbox lines indented in an item's notes are that item's checklist.
-- In step one they render as disabled checkboxes. Step two makes them tick.
+- In step one they render as disabled checkboxes. Step two ticks them in the open card: a box
+  ticks its own line, and nothing else on it changes. The row shows nothing about the checklist.
 
 ### Dates (owner: the Tasks emoji format)
 
@@ -1033,7 +1034,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     `menu.showAtMouseEvent(evt)`. The method returns a `boolean` whose meaning isn't documented,
     so don't depend on it.
 - **Disable `.task-list-item-checkbox` in rendered notes.** Otherwise it ticks on screen but saves
-  nothing.
+  nothing. Step two enables a card's boxes only when they match the checklist parsed from its
+  notes, in number and in each ticked state; a box in a callout, an embed or a `%%` comment puts
+  them out of step, and then every box stays disabled.
 
 ### Touch on the iPhone
 
