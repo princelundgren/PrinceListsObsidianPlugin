@@ -1,20 +1,14 @@
-import { Notice } from 'obsidian';
-import { dropAt, type Drop, type ShownRow } from '../core/drop';
+import { dropAt, type Drop } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
-import { planItemMove, type ItemPlace } from '../core/list-actions';
-import { contentStartLine } from '../obsidian/marker';
-import { followPlace } from './add-button';
 import { closeCard } from './card';
 import { targetOf } from './events';
 import type { PrinceListView } from './list-view';
-import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
-import { CHANGED_ELSEWHERE_NOTICE, writePlanned } from './write';
+import { markDrop, queueMove, shownRows } from './move';
+import { ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
 
 // Each row's drag carries a type of its own, this one with a random token added. Other drags, such as
 // a file's or a row's from another vault window, which has its own `current`, are left alone.
 const DRAG_TYPE = 'application/x-princelists-item';
-const DROP_ABOVE = 'princelists-drop-above';
-const DROP_BELOW = 'princelists-drop-below';
 
 interface MouseDrag {
 	view: PrinceListView;
@@ -110,44 +104,7 @@ function aim(drag: MouseDrag, evt: DragEvent): void {
 	showDrop(drag, dropAt(shownRows(drag.listEl), item, { line, below: evt.clientY > top + height / 2 }));
 }
 
-// In the order they show. Every row and heading carries its line, and hidden rows aren't drawn.
-function shownRows(listEl: HTMLElement): ShownRow[] {
-	return Array.from(listEl.querySelectorAll<HTMLElement>(`[${LINE_ATTR}]`), (el) => ({
-		line: lineOf(el) as number,
-		kind: el.hasClass(HEADING_CLASS) ? 'heading' : el.hasClass(ITEM_CLASS) ? 'item' : 'untouched',
-	}));
-}
-
 function showDrop(drag: MouseDrag, drop: Drop | null): void {
-	drag.marked?.removeClass(DROP_ABOVE, DROP_BELOW);
-	drag.marked = drop && drag.listEl.querySelector<HTMLElement>(`[${LINE_ATTR}="${drop.line}"]`);
-	drag.marked?.addClass(drop?.above ? DROP_ABOVE : DROP_BELOW);
+	drag.marked = markDrop(drag.listEl, drag.marked, drop);
 	drag.drop = drop;
-}
-
-// The move waits on the view's write queue, and its item and place follow the edits that land before
-// it runs.
-function queueMove(view: PrinceListView, line: number, place: ItemPlace): void {
-	const file = view.file;
-	if (!file) return;
-	const item = view.editing.track(line);
-	const anchor = place === 'first' ? null : view.editing.track('after' in place ? place.after : place.firstUnder);
-	void view.enqueue(async () => {
-		try {
-			if (view.viewClosed || view.file !== file) return;
-			if (item.line === null || anchor?.line === null) {
-				new Notice(CHANGED_ELSEWHERE_NOTICE);
-				return;
-			}
-			const moved = await writePlanned(view, (text) => {
-				const to = followPlace(place, anchor?.line ?? null);
-				return item.line === null || !to ? null : planItemMove(text, contentStartLine(text), item.line, to);
-			});
-			// Obsidian's echo of the write returns early in setViewData, so the view draws the move.
-			if (moved) view.render();
-		} finally {
-			view.editing.untrack(item);
-			if (anchor) view.editing.untrack(anchor);
-		}
-	});
 }

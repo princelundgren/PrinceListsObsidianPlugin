@@ -655,6 +655,17 @@ stays, and the blank line stays with it.
   - Hold an item and then move to drag it.
   - Holding an item row never opens a menu.
   - A swipe without a hold scrolls the list.
+  - **The drop line works as on the Mac (call).** A move drops where it shows, and an item
+    dropped over its own place stays as it is in the file.
+  - **A hold anywhere on an item row drags it (call),** its checkbox and any link in its title
+    included, but not the open card. A tap on a link still opens it. A hold closes any open card
+    first, as on the Mac.
+  - **The list scrolls at its edges while dragging (call),** so an item can go further than one
+    screen. It starts only once the finger has moved more than 5 px since the lift, so a row
+    held still at an edge doesn't scroll the list **(owner, 2026-10-27)**.
+  - **A redraw while dragging ends the drag (call),** with nothing written, since the row the
+    finger holds is gone: an outside change, or the removal of an empty item that closing the card
+    started. The release that follows is swallowed too.
 
 ### Done and archived (owner)
 
@@ -957,6 +968,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   (`docs/superpowers/notes/2026-10-21-spike-touch.md`).
   - Once a drag is armed, a non-passive `touchmove` handler calls `preventDefault` to stop
     scrolling.
+  - **The edge scroll (call)** starts 56 px from the top of the list or from where it stops being
+    visible, and speeds up linearly to 12 px a frame at the edge and beyond.
   - Kanban's `src/dnd/managers/DragManager.ts` is the reference.
   - Obsidian's own drag manager isn't public.
 - **A long-press on a folder in the iPhone file explorer reaches `file-menu`,** with source
@@ -969,7 +982,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
   - It keeps above the iPhone's floating navbar with Obsidian's `--view-bottom-spacing`, as Bases
     does **(call)**. The variable is undocumented, read from 1.14.4's `app.css`, and unset on the
-    Mac. If Obsidian drops it, the "+" sits lower on the iPhone, under the floating navbar.
+    Mac. If Obsidian drops it, the "+" sits lower on the iPhone, under the floating navbar, and the
+    edge scroll, its second user, takes the bottom of the view for the bottom of what is visible,
+    so dragging toward the navbar scrolls late.
 
 ### Where `✔` goes
 
