@@ -33,6 +33,12 @@ test('checklistOf gives null when a %% comment or $$ math is in the notes', () =
 	expect(boxesMatchChecklist([], null)).toBe(false);
 });
 
+// The check is on the raw text, so `$$` in code disables the boxes too: safe, if more than needed.
+test('checklistOf gives null for $$ inside code as well', () => {
+	expect(checklist(TRIP + '\n\t```\n\techo $$\n\t```\n')).toBeNull();
+	expect(checklist(TRIP + '\n\tcosts `$$` more\n')).toBeNull();
+});
+
 test('toggleChecklistLine flips only the box', () => {
 	expect(toggleChecklistLine('\t- [ ] passport')).toBe('\t- [x] passport');
 	expect(toggleChecklistLine('\t- [x] charger')).toBe('\t- [ ] charger');

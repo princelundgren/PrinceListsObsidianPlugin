@@ -181,7 +181,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		if (file === this.file && (file?.path ?? null) === this.shownPath) return;
 		this.file = file;
 		this.shownPath = file?.path ?? null;
-		if (this.field) noticeLostField(this.field.el.win, this.field.el.value);
+		if (this.field) noticeLostField(this.field);
 		this.field = null;
 		this.echoes = new WriteEchoes();
 		this.editing.reset();

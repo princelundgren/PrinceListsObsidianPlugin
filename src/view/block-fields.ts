@@ -21,6 +21,8 @@ export const BLOCK_FIELD_CLASS = 'princelists-block-field';
 export interface BlockField {
 	line: TrackedLine;
 	el: HTMLTextAreaElement;
+	/** What the field held when it opened, so an untouched field loses nothing. */
+	opened: string;
 	/** The title the field took the place of, put back when it closes. */
 	titleEl: Element;
 	/** Set when the block's own insert added the item, so closing an empty field removes it again. */
@@ -44,7 +46,7 @@ export function openBlockField(block: ListBlock, titleLine: number, inserted: In
 	// makes the row draggable again.
 	const rowEl = wrapper.closest<HTMLElement>(`.${ITEM_CLASS}`);
 	if (rowEl) rowEl.draggable = false;
-	block.field = { line: block.editing.track(titleLine), el, titleEl, inserted };
+	block.field = { line: block.editing.track(titleLine), el, opened: el.value, titleEl, inserted };
 	fitHeight(el);
 	el.focus();
 }
@@ -63,7 +65,7 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 		try {
 			const line = field.line.line;
 			if (line === null) {
-				if (save) noticeLostField(field.el.win, typed);
+				if (save) noticeLostField(field);
 				return;
 			}
 			if (save) await saveTitle(block, line, typed);
@@ -75,10 +77,12 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 	});
 }
 
-// A field whose typing can't be saved any more offers it for copying, unless it's empty.
-export function noticeLostField(win: Window, typed: string): void {
+// A field whose typing can't be saved any more offers it for copying. An untouched field lost nothing.
+export function noticeLostField(field: BlockField): void {
+	const typed = field.el.value;
+	if (typed === field.opened) return;
 	if (typed.trim() === '') new Notice(CHANGED_ELSEWHERE_NOTICE);
-	else showLostTypingNotice(win, typed);
+	else showLostTypingNotice(field.el.win, typed);
 }
 
 // Saves an open field, then adds an empty item at `place` and opens its field.
