@@ -683,8 +683,8 @@ stays, and the blank line stays with it.
   Delete removes the item and its notes. Step two adds Edit in Markdown, and its star is a button
   on the open card, not an entry here **(owner, 2026-10-27)**.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
-  heading and Delete heading. Step two adds Edit in Markdown, and a menu on the list's background
-  (step two's design, "Right-click menus").
+  heading and Delete heading. Step two adds Edit in Markdown, Collapse all headings and Expand all
+  headings, and a menu on the list's background (step two's design, "Right-click menus").
   - New item adds one as the first item under the heading. In a section without items, it goes
     after the section's content **(call)**: directly under the heading, a paragraph there would
     join the item as a lazy line, and a setext heading spans more than one line.
@@ -701,9 +701,9 @@ stays, and the blank line stays with it.
   mobile this is the only way to reach them **(owner)**. The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
-  heading and Delete heading **(owner, 2026-10-20)**. It's a tap, not a long-press, so there is
-  still no long-press menu. With a card open, the tap only closes the card ("Selecting and
-  adding").
+  heading and Delete heading **(owner, 2026-10-20)**. Step two adds Edit in Markdown, Collapse all
+  headings and Expand all headings. It's a tap, not a long-press, so there is still no long-press
+  menu. With a card open, the tap only closes the card ("Selecting and adding").
 - **New heading below (owner, 2026-10-20)** adds an empty heading at that point and opens the
   same field as Rename heading, with the cursor in it. Escape, or an empty name, removes the
   heading again.

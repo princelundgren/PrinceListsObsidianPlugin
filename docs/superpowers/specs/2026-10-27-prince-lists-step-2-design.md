@@ -34,8 +34,8 @@ only documented Obsidian APIs are used.
   Markdown", which opens the list as Markdown at the item.
 - **Notes edit one block at a time:** a card's notes and the list note stay drawn as in a note, and
   only the paragraph, table or list item you click shows its Markdown.
-- **Right-click menus:** a heading's menu gains "Edit in Markdown", and the list's background has a
-  menu of its own on desktop.
+- **Right-click menus:** a heading's menu gains "Edit in Markdown" and collapsing or expanding
+  every heading, and the list's background has a menu of its own on desktop.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -321,6 +321,12 @@ current todo app. Step one's own "Done when" doesn't change.
   dropped under the heading, or Cmd+Enter with an item in it selected.
 - **A collapsed section drags as any section does.** While Cmd+F filters the list, matches in a
   collapsed section show, and the section is collapsed again when the filter ends **(call)**.
+- **Collapse all headings and Expand all headings (owner, 2026-10-28)** are in a heading's menu,
+  on desktop and mobile, and the list's background menu, after a separator. Each shows only while
+  it would change something: Collapse all while any heading is open, Expand all while any is
+  collapsed. In the heading menu they come before Delete heading, which stays last, after a
+  separator of its own **(owner, 2026-10-28)**. They aren't commands **(owner, 2026-10-28)**: a
+  command ID can't change once released, so one waits until it's wanted.
 - **Not in a list inside another note (call)** in step two.
 
 ### Star (owner: in its list only)
@@ -426,10 +432,11 @@ renderer, and only the part you click becomes a plain-text field.
 ### Right-click menus (owner, 2026-10-28)
 
 - **The heading menu gains "Edit in Markdown",** with the caret at the end of the heading's line,
-  on desktop and on mobile.
+  on desktop and on mobile, and Collapse or Expand all headings ("Collapsing a heading").
 - **Right-clicking the list's background on desktop** opens the list menu: New item, New heading,
-  Edit in Markdown, Show archived and Open schedule. The background is anywhere a click lands on
-  no row, heading, field or link, the drawn list note included.
+  Edit in Markdown, Show archived, Collapse or Expand all headings, and Open schedule. The
+  background is anywhere a click lands on no row, heading, field or link, the drawn list note
+  included.
   - New item and New heading go at the end of the section the click is in: under the nearest
     heading above it, or in the part before the first heading **(owner)**. New item goes after the
     section's last item, before any text below it that isn't an item, which an item can't follow
