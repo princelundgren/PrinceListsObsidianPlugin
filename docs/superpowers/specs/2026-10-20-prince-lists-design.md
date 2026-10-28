@@ -1082,7 +1082,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 - **iOS WebKit fires no `contextmenu` event** (MDN compat data). Obsidian makes one itself on iOS
   after a still hold, 800 ms by its code. A device confirmed the event (its haptic comes with it);
-  the 800 ms wasn't measured. A hold on Android isn't checked.
+  the 800 ms wasn't measured. On an Android emulator a dispatched `contextmenu` on a block's row or
+  the list's background opens no menu; a real hold on Android isn't checked.
   - Because holding only ever drags, item rows must not open a menu, and a heading opens its menu
     on a tap. So on mobile, cancel `contextmenu` on rows and headings, in the capture phase.
   - On an iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
@@ -1201,8 +1202,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   checked yet.
 - **Many manual checks run scripted:** through Obsidian's CLI on desktop, and through the mobile
   browser engine's web inspector (Safari's for the iPhone, Chrome's DevTools protocol for the
-  Android emulator), with synthetic touch. The owner checks
-  by hand what needs a finger or an eye, such as holds, scrolling, the keyboard and the flash.
+  Android emulator), with synthetic touch. The owner checks by hand what needs a finger or an
+  eye, such as holds, scrolling, the keyboard and the flash.
 - **Spikes come first, and each one stops for the owner:**
   1. The flash when a list opens.
   2. Hold-to-drag on mobile: it must not break scrolling or trigger Obsidian's long-press

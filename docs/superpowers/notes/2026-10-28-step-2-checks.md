@@ -97,9 +97,8 @@ which found what the design expected might happen and goes to the owner.
   the list on an empty top-level item. Up and Down walk the pieces, and Backspace in an empty piece
   removes it. An Enter that confirms a composition starts no item. With real input on Android's
   on-screen keyboard, Enter continues a bullet, Backspace removes an empty piece, and the keyboard
-  stays up. The list note's pieces work
-  the same way, and typing `- [ ] x` at its top level warns. A box in the list note ticks its own
-  line, and Cmd+Z unticks it.
+  stays up. The list note's pieces work the same way, and typing `- [ ] x` at its top level
+  warns. A box in the list note ticks its own line, and Cmd+Z unticks it.
 
 ## Step 2: alongside Tasks and Kanban
 
@@ -113,7 +112,7 @@ On macOS, with Tasks 8.6.0 and Kanban 2.0.51 on:
 
 - Every check on an iPhone, including dragging and the keyboard in iOS's WebKit.
 - The native date picker opening (risk 5): the checks set the date input's value.
-- Cmd+F on mobile with a hardware keyboard (risk 2).
+- Cmd+F on mobile with a hardware keyboard (risk 2), and Cmd+K making a link.
 - A Japanese keyboard confirming a word with Enter on a real device. Only the composition flag on
   the event was checked.
 - Dropping a picture on a card's notes, and a note from outside the vault.

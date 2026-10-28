@@ -28,7 +28,8 @@ Todo lists for Obsidian, kept as plain Markdown notes.
   mobile the floating "+" too. On desktop, right-click for actions and drag items with the mouse.
   On mobile, hold an item for half a second and drag it; item actions are in the ⋯ button on an
   open item, and tapping a heading opens its menu. Step one has been checked on macOS and an
-  iPhone, and step two on macOS and an Android emulator; not yet on Windows, Linux or an iPad.
+  iPhone, and step two on macOS and an Android emulator. Step two isn't checked on an iPhone yet,
+  and neither step on Windows, Linux or an iPad.
 - **Star an item** with the star in its card, and the row shows it.
 - **Give an item a date** with the calendar icon in its card. The row shows the day, and the
   Schedule view ("Open schedule", from the ribbon or the list's ⋯ menu) gathers the dated items of
@@ -109,7 +110,7 @@ conflict copies show up as extra lists.
 
 ## Privacy
 
-PrinceLists works only on notes in Obsidian: the lists in your vault, and on desktop a note opened
+PrinceLists works only on notes in Obsidian: the notes in your vault, and on desktop a note opened
 from outside it (checked on macOS). It makes no network requests of its own, collects no data, and
 needs no account. A list's notes are rendered by Obsidian, so a picture from the web in them loads
 as it does in any note.
