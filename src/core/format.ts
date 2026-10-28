@@ -1,6 +1,6 @@
 import { codeBlock, toggleLineFormat, type LineFormat } from './format-lines';
 
-export type Format = 'bold' | 'italic' | 'code' | 'link' | 'codeBlock' | 'table' | LineFormat;
+export type Format = 'bold' | 'italic' | 'strikethrough' | 'underline' | 'code' | 'link' | 'codeBlock' | 'table' | LineFormat;
 
 /** Replace `from`..`to` with `insert`, then select `selectionStart`..`selectionEnd` in the new text. */
 export interface FormatEdit {
@@ -18,9 +18,13 @@ const TABLE = `| ${TABLE_HEADER} | Column 2 |\n| --- | --- |\n|  |  |`;
 export function formatSelection(text: string, start: number, end: number, format: Format): FormatEdit {
 	switch (format) {
 		case 'bold':
-			return toggleStars(text, start, end, 2);
+			return toggleMarkers(text, start, end, '*', 2);
 		case 'italic':
-			return toggleStars(text, start, end, 1);
+			return toggleMarkers(text, start, end, '*', 1);
+		case 'strikethrough':
+			return toggleMarkers(text, start, end, '~', 2);
+		case 'underline':
+			return toggleTags(text, start, end, '<u>', '</u>');
 		case 'code':
 			return toggleCode(text, start, end);
 		case 'link':
@@ -36,15 +40,32 @@ export function formatSelection(text: string, start: number, end: number, format
 	}
 }
 
-// In a run of stars around the selection, two or more mean bold and an odd count means italic.
-function toggleStars(text: string, start: number, end: number, size: 1 | 2): FormatEdit {
-	[start, end] = insideMarkers(text, ...trimmed(text, start, end), '*');
-	const run = Math.min(markersBefore(text, start, '*'), markersAfter(text, end, '*'));
+// In a run of markers around the selection, two or more mean bold or strikethrough, and an odd
+// count of stars means italic.
+function toggleMarkers(text: string, start: number, end: number, marker: '*' | '~', size: 1 | 2): FormatEdit {
+	[start, end] = insideMarkers(text, ...trimmed(text, start, end), marker);
+	const run = Math.min(markersBefore(text, start, marker), markersAfter(text, end, marker));
 	const isOn = size === 2 ? run >= 2 : run % 2 === 1;
 	const selected = text.slice(start, end);
 	if (isOn) return { from: start - size, to: end + size, insert: selected, selectionStart: start - size, selectionEnd: end - size };
-	const marker = '*'.repeat(size);
-	return { from: start, to: end, insert: marker + selected + marker, selectionStart: start + size, selectionEnd: end + size };
+	const markers = marker.repeat(size);
+	return { from: start, to: end, insert: markers + selected + markers, selectionStart: start + size, selectionEnd: end + size };
+}
+
+// Markdown has no underline, so it's written as HTML, which Obsidian draws in notes.
+function toggleTags(text: string, start: number, end: number, open: string, close: string): FormatEdit {
+	[start, end] = trimmed(text, start, end);
+	const selected = text.slice(start, end);
+	const inner = selected.slice(open.length, -close.length);
+	const isWholeSpan = selected.startsWith(open) && selected.endsWith(close) && !inner.includes(open) && !inner.includes(close);
+	if (selected.length >= open.length + close.length && isWholeSpan) {
+		return { from: start, to: end, insert: inner, selectionStart: start, selectionEnd: start + inner.length };
+	}
+	if (text.slice(start - open.length, start) === open && text.slice(end, end + close.length) === close) {
+		const from = start - open.length;
+		return { from, to: end + close.length, insert: selected, selectionStart: from, selectionEnd: from + selected.length };
+	}
+	return { from: start, to: end, insert: open + selected + close, selectionStart: start + open.length, selectionEnd: end + open.length };
 }
 
 function toggleCode(text: string, start: number, end: number): FormatEdit {

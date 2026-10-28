@@ -51,6 +51,34 @@ describe('formatSelection: bold and italic', () => {
 	});
 });
 
+describe('formatSelection: strikethrough and underline', () => {
+	test('wraps the selection, keeps it selected, and unwraps it on a second press', () => {
+		expect(format('a ‸b‸ c', 'strikethrough')).toBe('a ~~‸b‸~~ c');
+		expect(format('a ‸b‸ c', 'underline')).toBe('a <u>‸b‸</u> c');
+		expect(format('a ~~‸b‸~~ c', 'strikethrough')).toBe('a ‸b‸ c');
+		expect(format('a <u>‸b‸</u> c', 'underline')).toBe('a ‸b‸ c');
+	});
+
+	test('unwraps a selection that takes in its own markers', () => {
+		expect(format('‸~~b~~‸', 'strikethrough')).toBe('‸b‸');
+		expect(format('‸<u>b</u>‸', 'underline')).toBe('‸b‸');
+	});
+
+	test('wraps a selection holding two underlined spans as a whole, rather than joining them', () => {
+		expect(format('‸<u>a</u> and <u>b</u>‸', 'underline')).toBe('<u>‸<u>a</u> and <u>b</u>‸</u>');
+	});
+
+	test('keeps a space at the end of the selection outside the markers', () => {
+		expect(format('‸b ‸', 'strikethrough')).toBe('~~‸b‸~~ ');
+		expect(format('‸b ‸', 'underline')).toBe('<u>‸b‸</u> ');
+	});
+
+	test('puts the caret between the markers when nothing is selected', () => {
+		expect(format('‸', 'strikethrough')).toBe('~~‸~~');
+		expect(format('‸', 'underline')).toBe('<u>‸</u>');
+	});
+});
+
 describe('formatSelection: link', () => {
 	test('makes the selection the link text, with the caret where the address goes', () => {
 		expect(format('see ‸docs‸', 'link')).toBe('see [docs](‸)');
