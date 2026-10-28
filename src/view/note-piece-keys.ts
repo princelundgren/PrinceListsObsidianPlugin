@@ -102,7 +102,8 @@ function nextItemPlace(field: HTMLTextAreaElement): PiecePlace {
 	const el = field.closest<HTMLElement>(`.${NOTE_PIECE_CLASS}`);
 	const li = field.closest<HTMLElement>('li');
 	if (!el || !li) return { kind: 'after', el: field };
-	return { kind: 'newItem', el, after: Array.from(li.querySelectorAll<HTMLElement>('li')).at(-1) ?? li };
+	const items = li.querySelectorAll<HTMLElement>('li');
+	return { kind: 'newItem', el, after: items[items.length - 1] ?? li };
 }
 
 // The line after the list holding the open lines, or the one they end.
