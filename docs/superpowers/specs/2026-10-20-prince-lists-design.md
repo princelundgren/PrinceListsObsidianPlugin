@@ -7,8 +7,9 @@ governs: [src/**, styles.css, manifest.json]
 # PrinceLists for Obsidian: step one, a single list
 
 An Obsidian plugin that shows a plain Markdown note as a todo list you can tick, drag and open
-into cards. Step one covers creating a list and everything inside one list. Views that span lists (Today, Upcoming and the rest) come
-later.
+into cards. Step one covers creating a list and everything inside one list. [Step
+two](2026-10-27-prince-lists-step-2-design.md) adds the Schedule view, which spans lists, and a
+list shown inside another note. Other views across lists come later.
 
 **How decisions are marked:**
 
@@ -79,8 +80,9 @@ and data safety, and owner's advocate. Their findings are folded in.
 3. **Run on desktop and mobile (owner, 2026-10-27):** every platform Obsidian runs on, macOS,
    Windows, Linux, iOS, iPadOS and Android. Obsidian runs on all of them, and the code depends only
    on whether it runs on desktop or mobile, through Obsidian's `Platform`. This replaces the first
-   targets, the Mac and the iPhone (2026-10-20). Hands-on checks have run on macOS and an iPhone
-   so far; Windows, Linux, Android and the iPad aren't checked yet.
+   targets, the Mac and the iPhone (2026-10-20). Hands-on checks have run on macOS, an iPhone
+   (step one) and an Android emulator (step two) so far; Windows, Linux, a real Android device and
+   the iPad aren't checked yet.
 
 **Two parts (owner):**
 
@@ -118,13 +120,9 @@ This finish line is what keeps step one from growing into a standalone app.
 
 These are wanted later, roughly in this order. The file format already leaves room for them.
 
-- **[Step two](2026-10-27-prince-lists-step-2-design.md) (owner, 2026-10-27)** takes on what the
-  owner needs before moving in: ticking checklists, Cmd+F, showing a list inside another note,
-  "Turn into list", a When day with a Schedule view, starring an item, and dragging a heading to
-  move its whole section or collapsing it.
 - **Views across lists:** a sidebar with views such as Inbox, Today, Upcoming and Done, grouped
   by area. An area is a list's folder. A Favorites view gathers starred items **(owner,
-  2026-10-27)**.
+  2026-10-27)**. Step two's Schedule view is the first view across lists.
 - **Dates and tags:** a deadline on items, plus tags and tag filters.
 - **Smaller item features:**
   - repeating items, a trash, IDs on single items, and sorting modes
@@ -1084,7 +1082,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 - **iOS WebKit fires no `contextmenu` event** (MDN compat data). Obsidian makes one itself on iOS
   after a still hold, 800 ms by its code. A device confirmed the event (its haptic comes with it);
-  the 800 ms wasn't measured. A hold on Android isn't checked.
+  the 800 ms wasn't measured. On an Android emulator a dispatched `contextmenu` on a block's row or
+  the list's background opens no menu; a real hold on Android isn't checked.
   - Because holding only ever drags, item rows must not open a menu, and a heading opens its menu
     on a tap. So on mobile, cancel `contextmenu` on rows and headings, in the capture phase.
   - On an iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
@@ -1198,11 +1197,13 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Testing and owner checkpoints
 
-- **Manual testing uses a test vault on desktop and mobile,** so far macOS and an iPhone. Windows,
-  Linux, Android and the iPad aren't checked yet.
+- **Manual testing uses a test vault on desktop and mobile,** so far macOS, an iPhone (step one)
+  and an Android emulator (step two). Windows, Linux, a real Android device and the iPad aren't
+  checked yet.
 - **Many manual checks run scripted:** through Obsidian's CLI on desktop, and through the mobile
-  browser engine's web inspector (Safari's, for the iPhone), with synthetic touch. The owner checks
-  by hand what needs a finger or an eye, such as holds, scrolling, the keyboard and the flash.
+  browser engine's web inspector (Safari's for the iPhone, Chrome's DevTools protocol for the
+  Android emulator), with synthetic touch. The owner checks by hand what needs a finger or an
+  eye, such as holds, scrolling, the keyboard and the flash.
 - **Spikes come first, and each one stops for the owner:**
   1. The flash when a list opens.
   2. Hold-to-drag on mobile: it must not break scrolling or trigger Obsidian's long-press
