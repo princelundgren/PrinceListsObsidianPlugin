@@ -4,7 +4,6 @@ import { addItem, addItemBelowCard, hasNoItems } from './add-button';
 import {
 	CARD_ACTIONS_CLASS,
 	CARD_STAR_CLASS,
-	CARD_NOTES_CLASS,
 	CARD_TITLE_CLASS,
 	cardTitleBlur,
 	cardTitleInput,
@@ -89,9 +88,10 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	}
 	const notesBox = target.closest<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR);
 	if (notesBox) {
-		if (notesBox.closest(`.${CARD_NOTES_CLASS}`) && view.card?.el.contains(notesBox)) checklistClick(view, notesBox, evt);
-		// Any other rendered box, in the list note or a title, is disabled, but an embed can render
-		// more after that. They would tick on screen and save nothing.
+		const host = notesHostOf(view, notesBox);
+		if (host) checklistClick(view, host, notesBox, evt);
+		// Any other rendered box, as in a title, is disabled, but an embed can render more after that.
+		// They would tick on screen and save nothing.
 		else evt.preventDefault();
 		return;
 	}
@@ -134,12 +134,12 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	if (note) openPieceAt(view, note, evt);
 }
 
-// A press anywhere on the format bar, between its buttons too, or on a box in the card's notes would
-// take focus from the open piece's field, which closes it.
+// A press anywhere on the format bar, between its buttons too, or on a box in the open card or the
+// list note would take focus from the open piece's field, which closes it.
 function keepNotesFocused(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
-	const isCardBox = !!target?.closest(NOTES_CHECKBOX_SELECTOR) && !!view.card?.el.contains(target);
-	if (isCardBox || target?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
+	const isNotesBox = !!target?.closest(NOTES_CHECKBOX_SELECTOR) && (!!view.card?.el.contains(target) || notesHostOf(view, target) !== null);
+	if (isNotesBox || target?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {

@@ -1,5 +1,12 @@
 import { expect, test } from 'vitest';
-import { boxesMatchChecklist, checklistOf, planChecklistTick, toggleChecklistLine } from '../../src/core/checklist';
+import {
+	boxesMatchChecklist,
+	checklistOf,
+	listNoteChecklist,
+	planChecklistTick,
+	planListNoteTick,
+	toggleChecklistLine,
+} from '../../src/core/checklist';
 import { splitLines } from '../../src/core/lines';
 import { parseList, type ItemBlock } from '../../src/core/parse';
 
@@ -70,4 +77,32 @@ test('boxesMatchChecklist needs the same number of boxes, each ticked as its lin
 	expect(boxesMatchChecklist([false, true, false], lines)).toBe(false);
 	expect(boxesMatchChecklist([false, true, false, false], lines)).toBe(false);
 	expect(boxesMatchChecklist([false, true, false, true, false], lines)).toBe(false);
+});
+
+const PACKING = '---\nprincelists: true\n---\nPack:\n\n- bag\n  - [ ] passport\n  - [x] charger\n\n- [ ] trip\n';
+
+function listNote(text: string) {
+	const lines = splitLines(text);
+	return listNoteChecklist(lines, parseList(lines, 3));
+}
+
+test("listNoteChecklist finds the list note's nested checkbox lines, and none of the items'", () => {
+	expect(listNote(PACKING)).toEqual([
+		{ line: 6, ticked: false },
+		{ line: 7, ticked: true },
+	]);
+	expect(listNote(PACKING.replace('Pack:', '```\n  - [ ] x\n```'))?.map((entry) => entry.line)).toEqual([8, 9]);
+	expect(listNote(PACKING.replace('Pack:', 'Pack: %% later %%'))).toBeNull();
+	expect(listNote('---\nprincelists: true\n---\n- [ ] trip\n')).toEqual([]);
+});
+
+test('planListNoteTick flips the line the box stands for, as the file holds it now', () => {
+	expect(planListNoteTick(PACKING, 3, 0, '  - [ ] passport')).toEqual({
+		next: PACKING.replace('[ ] passport', '[x] passport'),
+		edit: { start: 6, delta: 0, kind: 'change' },
+	});
+	const crlf = PACKING.replace(/\n/g, '\r\n');
+	expect(planListNoteTick(crlf, 3, 1, '  - [x] charger')?.next).toBe(crlf.replace('[x] charger', '[ ] charger'));
+	expect(planListNoteTick(PACKING, 3, 1, '  - [ ] passport')).toBeNull();
+	expect(planListNoteTick(PACKING, 3, 2, '- [ ] trip')).toBeNull();
 });

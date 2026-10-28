@@ -1,5 +1,5 @@
 import type { Component } from 'obsidian';
-import { checklistOf, type ChecklistLine } from '../core/checklist';
+import { checklistOf, listNoteChecklist, type ChecklistLine } from '../core/checklist';
 import { getItemNotes, notesStartLine } from '../core/edit-items';
 import { getListNote } from '../core/edit-list-note';
 import type { Typed } from '../core/editing';
@@ -14,6 +14,8 @@ import type { Notes } from './note-piece-state';
 export interface NotesHost {
 	/** The element the pieces are drawn in. */
 	area: HTMLElement;
+	/** The line of the item whose notes these are; null for the list note. */
+	itemLine: number | null;
 	/** The notes as they read now, with the checklist lines their boxes tick; null once they're gone. */
 	notes(): { notes: Notes; checklist: ChecklistLine[] | null } | null;
 	/** The lines the open piece writes, while one is open. */
@@ -41,6 +43,7 @@ export function notesHostOf(view: PrinceListView, el: Element): NotesHost | null
 export function cardNotesHost(view: PrinceListView, card: Card, area: HTMLElement): NotesHost {
 	return {
 		area,
+		itemLine: view.selected,
 		notes: () => {
 			const { lines, model } = view.parse();
 			const item = card.lostAt === null && view.selected !== null ? itemAt(model, view.selected) : undefined;
@@ -59,13 +62,13 @@ export function cardNotesHost(view: PrinceListView, card: Card, area: HTMLElemen
 	};
 }
 
-// Its boxes don't tick: the list note has no checklist of its own.
 export function listNoteHost(view: PrinceListView, area: HTMLElement): NotesHost {
 	return {
 		area,
+		itemLine: null,
 		notes: () => {
 			const { lines, model } = view.parse();
-			return { notes: { markdown: getListNote(lines, model), start: model.listNote.start }, checklist: null };
+			return { notes: { markdown: getListNote(lines, model), start: model.listNote.start }, checklist: listNoteChecklist(lines, model) };
 		},
 		range: () => view.editing.listNoteRange(),
 		open: (range, isNew, indent) => openListNote(view, range, isNew, indent),

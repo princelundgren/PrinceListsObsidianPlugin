@@ -107,8 +107,10 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Which line a checkbox ticks (call):** the nth rendered checkbox is the nth checkbox line the
   core parser finds in the item's notes. Obsidian's rendered output carries no documented line
   numbers. "Risks" has the check.
-- **When the two disagree, every checkbox in that card stays disabled (call),** as in step one: if
+- **When the two disagree, every checkbox in that block stays disabled (call),** as in step one: if
   the number of rendered checkboxes or any of their ticked states differs from the parsed lines.
+  Each block of the notes is drawn on its own ("Editing notes a block at a time"), so it is checked
+  against the checklist lines inside it.
   Callouts, embeds, HTML, code fences, `%%` comments and `$$` math can each make them differ, and a
   tick on the wrong line is worse than no tick.
 - **Notes holding `%%` or `$$` anywhere, inside code too, keep every checkbox disabled (call).**
@@ -116,6 +118,8 @@ current todo app. Step one's own "Done when" doesn't change.
   with the same ticked states, so the boxes would line up with the wrong lines without either check
   noticing.
 - **Nested checklist lines** tick the same way.
+- **The list note's boxes tick the same way,** with the same checks. Its checkbox lines are always
+  nested, under a bullet, since a top-level one is an item.
 - **The row shows nothing about a checklist (call).** A progress count wasn't asked for.
 
 ### Cmd+F: filter the list (owner: this list only)

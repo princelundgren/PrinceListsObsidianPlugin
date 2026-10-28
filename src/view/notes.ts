@@ -18,8 +18,7 @@ export function renderNotes(host: MarkdownHost, sourcePath: string, el: HTMLElem
 	const child = host.addChild(new Component());
 	MarkdownRenderer.render(host.app, markdown, el, sourcePath, child).then(
 		() => {
-			// Notes outside the open card have no checklist: their boxes would tick on screen and save
-			// nothing.
+			// A title has no checklist: its boxes would tick on screen and save nothing.
 			for (const box of Array.from(el.querySelectorAll<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR))) box.disabled = true;
 		},
 		(error: unknown) => console.error(error),
