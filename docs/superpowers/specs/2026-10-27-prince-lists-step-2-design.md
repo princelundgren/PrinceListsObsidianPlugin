@@ -247,7 +247,7 @@ current todo app. Step one's own "Done when" doesn't change.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day. The
   list's name is smaller, on a line under the title, so it doesn't read as part of it **(owner,
-  2026-10-28)**.
+  2026-10-28)**. The star and the day stay right after the title, however long the list's name.
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
     Today with no day read as an item with no date beside the overdue ones that show theirs.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as

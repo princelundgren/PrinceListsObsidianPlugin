@@ -195,11 +195,12 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		box.checked = item.done;
 		addHiddenLabel(box, item.title);
 		const text = rowEl.createDiv({ cls: 'princelists-schedule-text' });
-		const block = renderInline(this, item.listPath, text.createDiv({ cls: 'princelists-item-title' }), item.title);
+		const titleLine = text.createDiv({ cls: 'princelists-schedule-title-line' });
+		const block = renderInline(this, item.listPath, titleLine.createDiv({ cls: 'princelists-item-title' }), item.title);
 		if (block) this.blocks.push(block);
+		if (item.starred) addStar(titleLine);
+		addWhen(titleLine, item.day, today);
 		text.createDiv({ cls: 'princelists-schedule-list', text: item.listName });
-		if (item.starred) addStar(rowEl);
-		addWhen(rowEl, item.day, today);
 		this.rows.set(rowEl, item);
 		return rowEl;
 	}
