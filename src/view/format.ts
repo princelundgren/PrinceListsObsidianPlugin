@@ -15,6 +15,10 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 	[
 		{ action: 'bold', icon: 'bold', label: 'Bold' },
 		{ action: 'italic', icon: 'italic', label: 'Italic' },
+		{ action: 'strikethrough', icon: 'strikethrough', label: 'Strikethrough' },
+		{ action: 'underline', icon: 'underline', label: 'Underline' },
+	],
+	[
 		{ action: 'code', icon: 'code', label: 'Inline code' },
 		{ action: 'link', icon: 'link', label: 'Link' },
 	],

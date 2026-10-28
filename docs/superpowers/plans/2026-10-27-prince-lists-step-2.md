@@ -999,7 +999,8 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
     selection's own ends, are those tags; otherwise it wraps the selection, which stays on the
     text inside. Spaces at the selection's ends stay outside the tags, as `trimmed` does for stars.
 - Produces, in `src/view/format.ts`: the second group reads Bold, Italic, Strikethrough
-  (`strikethrough`), Underline (`underline`), Inline code, Link.
+  (`strikethrough`) and Underline (`underline`), and Inline code and Link become a group of their
+  own: six buttons in one group don't fit a phone's card, and a group doesn't break.
 
 - [ ] **Step 1: Write the failing tests** in `tests/core/format.test.ts`:
   - `a b c` with `b` selected gives `a ~~b~~ c` and `a <u>b</u> c`, `b` still selected; the same

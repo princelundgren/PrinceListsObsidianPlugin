@@ -345,7 +345,7 @@ put its editor in a plugin's view.
   link, as in a note, and Cmd+B or Cmd+I again takes it off **(call)**. They're registered on the
   view's own `scope`, as Cmd+Z is, and anywhere else the key stays Obsidian's.
 - **A format bar under the notes** while they're edited, right under the open block: Undo and
-  Redo; Bold, Italic, Strikethrough, Underline, Inline code and Link; Bulleted list, Numbered
+  Redo; Bold, Italic, Strikethrough and Underline; Inline code and Link; Bulleted list, Numbered
   list and Checklist; Code block and Table. A press keeps focus in the notes, so the phone's
   keyboard stays up.
   - On a narrow card, such as a phone's, whole groups wrap to a second row, so every button stays
