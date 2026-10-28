@@ -554,7 +554,8 @@ stays, and the blank line stays with it.
     typed in reads as its text, as a title does.
   - Links in a card can be clicked.
   - On desktop, right-clicking an internal link in a card shows Obsidian's own link menu
-    **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**.
+    **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**. A picture has a menu of
+    its own (step two's design, "Right-click menus").
   - On mobile there is no right-click. A tap opens the link, and there is no link menu,
     because the plugin opens no menu on a long-press **(call)**.
 
@@ -1274,8 +1275,9 @@ Checked 2026-10-20.
   - menus and events: `Menu.showAtMouseEvent`; `Workspace.on('file-menu' | 'file-open')`, where
     `file-open` "could be in a new leaf, an existing leaf, or an embed"; `Plugin.addRibbonIcon`;
     `Workspace.openLinkText`; `MenuItem.setWarning` (0.15.0), which turns the item's "title and
-    icon" red; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a context menu to
-    internal file links"
+    icon" red; `MenuItem.setSection` (0.15.3), whose section IDs are read from the menu's
+    `data-section` attributes; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a context
+    menu to internal file links"
   - rendering and metadata: `MarkdownRenderer.render`, `CachedMetadata.listItems`,
     `getFrontMatterInfo` (1.5.7), `parseYaml`, and `getFileCache` (returns null when not cached)
   - files:
@@ -1284,7 +1286,11 @@ Checked 2026-10-20.
       (1.5.7)
     - `FileManager.generateMarkdownLink` (0.12.0), which generates a link "based on the user's
       preferences" (checked 2026-10-22)
-    - `Vault.createBinary`, `Vault.process` (1.1.0) and `Vault.on('modify')`
+    - `Vault.createBinary`, `Vault.readBinary` (0.9.7), `Vault.process` (1.1.0) and
+      `Vault.on('modify')`
+    - `MetadataCache.getFirstLinkpathDest` (0.12.5)
+    - `FileManager.promptForDeletion` (0.15.0), which resolves "true if the prompt was confirmed";
+      confirmed, it also moves the file to the trash (observed in 1.14.5)
     - `TExternalFile` (1.14.4): "Represents a file that is outside the Vault. Can be used with the
       vault API just like any other file."
     - `Vault.getAbstractFileByPath` (0.11.11), which gets "a file or folder inside the vault",
