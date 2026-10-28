@@ -22,33 +22,6 @@ palette.
 
 ## What it does
 
-<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, an item is ticked, then another is held and dragged into a different section" width="300">
-
-- **Headings make sections, and checkboxes are items.** Anything indented under an item is that
-  item's notes, and notes can hold any Markdown: links, pictures, bullet lists, tables.
-- **Drag to reorder.** Drag an item, or a heading to move its whole section. On mobile, hold an
-  item for half a second, then drag. Click the arrow beside a heading to fold its section away.
-- **Ticking an item** grays it out where it is. Twenty-four hours later it's archived and hidden,
-  and the checkbox icon in the pane's header, or "Show archived" in its ⋯ menu, brings archived
-  items back.
-- **Star an item** with the star in its card, and the row shows it.
-- **Give an item a date** with the calendar icon in its card. The row shows the day.
-- **Notes are edited a block at a time.** Click a paragraph, a table or a list item and only that
-  part turns into its Markdown; the rest stays drawn as in a note. Checklists in the notes tick
-  right in the open card.
-- **Formatting:** Cmd+B, Cmd+I and Cmd+K (Ctrl on Windows and Linux) make the selection bold,
-  italic or a link, and a format bar under the part you're editing has the rest. "Edit in
-  Markdown", in an item's or a heading's menu, opens the list as Markdown at that line.
-- **Pictures:** paste or drop one into an open item's notes. It's saved where Obsidian saves
-  attachments and shows at once, in a block of its own. On desktop, right-click a picture to copy
-  it, take it out of the notes, or delete the file too.
-- **Find:** Cmd+F (Ctrl+F on Windows and Linux) filters the list to the items that match. On mobile,
-  use the "Find in list" command.
-- **Undo:** Cmd+Z and Cmd+Shift+Z (Ctrl on Windows and Linux) undo and redo the list's own edits on
-  desktop. After a delete, an Undo button brings the item back on any device.
-- **Menus:** right-click an item, a heading or the list's background on desktop. On mobile, item
-  actions are in the ⋯ button on an open item, and tapping a heading opens its menu.
-
 ### The Schedule
 
 "Open schedule", from the ribbon or a list's ⋯ menu, gathers the dated items of every list under
@@ -58,8 +31,9 @@ Today, Tomorrow, Next 7 days and Later. Tick them there too, or open one in its 
 
 ### On your phone
 
-The same lists, with a floating "+" for new items.
+The same lists, with a floating "+" for new items. Hold an item for half a second, then drag it.
 
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, an item is ticked, then another is held and dragged into a different section" width="300">
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-phone.png" alt="A grocery list on a phone, with sections, starred items and a floating add button" width="300">
 
 ### A list inside another note
