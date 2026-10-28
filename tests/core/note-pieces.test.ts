@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { itemPieces, neighborPiece, nextItemMarker, notePieces, outdentMarker, pieceEnter, pieceText } from '../../src/core/note-pieces';
+import { holdsOnly, itemPieces, neighborPiece, nextItemMarker, notePieces, outdentMarker, pieceEnter, pieceText } from '../../src/core/note-pieces';
 
 const NOTES = [
 	'Intro paragraph',
@@ -209,5 +209,28 @@ describe('outdentMarker', () => {
 
 	test('reads the list an item is in', () => {
 		expect(outdentMarker(notes, lines, { start: 1, end: 2 }, '  - ')).toBe('- ');
+	});
+});
+
+describe('holdsOnly', () => {
+	test('empty notes hold only the new piece', () => {
+		expect(holdsOnly('', { start: 0, end: 0 })).toBe(true);
+	});
+
+	test('a new piece after another is not alone', () => {
+		expect(holdsOnly('Para', { start: 1, end: 1 })).toBe(false);
+	});
+
+	test('the only piece, emptied or not, is alone', () => {
+		expect(holdsOnly('Para\nmore', { start: 0, end: 2 })).toBe(true);
+		expect(holdsOnly('', { start: 0, end: 1 })).toBe(true);
+	});
+
+	test('one of two pieces is not alone', () => {
+		expect(holdsOnly('One\n\nTwo', { start: 2, end: 3 })).toBe(false);
+	});
+
+	test('an item open inside a longer list is not alone', () => {
+		expect(holdsOnly('- a\n- b', { start: 1, end: 2 })).toBe(false);
 	});
 });

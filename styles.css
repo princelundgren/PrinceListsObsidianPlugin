@@ -48,10 +48,6 @@ textarea.princelists-title {
 	margin-bottom: 0;
 }
 
-.princelists-list-note-text > .princelists-placeholder {
-	margin-bottom: var(--size-4-4);
-}
-
 .princelists-untouched {
 	color: var(--text-muted);
 	white-space: pre-wrap;
@@ -161,6 +157,11 @@ textarea.princelists-title {
 	margin-bottom: 0;
 }
 
+/* After the rule above, which it overrides: an empty list note's "Notes" keeps a gap above the rows. */
+.princelists-list-note-text > .princelists-placeholder {
+	margin-bottom: var(--size-4-4);
+}
+
 /* The open card: raised above the list, in place of its row (spec, "Layout"). Its margins stay inside
    the pane, so mobile gets no sideways scrolling. */
 .princelists-item.princelists-card {
@@ -204,6 +205,10 @@ textarea.princelists-title {
 .princelists-list-note-text,
 .princelists-card-notes {
 	cursor: text;
+}
+
+.princelists-quiet-placeholder::placeholder {
+	opacity: 0;
 }
 
 /* A table in rendered notes, drawn as in a note: Obsidian's own table rules apply only inside its
