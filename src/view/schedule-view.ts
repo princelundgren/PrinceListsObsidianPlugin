@@ -183,13 +183,12 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		for (const { group, items } of groups) {
 			sizer.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
 			const list = sizer.createEl('ul', { cls: ITEMS_CLASS });
-			for (const item of items) list.append(this.buildRow(item, group === 'today' && item.day === today ? null : today));
+			for (const item of items) list.append(this.buildRow(item, today));
 		}
 		this.scrollEl.scrollTop = scroll;
 	}
 
-	// `today` is null for an item whose day goes without saying: today's, in Today.
-	private buildRow(item: ScheduledItem, today: string | null): HTMLLIElement {
+	private buildRow(item: ScheduledItem, today: string): HTMLLIElement {
 		const rowEl = createEl('li', { cls: ITEM_CLASS });
 		rowEl.toggleClass('is-done', item.done);
 		const box = rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' });
@@ -200,7 +199,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		if (block) this.blocks.push(block);
 		text.createDiv({ cls: 'princelists-schedule-list', text: item.listName });
 		if (item.starred) addStar(rowEl);
-		if (today !== null) addWhen(rowEl, item.day, today);
+		addWhen(rowEl, item.day, today);
 		this.rows.set(rowEl, item);
 		return rowEl;
 	}
