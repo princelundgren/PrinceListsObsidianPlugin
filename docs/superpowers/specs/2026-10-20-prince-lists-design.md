@@ -582,7 +582,8 @@ stays, and the blank line stays with it.
   when Obsidian finds a file at exactly the new path.
 - **The list note and item notes (call):**
   - Both show as rendered Markdown. Clicking into one switches to a plain-text editor of the raw
-    Markdown, without the item's indent.
+    Markdown, without the item's indent. Step two narrows this to the block clicked (step two's
+    design, "Editing notes a block at a time").
   - **Where the caret goes (owner, 2026-10-27):** on the character clicked, wherever the rendered
     text matches the Markdown. On a link, a picture or another part the rendering draws or hides,
     at the end of that source line. A click on a link still follows it. The rendered notes show a
@@ -681,7 +682,8 @@ stays, and the blank line stays with it.
   Delete removes the item and its notes. Step two adds Edit in Markdown, and its star is a button
   on the open card, not an entry here **(owner, 2026-10-27)**.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
-  heading and Delete heading.
+  heading and Delete heading. Step two adds Edit in Markdown, and a menu on the list's background
+  (step two's design, "Right-click menus").
   - New item adds one as the first item under the heading. In a section without items, it goes
     after the section's content **(call)**: directly under the heading, a paragraph there would
     join the item as a lazy line, and a setext heading spans more than one line.

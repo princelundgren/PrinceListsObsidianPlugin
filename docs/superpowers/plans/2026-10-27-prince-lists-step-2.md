@@ -8,7 +8,9 @@
 
 **Goal:** Build step two of PrinceLists, what's needed before moving in: "Turn into list", a star,
 the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, dragging and collapsing headings, a
-When day with a Schedule view, and lists inside other notes. Then release it as `0.4.0`.
+When day with a Schedule view, and lists inside other notes. Before the release, Tasks 17 to 23 add
+two format buttons, right-click menus and editing notes a block at a time. Then release it as
+`0.4.0`.
 
 **Architecture:**
 - **Step one is the base.** Every list-view write still goes through `writeAction` or a typing
@@ -980,6 +982,287 @@ manual check runs there, never in a vault with real notes.
 - [ ] **Step 3: Update the design:** no edge scroll in a block, and why.
 - [ ] **Step 4: Commit** with the message "Drag items in a block".
 
+### Task 17: Add Strikethrough and Underline to the format bar
+
+Tasks 17 to 23 were added on 2026-10-28, after Task 15, and run before Task 16 **(owner)**. In
+code, a part of the notes edited on its own is a *piece*, so it isn't confused with the
+`princelists` code block.
+
+**Files:**
+- Modify: `src/core/format.ts`, `tests/core/format.test.ts`, `src/view/format.ts`
+
+**Interfaces:**
+- Produces, in `src/core/format.ts`: `Format` gains `'strikethrough' | 'underline'`.
+  - `strikethrough` toggles `~~` as `bold` toggles `**`: `insideMarkers` with `'~'`, on when the
+    run of `~` on both sides is 2 or more.
+  - `underline` toggles `<u>` and `</u>`: off when the text just outside the selection, or the
+    selection's own ends, are those tags; otherwise it wraps the selection, which stays on the
+    text inside. Spaces at the selection's ends stay outside the tags, as `trimmed` does for stars.
+- Produces, in `src/view/format.ts`: the second group reads Bold, Italic, Strikethrough
+  (`strikethrough`), Underline (`underline`), Inline code, Link.
+
+- [ ] **Step 1: Write the failing tests** in `tests/core/format.test.ts`:
+  - `a b c` with `b` selected gives `a ~~b~~ c` and `a <u>b</u> c`, `b` still selected; the same
+    call again gives `a b c`.
+  - `~~b~~` or `<u>b</u>` selected whole gives `b`.
+  - `b ` selected gives `~~b~~ ` and `<u>b</u> `.
+  - An empty selection gives `~~~~` or `<u></u>` with the caret in the middle.
+- [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
+- [ ] **Step 3: Add the two buttons** with Lucide's `strikethrough` and `underline` icons.
+- [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
+- [ ] **Step 5: Check it by hand on desktop and mobile:** both buttons toggle, the drawn notes show
+  the text struck through and underlined (design risks 11 and 12), and on a phone the bar's groups
+  still wrap whole.
+- [ ] **Step 6: Commit** with the message "Add Strikethrough and Underline to the format bar".
+
+### Task 18: Add Edit in Markdown to the heading menu, and a menu on the list's background
+
+**Files:**
+- Modify: `src/core/list-actions.ts`, `tests/core/list-actions.test.ts`, `src/view/menus.ts`,
+  `src/view/heading-field.ts`, `src/view/list-view.ts` (`toggleArchived` becomes public)
+
+**Interfaces:**
+- Produces, in `src/core/list-actions.ts`:
+  - `HeadingPlace` becomes `{ afterItem: number } | { afterSection: number } | 'top'`. `'top'`
+    puts the heading after `sections[0]`, the part before the first heading.
+  - `endOfSection(section: Section): ItemPlace`: after its last item; with no items, `firstUnder`
+    its heading; the part before the first heading with no items gives `'first'`.
+  - `sectionLastLine(lines: readonly Line[], section: Section, contentStart: number): number`: the
+    section's last line that isn't empty, or its heading's line, or `contentStart`.
+- Produces, in `src/view/heading-field.ts`: `addHeading` handles `'top'` as `addItem` handles
+  `'first'`, with no line to track.
+- Produces, in `src/view/menus.ts`:
+  - `headingMenu` gains Edit in Markdown (`file-text`) before Delete heading, through
+    `editItemInMarkdown` at the heading's line.
+  - `listMenu(view: PrinceListView, section: Section, menu: Menu): void`, only for a list's text
+    (`isListText`): New item (`list-plus`), New heading (`heading`), Edit in Markdown
+    (`file-text`, at `sectionLastLine`), Show archived (`archive`, checked while on,
+    `view.toggleArchived()`) and Open schedule (`SCHEDULE_ICON`, `openSchedule`). New item and New
+    heading track the section's heading line, or its last item's, with `trackWhileShown`.
+  - `showContextMenu` leaves any `input` or `textarea` its own menu, and opens `listMenu` when the
+    click is on no row or heading (links are handled before it). The section is the one under the
+    last heading whose top is above the click, or `sections[0]`. Blocks in other notes get none.
+
+- [ ] **Step 1: Write the failing tests:** `planHeadingInsert` with `'top'` puts `##` after the top
+  part's last item, before the first heading, and at the end of a list with no headings;
+  `endOfSection` gives each of its three answers, and with text after a section's last item,
+  places the item after that item; `sectionLastLine` skips empty lines at a section's end.
+- [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
+- [ ] **Step 3: Build the menus.**
+- [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
+- [ ] **Step 5: Check it by hand.** On desktop: right-click below a section's items, between
+  sections, on the drawn list note and below the last row, in a list with headings and in one
+  without; New item and New heading land at the end of that section's items, and Edit in Markdown
+  opens there. Right-clicking a row, a heading, a link, the filter field or a card's field shows
+  what it showed before. On mobile, a heading's tap menu has Edit in Markdown, and holding the
+  background opens nothing.
+- [ ] **Step 6: Commit** with the message "Add Edit in Markdown to the heading menu, and a menu on
+  the list's background".
+
+### Task 19: Split notes into pieces, and the keys' rules
+
+**Files:**
+- Create: `src/core/note-pieces.ts`, `tests/core/note-pieces.test.ts`
+
+**Interfaces:**
+- Produces, in `src/core/note-pieces.ts` (ranges are lines of the notes, `LineRange` from
+  `follow.ts`, end exclusive):
+  - `notePieces(markdown: string): LineRange[]`: one range per top-level CommonMark block of the
+    notes, a whole list as one, without its trailing empty lines. It parses the text `maskBlocks`
+    gives, so the split follows the list parser's own masking of fences, `$$` and `%%`; a small
+    helper exported from `parse.ts` walks the document's children without `topLevelParts`'
+    splitting of lists. Non-empty lines no block covers, such as link definitions, are a range of
+    their own.
+  - `itemPieces(markdown: string, piece: LineRange): LineRange[]`: every list item in the piece
+    that isn't inside a blockquote, at any depth, in document order, each over its own lines and
+    its nested items'.
+  - `pieceText(markdown: string, range: LineRange): { text: string; indent: string }`: the
+    range's lines, with `indent`, the first line's leading whitespace, taken off each line that
+    starts with it.
+  - `nextItemMarker(line: string): string | null`: the start of the item after `line`, at its
+    indent: `- [x] a` gives `- [ ] `, `\t3. b` gives `\t4. `, `1) c` gives `2) `, `* d` gives `* `;
+    null for a line that isn't a list item.
+  - `pieceEnter(text: string, caret: number): PieceEnter`, where `PieceEnter` is
+    `{ kind: 'newline' } | { kind: 'edit'; edit: FormatEdit } | { kind: 'nextItem'; marker:
+    string } | { kind: 'outdent' } | { kind: 'endList' }`, with a third parameter, `nested:
+    boolean`, true when the field's piece is itself a nested item:
+    - `nextItem`: the caret ends the field's last line, which is a list item with text.
+    - `edit`, inside the field: at the end of an earlier item line with text, a new line with
+      `nextItemMarker` after it; on an empty nested item, the item one level out; both with the
+      caret after the marker.
+    - `outdent`, when `nested`, and `endList` otherwise: the field's last line is an empty item at
+      the field's own indent.
+    - `newline` otherwise.
+  - `neighborPiece(ranges: readonly LineRange[], current: LineRange, direction: 'up' | 'down'):
+    LineRange | null`: up, the range with the greatest start before `current.start` (an item's
+    parent, from its first child); down, the smallest start at or after `current.end`, or, from a
+    parent, its first child.
+
+- [ ] **Step 1: Write the failing tests** on notes holding a paragraph, a table, a fenced block
+  with an empty line inside, a callout holding a list, a nested numbered and checklist list, a
+  `$$` block with an empty line inside and a link definition: the pieces, the item pieces (none
+  from the callout), `pieceText` of a nested item, every `nextItemMarker` example above, each
+  `pieceEnter` kind, including an empty nested item inside the field and one opened alone, and
+  `neighborPiece` into a parent and a first child.
+- [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
+- [ ] **Step 3: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
+- [ ] **Step 4: Commit** with the message "Split notes into pieces".
+
+### Task 20: Save one piece of a card's notes
+
+**Files:**
+- Create: `src/core/edit-piece.ts`, `tests/core/edit-piece.test.ts`
+- Modify: `src/core/follow.ts`, `tests/core/follow.test.ts`, `src/core/editing.ts`,
+  `tests/core/editing.test.ts`
+
+**Interfaces:**
+- Produces, in `src/core/edit-piece.ts`:
+  - `setNotesPiece(lines: readonly Line[], model: ListModel, item: ItemBlock, piece: PieceSession,
+    typed: string): { lines: Line[]; piece: PieceSession }`, with `PieceSession { range:
+    LineRange; indent: string; separator: boolean }` in file lines. It splices only `range`: the
+    typed lines, `indent` (the item's notes indent plus the piece's own) put back on each that
+    isn't empty, each with the file's usual line ending. Every other line keeps its bytes, the
+    blank line under the title included. A new piece (`separator: true`) gets an empty line before
+    it while it holds text, and loses it again when emptied. Guarded by `replaceRun` with the
+    item's key removed and added.
+  - A new item from Enter opens as an empty range with `separator: false`.
+- Produces, in `src/core/follow.ts`: `followRange(range, edit)`. An edit covers its `start` line
+  for a `change`, `start` to `start - delta` for a `delete`, and none for an `insert`. One that
+  starts at or after the range's end keeps it; one whose cover ends at or before the range's start
+  shifts it by `delta`; a `move` maps both ends through `moved`; anything else gives null. The list
+  note's callers keep their meaning.
+- Produces, in `src/core/editing.ts` (263 lines; move the list note's session methods to
+  `src/core/list-note-session.ts` if it would pass 300):
+  - `openNotesPiece(range: LineRange, isNew: boolean): string | null` in place of `openNotes()`;
+    `typeNotesPiece(markdown: string): Typed` in place of `typeNotes`.
+  - `outsideChange` maps the piece's range with `mapRange`; a range that can't be mapped ends the
+    session, and the next keystroke gets `{ lost: true }`.
+
+- [ ] **Step 1: Write the failing tests:**
+  - Typing into the second of three pieces of a CRLF file whose notes have a whitespace-only line
+    and a lazy line elsewhere changes only that piece's lines, byte for byte everywhere else.
+  - A new piece at the end gets one empty line before it, and erasing it takes that line again.
+  - A new item after `\t- a` goes on the next line with no empty line before it.
+  - A tick of a box above the open piece, and a line added above it from outside, both move the
+    range, and the next keystroke lands on its lines; an outside change to its own lines gives
+    `{ lost: true }`.
+  - `followRange` for an edit before, after and inside a range, and for a move.
+- [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
+- [ ] **Step 3: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
+- [ ] **Step 4: Commit** with the message "Save one piece of a card's notes".
+
+### Task 21: Edit a card's notes a piece at a time
+
+**Files:**
+- Create: `src/view/note-pieces.ts`
+- Modify: `src/view/card.ts`, `src/view/notes.ts`, `src/view/events.ts`, `src/view/pictures.ts`,
+  `src/view/checklist.ts`, `src/view/format.ts`, `src/view/list-view.ts`, `styles.css`
+
+**Interfaces:**
+- Consumes: Tasks 19 and 20.
+- Produces, in `src/view/note-pieces.ts`:
+  - `drawNotes(host: MarkdownHost, sourcePath: string, area: HTMLElement, notes: { markdown:
+    string; start: number }, checklist: readonly ChecklistLine[] | null, open: LineRange | null):
+    Component`: `start` is the notes' first file line (`notesStartLine`), and every range here and
+    in the tags is in file lines. Each piece is rendered into its own `.princelists-note-piece`,
+    tagged with its range, its boxes enabled against the checklist lines inside that range only.
+    Below them a `.princelists-notes-end` strip to click; with no notes, the "Notes" placeholder
+    instead. The open range isn't drawn.
+  - `openPieceAt(view: PrinceListView, area: HTMLElement, click: MouseEvent): void`: the clicked
+    piece by its tag, or, in a list piece whose drawn `li` count equals `itemPieces`' count, the
+    clicked `li`'s item. A tag that isn't among the current pieces draws the notes again and opens
+    nothing. The caret goes by `caretAtClick` on the clicked element and the piece's text. The
+    field is created and focused in the click's own handler. A click on the strip opens a new
+    piece at the end.
+  - Leaving the field draws only the piece that was open, in its place, and moves the later tags
+    by the lines it gained, unless the notes changed elsewhere meanwhile, which draws them all.
+  - The field keeps `NOTES_EDITOR_CLASS`, so the format bar, Cmd+B, Cmd+I and Cmd+K, field undo
+    and pasted pictures work on it unchanged. `buildFormatBar` takes the field and puts the bar
+    right after it.
+- A mousedown on a drawn box keeps focus in the open field, as `keepNotesFocused` does for the
+  bar, so the box ticks and the field stays.
+- `handleTyped` turns `{ lost: true }` into the lost card's notice and copy button, once.
+- A picture dropped on drawn notes goes in a new piece at the end.
+
+- [ ] **Step 1: Build it.** The rules are Tasks 19 and 20's tested functions.
+- [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
+- [ ] **Step 3: Check it by hand on desktop and mobile:** a table, a paragraph, a callout and a
+  nested checklist item each open alone, the rest staying drawn; a list with a callout inside
+  opens whole; the caret lands where clicked; `git diff` after typing shows only that piece's
+  lines; boxes are enabled and tick while another piece is open; clicking another piece opens it
+  at once; the strip opens a new piece that saves after an empty line; the format bar sits under
+  the field; a dropped picture lands in a new piece; design risk 10's item order holds.
+- [ ] **Step 4: Commit** with the message "Edit a card's notes a piece at a time".
+
+### Task 22: Move between pieces with Enter, Up, Down and Backspace
+
+**Files:**
+- Create: `src/view/note-piece-keys.ts`
+- Modify: `src/view/events.ts`
+
+**Interfaces:**
+- Consumes: Task 19's `pieceEnter` and `neighborPiece`; Task 21's field.
+- Enter and Backspace are read from the field's `beforeinput` (`insertLineBreak` and
+  `deleteContentBackward`), which every platform's keyboard sends, and never while `isComposing`.
+  Shift+Enter, noted on keydown, stays a plain new line. Enter acts on `pieceEnter`: `edit`
+  through `changeField`; `nextItem` saves and opens a new item after it with the marker; `outdent`
+  saves the piece one indent level out; `endList` removes the empty item and opens a new piece
+  after the list. The new field goes in place at once, and the left piece's drawing is put in
+  around it when the renderer is done. `insertParagraph` counts as Enter too.
+- Backspace in an empty field removes its piece, if it was saved, and opens the piece above at
+  its end.
+- Up with the caret at the field's very start, or Down at its very end, nothing selected and no
+  modifier, opens `neighborPiece` among the openable pieces (each piece, or a list's items where
+  its counts match): Up at its end, or, into an item's parent, at the end of the parent's own
+  line; Down at its start.
+- Every new field is created and focused in the event's own handler, so a phone's keyboard stays
+  up.
+
+- [ ] **Step 1: Build it.**
+- [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
+- [ ] **Step 3: Check it by hand on desktop, the iPhone and Android, with their on-screen
+  keyboards (if a keyboard sends no `beforeinput` for Backspace in an empty field, add a keydown
+  fallback):** Enter continues a bulleted, numbered and checklist item, and a nested one at its
+  indent; Enter on an empty nested item moves it out, and on an empty top-level item ends the
+  list; Up and Down walk every piece and item, into a parent from its first child; Backspace in an
+  empty piece removes it; the keyboard stays up throughout; confirming a word with a Japanese
+  keyboard's Enter doesn't start a new item; `git diff` shows only what was typed.
+- [ ] **Step 4: Commit** with the message "Move between pieces with Enter, Up, Down and Backspace".
+
+### Task 23: Edit the list note a piece at a time
+
+**Files:**
+- Modify: `src/core/edit-list-note.ts`, `tests/core/edit-list-note.test.ts`, `src/core/editing.ts`
+  (or `list-note-session.ts`), `tests/core/editing.test.ts`, `src/view/fields.ts`,
+  `src/view/note-pieces.ts`, `src/view/events.ts`, `src/view/list-view.ts`
+
+**Interfaces:**
+- Consumes: Tasks 19 to 22.
+- Produces, in `src/core/edit-list-note.ts`: `setListNotePiece(lines: readonly Line[], model:
+  ListModel, piece: PieceSession, typed: string): { lines: Line[]; piece: PieceSession }`: as
+  `setNotesPiece`, with the list note's own rules. The blank line after the note is written only
+  when the piece is the note's last, and the unclosed-block exception and the block check act on
+  the whole note as it would be saved.
+- Produces, in `src/core/editing.ts`: `openListNote(range?: LineRange, isNew?: boolean): string`
+  opens one piece; a session whose range is lost gets `{ lost: true }`, not the whole note.
+- The list note draws with `drawNotes` and opens with `openPieceAt`; Task 22's keys, the format
+  bar and Cmd+B, Cmd+I and Cmd+K work in it. It still takes no pictures. Its warnings check the
+  whole note as it would be saved.
+
+- [ ] **Step 1: Write the failing tests:** typing into a list note's second piece changes only its
+  lines; a new piece at the end of the note gets an empty line before it and the blank line after
+  it; a piece in the middle adds no line after it; an outside change above it moves the range, and
+  one to its own lines gives `{ lost: true }`; a nested `- [ ] x` under a plain bullet doesn't
+  warn.
+- [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
+- [ ] **Step 3: Build the view.**
+- [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
+- [ ] **Step 5: Check it by hand on desktop and mobile:** each piece of a list note with a table, a
+  callout and a bulleted list opens alone; typing `- [ ] x` at the top level warns as before;
+  Enter continues a bullet; `git diff` shows only the piece's lines.
+- [ ] **Step 6: Reconcile step one's design,** "The list note and item notes (call)", with what
+  Tasks 21 to 23 built, and commit with the message "Edit the list note a piece at a time".
+
 ### Task 16: Finish step two and release 0.4.0
 
 **Files:**
@@ -987,8 +1270,8 @@ manual check runs there, never in a vault with real notes.
 - Modify: both designs (reconcile them), `README.md`, `package.json`, `package-lock.json`,
   `manifest.json`, `versions.json`
 
-- [ ] **Step 1: Run every manual check of Tasks 1 to 15 again on the iPhone** in the test vault,
-  with the release build.
+- [ ] **Step 1: Run every manual check of Tasks 1 to 15 and 17 to 23 again on the iPhone** in
+  the test vault, with the release build.
 - [ ] **Step 2: Check alongside Tasks and Kanban:** a Tasks query reads a When as scheduled, a
   starred done item is still done, and Kanban still opens its own boards.
 - [ ] **Step 3: Write the notes file:** each check, its result and how it ran, naming no devices,
@@ -998,9 +1281,11 @@ manual check runs there, never in a vault with real notes.
   design at `status: building` until the owner confirms its "Done when" (lists moved in); then
   `live`. In step one's design, move what step two built out of "Not in step one" and say in the
   opening paragraph that the Schedule view spans lists.
-- [ ] **Step 5: Update the README:** "What it does" gains the star, the When and the Schedule view,
-  Cmd+F, checklists, dragging and collapsing headings, "Turn into list" and the `princelists` code
-  block, and the status line names `0.4.0`.
+- [ ] **Step 5: Update the README:** "What it does" gains the star, an item's date and the
+  Schedule view, Cmd+F, checklists, dragging and collapsing headings, "Turn into list" and the
+  `princelists` code block, formatting in a card (the keys, the format bar and Edit in Markdown),
+  editing notes a block at a time, the right-click menus and "Create new list", and the status
+  line names `0.4.0`.
 - [ ] **Step 6: Bump the version** with `npm version minor --no-git-tag-version`, which gives
   `0.4.0` and adds `"0.4.0": "1.5.7"` to `versions.json`. Check that `minAppVersion` is still
   `1.5.7` and that `npm run lint` passes.
