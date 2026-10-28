@@ -11,7 +11,8 @@ import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
-import { drawCardNotes } from './note-piece-field';
+import { drawPieces } from './note-piece-field';
+import { cardNotesHost } from './notes-host';
 import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
@@ -124,7 +125,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (notes) drawCardNotes(view, card, notes);
+	if (notes) drawPieces(view, cardNotesHost(view, card, notes));
 }
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {

@@ -62,7 +62,7 @@ describe('the title field across a typing session', () => {
 		state.typeTitle('buy #mi');
 		// The phone added an item at the top; Obsidian's merge kept the typing.
 		const merged = `${FRONTMATTER}- [ ] new\n- [ ] a\n- [ ] buy #mi #home\n- [ ] c\n`;
-		expect(state.outsideChange(merged)).toEqual({ lostSelected: false, noteText: null });
+		expect(state.outsideChange(merged)).toEqual({ lostSelected: false });
 		expect(state.selected).toBe(5);
 		state.typeTitle('buy #milk2');
 		expect(state.text).toBe(`${FRONTMATTER}- [ ] new\n- [ ] a\n- [ ] buy #milk2 #home\n- [ ] c\n`);
@@ -87,7 +87,7 @@ describe('the title field across a typing session', () => {
 		state.focusTitle();
 		state.typeTitle('buy');
 		const merged = `${FRONTMATTER}- [ ] a\n- [x] buy #home ✔ 2026-10-21 09:00\n- [ ] c\n`;
-		expect(state.outsideChange(merged)).toEqual({ lostSelected: true, noteText: null });
+		expect(state.outsideChange(merged)).toEqual({ lostSelected: true });
 		expect(state.selected).toBeNull();
 		expect(state.typeTitle('buy milk')).toEqual({ lost: true });
 		expect(state.text).toBe(merged);
@@ -174,12 +174,27 @@ describe('the list note across a typing session', () => {
 		const text = `${FRONTMATTER}- [ ] a\n- [ ] b\n`;
 		const state = editing(text);
 		state.open(4);
-		expect(state.openListNote()).toBe('');
+		expect(state.openListNote({ start: 3, end: 3 }, false)).toBe('');
 		const first = state.typeListNote('N');
 		expect(first).toEqual({ edit: { start: 3, delta: 2, kind: 'insert' } });
 		state.typeListNote('Note\nmore');
 		expect(state.text).toBe(`${FRONTMATTER}Note\nmore\n\n- [ ] a\n- [ ] b\n`);
 		expect(state.selected).toBe(7);
+	});
+
+	test('a piece opens alone, and typing into it changes only its lines', () => {
+		const state = editing(`${FRONTMATTER}First\n\n- p\n  - q\n\n- [ ] a\n`);
+		expect(state.openListNote({ start: 6, end: 7 }, false)).toBe('- q');
+		expect(state.listNoteOutdent('- q')).toBe('- ');
+		state.typeListNote('- q!');
+		expect(state.text).toBe(`${FRONTMATTER}First\n\n- p\n  - q!\n\n- [ ] a\n`);
+		expect(state.listNoteRange()).toEqual({ start: 6, end: 7 });
+	});
+
+	test('the note as typed is the whole note, which a nested checkbox line leaves a note', () => {
+		const state = editing(`${FRONTMATTER}- p\n  - q\n\n- [ ] a\n`);
+		state.openListNote({ start: 4, end: 5 }, false);
+		expect(state.listNoteAsTyped('- [ ] x')).toBe('- p\n  - [ ] x');
 	});
 
 	// The note's first save wrote a blank line before the items too. While it is still blank and right
@@ -190,11 +205,22 @@ describe('the list note across a typing session', () => {
 		[crlfText(`${FRONTMATTER}- [ ] a\n`)],
 	])('a note typed where there was none and erased again leaves %j as it was', (text) => {
 		const state = editing(text);
-		state.open(contentStartOf(splitLines(text)));
-		state.openListNote();
+		const start = contentStartOf(splitLines(text));
+		state.open(start);
+		state.openListNote({ start, end: start }, false);
 		typeEach((v) => state.typeListNote(v), ['N', 'No', 'N', '']);
 		expect(state.text).toBe(text);
-		expect(state.selected).toBe(contentStartOf(splitLines(text)));
+		expect(state.selected).toBe(start);
+	});
+
+	test('a new piece after the last is saved after an empty line, and erased leaves the note as it was', () => {
+		const text = `${FRONTMATTER}First\n- [ ] a\n`;
+		const state = editing(text);
+		state.openListNote({ start: 4, end: 4 }, true);
+		state.typeListNote('new');
+		expect(state.text).toBe(`${FRONTMATTER}First\n\nnew\n\n- [ ] a\n`);
+		typeEach((v) => state.typeListNote(v), ['ne', 'n', '']);
+		expect(state.text).toBe(text);
 	});
 
 	// Until the field loses focus, those lines are still the note being typed: a row drawn for a typed
@@ -202,7 +228,7 @@ describe('the list note across a typing session', () => {
 	test('rows for lines inside the note being typed are left out of a redraw', () => {
 		const text = `${FRONTMATTER}Old\n\n- [ ] a\n## H\n- [ ] b\n`;
 		const state = editing(text);
-		state.openListNote();
+		state.openListNote({ start: 3, end: 4 }, false);
 		state.typeListNote('Old\n# Typed\n- [ ] y\nmore');
 		const { lines, model } = list(state.text);
 		const drawn = (range: { start: number; end: number } | null) =>
@@ -216,14 +242,14 @@ describe('the list note across a typing session', () => {
 		expect(state.listNoteRange()).toBeNull();
 	});
 
-	// The range is the note's own lines: the blank line its save wrote is the session's only while it
-	// is still blank and still right under the note, so a line added between the two is kept.
+	// The blank line its save wrote is the session's only while it is still blank and still right
+	// under the piece, so a line added between the two is kept.
 	test.each([
 		['an item', '- [ ] milk'],
 		['a heading', '## Milk'],
 	])('%s another device adds right under the note survives the next keystroke', (_, added) => {
 		const state = editing(`${FRONTMATTER}- [ ] a\n`);
-		state.openListNote();
+		state.openListNote({ start: 3, end: 3 }, false);
 		state.typeListNote('N');
 		expect(state.text).toBe(`${FRONTMATTER}N\n\n- [ ] a\n`);
 		state.outsideChange(`${FRONTMATTER}N\n${added}\n\n- [ ] a\n`);
@@ -236,14 +262,14 @@ describe('the list note across a typing session', () => {
 	test('a blank line the list already had stays when the note is erased', () => {
 		const text = `${FRONTMATTER}Old\n\n- [ ] a\n`;
 		const state = editing(text);
-		state.openListNote();
+		state.openListNote({ start: 3, end: 4 }, false);
 		typeEach((v) => state.typeListNote(v), ['Ol', 'O', '']);
 		expect(state.text).toBe(`${FRONTMATTER}\n- [ ] a\n`);
 	});
 
 	test('an item added at the top elsewhere stays after the note being typed', () => {
 		const state = editing(`${FRONTMATTER}- [ ] a\n`);
-		state.openListNote();
+		state.openListNote({ start: 3, end: 3 }, false);
 		state.outsideChange(`${FRONTMATTER}- [ ] new\n- [ ] a\n`);
 		state.typeListNote('Note');
 		expect(state.text).toBe(`${FRONTMATTER}Note\n\n- [ ] new\n- [ ] a\n`);
@@ -252,7 +278,7 @@ describe('the list note across a typing session', () => {
 	test('a heading typed into the note, then taken out again, leaves the items as they were', () => {
 		const text = `${FRONTMATTER}Old\n\n- [ ] a\n`;
 		const state = editing(text);
-		state.openListNote();
+		state.openListNote({ start: 3, end: 4 }, false);
 		typeEach((v) => state.typeListNote(v), ['Old\n#', 'Old\n# ', 'Old\n# H', 'Old\n# ', 'Old\n#', 'Old\n', 'Old']);
 		expect(state.text).toBe(text);
 	});
@@ -260,7 +286,7 @@ describe('the list note across a typing session', () => {
 	test('an unclosed fence saves, and closing it brings back what follows as it was', () => {
 		const text = `${FRONTMATTER}Old\n\n- [ ] a\n## H\n- [ ] b\n`;
 		const state = editing(text);
-		state.openListNote();
+		state.openListNote({ start: 3, end: 4 }, false);
 		const typed = typeEach((v) => state.typeListNote(v), ['Old\n```', 'Old\n```\ncode', 'Old\n```\ncode\n```']);
 		expect(typed.every(saved)).toBe(true);
 		expect(state.text).toBe(`${FRONTMATTER}Old\n\`\`\`\ncode\n\`\`\`\n\n- [ ] a\n## H\n- [ ] b\n`);
@@ -269,33 +295,45 @@ describe('the list note across a typing session', () => {
 	test('a refused keystroke keeps nothing, says so once, and the next one tries again', () => {
 		const text = `${FRONTMATTER}Old\n\n  - [ ] a\n`;
 		const state = editing(text);
-		state.openListNote();
+		state.openListNote({ start: 3, end: 4 }, false);
 		const typed = typeEach((v) => state.typeListNote(v), ['- a', '- ab', 'ab']);
 		expect(typed[0]).toEqual({ refused: true, firstRefusal: true });
 		expect(typed[1]).toEqual({ refused: true, firstRefusal: false });
 		expect(saved(typed[2] as Typed)).toBe(true);
 		expect(state.text).toBe(`${FRONTMATTER}ab\n\n  - [ ] a\n`);
 		state.closeListNote();
-		state.openListNote();
+		state.openListNote({ start: 3, end: 4 }, false);
 		expect(state.typeListNote('- a')).toEqual({ refused: true, firstRefusal: true });
 	});
 
-	test("an outside change to the note's own lines makes the field read the note again", () => {
-		const state = editing(`${FRONTMATTER}Old\n\n- [ ] a\n`);
-		state.openListNote();
-		state.typeListNote('Mine');
-		const result = state.outsideChange(`${FRONTMATTER}Theirs\nand more\n\n- [ ] a\n`);
-		expect(result).toEqual({ lostSelected: false, noteText: 'Theirs\nand more' });
-		state.typeListNote('Theirs\nand more, and mine');
-		expect(state.text).toBe(`${FRONTMATTER}Theirs\nand more, and mine\n\n- [ ] a\n`);
+	test('an outside change above the piece moves it, and typing lands in the same piece', () => {
+		const state = editing(`${FRONTMATTER}First\n\nSecond\n\n- [ ] a\n`);
+		state.openListNote({ start: 5, end: 6 }, false);
+		state.outsideChange(`${FRONTMATTER}Zero\n\nFirst\n\nSecond\n\n- [ ] a\n`);
+		state.typeListNote('Second!');
+		expect(state.text).toBe(`${FRONTMATTER}Zero\n\nFirst\n\nSecond!\n\n- [ ] a\n`);
 	});
 
-	test('a change inside the note that leaves both ends is overwritten by the next keystroke', () => {
-		const state = editing(`${FRONTMATTER}One\ntwo\nthree\n\n- [ ] a\n`);
-		state.openListNote();
-		state.outsideChange(`${FRONTMATTER}One\nTWO\nthree\n\n- [ ] a\n`);
-		state.typeListNote('One\ntwo\nthree!');
-		expect(state.text).toBe(`${FRONTMATTER}One\ntwo\nthree!\n\n- [ ] a\n`);
+	test("an outside change to the piece's own lines loses it, and typing writes nothing", () => {
+		const state = editing(`${FRONTMATTER}One\ntwo\n\n- [ ] a\n`);
+		state.openListNote({ start: 3, end: 5 }, false);
+		state.typeListNote('One\ntwo!');
+		const merged = `${FRONTMATTER}One\nTWO\n\n- [ ] a\n`;
+		expect(state.outsideChange(merged)).toEqual({ lostSelected: false });
+		expect(state.typeListNote('One\ntwo!!')).toEqual({ lost: true });
+		expect(state.listNoteRange()).toBeNull();
+		expect(state.text).toBe(merged);
+	});
+
+	test("a card's piece and the list note's are one session: opening one ends the other", () => {
+		const state = editing(`${FRONTMATTER}Note\n\n- [ ] a\n\tfirst\n`);
+		state.open(5);
+		state.openNotesPiece({ start: 6, end: 7 }, false);
+		state.openListNote({ start: 3, end: 4 }, false);
+		expect(state.notesPieceRange()).toBeNull();
+		expect(state.typeNotesPiece('x')).toEqual({ lost: true });
+		state.closeNotes();
+		expect(state.listNoteRange()).toEqual({ start: 3, end: 4 });
 	});
 });
 

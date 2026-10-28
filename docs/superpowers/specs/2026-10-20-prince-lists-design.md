@@ -285,10 +285,11 @@ top level:
 - a line of `-` or `=` signs directly under text, which turns the text above it into a heading.
   A single `-`, typed to start a bullet, counts until a space and more text follow it
 
-If you type one of these, it becomes a section or an item when it is saved. The list-note editor
-says so in a gray line under it before it saves **(call)**.
+If you type one of these, it becomes a section or an item when it is saved. The list note says so
+in a gray line under it before it saves, checked on the whole note as it would be saved **(call)**.
+A nested checkbox line under a bullet stays in the note, so it doesn't warn.
 
-The editor also warns when the list note opens a fenced code block, a comment (`%%`) or a math
+It also warns when the list note opens a fenced code block, a comment (`%%`) or a math
 block (`$$`) without closing it, because an unclosed block hides every item below it **(owner,
 2026-10-20)**. It warns the same way about an HTML block that CommonMark runs to the end of the
 file when its end is missing, such as `<!--` without `-->` or `<pre>` without `</pre>` **(call)**.
@@ -298,7 +299,7 @@ one blank line between them **(owner, 2026-10-20)**. Without it, a list note tha
 block such as `<div>x</div>` would swallow the first item: CommonMark continues that kind of block
 until a blank line.
 
-A note the editor warns about for an unclosed block still saves, with no check of what follows, so
+A note that warns about an unclosed block still saves, with no check of what follows, so
 nothing typed is lost **(owner, 2026-10-21)**. Saving changes only the note's own lines, so what
 follows is never lost:
 
@@ -314,12 +315,12 @@ This is the one exception to refusing an edit that changes how the rest reads (s
 plugin leaves alone"). Any other note that would change what follows is refused **(call)**, as when
 a first item indented to a list item's content column would join that item.
 
-Each save replaces exactly the lines the editor's previous save wrote, not the list note as the file
-now parses **(call)**. Typing can change how the note's own lines parse: a `-` under text makes a
+Each save replaces exactly the lines the open block's previous save wrote, not the list note as the
+file now parses **(call)**. Typing can change how the note's own lines parse: a `-` under text makes a
 heading, and an opening fence makes the rest of the file part of the note. Re-reading the note's
 extent from the file after such a keystroke would delete or repeat lines. That includes the blank
-line a save wrote under the note, so a note typed and erased again leaves none behind, but only
-while it is still blank and directly under the note **(call)**: a line another device added there
+line a save wrote under the note's last block, so a note typed and erased again leaves none behind,
+but only while it is still blank and directly under that block **(call)**: a line another device added there
 stays, and the blank line stays with it.
 
 ### Sections
@@ -581,9 +582,9 @@ stays, and the blank line stays with it.
   vault has no folder in the vault (observed in 1.14.4), so for one the name counts as taken only
   when Obsidian finds a file at exactly the new path.
 - **The list note and item notes (call):**
-  - Both show as rendered Markdown. Clicking into one switches to a plain-text editor of the raw
-    Markdown, without the item's indent. Step two narrows this to the block clicked (step two's
-    design, "Editing notes a block at a time").
+  - Both are drawn as in a note, a block at a time. Clicking a block puts only its Markdown in a
+    plain-text field, without the item's indent (step two's design, "Editing notes a block at a
+    time").
   - **Where the caret goes (owner, 2026-10-27):** on the character clicked, wherever the rendered
     text matches the Markdown. On a link, a picture or another part the rendering draws or hides,
     at the end of that source line. A click on a link still follows it. The rendered notes show a
@@ -592,7 +593,7 @@ stays, and the blank line stays with it.
     26.2), a click goes to the end of the first line of the clicked paragraph or list item **(call)**.
     The older `caretRangeFromPoint` would tell the character, but it's deprecated, and Obsidian's
     lint rules don't allow deprecated APIs.
-  - Leaving the editor renders the text again, and saving puts the indent back.
+  - Leaving the field draws its block again, and saving puts the indent back.
 - **Pictures (owner):**
   - Pictures show from 1a on.
   - Pasting or dropping a picture into a card comes in 1b. In 1a you add a picture through "Open
@@ -836,9 +837,10 @@ needs no code.
 - **The file is the only copy of the truth.** When the file changes from outside (Sync or an agent),
   the view redraws from it.
   - An editor that has focus isn't torn down.
-  - An outside change inside the lines a focused editor writes, an item's notes or the list note,
-    is overwritten by its next keystroke, so typing wins **(call)**. When the change moves the
-    list note's lines so the editor can't tell where they are, it reads the note again instead.
+  - An outside change to the lines of the block a focused field writes, in an item's notes or the
+    list note, leaves that field unable to save, with the notice and copy button of a card whose
+    item went (step two's design, "Editing notes a block at a time"). A change elsewhere in the
+    notes stays.
   - Text being typed in an open card is part of what the view reports to Obsidian, so Obsidian's
     own merge covers it.
 - **Sync conflicts can't be fully prevented.** If both devices edit the same list while offline,

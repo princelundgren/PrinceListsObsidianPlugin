@@ -17,7 +17,7 @@ import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
 import { registerListKeys } from './keys';
-import { rereadListNote, type ListNoteSession, type ListTitleSession } from './fields';
+import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
@@ -39,6 +39,8 @@ export class PrinceListView extends TextFileView {
 	// sets text on while it loads the view, so a field of that name broke opening a list.
 	listTitleEl: HTMLTextAreaElement | null = null;
 	listNoteEl: HTMLElement | null = null;
+	/** The list note's drawn pieces. */
+	listNoteNotes: Component | null = null;
 	headingField: HeadingField | null = null;
 	/** Cmd+F's query, or null while its field is closed. Like showArchived, nothing restores it. */
 	filter: string | null = null;
@@ -276,8 +278,7 @@ export class PrinceListView extends TextFileView {
 	private outsideChange(data: string): void {
 		this.outsideChanges++;
 		const before = this.selected;
-		const { lostSelected, noteText } = this.editing.outsideChange(data);
-		if (noteText !== null) rereadListNote(this, noteText);
+		const { lostSelected } = this.editing.outsideChange(data);
 		if (lostSelected && this.card && before !== null) cardLost(this, this.card, before);
 	}
 

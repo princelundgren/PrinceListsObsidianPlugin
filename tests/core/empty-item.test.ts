@@ -117,7 +117,7 @@ test('after typing refused the restore, the item is deleted from the typed text,
 	state.text = inserted.textAfter;
 	const pending = state.track(titleLine);
 	expect(plan(state.text, titleLine, inserted)?.next).toBe(text);
-	state.openListNote();
+	state.openListNote({ start: 3, end: 3 }, false);
 	state.typeListNote('Typed');
 	const fallback = plan(state.text, pending.line as number, inserted, false);
 	expect(fallback?.next).toBe(`${FRONTMATTER}Typed\n\n- [ ] a\n`);

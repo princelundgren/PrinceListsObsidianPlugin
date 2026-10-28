@@ -1,11 +1,11 @@
 import type { LineRange } from '../core/follow';
 import { neighborPiece, notePieces, pieceAround, pieceEnter } from '../core/note-pieces';
-import { CARD_NOTES_CLASS } from './card';
 import { applyEdit } from './format';
 import type { PrinceListView } from './list-view';
-import { drawCardNotes, movePiece, selectedNotes, typePiece } from './note-piece-field';
+import { drawPieces, movePiece, typePiece } from './note-piece-field';
 import { NOTE_PIECE_CLASS, type Notes, type PiecePlace } from './note-piece-state';
 import { openablePieces } from './note-pieces';
+import { notesHostOf, type NotesHost } from './notes-host';
 
 // Enter and Shift+Enter send the same beforeinput, so Shift is noted on keydown.
 const shiftEnters = new WeakSet<HTMLTextAreaElement>();
@@ -36,28 +36,28 @@ export function pieceBeforeInput(view: PrinceListView, field: HTMLTextAreaElemen
 	}
 	const isEnter = evt.inputType === 'insertLineBreak' || evt.inputType === 'insertParagraph';
 	if (!isEnter) return;
-	const range = view.editing.notesPieceRange();
-	if (isShiftEnter || !range || field.selectionStart !== field.selectionEnd) return;
-	const outdent = view.editing.notesPieceOutdent(field.value);
+	const host = notesHostOf(view, field);
+	const range = host?.range();
+	if (isShiftEnter || !host || !range || field.selectionStart !== field.selectionEnd) return;
+	const outdent = host.outdent(field.value);
 	const enter = pieceEnter(field.value, field.selectionStart, outdent !== null);
 	if (enter.kind === 'newline') return;
 	evt.preventDefault();
 	if (enter.kind === 'edit') applyEdit(field, enter.edit);
 	else if (enter.kind === 'nextItem') movePiece(view, field, { place: nextItemPlace(field), range: { start: range.end, end: range.end }, text: enter.marker, caret: 'end' });
-	else if (enter.kind === 'outdent' && outdent !== null) outdentItem(view, field, outdent);
-	else endList(view, field);
+	else if (enter.kind === 'outdent' && outdent !== null) outdentItem(view, host, field, outdent);
+	else endList(view, host, field);
 }
 
 function moveToNeighbor(view: PrinceListView, field: HTMLTextAreaElement, direction: 'up' | 'down'): boolean {
-	const card = view.card;
-	const area = field.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (!card || !area) return false;
+	const host = notesHostOf(view, field);
+	if (!host) return false;
 	// The drawn pieces take the lines typing moved them to.
-	drawCardNotes(view, card, area);
-	const current = view.editing.notesPieceRange();
-	const found = selectedNotes(view);
+	drawPieces(view, host);
+	const current = host.range();
+	const found = host.notes();
 	if (!current || !found) return false;
-	const openable = openablePieces(area, found.notes, current);
+	const openable = openablePieces(host.area, found.notes, current);
 	const target = neighborPiece(openable.map((piece) => piece.range), current, direction);
 	const to = openable.find((piece) => piece.range === target);
 	if (!to) return false;
@@ -67,8 +67,8 @@ function moveToNeighbor(view: PrinceListView, field: HTMLTextAreaElement, direct
 }
 
 // The empty item at the end of the field moves one level out, after the item it was nested in.
-function outdentItem(view: PrinceListView, field: HTMLTextAreaElement, marker: string): void {
-	const range = saveAllButLastLine(view, field);
+function outdentItem(view: PrinceListView, host: NotesHost, field: HTMLTextAreaElement, marker: string): void {
+	const range = saveAllButLastLine(view, host, field);
 	if (!range) return;
 	const indent = /^[ \t]*/.exec(marker)?.[0] ?? '';
 	const el = field.closest<HTMLElement>(`.${NOTE_PIECE_CLASS}`);
@@ -78,9 +78,9 @@ function outdentItem(view: PrinceListView, field: HTMLTextAreaElement, marker: s
 }
 
 // The empty item at the end of the field goes, and a new piece opens after its list.
-function endList(view: PrinceListView, field: HTMLTextAreaElement): void {
-	const range = saveAllButLastLine(view, field);
-	const found = selectedNotes(view);
+function endList(view: PrinceListView, host: NotesHost, field: HTMLTextAreaElement): void {
+	const range = saveAllButLastLine(view, host, field);
+	const found = host.notes();
 	if (!range || !found) return;
 	const end = listEnd(found.notes, range);
 	const el = field.closest<HTMLElement>(`.${NOTE_PIECE_CLASS}`);
@@ -88,12 +88,12 @@ function endList(view: PrinceListView, field: HTMLTextAreaElement): void {
 }
 
 // The open lines once the field's last line, an empty item, is taken out; null when that wasn't saved.
-function saveAllButLastLine(view: PrinceListView, field: HTMLTextAreaElement): LineRange | null {
+function saveAllButLastLine(view: PrinceListView, host: NotesHost, field: HTMLTextAreaElement): LineRange | null {
 	const rest = field.value.slice(0, Math.max(field.value.lastIndexOf('\n'), 0));
-	const range = view.editing.notesPieceRange();
+	const range = host.range();
 	if (!range) return null;
 	const isUnsaved = range.start === range.end && rest === '';
-	return isUnsaved || typePiece(view, field, rest) ? view.editing.notesPieceRange() : null;
+	return isUnsaved || typePiece(view, field, rest) ? host.range() : null;
 }
 
 // A new item goes after the last item the field's own item holds; a field in place of a whole piece

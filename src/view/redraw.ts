@@ -3,7 +3,7 @@ import { isListText } from '../obsidian/marker';
 import { hasNoItems } from './add-button';
 import { dismissCard, redrawCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
-import { buildListNote, buildListTitle } from './fields';
+import { buildListNote, buildListTitle, refreshListNote } from './fields';
 import { buildFilterField } from './filter';
 import type { PrinceListView } from './list-view';
 import { OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
@@ -24,7 +24,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	if (isListText(view.text)) {
 		const { lines, model } = view.parse();
 		if (kept && kept === view.listNoteEl) slot = fresh.createDiv();
-		else view.listNoteEl = buildListNote(view, fresh, lines, model);
+		else view.listNoteEl = buildListNote(view, fresh);
 		if (view.filter === null) view.filterEl = null;
 		else if (kept && kept === view.filterEl) slot = fresh.createDiv();
 		else view.filterEl = buildFilterField(view, fresh);
@@ -41,6 +41,8 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		view.endListNote();
 		view.headingField = null;
 		view.listNoteEl = null;
+		if (view.listNoteNotes) view.removeChild(view.listNoteNotes);
+		view.listNoteNotes = null;
 		view.filter = null;
 		view.filterEl = null;
 		view.rowsHeldBack = false;
@@ -51,6 +53,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	listSizerEl.toggleClass('princelists-is-empty', isEmpty);
 	for (const button of [view.newItemButton, view.newItemAction]) button?.toggle(isListText(view.text));
 	if (view.card && kept === view.card.el) refreshCard(view, view.card);
+	if (kept && kept === view.listNoteEl) refreshListNote(view);
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);
 	listScrollEl.scrollTop = scrollTop;
 }
@@ -87,7 +90,7 @@ function placeField(view: PrinceListView, kept: HTMLElement | null): (FieldPlace
 function keptElement(view: PrinceListView, focusing: Element | null): HTMLElement | null {
 	const focused = focusing ?? view.contentEl.doc.activeElement;
 	if (!focused || !view.contentEl.contains(focused)) return null;
-	// A link in the rendered note can hold focus too; only the note's editor keeps it.
+	// A link in the rendered note can hold focus too; only a field in the note keeps it.
 	const note = view.listNote ? view.listNoteEl : null;
 	return [view.listTitleEl, note, view.filterEl, view.card?.el, view.headingField?.el].find((el) => el?.contains(focused)) ?? null;
 }

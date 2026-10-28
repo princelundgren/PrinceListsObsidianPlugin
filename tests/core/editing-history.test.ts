@@ -51,7 +51,7 @@ describe('the undo history', () => {
 		typeEach((v) => state.typeNotesPiece(v), ['n', 'no', 'note']);
 		state.closeNotes();
 		const noted = state.text;
-		state.openListNote();
+		state.openListNote({ start: 3, end: 3 }, false);
 		typeEach((v) => state.typeListNote(v), ['L', 'Li', 'List']);
 		const undo = state.history.undo(state.text);
 		expect(undo?.next).toBe(noted);

@@ -1,9 +1,17 @@
 import { describe, expect, test } from 'vitest';
 import { UnsafeEditError } from '../../src/core/edit-check';
-import { getListNote, listNoteUnclosedBlock, listNoteWouldRestructure, setListNote } from '../../src/core/edit-list-note';
+import {
+	getListNote,
+	listNoteUnclosedBlock,
+	listNoteWithPiece,
+	listNoteWouldRestructure,
+	setListNotePiece,
+	type ListNotePiece,
+} from '../../src/core/edit-list-note';
 import { mapLine } from '../../src/core/guard';
+import type { LineRange } from '../../src/core/follow';
 import { joinLines, splitLines, type Line } from '../../src/core/lines';
-import { isBlank } from '../../src/core/parse';
+import { isBlank, type ListModel } from '../../src/core/parse';
 import {
 	FIXTURES,
 	JOINING_CASES,
@@ -19,6 +27,76 @@ import {
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
 
+// Saves the whole note as one piece, which the rules for the note as a whole are tested through.
+function setWholeNote(lines: readonly Line[], model: ListModel, note: LineRange, markdown: string) {
+	const result = setListNotePiece(lines, model, wholeNote(note), markdown);
+	return { lines: result.lines, note: result.piece.range };
+}
+
+const wholeNote = (range: LineRange): ListNotePiece => ({ range, indent: '', separator: false, blankAfter: false });
+
+function savePiece(text: string, piece: ListNotePiece, typed: string) {
+	const { lines, model } = list(text);
+	const result = setListNotePiece(lines, model, piece, typed);
+	return { text: joinLines(result.lines), piece: result.piece };
+}
+
+describe('setListNotePiece', () => {
+	test('typing into the second piece changes only its lines, byte for byte everywhere else', () => {
+		const before = (second: string) => crlf(`${FRONTMATTER}First para\n\n${second}\n\n- [ ] a\n`);
+		const result = savePiece(before('Second'), wholeNote({ start: 5, end: 6 }), 'Second!\nmore');
+		expect(result.text).toBe(before('Second!\nmore'));
+		expect(result.piece.range).toEqual({ start: 5, end: 7 });
+	});
+
+	test('a new piece at the end gets an empty line before it and a blank line after it, and erasing takes both', () => {
+		const text = `${FRONTMATTER}First\n- [ ] a\n`;
+		const added = savePiece(text, { range: { start: 4, end: 4 }, indent: '', separator: true, blankAfter: false }, 'new');
+		expect(added.text).toBe(`${FRONTMATTER}First\n\nnew\n\n- [ ] a\n`);
+		expect(added.piece).toEqual({ range: { start: 5, end: 6 }, indent: '', separator: true, blankAfter: true });
+		expect(savePiece(added.text, added.piece, '').text).toBe(text);
+	});
+
+	test('a new last piece keeps its blank line after it while it leaves a block open, so closing it leaves one', () => {
+		const text = `${FRONTMATTER}First\n- [ ] a\n`;
+		const added = savePiece(text, { range: { start: 4, end: 4 }, indent: '', separator: true, blankAfter: false }, 'x');
+		const opened = savePiece(added.text, added.piece, '<!-- x');
+		expect(opened.text).toBe(`${FRONTMATTER}First\n\n<!-- x\n\n- [ ] a\n`);
+		expect(savePiece(opened.text, opened.piece, '<!-- x -->').text).toBe(`${FRONTMATTER}First\n\n<!-- x -->\n\n- [ ] a\n`);
+	});
+
+	test('a piece in the middle of the note adds no line after it', () => {
+		const result = savePiece(`${FRONTMATTER}- one\n- two\n\n- [ ] a\n`, wholeNote({ start: 3, end: 4 }), '- one!');
+		expect(result.text).toBe(`${FRONTMATTER}- one!\n- two\n\n- [ ] a\n`);
+	});
+
+	test("a nested item keeps its indent, and the note's checks read it nested", () => {
+		const text = `${FRONTMATTER}- a\n  - b\n\n- [ ] x\n`;
+		const piece: ListNotePiece = { range: { start: 4, end: 5 }, indent: '  ', separator: false, blankAfter: false };
+		const { lines, model } = list(text);
+		expect(listNoteWithPiece(lines, model, piece, '- [ ] y')).toBe('- a\n  - [ ] y');
+		expect(listNoteWouldRestructure(listNoteWithPiece(lines, model, piece, '- [ ] y'))).toBe(false);
+		expect(savePiece(text, piece, '- [ ] y').text).toBe(`${FRONTMATTER}- a\n  - [ ] y\n\n- [ ] x\n`);
+		expect(listNoteWouldRestructure(listNoteWithPiece(lines, model, wholeNote({ start: 3, end: 5 }), '- [ ] y'))).toBe(true);
+	});
+
+	test('a fence opened in one piece saves, and closing it brings back what follows as it was', () => {
+		const text = `${FRONTMATTER}First\n\nSecond\n\n- [ ] a\n`;
+		const { lines, model } = list(text);
+		expect(listNoteUnclosedBlock(listNoteWithPiece(lines, model, wholeNote({ start: 5, end: 6 }), '```'))).toBe(true);
+		const opened = savePiece(text, wholeNote({ start: 5, end: 6 }), '```');
+		expect(list(opened.text).items).toEqual([]);
+		expect(savePiece(opened.text, opened.piece, '```\n```').text).toBe(`${FRONTMATTER}First\n\n\`\`\`\n\`\`\`\n\n- [ ] a\n`);
+	});
+
+	test('refuses a piece whose save would take in the first item', () => {
+		const text = `${FRONTMATTER}First\n\n  - [ ] a\n`;
+		const { lines, model } = list(text);
+		const piece: ListNotePiece = { range: { start: 4, end: 4 }, indent: '', separator: true, blankAfter: false };
+		expect(() => setListNotePiece(lines, model, piece, '- bullet')).toThrow(UnsafeEditError);
+	});
+});
+
 describe('getListNote', () => {
 	test.each([
 		[`${FRONTMATTER}Stuff\n\nMore\n\n- [ ] a\n`, 'Stuff\n\nMore'],
@@ -33,7 +111,7 @@ describe('getListNote', () => {
 	});
 });
 
-describe('setListNote', () => {
+describe('setListNotePiece with the whole note', () => {
 	test.each([
 		[`${FRONTMATTER}Old\n\n- [ ] a\n`, 'New note', `${FRONTMATTER}New note\n\n- [ ] a\n`],
 		[FRONTMATTER, 'Note', `${FRONTMATTER}Note\n`],
@@ -57,7 +135,7 @@ describe('setListNote', () => {
 		[FRONTMATTER, '```js\ncode', `${FRONTMATTER}\`\`\`js\ncode\n`],
 	])('%j with %j', (text, markdown, expected) => {
 		const { lines, model } = list(text);
-		expect(joinLines(setListNote(lines, model, model.listNote, markdown).lines)).toBe(expected);
+		expect(joinLines(setWholeNote(lines, model, model.listNote, markdown).lines)).toBe(expected);
 	});
 	test.each([
 		[`${FRONTMATTER}- [ ] a\n`, '```js\ncode', `${FRONTMATTER}\`\`\`js\ncode\n\n- [ ] a\n`],
@@ -76,7 +154,7 @@ describe('setListNote', () => {
 		[`${FRONTMATTER}- [ ] a\n\n\`\`\`\n[r]: /u\n`, '```js\ncode', `${FRONTMATTER}\`\`\`js\ncode\n\n- [ ] a\n\n\`\`\`\n[r]: /u\n`],
 	])('saves %j with %j, which leaves a block open: what follows stays hidden until it closes', (text, markdown, expected) => {
 		const { lines, model } = list(text);
-		expect(joinLines(setListNote(lines, model, model.listNote, markdown).lines)).toBe(expected);
+		expect(joinLines(setWholeNote(lines, model, model.listNote, markdown).lines)).toBe(expected);
 		expect(listNoteUnclosedBlock(markdown)).toBe(true);
 	});
 	test.each([
@@ -85,7 +163,7 @@ describe('setListNote', () => {
 		[`${FRONTMATTER}\n   - [ ] a\n`, '```\nx\n```\n1. one'],
 	])('refuses %j with %j, which would take in what follows even after an empty line', (text, markdown) => {
 		const { lines, model } = list(text);
-		expect(() => setListNote(lines, model, model.listNote, markdown)).toThrow(UnsafeEditError);
+		expect(() => setWholeNote(lines, model, model.listNote, markdown)).toThrow(UnsafeEditError);
 		expect(joinLines(lines)).toBe(text);
 	});
 	test('refuses a range that is not in the lines, or starts above the content', () => {
@@ -97,18 +175,18 @@ describe('setListNote', () => {
 			{ start: 3, end: 7 },
 			{ start: -1, end: 0 },
 		]) {
-			expect(() => setListNote(lines, model, note, 'x'), JSON.stringify(note)).toThrow(
-				'The list note range is not in these lines; seed it again from the model',
+			expect(() => setWholeNote(lines, model, note, 'x'), JSON.stringify(note)).toThrow(
+				'The list note piece is not in these lines; open it again from the model',
 			);
 		}
 		expect(joinLines(lines)).toBe(text);
-		expect(joinLines(setListNote(lines, model, { start: 6, end: 6 }, '').lines)).toBe(text);
+		expect(joinLines(setWholeNote(lines, model, { start: 6, end: 6 }, '').lines)).toBe(text);
 	});
 	test('writing back what getListNote reads leaves the file byte-identical, but for the blank line', () => {
 		for (const text of [...Object.values(JOINING_CASES), ...FIXTURES.map(readFixture)]) {
 			const { lines, model } = list(text);
 			const { start, end } = model.listNote;
-			const after = joinLines(setListNote(lines, model, model.listNote, getListNote(lines, model)).lines);
+			const after = joinLines(setWholeNote(lines, model, model.listNote, getListNote(lines, model)).lines);
 			// The note is followed directly by an item or a heading, which gets its blank line.
 			const followed = end > start && end < lines.length && !isBlank(lines[end]?.text ?? '');
 			const expected = followed ? joinLines([...lines.slice(0, end), { text: '', eol: '\n' }, ...lines.slice(end)]) : text;
@@ -122,7 +200,7 @@ describe('setListNote', () => {
 			const { start, end } = model.listNote;
 			const oldNote = joinLines(lines.slice(start, end));
 			for (const markdown of [getListNote(lines, model), 'New note', '', '<div>x</div>', 'Text\n---', '- [ ] x', 'a\n\n  b\n']) {
-				const result = setListNote(lines, model, model.listNote, markdown).lines;
+				const result = setWholeNote(lines, model, model.listNote, markdown).lines;
 				expectRestKept(text, joinLines(result), { removed: blocks(oldNote), added: blocks(markdown) });
 				expectLinesBeforeKept(lines, result, start);
 				expectLinesAfterKept(lines, result, end);
@@ -140,7 +218,7 @@ function typeInto(text: string, typed: readonly string[]) {
 	return typed.map((markdown) => {
 		const { lines, model } = list(current);
 		try {
-			const result = setListNote(lines, model, range, markdown);
+			const result = setWholeNote(lines, model, range, markdown);
 			current = joinLines(result.lines);
 			range = result.note;
 			return { markdown, text: current, range, refused: false };
@@ -178,7 +256,7 @@ function expectSessionKeepsRest(text: string, steps: ReturnType<typeof typeInto>
 	}
 }
 
-describe('setListNote across a typing session', () => {
+describe('setListNotePiece with the whole note across a typing session', () => {
 	const shopping = `${FRONTMATTER}Hello\n\n- [ ] milk\n- [ ] eggs\n\n## Kitchen\n- [ ] jars\n`;
 	test.each([
 		[shopping, 'Hello\n```js\nx\n```'],
@@ -223,7 +301,7 @@ describe('setListNote across a typing session', () => {
 		const before = splitLines('- [ ] a\n');
 		const { lines, model } = list('Phone\n\n- [ ] a\n');
 		const start = mapLine(before, lines, list('- [ ] a\n').model.listNote.start) as number;
-		const result = setListNote(lines, model, { start, end: start }, 'M');
+		const result = setWholeNote(lines, model, { start, end: start }, 'M');
 		expect(joinLines(result.lines)).toBe('Phone\n\nM\n\n- [ ] a\n');
 		expect(result.note).toEqual({ start: 2, end: 3 });
 	});

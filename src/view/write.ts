@@ -8,7 +8,7 @@ import type { PrinceListView } from './list-view';
 export const UNSAFE_EDIT_NOTICE = "This list's layout can't take that change. Make it in Markdown instead.";
 export const CHANGED_ELSEWHERE_NOTICE = 'This list changed elsewhere. Try again.';
 export const SAVE_FAILED_NOTICE = "Couldn't save the change to this list.";
-export const LOST_TYPING_NOTICE = 'This list changed elsewhere, and your typing in this item may not be in it.';
+export const LOST_TYPING_NOTICE = 'This list changed elsewhere, and what you typed may not be in it.';
 
 // Obsidian hides a notice on any click, so the whole message copies, not only the button.
 export function showLostTypingNotice(win: Window, typed: string): void {

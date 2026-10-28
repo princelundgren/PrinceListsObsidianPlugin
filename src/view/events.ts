@@ -18,17 +18,7 @@ import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { checklistClick } from './checklist';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import {
-	beginListTitle,
-	closeListNote,
-	commitListTitle,
-	keepOneLine,
-	NOTE_CLASS,
-	NOTE_EDITOR_CLASS,
-	openListNote,
-	TITLE_CLASS,
-	typeListNote,
-} from './fields';
+import { beginListTitle, commitListTitle, keepOneLine, TITLE_CLASS } from './fields';
 import { filterBlur, filterInput, filterKeyDown } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { barActionAt, FORMAT_BAR_CLASS, runBarAction } from './format';
@@ -38,6 +28,7 @@ import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from '
 import { openPieceAt, pieceBlur, pieceInput } from './note-piece-field';
 import { pieceBeforeInput, pieceKeyDown } from './note-piece-keys';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
+import { notesHostOf } from './notes-host';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
 import { queueTick } from './tick';
@@ -86,6 +77,12 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		whenClick(target);
 		return;
 	}
+	const action = barActionAt(target);
+	if (action) {
+		const field = notesHostOf(view, target)?.area.querySelector('textarea');
+		if (field) runBarAction(field, action);
+		return;
+	}
 	if (target.closest(`.${OPEN_AS_MARKDOWN_CLASS}`)) {
 		if (view.file) void openAsMarkdown(view.leaf, view.file);
 		return;
@@ -108,12 +105,6 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (view.card?.el.contains(target)) {
-		const action = barActionAt(target);
-		if (action) {
-			const editor = view.card.el.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
-			if (editor) runBarAction(editor, action);
-			return;
-		}
 		if (target.closest(`.${CARD_STAR_CLASS}`)) {
 			toggleCardStar(view);
 			return;
@@ -123,7 +114,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 			showCardMenu(view, actions);
 			return;
 		}
-		const notes = target.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
+		const notes = notesHostOf(view, target);
 		if (notes) openPieceAt(view, notes, evt);
 		return;
 	}
@@ -139,7 +130,8 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (Platform.isMobile && showHeadingMenu(view, evt, target)) return;
-	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view, evt);
+	const note = notesHostOf(view, target);
+	if (note) openPieceAt(view, note, evt);
 }
 
 // A press anywhere on the format bar, between its buttons too, or on a box in the card's notes would
@@ -167,10 +159,10 @@ function swallowClick(view: PrinceListView, evt: MouseEvent): void {
 	evt.stopPropagation();
 }
 
-// A card field undoes from its own history. Elsewhere the page has one undo history, so Cmd+Z in one
-// field can reach typing in a field without focus, which nothing would save. That undo's beforeinput
-// targets the other field while focus is still in this one (observed in Obsidian 1.14.4 on macOS);
-// focus moves only with its input event.
+// A card field or a list note piece undoes from its own history. Elsewhere the page has one undo
+// history, so Cmd+Z in one field can reach typing in a field without focus, which nothing would save.
+// That undo's beforeinput targets the other field while focus is still in this one (observed in
+// Obsidian 1.14.4 on macOS); focus moves only with its input event.
 function onBeforeInput(view: PrinceListView, evt: InputEvent): void {
 	const focused = view.contentEl.doc.activeElement;
 	const field = focused?.instanceOf(HTMLTextAreaElement) ? focused : null;
@@ -199,7 +191,6 @@ function onInput(view: PrinceListView, evt: Event): void {
 	if (!target) return;
 	if (target.hasClass(CARD_TITLE_CLASS)) cardTitleInput(view, target);
 	else if (target.hasClass(NOTES_EDITOR_CLASS)) pieceInput(view, target);
-	else if (target.hasClass(NOTE_EDITOR_CLASS)) typeListNote(view);
 	else if (target.hasClass(TITLE_CLASS) || target.hasClass(HEADING_FIELD_CLASS)) keepOneLine(target);
 	afterFieldInput(target);
 }
@@ -248,13 +239,13 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 }
 
 function isPieceField(view: PrinceListView, field: HTMLTextAreaElement): boolean {
-	return field.hasClass(NOTES_EDITOR_CLASS) && !!view.card?.el.contains(field);
+	return field.hasClass(NOTES_EDITOR_CLASS) && notesHostOf(view, field) !== null;
 }
 
 function onFocusIn(view: PrinceListView, evt: FocusEvent): void {
 	const target = evt.targetNode;
 	if (!target?.instanceOf(HTMLTextAreaElement)) return;
-	if (view.card?.el.contains(target)) startFieldHistory(target);
+	if (view.card?.el.contains(target) || isPieceField(view, target)) startFieldHistory(target);
 	if (target.hasClass(CARD_TITLE_CLASS) && view.card?.el.contains(target)) view.editing.focusTitle();
 	else if (target.hasClass(TITLE_CLASS)) beginListTitle(view, target);
 }
@@ -279,8 +270,7 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 		// focus, which comes back to them on return, and commit when they lose it in the window.
 		const inWindow = target.doc.hasFocus();
 		if (inCard && target.hasClass(CARD_TITLE_CLASS)) cardTitleBlur(view, target);
-		else if (inCard && target.hasClass(NOTES_EDITOR_CLASS)) pieceBlur(view, target);
-		else if (target.hasClass(NOTE_EDITOR_CLASS)) closeListNote(view, focusing);
+		else if (target.hasClass(NOTES_EDITOR_CLASS)) pieceBlur(view, target, focusing);
 		else if (target.hasClass(TITLE_CLASS) && inWindow) commitListTitle(view, target);
 		else if (target.hasClass(HEADING_FIELD_CLASS) && inWindow) headingFieldBlur(view, target);
 	}
