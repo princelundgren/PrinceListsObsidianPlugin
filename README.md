@@ -47,7 +47,7 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 - **Right-click menus:** an item and a heading have their own, and on desktop the list's background
   has New item, New heading, Edit in Markdown, Show archived and Open schedule.
 - **A list inside another note:** a `princelists` code block naming a list shows its items, to tick
-  and edit there.
+  and edit there. Renaming the list doesn't change the name in the block, so type the new one in.
 
   ````markdown
   ```princelists

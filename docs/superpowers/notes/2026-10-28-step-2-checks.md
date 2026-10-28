@@ -1,7 +1,7 @@
 # Step two checks
 
 Plan step two, Task 16, Steps 1 and 2. Every check that was run passed, apart from design risk 3,
-which found what the design expected might happen and goes to the owner.
+which found what the design expected might happen. The owner accepted it.
 
 - **How they ran:** a scripted suite, run in a test vault through Obsidian's CLI (`obsidian eval`)
   on macOS and through the web view's DevTools protocol on an Android emulator. It drives the
@@ -72,9 +72,9 @@ which found what the design expected might happen and goes to the owner.
   view doesn't undo a block's edit. Items drag within and between sections with their notes,
   headings don't drag, and a hold opens no menu on mobile. A tick and a drag leave the note's
   source unchanged, and so do a click and typing with real input on both (risk 4).
-- **Risk 3, found:** renaming a list doesn't update the `[[link]]` inside a `princelists` block.
-  The block then shows that `[[old name]]` doesn't lead to a note. This goes to the owner, as the
-  design says.
+- **Risk 3, found and accepted:** renaming a list doesn't update the `[[link]]` inside a `princelists` block.
+  The block then shows that `[[old name]]` doesn't lead to a note. The owner accepted this, and
+  the design records why.
 - **Row dragging on a host (Task 14):** an item drags with its notes, within and between
   sections, and Cmd+Z puts it back. A drop in place writes nothing and leaves no drop line or card.
   On Android a held row near the bottom edge scrolls the list, and a tap after a drag opens the
