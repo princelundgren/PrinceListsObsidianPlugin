@@ -4,12 +4,14 @@ import { followLine, type OwnEdit } from '../../src/core/follow';
 import { headingText } from '../../src/core/display';
 import { EditHistory } from '../../src/core/history';
 import {
+	endOfSection,
 	planHeadingDelete,
 	planHeadingInsert,
 	planItemDelete,
 	planItemInsert,
 	planItemLineEdit,
 	planItemMove,
+	sectionLastLine,
 	type ItemPlace,
 	type PlannedDelete,
 } from '../../src/core/list-actions';
@@ -127,6 +129,10 @@ describe('planHeadingInsert', () => {
 		const text = '## G\n- [ ] a\n- [x] b ✔ 2026-01-01 10:00\n\nText\n\n## K\n';
 		expect(planHeadingInsert(text, 0, { afterSection: 0 })?.next).toBe('## G\n- [ ] a\n- [x] b ✔ 2026-01-01 10:00\n\nText\n##\n\n## K\n');
 	});
+	test("at 'top', it goes after the part before the first heading, or at the end of a list without one", () => {
+		expect(planHeadingInsert('- [ ] a\n## H\n- [ ] b\n', 0, 'top')?.next).toBe('- [ ] a\n##\n## H\n- [ ] b\n');
+		expect(planHeadingInsert('- [ ] a\n- [ ] b\n', 0, 'top')?.next).toBe('- [ ] a\n- [ ] b\n##\n');
+	});
 	test('null when no item or heading is on the line any more', () => {
 		expect(planHeadingInsert('Note\n\n- [ ] a\n', 0, { afterItem: 0 })).toBeNull();
 		expect(planHeadingInsert('- [ ] a\n', 0, { afterSection: 0 })).toBeNull();
@@ -151,6 +157,30 @@ describe('planHeadingInsert', () => {
 				expectFollowed(text, planned.next, planned.edit);
 			}
 		}
+	});
+});
+
+describe('endOfSection', () => {
+	test('after the last item, first under a heading with none, or first in a top part with none', () => {
+		const { section } = list('- [ ] a\n- [ ] b\n## H\n## K\n- [ ] c\n');
+		expect(endOfSection(section(0))).toEqual({ after: 1 });
+		expect(endOfSection(section(1))).toEqual({ firstUnder: 2 });
+		expect(endOfSection(list('Note\n## H\n').section(0))).toBe('first');
+	});
+	test("with text after the section's last item, a new item goes after that item, before the text", () => {
+		const text = '## H\n- [ ] a\n\nText\n';
+		const place = endOfSection(list(text).section(1));
+		expect(planItemInsert(text, 0, place)?.next).toBe('## H\n- [ ] a\n- [ ] \n\nText\n');
+	});
+});
+
+describe('sectionLastLine', () => {
+	test("is the section's last line that isn't empty, else its heading's line, else where the content starts", () => {
+		const { lines, section } = list(`${FRONTMATTER}- [ ] a\n\n\n## H\n\n## K\n- [ ] b\n\tnotes\n\n`);
+		expect(sectionLastLine(lines, section(0), 3)).toBe(3);
+		expect(sectionLastLine(lines, section(1), 3)).toBe(6);
+		expect(sectionLastLine(lines, section(2), 3)).toBe(10);
+		expect(sectionLastLine(splitLines(FRONTMATTER), list(FRONTMATTER).section(0), 3)).toBe(3);
 	});
 });
 

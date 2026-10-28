@@ -1,8 +1,12 @@
 import { Menu, Notice } from 'obsidian';
+import { SCHEDULE_ICON } from '../constants';
 import type { TrackedLine } from '../core/editing';
+import { endOfSection, sectionLastLine } from '../core/list-actions';
 import { itemAt, type ItemBlock, type Section } from '../core/parse';
+import { contentStartLine, isListText } from '../obsidian/marker';
+import { openSchedule } from '../obsidian/open-schedule';
 import { editInMarkdown } from '../obsidian/switch';
-import { addItem } from './add-button';
+import { addItem, followPlace } from './add-button';
 import { focusCardTitle, isNewEmptyItem } from './card';
 import { deleteHeadingAt, deleteItemAt } from './delete';
 import { addHeading, openHeadingField } from './heading-field';
@@ -64,6 +68,12 @@ export function headingMenu(view: PrinceListView, section: Section, menu: Menu):
 	);
 	menu.addItem((entry) =>
 		entry
+			.setTitle('Edit in Markdown')
+			.setIcon('file-text')
+			.onClick(atLine(anchor, (line) => editItemInMarkdown(view, line))),
+	);
+	menu.addItem((entry) =>
+		entry
 			.setTitle('Delete heading')
 			.setIcon('trash-2')
 			.setWarning(true)
@@ -71,10 +81,54 @@ export function headingMenu(view: PrinceListView, section: Section, menu: Menu):
 	);
 }
 
-// A right-click on a row or a heading, on desktop. A field keeps the menu it has of its own.
+// The list's own actions, from a right-click on its background on desktop. New item and New heading
+// go at the end of the section clicked in (spec, "Right-click menus").
+export function listMenu(view: PrinceListView, section: Section, menu: Menu): void {
+	const itemPlace = endOfSection(section);
+	const itemAnchor = itemPlace === 'first' ? null : trackWhileShown(view, 'after' in itemPlace ? itemPlace.after : itemPlace.firstUnder, menu);
+	const headingAnchor = section.headingLine === null ? null : trackWhileShown(view, section.headingLine, menu);
+	const lastLine = trackWhileShown(view, sectionLastLine(view.lines(), section, contentStartLine(view.text)), menu);
+	menu.addItem((entry) =>
+		entry
+			.setTitle('New item')
+			.setIcon('list-plus')
+			.onClick(atAnchor(itemAnchor, (line) => {
+				const place = followPlace(itemPlace, line);
+				if (place) addItem(view, place);
+			})),
+	);
+	menu.addItem((entry) =>
+		entry
+			.setTitle('New heading')
+			.setIcon('heading')
+			.onClick(atAnchor(headingAnchor, (line) => addHeading(view, line === null ? 'top' : { afterSection: line }))),
+	);
+	menu.addItem((entry) =>
+		entry
+			.setTitle('Edit in Markdown')
+			.setIcon('file-text')
+			.onClick(atLine(lastLine, (line) => editItemInMarkdown(view, line))),
+	);
+	menu.addItem((entry) =>
+		entry
+			.setTitle('Show archived')
+			.setIcon('archive')
+			.setChecked(view.showArchived)
+			.onClick(() => view.toggleArchived()),
+	);
+	menu.addItem((entry) =>
+		entry
+			.setTitle('Open schedule')
+			.setIcon(SCHEDULE_ICON)
+			.onClick(() => void openSchedule(view.app.workspace)),
+	);
+}
+
+// A right-click on desktop: a row's or a heading's menu, else the list's. A field keeps the menu it
+// has of its own.
 export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
-	if (target.closest('textarea')) return;
-	const menu = menuAt(view, target);
+	if (target.closest('textarea, input:not([type="checkbox"])')) return;
+	const menu = menuAt(view, target) ?? backgroundMenu(view, evt);
 	if (!menu) return;
 	evt.preventDefault();
 	menu.showAtMouseEvent(evt);
@@ -124,6 +178,20 @@ function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
 	return menu;
 }
 
+function backgroundMenu(view: PrinceListView, evt: MouseEvent): Menu | null {
+	if (!isListText(view.text)) return null;
+	const { model } = view.parse();
+	let section = model.sections[0] as Section;
+	for (const heading of view.contentEl.querySelectorAll<HTMLElement>(`.${HEADING_CLASS}`)) {
+		if (heading.getBoundingClientRect().top > evt.clientY) break;
+		const line = lineOf(heading);
+		if (line !== null) section = model.sections.find((s) => s.headingLine === line) ?? section;
+	}
+	const menu = new Menu();
+	listMenu(view, section, menu);
+	return menu;
+}
+
 // New item below. On an empty item the open card added, that item is the new one: closing the card
 // would remove it, only for the new item to take its place.
 function newItemBelow(view: PrinceListView, line: number): void {
@@ -153,6 +221,11 @@ function trackWhileShown(view: PrinceListView, line: number, menu: Menu): Tracke
 	const anchor = view.editing.track(line);
 	menu.onHide(() => view.editing.untrack(anchor));
 	return anchor;
+}
+
+// A place with no line to track, the part before the first heading, acts with null.
+function atAnchor(anchor: TrackedLine | null, action: (line: number | null) => void): () => void {
+	return anchor ? atLine(anchor, action) : () => action(null);
 }
 
 function atLine(anchor: TrackedLine, action: (line: number) => void): () => void {
