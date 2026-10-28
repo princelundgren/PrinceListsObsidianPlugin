@@ -107,6 +107,27 @@ describe('a piece of the notes across a typing session', () => {
 		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n\tpara\n\n\t- x\n\t  - y!\n\t  - z\n- [ ] b\n`);
 	});
 
+	test('opens a new item one level out, after the parent marker the open piece gives', () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n\n\t- x\n\t  - y\n- [ ] b\n`);
+		state.open(3);
+		state.openNotesPiece({ start: 6, end: 7 }, false);
+		state.openNotesPiece({ start: 7, end: 7 }, false);
+		const marker = state.notesPieceOutdent('- ');
+		expect(marker).toBe('\t- ');
+		state.openNotesPiece({ start: 7, end: 7 }, false, '\t');
+		state.typeNotesPiece('- z');
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n\t- x\n\t  - y\n\t- z\n- [ ] b\n`);
+	});
+
+	test('gives no outdent marker for a top-level item of its list', () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n\n\t- x\n\n\tpara\n\n\t  - y\n- [ ] b\n`);
+		state.open(3);
+		state.openNotesPiece({ start: 5, end: 6 }, false);
+		expect(state.notesPieceOutdent('- x')).toBeNull();
+		state.openNotesPiece({ start: 9, end: 10 }, false);
+		expect(state.notesPieceOutdent('- y')).toBeNull();
+	});
+
 	test('follows a tick and a new item above it, and a line added above it from outside', () => {
 		const state = editing(text);
 		state.open(3);

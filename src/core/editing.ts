@@ -1,13 +1,14 @@
 import { UnsafeEditError } from './edit-check';
 import { isBlankAt } from './edit-lines';
 import { mapPieceRange, setNotesPiece, type PieceSession } from './edit-piece';
+import { getItemNotes, notesStartLine } from './edit-items';
 import { getListNote, setListNote } from './edit-list-note';
 import { followLine, followRange, mapRange, ownEdit, type LineRange, type OwnEdit, type RunEdit } from './follow';
 import { mapLine } from './guard';
 import { EditHistory } from './history';
 import { parseItemLine } from './item-line';
 import { joinLines, splitLines, type Line } from './lines';
-import { pieceText } from './note-pieces';
+import { outdentMarker, pieceText } from './note-pieces';
 import { itemAt, parseList, type ItemBlock, type ListModel } from './parse';
 import { startTitleField, syncTitleField, typeTitle, type TitleField } from './title-field';
 import { splitStar } from './star';
@@ -103,9 +104,9 @@ export class ListEditing {
 		return this.notesPiece?.piece.range ?? null;
 	}
 
-	// An empty range is a new piece, at the notes' indent, or a new item from Enter, at the indent of
-	// the piece still open, which it follows.
-	openNotesPiece(range: LineRange, isNew: boolean): string | null {
+	// An empty range is a new piece, at the notes' indent, or a new item from Enter, at `indent` or
+	// the indent of the piece still open, which it follows.
+	openNotesPiece(range: LineRange, isNew: boolean, indent?: string): string | null {
 		const found = this.selectedItem();
 		if (!found) {
 			this.notesPiece = null;
@@ -115,9 +116,20 @@ export class ListEditing {
 		const opened =
 			range.start < range.end
 				? pieceText(this.text, range)
-				: { text: '', indent: isNew ? notesIndent : (this.notesPiece?.piece.indent ?? notesIndent) };
+				: { text: '', indent: indent ?? (isNew ? notesIndent : (this.notesPiece?.piece.indent ?? notesIndent)) };
 		this.notesPiece = { piece: { range, indent: opened.indent, separator: isNew }, refused: false };
 		return opened.text;
+	}
+
+	/** The marker that moves the open piece, an item whose field holds `text`, one level out. */
+	notesPieceOutdent(text: string): string | null {
+		const found = this.selectedItem();
+		const piece = this.notesPiece?.piece;
+		if (!found || !piece) return null;
+		const { lines, item } = found;
+		const start = notesStartLine(lines, item);
+		const fileLines = lines.slice(start, item.endLine).map((line) => line.text);
+		return outdentMarker(getItemNotes(lines, item), fileLines, { start: piece.range.start - start, end: piece.range.end - start }, piece.indent + text);
 	}
 
 	typeNotesPiece(markdown: string): Typed {

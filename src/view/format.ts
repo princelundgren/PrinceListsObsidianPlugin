@@ -1,5 +1,5 @@
 import { setIcon } from 'obsidian';
-import { formatSelection, type Format } from '../core/format';
+import { formatSelection, type Format, type FormatEdit } from '../core/format';
 import { changeField, stepField } from './field-undo';
 
 export const FORMAT_BAR_CLASS = 'princelists-format-bar';
@@ -60,7 +60,11 @@ export function runBarAction(field: HTMLTextAreaElement, action: BarAction): voi
 
 export function applyFormat(field: HTMLTextAreaElement, format: Format): void {
 	if (field.readOnly) return;
-	const edit = formatSelection(field.value, field.selectionStart, field.selectionEnd, format);
+	applyEdit(field, formatSelection(field.value, field.selectionStart, field.selectionEnd, format));
+}
+
+/** Makes `edit` in the field as one undo step, and saves it as typing would. */
+export function applyEdit(field: HTMLTextAreaElement, edit: FormatEdit): void {
 	changeField(field, () => {
 		field.setRangeText(edit.insert, edit.from, edit.to);
 		field.setSelectionRange(edit.selectionStart, edit.selectionEnd);
