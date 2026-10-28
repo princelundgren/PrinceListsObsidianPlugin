@@ -22,15 +22,20 @@ export interface HeadingField extends HeadingFieldStart {
 
 // New heading below: an empty heading, then the field on it (spec, "Item actions").
 export function addHeading(view: PrinceListView, place: HeadingPlace): void {
-	const anchor = 'afterItem' in place ? place.afterItem : place.afterSection;
+	const anchor = place === 'top' ? null : 'afterItem' in place ? place.afterItem : place.afterSection;
 	enqueueAt(view, anchor, async (pending) => {
 		const added = await writePlanned(view, (text) => {
-			const line = pending?.line ?? null;
-			if (line === null) return null;
-			return planHeadingInsert(text, contentStartLine(text), 'afterItem' in place ? { afterItem: line } : { afterSection: line });
+			const followed = followHeadingPlace(place, pending?.line ?? null);
+			return followed ? planHeadingInsert(text, contentStartLine(text), followed) : null;
 		});
 		if (added) openHeadingField(view, added.line, true);
 	});
+}
+
+function followHeadingPlace(place: HeadingPlace, line: number | null): HeadingPlace | null {
+	if (place === 'top') return place;
+	if (line === null) return null;
+	return 'afterItem' in place ? { afterItem: line } : { afterSection: line };
 }
 
 // Rename heading, and New heading below once its heading is written: a field in place of the heading

@@ -253,7 +253,7 @@ export class PrinceListView extends TextFileView {
 		this.syncArchivedButton();
 	}
 
-	private toggleArchived(): void {
+	toggleArchived(): void {
 		this.showArchived = !this.showArchived;
 		this.render();
 	}
