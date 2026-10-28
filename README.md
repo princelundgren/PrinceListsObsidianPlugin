@@ -60,10 +60,10 @@ doesn't change the name in the block, so type the new one in.
 
 ## Installing
 
-**Once PrinceLists is in Obsidian's community plugins:** open Settings → Community plugins, select
-Browse, search for PrinceLists, then install and enable it.
+In Obsidian, open Settings → Community plugins, select Browse, search for PrinceLists, then install
+and enable it.
 
-**Until then, by hand:**
+**By hand:**
 
 1. Download `main.js`, `manifest.json` and `styles.css` from the
    [latest release](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases/latest).
