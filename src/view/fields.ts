@@ -81,9 +81,10 @@ async function renameList(view: PrinceListView, file: TFile, field: HTMLTextArea
 	if (name === '') return keepName();
 	// A separator would move the list into another folder rather than rename it.
 	if (/[\\/]/.test(name)) return keepName("A list name can't contain / or \\.");
-	// Only the name is normalized: an outside note's path isn't a vault path.
+	// Only the name is normalized: an outside note's path isn't a vault path. The current name is too,
+	// so retyping it doesn't rename a file whose name is in another Unicode form.
 	const fileName = normalizePath(`${name}.${file.extension}`);
-	if (fileName === file.name) return keepName();
+	if (fileName === normalizePath(file.name)) return keepName();
 	// In the list's own folder, which keeps a note from outside the vault where it is (spec, "Notes
 	// outside the vault").
 	const path = `${file.path.slice(0, file.path.length - file.name.length)}${fileName}`;
