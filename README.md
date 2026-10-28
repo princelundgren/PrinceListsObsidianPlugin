@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> ·
+  <a href="#full-feature-list">Full feature list</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#how-a-list-is-stored">How a list is stored</a> ·
   <a href="https://github.com/princelundgren/PrinceListsObsidianPlugin/issues">Report a bug</a>
@@ -19,33 +19,21 @@
 PrinceLists turns a note into a todo list you can tick, drag and plan, on desktop and on your
 phone. Underneath, it stays plain Markdown that any editor can read.
 
-## Features
-
-- **Sections** group your items, and fold away with the arrow beside them.
-- **Notes on any item:** links, checklists and tables, edited a block at a time with a format bar.
-  Paste or drop pictures straight in.
-- **Drag to reorder** an item, or a whole section by its heading.
-- **Tick and forget.** Ticked items gray out, then hide after 24 hours. **Show archived** brings
-  them back.
-- **Stars and dates,** set in an item's open card and shown on its row.
-- **Find and undo:** Cmd+F filters the list and Cmd+Z undoes (Ctrl on Windows and Linux).
-- **Menus** on a right-click of an item, a heading or the list.
-
-### Schedule
+## Schedule
 
 **Open schedule**, from the ribbon or a list's ⋯ menu, gathers the dated items of every list under
 Today, Tomorrow, Next 7 days and Later. Tick them there, or open one in its list.
 
 ![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
-### Made for mobile
+## Made for mobile
 
 Add items with the floating **+**, hold an item for half a second to drag it, and tap a heading or
 an open item's ⋯ for its menu.
 
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, stars and a floating add button, an item is ticked, then another is held and dragged into a different section" width="300">
 
-### A list inside another note
+## A list inside another note
 
 Name a list in a `princelists` code block to show its items in any note, where you can tick and
 edit them. If you rename the list, update the name in the block.
@@ -55,6 +43,21 @@ edit them. If you rename the list, update the name in the block.
 [[Groceries]]
 ```
 ````
+
+## Full feature list
+
+- **Sections** group your items, and fold away with the arrow beside them.
+- **Notes on any item:** links, checklists and tables, edited a block at a time with a format bar.
+  Paste or drop pictures straight in.
+- **Drag to reorder** an item, or a whole section by its heading.
+- **Tick and forget.** Ticked items gray out, then hide after 24 hours. **Show archived** brings
+  them back.
+- **Stars and dates,** set in an item's open card and shown on its row.
+- **The Schedule** gathers every list's dated items under Today, Tomorrow, Next 7 days and Later.
+- **A list inside another note,** to tick and edit there.
+- **Mobile:** a floating **+**, and hold an item to drag it.
+- **Find and undo:** Cmd+F filters the list and Cmd+Z undoes (Ctrl on Windows and Linux).
+- **Menus** on a right-click of an item, a heading or the list.
 
 ## Quick start
 
