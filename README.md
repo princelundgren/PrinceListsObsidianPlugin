@@ -23,8 +23,7 @@ Today, Tomorrow, Next 7 days and Later. Tick them there, or open one in its list
 
 ![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
-On your phone, add items with the floating **+**, hold an item for half a second to drag it, and
-tap a heading or an open item's ⋯ for its menu.
+It works great on your phone too.
 
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, stars and a floating add button, an item is ticked, then another is held and dragged into a different section" width="300">
 
