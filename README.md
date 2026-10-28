@@ -59,7 +59,8 @@ edit them. If you rename the list, update the name in the block.
 ## Quick start
 
 1. **Install** PrinceLists from Settings → Community plugins → Browse, and enable it.
-2. **Make a list** with the list icon in the ribbon, or right-click a folder and choose **New list**.
+2. **Make a list** with the list icon in the ribbon, or right-click a folder and choose
+   **New list**.
 3. **Add items** with the **+** in the pane's header. Click an item to write notes, star it or give
    it a date.
 
