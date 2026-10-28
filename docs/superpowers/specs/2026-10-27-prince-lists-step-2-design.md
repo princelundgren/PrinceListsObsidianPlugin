@@ -312,7 +312,8 @@ current todo app. Step one's own "Done when" doesn't change.
   while collapsed. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
   on mobile.
 - **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. Mobile
-  has no hover, so there it always shows. It shows no tooltip: its accessible name is
+  has no hover, so there it always shows, as on a desktop system's touchscreen without a mouse. It
+  shows no tooltip: its accessible name is
   "Collapse section", with `aria-expanded` saying whether the section is open **(call)**.
 - **Collapsed, the section's rows hide;** the heading stays. The items before the first heading
   have no heading, so they can't collapse. The open card's item still shows in a collapsed
