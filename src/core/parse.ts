@@ -40,6 +40,7 @@ export interface ListModel {
 
 // CommonMark's fence lines. A backtick fence's info string can't hold a backtick.
 const COLUMN_ZERO_FENCE = /^(?:`{3,}(?!.*`)|~{3,})/;
+const INDENTED_FENCE = /^ {1,3}(?:`{3,}(?!.*`)|~{3,})/;
 const CLOSING_FENCE = /^ {0,3}(`{3,}|~{3,})[ \t]*$/;
 const LEADING_FENCE_RUN = /^[ \t]*(`+|~+)/;
 const OBSIDIAN_DELIMITERS = ['%%', '$$'];
@@ -129,10 +130,25 @@ export function parseList(lines: readonly Line[], contentStart: number): ListMod
 // Obsidian's %% comments and $$ math aren't CommonMark, so a checkbox line inside one would parse as
 // an item. Each region that opens at column 0 becomes a fenced code block in the copy that is parsed.
 // Column 0 keeps it top-level: an item's notes are indented, and a fence is never a lazy line. Fences
-// and HTML blocks, whose content isn't masked, are tracked at column 0 only for the same reason: an
-// indented one may sit in notes, and then the end of the item closes it.
+// and HTML blocks, whose content isn't masked, are tracked at column 0 for the same reason: an
+// indented one may sit in notes, and then the end of the item closes it. A top-level fence indented
+// 1 to 3 spaces is tracked too, once commonmark finds it in a masked copy.
 function maskLines(lines: readonly Line[], contentStart: number): Line[] {
-	const masked = lines.slice(contentStart);
+	const content = lines.slice(contentStart);
+	let trackedFenceStarts = new Set<number>();
+	let masked = maskRegions(content, trackedFenceStarts);
+	// Masking runs top-down, and only the lines above a fence decide whether it's top-level, so each pass
+	// gets right at least the first fence the last one got wrong, and this ends.
+	for (;;) {
+		const found = indentedFenceStarts(content, masked);
+		if (found.size === trackedFenceStarts.size && [...found].every((n) => trackedFenceStarts.has(n))) return masked;
+		trackedFenceStarts = found;
+		masked = maskRegions(content, trackedFenceStarts);
+	}
+}
+
+function maskRegions(content: readonly Line[], trackedFenceStarts: ReadonlySet<number>): Line[] {
+	const masked = content.slice();
 	let closesOpenBlock: ((text: string) => boolean) | null = null;
 	for (let i = 0; i < masked.length; i++) {
 		const { text } = masked[i] as Line;
@@ -140,7 +156,7 @@ function maskLines(lines: readonly Line[], contentStart: number): Line[] {
 			if (closesOpenBlock(text)) closesOpenBlock = null;
 			continue;
 		}
-		const fence = COLUMN_ZERO_FENCE.exec(text)?.[0];
+		const fence = COLUMN_ZERO_FENCE.exec(text)?.[0] ?? (trackedFenceStarts.has(i) ? fenceRun(text) : undefined);
 		if (fence) {
 			closesOpenBlock = (line) => closesFence(fence, line);
 			continue;
@@ -165,6 +181,19 @@ function maskLines(lines: readonly Line[], contentStart: number): Line[] {
 		i = close;
 	}
 	return masked;
+}
+
+// The lines that open a top-level fence indented 1 to 3 spaces in `masked`. Only a parse tells one from
+// a fence in an item's notes, so it runs only when `content` has such a fence and a %% or $$ line.
+function indentedFenceStarts(content: readonly Line[], masked: readonly Line[]): Set<number> {
+	const starts = new Set<number>();
+	const startsWithDelimiter = (text: string) => OBSIDIAN_DELIMITERS.some((d) => text.startsWith(d));
+	if (!content.some((l) => INDENTED_FENCE.test(l.text)) || !content.some((l) => startsWithDelimiter(l.text))) return starts;
+	for (const node of childrenOf(new Parser().parse(joinLines(masked)))) {
+		const start = node.sourcepos[0][0] - 1;
+		if (node.type === 'code_block' && node.info !== null && INDENTED_FENCE.test((masked[start] as Line).text)) starts.add(start);
+	}
+	return starts;
 }
 
 // Only the last top-level block can run to the end of the file. It never closed when its last line
