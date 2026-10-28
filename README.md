@@ -7,13 +7,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/princelundgren/PrinceListsObsidianPlugin" alt="MIT license"></a>
 </p>
 
-<p align="center">
-  <a href="#full-feature-list">Full feature list</a> ·
-  <a href="#quick-start">Quick start</a> ·
-  <a href="#how-a-list-is-stored">How a list is stored</a> ·
-  <a href="https://github.com/princelundgren/PrinceListsObsidianPlugin/issues">Report a bug</a>
-</p>
-
 ![In a todo list in Obsidian, a new item gets a title, notes with a link and a pasted picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
 PrinceLists turns a note into a todo list you can tick, drag and plan, on desktop and on your
