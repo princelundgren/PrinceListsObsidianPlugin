@@ -621,13 +621,19 @@ stays, and the blank line stays with it.
   - **Refused formats (call):** only the formats Obsidian shows are added: avif, bmp, gif, jpeg,
     jpg, png, svg and webp. Others, such as HEIC, would be linked but not shown, so a notice says
     they weren't added.
+  - **Pictures show at once (owner, 2026-10-28):** the links go in a block of their own, which is
+    drawn straight away, and typing moves to a new empty block below it. A link left in the open
+    field would show as Markdown until the field closed.
   - **Where the links go (call):** when the field a picture was pasted or dropped in is still open
-    once the last picture is saved, the links go in at its cursor as it is then, so typing meanwhile
-    isn't replaced, inside the line when the cursor is mid-line. Otherwise, as for a picture dropped
-    on the drawn notes, they go in a new piece at the end (step two's design, "Editing notes a
-    block at a time"). They save as typing does.
+    once the last picture is saved, their block goes after the open block, or after its whole list
+    when the open block is one of its items, so the list stays whole. It also goes after any block
+    that follows with no empty line between, such as a paragraph right under a heading, so it never
+    runs into the next block. When that field is an empty new block, their block takes its place.
+    Otherwise, as for a picture dropped on the drawn notes, they go in a new block at the end (step
+    two's design, "Editing notes a block at a time"). They save as typing does, and Cmd+Z once the
+    field is left takes them out.
   - **A card that closed or lost its item first (call):** nothing is inserted, and a notice gives
-    the saved path.
+    the saved path. So does a paste the notes couldn't take.
   - **A picture dragged from inside Obsidian (call)** isn't added: dropping a rendered picture back
     on the card would save a second copy.
   - **A list outside the vault takes no pictures (owner, 2026-10-27):** a paste or drop saves
@@ -889,7 +895,7 @@ needs no code.
     it.
   - In a card's title and notes, Cmd+Z and Cmd+Shift+Z step through that field's own history, not
     the list's **(owner, 2026-10-27)**. The browser drops a field's undo once a script changes its
-    text, as a pasted picture's link does, so the field keeps its own while it has focus: a run of
+    text, as a format bar button does, so the field keeps its own while it has focus: a run of
     typing in one place is one step, and each change the plugin makes is another. Once the field has
     nothing left to undo, Cmd+Z does nothing. Leaving the field, or the window, closes it and ends
     its history; Cmd+Z after that steps through the list's history, as before.

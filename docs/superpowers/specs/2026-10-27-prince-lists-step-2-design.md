@@ -430,7 +430,10 @@ renderer, and only the part you click becomes a plain-text field.
   item went.
 - **Leaving the field draws that block again,** and the rest stays as it was unless the notes
   changed elsewhere meanwhile; clicking another block moves the field there. The format bar,
-  Cmd+B, Cmd+I and Cmd+K, a pasted picture and the field's own Undo all act on the open block. A picture dropped on drawn notes goes in a new block at the end **(call)**.
+  Cmd+B, Cmd+I and Cmd+K and the field's own Undo act on the open block. A picture pasted or
+  dropped in the field goes in a block of its own, shown at once, with typing moved below
+  **(owner, 2026-10-28)**; one dropped on drawn notes goes in a new block at the end **(call)**.
+  Step one's design, "Where the links go", says where each goes.
 - **The list note works the same (owner, 2026-10-28),** format bar and keys included **(call)**,
   with its own rules kept: what would turn it into a heading or an item warns before it saves,
   checked on the whole note as it would be saved, and it takes no pictures.

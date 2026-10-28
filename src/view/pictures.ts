@@ -2,9 +2,8 @@ import { Notice } from 'obsidian';
 import { pictureName } from '../core/picture';
 import { CARD_NOTES_CLASS, NOTES_EDITOR_CLASS, type Card } from './card';
 import { targetOf } from './dom';
-import { changeField } from './field-undo';
 import type { PrinceListView } from './list-view';
-import { openNewPiece, pieceInput } from './note-piece-field';
+import { addBlockBelow, openNewPiece } from './note-piece-field';
 import { cardNotesHost } from './notes-host';
 
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";
@@ -73,8 +72,8 @@ function mayHoldPicture(evt: DragEvent): boolean {
 	return items.some((item) => item.kind === 'file' && item.type.startsWith('image/'));
 }
 
-// `into`, the open piece's field a picture was pasted or dropped in, takes it at its caret, while it is
-// still open. Otherwise it goes in a new piece at the end.
+// The pictures go in a block of their own (addBlockBelow) from `into`, the open piece's field they were
+// pasted or dropped in, while it is still open. Otherwise they go in a new piece at the end.
 async function addPictures(
 	view: PrinceListView,
 	card: Card,
@@ -115,22 +114,16 @@ async function addPictures(
 		new Notice(`The card closed before the picture was added. It's saved as ${paths.join(', ')}.`);
 		return;
 	}
-	insertLinks(view, card, links.join('\n'), into);
+	if (!insertLinks(view, card, links.join('\n'), into)) new Notice(`Couldn't add the picture to the notes. It's saved as ${paths.join(', ')}.`);
 }
 
-function insertLinks(view: PrinceListView, card: Card, text: string, into: HTMLTextAreaElement | null): void {
+// False when no field took the links.
+function insertLinks(view: PrinceListView, card: Card, text: string, into: HTMLTextAreaElement | null): boolean {
 	const area = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (!area) return;
-	if (into?.isConnected && !into.readOnly) {
-		const end = into.selectionEnd;
-		changeField(into, () => into.setRangeText(text, end, end, 'end'));
-		pieceInput(view, into);
-		return;
-	}
+	if (!area) return false;
+	if (into?.isConnected && !into.readOnly) return addBlockBelow(view, into, text);
 	// Blurred, an open field closes and its piece is drawn, before the new piece opens.
 	area.querySelector('textarea')?.blur();
 	const field = openNewPiece(view, cardNotesHost(view, card, area));
-	if (!field) return;
-	changeField(field, () => (field.value = text));
-	pieceInput(view, field);
+	return field !== null && addBlockBelow(view, field, text);
 }

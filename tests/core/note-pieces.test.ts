@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { holdsOnly, itemPieces, neighborPiece, nextItemMarker, notePieces, outdentMarker, pieceEnter, pieceText } from '../../src/core/note-pieces';
+import { blockAfter, holdsOnly, itemPieces, neighborPiece, nextItemMarker, notePieces, outdentMarker, pieceEnter, pieceText } from '../../src/core/note-pieces';
 
 const NOTES = [
 	'Intro paragraph',
@@ -236,5 +236,32 @@ describe('holdsOnly', () => {
 
 	test('an item open inside a longer list is not alone', () => {
 		expect(holdsOnly('- a\n- b', { start: 1, end: 2 })).toBe(false);
+	});
+});
+
+describe('blockAfter', () => {
+	test('a block added after a paragraph goes right after it', () => {
+		expect(blockAfter('para one\n\npara two', { start: 0, end: 1 })).toBe(1);
+	});
+
+	test('a block added after an item goes after its whole list', () => {
+		expect(blockAfter('- a\n- b\n- c\n\nafter', { start: 1, end: 2 })).toBe(3);
+	});
+
+	test('a block added after a heading goes after the paragraph right under it', () => {
+		expect(blockAfter('### H\npara\n\nnext', { start: 0, end: 1 })).toBe(2);
+	});
+
+	test('a block added where an emptied item was goes after its list', () => {
+		expect(blockAfter('- x\n- z\n\nafter', { start: 1, end: 1 })).toBe(2);
+		expect(blockAfter('- x\n\nafter', { start: 1, end: 1 })).toBe(1);
+	});
+
+	test('a block added goes after every piece that follows with no empty line between', () => {
+		expect(blockAfter('### A\n### B\npara\n\nnext', { start: 0, end: 1 })).toBe(3);
+	});
+
+	test('a block added after the last piece goes at the end of the notes', () => {
+		expect(blockAfter('one\n\ntwo', { start: 2, end: 3 })).toBe(3);
 	});
 });
