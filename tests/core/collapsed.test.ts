@@ -87,7 +87,7 @@ describe('collapseChoices', () => {
 		expect(collapseChoices([2, 5], new Set([5]))).toEqual({ canCollapse: true, canExpand: true });
 	});
 	test('a collapsed line that is no longer a heading doesn\'t count', () => {
-		expect(collapseChoices([2], new Set([2, 4]))).toEqual({ canCollapse: false, canExpand: true });
+		expect(collapseChoices([2], new Set([4]))).toEqual({ canCollapse: true, canExpand: false });
 		expect(collapseChoices([], new Set([4]))).toEqual({ canCollapse: false, canExpand: false });
 	});
 });

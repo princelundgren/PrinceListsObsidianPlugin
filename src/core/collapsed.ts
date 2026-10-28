@@ -15,8 +15,8 @@ export class CollapsedHeadings {
 	}
 
 	collapseAll(headingLines: readonly number[]): void {
-		const collapsed = this.lines();
-		for (const line of headingLines) if (!collapsed.has(line)) this.headings.add(this.editing.track(line));
+		this.clear();
+		for (const line of headingLines) this.headings.add(this.editing.track(line));
 	}
 
 	expand(headingLine: number): void {
