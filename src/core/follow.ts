@@ -70,10 +70,28 @@ export function followLine(line: number, edit: OwnEdit): number | null {
 	return line + edit.delta;
 }
 
-// The list note's range comes first in the file, so every edit but its own saves starts at or after
-// its end. One that starts inside it can't be followed, and the editor reads the note again.
+// The lines an edit replaces: a change its `start` line, a delete the lines it removed from `start`,
+// an insert none. Only an edit that replaces a line of the range loses it. A change that adds or
+// removes lines, a notes save or its undo, rewrote a run whose end it doesn't give.
 export function followRange(range: LineRange, edit: OwnEdit): LineRange | null {
-	return edit.start >= range.end ? range : null;
+	if (edit.kind === 'move') return moveRange(range, edit.moved);
+	if (edit.start >= range.end) return range;
+	if (edit.kind === 'change' && edit.delta !== 0) return null;
+	const coverEnd = edit.kind === 'change' ? edit.start + 1 : edit.kind === 'delete' ? edit.start - edit.delta : edit.start;
+	return coverEnd <= range.start ? { start: range.start + edit.delta, end: range.end + edit.delta } : null;
+}
+
+// An empty range is a position, so it goes with the line before it.
+function moveRange(range: LineRange, moved: readonly (number | null)[]): LineRange | null {
+	if (range.start === range.end) {
+		if (range.start === 0) return range;
+		const before = moved[range.start - 1] ?? null;
+		return before === null ? null : { start: before + 1, end: before + 1 };
+	}
+	const start = moved[range.start] ?? null;
+	const last = moved[range.end - 1] ?? null;
+	if (start === null || last === null || last - start !== range.end - 1 - range.start) return null;
+	return { start, end: last + 1 };
 }
 
 // After an outside change: the range's first and last lines, mapped. An empty range is a position

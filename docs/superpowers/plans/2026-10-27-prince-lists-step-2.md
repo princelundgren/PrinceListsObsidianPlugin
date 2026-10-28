@@ -1128,15 +1128,20 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
     it while it holds text, and loses it again when emptied. Guarded by `replaceRun` with the
     item's key removed and added.
   - A new item from Enter opens as an empty range with `separator: false`.
-- Produces, in `src/core/follow.ts`: `followRange(range, edit)`. An edit covers its `start` line
-  for a `change`, `start` to `start - delta` for a `delete`, and none for an `insert`. One that
-  starts at or after the range's end keeps it; one whose cover ends at or before the range's start
-  shifts it by `delta`; a `move` maps both ends through `moved`; anything else gives null. The list
-  note's callers keep their meaning.
-- Produces, in `src/core/editing.ts` (263 lines; move the list note's session methods to
-  `src/core/list-note-session.ts` if it would pass 300):
-  - `openNotesPiece(range: LineRange, isNew: boolean): string | null` in place of `openNotes()`;
-    `typeNotesPiece(markdown: string): Typed` in place of `typeNotes`.
+- Produces, in `src/core/follow.ts`: `followRange(range, edit)`. An edit covers its `start` line for
+  a `change`, `start` to `start - delta` for a `delete`, and none for an `insert`. One that starts
+  at or after the range's end keeps it; one whose cover ends at or before the range's start shifts
+  it by `delta`; a `move` maps both ends through `moved`; a `change` that adds or removes lines, a
+  notes save or its undo, gives null, since it doesn't say where its run ends; anything else gives
+  null. The list note's callers keep their meaning.
+- Produces, in `src/core/editing.ts` (it passes 300 lines until Task 21 removes `openNotes` and
+  `typeNotes`; if it stays past 300, move the list note's session methods to
+  `src/core/list-note-session.ts`):
+  - `openNotesPiece(range: LineRange, isNew: boolean): string | null` and
+    `typeNotesPiece(markdown: string): Typed`, which take the place of `openNotes()` and
+    `typeNotes`: those stay until Task 21 moves the card to the new ones and removes them. An empty
+    range opens at the notes' indent when `isNew`, else at the indent of the piece still open, which
+    it follows.
   - `outsideChange` maps the piece's range with `mapRange`; a range that can't be mapped ends the
     session, and the next keystroke gets `{ lost: true }`.
 
@@ -1158,7 +1163,9 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
 **Files:**
 - Create: `src/view/note-pieces.ts`
 - Modify: `src/view/card.ts`, `src/view/notes.ts`, `src/view/events.ts`, `src/view/pictures.ts`,
-  `src/view/checklist.ts`, `src/view/format.ts`, `src/view/list-view.ts`, `styles.css`
+  `src/view/checklist.ts`, `src/view/format.ts`, `src/view/list-view.ts`, `styles.css`,
+  `src/core/editing.ts` and `tests/core/editing.test.ts` (`openNotes`, `typeNotes` and their tests
+  go)
 
 **Interfaces:**
 - Consumes: Tasks 19 and 20.

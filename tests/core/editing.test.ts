@@ -164,6 +164,49 @@ describe('the notes field across a typing session', () => {
 	});
 });
 
+describe('a piece of the notes across a typing session', () => {
+	const text = `${FRONTMATTER}- [ ] a\n\n\t- [ ] box\n\n\tpiece\n- [ ] b\n`;
+
+	test('opens a piece without its indent, and a new item after it with the same indent', () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n\n\tpara\n\n\t- x\n\t  - y\n- [ ] b\n`);
+		state.open(3);
+		expect(state.openNotesPiece({ start: 8, end: 9 }, false)).toBe('- y');
+		expect(saved(state.typeNotesPiece('- y!'))).toBe(true);
+		state.openNotesPiece({ start: 9, end: 9 }, false);
+		state.typeNotesPiece('- z');
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n\tpara\n\n\t- x\n\t  - y!\n\t  - z\n- [ ] b\n`);
+	});
+
+	test('follows a tick and a new item above it, and a line added above it from outside', () => {
+		const state = editing(text);
+		state.open(3);
+		expect(state.openNotesPiece({ start: 7, end: 8 }, false)).toBe('piece');
+		state.applyOwn(text.replace('[ ] box', '[x] box'), { start: 5, delta: 0, kind: 'change' });
+		const withTop = `${FRONTMATTER}- [ ] top\n${state.text.slice(FRONTMATTER.length)}`;
+		state.applyOwn(withTop, { start: 3, delta: 1, kind: 'insert' });
+		state.outsideChange(`${FRONTMATTER}- [ ] first\n${state.text.slice(FRONTMATTER.length)}`);
+		expect(saved(state.typeNotesPiece('piece!'))).toBe(true);
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] first\n- [ ] top\n- [ ] a\n\n\t- [x] box\n\n\tpiece!\n- [ ] b\n`);
+	});
+
+	test('is lost once its item is deleted', () => {
+		const state = editing(text);
+		state.open(3);
+		state.openNotesPiece({ start: 7, end: 8 }, false);
+		state.applyOwn(`${FRONTMATTER}- [ ] b\n`, { start: 3, delta: -5, kind: 'delete' });
+		expect(state.typeNotesPiece('mine')).toEqual({ lost: true });
+	});
+
+	test('is lost once an outside change takes its own lines', () => {
+		const state = editing(text);
+		state.open(3);
+		state.openNotesPiece({ start: 7, end: 8 }, false);
+		state.outsideChange(text.replace('\tpiece', '\tpiece from the phone'));
+		expect(state.typeNotesPiece('mine')).toEqual({ lost: true });
+		expect(state.text).toBe(text.replace('\tpiece', '\tpiece from the phone'));
+	});
+});
+
 describe('the list note across a typing session', () => {
 	test('typing a note where there was none puts it before the items, and moves the selection', () => {
 		const text = `${FRONTMATTER}- [ ] a\n- [ ] b\n`;
