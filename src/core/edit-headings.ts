@@ -68,12 +68,28 @@ function findHeading(lines: readonly Line[], model: ListModel, section: Section)
 // the indent and # run, the spaces before the content, and any closing sequence with the spaces
 // around it. `after` is empty or starts with a space or tab, so an empty heading's closing sequence,
 // as in `## #`, matches that pattern too.
+// It scans back from the end: as a regex, the closing pattern retries every start in a run of spaces.
 export function splitAtx(text: string): { open: string; gap: string; content: string; close: string } | null {
 	const open = ATX_OPENING.exec(text)?.[0];
 	if (open === undefined) return null;
 	const after = text.slice(open.length);
-	const inner = after.replace(/[ \t]+#+[ \t]*$/, '');
+	const hashesEnd = blankRunStart(after, after.length);
+	let hashesStart = hashesEnd;
+	while (hashesStart > 0 && after[hashesStart - 1] === '#') hashesStart--;
+	const hasClosingSequence = hashesStart < hashesEnd && hashesStart > 0 && isSpaceOrTab(after[hashesStart - 1]);
+	const inner = hasClosingSequence ? after.slice(0, blankRunStart(after, hashesStart)) : after;
 	const gap = (/^[ \t]*/.exec(inner) as RegExpExecArray)[0];
-	const content = inner.slice(gap.length).replace(/[ \t]+$/, '');
+	const content = inner.slice(gap.length, Math.max(gap.length, blankRunStart(inner, inner.length)));
 	return { open, gap, content, close: after.slice(gap.length + content.length) };
+}
+
+function isSpaceOrTab(char: string | undefined): boolean {
+	return char === ' ' || char === '\t';
+}
+
+// Where the run of spaces and tabs that ends at `end` starts.
+function blankRunStart(text: string, end: number): number {
+	let start = end;
+	while (start > 0 && isSpaceOrTab(text[start - 1])) start--;
+	return start;
 }
