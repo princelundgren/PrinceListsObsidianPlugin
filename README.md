@@ -18,7 +18,7 @@ Make a list from the ribbon, a folder, or a note you already have.
 | --- | --- | --- |
 | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.png" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.png" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.png" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
-Ticked items hide after a day. **Show archived** brings them back.
+Ticked items hide after a day. **Show archived** brings them back, with blue checkboxes.
 
 ![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
 
