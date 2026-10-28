@@ -224,6 +224,9 @@ current todo app. Step one's own "Done when" doesn't change.
   star and the ⋯. Once the item has a When, the day takes the icon's place, after its own calendar
   icon. Clicking either opens the platform's date picker through an `<input type="date">`.
   Obsidian has no date picker API, and the HTML input gives each platform's own picker.
+  - **In a pane too narrow for the title beside them (call),** such as a sidebar, the When, star
+    and ⋯ move to a line of their own under the title, still on the right, so the title keeps
+    about 8em to show and edit.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's top right, and every platform's picker can
     already clear the day.
