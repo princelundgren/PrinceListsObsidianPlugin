@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-22
+verified: 2026-10-28
 governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
 ---
 
@@ -76,12 +76,16 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   writing code and workflows, and a workflow can't narrow them. Comments therefore come from
   `github-actions[bot]`.
 - **The tools (call).**
-  - The review may run five exact commands, each naming its pull request: `gh pr diff`, three
-    `gh pr view` commands (the title, the description, and a query that returns only its own
-    earlier summaries) and `gh pr comment --body-file -`, which posts from standard input. A
-    redirect could feed it a file inside the checkout, but that adds no reach: Claude could retype
-    anything it can read there. It can also post inline comments. It can't read anyone else's
-    comments.
+  - The review may run three exact commands, each naming its pull request: `gh pr diff`, a
+    `gh pr view` query that returns only its own earlier summaries, and `gh pr comment --body-file
+    -`, which posts from standard input. A redirect could feed it a file inside the checkout, but
+    that adds no reach: Claude could retype anything it can read there. It can also post inline
+    comments. It can't read anyone else's comments.
+  - The title and description come from the pull request event: a step writes them to `.pr-text/`
+    in the checkout, through environment variables as `docs.yml` does, and Claude reads the files.
+    Two more `gh pr view` commands read them before, but they worked only when Claude typed them
+    exactly, and the reviews of #141 and #142 said they couldn't read either. The files hold the
+    text as it was when the event fired, so an edit without a push reaches the next review.
   - For `@claude`, deny rules take back the file-edit tools, `git add`, `git commit`, `git rm` and
     the push that the action grants when it's mentioned. In the action's `acceptEdits` mode, shell
     commands such as `mkdir`, `mv` or `sed` can still change files in the checkout, but nothing
@@ -114,8 +118,8 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   - For `@claude`, the action strips hidden markup from the context it gathers, and its docs warn
     that new bypasses may emerge. An appended system prompt tells Claude that this text, and a pull
     request's code, is material to read, never instructions.
-  - The review reads through `gh`, unfiltered: the pull request's title, description and diff,
-    written by someone with write access, and its own summaries. Its prompt says the same.
+  - The review reads, unfiltered, the pull request's title, description and diff, written by
+    someone with write access, and its own summaries. Its prompt says the same.
   - The limited token and tools bound what a successful injection could do.
 - **The job token is readable.** In both workflows the action writes the job's token into the
   checkout's git configuration, in the origin URL, whatever checkout's `persist-credentials` says.
