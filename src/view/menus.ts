@@ -1,5 +1,6 @@
 import { Menu, Notice } from 'obsidian';
 import { SCHEDULE_ICON } from '../constants';
+import { collapseChoices } from '../core/collapsed';
 import type { TrackedLine } from '../core/editing';
 import { endOfSection, sectionLastLine } from '../core/list-actions';
 import { itemAt, type ItemBlock, type Section } from '../core/parse';
@@ -79,7 +80,7 @@ export function headingMenu(view: PrinceListView, section: Section, menu: Menu):
 			.setWarning(true)
 			.onClick(atLine(anchor, (line) => deleteHeadingAt(view, line))),
 	);
-	collapseAllItems(view, menu);
+	addCollapseAllEntries(view, menu);
 }
 
 // The list's own actions, from a right-click on its background on desktop. New item and New heading
@@ -117,7 +118,7 @@ export function listMenu(view: PrinceListView, section: Section, menu: Menu): vo
 			.setChecked(view.showArchived)
 			.onClick(() => view.toggleArchived()),
 	);
-	collapseAllItems(view, menu);
+	addCollapseAllEntries(view, menu);
 	menu.addSeparator();
 	menu.addItem((entry) =>
 		entry
@@ -127,25 +128,23 @@ export function listMenu(view: PrinceListView, section: Section, menu: Menu): vo
 	);
 }
 
-function collapseAllItems(view: PrinceListView, menu: Menu): void {
-	const headingLines = () => view.parse().model.sections.flatMap(({ headingLine }) => (headingLine === null ? [] : [headingLine]));
-	const collapsed = view.collapsed.lines();
-	const anyOpen = headingLines().some((line) => !collapsed.has(line));
-	const anyCollapsed = headingLines().some((line) => collapsed.has(line));
-	if (!anyOpen && !anyCollapsed) return;
+function addCollapseAllEntries(view: PrinceListView, menu: Menu): void {
+	const { canCollapse, canExpand } = collapseChoices(headingLinesOf(view), view.collapsed.lines());
+	if (!canCollapse && !canExpand) return;
 	menu.addSeparator();
-	if (anyOpen) {
+	if (canCollapse) {
 		menu.addItem((entry) =>
 			entry
 				.setTitle('Collapse all headings')
 				.setIcon('chevrons-down-up')
 				.onClick(() => {
-					view.collapsed.collapseAll(headingLines());
+					// Read again: the list can change while the menu is open.
+					view.collapsed.collapseAll(headingLinesOf(view));
 					view.render();
 				}),
 		);
 	}
-	if (anyCollapsed) {
+	if (canExpand) {
 		menu.addItem((entry) =>
 			entry
 				.setTitle('Expand all headings')
@@ -156,6 +155,10 @@ function collapseAllItems(view: PrinceListView, menu: Menu): void {
 				}),
 		);
 	}
+}
+
+function headingLinesOf(view: PrinceListView): number[] {
+	return view.parse().model.sections.flatMap(({ headingLine }) => (headingLine === null ? [] : [headingLine]));
 }
 
 // A right-click on desktop: a row's or a heading's menu, else the list's. A field keeps the menu it

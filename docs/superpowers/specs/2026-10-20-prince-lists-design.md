@@ -701,9 +701,9 @@ stays, and the blank line stays with it.
   mobile this is the only way to reach them **(owner)**. The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
-  heading and Delete heading **(owner, 2026-10-20)**, and step two's additions to it. It's a tap,
-  not a long-press, so there is still no long-press menu. With a card open, the tap only closes the card ("Selecting and
-  adding").
+  heading and Delete heading **(owner, 2026-10-20)**. Step two adds Edit in Markdown, Collapse all
+  headings and Expand all headings. It's a tap, not a long-press, so there is still no long-press
+  menu. With a card open, the tap only closes the card ("Selecting and adding").
 - **New heading below (owner, 2026-10-20)** adds an empty heading at that point and opens the
   same field as Rename heading, with the cursor in it. Escape, or an empty name, removes the
   heading again.

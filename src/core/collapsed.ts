@@ -49,6 +49,11 @@ export class CollapsedHeadings {
 	}
 }
 
+/** Which of Collapse all and Expand all would change something, given the list's heading lines and the collapsed lines. */
+export function collapseChoices(headingLines: readonly number[], collapsed: ReadonlySet<number>): { canCollapse: boolean; canExpand: boolean } {
+	return { canCollapse: headingLines.some((line) => !collapsed.has(line)), canExpand: headingLines.some((line) => collapsed.has(line)) };
+}
+
 export function sectionHeadingOf(model: ListModel, line: number): number | null {
 	let heading: number | null = null;
 	for (const { headingLine } of model.sections) if (headingLine !== null && headingLine <= line) heading = headingLine;
