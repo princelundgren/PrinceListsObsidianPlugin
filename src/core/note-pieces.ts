@@ -15,6 +15,11 @@ export type PieceEnter =
 const ITEM_START = /^([ \t]*)([-*+]|\d{1,9}[.)])(?:([ \t]+)(?:(\[.\])([ \t]+|$))?|$)/;
 const THEMATIC_BREAK = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
 
+/** Whether every piece of the notes lies within `range`, the lines of the piece open for typing. */
+export function holdsOnly(markdown: string, range: LineRange): boolean {
+	return notePieces(markdown).every((piece) => piece.start >= range.start && piece.end <= range.end);
+}
+
 export function notePieces(markdown: string): LineRange[] {
 	const lines = splitLines(markdown);
 	const pieces: LineRange[] = [];
