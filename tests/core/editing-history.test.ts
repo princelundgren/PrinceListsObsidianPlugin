@@ -47,8 +47,8 @@ describe('the undo history', () => {
 	test("the notes' and the list note's keystrokes make a step for each session", () => {
 		const state = editing(text);
 		state.open(4);
-		state.openNotes();
-		typeEach((v) => state.typeNotes(v), ['n', 'no', 'note']);
+		state.openNotesPiece({ start: 5, end: 5 }, true);
+		typeEach((v) => state.typeNotesPiece(v), ['n', 'no', 'note']);
 		state.closeNotes();
 		const noted = state.text;
 		state.openListNote();

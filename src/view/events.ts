@@ -10,10 +10,7 @@ import {
 	cardTitleInput,
 	closeCard,
 	dismissCard,
-	editNotes,
 	NOTES_EDITOR_CLASS,
-	notesBlur,
-	notesInput,
 	openCard,
 } from './card';
 import { toggleCardStar } from './card-star';
@@ -38,6 +35,7 @@ import { barActionAt, FORMAT_BAR_CLASS, runBarAction } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
+import { openPieceAt, pieceBlur, pieceInput } from './note-piece-field';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
@@ -48,7 +46,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
-	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepNotesFocused(evt));
+	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepNotesFocused(view, evt));
 	view.registerDomEvent(contentEl, 'beforeinput', (evt) => onBeforeInput(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
@@ -125,7 +123,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 			return;
 		}
 		const notes = target.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-		if (notes) editNotes(view, notes, evt);
+		if (notes) openPieceAt(view, notes, evt);
 		return;
 	}
 	// Anything else is a click elsewhere, which only closes an open card (spec, "Selecting and adding").
@@ -143,10 +141,12 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	if (target.closest(`.${NOTE_CLASS}`)) openListNote(view, evt);
 }
 
-// A press anywhere on the format bar, between its buttons too, would take focus from the notes
-// editor, which closes it.
-function keepNotesFocused(evt: MouseEvent): void {
-	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
+// A press anywhere on the format bar, between its buttons too, or on a box in the card's notes would
+// take focus from the open piece's field, which closes it.
+function keepNotesFocused(view: PrinceListView, evt: MouseEvent): void {
+	const target = targetOf(evt);
+	const isCardBox = !!target?.closest(NOTES_CHECKBOX_SELECTOR) && !!view.card?.el.contains(target);
+	if (isCardBox || target?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
@@ -193,7 +193,7 @@ function onInput(view: PrinceListView, evt: Event): void {
 	const target = Array.from(view.contentEl.querySelectorAll('textarea')).find((field) => field === evt.target);
 	if (!target) return;
 	if (target.hasClass(CARD_TITLE_CLASS)) cardTitleInput(view, target);
-	else if (target.hasClass(NOTES_EDITOR_CLASS)) notesInput(view, target);
+	else if (target.hasClass(NOTES_EDITOR_CLASS)) pieceInput(view, target);
 	else if (target.hasClass(NOTE_EDITOR_CLASS)) typeListNote(view);
 	else if (target.hasClass(TITLE_CLASS) || target.hasClass(HEADING_FIELD_CLASS)) keepOneLine(target);
 	afterFieldInput(target);
@@ -266,7 +266,7 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 		// focus, which comes back to them on return, and commit when they lose it in the window.
 		const inWindow = target.doc.hasFocus();
 		if (inCard && target.hasClass(CARD_TITLE_CLASS)) cardTitleBlur(view, target);
-		else if (inCard && target.hasClass(NOTES_EDITOR_CLASS)) notesBlur(view, target);
+		else if (inCard && target.hasClass(NOTES_EDITOR_CLASS)) pieceBlur(view, target);
 		else if (target.hasClass(NOTE_EDITOR_CLASS)) closeListNote(view, focusing);
 		else if (target.hasClass(TITLE_CLASS) && inWindow) commitListTitle(view, target);
 		else if (target.hasClass(HEADING_FIELD_CLASS) && inWindow) headingFieldBlur(view, target);

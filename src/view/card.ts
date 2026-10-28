@@ -1,5 +1,4 @@
 import { Notice, setIcon, type Component, type TFile } from 'obsidian';
-import { checklistOf } from '../core/checklist';
 import { isShown, itemRow, type ItemRow } from '../core/display';
 import { UnsafeEditError } from '../core/edit-check';
 import { isEmptyItem, planRemoval, type InsertedItem, type Removal } from '../core/empty-item';
@@ -9,12 +8,10 @@ import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
 import { buildWhenPicker, showWhen } from './card-when';
-import { caretAtClick } from './click-caret';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
-import { buildFormatBar } from './format';
 import type { PrinceListView } from './list-view';
-import { renderCardNotes } from './notes';
+import { drawCardNotes } from './note-piece-field';
 import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
@@ -27,7 +24,7 @@ export const CARD_STAR_CLASS = 'princelists-card-star';
 
 export interface Card {
 	el: HTMLElement;
-	/** The rendered notes' Component. */
+	/** The drawn notes' Component. */
 	notes: Component | null;
 	/** Set when this card's own insert created its item, so closing it may remove the item again. */
 	inserted: InsertedItem | null;
@@ -127,7 +124,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (notes && !notes.contains(focused)) showNotes(view, card, notes);
+	if (notes) drawCardNotes(view, card, notes);
 }
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {
@@ -145,35 +142,6 @@ export function cardTitleBlur(view: PrinceListView, field: HTMLTextAreaElement):
 	fitHeight(field);
 }
 
-// A click puts the caret where it was; without one, such as for a pasted picture, it goes at the end.
-export function editNotes(view: PrinceListView, area: HTMLElement, click?: MouseEvent): void {
-	const card = view.card;
-	if (!card || area.querySelector(`.${NOTES_EDITOR_CLASS}`)) return;
-	const notes = view.editing.openNotes();
-	if (notes === null) return;
-	const caret = click ? caretAtClick(area, click, notes) : notes.length;
-	if (card.notes) view.removeChild(card.notes);
-	card.notes = null;
-	area.empty();
-	const editor = area.createEl('textarea', { cls: [FIELD_CLASS, NOTES_EDITOR_CLASS], attr: { placeholder: 'Notes' } });
-	editor.value = notes;
-	buildFormatBar(area);
-	editor.focus();
-	editor.setSelectionRange(caret, caret);
-	fitHeight(editor);
-}
-
-export function notesInput(view: PrinceListView, editor: HTMLTextAreaElement): void {
-	fitHeight(editor);
-	view.handleTyped(view.editing.typeNotes(editor.value));
-}
-
-export function notesBlur(view: PrinceListView, editor: HTMLTextAreaElement): void {
-	view.editing.closeNotes();
-	const area = editor.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (view.card && view.card.lostAt === null && area) showNotes(view, view.card, area);
-}
-
 // An outside change took the card's item. A card with focus stays until it loses it, so the field
 // isn't torn down mid-word, but its typing has nowhere to go any more: the notice says so, and its
 // fields take no more typing. Typing that the change dropped from the file can be copied.
@@ -184,26 +152,16 @@ export function cardLost(view: PrinceListView, card: Card, line: number): void {
 		setLine(card.el, null);
 		for (const field of card.el.querySelectorAll('textarea')) field.readOnly = true;
 		const typed = focused?.instanceOf(HTMLTextAreaElement) ? focused.value : '';
-		if (missingTyping(view.text, typed, focused?.hasClass(CARD_TITLE_CLASS) ? 'title' : 'notes')) showLostTypingNotice(card.el.win, typed);
-		else new Notice(CHANGED_ELSEWHERE_NOTICE);
+		sayFieldLost(view, typed, focused?.hasClass(CARD_TITLE_CLASS) ? 'title' : 'notes');
 	} else {
 		dismissCard(view);
 	}
 }
 
-function showNotes(view: PrinceListView, card: Card, area: HTMLElement): void {
-	if (card.notes) view.removeChild(card.notes);
-	card.notes = null;
-	area.empty();
-	const notes = view.editing.selectedNotes();
-	// Something to click when there are no notes yet.
-	if (notes === '') {
-		area.createDiv({ cls: 'princelists-placeholder', text: 'Notes' });
-		return;
-	}
-	const { lines, model } = view.parse();
-	const item = view.selected === null ? undefined : itemAt(model, view.selected);
-	card.notes = renderCardNotes(view, view.sourcePath, area, notes, item ? checklistOf(lines, item) : []);
+// For a field whose lines an outside change took: its typing can be copied if the file lost it.
+export function sayFieldLost(view: PrinceListView, typed: string, field: 'title' | 'notes'): void {
+	if (missingTyping(view.text, typed, field)) showLostTypingNotice(view.contentEl.win, typed);
+	else new Notice(CHANGED_ELSEWHERE_NOTICE);
 }
 
 function endCard(view: PrinceListView, card: Card): void {

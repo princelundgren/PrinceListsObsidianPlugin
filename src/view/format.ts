@@ -34,9 +34,10 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 ];
 const ACTIONS = GROUPS.flat().map((button) => button.action);
 
-// Shown under a card's notes editor while it is open.
-export function buildFormatBar(parent: HTMLElement): void {
-	const bar = parent.createDiv({ cls: FORMAT_BAR_CLASS });
+// Shown right under the open piece of a card's notes.
+export function buildFormatBar(field: HTMLTextAreaElement): void {
+	const bar = createDiv({ cls: FORMAT_BAR_CLASS });
+	field.after(bar);
 	for (const group of GROUPS) {
 		const groupEl = bar.createDiv({ cls: 'princelists-format-group' });
 		for (const { action, icon, label } of group) {

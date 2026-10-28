@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { appendOnOwnLine, pictureName } from '../../src/core/picture';
+import { pictureName } from '../../src/core/picture';
 
 const now = new Date(2026, 9, 22, 14, 30, 5);
 
@@ -15,12 +15,4 @@ test.each([
 	[{ name: 'notes.pdf', type: 'application/pdf' }, false, null],
 ])('names %j (pasted: %s) as %s', (file, pasted, expected) => {
 	expect(pictureName(file, pasted, now)).toBe(expected);
-});
-
-test.each([
-	['', '![[a.png]]', '![[a.png]]'],
-	['Buy 6:', '![[a.png]]', 'Buy 6:\n![[a.png]]'],
-	['Buy 6:\n', '![[a.png]]', 'Buy 6:\n![[a.png]]'],
-])('appends to %j on its own line', (notes, text, expected) => {
-	expect(appendOnOwnLine(notes, text)).toBe(expected);
 });

@@ -94,76 +94,6 @@ describe('the title field across a typing session', () => {
 	});
 });
 
-describe('the notes field across a typing session', () => {
-	const text = `${FRONTMATTER}- [ ] a\n- [ ] b\n\n\told note\n- [ ] c\n\n\tc's note\n`;
-
-	test('every save uses the indent the notes had when the field opened', () => {
-		const state = editing(text);
-		state.open(4);
-		expect(state.openNotes()).toBe('old note');
-		typeEach((v) => state.typeNotes(v), [' x', ' xy', ' xy\n', ' xy\n- one', ' xy\n- one\n---']);
-		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n- [ ] b\n\n\t xy\n\t- one\n\t---\n- [ ] c\n\n\tc's note\n`);
-	});
-
-	test('the lines after the item shift as the notes grow and shrink, and selected stays', () => {
-		const state = editing(text);
-		state.open(4);
-		state.openNotes();
-		const grow = state.typeNotes('one\ntwo\nthree');
-		expect(grow).toEqual({ edit: { start: 4, delta: 2, kind: 'change' } });
-		const shrink = state.typeNotes('');
-		expect(shrink).toEqual({ edit: { start: 4, delta: -4, kind: 'change' } });
-		expect(state.selected).toBe(4);
-		expect(list(state.text).item(2).titleLine).toBe(5);
-	});
-
-	test('outside changes elsewhere are kept, and typing goes on in the same item', () => {
-		const state = editing(text);
-		state.open(4);
-		state.openNotes();
-		state.typeNotes('first');
-		// From the phone, one Sync at a time: an item added at the top, then c's note edited.
-		state.outsideChange(`${FRONTMATTER}- [ ] top\n- [ ] a\n- [ ] b\n\n\tfirst\n- [ ] c\n\n\tc's note\n`);
-		expect(state.selected).toBe(5);
-		state.outsideChange(`${FRONTMATTER}- [ ] top\n- [ ] a\n- [ ] b\n\n\tfirst\n- [ ] c\n\n\tc's note, edited\n`);
-		expect(state.selected).toBe(5);
-		state.typeNotes('first\nsecond');
-		expect(state.text).toBe(`${FRONTMATTER}- [ ] top\n- [ ] a\n- [ ] b\n\n\tfirst\n\tsecond\n- [ ] c\n\n\tc's note, edited\n`);
-	});
-
-	// mapLine finds one changed run between the lines both texts share at the start and the end, so
-	// changes above and below the item in one Sync lose it, and its card closes.
-	test('changes above and below it in one outside change lose the item', () => {
-		const state = editing(text);
-		state.open(4);
-		state.openNotes();
-		state.typeNotes('first');
-		const merged = `${FRONTMATTER}- [ ] top\n- [ ] a\n- [ ] b\n\n\tfirst\n- [ ] c\n\n\tc's note, edited\n`;
-		expect(state.outsideChange(merged).lostSelected).toBe(true);
-		expect(state.typeNotes('first\nsecond')).toEqual({ lost: true });
-		expect(state.text).toBe(merged);
-	});
-
-	test('an outside change inside the notes being typed is overwritten by the next keystroke', () => {
-		const state = editing(text);
-		state.open(4);
-		state.openNotes();
-		state.typeNotes('mine');
-		state.outsideChange(`${FRONTMATTER}- [ ] a\n- [ ] b\n\n\ttheirs\n- [ ] c\n\n\tc's note\n`);
-		state.typeNotes('mine!');
-		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n- [ ] b\n\n\tmine!\n- [ ] c\n\n\tc's note\n`);
-	});
-
-	test('closing the notes ends the session: typing then writes nothing', () => {
-		const state = editing(text);
-		state.open(4);
-		state.openNotes();
-		state.closeNotes();
-		expect(state.typeNotes('x')).toEqual({ lost: true });
-		expect(state.text).toBe(text);
-	});
-});
-
 describe('a piece of the notes across a typing session', () => {
 	const text = `${FRONTMATTER}- [ ] a\n\n\t- [ ] box\n\n\tpiece\n- [ ] b\n`;
 
@@ -187,6 +117,17 @@ describe('a piece of the notes across a typing session', () => {
 		state.outsideChange(`${FRONTMATTER}- [ ] first\n${state.text.slice(FRONTMATTER.length)}`);
 		expect(saved(state.typeNotesPiece('piece!'))).toBe(true);
 		expect(state.text).toBe(`${FRONTMATTER}- [ ] first\n- [ ] top\n- [ ] a\n\n\t- [x] box\n\n\tpiece!\n- [ ] b\n`);
+	});
+
+	test('notesPieceRange follows the lines typed, and is null once the piece closes', () => {
+		const state = editing(text);
+		state.open(3);
+		state.openNotesPiece({ start: 7, end: 8 }, false);
+		state.typeNotesPiece('one\ntwo\nthree');
+		expect(state.notesPieceRange()).toEqual({ start: 7, end: 10 });
+		state.closeNotes();
+		expect(state.notesPieceRange()).toBeNull();
+		expect(state.typeNotesPiece('x')).toEqual({ lost: true });
 	});
 
 	test('is lost once its item is deleted', () => {

@@ -1134,9 +1134,7 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
   it by `delta`; a `move` maps both ends through `moved`; a `change` that adds or removes lines, a
   notes save or its undo, gives null, since it doesn't say where its run ends; anything else gives
   null. The list note's callers keep their meaning.
-- Produces, in `src/core/editing.ts` (it passes 300 lines until Task 21 removes `openNotes` and
-  `typeNotes`; if it stays past 300, move the list note's session methods to
-  `src/core/list-note-session.ts`):
+- Produces, in `src/core/editing.ts`:
   - `openNotesPiece(range: LineRange, isNew: boolean): string | null` and
     `typeNotesPiece(markdown: string): Typed`, which take the place of `openNotes()` and
     `typeNotes`: those stay until Task 21 moves the card to the new ones and removes them. An empty
@@ -1161,11 +1159,11 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
 ### Task 21: Edit a card's notes a piece at a time
 
 **Files:**
-- Create: `src/view/note-pieces.ts`
+- Create: `src/view/note-pieces.ts` (drawing) and `src/view/note-piece-field.ts` (the field)
 - Modify: `src/view/card.ts`, `src/view/notes.ts`, `src/view/events.ts`, `src/view/pictures.ts`,
-  `src/view/checklist.ts`, `src/view/format.ts`, `src/view/list-view.ts`, `styles.css`,
-  `src/core/editing.ts` and `tests/core/editing.test.ts` (`openNotes`, `typeNotes` and their tests
-  go)
+  `src/view/checklist.ts`, `src/view/format.ts`, `styles.css`, `src/core/editing.ts`,
+  `src/core/picture.ts` and their tests (`openNotes`, `typeNotes`, `renderCardNotes` and
+  `appendOnOwnLine` go)
 
 **Interfaces:**
 - Consumes: Tasks 19 and 20.
@@ -1176,22 +1174,27 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
     in the tags is in file lines. Each piece is rendered into its own `.princelists-note-piece`,
     tagged with its range, its boxes enabled against the checklist lines inside that range only.
     Below them a `.princelists-notes-end` strip to click; with no notes, the "Notes" placeholder
-    instead. The open range isn't drawn.
-  - `openPieceAt(view: PrinceListView, area: HTMLElement, click: MouseEvent): void`: the clicked
+    instead. The open range isn't drawn. A piece whose text is unchanged keeps its element and takes
+    its new lines, so drawing again after a tick or an outside change redraws only what changed.
+  - In `src/view/note-piece-field.ts`, `openPieceAt(view: PrinceListView, area: HTMLElement,
+    click: MouseEvent): void`: the clicked
     piece by its tag, or, in a list piece whose drawn `li` count equals `itemPieces`' count, the
     clicked `li`'s item. A tag that isn't among the current pieces draws the notes again and opens
     nothing. The caret goes by `caretAtClick` on the clicked element and the piece's text. The
     field is created and focused in the click's own handler. A click on the strip opens a new
     piece at the end.
-  - Leaving the field draws only the piece that was open, in its place, and moves the later tags
-    by the lines it gained, unless the notes changed elsewhere meanwhile, which draws them all.
+  - Leaving the field removes it and draws the notes again, which redraws the piece that was open.
+    While an item is open, a tick in the rest of its list shows on that box only, and the list is
+    drawn again once the field closes.
   - The field keeps `NOTES_EDITOR_CLASS`, so the format bar, Cmd+B, Cmd+I and Cmd+K, field undo
     and pasted pictures work on it unchanged. `buildFormatBar` takes the field and puts the bar
     right after it.
 - A mousedown on a drawn box keeps focus in the open field, as `keepNotesFocused` does for the
   bar, so the box ticks and the field stays.
-- `handleTyped` turns `{ lost: true }` into the lost card's notice and copy button, once.
-- A picture dropped on drawn notes goes in a new piece at the end.
+- A field whose range an outside change took, or whose keystroke gets `{ lost: true }`, turns
+  read-only and shows the lost card's notice and copy button, once.
+- A picture dropped on drawn notes goes in a new piece at the end; one pasted or dropped in the
+  open field goes at its caret while that field is still open, and in a new piece otherwise.
 
 - [ ] **Step 1: Build it.** The rules are Tasks 19 and 20's tested functions.
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.

@@ -1,5 +1,4 @@
 import { UnsafeEditError } from './edit-check';
-import { getItemNotes, setItemNotes } from './edit-items';
 import { isBlankAt } from './edit-lines';
 import { mapPieceRange, setNotesPiece, type PieceSession } from './edit-piece';
 import { getListNote, setListNote } from './edit-list-note';
@@ -36,7 +35,6 @@ export class ListEditing {
 	private readonly tracked = new Set<TrackedLine>();
 	// `field` changes with every keystroke; the object around it is the typing session.
 	private title: { field: TitleField } | null = null;
-	private notes: { indent: string; refused: boolean } | null = null;
 	private notesPiece: { piece: PieceSession; refused: boolean } | null = null;
 	// `separator`: the blank line this session's last save wrote right under the note, or null.
 	private note: { range: LineRange; separator: number | null; refused: boolean } | null = null;
@@ -78,11 +76,6 @@ export class ListEditing {
 		return splitStar((line && parseItemLine(line.text)?.title) ?? '').plain;
 	}
 
-	selectedNotes(): string {
-		const found = this.selectedItem();
-		return found ? getItemNotes(found.lines, found.item) : '';
-	}
-
 	focusTitle(): void {
 		const line = this.selected === null ? undefined : splitLines(this.text)[this.selected];
 		this.title = line ? { field: startTitleField(line.text) } : null;
@@ -101,29 +94,13 @@ export class ListEditing {
 		return { edit: this.apply(joinLines(result.lines), found.item.titleLine, 'change', session) };
 	}
 
-	// The notes the textarea opens with. The indent is the one every save uses until it closes, since
-	// re-parsed after a save it would take in spaces typed at the start of the notes.
-	openNotes(): string | null {
-		const found = this.selectedItem();
-		if (!found) return null;
-		this.notes = { indent: found.item.notesIndent, refused: false };
-		return getItemNotes(found.lines, found.item);
-	}
-
 	closeNotes(): void {
-		this.notes = null;
 		this.notesPiece = null;
 	}
 
-	typeNotes(markdown: string): Typed {
-		const found = this.selectedItem();
-		const session = this.notes;
-		if (!found || !session) return { lost: true };
-		const { lines, model, item } = found;
-		return this.refusable(session, () => {
-			const next = joinLines(setItemNotes(lines, model, item, markdown, session.indent));
-			return { edit: this.apply(next, item.titleLine, 'change', session) };
-		});
+	/** The lines the open piece of the notes writes, while one is open. */
+	notesPieceRange(): LineRange | null {
+		return this.notesPiece?.piece.range ?? null;
 	}
 
 	// An empty range is a new piece, at the notes' indent, or a new item from Enter, at the indent of
@@ -289,7 +266,6 @@ export class ListEditing {
 
 	private endCard(): void {
 		this.title = null;
-		this.notes = null;
 		this.notesPiece = null;
 	}
 
