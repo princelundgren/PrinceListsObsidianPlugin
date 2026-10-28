@@ -1094,11 +1094,11 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
       caret after the marker.
     - `outdent`, when `nested`, and `endList` otherwise: the field's last line is an empty item at
       the field's own indent.
-    - `newline` otherwise.
+    - `newline` otherwise, as for a line that only looks like an item, in a fence or a paragraph.
   - `neighborPiece(ranges: readonly LineRange[], current: LineRange, direction: 'up' | 'down'):
     LineRange | null`: up, the range with the greatest start before `current.start` (an item's
-    parent, from its first child); down, the smallest start at or after `current.end`, or, from a
-    parent, its first child.
+    parent, from its first child); down, the smallest start after `current.start`: from a parent,
+    its first child, else the next piece.
 
 - [ ] **Step 1: Write the failing tests** on notes holding a paragraph, a table, a fenced block
   with an empty line inside, a callout holding a list, a nested numbered and checklist list, a
