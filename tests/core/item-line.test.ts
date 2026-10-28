@@ -89,8 +89,13 @@ describe('untickLine', () => {
 		[`- [x] a ${STAMP}`, '- [ ] a'],
 		[`- [x] a ${STAMP} 📅 2026-10-30 ✅ 2026-10-20`, '- [ ] a 📅 2026-10-30'],
 		['- [x] a ✔ 2026-10-20 10:00 ', '- [ ] a '],
+		['- [x]  ✔ 2026-10-20 10:00 ⏳ 2026-10-30', '- [ ] ⏳ 2026-10-30'],
+		['- [x]  📅 2026-10-30', '- [ ]  📅 2026-10-30'],
 	])('%s', (input, expected) => {
 		expect(untickLine(input)).toBe(expected);
+	});
+	test.each(['- [ ] ⏳ 2026-10-30', '- [ ] 📅 2026-11-01', '- [ ] '])('a tick and an untick of %s give it back', (line) => {
+		expect(untickLine(tickLine(line, new Date(2026, 9, 28, 10, 0)))).toBe(line);
 	});
 });
 
