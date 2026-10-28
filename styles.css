@@ -212,8 +212,12 @@ textarea.princelists-title {
 }
 
 /* A table in rendered notes, drawn as in a note: Obsidian's own table rules apply only inside its
-   views. */
+   views. One wider than the card scrolls inside it, as code does, so the list never scrolls sideways. */
 .princelists-card-notes table {
+	display: block;
+	width: max-content;
+	max-width: 100%;
+	overflow-x: auto;
 	border-collapse: collapse;
 	margin-block: var(--size-4-2);
 }
