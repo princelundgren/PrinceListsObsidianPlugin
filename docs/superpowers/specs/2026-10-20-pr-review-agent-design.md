@@ -173,5 +173,5 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   `node scripts/check-docs.mjs`; the full output is hidden, so the others aren't known. Local
   `claude -p` probes showed the exact rules refuse near misses and the deny rules stop `git commit`
   and the push script.
-- **The `@AGENTS.md` import.** Both prompts name `AGENTS.md` themselves, so a review that cites it
-  doesn't show the import loaded.
+- **`@claude` reading `AGENTS.md`.** Claude Code reads it when there's no `CLAUDE.md`, from 2.1.277,
+  but `claude.yml`'s prompt doesn't name it, and no `@claude` run has shown it loaded.
