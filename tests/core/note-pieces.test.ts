@@ -129,6 +129,10 @@ describe('pieceEnter', () => {
 		expect(pieceEnter('- [ ] b\n- [ ] ', 14, true)).toEqual({ kind: 'outdent' });
 	});
 
+	test('takes the field own indent from its first line with text, past a new piece empty line', () => {
+		expect(pieceEnter('\n  - a\n  - ', 12, false)).toEqual({ kind: 'endList' });
+	});
+
 	test('ends the list on an empty item at the field own indent when the piece is not nested', () => {
 		expect(pieceEnter('- [ ] a\n- [ ] ', 14, false)).toEqual({ kind: 'endList' });
 	});

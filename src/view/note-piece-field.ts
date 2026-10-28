@@ -1,3 +1,4 @@
+import { holdsSeparatorLine } from '../core/edit-lines';
 import type { LineRange } from '../core/follow';
 import { holdsOnly } from '../core/note-pieces';
 import { NOTES_EDITOR_CLASS, sayFieldLost } from './card';
@@ -25,6 +26,9 @@ export interface PieceMove {
 }
 
 const QUIET_PLACEHOLDER_CLASS = 'princelists-quiet-placeholder';
+// A new block's field, flush under the block above while it holds the empty line between them.
+const NEW_BLOCK_CLASS = 'princelists-new-block';
+const newBlocks = new WeakSet<HTMLTextAreaElement>();
 
 // Fields that handed typing on to another, which removes them itself.
 const handedOn = new WeakSet<HTMLTextAreaElement>();
@@ -62,7 +66,13 @@ export function openNewPiece(view: PrinceListView, host: NotesHost): HTMLTextAre
 
 export function pieceInput(view: PrinceListView, field: HTMLTextAreaElement): void {
 	fitHeight(field);
+	showNewBlock(field);
 	typePiece(view, field, field.value);
+}
+
+// The empty line is saved either way; once the field no longer shows it, the block's gap does.
+function showNewBlock(field: HTMLTextAreaElement): void {
+	field.toggleClass(NEW_BLOCK_CLASS, newBlocks.has(field) && holdsSeparatorLine(field.value));
 }
 
 /** Saves `markdown` as the open piece, as typing it would; false when it wasn't saved. */
@@ -94,6 +104,8 @@ export function movePiece(view: PrinceListView, from: HTMLTextAreaElement, to: P
 	hideField(from);
 	const text = to.text ?? opened;
 	const field = pieceField(text);
+	if (to.isNew) newBlocks.add(field);
+	showNewBlock(field);
 	putField(host.area, to.place, field);
 	field.focus();
 	const caret = to.caret === 'start' ? 0 : to.caret === 'end' || !text.includes('\n') ? text.length : text.indexOf('\n');
@@ -111,12 +123,15 @@ function openPiece(view: PrinceListView, host: NotesHost, place: PiecePlace, ran
 	if (!found) return null;
 	const end = notesEnd(found.notes);
 	const start = end ?? found.notes.start;
-	const text = host.open(range ?? { start, end: start }, range === null && end !== null);
+	const isNew = range === null && end !== null;
+	const text = host.open(range ?? { start, end: start }, isNew);
 	if (text === null) return null;
 	// Before the drawing makes way for the field.
 	const clicked = place.kind === 'item' ? place.li : place.kind === 'piece' ? place.el : null;
 	const caret = click && clicked ? caretAtClick(clicked, click, text) : text.length;
 	const field = pieceField(text);
+	if (isNew) newBlocks.add(field);
+	showNewBlock(field);
 	showPlaceholder(field, host);
 	showField(host.area, place, field);
 	buildFormatBar(field);

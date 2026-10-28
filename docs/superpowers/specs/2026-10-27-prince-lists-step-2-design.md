@@ -408,6 +408,12 @@ renderer, and only the part you click becomes a plain-text field.
 - **Clicking below the last block opens an empty block at the end (owner),** as clicking empty
   notes did. Once it holds text it's saved after an empty line when the notes already hold a
   block, so it stays a block of its own **(call)**.
+  - With a block above it, its field opens right under that block, holding the empty line with the
+    caret on the line below, as in a note: Up stops on the empty line before moving into the block
+    above, and Backspace takes the empty line first **(owner, 2026-10-28)**. The empty block that
+    Enter opens below a list opens the same way.
+  - The empty line is saved even when it's taken out of the field, so the block stays a block of
+    its own; the field then shows the gap between blocks in its place **(call)**.
   - Its gray "Notes" shows only while the notes hold nothing else, as in empty notes. With other
     blocks around it, the placeholder stays the field's name for screen readers but isn't shown
     **(call)**.
