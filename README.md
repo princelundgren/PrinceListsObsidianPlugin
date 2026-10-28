@@ -8,7 +8,7 @@
 </p>
 
 PrinceLists turns a note into a todo list you can tick, drag and plan, on desktop and on your
-phone. Underneath, it stays plain Markdown that any editor can read.
+phone.
 
 ![In a todo list in Obsidian, a new item gets a title, notes with a link and a pasted picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
