@@ -47,6 +47,17 @@ describe('CollapsedHeadings', () => {
 		expect(collapsed.lines()).toEqual(new Set());
 	});
 
+	test('collapseAll collapses every heading given, keeping those already collapsed', () => {
+		const { editing, collapsed } = collapsedIn(TEXT);
+		collapsed.toggle(4);
+		collapsed.collapseAll([4, 6]);
+		expect(collapsed.lines()).toEqual(new Set([4, 6]));
+		editing.outsideChange(TEXT.replace('- [ ] a\n', '- [ ] a\nText\n'));
+		expect(collapsed.lines()).toEqual(new Set([5, 7]));
+		collapsed.toggle(5);
+		expect(collapsed.lines()).toEqual(new Set([7]));
+	});
+
 	test('reset and clear expand every heading', () => {
 		const { editing, collapsed } = collapsedIn(TEXT);
 		collapsed.toggle(4);

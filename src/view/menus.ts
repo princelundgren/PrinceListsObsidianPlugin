@@ -79,6 +79,7 @@ export function headingMenu(view: PrinceListView, section: Section, menu: Menu):
 			.setWarning(true)
 			.onClick(atLine(anchor, (line) => deleteHeadingAt(view, line))),
 	);
+	collapseAllItems(view, menu);
 }
 
 // The list's own actions, from a right-click on its background on desktop. New item and New heading
@@ -116,12 +117,45 @@ export function listMenu(view: PrinceListView, section: Section, menu: Menu): vo
 			.setChecked(view.showArchived)
 			.onClick(() => view.toggleArchived()),
 	);
+	collapseAllItems(view, menu);
+	menu.addSeparator();
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Open schedule')
 			.setIcon(SCHEDULE_ICON)
 			.onClick(() => void openSchedule(view.app.workspace)),
 	);
+}
+
+function collapseAllItems(view: PrinceListView, menu: Menu): void {
+	const headingLines = () => view.parse().model.sections.flatMap(({ headingLine }) => (headingLine === null ? [] : [headingLine]));
+	const collapsed = view.collapsed.lines();
+	const anyOpen = headingLines().some((line) => !collapsed.has(line));
+	const anyCollapsed = headingLines().some((line) => collapsed.has(line));
+	if (!anyOpen && !anyCollapsed) return;
+	menu.addSeparator();
+	if (anyOpen) {
+		menu.addItem((entry) =>
+			entry
+				.setTitle('Collapse all headings')
+				.setIcon('chevrons-down-up')
+				.onClick(() => {
+					view.collapsed.collapseAll(headingLines());
+					view.render();
+				}),
+		);
+	}
+	if (anyCollapsed) {
+		menu.addItem((entry) =>
+			entry
+				.setTitle('Expand all headings')
+				.setIcon('chevrons-up-down')
+				.onClick(() => {
+					view.collapsed.clear();
+					view.render();
+				}),
+		);
+	}
 }
 
 // A right-click on desktop: a row's or a heading's menu, else the list's. A field keeps the menu it

@@ -14,6 +14,11 @@ export class CollapsedHeadings {
 		else this.headings.add(this.editing.track(headingLine));
 	}
 
+	collapseAll(headingLines: readonly number[]): void {
+		const collapsed = this.lines();
+		for (const line of headingLines) if (!collapsed.has(line)) this.headings.add(this.editing.track(line));
+	}
+
 	expand(headingLine: number): void {
 		const found = this.find(headingLine);
 		if (found) this.drop(found);
