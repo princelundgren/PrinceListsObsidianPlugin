@@ -36,8 +36,20 @@ textarea.princelists-title {
 }
 
 .princelists-list-note {
-	margin-bottom: var(--size-4-4);
 	color: var(--text-muted);
+}
+
+/* The space under the list note: below its last piece, a strip a line tall opens a new one. */
+.princelists-list-note-text > .princelists-notes-end {
+	min-height: calc(1em * var(--line-height-normal));
+}
+
+.princelists-list-note-text > .princelists-note-piece:nth-last-child(2) > :last-child {
+	margin-bottom: 0;
+}
+
+.princelists-list-note-text > .princelists-placeholder {
+	margin-bottom: var(--size-4-4);
 }
 
 .princelists-untouched {
@@ -54,7 +66,7 @@ textarea.princelists-title {
 	overflow-wrap: break-word;
 }
 
-textarea.princelists-list-note-editor {
+.princelists-list-note textarea {
 	color: var(--text-normal);
 }
 
@@ -244,6 +256,7 @@ textarea.princelists-list-note-editor {
 	min-height: calc(2em * var(--line-height-normal));
 }
 
+.princelists-list-note-text > .princelists-note-piece:first-child > :first-child,
 .princelists-card-notes > .princelists-note-piece:first-child > :first-child {
 	margin-top: 0;
 }

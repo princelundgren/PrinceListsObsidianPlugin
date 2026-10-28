@@ -1,9 +1,8 @@
 import { UnsafeEditError } from './edit-check';
-import { isBlankAt } from './edit-lines';
 import { mapPieceRange, setNotesPiece, type PieceSession } from './edit-piece';
 import { getItemNotes, notesStartLine } from './edit-items';
-import { getListNote, setListNote } from './edit-list-note';
-import { followLine, followRange, mapRange, ownEdit, type LineRange, type OwnEdit, type RunEdit } from './follow';
+import { getListNote, listNoteWithPiece, setListNotePiece, type ListNotePiece } from './edit-list-note';
+import { followLine, followRange, ownEdit, type LineRange, type OwnEdit, type RunEdit } from './follow';
 import { mapLine } from './guard';
 import { EditHistory } from './history';
 import { parseItemLine } from './item-line';
@@ -19,11 +18,16 @@ import { splitStar } from './star';
  * wrote nothing because its item or session is gone.
  */
 export type Typed = { edit: OwnEdit } | { refused: true; firstRefusal: boolean } | { lost: true };
+/** As Typed, with the whole list note as saved, which its warnings check. */
+export type TypedListNote = { edit: OwnEdit; note: string } | Exclude<Typed, { edit: OwnEdit }>;
 
 /** A line that follows the view's own edits and outside changes. null once it is gone. */
 export interface TrackedLine {
 	line: number | null;
 }
+
+// The one open piece of notes, in the open card's item or in the list note.
+type OpenPiece = { notes: 'item'; piece: PieceSession; refused: boolean } | { notes: 'listNote'; piece: ListNotePiece; refused: boolean };
 
 // The view's text and the line-based state that edits it: the open card's item (`selected`), the
 // three typing sessions and lines waiting for a write. Every edit that moves lines comes through
@@ -36,9 +40,7 @@ export class ListEditing {
 	private readonly tracked = new Set<TrackedLine>();
 	// `field` changes with every keystroke; the object around it is the typing session.
 	private title: { field: TitleField } | null = null;
-	private notesPiece: { piece: PieceSession; refused: boolean } | null = null;
-	// `separator`: the blank line this session's last save wrote right under the note, or null.
-	private note: { range: LineRange; separator: number | null; refused: boolean } | null = null;
+	private piece: OpenPiece | null = null;
 
 	constructor(private readonly contentStartOf: (text: string) => number) {}
 
@@ -48,7 +50,7 @@ export class ListEditing {
 		for (const tracked of this.tracked) tracked.line = null;
 		this.tracked.clear();
 		this.endCard();
-		this.note = null;
+		this.piece = null;
 		this.history.clear();
 	}
 
@@ -96,12 +98,12 @@ export class ListEditing {
 	}
 
 	closeNotes(): void {
-		this.notesPiece = null;
+		if (this.piece?.notes === 'item') this.piece = null;
 	}
 
 	/** The lines the open piece of the notes writes, while one is open. */
 	notesPieceRange(): LineRange | null {
-		return this.notesPiece?.piece.range ?? null;
+		return this.piece?.notes === 'item' ? this.piece.piece.range : null;
 	}
 
 	// An empty range is a new piece, at the notes' indent, or a new item from Enter, at `indent` or
@@ -109,33 +111,26 @@ export class ListEditing {
 	openNotesPiece(range: LineRange, isNew: boolean, indent?: string): string | null {
 		const found = this.selectedItem();
 		if (!found) {
-			this.notesPiece = null;
+			this.closeNotes();
 			return null;
 		}
-		const { notesIndent } = found.item;
-		const opened =
-			range.start < range.end
-				? pieceText(this.text, range)
-				: { text: '', indent: indent ?? (isNew ? notesIndent : (this.notesPiece?.piece.indent ?? notesIndent)) };
-		this.notesPiece = { piece: { range, indent: opened.indent, separator: isNew }, refused: false };
+		const opened = this.openedText(range, isNew, found.item.notesIndent, indent);
+		this.piece = { notes: 'item', piece: { range, indent: opened.indent, separator: isNew }, refused: false };
 		return opened.text;
 	}
 
 	/** The marker that moves the open piece, an item whose field holds `text`, one level out. */
 	notesPieceOutdent(text: string): string | null {
 		const found = this.selectedItem();
-		const piece = this.notesPiece?.piece;
-		if (!found || !piece) return null;
+		if (!found || this.piece?.notes !== 'item') return null;
 		const { lines, item } = found;
-		const start = notesStartLine(lines, item);
-		const fileLines = lines.slice(start, item.endLine).map((line) => line.text);
-		return outdentMarker(getItemNotes(lines, item), fileLines, { start: piece.range.start - start, end: piece.range.end - start }, piece.indent + text);
+		return outdentIn(lines, getItemNotes(lines, item), notesStartLine(lines, item), item.endLine, this.piece.piece, text);
 	}
 
 	typeNotesPiece(markdown: string): Typed {
 		const found = this.selectedItem();
-		const session = this.notesPiece;
-		if (!found || !session) return { lost: true };
+		const session = this.piece;
+		if (!found || session?.notes !== 'item') return { lost: true };
 		const { lines, model, item } = found;
 		return this.refusable(session, () => {
 			const result = setNotesPiece(lines, model, item, session.piece, markdown);
@@ -144,43 +139,50 @@ export class ListEditing {
 		});
 	}
 
-	// Seeds the range each save replaces; see setListNote for why it isn't re-read from the file.
-	openListNote(): string {
-		const { lines, model } = this.parse();
-		this.note = { range: model.listNote, separator: null, refused: false };
-		return getListNote(lines, model);
+	// An empty range is a new piece, or a new item from Enter, as in openNotesPiece.
+	openListNote(range: LineRange, isNew: boolean, indent?: string): string {
+		const opened = this.openedText(range, isNew, '', indent);
+		this.piece = { notes: 'listNote', piece: { range, indent: opened.indent, separator: isNew, blankAfter: false }, refused: false };
+		return opened.text;
 	}
 
 	closeListNote(): void {
-		this.note = null;
+		if (this.piece?.notes === 'listNote') this.piece = null;
 	}
 
-	/** The lines the list note's field writes, while it is open. */
+	/** The lines the list note's open piece writes, while one is open. */
 	listNoteRange(): LineRange | null {
-		return this.note?.range ?? null;
+		return this.piece?.notes === 'listNote' ? this.piece.piece.range : null;
 	}
 
-	typeListNote(markdown: string): Typed {
-		const session = this.note;
-		if (!session) return { lost: true };
+	/** As notesPieceOutdent, for the list note's open piece. */
+	listNoteOutdent(text: string): string | null {
+		if (this.piece?.notes !== 'listNote') return null;
+		const { lines, model } = this.parse();
+		const { start, end } = model.listNote;
+		return outdentIn(lines, getListNote(lines, model), start, end, this.piece.piece, text);
+	}
+
+	/** The whole list note as it would read with `markdown` saved in the open piece. */
+	listNoteAsTyped(markdown: string): string | null {
+		if (this.piece?.notes !== 'listNote') return null;
+		const { lines, model } = this.parse();
+		return listNoteWithPiece(lines, model, this.piece.piece, markdown);
+	}
+
+	typeListNote(markdown: string): TypedListNote {
+		const session = this.piece;
+		if (session?.notes !== 'listNote') return { lost: true };
 		const { lines, model } = this.parse();
 		return this.refusable(session, () => {
-			const { range, separator } = session;
-			// The blank line the last save wrote under the note is replaced with the note, so a note
-			// erased again leaves none behind; but only while it is still blank and right under the
-			// note, since a line another device added there must stay.
-			const owned = separator === range.end && isBlankAt(lines, separator);
-			const replaced = owned ? { start: range.start, end: range.end + 1 } : range;
-			const result = setListNote(lines, model, replaced, markdown);
-			// setListNote returns the note's own lines; a line count that grew past them is the blank
-			// line it wrote under the note.
-			const written = result.note.end - result.note.start;
-			const wroteSeparator = result.lines.length - lines.length > written - (replaced.end - replaced.start);
-			session.range = result.note;
-			session.separator = wroteSeparator ? result.note.end : null;
-			// With no note yet, the note goes in before whatever is at its start.
-			const kind = replaced.start === replaced.end ? 'insert' : 'change';
-			return { edit: this.apply(joinLines(result.lines), replaced.start, kind, session) };
+			const { range, separator } = session.piece;
+			const result = setListNotePiece(lines, model, session.piece, markdown);
+			session.piece = result.piece;
+			// A new piece's save starts at the unchanged line above it; with no line above, it goes in
+			// before whatever is at its start.
+			const isInsert = range.start === range.end && !separator;
+			const start = separator ? range.start - 1 : range.start;
+			return { edit: this.apply(joinLines(result.lines), start, isInsert ? 'insert' : 'change', session), note: result.note };
 		});
 	}
 
@@ -191,9 +193,8 @@ export class ListEditing {
 	}
 
 	// Lines are mapped by text, and a typing session keeps its text (spec, "Saving and outside
-	// changes"). The list note's field reads the note again only when its range can't be mapped, and
-	// `noteText` is then what it reads.
-	outsideChange(next: string): { lostSelected: boolean; noteText: string | null } {
+	// changes"). A piece of notes whose own lines changed is lost.
+	outsideChange(next: string): { lostSelected: boolean } {
 		const oldLines = splitLines(this.text);
 		const newLines = splitLines(next);
 		this.text = next;
@@ -203,29 +204,18 @@ export class ListEditing {
 		const hadSelected = this.selected !== null;
 		this.selected = map(this.selected);
 		this.afterMove(newLines);
-		if (this.notesPiece) {
-			const range = mapPieceRange(oldLines, newLines, this.notesPiece.piece.range);
-			if (range) this.notesPiece.piece.range = range;
-			else this.notesPiece = null;
+		const session = this.piece;
+		if (session) {
+			const { range } = session.piece;
+			const mapped = mapPieceRange(oldLines, newLines, range);
+			if (!mapped) this.piece = null;
+			else session.piece.range = mapped;
+			if (mapped && session.notes === 'listNote') session.piece.blankAfter &&= mapLine(oldLines, newLines, range.end) === mapped.end;
 		}
-		let noteText: string | null = null;
-		if (this.note) {
-			const range = mapRange(oldLines, newLines, this.note.range);
-			const { separator } = this.note;
-			this.note.separator = separator === null ? null : mapLine(oldLines, newLines, separator);
-			if (range) {
-				this.note.range = range;
-			} else {
-				const { lines, model } = this.parse();
-				this.note.range = model.listNote;
-				this.note.separator = null;
-				noteText = getListNote(lines, model);
-			}
-		}
-		return { lostSelected: hadSelected && this.selected === null, noteText };
+		return { lostSelected: hadSelected && this.selected === null };
 	}
 
-	private refusable(session: { refused: boolean }, save: () => Typed): Typed {
+	private refusable<T extends Typed>(session: { refused: boolean }, save: () => T): T | Exclude<Typed, { edit: OwnEdit }> {
 		try {
 			return save();
 		} catch (error) {
@@ -243,24 +233,18 @@ export class ListEditing {
 		return edit;
 	}
 
-	// The list note's own saves replace its range instead, so `from`, the keystroke's session, skips it.
+	// A piece's own saves set its range instead, so `from`, the keystroke's session, skips it.
 	private follow(next: string, edit: OwnEdit, from?: object): void {
 		this.text = next;
 		for (const tracked of this.tracked) tracked.line = tracked.line === null ? null : followLine(tracked.line, edit);
 		const selected = this.selected;
 		this.selected = selected === null ? null : followLine(selected, edit);
 		this.afterMove(splitLines(next), edit.kind !== 'move' && edit.start === selected ? edit.retitle : undefined);
-		if (this.notesPiece && this.notesPiece !== from) {
-			const range = followRange(this.notesPiece.piece.range, edit);
-			if (range) this.notesPiece.piece.range = range;
-			else this.notesPiece = null;
-		}
-		if (this.note && this.note !== from) {
-			const { separator } = this.note;
-			this.note.separator = separator === null ? null : followLine(separator, edit);
-			// No own edit starts inside the note. If one did, the field's text would win over the
-			// note as the file now parses.
-			this.note.range = followRange(this.note.range, edit) ?? this.parse().model.listNote;
+		const session = this.piece;
+		if (session && session !== from) {
+			const range = followRange(session.piece.range, edit);
+			if (range) session.piece.range = range;
+			else this.piece = null;
 		}
 	}
 
@@ -278,7 +262,14 @@ export class ListEditing {
 
 	private endCard(): void {
 		this.title = null;
-		this.notesPiece = null;
+		this.closeNotes();
+	}
+
+	// An empty range opens no text, at `indent`, the notes' indent when new, or the open piece's,
+	// which a new item from Enter follows.
+	private openedText(range: LineRange, isNew: boolean, notesIndent: string, indent?: string): { text: string; indent: string } {
+		if (range.start < range.end) return pieceText(this.text, range);
+		return { text: '', indent: indent ?? (isNew ? notesIndent : (this.piece?.piece.indent ?? notesIndent)) };
 	}
 
 	private parse(): { lines: Line[]; model: ListModel } {
@@ -292,4 +283,11 @@ export class ListEditing {
 		const item = itemAt(model, this.selected);
 		return item ? { lines, model, item } : null;
 	}
+}
+
+// The marker that moves `piece`, an item whose field holds `text`, one level out, in notes that start
+// at file line `start` and end before `end`.
+function outdentIn(lines: readonly Line[], notes: string, start: number, end: number, piece: PieceSession, text: string): string | null {
+	const fileLines = lines.slice(start, end).map((line) => line.text);
+	return outdentMarker(notes, fileLines, { start: piece.range.start - start, end: piece.range.end - start }, piece.indent + text);
 }

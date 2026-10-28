@@ -5,6 +5,7 @@ import { targetOf } from './dom';
 import { changeField } from './field-undo';
 import type { PrinceListView } from './list-view';
 import { openNewPiece, pieceInput } from './note-piece-field';
+import { cardNotesHost } from './notes-host';
 
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";
 const FAILED_NOTICE = "Couldn't add the picture.";
@@ -128,7 +129,7 @@ function insertLinks(view: PrinceListView, card: Card, text: string, into: HTMLT
 	}
 	// Blurred, an open field closes and its piece is drawn, before the new piece opens.
 	area.querySelector('textarea')?.blur();
-	const field = openNewPiece(view, area);
+	const field = openNewPiece(view, cardNotesHost(view, card, area));
 	if (!field) return;
 	changeField(field, () => (field.value = text));
 	pieceInput(view, field);

@@ -1246,22 +1246,38 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
 ### Task 23: Edit the list note a piece at a time
 
 **Files:**
-- Modify: `src/core/edit-list-note.ts`, `tests/core/edit-list-note.test.ts`, `src/core/editing.ts`
-  (or `list-note-session.ts`), `tests/core/editing.test.ts`, `src/view/fields.ts`,
-  `src/view/note-pieces.ts`, `src/view/events.ts`, `src/view/list-view.ts`
+- Create: `src/view/notes-host.ts`
+- Modify: `src/core/edit-list-note.ts`, `tests/core/edit-list-note.test.ts`, `src/core/editing.ts`,
+  `tests/core/editing.test.ts`, `src/view/fields.ts`, `src/view/note-piece-field.ts`,
+  `src/view/note-piece-keys.ts`, `src/view/events.ts`, `src/view/keys.ts`, `src/view/redraw.ts`,
+  `src/view/list-view.ts`, `src/view/card.ts`, `src/view/pictures.ts`, `src/view/field-undo.ts`,
+  `styles.css`
 
 **Interfaces:**
 - Consumes: Tasks 19 to 22.
-- Produces, in `src/core/edit-list-note.ts`: `setListNotePiece(lines: readonly Line[], model:
-  ListModel, piece: PieceSession, typed: string): { lines: Line[]; piece: PieceSession }`: as
+- Produces, in `src/core/edit-list-note.ts`: `ListNotePiece`, a `PieceSession` with `blankAfter`,
+  the blank line its last save wrote under it. `setListNotePiece(lines: readonly Line[], model:
+  ListModel, piece: ListNotePiece, typed: string): { lines: Line[]; piece: ListNotePiece; note:
+  string }`: as
   `setNotesPiece`, with the list note's own rules. The blank line after the note is written only
-  when the piece is the note's last, and the unclosed-block exception and the block check act on
-  the whole note as it would be saved.
-- Produces, in `src/core/editing.ts`: `openListNote(range?: LineRange, isNew?: boolean): string`
-  opens one piece; a session whose range is lost gets `{ lost: true }`, not the whole note.
+  when the piece is the note's last. The unclosed-block exception applies when the typed or the
+  replaced text, or the whole note before or after, leaves a block open; the block check acts on
+  the whole note as it would be saved, which it returns as `note` for the warnings.
+  `listNoteWithPiece(lines, model, piece, typed): string` is that whole note without saving, for a
+  piece just opened. `setListNote` goes.
+- Produces, in `src/core/editing.ts`: `openListNote(range: LineRange, isNew: boolean, indent?:
+  string): string` opens one piece, with `listNoteRange()`, `listNoteOutdent(text)`,
+  `listNoteAsTyped(markdown)`, `typeListNote(markdown)`, which also returns the saved `note`, and
+  `closeListNote()`. A session whose
+  range is lost gets `{ lost: true }`, not the whole note. A card's piece and the list note's are
+  one session, so opening one ends the other. `outsideChange` returns `{ lostSelected }`.
+- Produces, in `src/view/notes-host.ts`: `NotesHost`, the notes a piece field edits, the open
+  card's or the list note, found from an element by `notesHostOf(view, el)`. The piece field and
+  Task 22's keys act on it. A new piece after the last opens after an empty line only when the
+  notes already have one, so a card's first note has no blank line above it.
 - The list note draws with `drawNotes` and opens with `openPieceAt`; Task 22's keys, the format
-  bar and Cmd+B, Cmd+I and Cmd+K work in it. It still takes no pictures. Its warnings check the
-  whole note as it would be saved.
+  bar, its undo, and Cmd+B, Cmd+I and Cmd+K work in it. It still takes no pictures, and its boxes
+  don't tick. Its warnings check the whole note as it would be saved.
 
 - [ ] **Step 1: Write the failing tests:** typing into a list note's second piece changes only its
   lines; a new piece at the end of the note gets an empty line before it and the blank line after
