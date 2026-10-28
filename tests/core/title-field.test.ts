@@ -26,6 +26,9 @@ describe('oneLineTitle', () => {
 		expect(oneLineTitle('a\nb\r\nc\rd')).toBe('a b c d');
 		expect(oneLineTitle('plain')).toBe('plain');
 	});
+	test('replaces the Unicode line and paragraph separators with a space', () => {
+		expect(oneLineTitle('a\u2028b\u2029c')).toBe('a b c');
+	});
 });
 
 describe('typeTitle across a typing session', () => {

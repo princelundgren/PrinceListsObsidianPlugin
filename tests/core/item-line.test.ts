@@ -169,6 +169,10 @@ describe('parseItemLine', () => {
 			tail: ' 📅 2026-10-30 ^id',
 		});
 	});
+	// CommonMark doesn't end a line at U+2028 or U+2029, so the line is still one item.
+	test('reads a title holding a Unicode line separator', () => {
+		expect(parseItemLine('- [ ] a\u2028b 📅 2026-10-30')?.title).toBe('a\u2028b');
+	});
 	test.each(['- bullet', '## h', '-[ ] x', '- [ab] x'])('returns null for %s', (t) => {
 		expect(parseItemLine(t)).toBeNull();
 	});
