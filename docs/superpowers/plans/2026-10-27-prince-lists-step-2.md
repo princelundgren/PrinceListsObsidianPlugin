@@ -1276,8 +1276,10 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
   Task 22's keys act on it. A new piece after the last opens after an empty line only when the
   notes already have one, so a card's first note has no blank line above it.
 - The list note draws with `drawNotes` and opens with `openPieceAt`; Task 22's keys, the format
-  bar, its undo, and Cmd+B, Cmd+I and Cmd+K work in it. It still takes no pictures, and its boxes
-  don't tick. Its warnings check the whole note as it would be saved.
+  bar, its undo, and Cmd+B, Cmd+I and Cmd+K work in it. It still takes no pictures. Its nested
+  boxes tick as a card's do, through `listNoteChecklist(lines, model)` and `planListNoteTick(text,
+  contentStart, index, lineText)` in `src/core/checklist.ts`. Its warnings check the whole note as
+  it would be saved.
 
 - [ ] **Step 1: Write the failing tests:** typing into a list note's second piece changes only its
   lines; a new piece at the end of the note gets an empty line before it and the blank line after

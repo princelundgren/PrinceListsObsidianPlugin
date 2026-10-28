@@ -1,9 +1,10 @@
 import { Parser } from 'commonmark';
 import { getItemNotes, notesStartLine } from './edit-items';
+import { getListNote } from './edit-list-note';
 import { joinItemLine, parseItemLine } from './item-line';
 import type { PlannedLineEdit } from './list-actions';
 import { joinLines, spliceLines, splitLines, type Line } from './lines';
-import { itemAt, parseList, type ItemBlock } from './parse';
+import { itemAt, parseList, type ItemBlock, type ListModel } from './parse';
 
 export interface ChecklistLine {
 	line: number;
@@ -15,8 +16,15 @@ export interface ChecklistLine {
 // the notes hold `%%` or `$$`: Obsidian hides the boxes inside them, and an embed's or a callout's
 // box could make up the count, so no box can be lined up with its line.
 export function checklistOf(lines: readonly Line[], item: ItemBlock): ChecklistLine[] | null {
-	const notesStart = notesStartLine(lines, item);
-	const notes = getItemNotes(lines, item);
+	return checklistIn(lines, getItemNotes(lines, item), notesStartLine(lines, item));
+}
+
+/** As checklistOf, for the list note: its checkbox lines, which are nested, since a top-level one is an item. */
+export function listNoteChecklist(lines: readonly Line[], model: ListModel): ChecklistLine[] | null {
+	return checklistIn(lines, getListNote(lines, model), model.listNote.start);
+}
+
+function checklistIn(lines: readonly Line[], notes: string, notesStart: number): ChecklistLine[] | null {
 	if (notes === '') return [];
 	if (notes.includes('%%') || notes.includes('$$')) return null;
 	const checklist: ChecklistLine[] = [];
@@ -54,8 +62,17 @@ export function planChecklistTick(
 ): PlannedLineEdit | null {
 	const lines = splitLines(text);
 	const item = itemAt(parseList(lines, contentStart), titleLine);
-	if (!item) return null;
-	const entry = checklistOf(lines, item)?.[index];
+	return item ? tickIn(lines, checklistOf(lines, item), index, lineText) : null;
+}
+
+/** As planChecklistTick, for a box in the list note. */
+export function planListNoteTick(text: string, contentStart: number, index: number, lineText: string): PlannedLineEdit | null {
+	const lines = splitLines(text);
+	return tickIn(lines, listNoteChecklist(lines, parseList(lines, contentStart)), index, lineText);
+}
+
+function tickIn(lines: readonly Line[], checklist: ChecklistLine[] | null, index: number, lineText: string): PlannedLineEdit | null {
+	const entry = checklist?.[index];
 	const line = entry ? lines[entry.line] : undefined;
 	if (!entry || !line || line.text !== lineText) return null;
 	const next = joinLines(spliceLines(lines, entry.line, 1, [{ text: toggleChecklistLine(line.text), eol: line.eol }]));
