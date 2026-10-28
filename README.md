@@ -21,13 +21,13 @@ phone. Underneath, it stays plain Markdown that any editor can read.
 
 ## Features
 
-- **Sections and notes.** Headings make sections and checkboxes make items. Anything indented under
-  an item is its notes, in any Markdown.
-- **Drag to reorder** an item, or a heading with its whole section.
+- **Sections** group your items, and fold away with the arrow beside them.
+- **Notes on any item:** links, checklists and tables, edited a block at a time with a format bar.
+  Paste or drop pictures straight in.
+- **Drag to reorder** an item, or a whole section by its heading.
 - **Tick and forget.** Ticked items gray out, then hide after 24 hours. **Show archived** brings
   them back.
 - **Stars and dates,** set in an item's open card and shown on its row.
-- **Notes edit a block at a time,** with a format bar. Paste or drop pictures straight in.
 - **Find and undo:** Cmd+F filters the list and Cmd+Z undoes (Ctrl on Windows and Linux).
 - **Menus** on a right-click of an item, a heading or the list.
 
