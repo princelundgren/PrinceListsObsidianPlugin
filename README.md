@@ -7,10 +7,10 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/princelundgren/PrinceListsObsidianPlugin" alt="MIT license"></a>
 </p>
 
-![In a todo list in Obsidian, a new item gets a title, notes with a link and a pasted picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
-
 PrinceLists turns a note into a todo list you can tick, drag and plan, on desktop and on your
 phone. Underneath, it stays plain Markdown that any editor can read.
+
+![In a todo list in Obsidian, a new item gets a title, notes with a link and a pasted picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
 A ticked item grays out, and after 24 hours it's archived out of sight. **Show archived**, the
 checkbox icon in the pane's header, brings archived items back, each with a blue checkbox.
