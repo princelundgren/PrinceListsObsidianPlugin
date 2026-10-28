@@ -415,6 +415,22 @@ button.princelists-collapse:not(:focus-visible) {
 	}
 }
 
+/* On mobile, each takes a finger-sized box, as Obsidian's own buttons there do, with its icon its usual size. */
+.princelists-is-mobile button.princelists-card-actions,
+.princelists-is-mobile button.princelists-card-star,
+.princelists-is-mobile .princelists-format-bar button,
+.princelists-is-mobile .princelists-when-button,
+.princelists-is-mobile button.princelists-block-trash {
+	justify-content: center;
+	min-width: var(--input-height);
+	min-height: var(--input-height);
+}
+
+/* The taller row still centered on the title's first line. */
+.princelists-is-mobile .princelists-card-tools {
+	margin-block: calc((var(--line-height-normal) * 1em - var(--input-height)) / 2);
+}
+
 /* Rename heading's field reads as the heading it edits. */
 textarea.princelists-heading-field {
 	margin: var(--size-4-4) 0 var(--size-4-1);
@@ -538,6 +554,12 @@ button.princelists-collapse {
 	opacity: 0;
 	--icon-size: 10px;
 	--icon-stroke: 4px;
+}
+
+/* On mobile, wider into the margin for a finger, with the icon still beside its heading. */
+.princelists-is-mobile button.princelists-collapse {
+	justify-content: flex-end;
+	min-width: var(--size-4-5);
 }
 
 .princelists-is-collapsed .princelists-collapse {
