@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-28
+verified: 2026-10-29
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -81,7 +81,7 @@ and data safety, and owner's advocate. Their findings are folded in.
    Windows, Linux, iOS, iPadOS and Android. Obsidian runs on all of them, and the code depends only
    on whether it runs on desktop or mobile, through Obsidian's `Platform`. This replaces the first
    targets, the Mac and the iPhone (2026-10-20). Hands-on checks have run on macOS, an iPhone
-   (step one) and an Android emulator (step two) so far; Windows, Linux, a real Android device and
+   (step one), an Android emulator (step two) and Windows so far; Linux, a real Android device and
    the iPad aren't checked yet.
 
 **Two parts (owner):**
@@ -1209,8 +1209,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Testing and owner checkpoints
 
-- **Manual testing uses a test vault on desktop and mobile,** so far macOS, an iPhone (step one)
-  and an Android emulator (step two). Windows, Linux, a real Android device and the iPad aren't
+- **Manual testing uses a test vault on desktop and mobile,** so far macOS, an iPhone (step one),
+  an Android emulator (step two) and Windows. Linux, a real Android device and the iPad aren't
   checked yet.
 - **Many manual checks run scripted:** through Obsidian's CLI on desktop, and through the mobile
   browser engine's web inspector (Safari's for the iPhone, Chrome's DevTools protocol for the
