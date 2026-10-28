@@ -83,7 +83,7 @@ export function planHeadingInsert(text: string, contentStart: number, place: Hea
 
 // After the section's last item, which keeps a new item off any text below it that it would join.
 export function endOfSection(section: Section): ItemPlace {
-	const last = section.items.at(-1);
+	const last = section.items[section.items.length - 1];
 	if (last) return { after: last.titleLine };
 	return section.headingLine === null ? 'first' : { firstUnder: section.headingLine };
 }

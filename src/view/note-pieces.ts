@@ -84,7 +84,8 @@ export function placeAt(target: HTMLElement, notes: Notes): { place: PiecePlace;
 
 /** The line after the last piece, or null when there are no notes. */
 export function notesEnd(notes: Notes): number | null {
-	const last = notePieces(notes.markdown).at(-1);
+	const pieces = notePieces(notes.markdown);
+	const last = pieces[pieces.length - 1];
 	return last ? notes.start + last.end : null;
 }
 
@@ -186,7 +187,7 @@ function dropPiece(drawing: Drawing, el: HTMLElement): void {
 function keepSlot(drawing: Drawing, el: HTMLElement, pieces: Piece[]): void {
 	const drawn = drawnPieces.get(el) as DrawnPiece;
 	const first = pieces[0];
-	const last = pieces.at(-1);
+	const last = pieces[pieces.length - 1];
 	if (first && last) drawn.range = { start: first.range.start, end: last.range.end };
 	if (first && pieces.length === 1 && drawn.hidden !== el && first.text !== drawn.text) {
 		redrawAround(drawing, el, first, () => showBoxes(drawing, el));

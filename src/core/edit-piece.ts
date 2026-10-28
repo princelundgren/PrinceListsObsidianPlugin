@@ -30,7 +30,7 @@ export function setNotesPiece(
 	const before = lines.slice(item.titleLine, item.endLine).map((line) => line.text);
 	const after = [...before];
 	after.splice(from - item.titleLine, range.end - from, ...run);
-	while (after.length > 1 && isBlank(after.at(-1) as string)) after.pop();
+	while (after.length > 1 && isBlank(after[after.length - 1] as string)) after.pop();
 	const eol = dominantEol(lines);
 	const edited = replaceRun(lines, model, from, range.end, run.map((text) => ({ text, eol })), {
 		removed: [blockKey('item', before)],
