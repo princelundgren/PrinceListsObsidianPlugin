@@ -51,6 +51,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		super(containerEl);
 		this.link = blockLink(source);
 		this.rootEl = containerEl.createDiv({ cls: 'princelists-block' });
+		this.rootEl.toggleClass('princelists-is-mobile', Platform.isMobile);
 		this.rowsEl = createDiv();
 	}
 
