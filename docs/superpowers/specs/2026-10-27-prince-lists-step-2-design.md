@@ -402,6 +402,9 @@ renderer, and only the part you click becomes a plain-text field.
 - **Clicking below the last block opens an empty block at the end (owner),** as clicking empty
   notes did. Once it holds text it's saved after an empty line when the notes already hold a
   block, so it stays a block of its own **(call)**.
+  - Its gray "Notes" shows only while the notes hold nothing else, as in empty notes. With other
+    blocks around it, the placeholder stays the field's name for screen readers but isn't shown
+    **(call)**.
 - **Saving changes only the open block's lines,** which take the file's usual line ending; the
   rest of the notes keeps every byte, so a change another device made to another block stays
   **(call)**. The item's indent is put back, as before. An outside change that takes the block's

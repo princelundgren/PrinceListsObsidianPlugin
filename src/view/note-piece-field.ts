@@ -1,4 +1,5 @@
 import type { LineRange } from '../core/follow';
+import { notePieces } from '../core/note-pieces';
 import { NOTES_EDITOR_CLASS, sayFieldLost } from './card';
 import { caretAtClick } from './click-caret';
 import { fitHeight, targetOf } from './dom';
@@ -23,6 +24,8 @@ export interface PieceMove {
 	caret: 'start' | 'end' | 'firstLineEnd';
 }
 
+const QUIET_PLACEHOLDER_CLASS = 'princelists-quiet-placeholder';
+
 // Fields that handed typing on to another, which removes them itself.
 const handedOn = new WeakSet<HTMLTextAreaElement>();
 
@@ -34,6 +37,7 @@ export function drawPieces(view: PrinceListView, host: NotesHost): void {
 	host.keep(drawNotes(view, view.sourcePath, host.area, found.notes, found.checklist, open));
 	const field = host.area.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
 	if (field && !field.readOnly && open === null) pieceLost(view, field);
+	else if (field) showPlaceholder(field, host);
 }
 
 // The piece or item clicked opens in a field, the caret where the click was; the strip after the
@@ -113,6 +117,7 @@ function openPiece(view: PrinceListView, host: NotesHost, place: PiecePlace, ran
 	const clicked = place.kind === 'item' ? place.li : place.kind === 'piece' ? place.el : null;
 	const caret = click && clicked ? caretAtClick(clicked, click, text) : text.length;
 	const field = pieceField(text);
+	showPlaceholder(field, host);
 	showField(host.area, place, field);
 	buildFormatBar(field);
 	field.focus();
@@ -125,6 +130,15 @@ function pieceField(text: string): HTMLTextAreaElement {
 	const field = createEl('textarea', { cls: [FIELD_CLASS, NOTES_EDITOR_CLASS], attr: { rows: 1, placeholder: 'Notes' } });
 	field.value = text;
 	return field;
+}
+
+// The gray "Notes" shows only while the open piece is all the notes hold. It stays the field's name
+// for screen readers either way.
+function showPlaceholder(field: HTMLTextAreaElement, host: NotesHost): void {
+	const found = host.notes();
+	const open = host.range();
+	const alone = !found || !open || notePieces(found.notes.markdown).every((piece) => found.notes.start + piece.start >= open.start && found.notes.start + piece.end <= open.end);
+	field.toggleClass(QUIET_PLACEHOLDER_CLASS, !alone);
 }
 
 // The field can't save any more: it takes no more typing, and what it held can be copied.
