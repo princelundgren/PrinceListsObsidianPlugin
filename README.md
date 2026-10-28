@@ -24,6 +24,11 @@ Today, Tomorrow, Next 7 days and Later. Tick them there, or open one in its list
 
 ![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
+A ticked item grays out, and after 24 hours it's archived out of sight. **Show archived**, the
+checkbox icon in the pane's header, brings archived items back, each with a blue checkbox.
+
+![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
+
 On your phone, add items with the floating **+**, hold an item for half a second to drag it, and
 tap a heading or an open item's ⋯ for its menu.
 
