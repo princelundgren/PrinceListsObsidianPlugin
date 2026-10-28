@@ -574,11 +574,24 @@ button.princelists-collapse {
 	transform: rotate(-90deg);
 }
 
+/* In a right-to-left interface the collapsed arrow points left, as Obsidian's own fold arrows do. Four
+   classes, to outrank Obsidian's rule that mirrors icons there. */
+.mod-rtl .princelists-is-collapsed .princelists-collapse svg.svg-icon {
+	transform: rotate(90deg);
+}
+
 .princelists-heading:hover .princelists-collapse,
 .princelists-heading.princelists-is-collapsed .princelists-collapse,
 .princelists-is-mobile .princelists-collapse,
 .princelists-collapse:focus-visible {
 	opacity: 1;
+}
+
+/* A touchscreen with a desktop system has no hover either. */
+@media (hover: none) {
+	button.princelists-collapse {
+		opacity: 1;
+	}
 }
 
 /* Room below the last row, so it can scroll clear of mobile's navigation bar. */
@@ -663,5 +676,5 @@ button.princelists-block-new-item {
 .princelists-schedule .external-link,
 .princelists-block .external-link {
 	background-image: none;
-	padding-right: 0;
+	padding-inline-end: 0;
 }
