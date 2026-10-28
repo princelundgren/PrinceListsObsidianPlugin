@@ -12,11 +12,6 @@ export function pictureName(file: { name: string; type: string }, pasted: boolea
 	return hasExtension ? file.name.replace(/[#^|[\]]/g, '-') : null;
 }
 
-export function appendOnOwnLine(notes: string, text: string): string {
-	if (notes === '') return text;
-	return `${notes.endsWith('\n') ? notes : `${notes}\n`}${text}`;
-}
-
 function timestamp(date: Date): string {
 	const two = (value: number) => String(value).padStart(2, '0');
 	const day = `${date.getFullYear()}${two(date.getMonth() + 1)}${two(date.getDate())}`;

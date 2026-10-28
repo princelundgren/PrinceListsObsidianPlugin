@@ -1,9 +1,10 @@
 import { Notice } from 'obsidian';
-import { appendOnOwnLine, pictureName } from '../core/picture';
-import { CARD_NOTES_CLASS, editNotes, NOTES_EDITOR_CLASS, notesInput, type Card } from './card';
+import { pictureName } from '../core/picture';
+import { CARD_NOTES_CLASS, NOTES_EDITOR_CLASS, type Card } from './card';
 import { targetOf } from './dom';
 import { changeField } from './field-undo';
 import type { PrinceListView } from './list-view';
+import { openNewPiece, pieceInput } from './note-piece-field';
 
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";
 const FAILED_NOTICE = "Couldn't add the picture.";
@@ -38,7 +39,7 @@ function onPaste(view: PrinceListView, evt: ClipboardEvent): void {
 	const pictures = Array.from(evt.clipboardData?.files ?? []).filter((file) => file.type.startsWith('image/'));
 	if (pictures.length === 0) return;
 	evt.preventDefault();
-	void addPictures(view, card, pictures, true);
+	void addPictures(view, card, pictures, { pasted: true, into: editor });
 }
 
 function onDragOver(view: PrinceListView, evt: DragEvent): void {
@@ -54,7 +55,9 @@ function onDrop(view: PrinceListView, evt: DragEvent): void {
 	if (!card || !inOpenCard(view, evt) || !mayHoldPicture(evt)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
-	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), false);
+	const field = targetOf(evt)?.closest('textarea');
+	const into = field?.hasClass(NOTES_EDITOR_CLASS) ? field : null;
+	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), { pasted: false, into });
 }
 
 function inOpenCard(view: PrinceListView, evt: DragEvent): boolean {
@@ -69,7 +72,14 @@ function mayHoldPicture(evt: DragEvent): boolean {
 	return items.some((item) => item.kind === 'file' && item.type.startsWith('image/'));
 }
 
-async function addPictures(view: PrinceListView, card: Card, files: File[], pasted: boolean): Promise<void> {
+// `into`, the open piece's field a picture was pasted or dropped in, takes it at its caret, while it is
+// still open. Otherwise it goes in a new piece at the end.
+async function addPictures(
+	view: PrinceListView,
+	card: Card,
+	files: File[],
+	{ pasted, into }: { pasted: boolean; into: HTMLTextAreaElement | null },
+): Promise<void> {
 	const list = view.file;
 	if (!list) return;
 	// A note outside the vault has no parent (observed in 1.14.4), and its picture links can't resolve.
@@ -104,22 +114,22 @@ async function addPictures(view: PrinceListView, card: Card, files: File[], past
 		new Notice(`The card closed before the picture was added. It's saved as ${paths.join(', ')}.`);
 		return;
 	}
-	insertLinks(view, card, links.join('\n'));
+	insertLinks(view, card, links.join('\n'), into);
 }
 
-function insertLinks(view: PrinceListView, card: Card, text: string): void {
+function insertLinks(view: PrinceListView, card: Card, text: string, into: HTMLTextAreaElement | null): void {
 	const area = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
 	if (!area) return;
-	const open = area.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
-	if (open) {
-		const end = open.selectionEnd;
-		changeField(open, () => open.setRangeText(text, end, end, 'end'));
-		notesInput(view, open);
+	if (into?.isConnected && !into.readOnly) {
+		const end = into.selectionEnd;
+		changeField(into, () => into.setRangeText(text, end, end, 'end'));
+		pieceInput(view, into);
 		return;
 	}
-	editNotes(view, area);
-	const editor = area.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
-	if (!editor) return;
-	changeField(editor, () => (editor.value = appendOnOwnLine(editor.value, text)));
-	notesInput(view, editor);
+	// Blurred, an open field closes and its piece is drawn, before the new piece opens.
+	area.querySelector('textarea')?.blur();
+	const field = openNewPiece(view, area);
+	if (!field) return;
+	changeField(field, () => (field.value = text));
+	pieceInput(view, field);
 }

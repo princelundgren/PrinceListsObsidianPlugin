@@ -546,9 +546,9 @@ stays, and the blank line stays with it.
     color.
   - Notes use Obsidian's own Markdown rendering, so pictures, links and embeds look the way they
     do in any note.
-  - **A card's notes are at least three lines tall (owner, 2026-10-27),** empty or not, and so is
-    the notes field while it's being typed in, so it's easy to tap. Empty notes show a gray
-    "Notes".
+  - **A card's notes are at least three lines tall (owner, 2026-10-27),** empty or not, and stay so
+    while a piece of them is typed in, so they're easy to tap. The piece's own field fits its text
+    (owner, 2026-10-28). Empty notes show a gray "Notes".
   - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
     typed in reads as its text, as a title does.
   - Links in a card can be clicked.
@@ -620,11 +620,11 @@ stays, and the blank line stays with it.
   - **Refused formats (call):** only the formats Obsidian shows are added: avif, bmp, gif, jpeg,
     jpg, png, svg and webp. Others, such as HEIC, would be linked but not shown, so a notice says
     they weren't added.
-  - **Where the links go (call):** when a notes editor is open once the last picture is saved
-    (including one opened meanwhile), the links go in at its cursor as it is then, so typing
-    meanwhile isn't replaced, inside the line when the cursor is mid-line. With no editor open,
-    including one that closed meanwhile, the editor opens and the links go on a line of their own at
-    the end. They save as typing does.
+  - **Where the links go (call):** when the field a picture was pasted or dropped in is still open
+    once the last picture is saved, the links go in at its cursor as it is then, so typing meanwhile
+    isn't replaced, inside the line when the cursor is mid-line. Otherwise, as for a picture dropped
+    on the drawn notes, they go in a new piece at the end (step two's design, "Editing notes a
+    block at a time"). They save as typing does.
   - **A card that closed or lost its item first (call):** nothing is inserted, and a notice gives
     the saved path.
   - **A picture dragged from inside Obsidian (call)** isn't added: dropping a rendered picture back

@@ -1,5 +1,4 @@
 import { Component, Keymap, MarkdownRenderer, Menu, type App } from 'obsidian';
-import { boxesMatchChecklist, type ChecklistLine } from '../core/checklist';
 import { asInline, needsMarkdown } from '../core/inline';
 
 const INTERNAL_LINK = 'a.internal-link';
@@ -16,35 +15,12 @@ export interface MarkdownHost {
 // each block gets its own child of the host, which the caller removes on re-render or close. Links
 // are handled by handleLinkClick and handleLinkMenu, delegated once on the host's container.
 export function renderNotes(host: MarkdownHost, sourcePath: string, el: HTMLElement, markdown: string): Component {
-	// Notes outside the open card have no checklist, so their boxes stay disabled: they would tick on
-	// screen and save nothing.
-	return renderMarkdown(host, sourcePath, el, markdown, () => false);
-}
-
-// A card's notes, whose boxes tick their lines only while each box lines up with one.
-export function renderCardNotes(
-	host: MarkdownHost,
-	sourcePath: string,
-	el: HTMLElement,
-	markdown: string,
-	checklist: readonly ChecklistLine[] | null,
-): Component {
-	return renderMarkdown(host, sourcePath, el, markdown, (boxes) => boxesMatchChecklist(boxes.map((box) => box.checked), checklist));
-}
-
-function renderMarkdown(
-	host: MarkdownHost,
-	sourcePath: string,
-	el: HTMLElement,
-	markdown: string,
-	boxesEnabled: (boxes: HTMLInputElement[]) => boolean,
-): Component {
 	const child = host.addChild(new Component());
 	MarkdownRenderer.render(host.app, markdown, el, sourcePath, child).then(
 		() => {
-			const boxes = Array.from(el.querySelectorAll<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR));
-			const enabled = boxesEnabled(boxes);
-			for (const box of boxes) box.disabled = !enabled;
+			// Notes outside the open card have no checklist: their boxes would tick on screen and save
+			// nothing.
+			for (const box of Array.from(el.querySelectorAll<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR))) box.disabled = true;
 		},
 		(error: unknown) => console.error(error),
 	);

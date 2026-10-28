@@ -4,28 +4,26 @@ import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
 import { CARD_NOTES_CLASS } from './card';
 import type { PrinceListView } from './list-view';
-import { NOTES_CHECKBOX_SELECTOR } from './notes';
+import { boxLine } from './note-pieces';
 import { CHANGED_ELSEWHERE_NOTICE, enqueueAt, writePlanned } from './write';
 
 // A box in the open card's notes ticks its own line (spec, "Checklists"). The box shows the file, so
 // it changes once the write lands. An embed can render more boxes after the first check, and then
-// the boxes no longer line up with the lines: all are disabled and nothing is written.
+// the boxes no longer line up with their piece's lines: the box is disabled and nothing is written.
 export function checklistClick(view: PrinceListView, box: HTMLInputElement, evt: MouseEvent): void {
 	evt.preventDefault();
 	const titleLine = view.selected;
-	const notes = box.closest(`.${CARD_NOTES_CLASS}`);
-	if (titleLine === null || !notes) return;
-	const boxes = Array.from(notes.querySelectorAll<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR));
+	if (titleLine === null || !box.closest(`.${CARD_NOTES_CLASS}`)) return;
 	const { lines, model } = view.parse();
 	const item = itemAt(model, titleLine);
 	const checklist = item ? checklistOf(lines, item) : [];
-	if (!checklist || boxes.length !== checklist.length) {
-		for (const each of boxes) each.disabled = true;
+	const line = boxLine(box, checklist, view.editing.notesPieceRange());
+	const index = checklist?.findIndex((entry) => entry.line === line) ?? -1;
+	const lineText = lines[line ?? -1]?.text;
+	if (index < 0 || lineText === undefined) {
+		box.disabled = true;
 		return;
 	}
-	const index = boxes.indexOf(box);
-	const lineText = lines[checklist[index]?.line ?? -1]?.text;
-	if (lineText === undefined) return;
 	const seen = view.outsideChanges;
 	enqueueAt(view, titleLine, async (pending) => {
 		let planned = true;

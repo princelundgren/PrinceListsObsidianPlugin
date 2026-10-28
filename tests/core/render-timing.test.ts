@@ -44,12 +44,13 @@ test("the core's part of a redraw of 500 items takes under 50 ms, and 50 of the 
 test("a keystroke in a card's notes on a list of 500 items takes under 20 ms", () => {
 	const state = new ListEditing((t) => contentStartOf(splitLines(t)));
 	state.text = text;
-	state.open(splitLines(text).findIndex((line) => line.text.startsWith('- [ ] item 51 ')));
-	state.openNotes();
+	const titleLine = splitLines(text).findIndex((line) => line.text.startsWith('- [ ] item 51 '));
+	state.open(titleLine);
+	state.openNotesPiece({ start: titleLine + 1, end: titleLine + 1 }, true);
 	let typed = '';
 	const ms = fastest(() => {
 		typed += 'x';
-		state.typeNotes(typed);
+		state.typeNotesPiece(typed);
 	});
 	expect(ms).toBeLessThan(20);
 });
