@@ -73,8 +73,17 @@ export function itemAt(model: ListModel, titleLine: number): ItemBlock | undefin
 }
 
 export function topLevelBlocks(lines: readonly Line[], contentStart: number): Block[] {
+	return blocksOf(lines, contentStart, topLevelParts);
+}
+
+// The document's own blocks, a whole list as one.
+export function documentBlocks(lines: readonly Line[], contentStart: number): Block[] {
+	return blocksOf(lines, contentStart, childrenOf);
+}
+
+function blocksOf(lines: readonly Line[], contentStart: number, partsOf: (doc: Node) => Iterable<Node>): Block[] {
 	const doc = new Parser().parse(joinLines(maskLines(lines, contentStart)));
-	return [...topLevelParts(doc)].map((node) => {
+	return [...partsOf(doc)].map((node) => {
 		const start = contentStart + node.sourcepos[0][0] - 1;
 		const end = trimBlankEnd(lines, start + 1, Math.min(lines.length, contentStart + node.sourcepos[1][0]));
 		return { type: node.type, start, end };
@@ -178,6 +187,10 @@ function unclosedStart(doc: Node, masked: readonly Line[], contentStart: number)
 	return closed ? null : contentStart + first;
 }
 
+function* childrenOf(node: Node): Generator<Node> {
+	for (let child = node.firstChild; child; child = child.next) yield child;
+}
+
 // Top-level blocks, with each list split into its items.
 function* topLevelParts(doc: Node): Generator<Node> {
 	for (let block = doc.firstChild; block; block = block.next) {
@@ -218,7 +231,7 @@ function trimBlankEnd(lines: readonly Line[], start: number, end: number): numbe
 	return end;
 }
 
-function nonBlankRuns(lines: readonly Line[], start: number, end: number): ListModel['untouched'] {
+export function nonBlankRuns(lines: readonly Line[], start: number, end: number): ListModel['untouched'] {
 	const runs: ListModel['untouched'] = [];
 	for (let i = start; i < end; i++) {
 		if (isBlank((lines[i] as Line).text)) continue;
