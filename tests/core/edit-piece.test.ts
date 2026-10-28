@@ -1,7 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { mapPieceRange, setNotesPiece, type PieceSession } from '../../src/core/edit-piece';
-import { splitLines } from '../../src/core/lines';
-import { joinLines } from '../../src/core/lines';
+import { joinLines, splitLines } from '../../src/core/lines';
 import { crlf, list } from './edit-helpers';
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
