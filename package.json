@@ -1,6 +1,6 @@
 {
 	"name": "princelists",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"description": "Todo lists on plain Markdown notes, with sections, item notes and drag and drop.",
 	"main": "main.js",
 	"type": "module",
