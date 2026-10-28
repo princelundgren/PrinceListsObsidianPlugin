@@ -22,6 +22,18 @@ palette.
 
 ## What it does
 
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, an item is ticked, then another is held and dragged into a different section" width="300">
+
+- **Headings make sections, and checkboxes are items.** Anything indented under an item is its
+  notes, in any Markdown.
+- **Drag to reorder** an item, or a heading with its whole section. On mobile, hold first.
+- **Ticked items** gray out and hide after 24 hours. "Show archived" brings them back.
+- **Star an item or give it a date** in its open card.
+- **Notes edit a block at a time,** with a format bar. Paste or drop pictures straight in.
+- **Cmd+F** filters the list and **Cmd+Z** undoes (Ctrl on Windows and Linux).
+- **Right-click** an item, a heading or the list for its menu. On mobile, tap a heading, or ⋯ on
+  an open item.
+
 ### The Schedule
 
 "Open schedule", from the ribbon or a list's ⋯ menu, gathers the dated items of every list under
@@ -31,9 +43,8 @@ Today, Tomorrow, Next 7 days and Later. Tick them there too, or open one in its 
 
 ### On your phone
 
-The same lists, with a floating "+" for new items. Hold an item for half a second, then drag it.
+The same lists, with a floating "+" for new items.
 
-<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, an item is ticked, then another is held and dragged into a different section" width="300">
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-phone.png" alt="A grocery list on a phone, with sections, starred items and a floating add button" width="300">
 
 ### A list inside another note
