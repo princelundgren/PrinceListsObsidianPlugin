@@ -176,9 +176,10 @@ function createCardElement(): HTMLElement {
 	const el = createEl('li', { cls: [ITEM_CLASS, CARD_CLASS], attr: { tabindex: -1 } });
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
-	body.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
+	const head = body.createDiv({ cls: 'princelists-card-head' });
+	head.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	body.createDiv({ cls: CARD_NOTES_CLASS });
-	const tools = el.createDiv({ cls: 'princelists-card-tools' });
+	const tools = head.createDiv({ cls: 'princelists-card-tools' });
 	buildWhenPicker(tools);
 	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
 	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
