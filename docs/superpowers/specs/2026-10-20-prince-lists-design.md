@@ -1140,6 +1140,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 - **The delay is 24 hours of elapsed time.** Across a daylight-saving change, the hide time moves
   by an hour on the clock. Accepted.
 - **`✔` carries no time zone.** After traveling, two devices may disagree by a few hours. Accepted.
+- **A time the clock skipped can be read (call).** When summer time starts, `✔ 2026-03-29 02:30`
+  names a time that never showed on a clock in Stockholm. It counts as the moment the clock showed
+  then, 03:30, so the item hides a day later, not at once as "a time that can't be read" would.
 
 ### Frontmatter
 
