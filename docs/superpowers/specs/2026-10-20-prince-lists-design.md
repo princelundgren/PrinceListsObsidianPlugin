@@ -386,7 +386,9 @@ stays, and the blank line stays with it.
 - **A `%%` comment or a `$$` block is recognized only when its opening line starts with `%%` or
   `$$` at column 0 (call):** an indented one may belong to an item's notes, where masking it would
   change the item's extent. The accepted cost: a top-level comment or math block indented 1 to 3
-  spaces isn't recognized, so checkbox lines inside it become items. Masking also doesn't track
+  spaces isn't recognized, so checkbox lines inside it become items. A top-level fenced code block
+  indented 1 to 3 spaces is tracked, as one at column 0 is, so a `%%` or `$$` line inside it opens
+  nothing. Masking also doesn't track
   HTML blocks such as `<div>`, which end at a blank line, so a fence line inside one, with no blank
   line before the fence, can leave a later `%%` or `$$` region unmasked. Likewise, a new item
   added right after such a block would join it: at the end of the file after a list note that

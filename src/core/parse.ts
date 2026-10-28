@@ -138,13 +138,14 @@ function maskLines(lines: readonly Line[], contentStart: number): Line[] {
 	let trackedFenceStarts = new Set<number>();
 	let masked = maskRegions(content, trackedFenceStarts);
 	// Masking runs top-down, and only the lines above a fence decide whether it's top-level, so each pass
-	// gets right at least the first fence the last one got wrong, and this ends.
-	for (;;) {
+	// gets right at least the first fence the last one got wrong: one pass per line is more than enough.
+	for (let pass = 0; pass < content.length; pass++) {
 		const found = indentedFenceStarts(content, masked);
-		if (found.size === trackedFenceStarts.size && [...found].every((n) => trackedFenceStarts.has(n))) return masked;
+		if (found.size === trackedFenceStarts.size && [...found].every((n) => trackedFenceStarts.has(n))) break;
 		trackedFenceStarts = found;
 		masked = maskRegions(content, trackedFenceStarts);
 	}
+	return masked;
 }
 
 function maskRegions(content: readonly Line[], trackedFenceStarts: ReadonlySet<number>): Line[] {
