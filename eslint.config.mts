@@ -1,5 +1,6 @@
 import obsidianmd from 'eslint-plugin-obsidianmd';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 import { globalIgnores, defineConfig } from 'eslint/config';
 
 export default defineConfig(
@@ -33,5 +34,13 @@ export default defineConfig(
 	{
 		files: ['tests/**'],
 		rules: { 'obsidianmd/no-nodejs-modules': 'off' },
+	},
+	// The recommended config runs its manifest rule only on TypeScript files, so it never sees manifest.json.
+	{
+		files: ['manifest.json'],
+		extends: [tseslint.configs.disableTypeChecked],
+		languageOptions: { parser: tseslint.parser },
+		plugins: { obsidianmd },
+		rules: { 'obsidianmd/validate-manifest': 'error' },
 	},
 );

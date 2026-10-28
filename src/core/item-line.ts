@@ -29,7 +29,8 @@ const ID = '[a-zA-Z0-9\\-_]+';
 const TRAILING_FIELDS = [
 	`(?:🔺|⏫|🔼|🔽|⏬)${VS16}$`,
 	`(?:🛫|➕|⏳|⌛|📅|📆|🗓|✅|❌)${VS16} *\\d{4}-\\d{2}-\\d{2}$`,
-	`🔁${VS16} *[a-zA-Z0-9, !]+$`,
+	// Tasks' pattern has ` *` before a class that takes spaces too, so the two would split a run every way.
+	`🔁${VS16}[a-zA-Z0-9, !]+$`,
 	`🏁${VS16} *[a-zA-Z]+$`,
 	// Tasks' taskIdSequenceRegex also allows spaces after each id, which backtracks exponentially
 	// on a long line. The body is trimmed first, so this accepts the same lines.
@@ -39,16 +40,17 @@ const TRAILING_FIELDS = [
 	'(?:^|\\s)#[^ !@#$%^&*(),.?":{}|<>]+$',
 ].map((source) => new RegExp(source));
 
-const ITEM_PATTERN = /^(\s*(?:[-*+]|\d+[.)])[ \t]+\[)([^\]])(\] )(.*)$/;
+// The `s` flag lets the rest take U+2028 and U+2029, which `.` stops at but CommonMark doesn't.
+const ITEM_PATTERN = /^(\s*(?:[-*+]|\d+[.)])[ \t]+\[)([^\]])(\] )(.*)$/s;
 export const BLOCK_ID_PATTERN = / \^[A-Za-z0-9-]+$/;
 const MARK_SOURCE = `✔${VS16} +\\d{4}-\\d{2}-\\d{2}(?: \\d{2}:\\d{2})?`;
 export const MARK_PATTERN = new RegExp(MARK_SOURCE);
-const MARKS_PATTERN = new RegExp(`(?: +${MARK_SOURCE})+$`);
+const MARK_AT = new RegExp(MARK_SOURCE, 'y');
 const ONE_MARK_PATTERN = new RegExp(MARK_SOURCE, 'g');
 const MARK_TIME_PATTERN = new RegExp(
 	`^(?:✔${VS16} +(\\d{4})-(\\d{2})-(\\d{2})(?: (\\d{2}):(\\d{2}))?|✅${VS16} *(\\d{4})-(\\d{2})-(\\d{2}))$`,
 );
-export const DONE_DATE_PATTERN = new RegExp(` *✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
+export const DONE_DATE_PATTERN = new RegExp(`✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
 const DONE_DATE_FIELD = new RegExp(DONE_DATE_PATTERN, 'g');
 const REPEAT_FIELD = new RegExp(`🔁${VS16} *[a-zA-Z0-9, !]+`);
 
@@ -82,7 +84,7 @@ export function parseItemLine(text: string): ItemLineParts | null {
 	let tailStart = fieldsStart;
 	while (tailStart > 0 && /\s/.test(body.charAt(tailStart - 1))) tailStart--;
 	const head = body.slice(0, tailStart);
-	const marks = MARKS_PATTERN.exec(head)?.[0] ?? '';
+	const marks = trailingMarks(head);
 	return {
 		before,
 		status,
@@ -119,7 +121,10 @@ export function untickLine(text: string): string {
 	const parts = parseItemLine(text);
 	if (!parts) return text;
 	// Tasks' own untick removes its ✅ as well, so ours does too.
-	return joinItemLine({ ...parts, status: ' ', marks: '', tail: parts.tail.replace(DONE_DATE_FIELD, '') });
+	const tail = withoutDoneDates(parts.tail);
+	// With no title, the space tickLine put before the tail follows `] `, so it goes with the mark.
+	const tickedSpace = parts.title === '' && parts.marks !== '' && tail.startsWith(' ');
+	return joinItemLine({ ...parts, status: ' ', marks: '', tail: tickedSpace ? tail.slice(1) : tail });
 }
 
 // A tick of an open line, or an untick of a done one, as a box does it.
@@ -135,10 +140,46 @@ export function setTitle(text: string, title: string): string {
 	return joinItemLine({ ...parts, title, marks, tail: spaced(title + marks, parts.tail) });
 }
 
+// Each ✅ field goes with the spaces before it.
+function withoutDoneDates(tail: string): string {
+	let kept = '';
+	let copied = 0;
+	for (const field of tail.matchAll(DONE_DATE_FIELD)) {
+		kept += tail.slice(copied, findRunStart(tail, field.index, isSpace));
+		copied = field.index + field[0].length;
+	}
+	return kept + tail.slice(copied);
+}
+
 export function isRepeating(text: string): boolean {
 	const parts = parseItemLine(text);
 	return parts !== null && REPEAT_FIELD.test(parts.tail);
 }
+
+// The run of ✔ marks at the end of `head`, each with the spaces before it, read from the end.
+function trailingMarks(head: string): string {
+	let start = head.length;
+	for (;;) {
+		const at = head.lastIndexOf('✔', start - 1);
+		MARK_AT.lastIndex = at;
+		const mark = at < 0 ? null : MARK_AT.exec(head);
+		if (!mark || at + mark[0].length !== start) break;
+		const spacesStart = findRunStart(head, at, isSpace);
+		if (spacesStart === at) break;
+		start = spacesStart;
+	}
+	return head.slice(start);
+}
+
+/** Where the run of characters that pass `isRunChar` and end at `end` starts; `end` when there are none. */
+export function findRunStart(text: string, end: number, isRunChar: (char: string) => boolean): number {
+	// Scans back, so a long run costs linear time, unlike a pattern that starts with the run.
+	let start = end;
+	while (start > 0 && isRunChar(text.charAt(start - 1))) start--;
+	return start;
+}
+
+const isSpace = (char: string) => char === ' ';
 
 // Tasks needs no space before an emoji, so a tail can start without one. Once something stands
 // before it, a gap keeps the first field from running into the title or the mark.
@@ -147,7 +188,8 @@ function spaced(head: string, tail: string): string {
 }
 
 // The time a ✔ or ✅ mark counts as done: its own time, or the end of its day when it has none.
-// null when the date or time doesn't exist (month 13, 25:99).
+// null when the date or time doesn't exist (month 13, 25:99). A time the clock skipped, as when
+// summer time starts, is the moment the clock showed then, an hour later.
 export function markTime(mark: string): Date | null {
 	const m = MARK_TIME_PATTERN.exec(mark);
 	if (!m) return null;
@@ -162,7 +204,7 @@ export function markTime(mark: string): Date | null {
 		date.getFullYear() === y &&
 		date.getMonth() === mo - 1 &&
 		date.getDate() === d &&
-		(h === undefined || (date.getHours() === h && date.getMinutes() === mi));
+		(h === undefined || mi === undefined || (h < 24 && mi < 60));
 	return exists ? date : null;
 }
 

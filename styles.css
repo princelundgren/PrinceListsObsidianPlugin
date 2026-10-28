@@ -48,10 +48,6 @@ textarea.princelists-title {
 	margin-bottom: 0;
 }
 
-.princelists-list-note-text > .princelists-placeholder {
-	margin-bottom: var(--size-4-4);
-}
-
 .princelists-untouched {
 	color: var(--text-muted);
 	white-space: pre-wrap;
@@ -161,6 +157,11 @@ textarea.princelists-title {
 	margin-bottom: 0;
 }
 
+/* After the rule above, which it overrides: an empty list note's "Notes" keeps a gap above the rows. */
+.princelists-list-note-text > .princelists-placeholder {
+	margin-bottom: var(--size-4-4);
+}
+
 /* The open card: raised above the list, in place of its row (spec, "Layout"). Its margins stay inside
    the pane, so mobile gets no sideways scrolling. */
 .princelists-item.princelists-card {
@@ -206,9 +207,17 @@ textarea.princelists-title {
 	cursor: text;
 }
 
+.princelists-quiet-placeholder::placeholder {
+	opacity: 0;
+}
+
 /* A table in rendered notes, drawn as in a note: Obsidian's own table rules apply only inside its
-   views. */
+   views. One wider than the card scrolls inside it, as code does, so the list never scrolls sideways. */
 .princelists-card-notes table {
+	display: block;
+	width: max-content;
+	max-width: 100%;
+	overflow-x: auto;
 	border-collapse: collapse;
 	margin-block: var(--size-4-2);
 }
@@ -254,6 +263,11 @@ textarea.princelists-title {
 
 .princelists-notes-end {
 	min-height: calc(2em * var(--line-height-normal));
+}
+
+/* A new block's field holds the empty line above it, in place of the block's own margin. */
+.princelists-note-piece:has(+ .princelists-new-block) > :last-child {
+	margin-bottom: 0;
 }
 
 .princelists-list-note-text > .princelists-note-piece:first-child > :first-child,
@@ -337,20 +351,23 @@ button.princelists-new-item {
 }
 
 /* The title, with the card's When, star and ⋯ on its first line. They sit in the title's row only,
-   so the notes and the format bar under it span the card. */
+   so the notes and the format bar under it span the card. In a pane too narrow for both, such as a
+   sidebar, they move to a line of their own under the title, still on the right. */
 .princelists-card-head {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: flex-start;
 	gap: var(--size-4-2);
 }
 
 .princelists-card-head > .princelists-card-title {
 	flex: 1;
-	min-width: 0;
+	min-width: 8em;
 }
 
 .princelists-card-tools {
 	flex: none;
+	margin-inline-start: auto;
 	display: flex;
 	align-items: center;
 	gap: var(--size-2-1);
@@ -381,8 +398,15 @@ button.princelists-card-star,
 	padding: var(--size-2-2);
 	border-radius: var(--clickable-icon-radius);
 	background-color: transparent;
-	box-shadow: none;
 	color: var(--icon-color);
+}
+
+/* No button shadow on the icon buttons, but Obsidian's ring when the keyboard focuses one. */
+button.princelists-card-actions:not(:focus-visible),
+button.princelists-card-star:not(:focus-visible),
+.princelists-format-bar button:not(:focus-visible),
+button.princelists-collapse:not(:focus-visible) {
+	box-shadow: none;
 }
 
 @media (hover: hover) {
@@ -391,9 +415,24 @@ button.princelists-card-star,
 	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button {
 		background-color: var(--background-modifier-hover);
-		box-shadow: none;
 		color: var(--icon-color-hover);
 	}
+}
+
+/* On mobile, each takes a finger-sized box, as Obsidian's own buttons there do, with its icon its usual size. */
+.princelists-is-mobile button.princelists-card-actions,
+.princelists-is-mobile button.princelists-card-star,
+.princelists-is-mobile .princelists-format-bar button,
+.princelists-is-mobile .princelists-when-button,
+.princelists-is-mobile button.princelists-block-trash {
+	justify-content: center;
+	min-width: var(--input-height);
+	min-height: var(--input-height);
+}
+
+/* The taller row still centered on the title's first line. */
+.princelists-is-mobile .princelists-card-tools {
+	margin-block: calc((var(--line-height-normal) * 1em - var(--input-height)) / 2);
 }
 
 /* Rename heading's field reads as the heading it edits. */
@@ -515,11 +554,16 @@ button.princelists-collapse {
 	height: calc(var(--line-height-normal) * 1em);
 	background: none;
 	border: none;
-	box-shadow: none;
 	color: var(--collapse-icon-color);
 	opacity: 0;
 	--icon-size: 10px;
 	--icon-stroke: 4px;
+}
+
+/* On mobile, wider into the margin for a finger, with the icon still beside its heading. */
+.princelists-is-mobile button.princelists-collapse {
+	justify-content: flex-end;
+	min-width: var(--size-4-5);
 }
 
 .princelists-is-collapsed .princelists-collapse {
@@ -530,11 +574,24 @@ button.princelists-collapse {
 	transform: rotate(-90deg);
 }
 
+/* In a right-to-left interface the collapsed arrow points left, as Obsidian's own fold arrows do. Four
+   classes, to outrank Obsidian's rule that mirrors icons there. */
+.mod-rtl .princelists-is-collapsed .princelists-collapse svg.svg-icon {
+	transform: rotate(90deg);
+}
+
 .princelists-heading:hover .princelists-collapse,
 .princelists-heading.princelists-is-collapsed .princelists-collapse,
 .princelists-is-mobile .princelists-collapse,
 .princelists-collapse:focus-visible {
 	opacity: 1;
+}
+
+/* A touchscreen with a desktop system has no hover either. */
+@media (hover: none) {
+	button.princelists-collapse {
+		opacity: 1;
+	}
 }
 
 /* Room below the last row, so it can scroll clear of mobile's navigation bar. */
@@ -562,6 +619,13 @@ button.princelists-collapse {
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
+}
+
+/* The star and day follow the title, so a list name wider than the title doesn't push them away. */
+.princelists-schedule-title-line {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--size-4-2);
 }
 
 .princelists-schedule-list {
@@ -619,5 +683,5 @@ button.princelists-block-new-item {
 .princelists-schedule .external-link,
 .princelists-block .external-link {
 	background-image: none;
-	padding-right: 0;
+	padding-inline-end: 0;
 }

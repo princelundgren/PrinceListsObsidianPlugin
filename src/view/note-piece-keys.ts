@@ -4,7 +4,7 @@ import { applyEdit } from './format';
 import type { PrinceListView } from './list-view';
 import { drawPieces, movePiece, typePiece } from './note-piece-field';
 import { NOTE_PIECE_CLASS, type Notes, type PiecePlace } from './note-piece-state';
-import { openablePieces } from './note-pieces';
+import { notesEnd, openablePieces } from './note-pieces';
 import { notesHostOf, type NotesHost } from './notes-host';
 
 // Enter and Shift+Enter send the same beforeinput, so Shift is noted on keydown.
@@ -84,7 +84,7 @@ function endList(view: PrinceListView, host: NotesHost, field: HTMLTextAreaEleme
 	if (!range || !found) return;
 	const end = listEnd(found.notes, range);
 	const el = field.closest<HTMLElement>(`.${NOTE_PIECE_CLASS}`);
-	movePiece(view, field, { place: { kind: 'after', el: el ?? field }, range: { start: end, end }, isNew: true, caret: 'end' });
+	movePiece(view, field, { place: { kind: 'after', el: el ?? field }, range: { start: end, end }, isNew: notesEnd(found.notes) !== null, caret: 'end' });
 }
 
 // The open lines once the field's last line, an empty item, is taken out; null when that wasn't saved.
@@ -102,7 +102,8 @@ function nextItemPlace(field: HTMLTextAreaElement): PiecePlace {
 	const el = field.closest<HTMLElement>(`.${NOTE_PIECE_CLASS}`);
 	const li = field.closest<HTMLElement>('li');
 	if (!el || !li) return { kind: 'after', el: field };
-	return { kind: 'newItem', el, after: Array.from(li.querySelectorAll<HTMLElement>('li')).at(-1) ?? li };
+	const items = li.querySelectorAll<HTMLElement>('li');
+	return { kind: 'newItem', el, after: items[items.length - 1] ?? li };
 }
 
 // The line after the list holding the open lines, or the one they end.

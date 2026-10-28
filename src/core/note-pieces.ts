@@ -15,6 +15,11 @@ export type PieceEnter =
 const ITEM_START = /^([ \t]*)([-*+]|\d{1,9}[.)])(?:([ \t]+)(?:(\[.\])([ \t]+|$))?|$)/;
 const THEMATIC_BREAK = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
 
+/** Whether every piece of the notes lies within `range`, the lines of the piece open for typing. */
+export function holdsOnly(markdown: string, range: LineRange): boolean {
+	return notePieces(markdown).every((piece) => piece.start >= range.start && piece.end <= range.end);
+}
+
 export function notePieces(markdown: string): LineRange[] {
 	const lines = splitLines(markdown);
 	const pieces: LineRange[] = [];
@@ -67,7 +72,7 @@ export function pieceEnter(text: string, caret: number, nested: boolean): PieceE
 	const line = lines[lineIndex] as string;
 	const isLast = lineIndex === lines.length - 1;
 	const atLineEnd = caret === lineStart + line.length;
-	const ownIndent = columnOf(leadingSpace(lines[0] as string));
+	const ownIndent = columnOf(leadingSpace(lines.find((text) => text.trim() !== '') ?? ''));
 	const item = itemStart(line);
 	if (!item || caret < lineStart + item[0].length || !isListLine(text, lineIndex)) return { kind: 'newline' };
 	const isEmpty = !line.slice(item[0].length).trim();
@@ -105,6 +110,18 @@ export function neighborPiece(ranges: readonly LineRange[], current: LineRange, 
 export function outdentMarker(notes: string, fileLines: readonly string[], item: LineRange, firstLine: string): string | null {
 	const list = pieceAround(notePieces(notes), item);
 	return outerItemMarker(fileLines.slice(list?.start ?? item.start, item.start), columnOf(leadingSpace(firstLine)));
+}
+
+/**
+ * The line, in the notes, where a block added after the open lines goes: after the piece holding
+ * them, which is the whole list for an item, and after any pieces that follow with no empty line
+ * between, so the new block never runs into the next.
+ */
+export function blockAfter(markdown: string, range: LineRange): number {
+	const pieces = notePieces(markdown);
+	let end = pieceAround(pieces, range)?.end ?? range.end;
+	for (let next = pieces.find((piece) => piece.start === end); next; next = pieces.find((piece) => piece.start === end)) end = next.end;
+	return end;
 }
 
 /** The piece holding `range`; for an empty range, the piece it ends, before one starting there. */

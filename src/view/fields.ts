@@ -1,4 +1,4 @@
-import { Notice, type TFile } from 'obsidian';
+import { normalizePath, Notice, type TFile } from 'obsidian';
 import { listNoteUnclosedBlock, listNoteWouldRestructure } from '../core/edit-list-note';
 import { nameTaken } from '../core/file-name';
 import type { LineRange } from '../core/follow';
@@ -78,12 +78,15 @@ async function renameList(view: PrinceListView, file: TFile, field: HTMLTextArea
 		if (notice) new Notice(notice);
 		if (view.file === file) field.value = file.basename;
 	};
-	if (name === '' || name === file.basename) return keepName();
+	if (name === '') return keepName();
 	// A separator would move the list into another folder rather than rename it.
 	if (/[\\/]/.test(name)) return keepName("A list name can't contain / or \\.");
+	// Only the name is normalized: an outside note's path isn't a vault path. The current name is too,
+	// so retyping it doesn't rename a file whose name is in another Unicode form.
+	const fileName = normalizePath(`${name}.${file.extension}`);
+	if (fileName === normalizePath(file.name)) return keepName();
 	// In the list's own folder, which keeps a note from outside the vault where it is (spec, "Notes
 	// outside the vault").
-	const fileName = `${name}.${file.extension}`;
 	const path = `${file.path.slice(0, file.path.length - file.name.length)}${fileName}`;
 	if (isTaken(view, file, fileName, path)) return keepName('A note with that name already exists.');
 	try {

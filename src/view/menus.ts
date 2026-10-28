@@ -1,8 +1,9 @@
 import { Menu, Notice } from 'obsidian';
 import { SCHEDULE_ICON } from '../constants';
+import { collapseChoices } from '../core/collapsed';
 import type { TrackedLine } from '../core/editing';
 import { endOfSection, sectionLastLine } from '../core/list-actions';
-import { itemAt, type ItemBlock, type Section } from '../core/parse';
+import { itemAt, type ItemBlock, type ListModel, type Section } from '../core/parse';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import { editInMarkdown } from '../obsidian/switch';
@@ -45,7 +46,7 @@ export function itemMenu(view: PrinceListView, item: ItemBlock, menu: Menu): voi
 }
 
 // The heading actions, from a right-click on desktop and a tap on mobile.
-export function headingMenu(view: PrinceListView, section: Section, menu: Menu): void {
+export function headingMenu(view: PrinceListView, model: ListModel, section: Section, menu: Menu): void {
 	if (section.headingLine === null) return;
 	const anchor = trackWhileShown(view, section.headingLine, menu);
 	menu.addItem((entry) =>
@@ -72,6 +73,8 @@ export function headingMenu(view: PrinceListView, section: Section, menu: Menu):
 			.setIcon('file-text')
 			.onClick(atLine(anchor, (line) => editItemInMarkdown(view, line))),
 	);
+	addCollapseAllEntries(view, model, menu);
+	menu.addSeparator();
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Delete heading')
@@ -83,7 +86,7 @@ export function headingMenu(view: PrinceListView, section: Section, menu: Menu):
 
 // The list's own actions, from a right-click on its background on desktop. New item and New heading
 // go at the end of the section clicked in (spec, "Right-click menus").
-export function listMenu(view: PrinceListView, section: Section, menu: Menu): void {
+export function listMenu(view: PrinceListView, model: ListModel, section: Section, menu: Menu): void {
 	const itemPlace = endOfSection(section);
 	const itemAnchor = itemPlace === 'first' ? null : trackWhileShown(view, 'after' in itemPlace ? itemPlace.after : itemPlace.firstUnder, menu);
 	const headingAnchor = section.headingLine === null ? null : trackWhileShown(view, section.headingLine, menu);
@@ -116,12 +119,48 @@ export function listMenu(view: PrinceListView, section: Section, menu: Menu): vo
 			.setChecked(view.showArchived)
 			.onClick(() => view.toggleArchived()),
 	);
+	addCollapseAllEntries(view, model, menu);
+	menu.addSeparator();
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Open schedule')
 			.setIcon(SCHEDULE_ICON)
 			.onClick(() => void openSchedule(view.app.workspace)),
 	);
+}
+
+function addCollapseAllEntries(view: PrinceListView, model: ListModel, menu: Menu): void {
+	const { canCollapse, canExpand } = collapseChoices(headingLinesOf(model), view.collapsed.lines());
+	if (!canCollapse && !canExpand) return;
+	menu.addSeparator();
+	if (canCollapse) {
+		menu.addItem((entry) =>
+			entry
+				.setTitle('Collapse all headings')
+				.setIcon('chevrons-down-up')
+				.onClick(() => {
+					// Read again: the list can change while the menu is open.
+					view.collapsed.collapseAll(headingLinesOf(view.parse().model));
+					view.render();
+				}),
+		);
+	}
+	if (canExpand) {
+		menu.addItem((entry) =>
+			entry
+				.setTitle('Expand all headings')
+				.setIcon('chevrons-up-down')
+				.onClick(() => {
+					// Also drops collapsed lines that are no longer headings, which nothing shows.
+					view.collapsed.clear();
+					view.render();
+				}),
+		);
+	}
+}
+
+function headingLinesOf(model: ListModel): number[] {
+	return model.sections.flatMap(({ headingLine }) => (headingLine === null ? [] : [headingLine]));
 }
 
 // A right-click on desktop: a row's or a heading's menu, else the list's. A field keeps the menu it
@@ -174,7 +213,7 @@ function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
 	if (!item && !section) return null;
 	const menu = new Menu();
 	if (item) itemMenu(view, item, menu);
-	else if (section) headingMenu(view, section, menu);
+	else if (section) headingMenu(view, model, section, menu);
 	return menu;
 }
 
@@ -188,7 +227,7 @@ function backgroundMenu(view: PrinceListView, evt: MouseEvent): Menu | null {
 		if (line !== null) section = model.sections.find((s) => s.headingLine === line) ?? section;
 	}
 	const menu = new Menu();
-	listMenu(view, section, menu);
+	listMenu(view, model, section, menu);
 	return menu;
 }
 

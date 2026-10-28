@@ -1,5 +1,5 @@
 import { blockKeys, replaceRun } from './edit-check';
-import { isBlankAt, typedLines } from './edit-lines';
+import { isBlankAt, typedLines, withoutSeparatorLine } from './edit-lines';
 import type { PieceSession } from './edit-piece';
 import { dominantEol, spliceLines, splitLines, type Line } from './lines';
 import { isBlank, maskBlocks, parseList, type ListModel } from './parse';
@@ -61,7 +61,7 @@ export function listNoteWithPiece(lines: readonly Line[], model: ListModel, piec
 
 function noteText(note: readonly Line[]): string {
 	const texts = note.map((line) => line.text);
-	while (texts.length > 0 && isBlank(texts.at(-1) as string)) texts.pop();
+	while (texts.length > 0 && isBlank(texts[texts.length - 1] as string)) texts.pop();
 	return texts.join('\n');
 }
 
@@ -72,7 +72,7 @@ function planSave(lines: readonly Line[], model: ListModel, piece: ListNotePiece
 	const { range, indent, separator, blankAfter } = piece;
 	const eol = dominantEol(lines);
 	// A blank line stays as typed, without the indent.
-	const texts = typedLines(typed).map((text) => (isBlank(text) ? text : indent + text));
+	const texts = typedLines(separator ? withoutSeparatorLine(typed) : typed).map((text) => (isBlank(text) ? text : indent + text));
 	const from = separator && range.end > range.start && isBlankAt(lines, range.start - 1) ? range.start - 1 : range.start;
 	const to = blankAfter && isBlankAt(lines, range.end) ? range.end + 1 : range.end;
 	// A block the piece leaves open runs the note to the end of the file, so the blank line it wrote marks it last.

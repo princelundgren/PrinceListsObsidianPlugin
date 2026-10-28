@@ -265,11 +265,11 @@ export class ListEditing {
 		this.closeNotes();
 	}
 
-	// An empty range opens no text, at `indent`, the notes' indent when new, or the open piece's,
-	// which a new item from Enter follows.
+	// An empty range opens no text, or a new piece's empty line, at `indent`, the notes' indent when
+	// new, or the open piece's, which a new item from Enter follows.
 	private openedText(range: LineRange, isNew: boolean, notesIndent: string, indent?: string): { text: string; indent: string } {
 		if (range.start < range.end) return pieceText(this.text, range);
-		return { text: '', indent: indent ?? (isNew ? notesIndent : (this.piece?.piece.indent ?? notesIndent)) };
+		return { text: isNew ? '\n' : '', indent: indent ?? (isNew ? notesIndent : (this.piece?.piece.indent ?? notesIndent)) };
 	}
 
 	private parse(): { lines: Line[]; model: ListModel } {

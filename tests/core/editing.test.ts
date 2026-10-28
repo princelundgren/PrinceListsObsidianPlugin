@@ -107,6 +107,19 @@ describe('a piece of the notes across a typing session', () => {
 		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n\tpara\n\n\t- x\n\t  - y!\n\t  - z\n- [ ] b\n`);
 	});
 
+	test('a new piece after another opens holding its empty line, which is saved once', () => {
+		const before = `${FRONTMATTER}- [ ] a\n\tpara\n- [ ] b\n`;
+		const state = editing(before);
+		state.open(3);
+		expect(state.openNotesPiece({ start: 5, end: 5 }, true)).toBe('\n');
+		state.typeNotesPiece('\nnew');
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\tpara\n\n\tnew\n- [ ] b\n`);
+		state.typeNotesPiece('new');
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\tpara\n\n\tnew\n- [ ] b\n`);
+		typeEach((v) => state.typeNotesPiece(v), ['\nne', '\n']);
+		expect(state.text).toBe(before);
+	});
+
 	test('opens a new item one level out, after the parent marker the open piece gives', () => {
 		const state = editing(`${FRONTMATTER}- [ ] a\n\n\t- x\n\t  - y\n- [ ] b\n`);
 		state.open(3);
@@ -227,6 +240,16 @@ describe('the list note across a typing session', () => {
 		state.typeListNote('new');
 		expect(state.text).toBe(`${FRONTMATTER}First\n\nnew\n\n- [ ] a\n`);
 		typeEach((v) => state.typeListNote(v), ['ne', 'n', '']);
+		expect(state.text).toBe(text);
+	});
+
+	test('a new piece after the last opens holding its empty line, which is saved once', () => {
+		const text = `${FRONTMATTER}First\n- [ ] a\n`;
+		const state = editing(text);
+		expect(state.openListNote({ start: 4, end: 4 }, true)).toBe('\n');
+		state.typeListNote('\nnew');
+		expect(state.text).toBe(`${FRONTMATTER}First\n\nnew\n\n- [ ] a\n`);
+		typeEach((v) => state.typeListNote(v), ['\nne', '\n']);
 		expect(state.text).toBe(text);
 	});
 

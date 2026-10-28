@@ -14,6 +14,11 @@ export class CollapsedHeadings {
 		else this.headings.add(this.editing.track(headingLine));
 	}
 
+	collapseAll(headingLines: readonly number[]): void {
+		this.clear();
+		for (const line of headingLines) this.headings.add(this.editing.track(line));
+	}
+
 	expand(headingLine: number): void {
 		const found = this.find(headingLine);
 		if (found) this.drop(found);
@@ -42,6 +47,17 @@ export class CollapsedHeadings {
 		this.editing.untrack(tracked);
 		this.headings.delete(tracked);
 	}
+}
+
+/** Which of Collapse all and Expand all would change something, given the list's heading lines and the collapsed lines. */
+export function collapseChoices(
+	headingLines: readonly number[],
+	collapsed: ReadonlySet<number>,
+): { canCollapse: boolean; canExpand: boolean } {
+	return {
+		canCollapse: headingLines.some((line) => !collapsed.has(line)),
+		canExpand: headingLines.some((line) => collapsed.has(line)),
+	};
 }
 
 export function sectionHeadingOf(model: ListModel, line: number): number | null {

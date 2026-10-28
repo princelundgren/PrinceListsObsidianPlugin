@@ -162,9 +162,10 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 			return;
 		}
 		const { workspace } = this.app;
-		const shown = workspace.getLeavesOfType(VIEW_TYPE_LIST).find((leaf) => leaf.view instanceof PrinceListView && leaf.view.file === file);
+		// By its state, which a tab restored in the background keeps while its view waits to load.
+		const shown = workspace.getLeavesOfType(VIEW_TYPE_LIST).find((leaf) => leaf.getViewState().state?.file === file.path);
 		const leaf = shown ?? workspace.getLeaf('tab');
-		if (!shown) await openAsList(leaf, file);
+		if (!(leaf.view instanceof PrinceListView && leaf.view.file === file)) await openAsList(leaf, file);
 		workspace.setActiveLeaf(leaf, { focus: true });
 		if (leaf.view instanceof PrinceListView && leaf.view.file === file) openItem(leaf.view, item.titleLine, item.line);
 	}
@@ -182,24 +183,24 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		for (const { group, items } of groups) {
 			sizer.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
 			const list = sizer.createEl('ul', { cls: ITEMS_CLASS });
-			for (const item of items) list.append(this.buildRow(item, group === 'today' && item.day === today ? null : today));
+			for (const item of items) list.append(this.buildRow(item, today));
 		}
 		this.scrollEl.scrollTop = scroll;
 	}
 
-	// `today` is null for an item whose day goes without saying: today's, in Today.
-	private buildRow(item: ScheduledItem, today: string | null): HTMLLIElement {
+	private buildRow(item: ScheduledItem, today: string): HTMLLIElement {
 		const rowEl = createEl('li', { cls: ITEM_CLASS });
 		rowEl.toggleClass('is-done', item.done);
 		const box = rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' });
 		box.checked = item.done;
 		addHiddenLabel(box, item.title);
 		const text = rowEl.createDiv({ cls: 'princelists-schedule-text' });
-		const block = renderInline(this, item.listPath, text.createDiv({ cls: 'princelists-item-title' }), item.title);
+		const titleLine = text.createDiv({ cls: 'princelists-schedule-title-line' });
+		const block = renderInline(this, item.listPath, titleLine.createDiv({ cls: 'princelists-item-title' }), item.title);
 		if (block) this.blocks.push(block);
+		if (item.starred) addStar(titleLine);
+		addWhen(titleLine, item.day, today);
 		text.createDiv({ cls: 'princelists-schedule-list', text: item.listName });
-		if (item.starred) addStar(rowEl);
-		if (today !== null) addWhen(rowEl, item.day, today);
 		this.rows.set(rowEl, item);
 		return rowEl;
 	}

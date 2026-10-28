@@ -7,8 +7,9 @@ governs: [src/**, styles.css, manifest.json]
 # PrinceLists for Obsidian: step one, a single list
 
 An Obsidian plugin that shows a plain Markdown note as a todo list you can tick, drag and open
-into cards. Step one covers creating a list and everything inside one list. Views that span lists (Today, Upcoming and the rest) come
-later.
+into cards. Step one covers creating a list and everything inside one list. [Step
+two](2026-10-27-prince-lists-step-2-design.md) adds the Schedule view, which spans lists, and a
+list shown inside another note. Other views across lists come later.
 
 **How decisions are marked:**
 
@@ -79,8 +80,9 @@ and data safety, and owner's advocate. Their findings are folded in.
 3. **Run on desktop and mobile (owner, 2026-10-27):** every platform Obsidian runs on, macOS,
    Windows, Linux, iOS, iPadOS and Android. Obsidian runs on all of them, and the code depends only
    on whether it runs on desktop or mobile, through Obsidian's `Platform`. This replaces the first
-   targets, the Mac and the iPhone (2026-10-20). Hands-on checks have run on macOS and an iPhone
-   so far; Windows, Linux, Android and the iPad aren't checked yet.
+   targets, the Mac and the iPhone (2026-10-20). Hands-on checks have run on macOS, an iPhone
+   (step one) and an Android emulator (step two) so far; Windows, Linux, a real Android device and
+   the iPad aren't checked yet.
 
 **Two parts (owner):**
 
@@ -118,13 +120,9 @@ This finish line is what keeps step one from growing into a standalone app.
 
 These are wanted later, roughly in this order. The file format already leaves room for them.
 
-- **[Step two](2026-10-27-prince-lists-step-2-design.md) (owner, 2026-10-27)** takes on what the
-  owner needs before moving in: ticking checklists, Cmd+F, showing a list inside another note,
-  "Turn into list", a When day with a Schedule view, starring an item, and dragging a heading to
-  move its whole section or collapsing it.
 - **Views across lists:** a sidebar with views such as Inbox, Today, Upcoming and Done, grouped
   by area. An area is a list's folder. A Favorites view gathers starred items **(owner,
-  2026-10-27)**.
+  2026-10-27)**. Step two's Schedule view is the first view across lists.
 - **Dates and tags:** a deadline on items, plus tags and tag filters.
 - **Smaller item features:**
   - repeating items, a trash, IDs on single items, and sorting modes
@@ -388,7 +386,9 @@ stays, and the blank line stays with it.
 - **A `%%` comment or a `$$` block is recognized only when its opening line starts with `%%` or
   `$$` at column 0 (call):** an indented one may belong to an item's notes, where masking it would
   change the item's extent. The accepted cost: a top-level comment or math block indented 1 to 3
-  spaces isn't recognized, so checkbox lines inside it become items. Masking also doesn't track
+  spaces isn't recognized, so checkbox lines inside it become items. A top-level fenced code block
+  indented 1 to 3 spaces is tracked, as one at column 0 is, so a `%%` or `$$` line inside it opens
+  nothing. Masking also doesn't track
   HTML blocks such as `<div>`, which end at a blank line, so a fence line inside one, with no blank
   line before the fence, can leave a later `%%` or `$$` region unmasked. Likewise, a new item
   added right after such a block would join it: at the end of the file after a list note that
@@ -554,7 +554,8 @@ stays, and the blank line stays with it.
     typed in reads as its text, as a title does.
   - Links in a card can be clicked.
   - On desktop, right-clicking an internal link in a card shows Obsidian's own link menu
-    **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**.
+    **(owner, 2026-10-20)**. The item menu doesn't open as well **(call)**. A picture has a menu of
+    its own (step two's design, "Right-click menus").
   - On mobile there is no right-click. A tap opens the link, and there is no link menu,
     because the plugin opens no menu on a long-press **(call)**.
 
@@ -621,13 +622,19 @@ stays, and the blank line stays with it.
   - **Refused formats (call):** only the formats Obsidian shows are added: avif, bmp, gif, jpeg,
     jpg, png, svg and webp. Others, such as HEIC, would be linked but not shown, so a notice says
     they weren't added.
+  - **Pictures show at once (owner, 2026-10-28):** the links go in a block of their own, which is
+    drawn straight away, and typing moves to a new empty block below it. A link left in the open
+    field would show as Markdown until the field closed.
   - **Where the links go (call):** when the field a picture was pasted or dropped in is still open
-    once the last picture is saved, the links go in at its cursor as it is then, so typing meanwhile
-    isn't replaced, inside the line when the cursor is mid-line. Otherwise, as for a picture dropped
-    on the drawn notes, they go in a new piece at the end (step two's design, "Editing notes a
-    block at a time"). They save as typing does.
+    once the last picture is saved, their block goes after the open block, or after its whole list
+    when the open block is one of its items, so the list stays whole. It also goes after any block
+    that follows with no empty line between, such as a paragraph right under a heading, so it never
+    runs into the next block. When that field is an empty new block, their block takes its place.
+    Otherwise, as for a picture dropped on the drawn notes, they go in a new block at the end (step
+    two's design, "Editing notes a block at a time"). They save as typing does, and Cmd+Z once the
+    field is left takes them out.
   - **A card that closed or lost its item first (call):** nothing is inserted, and a notice gives
-    the saved path.
+    the saved path. So does a paste the notes couldn't take.
   - **A picture dragged from inside Obsidian (call)** isn't added: dropping a rendered picture back
     on the card would save a second copy.
   - **A list outside the vault takes no pictures (owner, 2026-10-27):** a paste or drop saves
@@ -683,8 +690,8 @@ stays, and the blank line stays with it.
   Delete removes the item and its notes. Step two adds Edit in Markdown, and its star is a button
   on the open card, not an entry here **(owner, 2026-10-27)**.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
-  heading and Delete heading. Step two adds Edit in Markdown, and a menu on the list's background
-  (step two's design, "Right-click menus").
+  heading and Delete heading. Step two adds Edit in Markdown, Collapse all headings and Expand all
+  headings, and a menu on the list's background (step two's design, "Right-click menus").
   - New item adds one as the first item under the heading. In a section without items, it goes
     after the section's content **(call)**: directly under the heading, a paragraph there would
     join the item as a lazy line, and a setext heading spans more than one line.
@@ -701,9 +708,9 @@ stays, and the blank line stays with it.
   mobile this is the only way to reach them **(owner)**. The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
-  heading and Delete heading **(owner, 2026-10-20)**. It's a tap, not a long-press, so there is
-  still no long-press menu. With a card open, the tap only closes the card ("Selecting and
-  adding").
+  heading and Delete heading **(owner, 2026-10-20)**. Step two adds Edit in Markdown, Collapse all
+  headings and Expand all headings. It's a tap, not a long-press, so there is still no long-press
+  menu. With a card open, the tap only closes the card ("Selecting and adding").
 - **New heading below (owner, 2026-10-20)** adds an empty heading at that point and opens the
   same field as Rename heading, with the cursor in it. Escape, or an empty name, removes the
   heading again.
@@ -889,7 +896,7 @@ needs no code.
     it.
   - In a card's title and notes, Cmd+Z and Cmd+Shift+Z step through that field's own history, not
     the list's **(owner, 2026-10-27)**. The browser drops a field's undo once a script changes its
-    text, as a pasted picture's link does, so the field keeps its own while it has focus: a run of
+    text, as a format bar button does, so the field keeps its own while it has focus: a run of
     typing in one place is one step, and each change the plugin makes is another. Once the field has
     nothing left to undo, Cmd+Z does nothing. Leaving the field, or the window, closes it and ends
     its history; Cmd+Z after that steps through the list's history, as before.
@@ -1084,7 +1091,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 - **iOS WebKit fires no `contextmenu` event** (MDN compat data). Obsidian makes one itself on iOS
   after a still hold, 800 ms by its code. A device confirmed the event (its haptic comes with it);
-  the 800 ms wasn't measured. A hold on Android isn't checked.
+  the 800 ms wasn't measured. On an Android emulator a dispatched `contextmenu` on a block's row or
+  the list's background opens no menu; a real hold on Android isn't checked.
   - Because holding only ever drags, item rows must not open a menu, and a heading opens its menu
     on a tap. So on mobile, cancel `contextmenu` on rows and headings, in the capture phase.
   - On an iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
@@ -1141,6 +1149,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 - **The delay is 24 hours of elapsed time.** Across a daylight-saving change, the hide time moves
   by an hour on the clock. Accepted.
 - **`✔` carries no time zone.** After traveling, two devices may disagree by a few hours. Accepted.
+- **A time the clock skipped can be read (call).** When summer time starts, `✔ 2026-03-29 02:30`
+  names a time that never showed on a clock in Stockholm. It counts as the moment the clock showed
+  then, 03:30, so the item hides a day later, not at once as "a time that can't be read" would.
 
 ### Frontmatter
 
@@ -1198,11 +1209,13 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ## Testing and owner checkpoints
 
-- **Manual testing uses a test vault on desktop and mobile,** so far macOS and an iPhone. Windows,
-  Linux, Android and the iPad aren't checked yet.
+- **Manual testing uses a test vault on desktop and mobile,** so far macOS, an iPhone (step one)
+  and an Android emulator (step two). Windows, Linux, a real Android device and the iPad aren't
+  checked yet.
 - **Many manual checks run scripted:** through Obsidian's CLI on desktop, and through the mobile
-  browser engine's web inspector (Safari's, for the iPhone), with synthetic touch. The owner checks
-  by hand what needs a finger or an eye, such as holds, scrolling, the keyboard and the flash.
+  browser engine's web inspector (Safari's for the iPhone, Chrome's DevTools protocol for the
+  Android emulator), with synthetic touch. The owner checks by hand what needs a finger or an
+  eye, such as holds, scrolling, the keyboard and the flash.
 - **Spikes come first, and each one stops for the owner:**
   1. The flash when a list opens.
   2. Hold-to-drag on mobile: it must not break scrolling or trigger Obsidian's long-press
@@ -1262,8 +1275,9 @@ Checked 2026-10-20.
   - menus and events: `Menu.showAtMouseEvent`; `Workspace.on('file-menu' | 'file-open')`, where
     `file-open` "could be in a new leaf, an existing leaf, or an embed"; `Plugin.addRibbonIcon`;
     `Workspace.openLinkText`; `MenuItem.setWarning` (0.15.0), which turns the item's "title and
-    icon" red; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a context menu to
-    internal file links"
+    icon" red; `MenuItem.setSection` (0.15.3), whose section IDs are read from the menu's
+    `data-section` attributes; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a context
+    menu to internal file links"
   - rendering and metadata: `MarkdownRenderer.render`, `CachedMetadata.listItems`,
     `getFrontMatterInfo` (1.5.7), `parseYaml`, and `getFileCache` (returns null when not cached)
   - files:
@@ -1272,7 +1286,11 @@ Checked 2026-10-20.
       (1.5.7)
     - `FileManager.generateMarkdownLink` (0.12.0), which generates a link "based on the user's
       preferences" (checked 2026-10-22)
-    - `Vault.createBinary`, `Vault.process` (1.1.0) and `Vault.on('modify')`
+    - `Vault.createBinary`, `Vault.readBinary` (0.9.7), `Vault.process` (1.1.0) and
+      `Vault.on('modify')`
+    - `MetadataCache.getFirstLinkpathDest` (0.12.5)
+    - `FileManager.promptForDeletion` (0.15.0), which resolves "true if the prompt was confirmed";
+      confirmed, it also moves the file to the trash (observed in 1.14.5)
     - `TExternalFile` (1.14.4): "Represents a file that is outside the Vault. Can be used with the
       vault API just like any other file."
     - `Vault.getAbstractFileByPath` (0.11.11), which gets "a file or folder inside the vault",

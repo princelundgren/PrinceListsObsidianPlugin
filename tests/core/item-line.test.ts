@@ -1,4 +1,5 @@
-import { describe, expect, test } from 'vitest';
+import process from 'node:process';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import {
 	TASKS_SIGNIFIERS,
 	formatStamp,
@@ -89,8 +90,13 @@ describe('untickLine', () => {
 		[`- [x] a ${STAMP}`, '- [ ] a'],
 		[`- [x] a ${STAMP} 📅 2026-10-30 ✅ 2026-10-20`, '- [ ] a 📅 2026-10-30'],
 		['- [x] a ✔ 2026-10-20 10:00 ', '- [ ] a '],
+		['- [x]  ✔ 2026-10-20 10:00 ⏳ 2026-10-30', '- [ ] ⏳ 2026-10-30'],
+		['- [x]  📅 2026-10-30', '- [ ]  📅 2026-10-30'],
 	])('%s', (input, expected) => {
 		expect(untickLine(input)).toBe(expected);
+	});
+	test.each(['- [ ] ⏳ 2026-10-30', '- [ ] 📅 2026-11-01', '- [ ] '])('a tick and an untick of %s give it back', (line) => {
+		expect(untickLine(tickLine(line, new Date(2026, 9, 28, 10, 0)))).toBe(line);
 	});
 });
 
@@ -168,6 +174,16 @@ describe('parseItemLine', () => {
 			tail: ' 📅 2026-10-30 ^id',
 		});
 	});
+	test('reads a ✔ mark only at the end of the title, after a space', () => {
+		expect(parseItemLine('- [x] ✔ 2026-10-20')?.title).toBe('✔ 2026-10-20');
+		expect(parseItemLine('- [x] a✔ 2026-10-20')?.title).toBe('a✔ 2026-10-20');
+		expect(parseItemLine('- [x] a\t✔ 2026-10-20')?.title).toBe('a\t✔ 2026-10-20');
+		expect(parseItemLine('- [x] a ✔ 2026-10-20 x')?.title).toBe('a ✔ 2026-10-20 x');
+	});
+	// CommonMark doesn't end a line at U+2028 or U+2029, so the line is still one item.
+	test('reads a title holding a Unicode line separator', () => {
+		expect(parseItemLine('- [ ] a\u2028b 📅 2026-10-30')?.title).toBe('a\u2028b');
+	});
 	test.each(['- bullet', '## h', '-[ ] x', '- [ab] x'])('returns null for %s', (t) => {
 		expect(parseItemLine(t)).toBeNull();
 	});
@@ -222,6 +238,23 @@ describe('markTime', () => {
 			expect(markTime(mark)).toBeNull();
 		},
 	);
+});
+
+describe('markTime in a time zone that skips an hour', () => {
+	// Node reads TZ again when it changes, so these dates are in Stockholm, which skipped from 02:00
+	// to 03:00 on 2026-03-29.
+	const zone = process.env.TZ;
+	beforeAll(() => {
+		process.env.TZ = 'Europe/Stockholm';
+	});
+	afterAll(() => {
+		// Assigning undefined would store the string "undefined".
+		if (zone === undefined) delete process.env.TZ;
+		else process.env.TZ = zone;
+	});
+	test('a time in the skipped hour reads as the moment the clock shows then', () => {
+		expect(markTime('✔ 2026-03-29 02:30')?.getTime()).toBe(new Date(2026, 2, 29, 3, 30).getTime());
+	});
 });
 
 test('a long ⛔ line parses without catastrophic backtracking', () => {

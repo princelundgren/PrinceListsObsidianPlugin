@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { toggleLine } from '../../src/core/item-line';
 import { joinLines, splitLines } from '../../src/core/lines';
-import { oneLineTitle, startTitleField, syncTitleField, typeTitle, type TitleField } from '../../src/core/title-field';
+import { joinTypedLines, oneLineTitle, startTitleField, syncTitleField, typeTitle, type TitleField } from '../../src/core/title-field';
 import { list } from './edit-helpers';
 
 // Types `final` one character at a time into the title of item n, as the field does: each keystroke
@@ -25,6 +25,26 @@ describe('oneLineTitle', () => {
 	test('replaces each line break with a space', () => {
 		expect(oneLineTitle('a\nb\r\nc\rd')).toBe('a b c d');
 		expect(oneLineTitle('plain')).toBe('plain');
+	});
+	test('replaces the Unicode line and paragraph separators with a space', () => {
+		expect(oneLineTitle('a\u2028b\u2029c')).toBe('a b c');
+	});
+});
+
+describe('joinTypedLines', () => {
+	test.each([
+		['a  \n\t b   c\n\nd', 'a b   c d'],
+		['a\r\nb', 'a b'],
+		['\n a', ' a'],
+		['a   b\t', 'a   b\t'],
+	])('%j', (typed, joined) => {
+		expect(joinTypedLines(typed)).toBe(joined);
+	});
+	test('a long run of spaces joins in under 100 ms', () => {
+		const typed = `x${' '.repeat(50_000)}y`;
+		const start = performance.now();
+		expect(joinTypedLines(typed)).toBe(typed);
+		expect(performance.now() - start).toBeLessThan(100);
 	});
 });
 

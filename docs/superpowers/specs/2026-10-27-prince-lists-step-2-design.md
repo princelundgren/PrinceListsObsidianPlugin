@@ -34,8 +34,8 @@ only documented Obsidian APIs are used.
   Markdown", which opens the list as Markdown at the item.
 - **Notes edit one block at a time:** a card's notes and the list note stay drawn as in a note, and
   only the paragraph, table or list item you click shows its Markdown.
-- **Right-click menus:** a heading's menu gains "Edit in Markdown", and the list's background has a
-  menu of its own on desktop.
+- **Right-click menus:** a heading's menu gains "Edit in Markdown" and collapsing or expanding
+  every heading, and the list's background has a menu of its own on desktop.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -224,6 +224,9 @@ current todo app. Step one's own "Done when" doesn't change.
   star and the ⋯. Once the item has a When, the day takes the icon's place, after its own calendar
   icon. Clicking either opens the platform's date picker through an `<input type="date">`.
   Obsidian has no date picker API, and the HTML input gives each platform's own picker.
+  - **In a pane too narrow for the title beside them (call),** such as a sidebar, the When, star
+    and ⋯ move to a line of their own under the title, still on the right, so the title keeps
+    about 8em to show and edit.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's top right, and every platform's picker can
     already clear the day.
@@ -242,9 +245,11 @@ current todo app. Step one's own "Done when" doesn't change.
   - The ranges **(call)**: Next 7 days is two to seven days ahead, and Later anything after that.
     An empty group is hidden.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
-- **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day, except
-  for today's items in Today. The list's name is smaller, on a line under the title, so it doesn't
-  read as part of it **(owner, 2026-10-28)**.
+- **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day. The
+  list's name is smaller, on a line under the title, so it doesn't read as part of it **(owner,
+  2026-10-28)**. The star and the day stay right after the title, however long the list's name.
+  - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
+    Today with no day read as an item with no date beside the overdue ones that show theirs.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
   its title in a list's title style. A muted line under it says what the page shows and how an item
   gets a When, for anyone who opens it without knowing.
@@ -309,7 +314,8 @@ current todo app. Step one's own "Done when" doesn't change.
   while collapsed. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
   on mobile.
 - **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. Mobile
-  has no hover, so there it always shows. It shows no tooltip: its accessible name is
+  has no hover, so there it always shows, as on a desktop system's touchscreen without a mouse. It
+  shows no tooltip: its accessible name is
   "Collapse section", with `aria-expanded` saying whether the section is open **(call)**.
 - **Collapsed, the section's rows hide;** the heading stays. The items before the first heading
   have no heading, so they can't collapse. The open card's item still shows in a collapsed
@@ -321,6 +327,12 @@ current todo app. Step one's own "Done when" doesn't change.
   dropped under the heading, or Cmd+Enter with an item in it selected.
 - **A collapsed section drags as any section does.** While Cmd+F filters the list, matches in a
   collapsed section show, and the section is collapsed again when the filter ends **(call)**.
+- **Collapse all headings and Expand all headings (owner, 2026-10-28)** are in a heading's menu,
+  on desktop and mobile, and the list's background menu, after a separator. Each shows only while
+  it would change something: Collapse all while any heading is open, Expand all while any is
+  collapsed. In the heading menu they come before Delete heading, which stays last, after a
+  separator of its own **(owner, 2026-10-28)**. They aren't commands **(owner, 2026-10-28)**: a
+  command ID can't change once released, so one waits until it's wanted.
 - **Not in a list inside another note (call)** in step two.
 
 ### Star (owner: in its list only)
@@ -402,6 +414,15 @@ renderer, and only the part you click becomes a plain-text field.
 - **Clicking below the last block opens an empty block at the end (owner),** as clicking empty
   notes did. Once it holds text it's saved after an empty line when the notes already hold a
   block, so it stays a block of its own **(call)**.
+  - With a block above it, its field opens right under that block, holding the empty line with the
+    caret on the line below, as in a note: Up stops on the empty line before moving into the block
+    above, and Backspace takes the empty line first **(owner, 2026-10-28)**. The empty block that
+    Enter opens below a list opens the same way.
+  - The empty line is saved even when it's taken out of the field, so the block stays a block of
+    its own; the field then shows the gap between blocks in its place **(call)**.
+  - Its gray "Notes" shows only while the notes hold nothing else, as in empty notes. With other
+    blocks around it, the placeholder stays the field's name for screen readers but isn't shown
+    **(call)**.
 - **Saving changes only the open block's lines,** which take the file's usual line ending; the
   rest of the notes keeps every byte, so a change another device made to another block stays
   **(call)**. The item's indent is put back, as before. An outside change that takes the block's
@@ -409,7 +430,10 @@ renderer, and only the part you click becomes a plain-text field.
   item went.
 - **Leaving the field draws that block again,** and the rest stays as it was unless the notes
   changed elsewhere meanwhile; clicking another block moves the field there. The format bar,
-  Cmd+B, Cmd+I and Cmd+K, a pasted picture and the field's own Undo all act on the open block. A picture dropped on drawn notes goes in a new block at the end **(call)**.
+  Cmd+B, Cmd+I and Cmd+K and the field's own Undo act on the open block. A picture pasted or
+  dropped in the field goes in a block of its own, shown at once, with typing moved below
+  **(owner, 2026-10-28)**; one dropped on drawn notes goes in a new block at the end **(call)**.
+  Step one's design, "Where the links go", says where each goes.
 - **The list note works the same (owner, 2026-10-28),** format bar and keys included **(call)**,
   with its own rules kept: what would turn it into a heading or an item warns before it saves,
   checked on the whole note as it would be saved, and it takes no pictures.
@@ -423,10 +447,11 @@ renderer, and only the part you click becomes a plain-text field.
 ### Right-click menus (owner, 2026-10-28)
 
 - **The heading menu gains "Edit in Markdown",** with the caret at the end of the heading's line,
-  on desktop and on mobile.
+  on desktop and on mobile, and Collapse or Expand all headings ("Collapsing a heading").
 - **Right-clicking the list's background on desktop** opens the list menu: New item, New heading,
-  Edit in Markdown, Show archived and Open schedule. The background is anywhere a click lands on
-  no row, heading, field or link, the drawn list note included.
+  Edit in Markdown, Show archived, Collapse or Expand all headings, and Open schedule. The
+  background is anywhere a click lands on no row, heading, field or link, the drawn list note
+  included.
   - New item and New heading go at the end of the section the click is in: under the nearest
     heading above it, or in the part before the first heading **(owner)**. New item goes after the
     section's last item, before any text below it that isn't an item, which an item can't follow
@@ -435,6 +460,25 @@ renderer, and only the part you click becomes a plain-text field.
   - Show archived and Open schedule do what they do in the pane's ⋯ menu.
   - Mobile has no background menu: the plugin opens no menu on a long-press (step one, "Touch on
     mobile").
+- **Right-clicking a picture on desktop** in a card's notes or the list note opens the picture's
+  menu, laid out as Obsidian's own image menu: Copy image and Remove image, then Obsidian's link
+  menu, then Delete image in red at the bottom. Swap file and Reset size are left out
+  **(owner, 2026-10-28)**.
+  - Remove image takes out the link only, and Delete image takes out the link and moves the file to
+    the trash after Obsidian's own prompt **(owner, 2026-10-28)**. A cancel leaves both.
+  - The link goes with one space beside it: the one before it after text, else the one after it,
+    so the line's indent stays. A line left empty goes, with one empty line next to it, so one
+    still separates the blocks around it; empty notes leave none under the title, and a block
+    right under a title keeps the empty line that keeps it apart from the title; the list note
+    keeps its empty line before an item or heading **(call)**. Cmd+Z puts it back.
+  - Remove and Delete show only while the piece's drawn pictures line up one to one with its
+    picture links, as a box lines up with its line ("Checklists"), and the removal is safe; a
+    picture in an embedded note belongs to that note and gets no picture menu **(call)**.
+  - Delete image checks the removal before Obsidian's prompt, so it doesn't trash a file whose
+    link can't go. Either refuses once the list changed elsewhere after the menu opened, so a change
+    while the prompt is open can still leave the link **(call)**.
+  - Copy image copies PNG, the one picture format the clipboard takes, so any other is drawn into a
+    PNG first **(call)**.
 
 ## Still later
 
@@ -457,7 +501,11 @@ These go into step one's "Not in step one" list:
 3. **Renaming a list:** whether Obsidian updates a `[[link]]` inside a `princelists` code block.
    Links in code blocks usually aren't links to Obsidian, so a block may show "not found" after a
    rename until it's edited. Nothing may fix it in the background, so if it happens, it goes to the
-   owner as an accepted cost or a change of format.
+   owner as an accepted cost or a change of format. Found: in Obsidian 1.14 a rename leaves the
+   block's link as it was, and the block shows that the link doesn't lead to a note. Accepted
+   **(owner, 2026-10-28):** the format stays, and the new name is typed into the block. It fails
+   where it can be seen, it only follows renaming a list another note shows, and a fix would be a
+   background write.
 4. **Live Preview:** a click, a drag or typing inside a rendered block stays in the block and
    doesn't move the cursor into its source.
 5. **`<input type="date">`** opens a picker on desktop and mobile, and returns `YYYY-MM-DD`.

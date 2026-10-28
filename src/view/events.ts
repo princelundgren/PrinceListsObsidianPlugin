@@ -28,6 +28,7 @@ import { openPieceAt, pieceBlur, pieceInput } from './note-piece-field';
 import { pieceBeforeInput, pieceKeyDown } from './note-piece-keys';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
 import { notesHostOf } from './notes-host';
+import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
 import { queueTick } from './tick';
@@ -50,8 +51,8 @@ export function registerFieldEvents(view: PrinceListView): void {
 	if (Platform.isMobile) {
 		view.registerDomEvent(contentEl, 'contextmenu', (evt) => onHoldMenu(view, evt), { capture: true });
 		view.registerDomEvent(contentEl, 'click', (evt) => swallowClick(view, evt), { capture: true });
-		// A hold that sent no click must not eat a later tap.
-		view.registerDomEvent(contentEl, 'touchstart', () => (view.swallowNextClick = false), { capture: true });
+		// A hold that sent no click must not eat a later tap, nor a right-click with a mouse, which sends no touch.
+		view.registerDomEvent(contentEl, 'pointerdown', () => (view.swallowNextClick = false), { capture: true });
 	}
 }
 
@@ -144,7 +145,8 @@ function keepNotesFocused(view: PrinceListView, evt: MouseEvent): void {
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
-	if (target && !handleLinkMenu(view.app, view.sourcePath, evt, target)) showContextMenu(view, evt, target);
+	if (!target || showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target)) return;
+	showContextMenu(view, evt, target);
 }
 
 function onHoldMenu(view: PrinceListView, evt: MouseEvent): void {
