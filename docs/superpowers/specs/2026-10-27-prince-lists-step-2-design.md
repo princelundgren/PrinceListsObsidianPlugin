@@ -324,8 +324,9 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Collapse all headings and Expand all headings (owner, 2026-10-28)** are in a heading's menu,
   on desktop and mobile, and the list's background menu, after a separator. Each shows only while
   it would change something: Collapse all while any heading is open, Expand all while any is
-  collapsed. They aren't commands **(owner, 2026-10-28)**: a command ID can't change once
-  released, so one waits until it's wanted.
+  collapsed. In the heading menu they come before Delete heading, which stays last, after a
+  separator of its own **(owner, 2026-10-28)**. They aren't commands **(owner, 2026-10-28)**: a
+  command ID can't change once released, so one waits until it's wanted.
 - **Not in a list inside another note (call)** in step two.
 
 ### Star (owner: in its list only)

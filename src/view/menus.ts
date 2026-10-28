@@ -73,6 +73,8 @@ export function headingMenu(view: PrinceListView, model: ListModel, section: Sec
 			.setIcon('file-text')
 			.onClick(atLine(anchor, (line) => editItemInMarkdown(view, line))),
 	);
+	addCollapseAllEntries(view, model, menu);
+	menu.addSeparator();
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Delete heading')
@@ -80,7 +82,6 @@ export function headingMenu(view: PrinceListView, model: ListModel, section: Sec
 			.setWarning(true)
 			.onClick(atLine(anchor, (line) => deleteHeadingAt(view, line))),
 	);
-	addCollapseAllEntries(view, model, menu);
 }
 
 // The list's own actions, from a right-click on its background on desktop. New item and New heading
