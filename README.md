@@ -8,8 +8,8 @@
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick start</a> ·
   <a href="#features">Features</a> ·
+  <a href="#quick-start">Quick start</a> ·
   <a href="#how-a-list-is-stored">How a list is stored</a> ·
   <a href="https://github.com/princelundgren/PrinceListsObsidianPlugin/issues">Report a bug</a>
 </p>
@@ -18,27 +18,6 @@
 
 PrinceLists turns a note into a todo list you can tick, drag and plan, on desktop and on your
 phone. Underneath, it stays plain Markdown that any editor can read.
-
-## Quick start
-
-1. **Install** PrinceLists from Settings → Community plugins → Browse, and enable it.
-2. **Make a list** with the list icon in the ribbon, or right-click a folder and choose **New list**.
-3. **Add items** with the **+** in the pane's header. Click an item to write notes, star it or give
-   it a date.
-
-Already have a note with checkboxes? Right-click it in the file explorer and choose
-**Turn into list**.
-
-<details>
-<summary>Install by hand instead</summary>
-
-1. Download `main.js`, `manifest.json` and `styles.css` from the
-   [latest release](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases/latest).
-2. Put them in `<vault>/.obsidian/plugins/princelists/`.
-3. In Settings → Community plugins, turn on community plugins if Restricted mode is on, and enable
-   PrinceLists under Installed plugins.
-
-</details>
 
 ## Features
 
@@ -79,6 +58,27 @@ edit them. If you rename the list, update the name in the block.
 [[Groceries]]
 ```
 ````
+
+## Quick start
+
+1. **Install** PrinceLists from Settings → Community plugins → Browse, and enable it.
+2. **Make a list** with the list icon in the ribbon, or right-click a folder and choose **New list**.
+3. **Add items** with the **+** in the pane's header. Click an item to write notes, star it or give
+   it a date.
+
+Already have a note with checkboxes? Right-click it in the file explorer and choose
+**Turn into list**.
+
+<details>
+<summary>Install by hand instead</summary>
+
+1. Download `main.js`, `manifest.json` and `styles.css` from the
+   [latest release](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases/latest).
+2. Put them in `<vault>/.obsidian/plugins/princelists/`.
+3. In Settings → Community plugins, turn on community plugins if Restricted mode is on, and enable
+   PrinceLists under Installed plugins.
+
+</details>
 
 ## How a list is stored
 
