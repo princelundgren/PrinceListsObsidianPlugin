@@ -61,7 +61,7 @@ export function listNoteWithPiece(lines: readonly Line[], model: ListModel, piec
 
 function noteText(note: readonly Line[]): string {
 	const texts = note.map((line) => line.text);
-	while (texts.length > 0 && isBlank(texts.at(-1) as string)) texts.pop();
+	while (texts.length > 0 && isBlank(texts[texts.length - 1] as string)) texts.pop();
 	return texts.join('\n');
 }
 
