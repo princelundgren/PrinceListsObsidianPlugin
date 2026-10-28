@@ -64,6 +64,10 @@ edit them. If you rename the list, update the name in the block.
 Already have a note with checkboxes? Right-click it in the file explorer and choose
 **Turn into list**.
 
+| The list icon in the ribbon | A folder's menu | A note's menu |
+| --- | --- | --- |
+| <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.png" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.png" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.png" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
+
 <details>
 <summary>Install by hand instead</summary>
 
