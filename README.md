@@ -12,6 +12,12 @@ your lists. It's simple to use, and powerful when you need it.
 
 ![In a todo list in Obsidian, a new item gets a title, notes with a link and a pasted picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
+Make a list from the ribbon, a folder, or a note you already have.
+
+| The list icon in the ribbon | A folder's menu | A note's menu |
+| --- | --- | --- |
+| <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.png" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.png" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.png" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
+
 Ticked items hide after a day. **Show archived** brings them back.
 
 ![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
@@ -77,10 +83,6 @@ You can show a list inside any other note, too.
 3. **Add items** with the **+**. Click one to add notes, a star or a date.
 
 Already have a note with checkboxes? Right-click it and choose **Turn into list**.
-
-| The list icon in the ribbon | A folder's menu | A note's menu |
-| --- | --- | --- |
-| <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.png" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.png" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.png" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
 <details>
 <summary>Install by hand instead</summary>
