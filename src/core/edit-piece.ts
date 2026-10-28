@@ -1,5 +1,5 @@
 import { blockKey, replaceRun } from './edit-check';
-import { isBlankAt, typedLines } from './edit-lines';
+import { isBlankAt, typedLines, withoutSeparatorLine } from './edit-lines';
 import { mapRange, type LineRange } from './follow';
 import { dominantEol, type Line } from './lines';
 import { isBlank, type ItemBlock, type ListModel } from './parse';
@@ -23,7 +23,7 @@ export function setNotesPiece(
 	typed: string,
 ): { lines: Line[]; piece: PieceSession } {
 	const { range, indent, separator } = piece;
-	const texts = typedLines(typed).map((text) => (isBlank(text) ? '' : indent + text));
+	const texts = typedLines(separator ? withoutSeparatorLine(typed) : typed).map((text) => (isBlank(text) ? '' : indent + text));
 	const ownsSeparator = separator && range.end > range.start && isBlankAt(lines, range.start - 1);
 	const from = ownsSeparator ? range.start - 1 : range.start;
 	const run = separator && texts.length > 0 ? ['', ...texts] : texts;
