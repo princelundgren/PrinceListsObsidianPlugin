@@ -460,6 +460,25 @@ renderer, and only the part you click becomes a plain-text field.
   - Show archived and Open schedule do what they do in the pane's ⋯ menu.
   - Mobile has no background menu: the plugin opens no menu on a long-press (step one, "Touch on
     mobile").
+- **Right-clicking a picture on desktop** in a card's notes or the list note opens the picture's
+  menu, laid out as Obsidian's own image menu: Copy image and Remove image, then Obsidian's link
+  menu, then Delete image in red at the bottom. Swap file and Reset size are left out
+  **(owner, 2026-10-28)**.
+  - Remove image takes out the link only, and Delete image takes out the link and moves the file to
+    the trash after Obsidian's own prompt **(owner, 2026-10-28)**. A cancel leaves both.
+  - The link goes with one space beside it: the one before it after text, else the one after it,
+    so the line's indent stays. A line left empty goes, with one empty line next to it, so one
+    still separates the blocks around it; empty notes leave none under the title, and a block
+    right under a title keeps the empty line that keeps it apart from the title; the list note
+    keeps its empty line before an item or heading **(call)**. Cmd+Z puts it back.
+  - Remove and Delete show only while the piece's drawn pictures line up one to one with its
+    picture links, as a box lines up with its line ("Checklists"), and the removal is safe; a
+    picture in an embedded note belongs to that note and gets no picture menu **(call)**.
+  - Delete image checks the removal before Obsidian's prompt, so it doesn't trash a file whose
+    link can't go. Either refuses once the list changed elsewhere after the menu opened, so a change
+    while the prompt is open can still leave the link **(call)**.
+  - Copy image copies PNG, the one picture format the clipboard takes, so any other is drawn into a
+    PNG first **(call)**.
 
 ## Still later
 
