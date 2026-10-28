@@ -26,6 +26,8 @@ export function pieceKeyDown(view: PrinceListView, field: HTMLTextAreaElement, e
 
 // Every platform's keyboard sends these, where some send no key for Enter or Backspace.
 export function pieceBeforeInput(view: PrinceListView, field: HTMLTextAreaElement, evt: InputEvent): void {
+	// Shift belongs to the keydown just before this input, whatever the input is.
+	const isShiftEnter = shiftEnters.delete(field);
 	if (evt.isComposing || field.readOnly) return;
 	if (evt.inputType === 'deleteContentBackward') {
 		// The keystroke that emptied the field already took its lines out.
@@ -34,8 +36,6 @@ export function pieceBeforeInput(view: PrinceListView, field: HTMLTextAreaElemen
 	}
 	const isEnter = evt.inputType === 'insertLineBreak' || evt.inputType === 'insertParagraph';
 	if (!isEnter) return;
-	// A keyboard that sends no keydown for Enter mustn't inherit an earlier Shift+Enter.
-	const isShiftEnter = shiftEnters.delete(field);
 	const range = view.editing.notesPieceRange();
 	if (isShiftEnter || !range || field.selectionStart !== field.selectionEnd) return;
 	const outdent = view.editing.notesPieceOutdent(field.value);

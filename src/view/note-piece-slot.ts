@@ -119,7 +119,11 @@ export function redrawAround(drawing: Drawing, el: HTMLElement, piece: Piece, dr
 		Object.assign(shown, { component, text: piece.text, hidden });
 		drawn();
 	};
-	MarkdownRenderer.render(drawing.app, piece.text, fresh, drawing.sourcePath, component).then(putAround, (error: unknown) => console.error(error));
+	MarkdownRenderer.render(drawing.app, piece.text, fresh, drawing.sourcePath, component).then(putAround, (error: unknown) => {
+		drawing.parent.removeChild(component);
+		if (shown.redrawing === attempt) shown.redrawing = null;
+		console.error(error);
+	});
 }
 
 // What an item draws, but the field, waits hidden before the field.
