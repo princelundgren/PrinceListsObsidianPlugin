@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { ListEditing, type Typed } from '../../src/core/editing';
 import { isEmptyItem } from '../../src/core/empty-item';
 import { ownEdit, type OwnEdit } from '../../src/core/follow';
+import { textEdit } from '../../src/core/history';
 import { planItemInsert, type PlannedInsert } from '../../src/core/list-actions';
 import { splitLines } from '../../src/core/lines';
 import { contentStartOf, list } from './edit-helpers';
@@ -42,6 +43,22 @@ describe('the undo history', () => {
 		expect(undo?.next).toBe(typed);
 		state.applyOwn(typed, (undo as { edit: OwnEdit }).edit);
 		expect(state.history.undo(state.text)?.next).toBe(text);
+	});
+
+	test('a typing step undone can be redone, and undone again', () => {
+		const state = editing(text);
+		state.open(4);
+		state.openNotesPiece({ start: 5, end: 5 }, true);
+		typeEach((v) => state.typeNotesPiece(v), ['n', 'n\n', 'n\nm']);
+		state.closeNotes();
+		const typed = state.text;
+		const undo = state.history.undo(typed);
+		state.applyOwn(text, (undo as { edit: OwnEdit }).edit);
+		const redo = state.history.redo(text);
+		expect(redo?.next).toBe(typed);
+		expect(redo?.edit).toEqual({ ...textEdit(text, typed), history: 'redo' });
+		state.applyOwn(typed, (redo as { edit: OwnEdit }).edit);
+		expect(state.history.undo(typed)?.next).toBe(text);
 	});
 
 	test("the notes' and the list note's keystrokes make a step for each session", () => {

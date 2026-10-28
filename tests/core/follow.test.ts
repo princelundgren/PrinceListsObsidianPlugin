@@ -124,6 +124,14 @@ describe('followRange', () => {
 		expect(followRange({ start: 1, end: 3 }, moveEdit([0, 1, 3, 2]))).toBeNull();
 		expect(followRange({ start: 2, end: 2 }, moveEdit([0, 3, 1, 2]))).toEqual({ start: 4, end: 4 });
 	});
+	test('an empty range at the start stays, and one after a line a move drops is lost', () => {
+		expect(followRange({ start: 0, end: 0 }, moveEdit([1, 0]))).toEqual({ start: 0, end: 0 });
+		expect(followRange({ start: 2, end: 2 }, moveEdit([0, null, 1]))).toBeNull();
+	});
+	test('a range whose first or last line a move drops is lost', () => {
+		expect(followRange({ start: 1, end: 3 }, moveEdit([0, null, 1, 2]))).toBeNull();
+		expect(followRange({ start: 1, end: 3 }, moveEdit([0, 1, null, 2]))).toBeNull();
+	});
 	test("an edit that starts inside the range can't be followed", () => {
 		expect(followRange(range, { start: 4, delta: 1, kind: 'change' })).toBeNull();
 		expect(followRange(range, { start: 3, delta: 0, kind: 'change' })).toBeNull();
