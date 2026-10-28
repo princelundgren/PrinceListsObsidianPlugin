@@ -207,6 +207,10 @@ textarea.princelists-title {
 	cursor: text;
 }
 
+.princelists-quiet-placeholder::placeholder {
+	opacity: 0;
+}
+
 /* A table in rendered notes, drawn as in a note: Obsidian's own table rules apply only inside its
    views. */
 .princelists-card-notes table {
