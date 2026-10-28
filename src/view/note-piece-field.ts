@@ -139,7 +139,8 @@ function showPlaceholder(field: HTMLTextAreaElement, host: NotesHost): void {
 	const open = host.range();
 	if (!found || !open) return;
 	const { markdown, start } = found.notes;
-	field.toggleClass(QUIET_PLACEHOLDER_CLASS, !holdsOnly(markdown, { start: open.start - start, end: open.end - start }));
+	const alone = holdsOnly(markdown, { start: open.start - start, end: open.end - start });
+	field.toggleClass(QUIET_PLACEHOLDER_CLASS, !alone);
 }
 
 // The field can't save any more: it takes no more typing, and what it held can be copied.
