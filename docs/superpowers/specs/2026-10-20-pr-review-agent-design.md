@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-22
+verified: 2026-10-28
 governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
 ---
 
@@ -55,8 +55,8 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   - The plugin stops on any pull request Claude has already commented on, so later pushes would go
     unreviewed.
   - The plugin checks rules only in `CLAUDE.md` files, and its agents get their paths, not their
-    contents. Here `CLAUDE.md` is one line that imports `AGENTS.md`, so those checks would find
-    the rules only if an agent followed the import. The plugin doesn't check the design.
+    contents. This repository keeps its rules in `AGENTS.md` and has no `CLAUDE.md`, so those
+    checks would find none. The plugin doesn't check the design.
   - It starts at least seven subagents per review, which costs subscription usage.
 
 ## Trust model
