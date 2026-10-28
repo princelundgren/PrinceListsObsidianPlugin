@@ -75,8 +75,8 @@ export function enableBlockDrag(block: ListBlock): void {
 		},
 		{ capture: true },
 	);
-	// A hold that sent no click must not eat a later tap.
-	block.registerDomEvent(rowsEl, 'touchstart', () => (block.swallowNextClick = false), { capture: true });
+	// A hold that sent no click must not eat a later tap, nor a right-click with a mouse, which sends no touch.
+	block.registerDomEvent(rowsEl, 'pointerdown', () => (block.swallowNextClick = false), { capture: true });
 }
 
 // As the list view's queueMove: the item and its place follow the edits that land before the move runs.
