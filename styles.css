@@ -621,6 +621,13 @@ button.princelists-collapse {
 	min-width: 0;
 }
 
+/* The star and day follow the title, so a list name wider than the title doesn't push them away. */
+.princelists-schedule-title-line {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--size-4-2);
+}
+
 .princelists-schedule-list {
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
