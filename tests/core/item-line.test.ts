@@ -1,4 +1,5 @@
-import { describe, expect, test } from 'vitest';
+import process from 'node:process';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import {
 	TASKS_SIGNIFIERS,
 	formatStamp,
@@ -222,6 +223,23 @@ describe('markTime', () => {
 			expect(markTime(mark)).toBeNull();
 		},
 	);
+});
+
+describe('markTime in a time zone that skips an hour', () => {
+	// Node reads TZ again when it changes, so these dates are in Stockholm, which skipped from 02:00
+	// to 03:00 on 2026-03-29.
+	const zone = process.env.TZ;
+	beforeAll(() => {
+		process.env.TZ = 'Europe/Stockholm';
+	});
+	afterAll(() => {
+		// Assigning undefined would store the string "undefined".
+		if (zone === undefined) delete process.env.TZ;
+		else process.env.TZ = zone;
+	});
+	test('a time in the skipped hour reads as the moment the clock shows then', () => {
+		expect(markTime('✔ 2026-03-29 02:30')?.getTime()).toBe(new Date(2026, 2, 29, 3, 30).getTime());
+	});
 });
 
 test('a long ⛔ line parses without catastrophic backtracking', () => {
