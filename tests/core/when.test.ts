@@ -7,6 +7,13 @@ describe('whenOf', () => {
 	test.each(['- [ ] a ⏳ 2026-10-30', '- [ ] a ⌛ 2026-10-30', '- [ ] a ⏳️ 2026-10-30'])('reads %s', (line) => {
 		expect(whenOf(line)).toBe('2026-10-30');
 	});
+	// Tasks needs no space before a field's emoji.
+	test.each(['- [ ] a ⏳ 2026-10-30📅 2026-11-01', '- [ ] a 📅 2026-11-01⏳ 2026-10-30', '- [ ] a ⏳ 2026-10-30🔁 every day'])(
+		'reads a field glued to its neighbor in %s',
+		(line) => {
+			expect(whenOf(line)).toBe('2026-10-30');
+		},
+	);
 	test('takes the earliest of several', () => {
 		expect(whenOf('- [ ] a ⏳ 2026-10-30 ⏳ 2026-10-28')).toBe('2026-10-28');
 	});
@@ -26,6 +33,9 @@ describe('setWhen', () => {
 		['- [ ] a ⏳ 2026-10-30', null, '- [ ] a'],
 		['- [ ] a ⌛ 2026-10-30', '2026-11-02', '- [ ] a ⏳ 2026-11-02'],
 		['- [ ] ', '2026-11-02', '- [ ] ⏳ 2026-11-02'],
+		['- [ ] a ⏳ 2026-10-30📅 2026-11-01', '2026-12-01', '- [ ] a ⏳ 2026-12-01📅 2026-11-01'],
+		['- [ ] a ⏳ 2026-10-30📅 2026-11-01', null, '- [ ] a 📅 2026-11-01'],
+		['- [ ] a 📅 2026-11-01⏳ 2026-10-30', null, '- [ ] a 📅 2026-11-01'],
 	])('%s with %s gives %s', (line, day, expected) => {
 		expect(setWhen(line, day)).toBe(expected);
 	});
