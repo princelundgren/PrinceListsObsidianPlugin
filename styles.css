@@ -48,10 +48,6 @@ textarea.princelists-title {
 	margin-bottom: 0;
 }
 
-.princelists-list-note-text > .princelists-placeholder {
-	margin-bottom: var(--size-4-4);
-}
-
 .princelists-untouched {
 	color: var(--text-muted);
 	white-space: pre-wrap;
@@ -159,6 +155,11 @@ textarea.princelists-title {
 .princelists-list-note-text > :last-child,
 .princelists-card-notes > :last-child {
 	margin-bottom: 0;
+}
+
+/* After the rule above, which it overrides: an empty list note's "Notes" keeps a gap above the rows. */
+.princelists-list-note-text > .princelists-placeholder {
+	margin-bottom: var(--size-4-4);
 }
 
 /* The open card: raised above the list, in place of its row (spec, "Layout"). Its margins stay inside
