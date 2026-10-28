@@ -261,6 +261,11 @@ textarea.princelists-title {
 	min-height: calc(2em * var(--line-height-normal));
 }
 
+/* A new block's field holds the empty line above it, in place of the block's own margin. */
+.princelists-note-piece:has(+ .princelists-new-block) > :last-child {
+	margin-bottom: 0;
+}
+
 .princelists-list-note-text > .princelists-note-piece:first-child > :first-child,
 .princelists-card-notes > .princelists-note-piece:first-child > :first-child {
 	margin-top: 0;

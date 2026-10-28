@@ -72,7 +72,7 @@ export function pieceEnter(text: string, caret: number, nested: boolean): PieceE
 	const line = lines[lineIndex] as string;
 	const isLast = lineIndex === lines.length - 1;
 	const atLineEnd = caret === lineStart + line.length;
-	const ownIndent = columnOf(leadingSpace(lines[0] as string));
+	const ownIndent = columnOf(leadingSpace(lines.find((text) => text.trim() !== '') ?? ''));
 	const item = itemStart(line);
 	if (!item || caret < lineStart + item[0].length || !isListLine(text, lineIndex)) return { kind: 'newline' };
 	const isEmpty = !line.slice(item[0].length).trim();

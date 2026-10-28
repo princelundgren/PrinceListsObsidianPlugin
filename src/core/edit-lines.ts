@@ -9,6 +9,17 @@ export function typedLines(markdown: string): string[] {
 	return texts;
 }
 
+// A new piece's field opens holding the empty line it's saved after, which the save writes itself.
+const SEPARATOR_LINE = /^[ \t]*\n/;
+
+export function holdsSeparatorLine(markdown: string): boolean {
+	return SEPARATOR_LINE.test(markdown);
+}
+
+export function withoutSeparatorLine(markdown: string): string {
+	return markdown.replace(SEPARATOR_LINE, '');
+}
+
 // Text for a single line, such as a title or a heading: a line break in it would write a second line
 // that nothing owns.
 export function hasLineBreak(text: string): boolean {
