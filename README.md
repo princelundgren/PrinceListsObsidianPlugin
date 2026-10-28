@@ -22,10 +22,12 @@ phone. Underneath, it stays plain Markdown that any editor can read.
 ## Quick start
 
 1. **Install** PrinceLists from Settings → Community plugins → Browse, and enable it.
-2. **Make a list:** right-click a note in the file explorer and choose **Turn into list**, or a
-   folder and choose **New list**. The list icon in the ribbon makes a new one too.
+2. **Make a list** with the list icon in the ribbon, or right-click a folder and choose **New list**.
 3. **Add items** with the **+** in the pane's header. Click an item to write notes, star it or give
    it a date.
+
+Already have a note with checkboxes? Right-click it in the file explorer and choose
+**Turn into list**.
 
 <details>
 <summary>Install by hand instead</summary>
