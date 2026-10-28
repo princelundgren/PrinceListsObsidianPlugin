@@ -112,6 +112,18 @@ export function outdentMarker(notes: string, fileLines: readonly string[], item:
 	return outerItemMarker(fileLines.slice(list?.start ?? item.start, item.start), columnOf(leadingSpace(firstLine)));
 }
 
+/**
+ * The line, in the notes, where a block added after the open lines goes: after the piece holding
+ * them, which is the whole list for an item, and after any pieces that follow with no empty line
+ * between, so the new block never runs into the next.
+ */
+export function blockAfter(markdown: string, range: LineRange): number {
+	const pieces = notePieces(markdown);
+	let end = pieceAround(pieces, range)?.end ?? range.end;
+	for (let next = pieces.find((piece) => piece.start === end); next; next = pieces.find((piece) => piece.start === end)) end = next.end;
+	return end;
+}
+
 /** The piece holding `range`; for an empty range, the piece it ends, before one starting there. */
 export function pieceAround(pieces: readonly LineRange[], range: LineRange): LineRange | undefined {
 	const at = range.start;
