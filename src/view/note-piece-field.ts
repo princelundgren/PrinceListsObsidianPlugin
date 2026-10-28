@@ -1,5 +1,5 @@
 import type { LineRange } from '../core/follow';
-import { notePieces } from '../core/note-pieces';
+import { holdsOnly } from '../core/note-pieces';
 import { NOTES_EDITOR_CLASS, sayFieldLost } from './card';
 import { caretAtClick } from './click-caret';
 import { fitHeight, targetOf } from './dom';
@@ -137,8 +137,9 @@ function pieceField(text: string): HTMLTextAreaElement {
 function showPlaceholder(field: HTMLTextAreaElement, host: NotesHost): void {
 	const found = host.notes();
 	const open = host.range();
-	const alone = !found || !open || notePieces(found.notes.markdown).every((piece) => found.notes.start + piece.start >= open.start && found.notes.start + piece.end <= open.end);
-	field.toggleClass(QUIET_PLACEHOLDER_CLASS, !alone);
+	if (!found || !open) return;
+	const { markdown, start } = found.notes;
+	field.toggleClass(QUIET_PLACEHOLDER_CLASS, !holdsOnly(markdown, { start: open.start - start, end: open.end - start }));
 }
 
 // The field can't save any more: it takes no more typing, and what it held can be copied.
