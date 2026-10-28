@@ -4,6 +4,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -12,3 +15,8 @@ updates:
       # The types match the oldest Node.js the scripts support (AGENTS.md), as in Obsidian's sample plugin.
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
+    # Majors and the runtime dependency keep a pull request each.
+    groups:
+      development:
+        dependency-type: development
+        update-types: [minor, patch]
