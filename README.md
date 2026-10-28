@@ -110,11 +110,14 @@ Stuff for the new apartment.
 - **`princelists: true`** in the note's properties makes it a list.
 - **Dates use the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's format,**
   so Tasks and other tools can still read them.
-- **A ticked item gets `✔` with the date and time.** This is PrinceLists' own field, because Tasks'
-  `✅` holds only a date. The plugin uses it to hide the item 24 hours later. Tasks still sees the
-  item as done, but not when, and shows the `✔` text as part of the item.
+- **A ticked item gets `✔` with the date and time.** This is PrinceLists' own field, because
+  Tasks' `✅` holds only a date. The plugin uses it to hide the item 24 hours later. Tasks still
+  sees the item as done, but not when, and shows the `✔` text as part of the item.
 - **The plugin changes only the lines you edit.** Everything else in the note stays exactly as you
   wrote it.
+
+The full format is in the
+[design](docs/superpowers/specs/2026-10-20-prince-lists-design.md#file-format).
 
 ## Syncing
 
@@ -135,7 +138,8 @@ as it does in any note.
 PrinceLists runs on Obsidian for desktop and mobile. Step one's features were checked by hand on
 macOS and an iPhone, and step two's (the star, dates, the Schedule, block editing and a list inside
 another note) on macOS and an Android emulator. Step two isn't checked on an iPhone yet, and nothing
-is checked on Windows, Linux, an iPad or a real Android device. If something looks wrong on your device, please [open an issue](https://github.com/princelundgren/PrinceListsObsidianPlugin/issues).
+is checked on Windows, Linux, an iPad or a real Android device. If something looks wrong on your
+device, please [open an issue](https://github.com/princelundgren/PrinceListsObsidianPlugin/issues).
 
 ## Contributing
 
