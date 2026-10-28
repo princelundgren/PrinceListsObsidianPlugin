@@ -50,8 +50,8 @@ export function registerFieldEvents(view: PrinceListView): void {
 	if (Platform.isMobile) {
 		view.registerDomEvent(contentEl, 'contextmenu', (evt) => onHoldMenu(view, evt), { capture: true });
 		view.registerDomEvent(contentEl, 'click', (evt) => swallowClick(view, evt), { capture: true });
-		// A hold that sent no click must not eat a later tap.
-		view.registerDomEvent(contentEl, 'touchstart', () => (view.swallowNextClick = false), { capture: true });
+		// A hold that sent no click must not eat a later tap, nor a right-click with a mouse, which sends no touch.
+		view.registerDomEvent(contentEl, 'pointerdown', () => (view.swallowNextClick = false), { capture: true });
 	}
 }
 
