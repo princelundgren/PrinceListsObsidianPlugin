@@ -55,8 +55,8 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   - The plugin stops on any pull request Claude has already commented on, so later pushes would go
     unreviewed.
   - The plugin checks rules only in `CLAUDE.md` files, and its agents get their paths, not their
-    contents. Here `CLAUDE.md` is one line that imports `AGENTS.md`, so those checks would find
-    the rules only if an agent followed the import. The plugin doesn't check the design.
+    contents. This repository keeps its rules in `AGENTS.md` and has no `CLAUDE.md`, so those
+    checks would find none. The plugin doesn't check the design.
   - It starts at least seven subagents per review, which costs subscription usage.
 
 ## Trust model
@@ -181,5 +181,5 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   `node scripts/check-docs.mjs`; the full output is hidden, so the others aren't known. Local
   `claude -p` probes showed the exact rules refuse near misses and the deny rules stop `git commit`
   and the push script.
-- **The `@AGENTS.md` import.** Both prompts name `AGENTS.md` themselves, so a review that cites it
-  doesn't show the import loaded.
+- **`@claude` reading `AGENTS.md`.** Claude Code reads it when there's no `CLAUDE.md`, from 2.1.277,
+  but `claude.yml`'s prompt doesn't name it, and no `@claude` run has shown it loaded.
