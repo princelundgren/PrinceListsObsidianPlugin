@@ -124,4 +124,5 @@ To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). The built `main.js` includes commonmark.js, entities and mdurl, under their own
+licenses: see [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).
