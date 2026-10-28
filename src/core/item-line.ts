@@ -120,7 +120,10 @@ export function untickLine(text: string): string {
 	const parts = parseItemLine(text);
 	if (!parts) return text;
 	// Tasks' own untick removes its ✅ as well, so ours does too.
-	return joinItemLine({ ...parts, status: ' ', marks: '', tail: parts.tail.replace(DONE_DATE_FIELD, '') });
+	const tail = parts.tail.replace(DONE_DATE_FIELD, '');
+	// With no title, the space tickLine put before the tail follows `] `, so it goes with the mark.
+	const tickedSpace = parts.title === '' && parts.marks !== '' && tail.startsWith(' ');
+	return joinItemLine({ ...parts, status: ' ', marks: '', tail: tickedSpace ? tail.slice(1) : tail });
 }
 
 // A tick of an open line, or an untick of a done one, as a box does it.
