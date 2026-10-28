@@ -29,17 +29,16 @@ export function notePieces(markdown: string): LineRange[] {
 }
 
 export function itemPieces(markdown: string, piece: LineRange): LineRange[] {
-	const lines = splitLines(markdown);
+	const lines = splitLines(markdown).slice(piece.start, piece.end);
 	const walker = new Parser().parse(maskBlocks(lines, 0).text).walker();
 	const items: LineRange[] = [];
 	for (let event = walker.next(); event; event = walker.next()) {
 		const { node, entering } = event;
 		if (!entering || node.type !== 'item' || isInQuote(node)) continue;
 		const start = node.sourcepos[0][0] - 1;
-		if (start < piece.start || start >= piece.end) continue;
-		let end = Math.min(node.sourcepos[1][0], piece.end);
+		let end = Math.min(node.sourcepos[1][0], lines.length);
 		while (end > start + 1 && isBlank(lines[end - 1]?.text ?? '')) end--;
-		items.push({ start, end });
+		items.push({ start: piece.start + start, end: piece.start + end });
 	}
 	return items;
 }
@@ -70,7 +69,7 @@ export function pieceEnter(text: string, caret: number, nested: boolean): PieceE
 	const atLineEnd = caret === lineStart + line.length;
 	const ownIndent = columnOf(leadingSpace(lines[0] as string));
 	const item = itemStart(line);
-	if (!item || caret < lineStart + item[0].length) return { kind: 'newline' };
+	if (!item || caret < lineStart + item[0].length || !isListLine(text, lineIndex)) return { kind: 'newline' };
 	const isEmpty = !line.slice(item[0].length).trim();
 	const indent = columnOf(item[1] ?? '');
 	if (isEmpty && indent <= ownIndent) {
@@ -113,6 +112,19 @@ function itemStart(line: string): RegExpExecArray | null {
 function caretAfter(from: number, length: number, insert: string): PieceEnter {
 	const caret = from + insert.length;
 	return { kind: 'edit', edit: { from, to: from + length, insert, selectionStart: caret, selectionEnd: caret } };
+}
+
+// Whether the field holds a list and the line isn't code inside it, so a line that only looks like an
+// item, in a fence or a paragraph, takes Enter as a new line.
+function isListLine(text: string, lineIndex: number): boolean {
+	const doc = new Parser().parse(maskBlocks(splitLines(text), 0).text);
+	if (doc.firstChild?.type !== 'list') return false;
+	const walker = doc.walker();
+	for (let event = walker.next(); event; event = walker.next()) {
+		const { node } = event;
+		if (node.type === 'code_block' && node.sourcepos[0][0] - 1 <= lineIndex && lineIndex < node.sourcepos[1][0]) return false;
+	}
+	return true;
 }
 
 function isInQuote(node: Node): boolean {

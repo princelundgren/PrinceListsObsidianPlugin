@@ -150,6 +150,14 @@ describe('pieceEnter', () => {
 		expect(pieceEnter('- a\n- [x]', 9, false)).toEqual({ kind: 'endList' });
 	});
 
+	test.each([
+		['a fenced code piece', '```\n- x\n```', 7],
+		['a paragraph with a numbered lazy line', 'a\n2. foo', 8],
+		['a code block inside an item', '- a\n  ```\n  - x\n  ```', 15],
+	])('is a plain new line at the end of a list-like line in %s', (_, text, caret) => {
+		expect(pieceEnter(text, caret, false)).toEqual({ kind: 'newline' });
+	});
+
 	test('is a plain new line after a thematic break', () => {
 		expect(pieceEnter('* * *', 5, false)).toEqual({ kind: 'newline' });
 	});
