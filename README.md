@@ -20,7 +20,7 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 - **Headings make sections, and checkboxes are items.** Anything indented under an item is that
   item's notes, and notes can hold any Markdown: links, pictures, bullet lists.
 - **Headings drag and collapse.** Drag a heading to move its whole section, and click the arrow
-  beside it to fold the section away.
+  beside it to fold the section away. A heading's menu collapses or expands them all at once.
 - **Ticking an item** grays it out where it is. Twenty-four hours later it's archived and hidden,
   and the checkbox icon in the pane's header, or "Show archived" in its ⋯ menu, brings archived
   items back.
@@ -45,7 +45,8 @@ Todo lists for Obsidian, kept as plain Markdown notes.
   strikethrough to tables. "Edit in Markdown", in an item's or a heading's menu, opens the list as
   Markdown at that line, where Obsidian's own tools work.
 - **Right-click menus:** an item and a heading have their own, and on desktop the list's background
-  has New item, New heading, Edit in Markdown, Show archived and Open schedule.
+  has New item, New heading, Edit in Markdown, Show archived, Collapse or Expand all headings, and
+  Open schedule.
 - **A list inside another note:** a `princelists` code block naming a list shows its items, to tick
   and edit there. Renaming the list doesn't change the name in the block, so type the new one in.
 
