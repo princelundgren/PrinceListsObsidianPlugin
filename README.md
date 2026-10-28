@@ -43,10 +43,7 @@ Today, Tomorrow, Next 7 days and Later. Tick them there, or open one in its list
 Add items with the floating **+**, hold an item for half a second to drag it, and tap a heading or
 an open item's ⋯ for its menu.
 
-<p>
-  <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, an item is ticked, then another is held and dragged into a different section" width="300">
-  <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-phone.png" alt="A grocery list on a phone, with sections, starred items and a floating add button" width="300">
-</p>
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, stars and a floating add button, an item is ticked, then another is held and dragged into a different section" width="300">
 
 ### A list inside another note
 
