@@ -13,11 +13,7 @@ export function doneAt(text: string, now: Date): DoneAt | null {
 	const parts = parseItemLine(text);
 	if (!parts || !isDoneStatus(parts.status)) return null;
 
-	// The ✅ match includes the spaces before it, which markTime doesn't accept.
-	const marks = [
-		...[...parts.marks.matchAll(EVERY_MARK)].map((m) => m[0]),
-		...[...parts.tail.matchAll(EVERY_DONE_DATE)].map((m) => m[0].trim()),
-	];
+	const marks = [...parts.marks.matchAll(EVERY_MARK), ...parts.tail.matchAll(EVERY_DONE_DATE)].map((m) => m[0]);
 	const latestReadable = now.getTime() + ARCHIVE_DELAY_MS;
 	let earliest: Date | null = null;
 	for (const mark of marks) {
