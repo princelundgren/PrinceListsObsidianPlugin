@@ -457,7 +457,9 @@ These go into step one's "Not in step one" list:
 3. **Renaming a list:** whether Obsidian updates a `[[link]]` inside a `princelists` code block.
    Links in code blocks usually aren't links to Obsidian, so a block may show "not found" after a
    rename until it's edited. Nothing may fix it in the background, so if it happens, it goes to the
-   owner as an accepted cost or a change of format.
+   owner as an accepted cost or a change of format. Found: in Obsidian 1.14 a rename leaves the
+   block's link as it was, and the block shows that the link doesn't lead to a note. The owner's
+   call is open.
 4. **Live Preview:** a click, a drag or typing inside a rendered block stays in the block and
    doesn't move the cursor into its source.
 5. **`<input type="date">`** opens a picker on desktop and mobile, and returns `YYYY-MM-DD`.
