@@ -192,6 +192,26 @@ test('masking skips what a fence or an HTML block of types 1 to 5 holds', () => 
 	expect(parse('```x```\n%%\n- [ ] y\n%%\n- [ ] b\n').sections[0]?.items).toEqual([item(4, 5)]);
 });
 
+test('masking skips what a top-level fence indented 1 to 3 spaces holds', () => {
+	for (const text of [' ```\n%%\n ```\n', '   ~~~\n$$\n   ~~~\n']) {
+		expect(maskBlocks(splitLines(text), 0)).toEqual({ text, unclosedStart: null });
+	}
+	expect(parse(' ```\n%%\n ```\n\n- [ ] after\n').sections[0]?.items).toEqual([item(4, 5)]);
+	expect(parse('  ```\n$$\n  ```\n%%\n- [ ] hidden\n%%\n- [ ] b\n').sections[0]?.items).toEqual([item(6, 7)]);
+	// The first pass pairs the two %% lines; once the first fence is tracked, the second one holds the next.
+	expect(parse(' ```\n%%\n ```\n ```\n%%\n ```\n- [ ] b\n').sections[0]?.items).toEqual([item(6, 7)]);
+	expect(maskBlocks(splitLines(' ```\n%%\n ```\n ```\n%%\n ```\n'), 0).unclosedStart).toBeNull();
+	// A fence left open in a %% region doesn't change which later fences are tracked.
+	expect(parse('%%\n```\n%%\n ```\nx\n ```\n%%\n- [ ] hidden\n%%\n- [ ] b\n').sections[0]?.items).toEqual([item(9, 10)]);
+});
+
+test('a fence in notes ends with its item, so a %% region after it is masked', () => {
+	expect(parse('- [ ] a\n  ```\n  code\n%%\n- [ ] hidden\n%%\n- [ ] b\n').sections[0]?.items).toEqual([
+		item(0, 3, '  '),
+		item(6, 7),
+	]);
+});
+
 test('a %% or $$ region indented 1 to 3 spaces is not masked', () => {
 	for (const text of [' %%\n- [ ] y\n %%\n', '   $$\n- [ ] y\n   $$\n']) {
 		expect(maskBlocks(splitLines(text), 0)).toEqual({ text, unclosedStart: null });
