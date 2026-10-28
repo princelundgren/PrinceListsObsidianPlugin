@@ -162,9 +162,10 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 			return;
 		}
 		const { workspace } = this.app;
-		const shown = workspace.getLeavesOfType(VIEW_TYPE_LIST).find((leaf) => leaf.view instanceof PrinceListView && leaf.view.file === file);
+		// By its state, which a tab restored in the background keeps while its view waits to load.
+		const shown = workspace.getLeavesOfType(VIEW_TYPE_LIST).find((leaf) => leaf.getViewState().state?.file === file.path);
 		const leaf = shown ?? workspace.getLeaf('tab');
-		if (!shown) await openAsList(leaf, file);
+		if (!(leaf.view instanceof PrinceListView && leaf.view.file === file)) await openAsList(leaf, file);
 		workspace.setActiveLeaf(leaf, { focus: true });
 		if (leaf.view instanceof PrinceListView && leaf.view.file === file) openItem(leaf.view, item.titleLine, item.line);
 	}
