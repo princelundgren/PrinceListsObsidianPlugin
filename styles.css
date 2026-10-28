@@ -394,8 +394,15 @@ button.princelists-card-star,
 	padding: var(--size-2-2);
 	border-radius: var(--clickable-icon-radius);
 	background-color: transparent;
-	box-shadow: none;
 	color: var(--icon-color);
+}
+
+/* No button shadow on the icon buttons, but Obsidian's ring when the keyboard focuses one. */
+button.princelists-card-actions:not(:focus-visible),
+button.princelists-card-star:not(:focus-visible),
+.princelists-format-bar button:not(:focus-visible),
+button.princelists-collapse:not(:focus-visible) {
+	box-shadow: none;
 }
 
 @media (hover: hover) {
@@ -404,7 +411,6 @@ button.princelists-card-star,
 	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button {
 		background-color: var(--background-modifier-hover);
-		box-shadow: none;
 		color: var(--icon-color-hover);
 	}
 }
@@ -528,7 +534,6 @@ button.princelists-collapse {
 	height: calc(var(--line-height-normal) * 1em);
 	background: none;
 	border: none;
-	box-shadow: none;
 	color: var(--collapse-icon-color);
 	opacity: 0;
 	--icon-size: 10px;
