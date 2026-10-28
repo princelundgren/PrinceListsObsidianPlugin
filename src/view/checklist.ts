@@ -14,6 +14,8 @@ import { CHANGED_ELSEWHERE_NOTICE, enqueueAt, writePlanned } from './write';
 // nothing is written.
 export function checklistClick(view: PrinceListView, host: NotesHost, box: HTMLInputElement, evt: MouseEvent): void {
 	evt.preventDefault();
+	const titleLine = host.kind === 'card' ? view.selected : null;
+	if (host.kind === 'card' && titleLine === null) return;
 	const checklist = host.notes()?.checklist ?? null;
 	const line = boxLine(box, checklist, host.range());
 	const index = checklist?.findIndex((entry) => entry.line === line) ?? -1;
@@ -23,11 +25,11 @@ export function checklistClick(view: PrinceListView, host: NotesHost, box: HTMLI
 		return;
 	}
 	const seen = view.outsideChanges;
-	enqueueAt(view, host.itemLine, async (pending) => {
+	enqueueAt(view, titleLine, async (pending) => {
 		let planned = true;
 		const written = await writePlanned(view, (text) => {
 			// An outside change may have moved the lines, and ticking the wrong one is worse than none.
-			const plan = view.outsideChanges === seen ? planTick(text, pending, index, lineText) : null;
+			const plan = view.outsideChanges === seen ? planTick(host.kind, text, pending, index, lineText) : null;
 			planned = plan !== null;
 			return plan;
 		});
@@ -38,9 +40,9 @@ export function checklistClick(view: PrinceListView, host: NotesHost, box: HTMLI
 }
 
 // A card's box is found from its item's line, which `item` follows while the tick waits; the list
-// note's, with no item, from the note itself.
-function planTick(text: string, item: TrackedLine | null, index: number, lineText: string): PlannedLineEdit | null {
+// note's from the note itself.
+function planTick(kind: NotesHost['kind'], text: string, item: TrackedLine | null, index: number, lineText: string): PlannedLineEdit | null {
 	const contentStart = contentStartLine(text);
-	if (item === null) return planListNoteTick(text, contentStart, index, lineText);
-	return item.line === null ? null : planChecklistTick(text, contentStart, item.line, index, lineText);
+	if (kind === 'listNote') return planListNoteTick(text, contentStart, index, lineText);
+	return item?.line == null ? null : planChecklistTick(text, contentStart, item.line, index, lineText);
 }
