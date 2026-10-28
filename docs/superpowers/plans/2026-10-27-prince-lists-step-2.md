@@ -1040,9 +1040,10 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
     (`file-text`, at `sectionLastLine`), Show archived (`archive`, checked while on,
     `view.toggleArchived()`) and Open schedule (`SCHEDULE_ICON`, `openSchedule`). New item and New
     heading track the section's heading line, or its last item's, with `trackWhileShown`.
-  - `showContextMenu` leaves any `input` or `textarea` its own menu, and opens `listMenu` when the
-    click is on no row or heading (links are handled before it). The section is the one under the
-    last heading whose top is above the click, or `sections[0]`. Blocks in other notes get none.
+  - `showContextMenu` leaves any text field, `textarea` or `input` other than a checkbox, its own
+    menu, and opens `listMenu` when the click is on no row or heading (links are handled before it).
+    The section is the one under the last heading whose top is above the click, or `sections[0]`.
+    Blocks in other notes get none.
 
 - [ ] **Step 1: Write the failing tests:** `planHeadingInsert` with `'top'` puts `##` after the top
   part's last item, before the first heading, and at the end of a list with no headings;

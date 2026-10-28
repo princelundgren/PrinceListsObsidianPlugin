@@ -12,8 +12,11 @@ import { itemAt, parseList, type ListModel, type Section } from './parse';
  */
 export type ItemPlace = { after: number } | { firstUnder: number } | 'first';
 
-/** Where a new heading goes: after the item whose title is on a line, or after the section whose heading is on a line. */
-export type HeadingPlace = { afterItem: number } | { afterSection: number };
+/**
+ * Where a new heading goes: after the item whose title is on a line, after the section whose heading is
+ * on a line, or after the part before the first heading.
+ */
+export type HeadingPlace = { afterItem: number } | { afterSection: number } | 'top';
 
 export interface PlannedInsert {
 	next: string;
@@ -63,7 +66,9 @@ export function planItemInsert(text: string, contentStart: number, place: ItemPl
 export function planHeadingInsert(text: string, contentStart: number, place: HeadingPlace): PlannedInsert | null {
 	const { lines, model } = parse(text, contentStart);
 	let at: Parameters<typeof insertHeading>[2];
-	if ('afterItem' in place) {
+	if (place === 'top') {
+		at = { afterSection: model.sections[0] as Section };
+	} else if ('afterItem' in place) {
 		const item = itemAt(model, place.afterItem);
 		if (!item) return null;
 		at = { afterItem: item };
@@ -74,6 +79,21 @@ export function planHeadingInsert(text: string, contentStart: number, place: Hea
 	}
 	const result = insertHeading(lines, model, at, '');
 	return insertPlan(text, result.lines, result.headingLine);
+}
+
+// After the section's last item, which keeps a new item off any text below it that it would join.
+export function endOfSection(section: Section): ItemPlace {
+	const last = section.items.at(-1);
+	if (last) return { after: last.titleLine };
+	return section.headingLine === null ? 'first' : { firstUnder: section.headingLine };
+}
+
+export function sectionLastLine(lines: readonly Line[], section: Section, contentStart: number): number {
+	const first = section.headingLine ?? contentStart;
+	for (let line = section.endLine - 1; line > first; line--) {
+		if (lines[line]?.text.trim()) return line;
+	}
+	return first;
 }
 
 export function planItemDelete(text: string, contentStart: number, titleLine: number): PlannedDelete | null {
