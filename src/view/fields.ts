@@ -128,7 +128,7 @@ export function openListNote(view: PrinceListView, range: LineRange, isNew: bool
 		};
 		view.listNote = { warnings, warned: false };
 	}
-	warnListNote(view, text);
+	warnListNote(view, view.editing.listNoteAsTyped(text));
 	return text;
 }
 
@@ -144,11 +144,10 @@ export function closeListNote(view: PrinceListView, focusing: Element | null): v
 	if (session.warned || view.rowsHeldBack) view.render(focusing);
 }
 
-// Checked on the whole note as it would read with `markdown` in the open piece. While either shows,
+// Checked on the whole note as saved, or as it reads with a piece just opened. While either shows,
 // the note still saves, so typing is never lost (spec, "The list note").
-export function warnListNote(view: PrinceListView, markdown: string): void {
+export function warnListNote(view: PrinceListView, note: string | null): void {
 	const session = view.listNote;
-	const note = view.editing.listNoteAsTyped(markdown);
 	if (!session || note === null) return;
 	const restructure = listNoteWouldRestructure(note);
 	const unclosed = listNoteUnclosedBlock(note);

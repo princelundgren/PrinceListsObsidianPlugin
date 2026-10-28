@@ -176,10 +176,17 @@ describe('the list note across a typing session', () => {
 		state.open(4);
 		expect(state.openListNote({ start: 3, end: 3 }, false)).toBe('');
 		const first = state.typeListNote('N');
-		expect(first).toEqual({ edit: { start: 3, delta: 2, kind: 'insert' } });
+		expect(first).toEqual({ edit: { start: 3, delta: 2, kind: 'insert' }, note: 'N' });
 		state.typeListNote('Note\nmore');
 		expect(state.text).toBe(`${FRONTMATTER}Note\nmore\n\n- [ ] a\n- [ ] b\n`);
 		expect(state.selected).toBe(7);
+	});
+
+	test("a new piece's first save is a change at the line above it, so the lines below it follow", () => {
+		const state = editing(`${FRONTMATTER}First\n\n- [ ] a\n`);
+		state.openListNote({ start: 4, end: 4 }, true);
+		expect(state.typeListNote('x')).toEqual({ edit: { start: 3, delta: 2, kind: 'change' }, note: 'First\n\nx' });
+		expect(state.text).toBe(`${FRONTMATTER}First\n\nx\n\n- [ ] a\n`);
 	});
 
 	test('a piece opens alone, and typing into it changes only its lines', () => {

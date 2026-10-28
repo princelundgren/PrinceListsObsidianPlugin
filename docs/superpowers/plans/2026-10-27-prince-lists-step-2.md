@@ -1257,15 +1257,18 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
 - Consumes: Tasks 19 to 22.
 - Produces, in `src/core/edit-list-note.ts`: `ListNotePiece`, a `PieceSession` with `blankAfter`,
   the blank line its last save wrote under it. `setListNotePiece(lines: readonly Line[], model:
-  ListModel, piece: ListNotePiece, typed: string): { lines: Line[]; piece: ListNotePiece }`: as
+  ListModel, piece: ListNotePiece, typed: string): { lines: Line[]; piece: ListNotePiece; note:
+  string }`: as
   `setNotesPiece`, with the list note's own rules. The blank line after the note is written only
   when the piece is the note's last. The unclosed-block exception applies when the typed or the
   replaced text, or the whole note before or after, leaves a block open; the block check acts on
-  the whole note as it would be saved. `listNoteWithPiece(lines, model, piece, typed): string` is
-  that whole note. `setListNote` goes.
+  the whole note as it would be saved, which it returns as `note` for the warnings.
+  `listNoteWithPiece(lines, model, piece, typed): string` is that whole note without saving, for a
+  piece just opened. `setListNote` goes.
 - Produces, in `src/core/editing.ts`: `openListNote(range: LineRange, isNew: boolean, indent?:
   string): string` opens one piece, with `listNoteRange()`, `listNoteOutdent(text)`,
-  `listNoteAsTyped(markdown)`, `typeListNote(markdown)` and `closeListNote()`. A session whose
+  `listNoteAsTyped(markdown)`, `typeListNote(markdown)`, which also returns the saved `note`, and
+  `closeListNote()`. A session whose
   range is lost gets `{ lost: true }`, not the whole note. A card's piece and the list note's are
   one session, so opening one ends the other. `outsideChange` returns `{ lostSelected }`.
 - Produces, in `src/view/notes-host.ts`: `NotesHost`, the notes a piece field edits, the open

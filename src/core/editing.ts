@@ -18,6 +18,8 @@ import { splitStar } from './star';
  * wrote nothing because its item or session is gone.
  */
 export type Typed = { edit: OwnEdit } | { refused: true; firstRefusal: boolean } | { lost: true };
+/** As Typed, with the whole list note as saved, which its warnings check. */
+export type TypedListNote = { edit: OwnEdit; note: string } | Exclude<Typed, { edit: OwnEdit }>;
 
 /** A line that follows the view's own edits and outside changes. null once it is gone. */
 export interface TrackedLine {
@@ -168,7 +170,7 @@ export class ListEditing {
 		return listNoteWithPiece(lines, model, this.piece.piece, markdown);
 	}
 
-	typeListNote(markdown: string): Typed {
+	typeListNote(markdown: string): TypedListNote {
 		const session = this.piece;
 		if (session?.notes !== 'listNote') return { lost: true };
 		const { lines, model } = this.parse();
@@ -180,7 +182,7 @@ export class ListEditing {
 			// before whatever is at its start.
 			const isInsert = range.start === range.end && !separator;
 			const start = separator ? range.start - 1 : range.start;
-			return { edit: this.apply(joinLines(result.lines), start, isInsert ? 'insert' : 'change', session) };
+			return { edit: this.apply(joinLines(result.lines), start, isInsert ? 'insert' : 'change', session), note: result.note };
 		});
 	}
 
@@ -213,7 +215,7 @@ export class ListEditing {
 		return { lostSelected: hadSelected && this.selected === null };
 	}
 
-	private refusable(session: { refused: boolean }, save: () => Typed): Typed {
+	private refusable<T extends Typed>(session: { refused: boolean }, save: () => T): T | Exclude<Typed, { edit: OwnEdit }> {
 		try {
 			return save();
 		} catch (error) {

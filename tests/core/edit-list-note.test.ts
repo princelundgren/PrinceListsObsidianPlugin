@@ -80,6 +80,19 @@ describe('setListNotePiece', () => {
 		expect(listNoteWouldRestructure(listNoteWithPiece(lines, model, wholeNote({ start: 3, end: 5 }), '- [ ] y'))).toBe(true);
 	});
 
+	test('a save returns the whole note as saved, which its warnings check', () => {
+		const { lines, model } = list(`${FRONTMATTER}- a\n  - b\n\n- [ ] x\n`);
+		const piece: ListNotePiece = { range: { start: 4, end: 5 }, indent: '  ', separator: false, blankAfter: false };
+		expect(setListNotePiece(lines, model, piece, '- [ ] y').note).toBe('- a\n  - [ ] y');
+	});
+
+	test('a fence opened and closed in a middle piece leaves the lines around it as they were', () => {
+		const text = `${FRONTMATTER}First\n\nSecond\n\n- [ ] a\n`;
+		const opened = savePiece(text, wholeNote({ start: 3, end: 4 }), '```');
+		expect(opened.text).toBe(`${FRONTMATTER}\`\`\`\n\nSecond\n\n- [ ] a\n`);
+		expect(savePiece(opened.text, opened.piece, '```\n```').text).toBe(`${FRONTMATTER}\`\`\`\n\`\`\`\n\nSecond\n\n- [ ] a\n`);
+	});
+
 	test('a fence opened in one piece saves, and closing it brings back what follows as it was', () => {
 		const text = `${FRONTMATTER}First\n\nSecond\n\n- [ ] a\n`;
 		const { lines, model } = list(text);

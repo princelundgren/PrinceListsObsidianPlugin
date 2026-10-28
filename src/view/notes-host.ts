@@ -71,8 +71,9 @@ export function listNoteHost(view: PrinceListView, area: HTMLElement): NotesHost
 		open: (range, isNew, indent) => openListNote(view, range, isNew, indent),
 		outdent: (text) => view.editing.listNoteOutdent(text),
 		type: (markdown) => {
-			warnListNote(view, markdown);
-			return view.editing.typeListNote(markdown);
+			const typed = view.editing.typeListNote(markdown);
+			if ('edit' in typed) warnListNote(view, typed.note);
+			return typed;
 		},
 		close: (focusing) => closeListNote(view, focusing),
 		keep: (drawn) => {
