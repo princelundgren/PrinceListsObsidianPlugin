@@ -19,21 +19,15 @@
 PrinceLists turns a note into a todo list you can tick, drag and plan, on desktop and on your
 phone. Underneath, it stays plain Markdown that any editor can read.
 
-## Schedule
-
 **Open schedule**, from the ribbon or a list's ⋯ menu, gathers the dated items of every list under
 Today, Tomorrow, Next 7 days and Later. Tick them there, or open one in its list.
 
 ![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
-## Made for mobile
-
-Add items with the floating **+**, hold an item for half a second to drag it, and tap a heading or
-an open item's ⋯ for its menu.
+On your phone, add items with the floating **+**, hold an item for half a second to drag it, and
+tap a heading or an open item's ⋯ for its menu.
 
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, stars and a floating add button, an item is ticked, then another is held and dragged into a different section" width="300">
-
-## A list inside another note
 
 Name a list in a `princelists` code block to show its items in any note, where you can tick and
 edit them. If you rename the list, update the name in the block.
