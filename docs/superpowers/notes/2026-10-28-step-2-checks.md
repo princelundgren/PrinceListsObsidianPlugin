@@ -14,7 +14,7 @@ which found what the design expected might happen. The owner accepted it.
   for a person: clicks and key presses through the CLI's `dev:cdp` command on macOS, and `adb` taps,
   text and key events on Android. Each is marked "real input" below.
 - **Versions:** Obsidian 1.14.5 on macOS 27 and 1.14.4 on Android 16. The plugin was built from
-  `main` after #117 merged.
+  this release's branch after #124 merged.
 - **The iPhone checks weren't run.** The plan's Step 1 asks for every manual check again on the
   iPhone. The owner set that aside for now, and the Android emulator stands in for mobile here.
 
