@@ -1,11 +1,12 @@
-import { BLOCK_ID_PATTERN, joinItemLine, parseItemLine } from './item-line';
+import { BLOCK_ID_PATTERN, joinItemLine, parseItemLine, TASKS_SIGNIFIERS } from './item-line';
 
 export type DayLabelKind = 'today' | 'tomorrow' | 'weekday' | 'date';
 
 const WHEN = '⏳';
-// Tasks reads both ⏳ and ⌛ as the scheduled date. A field ends at whitespace or the end of the
-// fields, as each of Tasks' field patterns is anchored to the end of what is left of the line.
-const SCHEDULED_FIELD = /(\s*)(?:⏳|⌛)️? *(\d{4})-(\d{2})-(\d{2})(?=\s|$)/g;
+// Tasks reads both ⏳ and ⌛ as the scheduled date. A field ends at whitespace, the end of the
+// fields, or the next field's emoji, which Tasks needs no space before.
+const NEXT_FIELD = TASKS_SIGNIFIERS.join('|');
+const SCHEDULED_FIELD = new RegExp(`(\\s*)(?:⏳|⌛)\uFE0F? *(\\d{4})-(\\d{2})-(\\d{2})(?=(\\s|$|${NEXT_FIELD}))`, 'g');
 const DAY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DAY_MS = 86_400_000;
 
@@ -25,8 +26,9 @@ export function setWhen(line: string, day: string | null): string {
 	if (!parts) return line;
 	const { fields, end } = splitTail(parts.tail);
 	let replaced = false;
-	let changed = fields.replace(SCHEDULED_FIELD, (field: string, space: string) => {
-		if (replaced || day === null) return '';
+	let changed = fields.replace(SCHEDULED_FIELD, (field: string, space: string, _y: string, _m: string, _d: string, next: string) => {
+		// A field glued to the next keeps its space, so the next isn't glued to what came before.
+		if (replaced || day === null) return next.trim() === '' ? '' : space;
 		replaced = true;
 		return `${space}${WHEN} ${day}`;
 	});
