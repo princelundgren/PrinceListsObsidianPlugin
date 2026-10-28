@@ -7,7 +7,7 @@ which found what the design expected might happen. The owner accepted it.
   on macOS and through the web view's DevTools protocol on an Android emulator. It drives the
   views through their DOM, with synthetic mouse, touch and key events, and reads the files back
   byte for byte.
-- **Result:** 211 checks on macOS and 192 on Android, all passing, in one run of the whole suite.
+- **Result:** 238 checks on macOS and 217 on Android, all passing, in one run of the whole suite.
   Some checks are desktop-only (mouse dragging, right-click menus, Tasks and Kanban), and some are
   mobile-only (holding, tapping a heading, edge scrolling).
 - **One-off checks with real input,** outside those counts, where a synthetic event can't stand in
