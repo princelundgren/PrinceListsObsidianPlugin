@@ -39,7 +39,8 @@ const TRAILING_FIELDS = [
 	'(?:^|\\s)#[^ !@#$%^&*(),.?":{}|<>]+$',
 ].map((source) => new RegExp(source));
 
-const ITEM_PATTERN = /^(\s*(?:[-*+]|\d+[.)])[ \t]+\[)([^\]])(\] )(.*)$/;
+// The `s` flag lets the rest take U+2028 and U+2029, which `.` stops at but CommonMark doesn't.
+const ITEM_PATTERN = /^(\s*(?:[-*+]|\d+[.)])[ \t]+\[)([^\]])(\] )(.*)$/s;
 export const BLOCK_ID_PATTERN = / \^[A-Za-z0-9-]+$/;
 const MARK_SOURCE = `✔${VS16} +\\d{4}-\\d{2}-\\d{2}(?: \\d{2}:\\d{2})?`;
 export const MARK_PATTERN = new RegExp(MARK_SOURCE);
@@ -150,7 +151,8 @@ function spaced(head: string, tail: string): string {
 }
 
 // The time a ✔ or ✅ mark counts as done: its own time, or the end of its day when it has none.
-// null when the date or time doesn't exist (month 13, 25:99).
+// null when the date or time doesn't exist (month 13, 25:99). A time the clock skipped, as when
+// summer time starts, is the moment the clock showed then, an hour later.
 export function markTime(mark: string): Date | null {
 	const m = MARK_TIME_PATTERN.exec(mark);
 	if (!m) return null;
@@ -165,7 +167,7 @@ export function markTime(mark: string): Date | null {
 		date.getFullYear() === y &&
 		date.getMonth() === mo - 1 &&
 		date.getDate() === d &&
-		(h === undefined || (date.getHours() === h && date.getMinutes() === mi));
+		(h === undefined || mi === undefined || (h < 24 && mi < 60));
 	return exists ? date : null;
 }
 
