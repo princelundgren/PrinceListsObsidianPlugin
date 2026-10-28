@@ -14,7 +14,7 @@ your lists. It's simple to use, and powerful when you need it.
 
 Make a list from the ribbon, a folder, or a note you already have.
 
-| Click the list icon in the ribbon | Right-click a folder for a new list | Right-click a note to turn it into a list |
+| Click the list icon in the ribbon | Right-click a folder on the sidebar | Right-click a note to turn it into a list |
 | --- | --- | --- |
 | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.png" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.png" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.png" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
