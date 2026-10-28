@@ -6,7 +6,8 @@ Todo lists for Obsidian, kept as plain Markdown notes.
 > `0.1.0`, and 1b, which adds dragging by touch, pictures in cards and Cmd+Z undo (Ctrl+Z on
 > Windows and Linux), in `0.2.0`. `0.3.0` adds small fixes from first use with a real list.
 > `0.4.0` adds step two: the star, an item's date and the Schedule view, a list inside another
-> note, and the rest listed below, checked on macOS and an Android emulator. You can follow along
+> note, and the rest listed below, checked on macOS and an Android emulator. `0.4.1` fixes what a
+> review before the community directory submission found. You can follow along
 > in the designs for [step one](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and
 > [step two](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md), and in the pull
 > requests.
