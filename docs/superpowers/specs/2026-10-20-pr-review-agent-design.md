@@ -150,7 +150,10 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 
 - **A ruleset for `main`** requires a pull request, squash merges, resolved review threads, the
   `ci` and `docs` checks on an up-to-date branch, and signed commits, and blocks force pushes and
-  deletion. It has no bypass.
+  deletion. It has no bypass. Since 2026-10-28 it also requires CodeQL results with no error
+  alerts and no high or critical security alerts, so auto-merge can't merge before CodeQL ends.
+- **Auto-merge** is on (2026-10-28). A personal account's repository can't use a merge queue, so a
+  pull request that falls behind `main` still needs its branch updated before it merges.
 - **A ruleset for tags** covers creating, updating and deleting them, since a pushed tag starts
   the release workflow. Only the repository admin role bypasses it.
 - **`persist-credentials: false` in `claude.yml`,** for tidiness only (see "The job token is
