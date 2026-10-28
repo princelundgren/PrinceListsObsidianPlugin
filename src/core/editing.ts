@@ -1,12 +1,14 @@
 import { UnsafeEditError } from './edit-check';
 import { getItemNotes, setItemNotes } from './edit-items';
 import { isBlankAt } from './edit-lines';
+import { mapPieceRange, setNotesPiece, type PieceSession } from './edit-piece';
 import { getListNote, setListNote } from './edit-list-note';
 import { followLine, followRange, mapRange, ownEdit, type LineRange, type OwnEdit, type RunEdit } from './follow';
 import { mapLine } from './guard';
 import { EditHistory } from './history';
 import { parseItemLine } from './item-line';
 import { joinLines, splitLines, type Line } from './lines';
+import { pieceText } from './note-pieces';
 import { itemAt, parseList, type ItemBlock, type ListModel } from './parse';
 import { startTitleField, syncTitleField, typeTitle, type TitleField } from './title-field';
 import { splitStar } from './star';
@@ -35,6 +37,7 @@ export class ListEditing {
 	// `field` changes with every keystroke; the object around it is the typing session.
 	private title: { field: TitleField } | null = null;
 	private notes: { indent: string; refused: boolean } | null = null;
+	private notesPiece: { piece: PieceSession; refused: boolean } | null = null;
 	// `separator`: the blank line this session's last save wrote right under the note, or null.
 	private note: { range: LineRange; separator: number | null; refused: boolean } | null = null;
 
@@ -109,6 +112,7 @@ export class ListEditing {
 
 	closeNotes(): void {
 		this.notes = null;
+		this.notesPiece = null;
 	}
 
 	typeNotes(markdown: string): Typed {
@@ -119,6 +123,35 @@ export class ListEditing {
 		return this.refusable(session, () => {
 			const next = joinLines(setItemNotes(lines, model, item, markdown, session.indent));
 			return { edit: this.apply(next, item.titleLine, 'change', session) };
+		});
+	}
+
+	// An empty range is a new piece, at the notes' indent, or a new item from Enter, at the indent of
+	// the piece still open, which it follows.
+	openNotesPiece(range: LineRange, isNew: boolean): string | null {
+		const found = this.selectedItem();
+		if (!found) {
+			this.notesPiece = null;
+			return null;
+		}
+		const { notesIndent } = found.item;
+		const opened =
+			range.start < range.end
+				? pieceText(this.text, range)
+				: { text: '', indent: isNew ? notesIndent : (this.notesPiece?.piece.indent ?? notesIndent) };
+		this.notesPiece = { piece: { range, indent: opened.indent, separator: isNew }, refused: false };
+		return opened.text;
+	}
+
+	typeNotesPiece(markdown: string): Typed {
+		const found = this.selectedItem();
+		const session = this.notesPiece;
+		if (!found || !session) return { lost: true };
+		const { lines, model, item } = found;
+		return this.refusable(session, () => {
+			const result = setNotesPiece(lines, model, item, session.piece, markdown);
+			session.piece = result.piece;
+			return { edit: this.apply(joinLines(result.lines), item.titleLine, 'change', session) };
 		});
 	}
 
@@ -181,6 +214,11 @@ export class ListEditing {
 		const hadSelected = this.selected !== null;
 		this.selected = map(this.selected);
 		this.afterMove(newLines);
+		if (this.notesPiece) {
+			const range = mapPieceRange(oldLines, newLines, this.notesPiece.piece.range);
+			if (range) this.notesPiece.piece.range = range;
+			else this.notesPiece = null;
+		}
 		let noteText: string | null = null;
 		if (this.note) {
 			const range = mapRange(oldLines, newLines, this.note.range);
@@ -223,6 +261,11 @@ export class ListEditing {
 		const selected = this.selected;
 		this.selected = selected === null ? null : followLine(selected, edit);
 		this.afterMove(splitLines(next), edit.kind !== 'move' && edit.start === selected ? edit.retitle : undefined);
+		if (this.notesPiece && this.notesPiece !== from) {
+			const range = followRange(this.notesPiece.piece.range, edit);
+			if (range) this.notesPiece.piece.range = range;
+			else this.notesPiece = null;
+		}
 		if (this.note && this.note !== from) {
 			const { separator } = this.note;
 			this.note.separator = separator === null ? null : followLine(separator, edit);
@@ -247,6 +290,7 @@ export class ListEditing {
 	private endCard(): void {
 		this.title = null;
 		this.notes = null;
+		this.notesPiece = null;
 	}
 
 	private parse(): { lines: Line[]; model: ListModel } {

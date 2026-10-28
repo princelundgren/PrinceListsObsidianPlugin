@@ -106,6 +106,24 @@ describe('followRange', () => {
 		expect(followRange(empty, { start: 3, delta: 1, kind: 'insert' })).toEqual(empty);
 		expect(followRange(empty, { start: 3, delta: -1, kind: 'delete' })).toEqual(empty);
 	});
+	test('an edit that ends at or before the range shifts it by its delta', () => {
+		expect(followRange(range, { start: 1, delta: 2, kind: 'insert' })).toEqual({ start: 5, end: 7 });
+		expect(followRange(range, { start: 3, delta: 1, kind: 'insert' })).toEqual({ start: 4, end: 6 });
+		expect(followRange(range, { start: 1, delta: -1, kind: 'delete' })).toEqual({ start: 2, end: 4 });
+		expect(followRange(range, { start: 2, delta: 0, kind: 'change' })).toEqual(range);
+	});
+	test("an edit that covers a line of the range can't be followed", () => {
+		expect(followRange(range, { start: 1, delta: -3, kind: 'delete' })).toBeNull();
+	});
+	test("a change above that adds or removes lines, such as an undo of a notes save, can't be followed", () => {
+		expect(followRange(range, { start: 1, delta: 1, kind: 'change' })).toBeNull();
+		expect(followRange(range, { start: 2, delta: -1, kind: 'change' })).toBeNull();
+	});
+	test('a move maps both ends, and a range it splits is lost', () => {
+		expect(followRange({ start: 1, end: 3 }, moveEdit([0, 3, 4, 1, 2]))).toEqual({ start: 3, end: 5 });
+		expect(followRange({ start: 1, end: 3 }, moveEdit([0, 1, 3, 2]))).toBeNull();
+		expect(followRange({ start: 2, end: 2 }, moveEdit([0, 3, 1, 2]))).toEqual({ start: 4, end: 4 });
+	});
 	test("an edit that starts inside the range can't be followed", () => {
 		expect(followRange(range, { start: 4, delta: 1, kind: 'change' })).toBeNull();
 		expect(followRange(range, { start: 3, delta: 0, kind: 'change' })).toBeNull();
