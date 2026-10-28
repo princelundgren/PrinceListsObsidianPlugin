@@ -174,6 +174,12 @@ describe('parseItemLine', () => {
 			tail: ' 📅 2026-10-30 ^id',
 		});
 	});
+	test('reads a ✔ mark only at the end of the title, after a space', () => {
+		expect(parseItemLine('- [x] ✔ 2026-10-20')?.title).toBe('✔ 2026-10-20');
+		expect(parseItemLine('- [x] a✔ 2026-10-20')?.title).toBe('a✔ 2026-10-20');
+		expect(parseItemLine('- [x] a\t✔ 2026-10-20')?.title).toBe('a\t✔ 2026-10-20');
+		expect(parseItemLine('- [x] a ✔ 2026-10-20 x')?.title).toBe('a ✔ 2026-10-20 x');
+	});
 	// CommonMark doesn't end a line at U+2028 or U+2029, so the line is still one item.
 	test('reads a title holding a Unicode line separator', () => {
 		expect(parseItemLine('- [ ] a\u2028b 📅 2026-10-30')?.title).toBe('a\u2028b');
