@@ -6,6 +6,7 @@ import { splitLines } from '../core/lines';
 import { planItemDelete, planItemInsert, planItemLineEdit, type ItemPlace, type PlannedDelete } from '../core/list-actions';
 import { lostFieldNotice } from '../core/missing-typing';
 import { keepStar, splitStar } from '../core/star';
+import { joinTypedLines } from '../core/title-field';
 import { contentStartLine } from '../obsidian/marker';
 import { followPlace } from './add-button';
 import { showUndoNotice } from './delete';
@@ -58,7 +59,7 @@ export function closeBlockField(block: ListBlock, save: boolean): void {
 	const field = block.field;
 	if (!field) return;
 	block.field = null;
-	const typed = field.el.value.replace(/\s*\n\s*/g, ' ');
+	const typed = joinTypedLines(field.el.value);
 	field.el.parentElement?.replaceWith(field.titleEl);
 	const rowEl = field.titleEl.closest<HTMLElement>(`.${ITEM_CLASS}`);
 	if (rowEl) rowEl.draggable = ROWS_DRAG;

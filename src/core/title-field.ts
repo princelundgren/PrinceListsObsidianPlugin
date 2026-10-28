@@ -19,6 +19,12 @@ export function oneLineTitle(typed: string): string {
 	return typed.replace(/\r\n|\r|\n|\u2028|\u2029/g, ' ');
 }
 
+// A block field's typed title, with each run of white space that holds a line break as one space. Each
+// run is matched once: `\s*\n\s*` would retry every start in a long run.
+export function joinTypedLines(typed: string): string {
+	return typed.replace(/\s+/g, (run) => (run.includes('\n') ? ' ' : run));
+}
+
 export function startTitleField(line: string): TitleField {
 	return { saved: line, written: line };
 }
