@@ -109,8 +109,9 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     fails the job.
 - **No approvals.** No tool can approve, and the repository doesn't let the job's token approve
   pull requests. The owner merges.
-- **Configuration and rules.** The action restores `.claude/`, `.mcp.json`, `CLAUDE.md` and similar
-  files from the base branch. `AGENTS.md` isn't on that list, so a pull request that edits it is
+- **Configuration and rules.** The action restores a fixed list of paths at the repository's root,
+  such as `.claude/`, `.mcp.json` and `CLAUDE.md`, from the base branch. `AGENTS.md` and a
+  `CLAUDE.md` in a subfolder aren't on that list, so a pull request that edits or adds one is
   reviewed against its own version. Only people with write access open pull requests from
   branches here, and neither workflow runs on a fork's, so a fork's `AGENTS.md` never reaches
   Claude.
