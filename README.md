@@ -38,7 +38,7 @@ Today, Tomorrow, Next 7 days and Later. Tick them there, or open one in its list
 
 ![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
-### On your phone
+### Made for mobile
 
 Add items with the floating **+**, hold an item for half a second to drag it, and tap a heading or
 an open item's ⋯ for its menu.
