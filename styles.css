@@ -336,7 +336,19 @@ button.princelists-new-item {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px));
 }
 
-/* The card's When, star and ⋯, on the title's first line. */
+/* The title, with the card's When, star and ⋯ on its first line. They sit in the title's row only,
+   so the notes and the format bar under it span the card. */
+.princelists-card-head {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--size-4-2);
+}
+
+.princelists-card-head > .princelists-card-title {
+	flex: 1;
+	min-width: 0;
+}
+
 .princelists-card-tools {
 	flex: none;
 	display: flex;
