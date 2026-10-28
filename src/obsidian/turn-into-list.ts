@@ -1,4 +1,4 @@
-import { type App, type EventRef, MarkdownView, Notice, type Plugin, type TFile, type WorkspaceLeaf } from 'obsidian';
+import { type App, Component, MarkdownView, Notice, type Plugin, type TFile, type WorkspaceLeaf } from 'obsidian';
 import { isMarkerValue } from '../core/frontmatter';
 import { applyMarkerEdit, type MarkerRefusal, planMarker } from '../core/marker-edit';
 import { isListText, readFrontmatter } from './marker';
@@ -74,24 +74,20 @@ async function writeThroughVault(app: App, file: TFile): Promise<Outcome> {
 function waitForMarker(plugin: Plugin, file: TFile, leaf: WorkspaceLeaf): void {
 	endWait?.();
 	const { metadataCache, vault } = plugin.app;
-	const refs: [{ offref(ref: EventRef): void }, EventRef][] = [];
+	// A child of its own, so ending the wait releases its listeners, not only the plugin's unload.
+	const wait = plugin.addChild(new Component());
 	const end = () => {
-		for (const [source, ref] of refs) source.offref(ref);
+		plugin.removeChild(wait);
 		if (endWait === end) endWait = null;
 	};
-	const listen = (source: { offref(ref: EventRef): void }, ref: EventRef) => {
-		refs.push([source, ref]);
-		plugin.registerEvent(ref);
-	};
-	listen(
-		metadataCache,
+	wait.registerEvent(
 		metadataCache.on('changed', (changed, data) => {
 			if (changed !== file || !isListText(data)) return;
 			end();
 			void openAsList(leaf, file);
 		}),
 	);
-	listen(vault, vault.on('delete', (deleted) => deleted === file && end()));
-	listen(vault, vault.on('rename', (renamed) => renamed === file && end()));
+	wait.registerEvent(vault.on('delete', (deleted) => deleted === file && end()));
+	wait.registerEvent(vault.on('rename', (renamed) => renamed === file && end()));
 	endWait = end;
 }
