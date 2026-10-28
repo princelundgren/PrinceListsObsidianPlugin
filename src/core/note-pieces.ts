@@ -86,14 +86,32 @@ export function pieceEnter(text: string, caret: number, nested: boolean): PieceE
 	return caretAfter(caret, 0, `\n${marker}`);
 }
 
-// Down is the smallest start after the current one's: a parent's first child, else the next piece.
+// Up is the nearest start above the current one's, which from a first child is its parent. Down is
+// the first start past the current piece, so past the items nested in it, which its field holds.
 export function neighborPiece(ranges: readonly LineRange[], current: LineRange, direction: 'up' | 'down'): LineRange | null {
 	let best: LineRange | null = null;
 	for (const range of ranges) {
-		if (direction === 'up' ? range.start >= current.start : range.start <= current.start) continue;
+		if (direction === 'up' ? range.start >= current.start : range.start < current.end) continue;
 		if (!best || (direction === 'up' ? range.start > best.start : range.start < best.start)) best = range;
 	}
 	return best;
+}
+
+/**
+ * The marker, in the file's indent, that moves an item one level out of its list; null at the list's
+ * top level. `notes` is the notes' Markdown, `fileLines` the same lines as in the file, `item` the
+ * item's lines, empty where a new one would go, and `firstLine` its line as in the file.
+ */
+export function outdentMarker(notes: string, fileLines: readonly string[], item: LineRange, firstLine: string): string | null {
+	const list = pieceAround(notePieces(notes), item);
+	return outerItemMarker(fileLines.slice(list?.start ?? item.start, item.start), columnOf(leadingSpace(firstLine)));
+}
+
+/** The piece holding `range`; for an empty range, the piece it ends, before one starting there. */
+export function pieceAround(pieces: readonly LineRange[], range: LineRange): LineRange | undefined {
+	const at = range.start;
+	const ended = range.start === range.end ? pieces.find((piece) => piece.end === at) : undefined;
+	return ended ?? pieces.find((piece) => piece.start <= at && at < piece.end) ?? pieces.find((piece) => piece.end === at);
 }
 
 // The item after the nearest earlier item indented less than `indent`: its parent.

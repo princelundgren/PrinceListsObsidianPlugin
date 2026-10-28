@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { itemPieces, neighborPiece, nextItemMarker, notePieces, pieceEnter, pieceText } from '../../src/core/note-pieces';
+import { itemPieces, neighborPiece, nextItemMarker, notePieces, outdentMarker, pieceEnter, pieceText } from '../../src/core/note-pieces';
 
 const NOTES = [
 	'Intro paragraph',
@@ -182,13 +182,32 @@ describe('neighborPiece', () => {
 		expect(neighborPiece(ranges, { start: 17, end: 19 }, 'up')).toEqual({ start: 16, end: 20 });
 	});
 
-	test('goes down from a parent into its first child, and on past a nested item', () => {
-		expect(neighborPiece(ranges, { start: 16, end: 20 }, 'down')).toEqual({ start: 17, end: 19 });
+	test('goes down past the items nested in the current one, which its field holds', () => {
+		expect(neighborPiece(ranges, { start: 16, end: 20 }, 'down')).toEqual({ start: 20, end: 21 });
 		expect(neighborPiece(ranges, { start: 18, end: 19 }, 'down')).toEqual({ start: 19, end: 20 });
+	});
+
+	test('goes either way from a piece emptied of its lines', () => {
+		expect(neighborPiece(ranges, { start: 19, end: 19 }, 'down')).toEqual({ start: 19, end: 20 });
+		expect(neighborPiece(ranges, { start: 19, end: 19 }, 'up')).toEqual({ start: 18, end: 19 });
 	});
 
 	test('gives null past either end', () => {
 		expect(neighborPiece(ranges, { start: 13, end: 15 }, 'up')).toBeNull();
 		expect(neighborPiece(ranges, { start: 20, end: 21 }, 'down')).toBeNull();
+	});
+});
+
+describe('outdentMarker', () => {
+	const notes = '- p\n  - q\n```\ncode\n```';
+	const lines = notes.split('\n');
+
+	test('reads the list a new item would end, not the fence right after it', () => {
+		expect(notePieces(notes)).toEqual([{ start: 0, end: 2 }, { start: 2, end: 5 }]);
+		expect(outdentMarker(notes, lines, { start: 2, end: 2 }, '  - ')).toBe('- ');
+	});
+
+	test('reads the list an item is in', () => {
+		expect(outdentMarker(notes, lines, { start: 1, end: 2 }, '  - ')).toBe('- ');
 	});
 });

@@ -1097,8 +1097,8 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
     - `newline` otherwise, as for a line that only looks like an item, in a fence or a paragraph.
   - `neighborPiece(ranges: readonly LineRange[], current: LineRange, direction: 'up' | 'down'):
     LineRange | null`: up, the range with the greatest start before `current.start` (an item's
-    parent, from its first child); down, the smallest start after `current.start`: from a parent,
-    its first child, else the next piece.
+    parent, from its first child); down, the smallest start at or after `current.end`, so past the
+    items nested in the current one, which its field holds.
 
 - [ ] **Step 1: Write the failing tests** on notes holding a paragraph, a table, a fenced block
   with an empty line inside, a callout holding a list, a nested numbered and checklist list, a
@@ -1135,11 +1135,11 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
   notes save or its undo, gives null, since it doesn't say where its run ends; anything else gives
   null. The list note's callers keep their meaning.
 - Produces, in `src/core/editing.ts`:
-  - `openNotesPiece(range: LineRange, isNew: boolean): string | null` and
+  - `openNotesPiece(range: LineRange, isNew: boolean, indent?: string): string | null` and
     `typeNotesPiece(markdown: string): Typed`, which take the place of `openNotes()` and
     `typeNotes`: those stay until Task 21 moves the card to the new ones and removes them. An empty
-    range opens at the notes' indent when `isNew`, else at the indent of the piece still open, which
-    it follows.
+    range opens at `indent` when given, else at the notes' indent when `isNew`, else at the indent
+    of the piece still open, which it follows.
   - `outsideChange` maps the piece's range with `mapRange`; a range that can't be mapped ends the
     session, and the next keystroke gets `{ lost: true }`.
 
@@ -1217,9 +1217,11 @@ code, a part of the notes edited on its own is a *piece*, so it isn't confused w
 - Enter and Backspace are read from the field's `beforeinput` (`insertLineBreak` and
   `deleteContentBackward`), which every platform's keyboard sends, and never while `isComposing`.
   Shift+Enter, noted on keydown, stays a plain new line. Enter acts on `pieceEnter`: `edit`
-  through `changeField`; `nextItem` saves and opens a new item after it with the marker; `outdent`
-  saves the piece one indent level out; `endList` removes the empty item and opens a new piece
-  after the list. The new field goes in place at once, and the left piece's drawing is put in
+  through `changeField`; `nextItem` opens a new item after it with the marker, saved once
+  something is typed after it; `outdent` takes the empty item out of the piece and opens it one
+  indent level out, after its parent, with the marker `notesPieceOutdent(text)` in
+  `src/core/editing.ts` gives (`outdentMarker` in `src/core/note-pieces.ts`); `endList` removes the empty item and
+  opens a new piece after the list. The new field goes in place at once, and the left piece's drawing is put in
   around it when the renderer is done. `insertParagraph` counts as Enter too.
 - Backspace in an empty field removes its piece, if it was saved, and opens the piece above at
   its end.

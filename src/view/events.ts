@@ -36,6 +36,7 @@ import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './headin
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
 import { openPieceAt, pieceBlur, pieceInput } from './note-piece-field';
+import { pieceBeforeInput, pieceKeyDown } from './note-piece-keys';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
@@ -174,6 +175,10 @@ function onBeforeInput(view: PrinceListView, evt: InputEvent): void {
 	const focused = view.contentEl.doc.activeElement;
 	const field = focused?.instanceOf(HTMLTextAreaElement) ? focused : null;
 	const isHistory = evt.inputType === 'historyUndo' || evt.inputType === 'historyRedo';
+	if (field && evt.target === field && isPieceField(view, field)) {
+		pieceBeforeInput(view, field, evt);
+		if (evt.defaultPrevented) return;
+	}
 	if (!isHistory) {
 		if (field && evt.target === field) beforeFieldInput(field, evt.inputType);
 	} else if (field && stepField(field, evt.inputType === 'historyUndo' ? 'undo' : 'redo')) {
@@ -203,6 +208,10 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	const target = evt.targetNode;
 	// A key that confirms an input method's composition isn't the user's Enter or Escape.
 	if (evt.isComposing || !target?.instanceOf(HTMLElement)) return;
+	if (target.instanceOf(HTMLTextAreaElement) && isPieceField(view, target)) {
+		pieceKeyDown(view, target, evt);
+		if (evt.defaultPrevented) return;
+	}
 	if (evt.key === 'Escape') {
 		if (target === view.filterEl) {
 			filterKeyDown(view, evt);
@@ -236,6 +245,10 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 			if (firstItem) addItem(view, 'first');
 		}
 	}
+}
+
+function isPieceField(view: PrinceListView, field: HTMLTextAreaElement): boolean {
+	return field.hasClass(NOTES_EDITOR_CLASS) && !!view.card?.el.contains(field);
 }
 
 function onFocusIn(view: PrinceListView, evt: FocusEvent): void {

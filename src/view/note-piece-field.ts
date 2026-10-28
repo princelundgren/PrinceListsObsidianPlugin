@@ -6,9 +6,27 @@ import { CARD_NOTES_CLASS, NOTES_EDITOR_CLASS, sayFieldLost, type Card } from '.
 import { caretAtClick } from './click-caret';
 import { fitHeight, targetOf } from './dom';
 import { FIELD_CLASS } from './fields';
-import { buildFormatBar, FORMAT_BAR_CLASS } from './format';
+import { buildFormatBar } from './format';
 import type { PrinceListView } from './list-view';
-import { drawNotes, hideField, notesEnd, placeAt, showField, type Notes, type PiecePlace } from './note-pieces';
+import { coverField, hideField, putField, removeField, showField } from './note-piece-slot';
+import type { Notes, PiecePlace } from './note-piece-state';
+import { drawNotes, notesEnd, placeAt } from './note-pieces';
+
+/**
+ * Where typing moves to: the lines to open, and the text the field starts with if not theirs, with
+ * the caret at its start, its end, or the end of its first line, which is an item's own.
+ */
+export interface PieceMove {
+	place: PiecePlace;
+	range: LineRange;
+	isNew?: boolean;
+	indent?: string;
+	text?: string;
+	caret: 'start' | 'end' | 'firstLineEnd';
+}
+
+// Fields that handed typing on to another, which removes them itself.
+const handedOn = new WeakSet<HTMLTextAreaElement>();
 
 // Draws the open card's notes, and says so once when an outside change took the open piece's lines.
 export function drawCardNotes(view: PrinceListView, card: Card, area: HTMLElement): void {
@@ -45,20 +63,48 @@ export function openNewPiece(view: PrinceListView, area: HTMLElement): HTMLTextA
 
 export function pieceInput(view: PrinceListView, field: HTMLTextAreaElement): void {
 	fitHeight(field);
-	const typed = view.editing.typeNotesPiece(field.value);
+	typePiece(view, field, field.value);
+}
+
+/** Saves `markdown` as the open piece, as typing it would; false when it wasn't saved. */
+export function typePiece(view: PrinceListView, field: HTMLTextAreaElement, markdown: string): boolean {
+	const typed = view.editing.typeNotesPiece(markdown);
 	if ('lost' in typed) pieceLost(view, field);
 	else view.handleTyped(typed);
+	return 'edit' in typed;
 }
 
 // The field goes once it has lost focus, and the piece it stood in for is drawn as it now reads.
 export function pieceBlur(view: PrinceListView, field: HTMLTextAreaElement): void {
+	if (handedOn.has(field)) return;
 	view.editing.closeNotes();
 	const area = field.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
 	hideField(field);
-	const bar = field.nextElementSibling;
-	if (bar?.hasClass(FORMAT_BAR_CLASS)) bar.remove();
-	field.remove();
+	removeField(field);
 	if (view.card && view.card.lostAt === null && area) drawCardNotes(view, view.card, area);
+}
+
+// Typing moves from `from` to a new field, which takes focus in the event's own handler, so a phone's
+// keyboard stays up. The piece left is drawn as it now reads.
+export function movePiece(view: PrinceListView, from: HTMLTextAreaElement, to: PieceMove): void {
+	const card = view.card;
+	const area = from.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
+	if (!card || !area) return;
+	const opened = view.editing.openNotesPiece(to.range, to.isNew ?? false, to.indent);
+	if (opened === null) return;
+	handedOn.add(from);
+	hideField(from);
+	const text = to.text ?? opened;
+	const field = pieceField(text);
+	putField(area, to.place, field);
+	field.focus();
+	const caret = to.caret === 'start' ? 0 : to.caret === 'end' || !text.includes('\n') ? text.length : text.indexOf('\n');
+	field.setSelectionRange(caret, caret);
+	removeField(from);
+	coverField(to.place, field);
+	buildFormatBar(field);
+	fitHeight(field);
+	drawCardNotes(view, card, area);
 }
 
 // `range` null opens a new piece after the last.
@@ -71,13 +117,18 @@ function openPiece(view: PrinceListView, area: HTMLElement, place: PiecePlace, r
 	// Before the drawing makes way for the field.
 	const clicked = place.kind === 'item' ? place.li : place.kind === 'piece' ? place.el : null;
 	const caret = click && clicked ? caretAtClick(clicked, click, text) : text.length;
-	const field = createEl('textarea', { cls: [FIELD_CLASS, NOTES_EDITOR_CLASS], attr: { rows: 1, placeholder: 'Notes' } });
-	field.value = text;
+	const field = pieceField(text);
 	showField(area, place, field);
 	buildFormatBar(field);
 	field.focus();
 	field.setSelectionRange(caret, caret);
 	fitHeight(field);
+	return field;
+}
+
+function pieceField(text: string): HTMLTextAreaElement {
+	const field = createEl('textarea', { cls: [FIELD_CLASS, NOTES_EDITOR_CLASS], attr: { rows: 1, placeholder: 'Notes' } });
+	field.value = text;
 	return field;
 }
 
@@ -87,7 +138,7 @@ function pieceLost(view: PrinceListView, field: HTMLTextAreaElement): void {
 	sayFieldLost(view, field.value, 'notes');
 }
 
-function selectedNotes(view: PrinceListView): { notes: Notes; checklist: ChecklistLine[] | null } | null {
+export function selectedNotes(view: PrinceListView): { notes: Notes; checklist: ChecklistLine[] | null } | null {
 	const { lines, model } = view.parse();
 	const item = view.selected === null ? undefined : itemAt(model, view.selected);
 	if (!item) return null;
