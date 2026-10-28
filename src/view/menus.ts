@@ -150,6 +150,7 @@ function addCollapseAllEntries(view: PrinceListView, menu: Menu): void {
 				.setTitle('Expand all headings')
 				.setIcon('chevrons-up-down')
 				.onClick(() => {
+					// Also drops collapsed lines that are no longer headings, which nothing shows.
 					view.collapsed.clear();
 					view.render();
 				}),
