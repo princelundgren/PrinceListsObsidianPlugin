@@ -87,6 +87,7 @@ export function listMenu(view: PrinceListView, section: Section, menu: Menu): vo
 	const itemPlace = endOfSection(section);
 	const itemAnchor = itemPlace === 'first' ? null : trackWhileShown(view, 'after' in itemPlace ? itemPlace.after : itemPlace.firstUnder, menu);
 	const headingAnchor = section.headingLine === null ? null : trackWhileShown(view, section.headingLine, menu);
+	const lastLine = trackWhileShown(view, sectionLastLine(view.lines(), section, contentStartLine(view.text)), menu);
 	menu.addItem((entry) =>
 		entry
 			.setTitle('New item')
@@ -106,7 +107,7 @@ export function listMenu(view: PrinceListView, section: Section, menu: Menu): vo
 		entry
 			.setTitle('Edit in Markdown')
 			.setIcon('file-text')
-			.onClick(() => editItemInMarkdown(view, sectionLastLine(view.lines(), section, contentStartLine(view.text)))),
+			.onClick(atLine(lastLine, (line) => editItemInMarkdown(view, line))),
 	);
 	menu.addItem((entry) =>
 		entry
