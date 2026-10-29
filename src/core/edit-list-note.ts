@@ -77,7 +77,7 @@ function planSave(lines: readonly Line[], model: ListModel, piece: ListNotePiece
 	const texts = typedLines(piece.separator ? withoutSeparatorLine(typed) : typed).map((text) => (isBlank(text) ? text : indent + text));
 	// An erased block takes one blank line with it, so typing in it again puts that line back: the one
 	// below when it is the block's own, or the first block's; otherwise the one above, as a new piece has.
-	const separator = piece.separator || (texts.length === 0 && !piece.blankAfter && takesLineAbove(lines, range));
+	const separator = piece.separator || (texts.length === 0 && !piece.blankAfter && liesBetweenBlankLines(lines, range));
 	const blankAfter = piece.blankAfter || (texts.length === 0 && !separator && takesLineBelow(lines, model, range));
 	const from = separator && range.end > range.start && isBlankAt(lines, range.start - 1) ? range.start - 1 : range.start;
 	const to = blankAfter && isBlankAt(lines, range.end) ? range.end + 1 : range.end;
@@ -102,7 +102,7 @@ function planSave(lines: readonly Line[], model: ListModel, piece: ListNotePiece
 }
 
 // One empty line still separates the blocks around an erased one.
-function takesLineAbove(lines: readonly Line[], range: LineRange): boolean {
+function liesBetweenBlankLines(lines: readonly Line[], range: LineRange): boolean {
 	return range.end > range.start && isBlankAt(lines, range.start - 1) && isBlankAt(lines, range.end);
 }
 
