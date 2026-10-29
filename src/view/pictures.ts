@@ -1,9 +1,10 @@
+import { EditorView } from '@codemirror/view';
 import { Notice } from 'obsidian';
 import { pictureName } from '../core/picture';
 import type { Card } from './card';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
-import { appendNotesBlock } from './notes-editor';
+import { appendNotesBlock, NOTES_CODEMIRROR_CLASS } from './notes-editor';
 
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";
 const FAILED_NOTICE = "Couldn't add the picture.";
@@ -26,6 +27,12 @@ export function registerPictureEvents(view: PrinceListView): void {
 	});
 	// After the view's own drop listener, which needs the flag.
 	view.registerDomEvent(contentEl.doc, 'drop', () => (dragFromPage = false));
+	// A picture in the notes loads after their editor measured it, and `load` doesn't bubble.
+	view.registerDomEvent(contentEl, 'load', () => measureNotesEditors(contentEl), { capture: true });
+}
+
+function measureNotesEditors(contentEl: HTMLElement): void {
+	for (const editorEl of contentEl.findAll(`.${NOTES_CODEMIRROR_CLASS}`)) EditorView.findFromDOM(editorEl)?.requestMeasure();
 }
 
 // A paste goes where focus is, so it is in the notes while their editor has it.

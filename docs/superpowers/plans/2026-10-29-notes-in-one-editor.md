@@ -334,8 +334,11 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 ### Task 3: Draw a card's notes as Live Preview does
 
 **Files:**
-- Create: `src/core/wiki-links.ts`, `tests/core/wiki-links.test.ts`, `src/view/notes-drawing.ts`
-- Modify: `src/view/notes-editor.ts`, `styles.css`
+- Create: `src/core/wiki-links.ts`, `tests/core/wiki-links.test.ts`, `src/view/notes-drawing.ts`,
+  `src/view/notes-widgets.ts` (the bullet, rule and picture widgets), `src/view/notes-links.ts`
+  (what the drawing needs from Obsidian), and `src/core/drawn-links.ts` with
+  `tests/core/drawn-links.test.ts` (`linkTarget`, `isWebAddress` and `pictureLook`)
+- Modify: `src/view/notes-editor.ts`, `src/view/notes.ts`, `src/view/pictures.ts`, `styles.css`
 
 **Interfaces:**
 - Produces, in `src/core/wiki-links.ts`: `WikiLink { from: number; to: number; linkpath: string;
@@ -354,13 +357,29 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   - Headings, quotes and code lines get a line class each, styled with Obsidian's heading, quote and
     code variables.
   - A picture (`Image`, or an embed whose path has a `PICTURE_EXTENSIONS` extension) is an `<img>`
-    from `getFirstLinkpathDest` and `getResourcePath`; a link it can't find shows as typed.
+    from `getFirstLinkpathDest` and `getResourcePath`; a link it can't find shows as typed. The
+    drawing finds pictures with `pictureLinks`, as the picture menu does. A picture from the web,
+    an `Image` whose address is http or https, is drawn by `MarkdownRenderer.render` from its
+    Markdown, as Task 5 draws blocks: the privacy rule lets Obsidian's renderer load it, as in any
+    note, and so is a web page it embeds, such as a video, which Obsidian's own styles fit to the
+    card. Its widget's `Component` is a child of the list view, removed in `destroy`. As in a note,
+    a last `|` part such as `100` or `100x80` sets a picture's size and the caption before it is its
+    alt text; a wiki embed without one has its path as alt text. While
+    the selection touches a picture, its Markdown shows with the picture after it.
+  - The parser reads `[[a]]` as a link in brackets and `![[a]]` as an image, so the drawing skips
+    `Link` and `Image` nodes that overlap a wikilink. A link without an address, `[a]`, shows as
+    typed, and so does one split across lines: a view plugin can't hide a line break.
+  - A `javascript:`, `vbscript:` or `data:` link gets no `href`, as in Obsidian's own notes.
+    `linkTarget` decides, and `pictureLook` reads a picture's alt text and size.
   - A link is an `a` mark (`Decoration.mark({ tagName: 'a' })`) with `internal-link` and
     `data-href`, or `external-link` and `href`. The view's delegated click and right-click listeners
     in `events.ts` already follow it with `handleLinkClick` and show `handleLinkMenu`; the editor's
     own handlers leave links to them, so a link opens once. The editor's `mousedown` handler on a
     drawn link returns true and prevents the default, so the caret stays put and the link stays
-    drawn for the click.
+    drawn for the click. The browser follows no link in editable content, so `handleLinkClick`
+    opens a web address there with `window.open`, which Obsidian handles as a clicked link.
+    `isWebAddress` limits it to http and https: `window.open` doesn't hand other schemes, such as
+    `obsidian://`, on as a clicked link does, so they stay unopened in the editor.
   - Tags, footnotes, `%%` comments and anything else show as typed.
 
 - [ ] **Step 1: Write the failing tests** for `wikiLinks`: `[[a]]`, `[[a|b]]`, `[[a#h|b]]`,

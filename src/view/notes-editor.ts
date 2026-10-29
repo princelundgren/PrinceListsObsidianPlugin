@@ -5,8 +5,10 @@ import { Annotation, Compartment, EditorState, Transaction, type ChangeSpec, typ
 import { EditorView, placeholder } from '@codemirror/view';
 import { Notice } from 'obsidian';
 import { changedLines, type NotesChange } from '../core/notes-lines';
+import { targetOf } from './dom';
 import { buildFormatBar } from './format';
 import type { PrinceListView } from './list-view';
+import { notesDrawing } from './notes-drawing';
 import { notesKeymap } from './notes-keys';
 import type { NotesSource } from './notes-source';
 import { UNSAFE_EDIT_NOTICE } from './write';
@@ -61,6 +63,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				markdownLanguage,
 				indentUnit.of('\t'),
 				notesKeymap(),
+				notesDrawing(view, view.sourcePath),
 				placeholder('Notes'),
 				EditorView.lineWrapping,
 				EditorView.editorAttributes.of({ class: NOTES_CODEMIRROR_CLASS }),
@@ -91,6 +94,13 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 						if (!editor.dom.doc.hasFocus()) return;
 						current.close();
 						sync(editor);
+					},
+					// A drawn link follows on its click, through the view's own listener, as in Live Preview:
+					// the caret stays where it was, and the link stays drawn.
+					mousedown: (evt) => {
+						if (!targetOf(evt)?.closest('a')) return false;
+						evt.preventDefault();
+						return true;
 					},
 					// A file is never text in the notes: pictures go through the view's own listeners.
 					paste: (evt) => !evt.clipboardData?.getData('text/plain') && (evt.clipboardData?.files.length ?? 0) > 0,
