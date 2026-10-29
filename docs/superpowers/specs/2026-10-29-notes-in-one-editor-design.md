@@ -1,0 +1,221 @@
+---
+status: draft
+---
+
+# PrinceLists for Obsidian: notes in one editor
+
+A card's notes and the list note edit a block at a time: Obsidian's renderer draws them, and the
+block you click becomes a plain-text field (step two, "Editing notes a block at a time"). Hands-on
+testing on macOS, iOS and Android found that the seams between blocks are where notes break or
+stop feeling like a note: arrow keys, selecting across blocks, joining two blocks, and key handling
+that each platform needs its own fixes for (#182). This design puts the notes in one CodeMirror 6
+editor that looks like Obsidian's Live Preview, and the block fields go **(owner)**.
+
+**How decisions are marked:** as in the [step one design](2026-10-20-prince-lists-design.md).
+**(owner)** means the owner decided it on 2026-10-29 unless another date is given; **(call)** means
+the designer did, and a builder may revisit it. Step one's rules still hold: an edit replaces only
+the lines it concerns, nothing is written in the background, and only documented Obsidian APIs are
+used.
+
+**Keys:** Cmd in this design means Obsidian's `Mod` key, which is Ctrl on Windows and Linux.
+
+## At a glance
+
+- **One editor** holds a card's notes, and another the list note **(owner)**, both in the same
+  release, replacing step two's "Editing notes a block at a time".
+- **It looks like a note:** Markdown shows only where the cursor is, as in Obsidian's Live Preview.
+  Tables, code blocks, callouts, math and embedded notes are drawn by Obsidian's renderer until the
+  cursor enters them **(owner)**.
+- **Keys, selection and undo** are CodeMirror's, across the whole notes, with no custom handling
+  per platform.
+- **Saving changes only the lines a change touched,** through the same checks as before.
+- **On mobile the format bar is one row** that scrolls sideways **(owner)**.
+
+## The editor
+
+- **CodeMirror 6, Obsidian's own editor library (owner, #182).** Obsidian documents CodeMirror only
+  as extensions to its own editor (`registerEditorExtension`), and no way to put that editor in a
+  plugin's view. So the plugin makes its own `EditorView`, with CodeMirror's public API and the
+  packages Obsidian gives plugins at runtime: `@codemirror/state`, `view`, `language` and
+  `commands` stay out of `main.js`, as the build already marks them. No private Obsidian API, and
+  nothing reaches into Obsidian's DOM.
+- **Two new dependencies (owner, #182),** bundled: `@codemirror/lang-markdown` and
+  `@lezer/markdown`, both MIT. Only `markdownLanguage`, `insertNewlineContinueMarkupCommand` and
+  `deleteMarkupBackward` are imported: `markdown()` would bundle the HTML, CSS and JavaScript
+  parsers too, about 146 kB more. AGENTS.md's dependency line changes with the build.
+- **What it holds:** the notes line for line, without the item's indent, as the block fields held a
+  block. Every line in the editor is one line in the file, so a change knows exactly which file
+  lines it touched **(call)**.
+- **It's always there:** the card's notes and the list note are the editor itself, focused or not;
+  a click puts the caret where it lands, so step one's `caretPositionFromPoint` rule goes. Empty
+  notes show the gray "Notes" and stay three lines tall (step one, "A card's notes are at least
+  three lines tall").
+- **Each open card has one,** and the list note one; the Schedule view and a list inside another
+  note have no cards and no editor. Closing the card or the view destroys it.
+- **Listeners:** clicks on drawn checkboxes, links and blocks go through one
+  `EditorView.domEventHandlers` per editor, as AGENTS.md's one delegated listener per container
+  asks.
+
+## What shows drawn (owner: as Obsidian's Live Preview)
+
+Compared with Obsidian's own editor side by side on desktop:
+
+- **Inline:** bold, italic, strikethrough, `<u>`, inline code, links, pictures, checkboxes and list
+  bullets are drawn, and show their Markdown only while the selection touches them.
+- **By line:** headings, quotes and horizontal rules show their Markdown while the cursor is on
+  their line.
+- **Big blocks:** a table, a code block, a callout, a `$$` math block, an embedded note and an HTML
+  block are drawn by `MarkdownRenderer.render`, each into a block widget with its own `Component`,
+  until the cursor or selection enters it; then the whole block shows its Markdown.
+  - The widgets come from a `StateField`: CodeMirror takes block decorations only from state, not
+    from a view plugin.
+  - A click on a drawn block puts the caret at the start of its first line **(call)**.
+  - A widget is drawn again only when its own Markdown changes, so typing elsewhere doesn't redraw
+    it **(call)**.
+- **While the editor isn't focused,** nothing shows its Markdown, wherever the selection was left.
+- **Anything else shows as typed (call),** such as a tag or a footnote, in the editor's text style.
+- **Styles:** Obsidian's CSS variables only, as everywhere in the plugin.
+
+## Checkboxes
+
+- **A drawn checkbox ticks its own line (call):** the editor knows which line drew it, so step
+  two's count check and its `%%` and `$$` rule no longer apply to it. A click turns `[ ]` into
+  `[x]` and back, saved at once, with no `✔` date, focused or not. A tick is the editor's own
+  change, in its history, saved like typing.
+- **A box inside a drawn big block,** such as a callout, ticks by step two's "Ticking checklists"
+  rules, counted within that block: the nth drawn box is the nth checklist line in it, and every box
+  in the block stays disabled when the two disagree or the block holds `%%` or `$$`.
+
+## Keys and touch
+
+- **CodeMirror's own:** arrow keys across the whole notes, Shift and the arrows, Cmd+A for all the
+  notes, word and line moves, double and triple clicks, Backspace and Delete joining lines, and
+  input methods.
+- **Lists, as in a note:** Enter continues a list item of its kind
+  (`insertNewlineContinueMarkupCommand`): a checklist's starts unticked, a numbered one counts on
+  and renumbers the items after it. Enter on an empty nested item moves it one level out, and on a
+  top-level one takes its marker off. A tight list stays tight (`nonTightLists: false`), as in a
+  note **(call)**. Backspace right after a marker turns it into spaces, and a second Backspace
+  takes them (`deleteMarkupBackward`).
+- **Tab and Shift+Tab** indent and outdent the list items the selection is on, by one tab,
+  Obsidian's default indent **(call)**. On other lines Tab leaves the editor, as from any field, so
+  a keyboard user can get out **(call)**.
+- **Cmd+B, Cmd+I and Cmd+K** make the selection bold, italic or a link, as before, now in the
+  editor's own keymap.
+- **Escape** leaves the notes, as before. **Cmd+F** stays the list's filter: CodeMirror's search
+  isn't loaded **(call)**.
+- **Links:** a click on a drawn link follows it, as in Live Preview, through Obsidian's
+  `openLinkText`; the caret reaches it with the arrow keys or a click beside it.
+- **Right-click on desktop:** on a link, Obsidian's link menu (step one); on a picture, the picture
+  menu (step two, "Right-click menus"). Elsewhere in the notes the plugin opens no menu of its own,
+  and the list's background menu no longer covers the list note **(call)**.
+
+## Undo (call)
+
+- **While the editor has focus,** Cmd+Z and Cmd+Shift+Z, and the format bar's Undo and Redo, step
+  through the editor's own history, across the whole notes.
+- **Outside the editor,** they stay the list's (step one, "Undo (1b, call)"), where a visit to the
+  notes is one step, as typing in a field was.
+- **Any change the editor didn't make** clears its history, as an outside change clears the list's:
+  an outside change, the list's undo, or a tick from elsewhere. So the editor's undo never takes
+  back a change it didn't make.
+
+## The format bar
+
+- **Under the editor while it has focus,** with the same buttons and rules as step two's "Formatting
+  in a card". A press keeps focus in the editor, so a phone's keyboard stays up.
+- **On mobile, one row that scrolls sideways (owner),** with no scroll bar, as Obsidian's own
+  toolbar above the keyboard does. On desktop, whole groups still wrap on a narrow card.
+
+## Saving
+
+- **After each change, only the lines it touched (call).** From the change's first touched line to
+  its last, the lines are written back with the item's indent, through the core's existing piece
+  save (`setNotesPiece`, `setListNotePiece`) and its check that the list's layout can take them.
+  The notes' other lines keep every byte. The core saves a given line range directly, with no
+  open, type and close session around each change.
+- **Empty notes** get the empty line under the title with their first text, so it can't join the
+  title, as the block fields did.
+- **A refused change is taken back in the editor at once (call),** outside its history, so Redo
+  can't bring it back, with step one's notice that the list's layout can't take that change, once
+  per visit to the notes. So the editor never holds lines the file doesn't, and nothing is left to
+  save when the card closes.
+- **Outside changes** show in the editor at once, mapped so the caret stays on its text. Step one's
+  rule that an outside change to the open block's lines leaves the field unable to save goes: there
+  is no unsaved field. An outside change that loses track of the item still closes the card as step
+  one says, with its "Copy text".
+- **The list note keeps its rules:** what would turn it into a heading or an item warns before it
+  saves, checked on the whole note as it would be saved, and it takes no pictures.
+
+## Pictures
+
+- **Step one's "Pictures show at once" and "Where the links go" hold,** with the block the caret is
+  in as the open block: the links go in a block of their own after it, or after its whole list,
+  drawn at once, and the caret moves to an empty line below them. A picture dropped on the notes
+  goes after the block it's dropped on **(call)**.
+- **The picture menu's Remove image and Delete image** show for every picture drawn from a link in
+  the notes, since the editor knows each picture's own link; a picture in an embedded note still
+  gets none.
+
+## What goes, and what changes in the other designs
+
+- **The block-field view code:** the note-piece fields, their keys and slots, and drawing notes a
+  block at a time. Core functions that only served them, such as finding the neighbor block for Up
+  and Down, go with them.
+- **Step one changes with the build:**
+  - "Notes use Obsidian's own Markdown rendering" becomes: big blocks do, and the editor draws the
+    rest.
+  - "The piece's own field fits its text" goes.
+  - "The list note and item notes": drawn a block at a time, where the caret goes, and the
+    `caretPositionFromPoint` rule are replaced by "The editor" **(owner, #182)**. A click still
+    lands on the character clicked, and a link still follows.
+  - "Pictures show at once" and "Where the links go" say "the block the caret is in" for "the open
+    field", and a picture dropped on the notes goes after the block it's dropped on.
+  - "An outside change to the lines of the block a focused field writes" is replaced by "Saving".
+  - "Undo (1b, call)" points here for the notes.
+- **Step two changes with the build:**
+  - "Editing notes a block at a time" is replaced by this design, its rule for a picture dropped
+    on the drawn notes included.
+  - "Formatting in a card" points its format bar and keys here, and drops the wrapped rows on
+    mobile.
+  - "Ticking checklists" applies only to boxes inside a drawn big block.
+  - "Right-click menus": the background no longer includes the list note, and Remove and Delete
+    image no longer wait for pictures to line up with links.
+
+## What this costs (call)
+
+- **Size:** about 42 kB more `main.js`, minified, less the block-field code that goes.
+- **Our own Live Preview:** the drawn look is the plugin's, not Obsidian's, so it can differ from a
+  note in small ways, and a theme that styles Obsidian's editor doesn't style this one.
+- **A CodeMirror update in Obsidian** could stop matching the bundled Markdown package. Risk 1
+  checks it at the build, and again whenever `minAppVersion` moves.
+- **A drawn block shows its whole Markdown** once the cursor enters it: a table shows its pipes.
+- **A numbered checklist item,** `1. [ ]`, continues as a numbered item without a box: the command
+  carries a box only for bullets.
+
+## Risks to check during the build
+
+1. **Versions:** `@codemirror/lang-markdown`'s dependency ranges include the
+   `@codemirror/language`, `state` and `view` that Obsidian 1.5.7, the current `minAppVersion`, and
+   the current Obsidian ship, and the editor loads in both.
+2. **Byte for byte:** focusing and leaving changes nothing; typing changes only the touched lines;
+   mixed tab and space indents stay as they were; a file without a final newline and one with CRLF
+   endings keep both (AGENTS.md).
+3. **The save cases the block fields got wrong** become tests: emptying a block in the middle, at
+   the end and at the start of the notes, and the same in the list note.
+4. **Empty lines at the end of the notes:** one typed there stays in the editor and in the file,
+   and the next parse still ends the notes where the editor does.
+5. **iOS:** Backspace on an empty line, the keyboard's autocorrect and dictation, a Japanese input
+   method's Enter, which only confirms a word, and a refused change taken back mid-word.
+6. **Android:** the on-screen keyboard's Backspace and Enter, and the format bar above it.
+7. **A drawn block:** a click inside a drawn table or callout enters it without jumping the card's
+   scroll, and a widget with an embedded note unloads when it's taken away.
+8. **Right-click elsewhere in the notes** on desktop shows what a text field shows in Obsidian, or
+   nothing, and never the item menu.
+
+## Order (call)
+
+One release, in plan tasks that each keep the plugin working: the editor for a card's notes with
+the inline and line drawing; saving with the refused-change rule and undo; keys, Tab and the format
+bar; checkboxes and big blocks; pictures; the list note; then removing the block-field code and
+updating step one's and step two's designs.
