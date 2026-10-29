@@ -1,5 +1,5 @@
 import { syntaxTree } from '@codemirror/language';
-import type { EditorState, Extension, Range, SelectionRange } from '@codemirror/state';
+import type { EditorState, Extension } from '@codemirror/state';
 import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate, type WidgetType } from '@codemirror/view';
 import type { SyntaxNode } from '@lezer/common';
 import { isWebAddress, linkTarget, pictureLook } from '../core/drawn-links';
@@ -8,10 +8,9 @@ import { pictureLinks } from '../core/picture-links';
 import { wikiLinks } from '../core/wiki-links';
 import type { PrinceListView } from './list-view';
 import { notesLinks, type NotesLinks } from './notes-links';
+import { Drawing, HIDDEN } from './notes-decorations';
 import { BulletWidget, CheckboxWidget, RuleWidget } from './notes-widgets';
 
-const HIDDEN = Decoration.replace({});
-const FAINT = Decoration.mark({ class: 'princelists-notes-markup' });
 const LIST_NUMBER = Decoration.mark({ class: 'princelists-notes-list-number' });
 const INLINE = {
 	Emphasis: { mark: 'EmphasisMark', look: Decoration.mark({ tagName: 'em' }) },
@@ -60,46 +59,6 @@ class NotesDrawing {
 			},
 		});
 		return Decoration.set(drawing.ranges, true);
-	}
-}
-
-// The decorations so far, and what the selection shows as typed.
-class Drawing {
-	readonly ranges: Range<Decoration>[] = [];
-
-	constructor(
-		readonly state: EditorState,
-		private readonly selection: readonly SelectionRange[],
-	) {}
-
-	touches(from: number, to: number): boolean {
-		return this.selection.some((range) => range.from <= to && range.to >= from);
-	}
-
-	touchesLine(pos: number): boolean {
-		const line = this.state.doc.lineAt(pos);
-		return this.touches(line.from, line.to);
-	}
-
-	// Nothing for an empty range: CodeMirror refuses an empty mark.
-	add(decoration: Decoration, from: number, to: number): void {
-		if (from < to) this.ranges.push(decoration.range(from, to));
-	}
-
-	widget(decoration: Decoration, at: number): void {
-		this.ranges.push(decoration.range(at));
-	}
-
-	// A node's own Markdown: faint while shown, hidden otherwise.
-	markup(from: number, to: number, isShown: boolean): void {
-		this.add(isShown ? FAINT : HIDDEN, from, to);
-	}
-
-	lineClass(from: number, to: number, className: string): void {
-		const { doc } = this.state;
-		for (let number = doc.lineAt(from).number; number <= doc.lineAt(to).number; number++) {
-			this.ranges.push(Decoration.line({ class: className }).range(doc.line(number).from));
-		}
 	}
 }
 
