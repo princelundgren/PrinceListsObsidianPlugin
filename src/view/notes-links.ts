@@ -6,8 +6,8 @@ import { PictureWidget, WebPictureWidget } from './notes-widgets';
 
 /** What the notes drawing needs from Obsidian, with links resolved as in one note. */
 export interface NotesLinks {
-	/** A picture from the vault, or null when no file has that path. */
-	picture(linkpath: string, look: PictureLook): WidgetType | null;
+	/** A picture from the vault, drawn from the link at `column` of its line, or null when no file has that path. */
+	picture(linkpath: string, look: PictureLook, column: number): WidgetType | null;
 	/** A picture from the web, which Obsidian's renderer draws from its Markdown. */
 	webPicture(markdown: string): WidgetType;
 	isResolved(linktext: string): boolean;
@@ -17,9 +17,9 @@ export interface NotesLinks {
 export function notesLinks(view: PrinceListView, sourcePath: string): NotesLinks {
 	const { metadataCache, vault } = view.app;
 	return {
-		picture: (linkpath, look) => {
+		picture: (linkpath, look, column) => {
 			const file = metadataCache.getFirstLinkpathDest(linkpath, sourcePath);
-			return file ? new PictureWidget(vault.getResourcePath(file), look) : null;
+			return file ? new PictureWidget(vault.getResourcePath(file), look, column) : null;
 		},
 		webPicture: (markdown) => new WebPictureWidget(markdown, view, sourcePath),
 		// A link to a heading in the same note, `[[#h]]`, has no path.

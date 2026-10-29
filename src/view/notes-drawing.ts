@@ -79,7 +79,7 @@ function drawLineLinks(drawing: Drawing, from: number, to: number, links: NotesL
 		for (const picture of pictureLinks([line.text])) {
 			if (isCode(picture.from)) continue;
 			const look = pictureLook(line.text.slice(picture.from, picture.to));
-			drawPicture(drawing, line.from + picture.from, line.from + picture.to, links.picture(picture.linkpath, look));
+			drawPicture(drawing, line.from + picture.from, line.from + picture.to, links.picture(picture.linkpath, look, picture.from));
 		}
 		for (const wiki of wikis) {
 			spans.push({ from: line.from + wiki.from, to: line.from + wiki.to });

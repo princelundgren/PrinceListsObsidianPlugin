@@ -5,6 +5,7 @@ import { Annotation, Compartment, EditorState, Transaction, type ChangeSpec, typ
 import { EditorView, placeholder } from '@codemirror/view';
 import { Notice } from 'obsidian';
 import { checklistStatusAt } from '../core/checklist';
+import { blockBelow } from '../core/note-pieces';
 import { changedLines, type NotesChange } from '../core/notes-lines';
 import { notesBoxClick } from './checklist';
 import { targetOf } from './dom';
@@ -191,18 +192,19 @@ export function lockNotesEditor(editor: EditorView): void {
 }
 
 /**
- * Focuses the editor and adds `markdown` as a block of its own at the end of the notes, in place of
- * notes that are only blank, so it's saved as typing is. False when the notes didn't take it.
+ * Focuses the editor and adds `block`'s lines as a block of their own below the notes' line `line`
+ * (core's blockBelow), with the caret on the empty line under them, so they're drawn at once and saved
+ * as typing is. False when the notes didn't take them.
  */
-export function appendNotesBlock(editor: EditorView, markdown: string): boolean {
+export function addNotesBlock(editor: EditorView, line: number, block: readonly string[]): boolean {
 	editor.focus();
 	const { doc } = editor.state;
-	const text = doc.toString();
-	const from = text.trim() === '' ? 0 : doc.length;
-	const gap = from === 0 || text.endsWith('\n\n') ? '' : text.endsWith('\n') ? '\n' : '\n\n';
-	const insert = gap + markdown;
-	editor.dispatch({ changes: { from, to: doc.length, insert }, selection: { anchor: from + insert.length }, userEvent: 'input.paste' });
-	return editor.state.doc.toString() === text.slice(0, from) + insert;
+	// A line found before the pictures were saved may be past the end of notes changed since.
+	const { change, caret } = blockBelow(doc.toString(), Math.min(line, doc.lines - 1), block);
+	const changes = editor.state.changes(lineChange(doc, change));
+	const next = changes.apply(doc);
+	editor.dispatch({ changes, selection: { anchor: next.line(caret + 1).from }, userEvent: 'input.paste' });
+	return editor.state.doc.eq(next);
 }
 
 // Lines [from, to) of `doc` become `change.lines`, as character positions.

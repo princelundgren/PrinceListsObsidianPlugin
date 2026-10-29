@@ -4,7 +4,7 @@ import { pictureName } from '../core/picture';
 import type { Card } from './card';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
-import { appendNotesBlock, NOTES_CODEMIRROR_CLASS } from './notes-editor';
+import { addNotesBlock, NOTES_CODEMIRROR_CLASS } from './notes-editor';
 
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";
 const FAILED_NOTICE = "Couldn't add the picture.";
@@ -44,7 +44,7 @@ function onPaste(view: PrinceListView, evt: ClipboardEvent): void {
 	const pictures = Array.from(evt.clipboardData?.files ?? []).filter((file) => file.type.startsWith('image/'));
 	if (pictures.length === 0) return;
 	evt.preventDefault();
-	void addPictures(view, card, pictures, true);
+	void addPictures(view, card, pictures, true, ({ state }) => state.doc.lineAt(state.selection.main.head).number - 1);
 }
 
 function onDragOver(view: PrinceListView, evt: DragEvent): void {
@@ -60,7 +60,17 @@ function onDrop(view: PrinceListView, evt: DragEvent): void {
 	if (!card || !inOpenCard(view, evt) || !mayHoldPicture(evt)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
-	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), false);
+	// The pointer's coordinates name a line only now, before the pictures are saved and the notes may move.
+	const line = card.editor ? droppedLine(card.editor, evt) : 0;
+	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), false, () => line);
+}
+
+// The notes' line dropped on, or their last line for a drop elsewhere on the card.
+function droppedLine(editor: EditorView, evt: DragEvent): number {
+	const target = targetOf(evt);
+	const { doc } = editor.state;
+	const pos = target && editor.contentDOM.contains(target) ? editor.posAtCoords({ x: evt.clientX, y: evt.clientY }) : null;
+	return doc.lineAt(pos ?? doc.length).number - 1;
 }
 
 function inOpenCard(view: PrinceListView, evt: DragEvent): boolean {
@@ -75,8 +85,8 @@ function mayHoldPicture(evt: DragEvent): boolean {
 	return items.some((item) => item.kind === 'file' && item.type.startsWith('image/'));
 }
 
-// The pictures go in a block of their own at the end of the notes.
-async function addPictures(view: PrinceListView, card: Card, files: File[], pasted: boolean): Promise<void> {
+// The pictures go in a block of their own below the notes' line `lineOf` gives once they're saved.
+async function addPictures(view: PrinceListView, card: Card, files: File[], pasted: boolean, lineOf: (editor: EditorView) => number): Promise<void> {
 	const list = view.file;
 	if (!list) return;
 	// A note outside the vault has no parent (observed in 1.14.4), and its picture links can't resolve.
@@ -111,5 +121,5 @@ async function addPictures(view: PrinceListView, card: Card, files: File[], past
 		new Notice(`The card closed before the picture was added. It's saved as ${paths.join(', ')}.`);
 		return;
 	}
-	if (!card.editor || !appendNotesBlock(card.editor, links.join('\n'))) new Notice(`Couldn't add the picture to the notes. It's saved as ${paths.join(', ')}.`);
+	if (!card.editor || !addNotesBlock(card.editor, lineOf(card.editor), links)) new Notice(`Couldn't add the picture to the notes. It's saved as ${paths.join(', ')}.`);
 }
