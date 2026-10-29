@@ -341,7 +341,8 @@ current todo app. Step one's own "Done when" doesn't change.
 
 - **The card's star button (owner, 2026-10-27)** sits between the When and the ⋯ and adds or
   removes the star: an outline when the item has none, filled in `--color-yellow` when it has one.
-  The item menu has no star entry **(owner)**, so the star is set only from the open card.
+  A list's row adds or removes it from its right-click menu too **(owner, 2026-10-29)**, where the
+  item menu at first had no star entry **(owner)**: the step one design's "Item actions".
 - **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
   show: a list, the Schedule view and a list inside another note.
 

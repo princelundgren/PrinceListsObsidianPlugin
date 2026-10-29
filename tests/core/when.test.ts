@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { itemRow } from '../../src/core/display';
 import { parseItemLine } from '../../src/core/item-line';
-import { dayLabelKind, dayOf, daysFrom, setWhen, whenOf } from '../../src/core/when';
+import { dayAfter, dayLabelKind, dayOf, daysFrom, setWhen, whenOf } from '../../src/core/when';
 
 describe('whenOf', () => {
 	test.each(['- [ ] a ⏳ 2026-10-30', '- [ ] a ⌛ 2026-10-30', '- [ ] a ⏳️ 2026-10-30'])('reads %s', (line) => {
@@ -53,6 +53,14 @@ describe('days', () => {
 	test('dayOf is the local calendar day', () => {
 		expect(dayOf(new Date(2026, 9, 27, 23, 59))).toBe('2026-10-27');
 		expect(dayOf(new Date(2026, 9, 28, 0, 0))).toBe('2026-10-28');
+	});
+	test('dayAfter is the next calendar day across a month, a year and a change of the clocks', () => {
+		expect(dayAfter(new Date(2026, 9, 31, 23, 30))).toBe('2026-11-01');
+		expect(dayAfter(new Date(2026, 11, 31, 12, 0))).toBe('2027-01-01');
+		// A day taken as 24 hours fails these only where the clocks change that night, as they do in
+		// New York, the time zone CI runs the tests in.
+		expect(dayAfter(new Date(2026, 2, 7, 23, 30))).toBe('2026-03-08');
+		expect(dayAfter(new Date(2026, 10, 1, 0, 30))).toBe('2026-11-02');
 	});
 	test('daysFrom counts calendar days across a daylight-saving change and a new year', () => {
 		expect(daysFrom('2026-03-28', '2026-03-30')).toBe(2);

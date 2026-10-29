@@ -688,8 +688,20 @@ stays, and the blank line stays with it.
 
 - **On desktop, right-click an item** for New item below, New heading below and Delete item
   **(call)**. Delete item removes the item and its notes, and its name says what goes **(owner,
-  2026-10-29)**. Step two adds Edit in Markdown, and its star is a button on the open card, not an
-  entry here **(owner, 2026-10-27)**.
+  2026-10-29)**. Step two adds Edit in Markdown.
+- **A row's right-click menu also does what the item's card does (owner, 2026-10-29),** so an item
+  needn't be opened for it: Tick or Untick, Add star or Remove star, then Set date to today, Set
+  date to tomorrow, Set date…, and Remove date when it has one. Each entry says what the item holds
+  when the menu opens, and does just that: Tick on an item ticked meanwhile does nothing. This
+  replaces keeping the star on the card alone **(owner, 2026-10-27)**.
+  - **Set date… opens the card with the platform's date picker** **(call)**. The picker needs a
+    recent user action, and with Native menus on a menu's click may not count as one; then the
+    card opens without it, and its date button opens the picker.
+  - **The card's ⋯ menu, and a right-click on the open card, stay without them (owner,
+    2026-10-29),** since the card shows the box, the star and the date beside them.
+  - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
+    Tasks' "done" or Obsidian's "checkbox status"; the star button's "Add star" and "Remove star";
+    and "Remove", as in Remove image.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading and Delete heading. Step two adds Edit in Markdown, Collapse all headings and Expand all
   headings, and a menu on the list's background (step two's design, "Right-click menus").

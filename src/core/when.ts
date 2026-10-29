@@ -54,6 +54,11 @@ export function dayOf(date: Date): string {
 	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+/** The local calendar day after `date`'s, as `YYYY-MM-DD`; a day isn't always 24 hours. */
+export function dayAfter(date: Date): string {
+	return dayOf(new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1));
+}
+
 export function daysFrom(today: string, day: string): number {
 	return Math.round((utcOf(day) - utcOf(today)) / DAY_MS);
 }
