@@ -108,8 +108,12 @@ Compared with Obsidian's own editor side by side on desktop:
   editor's own keymap.
 - **Escape** leaves the notes, as before. **Cmd+F** stays the list's filter: CodeMirror's search
   isn't loaded **(call)**.
-- **Links:** a click on a drawn link follows it, as in Live Preview, through Obsidian's
-  `openLinkText`; the caret reaches it with the arrow keys or a click beside it.
+- **Links:** a click on a drawn link follows it, as in Live Preview: a link to a note through
+  Obsidian's `openLinkText`, and a web link through `window.open`, which Obsidian handles as a
+  clicked link, since the browser follows no link in editable content. A `mailto:` or app link,
+  such as `obsidian://`, stays unopened in the editor **(call)**: `window.open` doesn't pass it on,
+  and Obsidian's reading view didn't open an `obsidian://` link on a real click either. The caret
+  reaches a link with the arrow keys or a click beside it.
 - **Right-click on desktop:** on a link, Obsidian's link menu (step one); on a picture, the picture
   menu (step two, "Right-click menus"). Elsewhere in the notes the plugin opens no menu of its own,
   and the list's background menu no longer covers the list note **(call)**.
