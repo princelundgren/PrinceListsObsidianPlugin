@@ -164,6 +164,9 @@ Compared with Obsidian's own editor side by side on desktop:
 - **The block-field view code:** the note-piece fields, their keys and slots, and drawing notes a
   block at a time. Core functions that only served them, such as finding the neighbor block for Up
   and Down, go with them.
+- **A new core entry point** saves a given line range of the notes through the piece save, in place
+  of the open, type and close session the fields used; it comes with its tests first, as every
+  change in `src/core/` does.
 - **Step one changes with the build:**
   - "Notes use Obsidian's own Markdown rendering" becomes: big blocks do, and the editor draws the
     rest.
