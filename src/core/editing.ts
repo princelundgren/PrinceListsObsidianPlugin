@@ -178,10 +178,10 @@ export class ListEditing {
 			const { range, separator } = session.piece;
 			const result = setListNotePiece(lines, model, session.piece, markdown);
 			session.piece = result.piece;
-			// A new piece's save starts at the unchanged line above it; with no line above, it goes in
-			// before whatever is at its start.
+			// A new piece's save starts at the unchanged line above it, an erased one's at the empty line
+			// it takes; with no line above, it goes in before whatever is at its start.
 			const isInsert = range.start === range.end && !separator;
-			const start = separator ? range.start - 1 : range.start;
+			const start = separator || result.piece.separator ? range.start - 1 : range.start;
 			return { edit: this.apply(joinLines(result.lines), start, isInsert ? 'insert' : 'change', session), note: result.note };
 		});
 	}
@@ -210,7 +210,9 @@ export class ListEditing {
 			const mapped = mapPieceRange(oldLines, newLines, range);
 			if (!mapped) this.piece = null;
 			else session.piece.range = mapped;
-			if (mapped && session.notes === 'listNote') session.piece.blankAfter &&= mapLine(oldLines, newLines, range.end) === mapped.end;
+			// An erased block still owes the blank line it took below, whatever the line now under it.
+			const owesBlank = range.start === range.end;
+			if (mapped && session.notes === 'listNote') session.piece.blankAfter &&= owesBlank || mapLine(oldLines, newLines, range.end) === mapped.end;
 		}
 		return { lostSelected: hadSelected && this.selected === null };
 	}

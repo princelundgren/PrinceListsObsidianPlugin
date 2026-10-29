@@ -65,6 +65,31 @@ describe('setListNotePiece', () => {
 		expect(savePiece(opened.text, opened.piece, '<!-- x -->').text).toBe(`${FRONTMATTER}First\n\n<!-- x -->\n\n- [ ] a\n`);
 	});
 
+	test('takes one blank line with an erased block between two others, and puts it back when typing returns', () => {
+		const note = (...blocks: string[]) => `${FRONTMATTER}${blocks.join('\n\n')}\n\n- [ ] a\n`;
+		const erase = (blocks: string[], i: number) => {
+			const start = 3 + 2 * i;
+			return savePiece(note(...blocks), { range: { start, end: start + 1 }, indent: '', separator: false, blankAfter: false }, '');
+		};
+
+		const middle = erase(['First', 'Second', 'Third'], 1);
+		expect(middle.text).toBe(note('First', 'Third'));
+		expect(savePiece(middle.text, middle.piece, 'Second').text).toBe(note('First', 'Second', 'Third'));
+		expect(erase(['First', 'Second'], 1).text).toBe(note('First'));
+	});
+
+	test('puts back an erased block with both of the blank lines under it', () => {
+		const text = `${FRONTMATTER}First\n\nSecond\n\n\nThird\n\n- [ ] a\n`;
+		const erased = savePiece(text, wholeNote({ start: 5, end: 6 }), '');
+		expect(erased.text).toBe(`${FRONTMATTER}First\n\n\nThird\n\n- [ ] a\n`);
+		expect(savePiece(erased.text, erased.piece, 'Second').text).toBe(text);
+	});
+
+	test('keeps the blank line above an erased last block with an item right under it', () => {
+		const result = savePiece(`${FRONTMATTER}First\n\nSecond\n- [ ] a\n`, wholeNote({ start: 5, end: 6 }), '');
+		expect(result.text).toBe(`${FRONTMATTER}First\n\n- [ ] a\n`);
+	});
+
 	test('a piece in the middle of the note adds no line after it', () => {
 		const result = savePiece(`${FRONTMATTER}- one\n- two\n\n- [ ] a\n`, wholeNote({ start: 3, end: 4 }), '- one!');
 		expect(result.text).toBe(`${FRONTMATTER}- one!\n- two\n\n- [ ] a\n`);

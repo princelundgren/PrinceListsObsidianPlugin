@@ -422,7 +422,10 @@ renderer, and only the part you click becomes a plain-text field.
     Down at the very end into the block below, at its start **(call)**: a field can't tell which
     wrapped line the caret is on. From an item's first child, Up goes to the item itself.
   - Backspace in an empty field removes that block and moves to the end of the block above
-    **(call)**. Joining two blocks that hold text is done in "Edit in Markdown" **(call)**.
+    **(call)**. One empty line next to it goes with it, so one still separates the blocks around
+    it; in the list note, the empty line above the first item stays, as when the whole note is
+    erased. Typing in the field again puts the line back **(call)**. Joining two blocks that hold
+    text is done in "Edit in Markdown" **(call)**.
   - Enter that confirms a word in an input method, such as a Japanese keyboard's, only confirms it.
 - **Clicking below the last block opens an empty block at the end (owner),** as clicking empty
   notes did. Once it holds text it's saved after an empty line when the notes already hold a

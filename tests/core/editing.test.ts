@@ -297,6 +297,37 @@ describe('the list note across a typing session', () => {
 		expect(state.text).toBe(`${FRONTMATTER}\n- [ ] a\n`);
 	});
 
+	test('an erased block of the note comes back in its place after the block under it changed elsewhere', () => {
+		const state = editing(`${FRONTMATTER}First\n\nSecond\n\nThird\n\n- [ ] a\n`);
+		state.openListNote({ start: 5, end: 6 }, false);
+		typeEach((v) => state.typeListNote(v), ['Secon', '']);
+		expect(state.text).toBe(`${FRONTMATTER}First\n\nThird\n\n- [ ] a\n`);
+		state.outsideChange(`${FRONTMATTER}First\n\nThird edited\n\n- [ ] a\n`);
+		state.typeListNote('Second');
+		expect(state.text).toBe(`${FRONTMATTER}First\n\nSecond\n\nThird edited\n\n- [ ] a\n`);
+	});
+
+	test('the first block of the note takes the blank line under it when another block follows, and typing puts it back', () => {
+		const state = editing(`${FRONTMATTER}First\n\nSecond\n\n- [ ] a\n`);
+		state.openListNote({ start: 3, end: 4 }, false);
+		typeEach((v) => state.typeListNote(v), ['Firs', '']);
+		expect(state.text).toBe(`${FRONTMATTER}Second\n\n- [ ] a\n`);
+		state.outsideChange(`${FRONTMATTER}Second edited\n\n- [ ] a\n`);
+		typeEach((v) => state.typeListNote(v), ['F', 'First']);
+		expect(state.text).toBe(`${FRONTMATTER}First\n\nSecond edited\n\n- [ ] a\n`);
+	});
+
+	test('the last block of the note keeps the blank line above the first item it wrote when it is erased', () => {
+		const state = editing(`${FRONTMATTER}First\n\nSecond\n- [ ] a\n`);
+		state.openListNote({ start: 5, end: 6 }, false);
+		state.typeListNote('Second!');
+		expect(state.text).toBe(`${FRONTMATTER}First\n\nSecond!\n\n- [ ] a\n`);
+		state.typeListNote('');
+		expect(state.text).toBe(`${FRONTMATTER}First\n\n- [ ] a\n`);
+		state.typeListNote('Second');
+		expect(state.text).toBe(`${FRONTMATTER}First\n\nSecond\n\n- [ ] a\n`);
+	});
+
 	test('an item added at the top elsewhere stays after the note being typed', () => {
 		const state = editing(`${FRONTMATTER}- [ ] a\n`);
 		state.openListNote({ start: 3, end: 3 }, false);

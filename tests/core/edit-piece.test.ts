@@ -30,6 +30,30 @@ describe('setNotesPiece', () => {
 		expect(erased.piece.range).toEqual({ start: 6, end: 6 });
 	});
 
+	test('takes one empty line with an erased block, and puts it back when typing returns', () => {
+		const notes = (...blocks: string[]) => `${FRONTMATTER}- [ ] a\n\n${blocks.map((block) => `\t${block}`).join('\n\n')}\n- [ ] b\n`;
+		const erase = (blocks: string[], i: number) => {
+			const start = 5 + 2 * i;
+			return save(notes(...blocks), { range: { start, end: start + 1 }, indent: '\t', separator: false }, '');
+		};
+
+		const middle = erase(['Alpha', 'Beta', 'Gamma'], 1);
+		expect(middle.text).toBe(notes('Alpha', 'Gamma'));
+		expect(save(middle.text, middle.piece, 'Beta').text).toBe(notes('Alpha', 'Beta', 'Gamma'));
+
+		expect(erase(['Alpha', 'Beta'], 1).text).toBe(notes('Alpha'));
+		const first = erase(['Alpha', 'Beta'], 0);
+		expect(first.text).toBe(notes('Beta'));
+		expect(save(first.text, first.piece, 'Alpha').text).toBe(notes('Alpha', 'Beta'));
+		expect(erase(['Alpha'], 0).text).toBe(`${FRONTMATTER}- [ ] a\n- [ ] b\n`);
+	});
+
+	test('keeps the empty line above an erased block that another block follows directly', () => {
+		const text = `${FRONTMATTER}- [ ] a\n\n\tAlpha\n\n\tBeta\n\t- x\n- [ ] b\n`;
+		const result = save(text, { range: { start: 7, end: 8 }, indent: '\t', separator: false }, '');
+		expect(result.text).toBe(`${FRONTMATTER}- [ ] a\n\n\tAlpha\n\n\t- x\n- [ ] b\n`);
+	});
+
 	test('puts a new item after a nested one on the next line, with no empty line', () => {
 		const text = `${FRONTMATTER}- [ ] a\n\t- x\n- [ ] b\n`;
 		const result = save(text, { range: { start: 5, end: 5 }, indent: '\t', separator: false }, '- y');
