@@ -16,7 +16,7 @@ Make a list from the ribbon, a folder, or a note you already have.
 
 | Click the list icon in the ribbon | Right-click a folder in the sidebar | Right-click a note to turn it into a list |
 | --- | --- | --- |
-| <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.png" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.png" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.png" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
+| <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.webp" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.webp" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.webp" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
 Ticked items hide after a day. Show archived brings them back, with blue checkboxes.
 
@@ -24,7 +24,7 @@ Ticked items hide after a day. Show archived brings them back, with blue checkbo
 
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 
-<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.png" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the line being edited" width="520">
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.webp" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the line being edited" width="520">
 
 The Schedule shows the dated items from all your lists.
 
@@ -42,7 +42,7 @@ You can embed lists in normal notes.
 ```
 ````
 
-<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.png" alt="An ordinary note with a paragraph above and below the Hardware store list, shown with its checkboxes, a star and a New item button" width="540">
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.webp" alt="An ordinary note with a paragraph above and below the Hardware store list, shown with its checkboxes, a star and a New item button" width="540">
 
 ## Full feature list
 
