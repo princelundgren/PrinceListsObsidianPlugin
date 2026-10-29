@@ -166,6 +166,7 @@ test('reports a raw link to this repo\'s main whose file is missing, in Markdown
 			`![gone](${raw}/main/docs/old.png) | <img src="${raw}/main/docs/c.webp"> |`,
 			`![ok](${upperRaw}/main/docs/my%20pic.png) ![bad](${raw}/main/x%E0%A4%A.png)`,
 			`![other branch](${raw}/a-branch/NOPE.png) ![other repo](https://raw.githubusercontent.com/someone/else/main/x.png)`,
+			`![not main](${raw}/Main/NOPE.png) See ${raw}/main/docs/a.gif, then ${raw}/main/README.md.`,
 			`\`${raw}/main/NOPE.md\``,
 			'```',
 			`${raw}/main/IN-A-FENCE.md`,

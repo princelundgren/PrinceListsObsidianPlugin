@@ -204,14 +204,18 @@ export function checkLinks(docs, files) {
 	return findings;
 }
 
-const RAW_LINK = /https:\/\/raw\.githubusercontent\.com\/princelundgren\/PrinceListsObsidianPlugin\/(?:refs\/heads\/)?main\/([^\s"'<>)?#]+)/gi;
+// Owner and repo match in any case, as GitHub serves them; checkRawLinks checks the branch exactly.
+const RAW_LINK = /https:\/\/raw\.githubusercontent\.com\/princelundgren\/PrinceListsObsidianPlugin\/((?:refs\/heads\/)?main)\/([^\s"'<>)?#]*[^\s"'<>)?#.,;:!])/gi;
 
 // Reports raw.githubusercontent.com links to this repo's main whose file isn't in files; checkLinks skips URLs.
 export function checkRawLinks(docs, files) {
 	const findings = [];
 	for (const [path, text] of docs) {
 		for (const [index, line] of proseLines(text)) {
-			for (const [url, encoded] of withoutCodeSpans(line).matchAll(RAW_LINK)) {
+			for (const [url, branch, encoded] of withoutCodeSpans(line).matchAll(RAW_LINK)) {
+				if (branch !== 'main' && branch !== 'refs/heads/main') {
+					continue;
+				}
 				const report = (problem) => findings.push(finding(path, index + 1, `broken link "${url}": ${problem}`));
 				let target;
 				try {
