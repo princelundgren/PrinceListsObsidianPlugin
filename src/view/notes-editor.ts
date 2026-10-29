@@ -107,7 +107,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 					// Elsewhere on a drawn block, the caret goes to its start, which shows its Markdown.
 					mousedown: (evt, editor) => {
 						const target = targetOf(evt);
-						if (target?.closest(`a, button, ${NOTES_DRAWN_CHECKBOX_SELECTOR}`)) {
+						if (target?.closest(`a, .${NOTES_BLOCK_CLASS} button, ${NOTES_DRAWN_CHECKBOX_SELECTOR}`)) {
 							evt.preventDefault();
 							return true;
 						}
