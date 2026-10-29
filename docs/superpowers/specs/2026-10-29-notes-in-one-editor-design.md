@@ -177,7 +177,9 @@ Compared with Obsidian's own editor side by side on desktop:
 
 - **Step one's "Pictures show at once" and "Where the links go" hold,** with the block the caret is
   in as the open block: the links go in a block of their own after it, or after its whole list,
-  drawn at once, and the caret moves to an empty line below them. On an empty line between blocks,
+  drawn at once, and the caret moves to an empty line below them. Text typed there joins the
+  picture's paragraph, as in Live Preview, not a new block of its own as in step one **(owner,
+  2026-10-29)**. On an empty line between blocks,
   they take its place, as they take an empty new block's. A picture dropped on the notes goes after
   the block it's dropped on **(call)**.
 - **The picture menu's Remove image and Delete image** show for every picture the editor draws,
