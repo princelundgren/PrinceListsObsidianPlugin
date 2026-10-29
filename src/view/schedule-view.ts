@@ -5,7 +5,7 @@ import { isMarkerValue } from '../core/frontmatter';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
-import { groupSchedule, scheduledItems, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
+import { datedItems, groupSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import { dayOf } from '../core/when';
 import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine } from '../obsidian/marker';
@@ -40,9 +40,12 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	// Ticks run in turn, so each is worked out on the text the one before it wrote.
 	private readonly enqueue = serialQueue((error) => console.error(error));
 	// Paths an event updated while a refresh was reading, which its older reads must not overwrite.
-	private readonly updatedPaths = new Set<string>();
+	// null while no refresh is reading.
+	private updatedPaths: Set<string> | null = null;
 	private refreshes = 0;
 	private blocks: Component[] = [];
+	// Today and the groups as drawn last. Every field counts: the rows keep these items, and ticks use their lines.
+	private drawn: string | null = null;
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
 
@@ -73,18 +76,27 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	}
 
 	async onClose(): Promise<void> {
+		// A refresh still reading draws nothing once it finishes.
+		this.refreshes++;
+		this.drawn = null;
+		this.lists.clear();
 		this.removeBlocks();
 	}
 
 	async refresh(): Promise<void> {
 		const refresh = ++this.refreshes;
-		this.updatedPaths.clear();
+		const updatedPaths = new Set<string>();
+		this.updatedPaths = updatedPaths;
 		const { vault, metadataCache } = this.app;
 		const files = vault.getMarkdownFiles().filter((file) => isList(metadataCache.getFileCache(file)));
-		const read = await Promise.all(files.map(async (file) => [file.path, readList(file, await vault.cachedRead(file))] as const));
+		// The events keep a held list current.
+		const read = await Promise.all(
+			files.map(async (file) => [file.path, this.lists.get(file.path) ?? readList(file, await vault.cachedRead(file))] as const),
+		);
 		if (refresh !== this.refreshes) return;
-		const lists = new Map(read.filter(([path]) => !this.updatedPaths.has(path)));
-		for (const path of this.updatedPaths) {
+		this.updatedPaths = null;
+		const lists = new Map(read.filter(([path]) => !updatedPaths.has(path)));
+		for (const path of updatedPaths) {
 			const list = this.lists.get(path);
 			if (list) lists.set(path, list);
 		}
@@ -98,13 +110,13 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	}
 
 	private listRead(file: TFile, text: string): void {
-		this.updatedPaths.add(file.path);
+		this.updatedPaths?.add(file.path);
 		this.lists.set(file.path, readList(file, text));
 		this.draw();
 	}
 
 	private async listRenamed(file: TAbstractFile, oldPath: string): Promise<void> {
-		this.updatedPaths.add(oldPath).add(file.path);
+		this.updatedPaths?.add(oldPath).add(file.path);
 		const wasList = this.lists.delete(oldPath);
 		if (file instanceof TFile && isList(this.app.metadataCache.getFileCache(file))) {
 			this.lists.set(file.path, readList(file, await this.app.vault.cachedRead(file)));
@@ -115,7 +127,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	}
 
 	private listDeleted(path: string): void {
-		this.updatedPaths.add(path);
+		this.updatedPaths?.add(path);
 		if (this.lists.delete(path)) this.draw();
 	}
 
@@ -171,14 +183,18 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	}
 
 	private draw(): void {
+		const now = new Date();
+		const today = dayOf(now);
+		const groups = groupSchedule([...this.lists.values()].flatMap((list) => unarchived(list.items, now)), today);
+		const drawn = JSON.stringify([today, groups]);
+		if (drawn === this.drawn) return;
+		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;
 		this.removeBlocks();
 		this.scrollEl.empty();
 		const sizer = this.scrollEl.createDiv({ cls: 'princelists-sizer' });
 		sizer.createDiv({ cls: 'princelists-schedule-title', text: 'Schedule', attr: { role: 'heading', 'aria-level': 1 } });
 		sizer.createDiv({ cls: 'princelists-schedule-about', text: SCHEDULE_ABOUT });
-		const today = dayOf(new Date());
-		const groups = groupSchedule([...this.lists.values()].flatMap((list) => list.items), today);
 		if (groups.length === 0) sizer.createDiv({ cls: 'princelists-schedule-empty', text: 'No items have a date.' });
 		for (const { group, items } of groups) {
 			sizer.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
@@ -216,5 +232,5 @@ function isList(cache: CachedMetadata | null): boolean {
 }
 
 function readList(file: TFile, text: string): ReadList {
-	return { text, items: scheduledItems(text, contentStartLine(text), new Date(), { path: file.path, name: file.basename }) };
+	return { text, items: datedItems(text, contentStartLine(text), { path: file.path, name: file.basename }) };
 }

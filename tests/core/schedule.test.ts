@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { groupSchedule, scheduleGroup, scheduledItems, type ScheduledItem } from '../../src/core/schedule';
+import { datedItems, groupSchedule, scheduleGroup, unarchived, type ScheduledItem } from '../../src/core/schedule';
 
 const now = new Date(2026, 9, 27, 12, 0);
 const list = { path: 'Lists/Home.md', name: 'Home' };
 
-describe('scheduledItems', () => {
-	test('keeps open items with a When and done ones not yet archived, across sections', () => {
+describe('datedItems and unarchived', () => {
+	test('keep open items with a When and done ones not yet archived, across sections', () => {
 		const text = [
 			'---',
 			'princelists: true',
@@ -21,13 +21,42 @@ describe('scheduledItems', () => {
 			'- [ ] under a heading ⭐ ⏳ 2026-11-02',
 			'',
 		].join('\n');
-		const items = scheduledItems(text, 3, now, list);
+		const items = unarchived(datedItems(text, 3, list), now);
 		expect(items.map(({ title, titleLine, day, done, starred, order }) => ({ title, titleLine, day, done, starred, order }))).toEqual([
 			{ title: 'open', titleLine: 3, day: '2026-10-28', done: false, starred: false, order: 0 },
 			{ title: 'ticked today', titleLine: 5, day: '2026-10-27', done: true, starred: false, order: 2 },
 			{ title: 'under a heading', titleLine: 11, day: '2026-11-02', done: false, starred: true, order: 4 },
 		]);
 		expect(items[0]).toMatchObject({ listPath: 'Lists/Home.md', listName: 'Home', line: '- [ ] open ⏳ 2026-10-28' });
+	});
+});
+
+describe('unarchived', () => {
+	// A tick more than a day ahead counts as done long ago, and from its time once it is less than a day ahead.
+	const text = [
+		'---',
+		'princelists: true',
+		'---',
+		'- [x] ticked ✔ 2026-10-27 11:00 ⏳ 2026-10-27',
+		'- [x] ahead ✔ 2026-10-30 12:00 ⏳ 2026-10-27',
+		'- [ ] open ⏳ 2026-10-28',
+		'',
+	].join('\n');
+	const items = datedItems(text, 3, list);
+	const titles = (at: Date) => unarchived(items, at).map((item) => item.title);
+
+	test.each([
+		[new Date(2026, 9, 27, 12, 0), ['ticked', 'open']],
+		[new Date(2026, 9, 28, 10, 59), ['ticked', 'open']],
+		[new Date(2026, 9, 28, 11, 0), ['open']],
+		[new Date(2026, 9, 29, 13, 0), ['ahead', 'open']],
+	])('at %s, keeps what a list read then shows', (at, shown) => {
+		expect(titles(at)).toEqual(shown);
+	});
+
+	test('brings an item back when the clock moves back', () => {
+		expect(titles(new Date(2026, 9, 28, 11, 30))).toEqual(['open']);
+		expect(titles(new Date(2026, 9, 28, 10, 30))).toEqual(['ticked', 'open']);
 	});
 });
 

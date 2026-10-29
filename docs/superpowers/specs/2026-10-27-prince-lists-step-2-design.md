@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-28
+verified: 2026-10-29
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -187,10 +187,10 @@ current todo app. Step one's own "Done when" doesn't change.
 - **Writes go to the list's file** through the same guarded edits. An open list view of that file
   follows them as a change from outside **(call)**. Cmd+Z doesn't step through edits made in a
   block **(call)**.
-- **It redraws when the list file changes.** Its listeners belong to a `MarkdownRenderChild`, so
-  they go when the block does. The metadata cache reports each of the block's own writes, sometimes
-  only after a later one has landed; a late report is the block's own write, not a change from
-  outside.
+- **It follows changes to the list file,** and draws again only when they change its rows. Its
+  listeners belong to a `MarkdownRenderChild`, so they go when the block does. The metadata cache
+  reports each of the block's own writes, sometimes only after a later one has landed; a late report
+  is the block's own write, not a change from outside.
 - **A link to no file, or to a note without the marker,** shows a gray line saying so, naming the
   link. So does a block that names the note it's in **(call)**: that note may be open in an editor
   with typing not yet saved. A note from outside the vault can't be linked, so it can't be shown
@@ -262,8 +262,10 @@ current todo app. Step one's own "Done when" doesn't change.
   a tab whose list view already shows that list, else in a new tab. The card opens only while the
   item's line still reads as the view showed it, so an edit since then opens the list with no card.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
-  metadata cache's `changed` event and the vault's `rename` and `delete`. Like a list, it runs no
-  timer, so a view left open over midnight moves its items when it next gets focus.
+  metadata cache's `changed` event and the vault's `rename` and `delete`. Those keep the lists it
+  has read current, so focus reads only lists it doesn't hold yet, and it draws again only when
+  today or its rows change. Like a list, it runs no timer, so a view left open over midnight moves
+  its items when it next gets focus.
 - **Lists are found** by the marker in the metadata cache's frontmatter, and read with
   `vault.cachedRead`. Notes outside the vault aren't included.
 
