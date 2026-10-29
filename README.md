@@ -22,7 +22,7 @@ Ticked items hide after a day. **Show archived** brings them back, with blue che
 
 ![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
 
-Powerful notes, with a toolbar for formatting.
+Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.png" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the line being edited" width="520">
 
