@@ -122,8 +122,8 @@ export function renderList(
 		if (section.heading) {
 			placeCard(section.heading.line, false);
 			if (!placeField(section.heading.line, true)) {
-				const { line, ...shown } = section.heading;
-				const key = JSON.stringify(['heading', sourcePath, shown, section.collapsed]);
+				const { line, ...headingShown } = section.heading;
+				const key = JSON.stringify(['heading', sourcePath, headingShown, section.collapsed]);
 				let headingEl = drawn.get(key)?.shift();
 				if (headingEl) {
 					setLine(headingEl, line);
