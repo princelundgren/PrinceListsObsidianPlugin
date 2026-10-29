@@ -354,6 +354,17 @@ textarea.princelists-title {
 	vertical-align: middle;
 }
 
+.princelists-notes-codemirror .task-list-item-checkbox {
+	margin-inline-start: var(--checkbox-margin-inline-start);
+	margin-inline-end: 0.25em;
+	vertical-align: middle;
+}
+
+.princelists-notes-codemirror .princelists-notes-done {
+	text-decoration: var(--checklist-done-decoration);
+	color: var(--checklist-done-color);
+}
+
 .princelists-notes-picture {
 	max-width: 100%;
 	vertical-align: bottom;

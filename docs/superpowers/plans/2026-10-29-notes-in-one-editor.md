@@ -399,7 +399,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 
 **Files:**
 - Modify: `src/core/checklist.ts`, `tests/core/checklist.test.ts`, `src/view/notes-drawing.ts`,
-  `src/view/notes-editor.ts`, `src/view/checklist.ts`, `src/view/events.ts`
+  `src/view/notes-widgets.ts`, `src/view/notes-editor.ts`, `src/view/notes.ts`,
+  `src/view/checklist.ts`, `src/view/events.ts`, `styles.css`
 
 **Interfaces:**
 - Consumes: Task 3's drawing.
@@ -412,9 +413,15 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - The editor's `domEventHandlers` handle every box it draws, Task 5's disabled ones included;
   `events.ts`'s `.task-list-item-checkbox` handling and `keepNotesFocused` leave boxes inside the
   editor to it, so a click ticks once.
-- A `TaskMarker` outside a big block draws as a checkbox widget that knows its editor line. Its
-  mousedown is prevented, so it never takes focus. A click with focus is the editor's own change, in
-  its history. A click without focus writes through `planNotesLineTick` as `checklistClick` writes:
+- A `TaskMarker` outside a big block draws as a checkbox widget, Obsidian's
+  `task-list-item-checkbox`, in place of the `[ ]` and a bullet's mark, unless the selection
+  touches them; a ticked line is struck through with Obsidian's `--checklist-done-*` variables. A
+  line that `parseItemLine` doesn't read, such as one in a quote, shows as typed. The editor finds a
+  box's line with `posAtDOM`, as CodeMirror's own checkbox example does, and the widget's
+  `ignoreEvent` lets its clicks through to the editor's handlers. Its mousedown is prevented, so it
+  never takes focus. A click during a visit, as with focus, is the editor's own change, in its
+  history: it changes only the status character, at `checklistStatusAt`, so the caret stays. A
+  click outside one writes through `planNotesLineTick` as `checklistClick` writes:
   queued with the item's tracked line, and refused with `CHANGED_ELSEWHERE_NOTICE` when an outside
   change came between. The sync after it clears the editor's history.
 

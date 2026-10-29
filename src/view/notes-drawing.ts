@@ -3,11 +3,12 @@ import type { EditorState, Extension, Range, SelectionRange } from '@codemirror/
 import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate, type WidgetType } from '@codemirror/view';
 import type { SyntaxNode } from '@lezer/common';
 import { isWebAddress, linkTarget, pictureLook } from '../core/drawn-links';
+import { parseItemLine } from '../core/item-line';
 import { pictureLinks } from '../core/picture-links';
 import { wikiLinks } from '../core/wiki-links';
 import type { PrinceListView } from './list-view';
 import { notesLinks, type NotesLinks } from './notes-links';
-import { BulletWidget, RuleWidget } from './notes-widgets';
+import { BulletWidget, CheckboxWidget, RuleWidget } from './notes-widgets';
 
 const HIDDEN = Decoration.replace({});
 const FAINT = Decoration.mark({ class: 'princelists-notes-markup' });
@@ -169,8 +170,7 @@ function drawNode(drawing: Drawing, node: SyntaxNode, links: NotesLinks): boolea
 			drawUnderline(drawing, node);
 			return false;
 		case 'ListMark':
-			if (node.parent?.parent?.name !== 'BulletList') drawing.add(LIST_NUMBER, node.from, node.to);
-			else if (!drawing.touches(node.from, node.to)) drawing.add(Decoration.replace({ widget: new BulletWidget() }), node.from, node.to);
+			drawListMark(drawing, node);
 			return false;
 		case 'Blockquote':
 			drawing.lineClass(node.from, node.to, 'princelists-notes-quote');
@@ -199,6 +199,27 @@ function drawHeadingMarks(drawing: Drawing, heading: SyntaxNode): void {
 		if (mark.from === heading.from) drawing.markup(mark.from, spaceAfter(drawing.state, mark.to), isShown);
 		else drawing.markup(spaceBefore(drawing.state, mark.from), mark.to, isShown);
 	}
+}
+
+// A bullet, or a number, which stays. A checklist line's box takes the place of its `[ ]` and its
+// bullet, as in Live Preview.
+function drawListMark(drawing: Drawing, mark: SyntaxNode): void {
+	const isBullet = mark.parent?.parent?.name === 'BulletList';
+	if (!isBullet) drawing.add(LIST_NUMBER, mark.from, mark.to);
+	const marker = mark.nextSibling?.name === 'Task' ? mark.nextSibling.getChild('TaskMarker') : null;
+	if (marker) drawCheckbox(drawing, isBullet ? mark.from : marker.from, marker);
+	else if (isBullet && !drawing.touches(mark.from, mark.to)) drawing.add(Decoration.replace({ widget: new BulletWidget() }), mark.from, mark.to);
+}
+
+// The box from `from` to the end of `marker`, shown as typed while the selection touches it, and a
+// ticked line's text struck through. A box the plugin can't tick shows as typed, as Live Preview
+// shows one in a quote.
+function drawCheckbox(drawing: Drawing, from: number, marker: SyntaxNode): void {
+	const { state } = drawing;
+	if (!parseItemLine(state.doc.lineAt(marker.from).text)) return;
+	const isTicked = state.sliceDoc(marker.from + 1, marker.from + 2) !== ' ';
+	if (isTicked) drawing.lineClass(marker.from, marker.from, 'princelists-notes-done');
+	if (!drawing.touches(from, marker.to)) drawing.add(Decoration.replace({ widget: new CheckboxWidget(isTicked) }), from, marker.to);
 }
 
 // `[text](address)`, which shows its text; a reference link, with no address, shows as typed.

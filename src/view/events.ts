@@ -27,6 +27,7 @@ import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from '
 import { openPieceAt, pieceBlur, pieceInput } from './note-piece-field';
 import { pieceBeforeInput, pieceKeyDown } from './note-piece-keys';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
+import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
 import { notesHostOf } from './notes-host';
 import { runNotesBarAction } from './notes-keys';
 import { showPictureMenu } from './picture-menu';
@@ -91,6 +92,8 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	const notesBox = target.closest<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR);
+	// The notes editor ticks the boxes it draws.
+	if (notesBox?.closest(`.${NOTES_CODEMIRROR_CLASS}`)) return;
 	if (notesBox) {
 		const host = notesHostOf(view, notesBox);
 		if (host) checklistClick(view, host, notesBox, evt);
@@ -142,7 +145,8 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 // list note would take focus from the open piece's field, which closes it.
 function keepNotesFocused(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
-	const isNotesBox = !!target?.closest(NOTES_CHECKBOX_SELECTOR) && (!!view.card?.el.contains(target) || notesHostOf(view, target) !== null);
+	const box = target?.closest(NOTES_CHECKBOX_SELECTOR);
+	const isNotesBox = !!box && !box.closest(`.${NOTES_CODEMIRROR_CLASS}`) && (!!view.card?.el.contains(box) || notesHostOf(view, box) !== null);
 	if (isNotesBox || target?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
 }
 

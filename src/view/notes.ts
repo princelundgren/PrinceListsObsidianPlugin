@@ -3,7 +3,8 @@ import { isWebAddress } from '../core/drawn-links';
 import { asInline, needsMarkdown } from '../core/inline';
 
 const INTERNAL_LINK = 'a.internal-link';
-export const NOTES_CHECKBOX_SELECTOR = '.task-list-item-checkbox';
+export const NOTES_CHECKBOX_CLASS = 'task-list-item-checkbox';
+export const NOTES_CHECKBOX_SELECTOR = `.${NOTES_CHECKBOX_CLASS}`;
 
 // What rendering Markdown needs: the app, and a component that each rendered block becomes a child of.
 export interface MarkdownHost {
