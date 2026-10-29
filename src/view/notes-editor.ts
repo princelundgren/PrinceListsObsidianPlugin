@@ -112,8 +112,9 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 							return true;
 						}
 						const block = target?.closest(`.${NOTES_BLOCK_CLASS}`);
-						// Only the main button, as CodeMirror's own mouse selection.
-						if (!block || evt.button !== 0) return false;
+						// A plain press of the main button only: Shift extends the selection and Mod adds a cursor, as
+						// anywhere in the editor.
+						if (!block || evt.button !== 0 || evt.shiftKey || evt.ctrlKey || evt.metaKey || evt.altKey) return false;
 						evt.preventDefault();
 						editor.dispatch({ selection: { anchor: editor.posAtDOM(block) } });
 						editor.focus();

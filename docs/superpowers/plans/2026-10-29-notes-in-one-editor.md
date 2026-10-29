@@ -473,7 +473,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     the renderer draws, such as a code block's copy button, the button works.
   - CodeMirror's vertical motion passes a block widget by, so ArrowDown and ArrowUp, with one empty
     cursor, run `moveVertically` and stop at the start or end of a drawn block it would pass,
-    keeping its goal column. A mousedown shows a block's Markdown only with the main button.
+    keeping its goal column. A mousedown shows a block's Markdown only with the main button and no
+    modifier; a modified one is CodeMirror's, so Shift extends the selection.
   - Its boxes draw disabled (owner): step two's count can't line one up with its line, since it
     doesn't read list items behind `>`, and tables, code, math, HTML and another note's embed hold
     no checklist line of these notes. A click on one shows the block's Markdown, where `[ ]` can be

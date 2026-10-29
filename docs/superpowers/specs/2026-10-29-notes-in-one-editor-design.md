@@ -73,7 +73,8 @@ Compared with Obsidian's own editor side by side on desktop:
   the whole block shows its Markdown.
   - The widgets come from a `StateField`: CodeMirror takes block decorations only from state, not
     from a view plugin.
-  - A click on a drawn block puts the caret at the start of its first line **(call)**. A link in
+  - A click on a drawn block puts the caret at the start of its first line **(call)**; with Shift or
+    another modifier held, it selects as anywhere in the editor. A link in
     it opens, and a button the renderer draws, such as a code block's copy button, works as in a
     note.
   - Up and Down onto a drawn block stop at its start or end, as Live Preview's arrow keys enter a
