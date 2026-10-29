@@ -1,4 +1,4 @@
-import { blockKey, blockKeys, replaceRun, sameBlocks } from './edit-check';
+import { blockKey, blockKeys, modelBlockKeys, replaceRun, sameBlocks } from './edit-check';
 import { gapEnd, hasLineBreak, isBlankAt } from './edit-lines';
 import { dominantEol, spliceLines, type Line } from './lines';
 import type { ItemBlock, ListModel, Section } from './parse';
@@ -58,7 +58,7 @@ export function setHeadingText(
 
 function findHeading(lines: readonly Line[], model: ListModel, section: Section) {
 	const at = section.headingLine;
-	const blocks = blockKeys(lines, model.contentStart);
+	const blocks = modelBlockKeys(lines, model);
 	const heading = blocks.find((b) => at !== null && b.start <= at && at < b.end);
 	if (at === null || heading?.type !== 'heading') throw new Error('The section has no heading here; parse the lines again');
 	return { at, heading, blocks };

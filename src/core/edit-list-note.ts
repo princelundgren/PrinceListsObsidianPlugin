@@ -1,4 +1,4 @@
-import { blockKeys, replaceRun } from './edit-check';
+import { blockKeys, modelBlockKeys, replaceRun } from './edit-check';
 import { isBlankAt, typedLines, withoutSeparatorLine } from './edit-lines';
 import type { PieceSession } from './edit-piece';
 import { dominantEol, spliceLines, splitLines, type Line } from './lines';
@@ -46,7 +46,7 @@ export function setListNotePiece(
 		return { lines: spliceLines(lines, save.from, save.to - save.from, save.run), piece: next, note };
 	}
 	const noteEnd = model.listNote.start + save.noteBefore.length;
-	const noteBlocks = blockKeys(lines, model.contentStart).filter((b) => b.start >= model.listNote.start && b.end <= noteEnd);
+	const noteBlocks = modelBlockKeys(lines, model).filter((b) => b.start >= model.listNote.start && b.end <= noteEnd);
 	const edited = replaceRun(lines, model, save.from, save.to, save.run, {
 		removed: noteBlocks.map((b) => b.key),
 		added: blockKeys(save.noteAfter, 0).map((b) => b.key),

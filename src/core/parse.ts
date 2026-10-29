@@ -36,6 +36,8 @@ export interface ListModel {
 	listNote: { start: number; end: number };
 	sections: Section[];
 	untouched: { start: number; end: number }[];
+	/** The top-level blocks it was read from, so an edit's check needn't parse the same lines again. */
+	blocks: Block[];
 }
 
 // CommonMark's fence lines. A backtick fence's info string can't hold a backtick.
@@ -98,7 +100,8 @@ export function parseList(lines: readonly Line[], contentStart: number): ListMod
 	let firstHeadingOrItem: number | null = null;
 	let covered = contentStart;
 
-	for (const block of topLevelBlocks(lines, contentStart)) {
+	const blocks = topLevelBlocks(lines, contentStart);
+	for (const block of blocks) {
 		const { type, end } = block;
 		const start = type === 'heading' ? headingContentStart(lines, block.start, end) : block.start;
 		// Non-blank lines no node covers, such as link reference definitions that commonmark drops from
@@ -124,7 +127,7 @@ export function parseList(lines: readonly Line[], contentStart: number): ListMod
 		section.endLine = trimBlankEnd(lines, section.headingLine ?? contentStart, next);
 	});
 	const listNoteEnd = trimBlankEnd(lines, contentStart, firstHeadingOrItem ?? lines.length);
-	return { contentStart, listNote: { start: contentStart, end: listNoteEnd }, sections, untouched };
+	return { contentStart, listNote: { start: contentStart, end: listNoteEnd }, sections, untouched, blocks };
 }
 
 // Obsidian's %% comments and $$ math aren't CommonMark, so a checkbox line inside one would parse as
