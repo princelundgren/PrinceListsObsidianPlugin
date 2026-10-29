@@ -484,8 +484,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   `read` through `getListNote` from the list note's first line with text, as Task 1's
   `openNotes('listNote')` starts, `open` through `openNotes('listNote')` and `save` through
   `saveListNote`: it checks `warnListNote` on the returned `note`, the whole note as saved, as
-  `fields.ts` does for a piece, and returns the result as `Typed` without its `note`. Leaving the note still draws the whole list again when it warned or rows were held back,
-  as `closeListNote` in `fields.ts` does now, alongside the sync on blur.
+  `fields.ts` does for a piece, and returns the result as `Typed` without its `note`. Leaving the
+  note still draws the whole list again when it warned or rows were held back, as `closeListNote`
+  in `fields.ts` does now, alongside the sync on blur.
 - `buildListNote` and `refreshListNote` show the list note's editor with `showNotesEditor`; the
   view keeps it in place of `listNoteNotes` and destroys it in `onClose` and when the note stops
   being a list.
