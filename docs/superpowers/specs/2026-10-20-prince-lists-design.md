@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-29
+verified: 2026-10-28
 governs: [src/**, styles.css, manifest.json]
 ---
 
