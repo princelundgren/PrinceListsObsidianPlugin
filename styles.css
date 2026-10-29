@@ -359,6 +359,16 @@ textarea.princelists-title {
 	vertical-align: bottom;
 }
 
+.princelists-notes-web-picture > p {
+	display: inline;
+	margin: 0;
+}
+
+.princelists-notes-web-picture img {
+	max-width: 100%;
+	vertical-align: bottom;
+}
+
 .princelists-notes-codemirror .princelists-notes-h1 {
 	font-family: var(--h1-font);
 	font-size: var(--h1-size);

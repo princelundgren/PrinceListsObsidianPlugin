@@ -1,5 +1,8 @@
 import { WidgetType } from '@codemirror/view';
+import type { Component } from 'obsidian';
 import type { PictureLook } from '../core/drawn-links';
+import type { PrinceListView } from './list-view';
+import { renderNotes } from './notes';
 
 /** A list item's `-`, `*` or `+`, drawn as a bullet. */
 export class BulletWidget extends WidgetType {
@@ -45,3 +48,32 @@ export class PictureWidget extends WidgetType {
 		return img;
 	}
 }
+
+/** A picture from the web, drawn from its Markdown by Obsidian's renderer, as in a note. */
+export class WebPictureWidget extends WidgetType {
+	constructor(
+		readonly markdown: string,
+		private readonly view: PrinceListView,
+		private readonly sourcePath: string,
+	) {
+		super();
+	}
+
+	eq(other: WebPictureWidget): boolean {
+		return other.markdown === this.markdown;
+	}
+
+	toDOM(): HTMLElement {
+		const el = createSpan({ cls: 'princelists-notes-web-picture' });
+		renderedPictures.set(el, renderNotes(this.view, this.sourcePath, el, this.markdown));
+		return el;
+	}
+
+	destroy(dom: HTMLElement): void {
+		const component = renderedPictures.get(dom);
+		if (component) this.view.removeChild(component);
+	}
+}
+
+// By element, since CodeMirror keeps the element of a widget that an equal one replaces.
+const renderedPictures = new WeakMap<HTMLElement, Component>();

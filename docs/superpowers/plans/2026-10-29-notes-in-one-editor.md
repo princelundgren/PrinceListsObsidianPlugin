@@ -335,9 +335,10 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 
 **Files:**
 - Create: `src/core/wiki-links.ts`, `tests/core/wiki-links.test.ts`, `src/view/notes-drawing.ts`,
-  `src/view/notes-widgets.ts` (the bullet, rule and picture widgets), and `src/core/drawn-links.ts`
-  with `tests/core/drawn-links.test.ts` (`linkTarget` and `pictureLook`)
-- Modify: `src/view/notes-editor.ts`, `styles.css`
+  `src/view/notes-widgets.ts` (the bullet, rule and picture widgets), `src/view/notes-links.ts`
+  (what the drawing needs from Obsidian), and `src/core/drawn-links.ts` with
+  `tests/core/drawn-links.test.ts` (`linkTarget`, `isWebAddress` and `pictureLook`)
+- Modify: `src/view/notes-editor.ts`, `src/view/notes.ts`, `src/view/pictures.ts`, `styles.css`
 
 **Interfaces:**
 - Produces, in `src/core/wiki-links.ts`: `WikiLink { from: number; to: number; linkpath: string;
@@ -357,9 +358,13 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     code variables.
   - A picture (`Image`, or an embed whose path has a `PICTURE_EXTENSIONS` extension) is an `<img>`
     from `getFirstLinkpathDest` and `getResourcePath`; a link it can't find shows as typed. The
-    drawing finds pictures with `pictureLinks`, as the picture menu does, so a picture from the web
-    shows as typed. As in a note, a last `|` part such as `100` or `100x80` sets a picture's size and
-    the caption before it is its alt text; a wiki embed without one has its path as alt text. While
+    drawing finds pictures with `pictureLinks`, as the picture menu does. A picture from the web,
+    an `Image` whose address is http or https, is drawn by `MarkdownRenderer.render` from its
+    Markdown, as Task 5 draws blocks: the privacy rule lets Obsidian's renderer load it, as in any
+    note, and so is a web page it embeds, such as a video, which Obsidian's own styles fit to the
+    card. Its widget's `Component` is a child of the list view, removed in `destroy`. As in a note,
+    a last `|` part such as `100` or `100x80` sets a picture's size and the caption before it is its
+    alt text; a wiki embed without one has its path as alt text. While
     the selection touches a picture, its Markdown shows with the picture after it.
   - The parser reads `[[a]]` as a link in brackets and `![[a]]` as an image, so the drawing skips
     `Link` and `Image` nodes that overlap a wikilink. A link without an address, `[a]`, shows as

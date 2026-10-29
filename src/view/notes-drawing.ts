@@ -1,13 +1,13 @@
 import { syntaxTree } from '@codemirror/language';
 import type { EditorState, Extension, Range, SelectionRange } from '@codemirror/state';
-import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate } from '@codemirror/view';
+import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate, type WidgetType } from '@codemirror/view';
 import type { SyntaxNode } from '@lezer/common';
-import { getLinkpath, type App } from 'obsidian';
-import { linkTarget, pictureLook, type PictureLook } from '../core/drawn-links';
+import { isWebAddress, linkTarget, pictureLook } from '../core/drawn-links';
 import { pictureLinks } from '../core/picture-links';
 import { wikiLinks } from '../core/wiki-links';
 import type { PrinceListView } from './list-view';
-import { BulletWidget, PictureWidget, RuleWidget } from './notes-widgets';
+import { notesLinks, type NotesLinks } from './notes-links';
+import { BulletWidget, RuleWidget } from './notes-widgets';
 
 const HIDDEN = Decoration.replace({});
 const FAINT = Decoration.mark({ class: 'princelists-notes-markup' });
@@ -27,15 +27,15 @@ const CODE_NODES = new Set(['InlineCode', 'FencedCode', 'CodeBlock']);
  * their line. Without focus, nothing shows its Markdown. Links in `sourcePath` resolve as in that note.
  */
 export function notesDrawing(view: PrinceListView, sourcePath: string): Extension {
-	return ViewPlugin.define((editor) => new NotesDrawing(editor, view.app, sourcePath), { decorations: (drawing) => drawing.decorations });
+	return ViewPlugin.define((editor) => new NotesDrawing(editor, notesLinks(view, sourcePath)), { decorations: (drawing) => drawing.decorations });
 }
 
 class NotesDrawing {
 	decorations: DecorationSet;
-	private readonly links: LinkResolver;
-
-	constructor(editor: EditorView, app: App, sourcePath: string) {
-		this.links = vaultLinks(app, sourcePath);
+	constructor(
+		editor: EditorView,
+		private readonly links: NotesLinks,
+	) {
 		this.decorations = this.draw(editor);
 	}
 
@@ -55,32 +55,11 @@ class NotesDrawing {
 				// The parser reads `[[a]]` as a link in brackets: the wikilink drawing has it.
 				const isLinkNode = node.name === 'Link' || node.name === 'Image';
 				if (isLinkNode && wikiSpans.some((span) => node.from < span.to && node.to > span.from)) return false;
-				return drawNode(drawing, node.node);
+				return drawNode(drawing, node.node, this.links);
 			},
 		});
 		return Decoration.set(drawing.ranges, true);
 	}
-}
-
-// What the drawing needs from the vault.
-interface LinkResolver {
-	/** A picture's address in the vault, or null when no file has that path. */
-	picture(linkpath: string): string | null;
-	isResolved(linktext: string): boolean;
-}
-
-function vaultLinks(app: App, sourcePath: string): LinkResolver {
-	return {
-		picture: (linkpath) => {
-			const file = app.metadataCache.getFirstLinkpathDest(linkpath, sourcePath);
-			return file ? app.vault.getResourcePath(file) : null;
-		},
-		// A link to a heading in the same note, `[[#h]]`, has no path.
-		isResolved: (linktext) => {
-			const linkpath = getLinkpath(linktext);
-			return linkpath === '' || app.metadataCache.getFirstLinkpathDest(linkpath, sourcePath) !== null;
-		},
-	};
 }
 
 // The decorations so far, and what the selection shows as typed.
@@ -124,7 +103,7 @@ class Drawing {
 }
 
 // Wikilinks and pictures, which the parser doesn't know, line by line; returns the wikilinks' spans.
-function drawLineLinks(drawing: Drawing, from: number, to: number, links: LinkResolver): { from: number; to: number }[] {
+function drawLineLinks(drawing: Drawing, from: number, to: number, links: NotesLinks): { from: number; to: number }[] {
 	const { doc } = drawing.state;
 	const tree = syntaxTree(drawing.state);
 	const spans: { from: number; to: number }[] = [];
@@ -135,7 +114,7 @@ function drawLineLinks(drawing: Drawing, from: number, to: number, links: LinkRe
 		for (const picture of pictureLinks([line.text])) {
 			if (isCode(picture.from)) continue;
 			const look = pictureLook(line.text.slice(picture.from, picture.to));
-			drawPicture(drawing, line.from + picture.from, line.from + picture.to, links.picture(picture.linkpath), look);
+			drawPicture(drawing, line.from + picture.from, line.from + picture.to, links.picture(picture.linkpath, look));
 		}
 		for (const wiki of wikis) {
 			spans.push({ from: line.from + wiki.from, to: line.from + wiki.to });
@@ -160,7 +139,7 @@ function isInCode(node: SyntaxNode | null): boolean {
 }
 
 // Returns whether the parse inside the node is drawn too.
-function drawNode(drawing: Drawing, node: SyntaxNode): boolean {
+function drawNode(drawing: Drawing, node: SyntaxNode, links: NotesLinks): boolean {
 	const { name } = node;
 	if (name in INLINE) {
 		const { mark, look } = INLINE[name as keyof typeof INLINE];
@@ -184,7 +163,7 @@ function drawNode(drawing: Drawing, node: SyntaxNode): boolean {
 			drawAddress(drawing, node);
 			return false;
 		case 'Image':
-			// A picture from the vault was drawn with its line; one from the web shows as typed.
+			drawWebPicture(drawing, node, links);
 			return false;
 		case 'HTMLTag':
 			drawUnderline(drawing, node);
@@ -263,13 +242,23 @@ function linkLook(address: string): Decoration {
 	}
 }
 
-// A picture from the vault, which shows its Markdown before it while the selection touches it. One
-// with no file shows as typed.
-function drawPicture(drawing: Drawing, from: number, to: number, src: string | null, look: PictureLook): void {
-	if (src === null) return;
-	const widget = new PictureWidget(src, look);
+// A picture, which shows its Markdown before it while the selection touches it. One with no file
+// shows as typed.
+function drawPicture(drawing: Drawing, from: number, to: number, widget: WidgetType | null): void {
+	if (widget === null) return;
 	if (drawing.touches(from, to)) drawing.widget(Decoration.widget({ widget, side: 1 }), to);
 	else drawing.add(Decoration.replace({ widget }), from, to);
+}
+
+// `![…](https://…)`. One from the vault was drawn with its line, and one that spans lines shows as
+// typed, as a link does.
+function drawWebPicture(drawing: Drawing, node: SyntaxNode, links: NotesLinks): void {
+	const url = node.getChild('URL');
+	const { doc } = drawing.state;
+	if (!url || doc.lineAt(node.from).number !== doc.lineAt(node.to).number) return;
+	const target = linkTarget(drawing.state.sliceDoc(url.from, url.to));
+	if (target.kind !== 'web' || !isWebAddress(target.href)) return;
+	drawPicture(drawing, node.from, node.to, links.webPicture(drawing.state.sliceDoc(node.from, node.to)));
 }
 
 // `<u>…</u>` in one paragraph underlines what it holds.
