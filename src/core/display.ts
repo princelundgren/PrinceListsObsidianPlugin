@@ -110,12 +110,17 @@ export function withoutRange(sections: SectionRows[], range: { start: number; en
 }
 
 export function itemRow(text: string, titleLine: number, now: Date): ItemRow {
+	const row = timelessItemRow(text, titleLine);
+	return { ...row, archived: row.done && isArchived(text, now) };
+}
+
+/** The fields of an item's row that don't depend on the time: all but `archived`. */
+export function timelessItemRow(text: string, titleLine: number): Omit<ItemRow, 'archived'> {
 	// parseList makes an item only of a line parseItemLine reads.
 	const parts = parseItemLine(text) as ItemLineParts;
 	const { plain, star } = splitStar(parts.title);
 	const label = plain === '' ? (parts.marks + parts.tail).trim() : plain;
-	const done = isDoneStatus(parts.status);
-	return { kind: 'item', titleLine, title: plain, label, done, archived: done && isArchived(text, now), starred: star !== '', when: whenOf(text) };
+	return { kind: 'item', titleLine, title: plain, label, done: isDoneStatus(parts.status), starred: star !== '', when: whenOf(text) };
 }
 
 function firstLine(row: ListRow): number {

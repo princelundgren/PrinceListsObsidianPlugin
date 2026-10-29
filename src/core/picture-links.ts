@@ -1,4 +1,4 @@
-import { blockKey, blockKeys, replaceRun } from './edit-check';
+import { blockKey, blockKeys, modelBlockKeys, replaceRun } from './edit-check';
 import { notesStartLine } from './edit-items';
 import type { RunEdit } from './follow';
 import { joinLines, splitLines, type Line } from './lines';
@@ -123,7 +123,7 @@ function guardKeys(lines: readonly Line[], model: ListModel, notes: NotesRange, 
 		const texts = (from: readonly Line[], to: number) => from.slice(item.start, to).map((line) => line.text);
 		return { removed: [blockKey('item', texts(lines, item.end))], added: [blockKey('item', texts(after, item.end + delta))] };
 	}
-	const noteBlocks = blockKeys(lines, model.contentStart).filter((block) => block.start >= notes.first && block.end <= notes.end);
+	const noteBlocks = modelBlockKeys(lines, model).filter((block) => block.start >= notes.first && block.end <= notes.end);
 	return { removed: noteBlocks.map((block) => block.key), added: blockKeys(after.slice(notes.first, notes.end + delta), 0).map((block) => block.key) };
 }
 
