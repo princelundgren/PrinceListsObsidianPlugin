@@ -24,8 +24,8 @@ const TABLE_DELIMITER = /^\s*\|?(\s*:?-+:?\s*\|)+(\s*:?-+:?\s*)?$/;
  * finds one, and a `%%` comment is none.
  */
 export function drawnBlocks(markdown: string): DrawnBlock[] {
-	const texts = splitLines(markdown).map((line) => line.text);
-	return [...blocksIn(new Parser().parse(maskBlocks(splitLines(markdown), 0).text), texts)];
+	const lines = splitLines(markdown);
+	return [...blocksIn(new Parser().parse(maskBlocks(lines, 0).text), lines.map((line) => line.text))];
 }
 
 function* blocksIn(parent: Node, texts: readonly string[]): Generator<DrawnBlock> {
