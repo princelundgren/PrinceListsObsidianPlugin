@@ -129,9 +129,10 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - Produces, in `src/core/editing.ts`, on `ListEditing`, taking the open piece's place so
   `followRange` and `mapPieceRange` serve a visit as they serve a piece:
   - `openNotes(kind: 'item' | 'listNote'): string | null`: starts a visit to the open card's notes
-    or the list note, from `notesStartLine` (for the list note, its first line with text) over all
-    their lines, ending any other visit or piece. It returns the notes as the editor holds them,
-    without the notes' indent, or null when the card's item is gone.
+    or the list note, over the lines the parse gives them: from `notesStartLine` to `item.endLine`
+    (for the list note, from its first line with text to `listNote.end`), ending any other visit or
+    piece. So it returns the same text as the notes as parsed, without the notes' indent, which the
+    editor already holds, or null when the card's item is gone.
   - `visitText(): string | null`: the visit's own file lines as the editor holds them, after an
     outside change that kept the visit; null once the visit is lost.
   - `notesChangeFits(change: NotesChange): boolean`: whether the visit's notes can take the change,
@@ -173,6 +174,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     its blank line after the note once.
   - A list note with two empty lines under the frontmatter: `openNotes('listNote')` starts at its
     first line with text, and a change to it leaves the empty lines as they were.
+  - A card's notes and a list note, each with empty lines above and below their text:
+    `openNotes` returns exactly the notes as parsed (`getItemNotes`, and `getListNote` from the
+    first line with text), so the editor's lines line up with the visit's.
   - The list note `Old` above `  - [ ] a`: `notesChangeFits` with `- a` is false and the text is
     unchanged; with `ab` it is true.
   - A line tracked at an empty list note's start follows the note's first text.
@@ -215,7 +219,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     `source.read()`; on each redraw while the editor hasn't focus, with `source.read()`; and with
     focus, after an outside change, the list's undo or redo, or a tick from elsewhere, with
     `source.visitText()`, or with `source.read()` and a new visit when that is null. On focus,
-    `source.open()`.
+    `source.open()` starts a visit, and the editor syncs to the text it returns, which is the text it
+    already holds unless the file changed unseen.
   - An `EditorState.changeFilter` stops a change that isn't a sync when `source.fits` is false for
     `changedLines(tr.startState.doc, tr.newDoc)`, and shows step one's notice once per visit, so a
     refused change never reaches the document or the editor's history (design, "Saving").
@@ -397,7 +402,7 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - [ ] **Step 6: Commit** with the message "Draw tables, code, callouts, math and embeds with
   Obsidian's renderer".
 
-### Task 6: Put pictures after the caret's block, and remove them from the menu
+### Task 6: Put pictures after the caret's block, and keep their menu working
 
 **Files:**
 - Modify: `src/view/pictures.ts`, `src/view/picture-menu.ts`, `src/view/notes-drawing.ts`,
@@ -422,8 +427,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   the pointer; the caret ends on the empty line below; Remove image and Delete image show for two
   pictures on one line and remove the right one; `git diff` shows only the new or removed link
   lines.
-- [ ] **Step 4: Commit** with the message "Put pictures after the caret's block, and remove them
-  from the menu".
+- [ ] **Step 4: Commit** with the message "Put pictures after the caret's block, and keep their menu
+  working".
 
 ### Task 7: Edit the list note in one editor
 
