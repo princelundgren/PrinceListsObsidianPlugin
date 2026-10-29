@@ -120,3 +120,13 @@ function endOfBlock(texts: readonly string[], start: number, endLine: number): n
 	while (end > start + 1 && isBlank(texts[end - 1] as string)) end--;
 	return end;
 }
+
+/**
+ * The first of `spans`, in order, that a caret moving from `from` to `to` crosses into: going down, the
+ * first whose start is past `from` and no further than `to`; going up, the first whose end is before
+ * `from` and no nearer than `to`. Undefined when it crosses none.
+ */
+export function spanCrossed<S extends { from: number; to: number }>(spans: readonly S[], from: number, to: number): S | undefined {
+	if (to > from) return spans.find((span) => span.from > from && span.from <= to);
+	return [...spans].reverse().find((span) => span.to < from && span.to >= to);
+}

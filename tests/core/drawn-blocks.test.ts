@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { drawnBlocks } from '../../src/core/drawn-blocks';
+import { drawnBlocks, spanCrossed } from '../../src/core/drawn-blocks';
 
 describe('drawnBlocks', () => {
 	test('draws a table, header to last row', () => {
@@ -92,5 +92,29 @@ describe('drawnBlocks', () => {
 
 	test('gives the blocks in order', () => {
 		expect(drawnBlocks('$$\nx\n$$\n\n<div>\n</div>\n\n```\ny\n```').map((block) => block.kind)).toEqual(['math', 'html', 'code']);
+	});
+});
+
+describe('spanCrossed', () => {
+	const spans = [
+		{ from: 10, to: 20 },
+		{ from: 30, to: 40 },
+	];
+
+	test('going down, gives the first span whose start it passes or reaches', () => {
+		expect(spanCrossed(spans, 5, 35)).toEqual({ from: 10, to: 20 });
+		expect(spanCrossed(spans, 5, 10)).toEqual({ from: 10, to: 20 });
+	});
+
+	test('going up, gives the first span whose end it passes or reaches', () => {
+		expect(spanCrossed(spans, 45, 15)).toEqual({ from: 30, to: 40 });
+		expect(spanCrossed(spans, 45, 40)).toEqual({ from: 30, to: 40 });
+	});
+
+	test('gives none for a move that stops short, or starts at the edge it would cross', () => {
+		expect(spanCrossed(spans, 5, 9)).toBeUndefined();
+		expect(spanCrossed(spans, 10, 25)).toBeUndefined();
+		expect(spanCrossed(spans, 20, 5)).toBeUndefined();
+		expect(spanCrossed(spans, 25, 25)).toBeUndefined();
 	});
 });

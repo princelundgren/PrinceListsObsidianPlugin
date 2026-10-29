@@ -1,6 +1,6 @@
 import { EditorSelection, Prec, StateEffect, StateField, type Range, type Text } from '@codemirror/state';
 import { Decoration, EditorView, keymap, WidgetType, type Command, type DecorationSet } from '@codemirror/view';
-import { drawnBlocks, type DrawnBlock } from '../core/drawn-blocks';
+import { drawnBlocks, spanCrossed, type DrawnBlock } from '../core/drawn-blocks';
 import { pieceText } from '../core/note-pieces';
 import type { PrinceListView } from './list-view';
 import { renderIntoWidget, unloadWidget } from './notes-widgets';
@@ -70,8 +70,7 @@ function stopAtBlock(field: StateField<DrawnBlocks>, forward: boolean): Command 
 		const [cursor] = ranges;
 		if (ranges.length !== 1 || !cursor?.empty) return false;
 		const moved = editor.moveVertically(cursor, forward);
-		const { spans } = editor.state.field(field);
-		const passed = forward ? spans.find((span) => span.from > cursor.head && span.from <= moved.head) : [...spans].reverse().find((span) => span.to < cursor.head && span.to >= moved.head);
+		const passed = spanCrossed(editor.state.field(field).spans, cursor.head, moved.head);
 		if (!passed) return false;
 		// The goal column goes along, so the next Up or Down leaves the block in the column it came from.
 		const stop = EditorSelection.cursor(forward ? passed.from : passed.to, undefined, undefined, moved.goalColumn);
