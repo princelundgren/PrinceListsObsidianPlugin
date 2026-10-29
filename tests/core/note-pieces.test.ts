@@ -279,6 +279,14 @@ describe('blockBelow', () => {
 		return [...old.slice(0, from), ...lines, ...old.slice(to)].join('\n');
 	};
 
+	test('takes the place of the empty last line of notes that end in a line break', () => {
+		expect(added('one\n', 1)).toEqual({ notes: 'one\n\n![[p.png]]\n', caret: 3 });
+	});
+
+	test('adds no second empty line after a paragraph followed by the empty last line', () => {
+		expect(added('one\n', 0)).toEqual({ notes: 'one\n\n![[p.png]]\n', caret: 3 });
+	});
+
 	test("goes after the caret's paragraph, with the caret on the empty line below it", () => {
 		expect(added('one\ntwo\n\nnext', 0)).toEqual({ notes: 'one\ntwo\n\n![[p.png]]\n\nnext', caret: 4 });
 	});

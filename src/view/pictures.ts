@@ -60,7 +60,9 @@ function onDrop(view: PrinceListView, evt: DragEvent): void {
 	if (!card || !inOpenCard(view, evt) || !mayHoldPicture(evt)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
-	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), false, (editor) => droppedLine(editor, evt));
+	// The pointer's coordinates name a line only now, before the pictures are saved and the notes may move.
+	const line = card.editor ? droppedLine(card.editor, evt) : 0;
+	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), false, () => line);
 }
 
 // The notes' line dropped on, or their last line for a drop elsewhere on the card.
@@ -83,7 +85,7 @@ function mayHoldPicture(evt: DragEvent): boolean {
 	return items.some((item) => item.kind === 'file' && item.type.startsWith('image/'));
 }
 
-// The pictures go in a block of their own below the notes' line that `lineOf` finds once they're saved.
+// The pictures go in a block of their own below the notes' line `lineOf` gives once they're saved.
 async function addPictures(view: PrinceListView, card: Card, files: File[], pasted: boolean, lineOf: (editor: EditorView) => number): Promise<void> {
 	const list = view.file;
 	if (!list) return;

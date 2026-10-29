@@ -527,8 +527,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   of Task 2's `appendNotesBlock`: it focuses the editor and makes `blockBelow`'s change as one
   editor change, so it saves as typing does. A pasted picture's links go below the caret's line
   (step one, "Where the links go"). A dropped one's go below the line `posAtCoords` finds under the
-  pointer, or below the last line for a drop elsewhere on the card. Either line is found once the
-  pictures are saved.
+  pointer, or below the last line for a drop elsewhere on the card. The caret's line is found once
+  the pictures are saved, since the editor moves the caret with any change meanwhile; the pointer's
+  at the drop, while its coordinates still name that line.
 - A picture widget carries its link's column. Its line comes from `posAtDOM`, so a change that moves
   lines doesn't redraw the pictures below it, and `updateDOM` keeps the drawn picture when only the
   column changes. The picture menu's Remove image and Delete image build the `PictureLinkAt` for

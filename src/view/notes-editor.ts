@@ -199,6 +199,7 @@ export function lockNotesEditor(editor: EditorView): void {
 export function addNotesBlock(editor: EditorView, line: number, block: readonly string[]): boolean {
 	editor.focus();
 	const { doc } = editor.state;
+	// A line found before the pictures were saved may be past the end of notes changed since.
 	const { change, caret } = blockBelow(doc.toString(), Math.min(line, doc.lines - 1), block);
 	const changes = editor.state.changes(lineChange(doc, change));
 	const next = changes.apply(doc);
