@@ -49,7 +49,7 @@ You can embed lists in normal notes.
 **Lists**
 
 - **Any note can be a list:** make a new one, or turn a note with checkboxes into one.
-- **Back to Markdown** any time with **Open as Markdown**.
+- **Back to Markdown** any time with **Open as Markdown**, or for good with **Turn into note**.
 - **Sections** come from headings. Drag them, collapse one, or collapse them all.
 - **A note for the list** sits under its title.
 

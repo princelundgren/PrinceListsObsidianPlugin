@@ -215,8 +215,14 @@ current todo app. Step one's own "Done when" doesn't change.
     any note (observed in 1.14.4). A note that isn't open keeps CRLF.
 - **Only notes in the vault (call).** A note from outside the vault has no parent folder (observed
   in 1.14.4), which is how it's told apart, as step one does for pictures.
-- **Undoing it (call):** open the note as Markdown and remove the line. No command reverses it in
-  step two.
+- **"Turn into note" undoes it (owner, 2026-10-29),** as a command and in a list's file menu, so
+  turning a note into a list isn't a one-way door. It takes out only the marker's line, or the
+  frontmatter with it when the marker was all it held, so a note Turn into list gave frontmatter
+  gets back its text. Items stay `- [ ]` lines. A tab showing the list switches to Markdown by
+  itself; otherwise the note opens as Markdown. Typing not yet saved, in an editor or the list, is
+  saved first, and the write goes through `vault.process`, as for Turn into list.
+  - A marker that isn't on a line of its own, such as `{princelists: true}`, or whose value runs
+    over several lines, is left as it is, with a message saying so **(call)**.
 
 ### When and the Schedule view (owner)
 
@@ -261,6 +267,10 @@ current todo app. Step one's own "Done when" doesn't change.
 - **A click on a row,** away from a link, opens its list with that item's card open **(call)**: in
   a tab whose list view already shows that list, else in a new tab. The card opens only while the
   item's line still reads as the view showed it, so an edit since then opens the list with no card.
+- **It's a view in a tab, like a note (call):** while it's active, no file is, so the file explorer
+  highlights none, as with Graph view (observed in 1.14.4). A link in a row opens where a link in a
+  note would, and a note opened from the file explorer takes the Schedule's tab, as it would a
+  note's; Back brings the Schedule back.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
   metadata cache's `changed` event and the vault's `rename` and `delete`. Those keep the lists it
   has read current, so focus reads only lists it doesn't hold yet, and it draws again only when

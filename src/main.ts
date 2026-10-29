@@ -1,10 +1,11 @@
-import { MarkdownView, Notice, Plugin, TFile, TFolder } from 'obsidian';
+import { FileView, MarkdownView, Notice, Plugin, TFile, TFolder } from 'obsidian';
 import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { openSchedule } from './obsidian/open-schedule';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
 import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
+import { canTurnIntoNote, turnIntoNote } from './obsidian/turn-into-note';
 import { openFilter } from './view/filter';
 import { ListBlock } from './view/list-block';
 import { PrinceListView } from './view/list-view';
@@ -36,6 +37,7 @@ export default class PrinceListsPlugin extends Plugin {
 						item
 							.setTitle('New list')
 							.setIcon(RIBBON_ICON)
+							.setSection('action-primary')
 							.onClick(() => void this.newList(file)),
 					);
 				} else if (file instanceof TFile && canTurnIntoList(this.app, file)) {
@@ -44,6 +46,13 @@ export default class PrinceListsPlugin extends Plugin {
 							.setTitle('Turn into list')
 							.setIcon(RIBBON_ICON)
 							.onClick(() => void turnIntoList(this, file)),
+					);
+				} else if (file instanceof TFile && canTurnIntoNote(this.app, file)) {
+					menu.addItem((item) =>
+						item
+							.setTitle('Turn into note')
+							.setIcon('file-text')
+							.onClick(() => void turnIntoNote(this.app, file)),
 					);
 				}
 			}),
@@ -55,6 +64,16 @@ export default class PrinceListsPlugin extends Plugin {
 				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (!view?.file || !canTurnIntoList(this.app, view.file) || isListText(view.getViewData())) return false;
 				if (!checking) void turnIntoList(this, view.file);
+				return true;
+			},
+		});
+		this.addCommand({
+			id: 'turn-into-note',
+			name: 'Turn into note',
+			checkCallback: (checking) => {
+				const file = this.app.workspace.getActiveViewOfType(FileView)?.file;
+				if (!file || !canTurnIntoNote(this.app, file)) return false;
+				if (!checking) void turnIntoNote(this.app, file);
 				return true;
 			},
 		});
