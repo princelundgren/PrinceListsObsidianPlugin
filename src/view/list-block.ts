@@ -1,7 +1,7 @@
 import { getLinkpath, MarkdownRenderChild, Notice, Platform, setIcon, type App, type Component, type TFile } from 'obsidian';
 import { guardedWrite, type WriteResult } from '../core/action-write';
 import { blockLink } from '../core/block-source';
-import { visibleSections } from '../core/display';
+import { visibleSections, type SectionRows } from '../core/display';
 import { toggleItem } from '../core/edit-items';
 import { ListEditing } from '../core/editing';
 import type { OwnEdit } from '../core/follow';
@@ -9,6 +9,7 @@ import { toggleLine } from '../core/item-line';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import { dayOf } from '../core/when';
 import { WriteEchoes } from '../core/write-echoes';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { blockDragHost, enableBlockDrag } from './block-drag';
@@ -41,6 +42,8 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	// The path drawn last: a rename that keeps the link's file still redraws its name and link.
 	private shownPath: string | null | undefined;
 	private drawnText: string | null = null;
+	// What the rows showed when drawn, or null when the block drew a message instead.
+	private drawnRows: string | null = null;
 
 	constructor(
 		readonly app: App,
@@ -139,7 +142,13 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 
 	draw(): void {
+		this.drawWith(null);
+	}
+
+	// `sections`, when given, are shownSections() of the current text.
+	private drawWith(sections: SectionRows[] | null): void {
 		this.drawnText = this.editing.text;
+		this.drawnRows = null;
 		this.removeBlocks();
 		this.rootEl.empty();
 		const { file } = this;
@@ -151,10 +160,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.rootEl.createEl('a', { cls: 'internal-link', text: file.basename, attr: { 'data-href': file.path, href: file.path } });
 		this.rowsEl.empty();
 		this.rootEl.append(this.rowsEl);
-		const lines = splitLines(this.editing.text);
-		const model = parseList(lines, contentStartLine(this.editing.text));
-		const sections = visibleSections(lines, model, new Date(), { showArchived: false, query: '', keepLine: null, collapsed: new Set() });
-		for (const section of sections) {
+		const shown = sections ?? this.shownSections();
+		this.drawnRows = rowsKey(file, shown);
+		for (const section of shown) {
 			if (section.heading) this.rowsEl.append(buildHeading(this, file.path, section.heading, this.blocks));
 			let list: HTMLUListElement | null = null;
 			for (const row of section.rows) {
@@ -166,6 +174,24 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		const button = this.rootEl.createEl('button', { cls: NEW_ITEM_CLASS });
 		setIcon(button.createSpan({ cls: 'princelists-block-new-item-icon' }), 'plus');
 		button.createSpan({ text: 'New item' });
+	}
+
+	private shownSections(): SectionRows[] {
+		const lines = splitLines(this.editing.text);
+		const model = parseList(lines, contentStartLine(this.editing.text));
+		return visibleSections(lines, model, new Date(), { showArchived: false, query: '', keepLine: null, collapsed: new Set() });
+	}
+
+	// A change from outside often leaves every row as drawn, such as a list view's save of an item's notes.
+	private drawIfRowsChanged(): void {
+		const { file, drawnRows } = this;
+		if (!file || drawnRows === null || this.message() !== null) {
+			this.draw();
+			return;
+		}
+		const sections = this.shownSections();
+		if (rowsKey(file, sections) === drawnRows) this.drawnText = this.editing.text;
+		else this.drawWith(sections);
 	}
 
 	// The gray line in place of the rows, or null when there are rows to draw.
@@ -204,7 +230,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private takeOutsideChange(text: string): void {
 		this.outsideChanges++;
 		this.editing.outsideChange(text);
-		if (!this.field) this.draw();
+		if (!this.field) this.drawIfRowsChanged();
 	}
 
 	private onClick(evt: MouseEvent): void {
@@ -292,4 +318,11 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		for (const block of this.blocks.values()) this.removeChild(block);
 		this.blocks.clear();
 	}
+}
+
+// The link's file, today, which a row's day is shown against, and every heading and item row the block
+// draws, with the lines their LINE_ATTRs must keep true.
+function rowsKey(file: TFile, sections: SectionRows[]): string {
+	const drawn = sections.map(({ heading, rows }) => [heading, rows.filter((row) => row.kind === 'item')]);
+	return JSON.stringify([file.path, dayOf(new Date()), drawn]);
 }
