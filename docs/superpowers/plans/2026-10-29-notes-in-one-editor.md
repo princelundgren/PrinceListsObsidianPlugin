@@ -217,8 +217,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - Modify: `package.json`, `package-lock.json`, `AGENTS.md` (the dependency line),
   `THIRD_PARTY_NOTICES`, `README.md` (its license line), `src/view/card.ts`, `src/view/events.ts`,
   `src/view/format.ts`, `src/view/pictures.ts`, `src/view/menus.ts`, `src/view/notes-host.ts`,
-  `src/view/note-piece-field.ts`, `styles.css`, and the `minAppVersion` lines of `manifest.json`,
-  the designs and `src/view/delete.ts`
+  `src/view/note-piece-field.ts`, `styles.css`, `.github/dependabot.yml`, and the `minAppVersion`
+  lines of `manifest.json`, the designs and `src/view/delete.ts`
 
 **Interfaces:**
 - Consumes: Task 1.
@@ -257,9 +257,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     when `source.fits` is false for `changedLines(tr.startState.doc.toString(),
     tr.newDoc.toString())`, and shows step one's notice once per visit, so a refused change never
     reaches the document or the editor's history (design, "Saving"). A change with no visit open,
-    as a drop from another app makes without a focus event, opens one, and is refused when the
-    notes no longer read as the editor shows them; that visit ends after the change, with a sync,
-    unless the editor has focus by then.
+    as a drop from another app makes without a focus event, opens one, and is refused, closing it,
+    when the notes no longer read as the editor shows them. After the change the editor syncs, and
+    the visit ends unless the editor has focus by then.
   - Saving, from the editor's `dispatchTransactions`, after `editor.update(trs)`: for each
     transaction that changed the doc and isn't a sync, `changedLines(tr.startState.doc.toString(),
     tr.state.doc.toString())` to `source.save`, then `view.handleTyped`, so a sync batched into the
@@ -533,9 +533,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 **Interfaces:**
 - Goes from `ListEditing`: `openNotesPiece`, `typeNotesPiece`, `notesPieceOutdent`, `openListNote`,
   `typeListNote`, `listNoteRange`, `listNoteOutdent` and `listNoteAsTyped`. `notesPieceRange`
-  stays, since the card's `visitStart` reads the visit's range through it. Goes from `src/core/note-pieces.ts`: `pieceEnter`, `nextItemMarker`,
-  `neighborPiece`, `outdentMarker`, `itemPieces`, `pieceText` and `holdsOnly`, unless something
-  that stays still calls one. `notePieces`, `blockAfter` and `pieceAround` stay. Goes too, unless
+  stays, since the card's `visitStart` reads the visit's range through it. Goes from
+  `src/core/note-pieces.ts`: `pieceEnter`, `nextItemMarker`, `neighborPiece`, `outdentMarker`,
+  `itemPieces`, `pieceText` and `holdsOnly`, unless something that stays still calls one. `notePieces`, `blockAfter` and `pieceAround` stay. Goes too, unless
   something that stays still calls it: `listNoteWithPiece` in `edit-list-note.ts`,
   `holdsSeparatorLine`, `typedLines` and `withoutSeparatorLine` in `edit-lines.ts`, and
   `setNotesPiece` and `setListNotePiece` themselves.

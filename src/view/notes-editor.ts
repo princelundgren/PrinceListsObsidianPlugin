@@ -49,8 +49,8 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 		if (markdown !== null) syncNotesEditor(editor, markdown);
 	};
 	// A change can come without a focus event, as a drop from another app does: it opens the visit it
-	// saves in, which ends with the change.
-	let isVisitWithoutFocus = false;
+	// saves in, which ends with the change unless the editor has focus by then.
+	let isVisitFromChange = false;
 	const editor = new EditorView({
 		parent: area,
 		state: EditorState.create({
@@ -69,9 +69,12 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				EditorState.changeFilter.of((tr) => {
 					if (!tr.docChanged) return true;
 					if (current.visitStart() === null) {
-						isVisitWithoutFocus = true;
-						// The notes changed since the editor last showed them: the visit's end syncs it.
-						if (openVisit() !== tr.startState.doc.toString()) return false;
+						isVisitFromChange = true;
+						// The notes changed since the editor last showed them: the sync after the change shows them.
+						if (openVisit() !== tr.startState.doc.toString()) {
+							current.close();
+							return false;
+						}
 					}
 					const change = changedLines(tr.startState.doc.toString(), tr.newDoc.toString());
 					if (!change || current.fits(change)) return true;
@@ -108,10 +111,9 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				sync(editor);
 				break;
 			}
-			if (!isVisitWithoutFocus) return;
-			isVisitWithoutFocus = false;
-			if (editor.hasFocus) return;
-			current.close();
+			if (!isVisitFromChange) return;
+			isVisitFromChange = false;
+			if (!editor.hasFocus) current.close();
 			sync(editor);
 		},
 	});
