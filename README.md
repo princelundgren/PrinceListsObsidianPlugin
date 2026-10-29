@@ -14,11 +14,11 @@ your lists. It's simple to use, and powerful when you need it.
 
 Make a list from the ribbon, a folder, or a note you already have.
 
-| Click the list icon in the ribbon | Right-click a folder on the sidebar | Right-click a note to turn it into a list |
+| Click the list icon in the ribbon | Right-click a folder in the sidebar | Right-click a note to turn it into a list |
 | --- | --- | --- |
 | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.png" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.png" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.png" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
-Ticked items hide after a day. **Show archived** brings them back, with blue checkboxes.
+Ticked items hide after a day. Show archived brings them back, with blue checkboxes.
 
 ![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
 
@@ -50,7 +50,7 @@ You can embed lists in normal notes.
 
 - **Any note can be a list:** make a new one, or turn a note with checkboxes into one.
 - **Back to Markdown** any time with **Open as Markdown**.
-- **Sections** come from headings. Drag them, fold them, or collapse them all.
+- **Sections** come from headings. Drag them, collapse one, or collapse them all.
 - **A note for the list** sits under its title.
 
 **Items**
@@ -63,12 +63,13 @@ You can embed lists in normal notes.
 **Notes on an item**
 
 - **Any Markdown:** links, checklists, tables and code.
-- **A format bar** for bold, italic, links, lists, tables and more.
+- **A toolbar** for bold, italic, links, lists, tables and more.
 - **Pictures:** paste or drop them in.
 
 **Across lists**
 
-- **The Schedule** sorts dated items into Today, Tomorrow, Next 7 days and Later.
+- **The Schedule** sorts dated items into Today (with anything overdue), Tomorrow, Next 7 days and
+  Later.
 - **A list inside another note** can be ticked and edited there. If you rename the list, update
   the block.
 - **Works with Tasks:** dates use the Tasks plugin's format.
@@ -88,14 +89,15 @@ You can embed lists in normal notes.
    **New list**.
 3. **Add items** with the **+**. Click one to add notes, a star or a date.
 
-Already have a note with checkboxes? Right-click it and choose **Turn into list**.
+Already have a note with checkboxes? Right-click it and choose **Turn into list**. Items already
+ticked hide at once, and **Show archived** shows them.
 
 <details>
 <summary>Install by hand instead</summary>
 
 1. Download `main.js`, `manifest.json` and `styles.css` from the
    [latest release](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases/latest).
-2. Put them in `<vault>/.obsidian/plugins/princelists/`.
+2. Put them in `<vault>/.obsidian/plugins/princelists/`, where `<vault>` is your vault's folder.
 3. In Settings → Community plugins, turn on community plugins if Restricted mode is on, and enable
    PrinceLists under Installed plugins.
 
@@ -120,8 +122,10 @@ Stuff for the new apartment.
 ```
 
 - **`princelists: true`** makes a note a list.
-- **Dates** use the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's
-  format.
+- **Headings** are sections, **checkboxes** are items, and lines indented under an item are its
+  notes.
+- **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks)
+  plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are.
 - **`✔` with a time** marks when you ticked an item. Tasks still sees it as done.
 - **Only the lines you edit change.** The rest of the note stays as you wrote it.
 
@@ -130,8 +134,9 @@ The full format is in the
 
 ## Good to know
 
-- **Private:** no network requests of its own, no data collected, no account. A picture linked
-  from the web loads as in any note.
+- **Private:** PrinceLists works only on notes Obsidian opens: your vault's, and on desktop a
+  note you open from outside it. No network requests of its own, no data collected, no account. A
+  picture linked from the web loads as in any note.
 - **Obsidian Sync:** turn on Sync's "Active community plugin list" and "Installed community plugin
   list" to get PrinceLists on your other devices. If two devices edit a list within seconds, Sync
   can drop one change, as in any note. Sync's "Create conflict file" setting keeps both, as extra
