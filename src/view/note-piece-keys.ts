@@ -10,11 +10,19 @@ import { notesHostOf, type NotesHost } from './notes-host';
 // Enter and Shift+Enter send the same beforeinput, so Shift is noted on keydown.
 const shiftEnters = new WeakSet<HTMLTextAreaElement>();
 
-// Up at the field's very start, or Down at its very end, moves to the piece above or below.
+// Up at the field's very start, or Down at its very end, moves to the piece above or below, and
+// Backspace in an empty field to the piece above.
 export function pieceKeyDown(view: PrinceListView, field: HTMLTextAreaElement, evt: KeyboardEvent): void {
 	if (evt.key === 'Enter') {
 		if (evt.shiftKey) shiftEnters.add(field);
 		else shiftEnters.delete(field);
+		return;
+	}
+	if (evt.key === 'Backspace') {
+		// WebKit, as on iOS, sends no beforeinput for a Backspace with nothing to delete. Shift counts
+		// for nothing, as in Chromium's beforeinput, and iOS may report it lit in an empty field.
+		const hasEditModifier = evt.altKey || evt.ctrlKey || evt.metaKey;
+		if (!hasEditModifier && !field.readOnly && field.value === '' && moveToNeighbor(view, field, 'up')) evt.preventDefault();
 		return;
 	}
 	const direction = evt.key === 'ArrowUp' ? 'up' : evt.key === 'ArrowDown' ? 'down' : null;
@@ -24,7 +32,8 @@ export function pieceKeyDown(view: PrinceListView, field: HTMLTextAreaElement, e
 	if (field.selectionStart === edge && moveToNeighbor(view, field, direction)) evt.preventDefault();
 }
 
-// Every platform's keyboard sends these, where some send no key for Enter or Backspace.
+// Enter and Backspace come from here, since Android's keyboards send no key for them. WebKit's
+// Backspace in an empty field comes from the keydown instead.
 export function pieceBeforeInput(view: PrinceListView, field: HTMLTextAreaElement, evt: InputEvent): void {
 	// Shift belongs to the keydown just before this input, whatever the input is.
 	const isShiftEnter = shiftEnters.delete(field);
