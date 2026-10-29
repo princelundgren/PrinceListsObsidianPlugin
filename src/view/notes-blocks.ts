@@ -79,7 +79,12 @@ function stopAtBlock(field: StateField<DrawnBlocks>, forward: boolean): Command 
 }
 
 function placedBlocks(doc: Text): PlacedBlock[] {
-	return drawnBlocks(doc.toString()).map(({ lines, kind, markdown }) => ({ from: doc.line(lines.start + 1).from, to: doc.line(lines.end).to, kind, markdown }));
+	return drawnBlocks(doc.toString()).map(({ lines, kind, markdown }) => ({
+		from: doc.line(lines.start + 1).from,
+		to: doc.line(lines.end).to,
+		kind,
+		markdown,
+	}));
 }
 
 // Drawn again only when its own Markdown changes, so typing elsewhere leaves it, and its embeds, be.

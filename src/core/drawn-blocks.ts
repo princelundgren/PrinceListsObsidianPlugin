@@ -7,8 +7,9 @@ import { pictureLinks } from './picture-links';
 import { wikiLinks } from './wiki-links';
 
 /**
- * A block of the notes that Obsidian's renderer draws whole: its lines, and the Markdown it draws, which
- * is those lines less the first line's indent, so a block in a list item draws as at the left margin.
+ * A block of the notes that Obsidian's renderer draws whole: its lines, and the Markdown it draws:
+ * those lines less the first line's indent, so a block in a list item draws as at the left margin,
+ * or for indented code, the code as CommonMark reads it, indented four spaces.
  */
 export interface DrawnBlock {
 	lines: LineRange;

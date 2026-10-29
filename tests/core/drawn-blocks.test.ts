@@ -133,6 +133,7 @@ describe("a drawn block's Markdown", () => {
 		expect(markdownOf('p\n\n    code\n\n      more')).toEqual(['    code\n    \n      more']);
 		expect(markdownOf('p\n\n        a\n    b')).toEqual(['        a\n    b']);
 		expect(markdownOf('- a\n\n        deep\n      shallow')).toEqual(['      deep\n    shallow']);
+		expect(markdownOf('p\n\n\tcode\n    more')).toEqual(['    code\n    more']);
 		expect(markdownOf('- a\n\n      %%\n      hidden\n      %%')).toEqual(['    %%\n    hidden\n    %%']);
 	});
 
