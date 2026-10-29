@@ -80,8 +80,10 @@ Compared with Obsidian's own editor side by side on desktop:
 
 - **A drawn checkbox ticks its own line (call):** the editor knows which line drew it, so step
   two's count check and its `%%` and `$$` rule no longer apply to it. A click turns `[ ]` into
-  `[x]` and back, saved at once, with no `✔` date, focused or not. A tick is the editor's own
-  change, in its history, saved like typing.
+  `[x]` and back, saved at once, with no `✔` date, focused or not. A tick while the editor has
+  focus is its own change, in its history, saved like typing. A tick while it hasn't is the list's,
+  as a tick on a row is: the list's Cmd+Z takes it back, and it clears the editor's history like
+  any change the editor didn't make.
 - **A box inside a drawn big block,** such as a callout, ticks by step two's "Ticking checklists"
   rules, counted within that block: the nth drawn box is the nth checklist line in it, and every box
   in the block stays disabled when the two disagree or the block holds `%%` or `$$`.
