@@ -28,7 +28,7 @@ Each item has a title, a date, a star and powerful notes, with a toolbar for for
 
 The Schedule shows the dated items from all your lists.
 
-![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
+![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
 It works great on your phone too.
 
