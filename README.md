@@ -136,7 +136,12 @@ The full format is in the
 
 - **Private:** PrinceLists works only on notes Obsidian opens: your vault's, and on desktop a
   note you open from outside it. No network requests of its own, no data collected, no account. A
-  picture linked from the web loads as in any note.
+  picture linked from the web loads as in any note. What Obsidian's plugin directory notes:
+  - **Vault enumeration:** to find your lists, the Schedule goes through your vault's list of
+    notes, and reads only the lists.
+  - **Clipboard access:** only when you ask. Copy image and Copy text write to it, and a picture you
+    paste into an item's notes is read from your paste. PrinceLists never reads the clipboard by
+    itself.
 - **Obsidian Sync:** turn on Sync's "Active community plugin list" and "Installed community plugin
   list" to get PrinceLists on your other devices. If two devices edit a list within seconds, Sync
   can drop one change, as in any note. Sync's "Create conflict file" setting keeps both, as extra
