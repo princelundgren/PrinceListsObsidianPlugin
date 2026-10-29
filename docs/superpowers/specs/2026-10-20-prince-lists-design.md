@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-28
+verified: 2026-10-29
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -844,6 +844,9 @@ needs no code.
 - **The file is the only copy of the truth.** When the file changes from outside (Sync or an agent),
   the view redraws from it.
   - An editor that has focus isn't torn down.
+  - A redraw moves the rows and headings that show the same, the list note and the card into place
+    **(call)**, so pictures and embeds aren't loaded again. A title renders again only when its row
+    changes, so a link drawn before its note existed keeps that look until then.
   - An outside change to the lines of the block a focused field writes, in an item's notes or the
     list note, leaves that field unable to save, with the notice and copy button of a card whose
     item went (step two's design, "Editing notes a block at a time"). A change elsewhere in the

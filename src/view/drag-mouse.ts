@@ -21,8 +21,8 @@ interface MouseDrag {
 }
 
 // The row's drag in progress, in whichever list pane of this window it started. A redraw during a
-// drag, such as when closing the card removed an empty item, detaches the row it started on, and its
-// dragend then never comes. The next drag start in any list pane ends it.
+// drag can detach the row it started on, such as when an outside change edited it, and its dragend
+// then never comes. The next drag start in any list pane ends it.
 let current: MouseDrag | null = null;
 
 // Dragging rows and headings with the mouse, on desktop only (spec, "Dragging"). The host's rowsEl takes

@@ -95,14 +95,15 @@ export function typePiece(view: PrinceListView, field: HTMLTextAreaElement, mark
 }
 
 // The field goes once it has lost focus, to `focusing`, and the piece it stood in for is drawn as it
-// now reads. Closing the list note can draw the whole list again, which leaves this area behind.
+// now reads. It goes before the host closes: closing the list note can draw the whole list again,
+// which would take a field still there for one an outside change left without its lines.
 export function pieceBlur(view: PrinceListView, field: HTMLTextAreaElement, focusing: Element | null): void {
 	if (handedOn.has(field)) return;
 	const host = notesHostOf(view, field);
-	host?.close(focusing);
 	const area = field.parentElement;
 	hideField(field);
 	removeField(field);
+	host?.close(focusing);
 	if (area) markPieceAbove(area);
 	if (host?.area.isConnected) drawPieces(view, host);
 }

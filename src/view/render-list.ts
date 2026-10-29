@@ -38,6 +38,30 @@ export function setLine(el: Element, line: number | null): void {
 	el.setAttr(LINE_ATTR, line);
 }
 
+// What each row and heading renderList built shows, all but its line, so a later drawing can move it.
+const drawnAs = new WeakMap<HTMLElement, string>();
+
+/** The rows and headings renderList drew under `el`, by what they show, for the next drawing to take. */
+export type DrawnRows = Map<string, HTMLElement[]>;
+
+/** Makes the next drawing build `rowEl` anew instead of moving it. */
+export function forgetDrawn(rowEl: HTMLElement): void {
+	drawnAs.delete(rowEl);
+}
+
+/** The rows and headings renderList drew under `el` and can move, by what each shows. */
+export function drawnRows(el: HTMLElement): DrawnRows {
+	const drawn: DrawnRows = new Map();
+	for (const rowEl of Array.from(el.querySelectorAll<HTMLElement>(`.${ITEM_CLASS}, .${HEADING_CLASS}`))) {
+		const key = drawnAs.get(rowEl);
+		if (key === undefined) continue;
+		const same = drawn.get(key);
+		if (same) same.push(rowEl);
+		else drawn.set(key, [rowEl]);
+	}
+	return drawn;
+}
+
 /**
  * Where the open card goes: in place of the row at `line`, or, when `replaces` is false, before the
  * first row after it.
@@ -57,8 +81,9 @@ export interface FieldPlace {
 // Draws the sections under `el`. Each row and heading carries its first line in LINE_ATTR for the
 // view's delegated listeners, so they get no listeners of their own. The view keeps every LINE_ATTR
 // true to its text between redraws (PrinceListView.applyOwnText). Rendered titles and headings record
-// their Component in `blocks`, keyed by their element. Rows inside `skip`, the list note being typed,
-// aren't drawn; the result says whether any were left out.
+// their Component in `blocks`, keyed by their element. A row or heading in `drawn` that shows the same
+// moves here with its Component, and only its line changes. Rows inside `skip`, the list note being
+// typed, aren't drawn; the result says whether any were left out.
 export function renderList(
 	view: PrinceListView,
 	el: HTMLElement,
@@ -68,6 +93,7 @@ export function renderList(
 	blocks: Map<HTMLElement, Component>,
 	skip: LineRange | null,
 	field: FieldPlace | null,
+	drawn: DrawnRows,
 ): boolean {
 	let placed = card === null;
 	let fieldPlaced = field === null;
@@ -89,14 +115,23 @@ export function renderList(
 		return isHeading && line === field.line;
 	};
 	const sourcePath = view.sourcePath;
+	const today = dayOf(new Date());
 	const sections = visibleSections(lines, model, new Date(), { showArchived: view.showArchived, query: view.filter ?? '', keepLine: view.selected, collapsed: view.collapsed.lines() });
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {
 		if (section.heading) {
 			placeCard(section.heading.line, false);
 			if (!placeField(section.heading.line, true)) {
-				const headingEl = buildHeading(view, sourcePath, section.heading, blocks);
-				addCollapseArrow(headingEl, section.collapsed);
+				const { line, ...shown } = section.heading;
+				const key = JSON.stringify(['heading', sourcePath, shown, section.collapsed]);
+				let headingEl = drawn.get(key)?.shift();
+				if (headingEl) {
+					setLine(headingEl, line);
+				} else {
+					headingEl = buildHeading(view, sourcePath, section.heading, blocks);
+					addCollapseArrow(headingEl, section.collapsed);
+					drawnAs.set(headingEl, key);
+				}
 				el.append(headingEl);
 			}
 			list = null;
@@ -112,7 +147,7 @@ export function renderList(
 				continue;
 			}
 			if (placeCard(row.titleLine, true)) continue;
-			items().append(buildRow(view, sourcePath, row, blocks));
+			items().append(takeRow(view, sourcePath, row, blocks, drawn, today));
 		}
 	}
 	if (!placed && card) items().append(card.el);
@@ -145,6 +180,22 @@ export function buildRow(host: RowHost, sourcePath: string, row: ItemRow, blocks
 	if (row.starred) addStar(rowEl);
 	if (row.when !== null) addWhen(rowEl, row.when, dayOf(new Date()));
 	showDone(rowEl, row);
+	return rowEl;
+}
+
+// A tick in place leaves a row showing other than its key says, so a moved row shows its row's box again.
+function takeRow(view: PrinceListView, sourcePath: string, row: ItemRow, blocks: Map<HTMLElement, Component>, drawn: DrawnRows, today: string): HTMLLIElement {
+	const { titleLine, ...shown } = row;
+	// Today only changes how a When reads.
+	const key = JSON.stringify(['item', sourcePath, shown.when === null ? null : today, shown]);
+	const moved = drawn.get(key)?.shift();
+	if (moved?.instanceOf(HTMLLIElement)) {
+		setLine(moved, titleLine);
+		showDone(moved, row);
+		return moved;
+	}
+	const rowEl = buildRow(view, sourcePath, row, blocks);
+	drawnAs.set(rowEl, key);
 	return rowEl;
 }
 

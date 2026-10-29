@@ -116,7 +116,7 @@ export function redrawAround(drawing: Drawing, el: HTMLElement, piece: Piece, dr
 		const hidden = hideAround(field.parentElement as HTMLElement, field);
 		field.after(...trailing);
 		drawing.parent.removeChild(shown.component);
-		Object.assign(shown, { component, text: piece.text, hidden });
+		Object.assign(shown, { component, text: piece.text, hidden, sourcePath: drawing.sourcePath });
 		drawn();
 	};
 	MarkdownRenderer.render(drawing.app, piece.text, fresh, drawing.sourcePath, component).then(putAround, (error: unknown) => {

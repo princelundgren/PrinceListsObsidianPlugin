@@ -145,12 +145,15 @@ function partsAround(wanted: Piece[], open: LineRange, notes: Notes): Piece[] {
 	});
 }
 
-// Matches the drawn elements to the pieces by text, in order: a match is kept, and anything else is
-// drawn again, before `end` when no kept element follows.
+// Matches the drawn elements to the pieces by text and note, in order: a match is kept, and anything
+// else is drawn again, before `end` when no kept element follows.
 function reconcile(drawing: Drawing, area: HTMLElement, existing: HTMLElement[], wanted: Piece[], end: Node | null): void {
 	let next = 0;
 	for (const piece of wanted) {
-		const found = existing.findIndex((el, i) => i >= next && drawnPieces.get(el)?.text === piece.text);
+		const found = existing.findIndex((el, i) => {
+			const drawn = drawnPieces.get(el);
+			return i >= next && drawn?.text === piece.text && drawn.sourcePath === drawing.sourcePath;
+		});
 		if (found < 0) {
 			area.insertBefore(drawPiece(drawing, piece), existing[next] ?? end);
 			continue;
@@ -167,7 +170,7 @@ function reconcile(drawing: Drawing, area: HTMLElement, existing: HTMLElement[],
 function drawPiece(drawing: Drawing, piece: Piece): HTMLElement {
 	const el = createDiv({ cls: NOTE_PIECE_CLASS });
 	const component = drawing.parent.addChild(new Component());
-	drawnPieces.set(el, { ...piece, component, hidden: null, redrawing: null });
+	drawnPieces.set(el, { ...piece, component, hidden: null, redrawing: null, sourcePath: drawing.sourcePath });
 	MarkdownRenderer.render(drawing.app, piece.text, el, drawing.sourcePath, component).then(
 		() => showBoxes(drawing, el),
 		(error: unknown) => console.error(error),

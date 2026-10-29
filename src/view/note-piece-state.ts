@@ -36,6 +36,8 @@ export interface DrawnPiece extends Piece {
 	component: Component;
 	hidden: HTMLElement | null;
 	redrawing: { text: string; field: HTMLTextAreaElement } | null;
+	/** The note its links and embeds were rendered for. */
+	sourcePath: string;
 }
 
 export interface Drawing {

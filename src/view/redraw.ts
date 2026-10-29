@@ -1,30 +1,37 @@
 import { Platform } from 'obsidian';
 import { isListText } from '../obsidian/marker';
 import { hasNoItems } from './add-button';
-import { dismissCard, redrawCard, refreshCard } from './card';
+import { dismissCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
 import { buildListNote, buildListTitle, refreshListNote } from './fields';
 import { buildFilterField } from './filter';
 import type { PrinceListView } from './list-view';
-import { OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
+import { drawnRows, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
 
 // Draws everything again from the view's text, except the title, list note, card or heading field that
-// holds focus, or is about to (`focusing`): those stay in place and update after blur.
+// holds focus, or is about to (`focusing`): those stay in place and update after blur. The list note,
+// the card, and rows and headings that show the same move into the new drawing, so what they render
+// isn't loaded again.
 export function redraw(view: PrinceListView, focusing: Element | null): void {
 	const { contentEl, listScrollEl, listSizerEl } = view;
 	const { scrollTop } = listScrollEl;
 	const kept = keptElement(view, focusing);
 	const isEmpty = hasNoItems(view);
-	for (const block of view.blocks.values()) view.removeChild(block);
-	view.blocks.clear();
+	const drawn = drawnRows(listSizerEl);
 	const fresh = createDiv();
 	let slot: HTMLElement | null = null;
 	if (kept && kept === view.listTitleEl) slot = fresh.createDiv();
 	else view.listTitleEl = buildListTitle(view, fresh);
 	if (isListText(view.text)) {
 		const { lines, model } = view.parse();
-		if (kept && kept === view.listNoteEl) slot = fresh.createDiv();
-		else view.listNoteEl = buildListNote(view, fresh);
+		if (kept && kept === view.listNoteEl) {
+			slot = fresh.createDiv();
+		} else if (view.listNoteEl) {
+			fresh.append(view.listNoteEl);
+			refreshListNote(view);
+		} else {
+			view.listNoteEl = buildListNote(view, fresh);
+		}
 		if (view.filter === null) view.filterEl = null;
 		else if (kept && kept === view.filterEl) slot = fresh.createDiv();
 		else view.filterEl = buildFilterField(view, fresh);
@@ -32,7 +39,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		if (card?.keeps) slot = card.el;
 		const field = placeField(view, kept);
 		if (field?.keeps) slot = field.el;
-		view.rowsHeldBack = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field);
+		view.rowsHeldBack = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field, drawn);
 		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint() });
 		// Room to scroll the last row clear of mobile's floating "+".
 		fresh.createDiv({ cls: 'princelists-end' });
@@ -50,6 +57,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		fresh.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
 	}
 	replaceKeeping(listSizerEl, fresh, kept, slot);
+	for (const el of Array.from(view.blocks.keys())) if (!listSizerEl.contains(el)) view.dropBlock(el);
 	listSizerEl.toggleClass('princelists-is-empty', isEmpty);
 	for (const button of [view.newItemButton, view.newItemAction]) button?.toggle(isListText(view.text));
 	if (view.card && kept === view.card.el) refreshCard(view, view.card);
@@ -64,7 +72,7 @@ function emptyHint(): string {
 	return Platform.isMacOS ? 'Press Cmd+Enter or + to add an item' : 'Press Ctrl+Enter or + to add an item';
 }
 
-// Where a redraw puts the card: a slot for the card that keeps focus, or the card drawn again.
+// Where a redraw puts the card: a slot for the card that keeps focus, or the card, updated.
 function placeCard(view: PrinceListView, kept: HTMLElement | null): (CardPlace & { keeps: boolean }) | null {
 	const card = view.card;
 	if (!card) return null;
@@ -74,7 +82,7 @@ function placeCard(view: PrinceListView, kept: HTMLElement | null): (CardPlace &
 		return null;
 	}
 	const keeps = kept === card.el;
-	if (!keeps) redrawCard(view, card);
+	if (!keeps) refreshCard(view, card);
 	return { el: keeps ? createEl('li') : card.el, line, replaces: view.selected !== null, keeps };
 }
 
