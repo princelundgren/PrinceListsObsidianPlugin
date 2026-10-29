@@ -22,6 +22,10 @@ Ticked items hide after a day. **Show archived** brings them back, with blue che
 
 ![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
 
+Powerful notes, with a toolbar for formatting.
+
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.png" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the line being edited" width="520">
+
 The Schedule shows the dated items from all your lists.
 
 ![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
@@ -30,13 +34,15 @@ It works great on your phone too.
 
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, stars and a floating add button, an item is ticked, then another is held and dragged into a different section" width="300">
 
-You can show a list inside any other note, too.
+You can embed lists in normal notes.
 
 ````markdown
 ```princelists
-[[Groceries]]
+[[Hardware store]]
 ```
 ````
+
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.png" alt="An ordinary note with a paragraph above and below the Hardware store list, shown with its checkboxes, a star and a New item button" width="540">
 
 ## Full feature list
 
