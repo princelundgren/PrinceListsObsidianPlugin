@@ -43,5 +43,5 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 function pickDate(view: PrinceListView, line: number): void {
 	openCard(view, line);
 	const input = view.card?.el.querySelector<HTMLInputElement>(`.${WHEN_INPUT_CLASS}`);
-	if (input && navigator.userActivation.isActive) whenClick(input);
+	if (input?.win.navigator.userActivation.isActive) whenClick(input);
 }
