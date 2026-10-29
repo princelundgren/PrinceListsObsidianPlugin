@@ -13,7 +13,12 @@ import { CHANGED_ELSEWHERE_NOTICE, tryEdit, writeAction } from './write';
 // edits meanwhile, even when a redraw replaced its row.
 export function queueTick(view: PrinceListView, row: HTMLElement): void {
 	const line = lineOf(row);
-	if (line === null) return;
+	if (line !== null) queueTickAt(view, line, row, null);
+}
+
+// Ticks the item at `line` when `done`, unticks it when not, and does nothing when it already is so;
+// null switches it whichever way it is. `row`, when it still stands for that item, shows the change.
+export function queueTickAt(view: PrinceListView, line: number, row: HTMLElement | null, done: boolean | null): void {
 	const pending = view.editing.track(line);
 	const seen = view.outsideChanges;
 	const file = view.file;
@@ -21,7 +26,7 @@ export function queueTick(view: PrinceListView, row: HTMLElement): void {
 		try {
 			// With another file in the view, or none, the tap is moot and nothing need be said.
 			if (view.viewClosed || view.file !== file) return;
-			await tick(view, row, pending, seen);
+			await tick(view, row, pending, seen, done);
 		} finally {
 			view.editing.untrack(pending);
 		}
@@ -30,7 +35,7 @@ export function queueTick(view: PrinceListView, row: HTMLElement): void {
 
 // Parsed from the view's text, which the write's guard expects, not taken from the last render: an
 // earlier tick may have changed the text since, and an edit of the older lines would undo it.
-async function tick(view: PrinceListView, row: HTMLElement, pending: { line: number | null }, seen: number): Promise<void> {
+async function tick(view: PrinceListView, row: HTMLElement | null, pending: { line: number | null }, seen: number, done: boolean | null): Promise<void> {
 	for (let attempt = 0; attempt < 2; attempt++) {
 		// An outside change while this tap waited may have moved lines, and ticking the wrong item is
 		// worse than dropping the tap. A silent drop would look like a lost tick.
@@ -43,8 +48,8 @@ async function tick(view: PrinceListView, row: HTMLElement, pending: { line: num
 		const text = view.text;
 		const { lines, model } = view.parse();
 		const item = itemAt(model, titleLine);
-		if (!item) return;
 		const now = new Date();
+		if (!item || done === itemRow((lines[titleLine] as Line).text, titleLine, now).done) return;
 		const edited = tryEdit(() => toggleItem(lines, item, now));
 		if (!edited) return;
 		// A title field with focus makes the same tick to the line it saved (syncTitleField).
@@ -54,7 +59,7 @@ async function tick(view: PrinceListView, row: HTMLElement, pending: { line: num
 			// Obsidian's echo of this write returns early in setViewData, so the row is updated here. A
 			// tick moves no line, so the row still stands for this item. A redraw during the write,
 			// such as "Show archived", drew from the text before the tick, so the view redraws again.
-			if (row.isConnected && lineOf(row) === titleLine) showDone(row, itemRow((edited[titleLine] as Line).text, titleLine, now));
+			if (row?.isConnected && lineOf(row) === titleLine) showDone(row, itemRow((edited[titleLine] as Line).text, titleLine, now));
 			else view.render();
 			return;
 		}

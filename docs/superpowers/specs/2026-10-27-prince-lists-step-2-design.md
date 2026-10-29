@@ -174,9 +174,9 @@ current todo app. Step one's own "Done when" doesn't change.
   next one. Leaving a new item with an empty title removes it, as in the list view.
 - **Deleting (call):** a trash button shows at the end of the title field while it's open, on
   desktop and mobile, since mobile has no long-press menu. On desktop, right-clicking an item
-  offers Delete too. Both show the Undo message, as Delete does in the list view. The trash button
-  deletes without saving what was typed in the field **(call)**, so Undo brings back the item as
-  the file had it.
+  offers Delete item too. Both show the Undo message, as Delete item does in the list view. The
+  trash button deletes without saving what was typed in the field **(call)**, so Undo brings back
+  the item as the file had it.
 - **Dragging** works within the block, within and between sections: with the mouse on desktop and
   hold-and-move on mobile, with the list view's drop rules. Lifting an item closes an open
   title field and saves it. A hold on an item opens no menu, and a swipe that starts no lift
@@ -351,7 +351,8 @@ current todo app. Step one's own "Done when" doesn't change.
 
 - **The card's star button (owner, 2026-10-27)** sits between the When and the ⋯ and adds or
   removes the star: an outline when the item has none, filled in `--color-yellow` when it has one.
-  The item menu has no star entry **(owner)**, so the star is set only from the open card.
+  A list's row adds or removes it from its right-click menu too **(owner, 2026-10-29)**, where the
+  item menu at first had no star entry **(owner)**: the step one design's "Item actions".
 - **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
   show: a list, the Schedule view and a list inside another note.
 

@@ -3,21 +3,22 @@ import { SCHEDULE_ICON } from '../constants';
 import { collapseChoices } from '../core/collapsed';
 import type { TrackedLine } from '../core/editing';
 import { endOfSection, sectionLastLine } from '../core/list-actions';
-import { itemAt, type ItemBlock, type ListModel, type Section } from '../core/parse';
+import { itemAt, type ListModel, type Section } from '../core/parse';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import { editInMarkdown } from '../obsidian/switch';
 import { addItem, followPlace } from './add-button';
-import { focusCardTitle, isNewEmptyItem } from './card';
+import { CARD_CLASS, focusCardTitle, isNewEmptyItem } from './card';
 import { deleteHeadingAt, deleteItemAt } from './delete';
 import { addHeading, openHeadingField } from './heading-field';
+import { itemQuickMenu } from './item-quick-menu';
 import type { PrinceListView } from './list-view';
+import { atLine, trackWhileShown } from './menu-anchor';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
-import { CHANGED_ELSEWHERE_NOTICE, enqueueAt, SAVE_FAILED_NOTICE } from './write';
+import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
 // The item actions, from a right-click on desktop and the card's ⋯ (spec, "Item actions").
-export function itemMenu(view: PrinceListView, item: ItemBlock, menu: Menu): void {
-	const anchor = trackWhileShown(view, item.titleLine, menu);
+export function itemMenu(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 	menu.addItem((entry) =>
 		entry
 			.setTitle('New item below')
@@ -38,7 +39,7 @@ export function itemMenu(view: PrinceListView, item: ItemBlock, menu: Menu): voi
 	);
 	menu.addItem((entry) =>
 		entry
-			.setTitle('Delete')
+			.setTitle('Delete item')
 			.setIcon('trash-2')
 			.setWarning(true)
 			.onClick(atLine(anchor, (line) => deleteItemAt(view, line))),
@@ -197,13 +198,13 @@ export function showCardMenu(view: PrinceListView, button: HTMLElement): void {
 	const item = line === null ? undefined : itemAt(view.parse().model, line);
 	if (!item) return;
 	const menu = new Menu();
-	itemMenu(view, item, menu);
+	itemMenu(view, trackWhileShown(view, item.titleLine, menu), menu);
 	const { left, bottom, width } = button.getBoundingClientRect();
 	menu.showAtPosition({ x: left, y: bottom, width, overlap: true, left: true }, button.doc);
 }
 
 function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
-	const row = target.closest(`.${ITEM_CLASS}`);
+	const row = target.closest<HTMLElement>(`.${ITEM_CLASS}`);
 	const heading = row ? null : target.closest(`.${HEADING_CLASS}`);
 	const line = row ? lineOf(row) : heading ? lineOf(heading) : null;
 	if (line === null) return null;
@@ -212,8 +213,14 @@ function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
 	const section = heading ? model.sections.find((s) => s.headingLine === line) : undefined;
 	if (!item && !section) return null;
 	const menu = new Menu();
-	if (item) itemMenu(view, item, menu);
-	else if (section) headingMenu(view, model, section, menu);
+	if (item && row) {
+		const anchor = trackWhileShown(view, item.titleLine, menu);
+		// The open card shows its box, star and date already, so it gets what its ⋯ has.
+		if (!row.classList.contains(CARD_CLASS)) itemQuickMenu(view, item, row, anchor, menu);
+		itemMenu(view, anchor, menu);
+	} else if (section) {
+		headingMenu(view, model, section, menu);
+	}
 	return menu;
 }
 
@@ -254,22 +261,7 @@ function editItemInMarkdown(view: PrinceListView, line: number): void {
 	});
 }
 
-// The menu's line follows the view's edits while it shows: on mobile, the tap that opened it also
-// closed the card, which can remove an empty item above it meanwhile.
-function trackWhileShown(view: PrinceListView, line: number, menu: Menu): TrackedLine {
-	const anchor = view.editing.track(line);
-	menu.onHide(() => view.editing.untrack(anchor));
-	return anchor;
-}
-
 // A place with no line to track, the part before the first heading, acts with null.
 function atAnchor(anchor: TrackedLine | null, action: (line: number | null) => void): () => void {
 	return anchor ? atLine(anchor, action) : () => action(null);
-}
-
-function atLine(anchor: TrackedLine, action: (line: number) => void): () => void {
-	return () => {
-		if (anchor.line === null) new Notice(CHANGED_ELSEWHERE_NOTICE);
-		else action(anchor.line);
-	};
 }
