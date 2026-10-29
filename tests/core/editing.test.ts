@@ -485,4 +485,13 @@ describe('a visit to the notes', () => {
 		expect(state.saveNotes({ from: 0, to: 1, lines: ['mine'] })).toEqual({ lost: true });
 		expect(state.visitText()).toBeNull();
 	});
+
+	test('a change outside the lines the visit holds throws, as the editor and the file are out of step', () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n\tx\n- [ ] b\n`);
+		state.open(3);
+		state.openNotes('item');
+		const stale = { from: 1, to: 2, lines: ['y'] };
+		expect(() => state.notesChangeFits(stale)).toThrow('Lines 1 to 2 are not in the 1 lines of these notes');
+		expect(() => state.saveNotes(stale)).toThrow('Lines 1 to 2 are not in the 1 lines of these notes');
+	});
 });

@@ -8,7 +8,7 @@ import { EditHistory } from './history';
 import { parseItemLine } from './item-line';
 import { joinLines, splitLines, type Line } from './lines';
 import type { NotesChange } from './notes-lines';
-import { fitsInVisit, openVisit, saveInVisit, visitText, type NotesVisit } from './notes-visit';
+import { fitsInVisit, isVisit, openVisit, saveInVisit, visitText, type NotesVisit } from './notes-visit';
 import { outdentMarker, pieceText } from './note-pieces';
 import { itemAt, parseList, type ItemBlock, type ListModel } from './parse';
 import { startTitleField, syncTitleField, typeTitle, type TitleField } from './title-field';
@@ -132,7 +132,7 @@ export class ListEditing {
 	typeNotesPiece(markdown: string): Typed {
 		const found = this.selectedItem();
 		const session = this.piece;
-		if (!found || session?.notes !== 'item' || 'visit' in session) return { lost: true };
+		if (!found || session?.notes !== 'item' || isVisit(session)) return { lost: true };
 		const { lines, model, item } = found;
 		return this.refusable(session, () => {
 			const result = setNotesPiece(lines, model, item, session.piece, markdown);
@@ -174,7 +174,7 @@ export class ListEditing {
 
 	typeListNote(markdown: string): TypedListNote {
 		const session = this.piece;
-		if (session?.notes !== 'listNote' || 'visit' in session) return { lost: true };
+		if (session?.notes !== 'listNote' || isVisit(session)) return { lost: true };
 		const { lines, model } = this.parse();
 		return this.refusable(session, () => {
 			const { range, separator } = session.piece;
@@ -204,10 +204,13 @@ export class ListEditing {
 	/** The visit's own lines as its editor holds them, or null once an outside change took them. */
 	visitText(): string | null {
 		const visit = this.piece;
-		return visit && 'visit' in visit ? visitText(splitLines(this.text), visit) : null;
+		return isVisit(visit) ? visitText(splitLines(this.text), visit) : null;
 	}
 
-	/** Whether the visit's notes can take `change`. It changes nothing. Without a visit, a save says so. */
+	/**
+	 * Whether the visit's notes can take `change`. It changes nothing. Without a visit, a save says so.
+	 * Throws when `change` reaches past the lines the visit holds: the editor is out of step with them.
+	 */
 	notesChangeFits(change: NotesChange): boolean {
 		const found = this.visited();
 		return !found || fitsInVisit(found.lines, found.model, found.item, found.visit, change);
@@ -266,7 +269,7 @@ export class ListEditing {
 
 	private visited(notes?: NotesVisit['notes']) {
 		const visit = this.piece;
-		if (!visit || !('visit' in visit) || (notes && visit.notes !== notes)) return null;
+		if (!isVisit(visit) || (notes && visit.notes !== notes)) return null;
 		const found = visit.notes === 'item' ? this.selectedItem() : { ...this.parse(), item: null };
 		return found && { ...found, visit };
 	}

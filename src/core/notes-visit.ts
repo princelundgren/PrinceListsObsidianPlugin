@@ -13,6 +13,9 @@ export interface NotesVisit {
 	visit: true;
 }
 
+/** Whether the notes' open piece is a visit. */
+export const isVisit = (piece: { notes: NotesVisit['notes'] } | null): piece is NotesVisit => piece !== null && 'visit' in piece;
+
 /** A save in a visit: where its edit starts and of what kind, and for the list note the whole note. */
 export interface VisitSave {
 	lines: Line[];

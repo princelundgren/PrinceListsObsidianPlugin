@@ -84,6 +84,12 @@ describe("a visit to a card's notes", () => {
 		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n  one\n\ttwo!\n- [ ] b\n`);
 	});
 
+	test('a touched line whose shown indent was deleted takes the notes\' indent', () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n  one\n\ttwo\n- [ ] b\n`, 3);
+		editor(state, 'item').type('one\ntwo');
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n  one\n  two\n- [ ] b\n`);
+	});
+
 	test("a touched lazy line takes the notes' indent, so a list marker typed on it stays in the notes", () => {
 		const state = editing(`${FRONTMATTER}- [ ] a\n\tone\nlazy\n- [ ] b\n`, 3);
 		expect(saved(editor(state, 'item').type('one\n- lazy'))).toBe(true);
