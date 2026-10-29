@@ -36,6 +36,7 @@ export default class PrinceListsPlugin extends Plugin {
 						item
 							.setTitle('New list')
 							.setIcon(RIBBON_ICON)
+							.setSection('action-primary')
 							.onClick(() => void this.newList(file)),
 					);
 				} else if (file instanceof TFile && canTurnIntoList(this.app, file)) {

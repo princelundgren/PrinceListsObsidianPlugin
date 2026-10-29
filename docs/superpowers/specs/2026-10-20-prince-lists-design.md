@@ -783,9 +783,11 @@ stays, and the blank line stays with it.
 **Creating a list has three routes (owner):**
 
 - Right-click a folder in the file explorer and choose New list (`workspace.on('file-menu')`),
-  named as Obsidian's own entries there are, such as New note and New canvas. The list is created
-  in that folder. On mobile this is a long-press on the folder, confirmed on an iPhone in the 1a
-  checks; Android isn't checked.
+  named as Obsidian's own entries there are, such as New note and New canvas, and among them at
+  the top of the menu **(owner, 2026-10-29)**: `MenuItem.setSection('action-primary')`, the
+  section ID those entries carry in the menu's `data-section`. The list is created in that folder.
+  On mobile this is a long-press on the folder, confirmed on an iPhone in the 1a checks; Android
+  isn't checked.
 - The "Create new list" command, named as Obsidian's own are, such as "Create new canvas"
   **(owner, 2026-10-27)**. It's in the command palette on desktop and mobile, and you can give
   it a hotkey under Settings → Hotkeys. The plugin sets no default hotkey, because Obsidian's
