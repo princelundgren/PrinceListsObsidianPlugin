@@ -64,7 +64,8 @@ You can embed lists in normal notes.
 
 - **Any Markdown:** links, checklists, tables and code.
 - **A toolbar** for bold, italic, links, lists, tables and more.
-- **Pictures:** paste or drop them in.
+- **Pictures:** paste or drop them in. On iOS, paste them: a picture dropped from Photos doesn't
+  reach Obsidian.
 
 **Across lists**
 

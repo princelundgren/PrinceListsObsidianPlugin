@@ -616,6 +616,8 @@ stays, and the blank line stays with it.
   - **Dropping (call):** a picture file dropped on an open card is saved and linked. Any other drag
     leaves the card alone. Where the platform hides a drag's file kinds until the drop, as iOS does,
     the card accepts any file drag and checks each file when it lands **(owner, 2026-10-27)**.
+    On iOS 18.7 a picture dragged from Photos lands with no file, in Obsidian's own editor too,
+    so the card says none came and to paste it instead **(owner, 2026-10-29)**.
   - **Names (call):** a pasted picture is named `Pasted image YYYYMMDDHHmmss.<ext>` in local time,
     as Obsidian names its own. A dropped one keeps its name, with `#`, `^`, `|`, `[` and `]`
     replaced by `-`, since in a link they start a heading, a block, an alias or the brackets.
