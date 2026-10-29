@@ -16,9 +16,11 @@ release it as `1.1.0`.
   always a file line.
 - **Editor line `n` is file line `start + n`,** where `start` is the visit's first line. The notes
   as parsed leave out empty lines at their start and end (a card's from `notesStartLine`, the list
-  note's from its first line with text), so the editor takes the notes as parsed only when it's
-  created, when a visit ends, and when an outside change loses the visit. While a visit lasts, a
-  sync takes the visit's own file lines, and the editor's own changes never reload it.
+  note's from its first line with text), so the editor takes the notes as parsed only outside a
+  visit: when it's created, on a redraw while it hasn't focus, when a visit ends, and when an
+  outside change loses the visit. While a visit lasts, a sync takes the visit's own file lines, and
+  the editor's own changes never reload it. Empty notes are the one exception to `start + n`: the
+  editor holds one empty line that maps to no file line.
 - **A change the layout can't take never lands.** An `EditorState.changeFilter` asks the core
   whether the change fits and stops it when it doesn't, so it never reaches the document or the
   editor's history.
@@ -61,11 +63,14 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - **The manifest:** `minAppVersion` stays `1.5.7` (design risk 1). Obsidian APIs this plan names,
   checked in `obsidian.d.ts` 1.14.4: `MarkdownRenderer.render`, `Workspace.openLinkText` and
   `MetadataCache.getFirstLinkpathDest`, already used; and `Vault.getResourcePath(file)`, `@since
-  0.9.7`, new here (not the adapter's, which `FileSystemAdapter` has `@since 1.7.2`).
+  0.9.7`, new here (not `DataAdapter.getResourcePath`, which the mobile `CapacitorAdapter` has only
+  `@since 1.7.2`).
 - **CodeMirror APIs** this plan names, from its reference manual: `EditorView`,
   `EditorView.updateListener`, `EditorView.domEventHandlers`, `EditorView.lineWrapping`,
-  `EditorView.posAtCoords`, `EditorState.create`, `EditorState.changeFilter`,
-  `Transaction.addToHistory`, `Annotation`, `Compartment`, `StateField`, `ViewPlugin`, `Decoration`,
+  `EditorView.posAtCoords`, `EditorView.focusChangeEffect` (`@codemirror/view` 6.9.0, part of design
+  risk 1's check), `EditorState.create`, `EditorState.changeFilter`, the `filter: false` transaction
+  option, `Transaction.addToHistory`, `Transaction.newDoc`, `Annotation`, `Compartment`,
+  `StateField`, `ViewPlugin`, `Decoration`,
   `WidgetType`, `placeholder`, `keymap`, `history`, `historyKeymap`, `defaultKeymap`, `undo`, `redo`,
   `indentMore`, `indentLess`, `indentUnit` and `syntaxTree`. Not `EditorView.setState` or `reset`:
   they redraw every widget.
@@ -85,8 +90,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   tests it in the core; Task 2 checks it by hand.
 - **An input method or dictation on a phone,** with a refused change stopped mid-word. No text is
   lost or doubled. Task 2 checks it on the iPhone and Android.
-- **The same list in two panes with the same card open.** Typing in one shows in the other at once,
-  with its caret kept. Task 2 checks it by hand.
+- **The same list in two panes with the same card open.** Typing in one shows in the other once it
+  saves, with that card's notes in step and its caret kept. Task 2 checks it by hand.
 - **Notes with empty lines at their start or end, and mixed tab and space indents.** An editor line
   keeps writing the same file line until the visit ends, and a touched line keeps its own indent.
   Task 1 tests it.
@@ -99,9 +104,11 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 ### Task 1: Save a line range of the notes
 
 **Files:**
-- Create: `src/core/notes-lines.ts`, `tests/core/notes-lines.test.ts`
-- Modify: `src/core/editing.ts`, `tests/core/editing.test.ts`,
-  `docs/superpowers/specs/2026-10-29-notes-in-one-editor-design.md` (header)
+- Create: `src/core/notes-lines.ts`, `tests/core/notes-lines.test.ts`, `src/core/notes-visit.ts`
+  (the visit's state and saves, which `ListEditing` holds, so `editing.ts` stays near 300 lines)
+- Modify: `src/core/editing.ts`, `src/core/edit-piece.ts`, `src/core/edit-list-note.ts`,
+  `tests/core/editing.test.ts`, `docs/superpowers/specs/2026-10-29-notes-in-one-editor-design.md`
+  (header and "Saving")
 
 **Interfaces:**
 - Produces, in `src/core/notes-lines.ts`:
@@ -113,19 +120,22 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     overlap; null when the texts are equal. An inserted line among equal lines rewrites none of
     them.
   - `NotesSpan { range: LineRange; indent: string; separator: boolean; blankAfter: boolean }`: the
-    editor's notes in file lines. An editor holding one empty line is empty notes, an empty `range`.
-    `separator`: the empty line above `range.start` is the one the notes' first text wrote under the
-    title, which a change that empties the notes takes again. `blankAfter` is the list note's, as in
-    `ListNotePiece`.
+    editor's notes in file lines. An editor holding one empty line is empty notes, an empty `range`,
+    and that line maps to no file line: a change to empty notes saves as an insert at `range.start`
+    of every line the editor then holds, and a change that leaves the editor one empty line removes
+    the whole range. `separator`: the empty line above `range.start` is the one the notes' first
+    text wrote under the title, which a change that empties the notes takes again; `openNotes` sets
+    it when the notes are empty. `blankAfter` is the list note's, as in `ListNotePiece`.
   - `saveItemNotesLines(lines: readonly Line[], model: ListModel, item: ItemBlock, span: NotesSpan,
     change: NotesChange): { lines: Line[]; span: NotesSpan }` and `saveListNoteLines(lines, model,
     span, change): { lines: Line[]; span: NotesSpan; note: string }`: file lines `[range.start +
     from, range.start + to)` replaced by `change.lines`, one file line each, with no empty lines
     trimmed. A new line takes the span's indent; a line that was in the file keeps its own leading
     whitespace when the change kept it; an empty line is written as `''`. The run goes through
-    `replaceRun` with the block keys `setNotesPiece` and `setListNotePiece` use, and throws
-    `UnsafeEditError` as they do. The list note keeps its own rules from `planSave`: the blank line
-    after the note when the change ends it, and the unclosed-block exception.
+    `replaceRun` and throws `UnsafeEditError` as the piece saves do. Task 1 moves the item's block
+    keys out of `setNotesPiece`, and the list note's block keys and `planSave`'s blank-after and
+    unclosed-block rules out of `setListNotePiece` and `planSave`, into exported helpers that take
+    file lines, without `typedLines`; both saves call them, so Task 8 keeps them.
 - Produces, in `src/core/editing.ts`, on `ListEditing`, taking the open piece's place so
   `followRange` and `mapPieceRange` serve a visit as they serve a piece:
   - `openNotes(kind: 'item' | 'listNote'): string | null`: starts a visit to the open card's notes
@@ -148,7 +158,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - [ ] **Step 1: Set the design's header** to `status: building`, `verified` today, and `governs:
   [src/**, styles.css, manifest.json]`, as step two's design has. In its "Saving", say the lines go
   through the piece save's layout check (`replaceRun`) rather than `setNotesPiece` itself, since
-  that drops empty lines at the end of what it saves.
+  that drops empty lines at the end of what it saves; and that a refused change never lands,
+  stopped by an `EditorState.changeFilter`, since taking it back afterward let undo restore a
+  refused deletion twice.
 - [ ] **Step 2: Write the failing tests:**
   - `changedLines`: typing in line 2 of 3 gives `{ from: 1, to: 2, lines: ['ab'] }`; Enter at the
     end of `a` in `x\na\ny` gives `{ from: 2, to: 2, lines: [''] }`; joining two lines; erasing all
@@ -169,6 +181,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     note.
   - Empty notes: the first text gets one empty line under the title, as a new piece does, and the
     span's start moves past it; erasing it again takes that line too; typing again writes it once.
+  - Enter in empty notes, then `x` on the second line: the file holds the empty line under the
+    title, an empty line and `x`, and `visitText` equals the editor's text.
   - An empty line typed at the end of the notes, then text on it: the text lands on the line the
     empty one took, and the next item's title is untouched (design risk 4). The list note writes
     its blank line after the note once.
@@ -200,36 +214,45 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 
 **Interfaces:**
 - Consumes: Task 1.
-- Produces, in `src/view/notes-source.ts`: `NotesSource { kind: 'card' | 'listNote'; read(): {
+- Produces, in `src/view/notes-source.ts`: `NotesSource { kind: 'item' | 'listNote'; read(): {
   markdown: string; start: number } | null; open(): string | null; visitText(): string | null;
-  fits(change: NotesChange): boolean; save(change: NotesChange): Typed; close(): void }`, the notes
-  an editor holds, and `cardNotesSource(view: PrinceListView, card: Card): NotesSource`. `read`
-  gives the notes as parsed, `open` starts a visit, `visitText` and `fits` are Task 1's, `save` goes
+  visitStart(): number | null; fits(change: NotesChange): boolean; save(change: NotesChange): Typed;
+  close(): void }`, the notes an editor holds, and `cardNotesSource(view: PrinceListView, card:
+  Card): NotesSource`. `read` gives the notes as parsed, `open` starts a visit, `visitText` and
+  `fits` are Task 1's, `visitStart` is the visit's `range.start` or null outside one, `save` goes
   through `saveNotes` (`saveListNote` with its warnings in Task 7).
 - Produces, in `src/view/notes-editor.ts`:
   - `showNotesEditor(view: PrinceListView, source: NotesSource, area: HTMLElement): EditorView`:
     creates the editor in `area` once, or, for the one already there, syncs it. The card keeps it
     in `card.editor` in place of `card.notes`, and closing the card destroys it.
   - `syncNotesEditor(editor: EditorView, markdown: string): void`: unless the text is already
-    `markdown`, dispatches the change `changedLines` gives, annotated as a sync and with
-    `Transaction.addToHistory.of(false)`, so the selection maps through it. It clears the editor's
-    history by reconfiguring the `history()` extension's `Compartment` to nothing and back, so its
-    undo never takes back a change it didn't make. A sync is never saved or filtered.
+    `markdown`, dispatches the change `changedLines` gives, annotated as a sync, with
+    `Transaction.addToHistory.of(false)` and `filter: false`, so the selection maps through it and
+    no change filter sees it. It then clears the editor's history in two more transactions,
+    reconfiguring the `history()` extension's `Compartment` to nothing and then back (both in one
+    leaves the history in place), so its undo never takes back a change it didn't make. A sync is
+    never saved.
   - When a sync runs: on creating and on blur (the visit ends, `source.close()`), with
     `source.read()`; on each redraw while the editor hasn't focus, with `source.read()`; and with
     focus, after an outside change, the list's undo or redo, or a tick from elsewhere, with
     `source.visitText()`, or with `source.read()` and a new visit when that is null. On focus,
     `source.open()` starts a visit, and the editor syncs to the text it returns, which is the text it
-    already holds unless the file changed unseen.
-  - An `EditorState.changeFilter` stops a change that isn't a sync when `source.fits` is false for
-    `changedLines(tr.startState.doc, tr.newDoc)`, and shows step one's notice once per visit, so a
-    refused change never reaches the document or the editor's history (design, "Saving").
-  - Each doc change that isn't a sync is saved from an `EditorView.updateListener`:
-    `changedLines(before, after)` to `source.save`, then `view.handleTyped`. A lost one syncs, and
-    when the item itself is gone the card closes as step one says, with its "Copy text".
+    already holds unless the file changed unseen. Focus comes from `EditorView.focusChangeEffect`.
+    Moving to another window or app doesn't end a visit, as `onFocusOut` in `events.ts` keeps the
+    list title's field.
+  - An `EditorState.changeFilter` returns true when `!tr.docChanged`; otherwise it stops the change
+    when `source.fits` is false for `changedLines(tr.startState.doc.toString(),
+    tr.newDoc.toString())`, and shows step one's notice once per visit, so a refused change never
+    reaches the document or the editor's history (design, "Saving").
+  - Saving, from an `EditorView.updateListener`: for each transaction in `update.transactions` that
+    changed the doc and isn't a sync, `changedLines(tr.startState.doc.toString(),
+    tr.state.doc.toString())` to `source.save`, then `view.handleTyped`, so a sync batched into the
+    same update is never saved. A lost or refused one syncs, and when the item itself is gone the
+    card closes as step one says, with its "Copy text".
 - Produces, in `src/view/notes-keys.ts`: `notesKeymap(view: PrinceListView)`, then
-  `historyKeymap`, then `defaultKeymap` without its `Mod-Enter` and `Escape` bindings, filtered by
-  `key`: Cmd+Enter stays the list's add, and Escape the view's, which closes the card.
+  `historyKeymap`, then `defaultKeymap` without its `Mod-Enter`, `Escape`, `Mod-[` and `Mod-]`
+  bindings, filtered by `key`: Cmd+Enter stays the list's add, Escape the view's, which closes the
+  card, and only Tab indents, on list items.
   - Enter: `insertNewlineContinueMarkupCommand({ nonTightLists: false })`; Backspace:
     `deleteMarkupBackward`.
   - Cmd+Shift+Z: `redo`, which `historyKeymap` binds only on macOS and Linux.
@@ -238,7 +261,7 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   - Cmd+B, Cmd+I and Cmd+K: `formatSelection` from `src/core/format.ts` on the selection, one
     change.
   - `runNotesBarAction(editor: EditorView, action: BarAction): void`: Undo and Redo through
-    `undo` and `redo`, the rest as the keys.
+    `undo` and `redo`, the rest as the keys. `format.ts` exports `BarAction`.
 - `buildFormatBar(after: HTMLElement)` takes the element the bar follows, the editor's `dom` here.
   The bar shows only while the editor has CodeMirror's `cm-focused` class. A press keeps focus.
   `styles.css` gets the phone's one row: `.princelists-is-mobile .princelists-format-bar` with
@@ -273,10 +296,13 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     two lines, then Cmd+Z: nothing is doubled.
   - Leaving the notes, then Cmd+Z in the list: the visit goes back as one step, and in the notes
     again Cmd+Z does nothing.
-  - The same list in two panes: typing in one card shows in the other at once.
-  - On the iPhone: Backspace on an empty line, autocorrect and dictation, a Japanese keyboard's
-    Enter that confirms a word, and a refused change mid-word with autocorrect on (design risk 5). On Android: the keyboard's Backspace and
-    Enter, and the bar above it (design risk 6).
+  - The same list in two panes: typing in one card shows in the other once it saves, with that
+    card's notes in step.
+  - Switching to another app and back keeps the visit: Cmd+Z after it still undoes the typing.
+  - On the iPhone: Backspace on an empty line, autocorrect and dictation, and a Japanese keyboard's
+    Enter that confirms a word (design risk 5). A refused change mid-word with autocorrect on: the
+    word up to the refused step stays and nothing is doubled; if it doubles, raise it in the pull
+    request. On Android: the keyboard's Backspace and Enter, and the bar above it (design risk 6).
   - Right-click in the notes on desktop shows no item menu (design risk 8).
   - Write down `main.js`'s size before and after.
 - [ ] **Step 6: Commit** with the message "Edit a card's notes in one editor".
@@ -293,9 +319,10 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   `[[…]]` and `![[…]]` in a line, in order, with columns `[from, to)`. `linkpath` is the part before
   `|`; `display`, the part after it. The Markdown parser has no wikilinks, so the drawing finds them
   here and skips those inside inline code or a code block by `syntaxTree`.
-- Produces, in `src/view/notes-drawing.ts`: `notesDrawing(view: PrinceListView, sourcePath: string)`,
-  a `ViewPlugin` whose decorations follow the design's "What shows drawn" for inline marks and
-  lines, rebuilt when the doc, the selection, the focus, the viewport or the syntax tree changes:
+- Produces, in `src/view/notes-drawing.ts`: `notesDrawing(view: PrinceListView, sourcePath:
+  string)`, a `ViewPlugin` whose decorations follow the design's "What shows drawn" for inline
+  marks and lines, rebuilt when the doc, the selection, the focus, the viewport or the syntax tree
+  changes:
   - Inline marks (`EmphasisMark`, `StrikethroughMark`, `InlineCode`'s `CodeMark`, `<u>`), links,
     wikilinks, pictures and bullets hide their Markdown unless the selection touches them; heading
     marks, quote marks and rules unless the caret's line is theirs. Without focus, nothing shows
@@ -307,7 +334,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   - A link is an `a` mark (`Decoration.mark({ tagName: 'a' })`) with `internal-link` and
     `data-href`, or `external-link` and `href`. The view's delegated click and right-click listeners
     in `events.ts` already follow it with `handleLinkClick` and show `handleLinkMenu`; the editor's
-    own handlers leave links to them, so a link opens once.
+    own handlers leave links to them, so a link opens once. The editor's `mousedown` handler on a
+    drawn link returns true and prevents the default, so the caret stays put and the link stays
+    drawn for the click.
   - Tags, footnotes, `%%` comments and anything else show as typed.
 
 - [ ] **Step 1: Write the failing tests** for `wikiLinks`: `[[a]]`, `[[a|b]]`, `[[a#h|b]]`,
@@ -318,23 +347,28 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - [ ] **Step 5: Check it by hand on desktop and mobile,** side by side with the same Markdown in a
   note in Live Preview: each mark, link, picture and bullet shows its Markdown only while the
   selection touches it; headings, quotes and rules only on the caret's line; a click lands on the
-  character clicked; a click on a link opens it, Cmd+click in a new tab; nothing shows its Markdown
-  once the editor loses focus.
+  character clicked; a click on an internal link opens it, Cmd+click in a new tab, and a click on
+  an external link opens it in the browser (if it doesn't inside the editor, raise it in the pull
+  request rather than working around it); nothing shows its Markdown once the editor loses focus.
 - [ ] **Step 6: Commit** with the message "Draw a card's notes as Live Preview does".
 
 ### Task 4: Tick checkboxes drawn in the notes
 
 **Files:**
 - Modify: `src/core/checklist.ts`, `tests/core/checklist.test.ts`, `src/view/notes-drawing.ts`,
-  `src/view/notes-editor.ts`, `src/view/checklist.ts`
+  `src/view/notes-editor.ts`, `src/view/checklist.ts`, `src/view/events.ts`
 
 **Interfaces:**
 - Consumes: Task 3's drawing.
 - Produces, in `src/core/checklist.ts`: `planNotesLineTick(text: string, contentStart: number,
   notesOf: number | 'listNote', line: number, lineText: string): PlannedLineEdit | null`: ticks
-  file line `line` with `toggleChecklistLine` when it still reads `lineText` and is a checklist line
-  of the notes of the item at title line `notesOf`, or of the list note; null otherwise. Unlike
-  `planChecklistTick`, it doesn't count boxes, so `%%` and `$$` in the notes don't stop it.
+  file line `line` with `toggleChecklistLine` when it still reads `lineText`, lies within the notes'
+  lines (of the item at title line `notesOf`, or of the list note) and `parseItemLine` reads it as a
+  checklist item; null otherwise. Unlike `planChecklistTick`, it doesn't go through `checklistOf`,
+  so `%%` and `$$` in the notes don't stop it.
+- The editor's `domEventHandlers` handle every box it draws, Task 5's disabled ones included;
+  `events.ts`'s `.task-list-item-checkbox` handling and `keepNotesFocused` leave boxes inside the
+  editor to it, so a click ticks once.
 - A `TaskMarker` outside a big block draws as a checkbox widget that knows its editor line. Its
   mousedown is prevented, so it never takes focus. A click with focus is the editor's own change, in
   its history. A click without focus writes through `planNotesLineTick` as `checklistClick` writes:
@@ -357,8 +391,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 **Files:**
 - Create: `src/core/drawn-blocks.ts`, `tests/core/drawn-blocks.test.ts`,
   `src/view/notes-blocks.ts`
-- Modify: `src/core/checklist.ts`, `tests/core/checklist.test.ts`, `src/view/notes-editor.ts`,
-  `src/view/notes-drawing.ts`, `styles.css`
+- Modify: `src/view/notes-editor.ts`, `src/view/notes-drawing.ts`, `src/view/events.ts`,
+  `styles.css`, `docs/superpowers/specs/2026-10-29-notes-in-one-editor-design.md` ("Checkboxes")
 
 **Interfaces:**
 - Produces, in `src/core/drawn-blocks.ts`: `DrawnBlock { lines: LineRange; kind: 'table' | 'code'
@@ -367,30 +401,28 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   block, embed of a note alone on its line, and HTML block in the notes, in order, at any depth of
   list, but none inside another. It reads the notes as `notePieces` does, through `maskBlocks` and
   CommonMark, so it agrees with the save's and the ticks' parse.
-- Produces, in `src/core/checklist.ts`: `blockChecklist(lines: readonly Line[], start: number, end:
-  number): ChecklistLine[] | null`: the checklist lines of file lines `[start, end)` as
-  `checklistIn` reads them, null when those lines hold `%%` or `$$`, so a comment elsewhere in the
-  notes doesn't disable a block's boxes (design, "Checkboxes").
 - Produces, in `src/view/notes-blocks.ts`: `drawnBlocksField(view: PrinceListView, sourcePath:
   string)`, a `StateField` of block widgets (CodeMirror takes block decorations only from state):
   - One `Decoration.replace({ block: true })` over each block's lines, except the blocks the
-    selection touches while the editor has focus.
+    selection touches while the editor has focus. The field learns of focus from
+    `EditorView.focusChangeEffect`, since a `StateField` can't read the view.
   - A widget renders its Markdown, less its first line's indent, with `MarkdownRenderer.render`
     and a `Component` of its own, a child of the list view, removed in the widget's `destroy`. Its
     `eq` compares the Markdown and kind, so typing elsewhere doesn't redraw it.
   - A mousedown on a drawn block puts the caret at the start of its first line and focuses the
     editor, without scrolling the card; on a link in it, the link opens instead.
-  - Its boxes tick by step two's "Ticking checklists" rules, counted within the block's lines
-    (`blockChecklist` and `boxesMatchChecklist`), with focus as Task 4's widget does, without it
-    through `planNotesLineTick`.
+  - Its boxes draw disabled (owner): step two's count can't line one up with its line, since it
+    doesn't read list items behind `>`, and tables, code, math, HTML and another note's embed hold
+    no checklist line of these notes. A click on one shows the block's Markdown, where `[ ]` can be
+    typed. This task updates the design's "Checkboxes" bullet on boxes in a drawn block to say so,
+    and why.
   - Task 3's drawing skips the lines of the drawn blocks.
 
 - [ ] **Step 1: Write the failing tests** on notes holding a table, a fence with an empty line
   inside, a callout holding a list and a table, a plain quote (not drawn), a `$$` block with an
   empty line inside, `![[Other note]]` alone on its line, `![[p.png]]` alone on its line (not
   drawn), a `<div>` block, a fence inside a list item (only its own lines), and an unclosed fence,
-  drawn to the end of the notes. `blockChecklist` on a table's lines in notes holding `%%`
-  elsewhere gives its lines; on lines holding `$$`, null.
+  drawn to the end of the notes.
 - [ ] **Step 2: Run** `npm test`. Expected: FAIL. Then implement and expect PASS.
 - [ ] **Step 3: Build the field.**
 - [ ] **Step 4: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
@@ -398,7 +430,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   note and shows its Markdown once the caret enters it, with the arrow keys or a click; a click
   inside a drawn table or callout doesn't jump the card's scroll; typing elsewhere doesn't redraw a
   block; an embedded note's widget unloads when it's taken away, so its embed's own Component is
-  gone; a box in a callout stays disabled, as step two says.
+  gone; a box in a callout or an embedded note draws disabled, and a click on it shows the block's
+  Markdown.
 - [ ] **Step 6: Commit** with the message "Draw tables, code, callouts, math and embeds with
   Obsidian's renderer".
 
@@ -415,10 +448,11 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   whole list (`blockAfter` on the caret's line), as one change in the editor, and the caret moves to
   an empty line below them (step one, "Where the links go"). A picture dropped on the notes goes
   after the block it's dropped on, found with `posAtCoords`, and focuses the editor.
-- A picture widget carries its link's notes line and columns. The picture menu's Remove image and
-  Delete image use them, with `source.read().start`, as the `PictureLinkAt` for
-  `planPictureRemove`, so every picture drawn from a link in the notes gets them. A picture inside
-  a drawn embed gets none.
+- A picture widget carries its link's editor line and columns. The picture menu's Remove image and
+  Delete image use them as the `PictureLinkAt` for `planPictureRemove`: the file line is
+  `source.visitStart()` plus the editor line while a visit lasts, else `source.read().start` plus
+  it, and the columns are moved by the length of the indent the editor left off that line. So every
+  picture drawn from a link in the notes gets them. A picture inside a drawn embed gets none.
 
 - [ ] **Step 1: Build it.**
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.
@@ -497,9 +531,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   "Editing notes a block at a time", "Formatting in a card", "Ticking checklists" and "Right-click
   menus". In this design, record each deviation the build decided with its reason, including
   design risk 4: a typed empty line at the end stays in the file, and leaves the editor when the
-  visit ends, since the parse ends the notes at their last line with text; and that a box inside a
-  callout stays disabled, since step two's checklist doesn't count lines that start with `>`. Set
-  `verified` on all three.
+  visit ends, since the parse ends the notes at their last line with text. In its "Order", record
+  the plan's order and why. Set `verified` on all three.
 - [ ] **Step 4: Check it by hand on desktop and mobile** once more: a card's notes and the list note
   edit, draw, tick and take pictures as in Tasks 2 to 7.
 - [ ] **Step 5: Commit** with the message "Remove the block fields, and update the designs". Write
