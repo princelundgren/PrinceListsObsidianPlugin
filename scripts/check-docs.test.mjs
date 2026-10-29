@@ -10,6 +10,7 @@ import {
 	checkLinks,
 	checkPullRequestBody,
 	checkPullRequestTitle,
+	checkRawLinks,
 	checkText,
 	headingAnchors,
 	PR_PARTS,
@@ -153,6 +154,25 @@ test('reports missing files and headings, and passes good links', () => {
 		'README.md:5: broken link "/NOPE.md": no file NOPE.md',
 		'README.md:5: broken link "x%E0%A4%A.md": bad percent-encoding',
 		'docs/guide.md:1: broken link "../agents.md": no file agents.md',
+	]);
+});
+
+test('reports a raw link to this repo whose file is missing, in Markdown or HTML', () => {
+	const raw = 'https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin';
+	const docs = new Map([
+		['README.md', [
+			`![ok](${raw}/main/docs/images/a.gif) <img src="${raw}/a-branch/docs/images/b.webp" width="200">`,
+			`![gone](${raw}/main/docs/images/old.png) | <img src="${raw}/main/docs/images/c.webp"> |`,
+			`\`${raw}/main/NOPE.md\` ![other repo](https://raw.githubusercontent.com/someone/else/main/x.png)`,
+			'```',
+			`${raw}/main/IN-A-FENCE.md`,
+			'```',
+		].join('\n')],
+	]);
+	const files = new Set(['README.md', 'docs/images/a.gif', 'docs/images/b.webp']);
+	assert.deepEqual(lines(checkRawLinks(docs, files)), [
+		`README.md:2: broken link "${raw}/main/docs/images/old.png": no file docs/images/old.png`,
+		`README.md:2: broken link "${raw}/main/docs/images/c.webp": no file docs/images/c.webp`,
 	]);
 });
 

@@ -204,6 +204,23 @@ export function checkLinks(docs, files) {
 	return findings;
 }
 
+const RAW_LINK = /https:\/\/raw\.githubusercontent\.com\/princelundgren\/PrinceListsObsidianPlugin\/[^/\s]+\/([^\s"'<>)]+)/g;
+
+// checkLinks skips URLs, but the README links its pictures by full raw URL for Obsidian's plugin browser.
+export function checkRawLinks(docs, files) {
+	const findings = [];
+	for (const [path, text] of docs) {
+		for (const [index, line] of proseLines(text)) {
+			for (const [url, target] of withoutCodeSpans(line).matchAll(RAW_LINK)) {
+				if (!files.has(target)) {
+					findings.push(finding(path, index + 1, `broken link "${url}": no file ${target}`));
+				}
+			}
+		}
+	}
+	return findings;
+}
+
 export const PR_PARTS = [
 	'What does this PR do?',
 	'Why is this change needed?',
