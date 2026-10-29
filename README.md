@@ -55,7 +55,7 @@ You can embed lists in normal notes.
 
 **Items**
 
-- **Add** with the **+** or Cmd+Enter, and **drag** to reorder.
+- **Add** with the **+**, and **drag** to reorder.
 - **Star** an item and give it a date.
 - **Tick and forget:** ticked items hide after a day.
 - **Delete** with Undo.
@@ -76,8 +76,8 @@ You can embed lists in normal notes.
 
 **Keys and devices**
 
-- **Shortcuts:** Cmd+F filters, Cmd+Z undoes, and Cmd+B, Cmd+I and Cmd+K format. Use Ctrl on
-  Windows and Linux.
+- **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters, Cmd+Z undoes, and Cmd+B, Cmd+I and Cmd+K
+  format. Use Ctrl on Windows and Linux.
 - **Right-click menus** on items, headings, pictures and the list.
 - **Made for touch:** a floating **+**, finger-sized buttons, and hold to drag.
 - **Fits your theme,** light or dark.
