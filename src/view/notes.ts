@@ -38,7 +38,8 @@ export function renderInline(host: MarkdownHost, sourcePath: string, el: HTMLEle
 
 // For a host's click listener. True when the click was on a link, which then does only what a link
 // does: an internal one opens through the workspace, as in Kanban's renderMarkdown, and any other
-// keeps the browser's default. Either way it doesn't tick an item or open a card.
+// keeps the browser's default, or in the notes editor, where the browser follows no link, opens as it
+// would. Either way it doesn't tick an item or open a card.
 export function handleLinkClick(app: App, sourcePath: string, evt: MouseEvent, target: HTMLElement): boolean {
 	const link = target.closest('a');
 	if (!link) return false;
@@ -46,6 +47,10 @@ export function handleLinkClick(app: App, sourcePath: string, evt: MouseEvent, t
 		evt.preventDefault();
 		const linktext = linkText(link);
 		if (linktext) void app.workspace.openLinkText(linktext, sourcePath, Keymap.isModEvent(evt));
+	} else if (link.isContentEditable) {
+		evt.preventDefault();
+		const href = link.getAttr('href');
+		if (href) link.win.open(href, '_blank');
 	}
 	return true;
 }
