@@ -38,7 +38,7 @@ export function itemMenu(view: PrinceListView, item: ItemBlock, menu: Menu): voi
 	);
 	menu.addItem((entry) =>
 		entry
-			.setTitle('Delete')
+			.setTitle('Delete item')
 			.setIcon('trash-2')
 			.setWarning(true)
 			.onClick(atLine(anchor, (line) => deleteItemAt(view, line))),

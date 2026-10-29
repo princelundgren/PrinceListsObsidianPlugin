@@ -663,14 +663,14 @@ stays, and the blank line stays with it.
     a run of items can still be typed in one go. On mobile, "+" adds each next item.
   - In a new item whose title is still empty, Shift+Enter closes the card instead, which removes the
     item, so a second Shift+Enter ends a run of new items. "+" and New item below keep it, with the
-    cursor back in its title. Delete closes the card, which removes the item as a cancel, with no
-    Undo **(call)**.
+    cursor back in its title. Delete item closes the card, which removes the item as a cancel, with
+    no Undo **(call)**.
   - A new item is removed again if you close its card while its title is still empty and it has
     no notes **(call)**. Removing it restores the text from before it was added, so an empty line
     the insert wrote goes too. If the file changed outside the view while the card was open, the
     item is deleted from the current text instead, without a message **(call)**. If even that would
     change how the rest reads, the empty item stays and the view says so. Closing means Escape, a
-    click elsewhere, Enter, starting a drag, a menu choice that adds an item, Delete on it, or
+    click elsewhere, Enter, starting a drag, a menu choice that adds an item, Delete item on it, or
     Cmd+Z with focus outside its fields.
     Closing the list, switching files or a change from outside never removes an item, and an item
     that existed before the card opened is never removed this way.
@@ -686,9 +686,10 @@ stays, and the blank line stays with it.
 
 ### Item actions (owner)
 
-- **On desktop, right-click an item** for New item below, New heading below and Delete **(call)**.
-  Delete removes the item and its notes. Step two adds Edit in Markdown, and its star is a button
-  on the open card, not an entry here **(owner, 2026-10-27)**.
+- **On desktop, right-click an item** for New item below, New heading below and Delete item
+  **(call)**. Delete item removes the item and its notes, and its name says what goes **(owner,
+  2026-10-29)**. Step two adds Edit in Markdown, and its star is a button on the open card, not an
+  entry here **(owner, 2026-10-27)**.
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading and Delete heading. Step two adds Edit in Markdown, Collapse all headings and Expand all
   headings, and a menu on the list's background (step two's design, "Right-click menus").
@@ -720,10 +721,10 @@ stays, and the blank line stays with it.
     closed with the field open.
 - **A new heading inserted below an item takes the items after it (call).** This is the same as
   typing that heading into the raw file at that point.
-- **Undoing a delete (call):** after Delete or Delete heading, a message with an **Undo** button
+- **Undoing a delete (call):** after Delete item or Delete heading, a message with an **Undo** button
   shows for a few seconds. Removing an empty new item or heading is a cancel, with no Undo.
   Obsidian's File recovery core plugin, when enabled, is the backstop.
-- **Delete and Delete heading show in red (owner, 2026-10-20)** in every menu that has them,
+- **Delete item and Delete heading show in red (owner, 2026-10-20)** in every menu that has them,
   through `MenuItem.setWarning(true)`. The red comes from the `is-warning` class, so with Settings →
   Appearance → Native menus on, the desktop right-click menus may not show it (obsidian.md/help,
   Settings: native menus "will not be affected by your theme").

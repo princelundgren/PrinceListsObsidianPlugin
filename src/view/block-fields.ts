@@ -153,7 +153,7 @@ export function showBlockItemMenu(block: ListBlock, evt: MouseEvent, titleLine: 
 	const menu = new Menu();
 	menu.addItem((item) =>
 		item
-			.setTitle('Delete')
+			.setTitle('Delete item')
 			.setIcon('trash-2')
 			.setWarning(true)
 			.onClick(() => {
