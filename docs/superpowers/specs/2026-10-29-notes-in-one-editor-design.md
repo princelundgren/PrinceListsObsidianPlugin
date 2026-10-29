@@ -203,15 +203,18 @@ Compared with Obsidian's own editor side by side on desktop:
   note in small ways, and a theme that styles Obsidian's editor doesn't style this one.
 - **A CodeMirror update in Obsidian** could stop matching the bundled Markdown package. Risk 1
   checks it at the build, and again whenever `minAppVersion` moves.
+- **Obsidian 1.13.4 or later** (risk 1), where step two ran on 1.5.7.
 - **A drawn block shows its whole Markdown** once the cursor enters it: a table shows its pipes.
 - **A numbered checklist item,** `1. [ ]`, continues as a numbered item without a box: the command
   carries a box only for bullets.
 
 ## Risks to check during the build
 
-1. **Versions:** `@codemirror/lang-markdown`'s dependency ranges include the
-   `@codemirror/language`, `state` and `view` that Obsidian 1.5.7, the current `minAppVersion`, and
-   the current Obsidian ship, and the editor loads in both.
+1. **Versions:** the dependency ranges of `@codemirror/lang-markdown` and `@lezer/markdown`
+   include the `@codemirror/*` and `@lezer/common` that Obsidian ships from `minAppVersion` on, and
+   the editor loads there. `@lezer/markdown` 1.7 and later need `@lezer/common` 1.5, which public
+   Obsidian ships from 1.13.4 on (checked in each release's `app.js`), so `minAppVersion` goes
+   from 1.5.7 to 1.13.4 **(owner, 2026-10-29)**. Those on an older Obsidian keep PrinceLists 1.0.
 2. **Byte for byte:** focusing and leaving changes nothing; typing changes only the touched lines;
    mixed tab and space indents stay as they were; a file without a final newline and one with CRLF
    endings keep both (AGENTS.md).

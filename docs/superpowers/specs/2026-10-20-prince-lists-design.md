@@ -134,7 +134,7 @@ These are wanted later, roughly in this order. The file format already leaves ro
   from a script.
   - The CLI needs the Obsidian app running (Obsidian Help, "Obsidian CLI").
   - Whether it does anything on mobile is unverified.
-  - Using it means raising `minAppVersion` to at least 1.12.2.
+  - It needs Obsidian 1.12.2, which `minAppVersion` already covers.
 - **Importing from other todo apps.** Another app's lists could come in through its export or an
   integration; whether headings and notes survive is unverified.
 - **Moving old archived items** into an archive note.
@@ -961,8 +961,10 @@ From here on the document is for the builder.
   "Heading", "Notes"), seen only while it's empty, and a checkbox from a hidden copy of its item's
   title.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
-  `@since` tag in `obsidian.d.ts`. Every device must run at least that version, mobile
-  included. For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts").
+  `@since` tag in `obsidian.d.ts`, and from the CodeMirror and Lezer packages the bundled code
+  takes from Obsidian at runtime. Every device must run at least that version, mobile included.
+  For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts"). The notes editor
+  raises it to 1.13.4 **(owner, 2026-10-29)**: see its design's risk 1.
 - **Installing:** copy `main.js`, `manifest.json` and `styles.css` into
   `<vault>/.obsidian/plugins/princelists/`. The folder name must match the ID, or
   `onExternalSettingsChange` and similar methods aren't called (Manifest docs). Obsidian Sync takes
@@ -1222,8 +1224,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     doesn't check `instanceof`, so it wouldn't catch that (tested with `eslint-plugin-obsidianmd`
     0.4.2 on 2026-10-20).
   - The picture refusal tells them apart by `file.parent === null` instead, observed in 1.14.4 as
-    the rename check does **(call)**: `TExternalFile` is newer than `minAppVersion` 1.5.7.
-- **Outside notes leave `minAppVersion` at 1.5.7:** nothing here uses a newer API.
+    the rename check does **(call)**: `TExternalFile` is newer than `minAppVersion`.
+- **Outside notes don't raise `minAppVersion`:** nothing here uses an API newer than 1.5.7.
 
 ## Testing and owner checkpoints
 

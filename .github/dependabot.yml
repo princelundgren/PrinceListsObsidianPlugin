@@ -16,6 +16,9 @@ updates:
       # The types match the oldest Node.js the scripts support (AGENTS.md), as in Obsidian's sample plugin.
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
+      # Pinned to the versions obsidian names as peers, so they move with obsidian.
+      - dependency-name: '@codemirror/state'
+      - dependency-name: '@codemirror/view'
     groups:
       # Majors, here and in actions, and the runtime dependency keep a pull request each.
       development:
