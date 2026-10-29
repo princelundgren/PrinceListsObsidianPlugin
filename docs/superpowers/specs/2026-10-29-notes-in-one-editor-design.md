@@ -68,15 +68,14 @@ Compared with Obsidian's own editor side by side on desktop:
   their line.
 - **Big blocks:** a table, a code block, a callout, a `$$` math block at the notes' own left margin
   (where the save reads one), an embed alone on its line that isn't a picture, such as a note or a
-  PDF, and an HTML block other than a comment are drawn by `MarkdownRenderer.render`,
-  each into a block widget with its own `Component`, until the cursor or selection enters it; then
-  the whole block shows its Markdown.
+  PDF, and an HTML block other than a comment are drawn by `MarkdownRenderer.render`, each into a
+  block widget with its own `Component`, until the cursor or selection enters it; then the whole
+  block shows its Markdown.
   - The widgets come from a `StateField`: CodeMirror takes block decorations only from state, not
     from a view plugin.
   - A click on a drawn block puts the caret at the start of its first line **(call)**; with Shift or
-    another modifier held, it selects as anywhere in the editor. A link in
-    it opens, and a button the renderer draws, such as a code block's copy button, works as in a
-    note.
+    another modifier held, it selects as anywhere in the editor. A link in it opens, and a button
+    the renderer draws, such as a code block's copy button, works as in a note.
   - Up and Down onto a drawn block stop at its start or end, as Live Preview's arrow keys enter a
     block **(call)**: CodeMirror's own vertical motion passes a block widget by.
   - A widget is drawn again only when its own Markdown changes, so typing elsewhere doesn't redraw

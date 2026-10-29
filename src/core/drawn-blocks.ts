@@ -6,15 +6,18 @@ import { isBlank, maskBlocks } from './parse';
 import { pictureLinks } from './picture-links';
 import { wikiLinks } from './wiki-links';
 
-/** A block of the notes that Obsidian's renderer draws whole, and its lines. */
+/**
+ * A block of the notes that Obsidian's renderer draws whole: its lines, and the Markdown it draws, which
+ * is those lines less the first line's indent, so a block in a list item draws as at the left margin.
+ */
 export interface DrawnBlock {
 	lines: LineRange;
 	kind: 'table' | 'code' | 'callout' | 'math' | 'embed' | 'html';
+	markdown: string;
 }
 
 const CALLOUT = /^[ \t]*>[ \t]*\[![^\]]+\]/;
 const HTML_COMMENT = /^[ \t]*<!--/;
-const FENCE = /^(`{3,}|~{3,})/;
 const CODE_INDENT = '    ';
 // GFM's delimiter row, as @lezer/markdown, the notes editor's parser, reads it.
 const TABLE_DELIMITER = /^\s*\|?(\s*:?-+:?\s*\|)+(\s*:?-+:?\s*)?$/;
@@ -44,7 +47,7 @@ function* blocksIn(parent: Node, texts: readonly string[]): Generator<DrawnBlock
 		if (node.type === 'paragraph') yield* blocksInParagraph(texts, lines, startsItsLine);
 		if (!startsItsLine) continue;
 		const kind = kindOf(node.type, first);
-		if (kind) yield { lines, kind };
+		if (kind) yield { lines, kind, markdown: isIndentedCode(node) ? indentedCode(node) : blockText(texts, lines) };
 	}
 }
 
@@ -73,10 +76,12 @@ function* blocksInParagraph(texts: readonly string[], paragraph: LineRange, star
 		const next = texts[i + 1];
 		const mayStartTable = i === paragraph.start || !isFirstLinePiped;
 		if (mayStartTable && next !== undefined && i + 1 < paragraph.end && isTableStart(text, next)) {
-			yield { lines: { start: i, end: paragraph.end }, kind: 'table' };
+			const lines = { start: i, end: paragraph.end };
+			yield { lines, kind: 'table', markdown: blockText(texts, lines) };
 			return;
 		}
-		if (isEmbedLine(text)) yield { lines: { start: i, end: i + 1 }, kind: 'embed' };
+		const line = { start: i, end: i + 1 };
+		if (isEmbedLine(text)) yield { lines: line, kind: 'embed', markdown: blockText(texts, line) };
 	}
 }
 
@@ -127,22 +132,26 @@ function endOfBlock(texts: readonly string[], start: number, endLine: number): n
 /**
  * The first of `spans`, in order, that a caret moving from `from` to `to` crosses into: going down, the
  * first whose start is past `from` and no further than `to`; going up, the first whose end is before
- * `from` and no nearer than `to`. Undefined when it crosses none.
+ * `from` and no further than `to`. Undefined when it crosses none.
  */
 export function spanCrossed<S extends { from: number; to: number }>(spans: readonly S[], from: number, to: number): S | undefined {
 	if (to > from) return spans.find((span) => span.from > from && span.from <= to);
 	return [...spans].reverse().find((span) => span.to < from && span.to >= to);
 }
 
-/**
- * The Markdown the renderer draws for a block of `kind` whose lines are `text`: without the indent its
- * lines share, so a block in a list item draws as at the left margin, except that indented code keeps
- * the four spaces that make it code.
- */
-export function blockMarkdown(text: string, kind: DrawnBlock['kind']): string {
-	const unindented = pieceText(text, { start: 0, end: splitLines(text).length }).text;
-	if (kind !== 'code' || FENCE.test(unindented)) return unindented;
-	return unindented
+function blockText(texts: readonly string[], lines: LineRange): string {
+	return pieceText(texts.slice(lines.start, lines.end).join('\n'), { start: 0, end: lines.end - lines.start }).text;
+}
+
+// CommonMark gives a fenced block's info string, and null for indented code.
+function isIndentedCode(node: Node): boolean {
+	return node.type === 'code_block' && node.info === null;
+}
+
+// As CommonMark read the code, so its lines keep their own indents, and four spaces make it code again.
+function indentedCode(node: Node): string {
+	return (node.literal ?? '')
+		.replace(/\n$/, '')
 		.split('\n')
 		.map((line) => CODE_INDENT + line)
 		.join('\n');

@@ -1,6 +1,6 @@
 import { EditorSelection, Prec, StateEffect, StateField, type Range, type Text } from '@codemirror/state';
 import { Decoration, EditorView, keymap, WidgetType, type Command, type DecorationSet } from '@codemirror/view';
-import { blockMarkdown, drawnBlocks, spanCrossed, type DrawnBlock } from '../core/drawn-blocks';
+import { drawnBlocks, spanCrossed, type DrawnBlock } from '../core/drawn-blocks';
 import type { PrinceListView } from './list-view';
 import { renderIntoWidget, unloadWidget } from './notes-widgets';
 
@@ -78,14 +78,8 @@ function stopAtBlock(field: StateField<DrawnBlocks>, forward: boolean): Command 
 	};
 }
 
-// Each block's own lines are sliced out: splitting the whole notes per block costs time by the square of
-// their length.
 function placedBlocks(doc: Text): PlacedBlock[] {
-	return drawnBlocks(doc.toString()).map(({ lines, kind }) => {
-		const from = doc.line(lines.start + 1).from;
-		const to = doc.line(lines.end).to;
-		return { from, to, kind, markdown: blockMarkdown(doc.sliceString(from, to), kind) };
-	});
+	return drawnBlocks(doc.toString()).map(({ lines, kind, markdown }) => ({ from: doc.line(lines.start + 1).from, to: doc.line(lines.end).to, kind, markdown }));
 }
 
 // Drawn again only when its own Markdown changes, so typing elsewhere leaves it, and its embeds, be.
@@ -113,7 +107,8 @@ class BlockWidget extends WidgetType {
 		unloadWidget(this.view, dom);
 	}
 
-	// The editor's mousedown handler shows the block's Markdown, or leaves a link or button in it be.
+	// The editor's mousedown handler shows the block's Markdown, leaves a link or button in it be, or
+	// hands a modified press on to CodeMirror's own.
 	ignoreEvent(event: Event): boolean {
 		return event.type !== 'mousedown';
 	}

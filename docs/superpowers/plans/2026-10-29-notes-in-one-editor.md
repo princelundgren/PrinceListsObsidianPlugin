@@ -449,7 +449,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 
 **Interfaces:**
 - Produces, in `src/core/drawn-blocks.ts`: `DrawnBlock { lines: LineRange; kind: 'table' | 'code'
-  | 'callout' | 'math' | 'embed' | 'html' }` and `drawnBlocks(markdown: string): DrawnBlock[]`:
+  | 'callout' | 'math' | 'embed' | 'html'; markdown: string }` and `drawnBlocks(markdown: string):
+  DrawnBlock[]`:
   each table, fenced or indented code block, callout (a quote whose first line is `> [!…]`), `$$`
   block, embed alone on its line that isn't a picture, and HTML block other than a comment (the
   renderer draws one as nothing, which would hide its text) in the notes, in order, at any
@@ -459,24 +460,27 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   notes' own column 0, and a `%%` comment is none. CommonMark has no tables, so a table is found in
   a paragraph as `@lezer/markdown` finds one, from a line with a pipe followed by a delimiter row
   with as many cells, to the paragraph's end: on the paragraph's first line, or on a later one when
-  the first has no pipe.
+  the first has no pipe. A block's `markdown` is its lines less the first line's indent, except
+  that indented code is CommonMark's own reading of it (its `literal`, where `info` is null) with
+  four spaces, so it still draws as code.
+- Produces, in `src/core/drawn-blocks.ts`: `spanCrossed(spans, from, to)`, the first span a caret
+  moving from `from` to `to` crosses into, for the arrow keys below.
 - Produces, in `src/view/notes-blocks.ts`: `drawnBlocksField(view: PrinceListView, sourcePath:
   string)`, a `StateField` of block widgets (CodeMirror takes block decorations only from state):
   - One `Decoration.replace({ block: true })` over each block's lines, except the blocks the
     selection touches while the editor has focus. The field learns of focus from
     `EditorView.focusChangeEffect`, since a `StateField` can't read the view.
-  - A widget renders its Markdown, less its first line's indent (`blockMarkdown` in
-    `drawn-blocks.ts`, which keeps indented code's four spaces, so it still draws as code), with
-    `MarkdownRenderer.render`
-    and a `Component` of its own, a child of the list view, removed in the widget's `destroy`. Its
+  - A widget renders the block's `markdown` with `MarkdownRenderer.render` and a `Component` of
+    its own, a child of the list view, removed in the widget's `destroy`. Its
     `eq` compares the Markdown and kind, so typing elsewhere doesn't redraw it.
   - A mousedown on a drawn block puts the caret at the start of its first line and focuses the
     editor, without scrolling the card; on a link in it, the link opens instead, and on a button
-    the renderer draws, such as a code block's copy button, the button works.
+    the renderer draws, such as a code block's copy button, the button works. It does so only for
+    the main button with no modifier; a modified press is CodeMirror's, so Shift extends the
+    selection.
   - CodeMirror's vertical motion passes a block widget by, so ArrowDown and ArrowUp, with one empty
     cursor, run `moveVertically` and stop at the start or end of a drawn block it would pass,
-    keeping its goal column. A mousedown shows a block's Markdown only with the main button and no
-    modifier; a modified one is CodeMirror's, so Shift extends the selection.
+    keeping its goal column.
   - Its boxes draw disabled (owner): step two's count can't line one up with its line, since it
     doesn't read list items behind `>`, and tables, code, math, HTML and another note's embed hold
     no checklist line of these notes. A click on one shows the block's Markdown, where `[ ]` can be
