@@ -27,17 +27,25 @@ export function setNotesPiece(
 	const ownsSeparator = separator && range.end > range.start && isBlankAt(lines, range.start - 1);
 	const from = ownsSeparator ? range.start - 1 : range.start;
 	const run = separator && texts.length > 0 ? ['', ...texts] : texts;
-	const before = lines.slice(item.titleLine, item.endLine).map((line) => line.text);
-	const after = [...before];
-	after.splice(from - item.titleLine, range.end - from, ...run);
-	while (after.length > 1 && isBlank(after[after.length - 1] as string)) after.pop();
 	const eol = dominantEol(lines);
-	const edited = replaceRun(lines, model, from, range.end, run.map((text) => ({ text, eol })), {
-		removed: [blockKey('item', before)],
-		added: [blockKey('item', after)],
-	});
+	const edited = replaceRun(lines, model, from, range.end, run.map((text) => ({ text, eol })), itemNotesKeys(lines, item, from, range.end, run));
 	const start = from + run.length - texts.length;
 	return { lines: edited, piece: { ...piece, range: { start, end: start + texts.length } } };
+}
+
+/** The item's block, as replaceRun names it, before and after lines [from, to) become `run`. */
+export function itemNotesKeys(
+	lines: readonly Line[],
+	item: ItemBlock,
+	from: number,
+	to: number,
+	run: readonly string[],
+): { removed: string[]; added: string[] } {
+	const before = lines.slice(item.titleLine, item.endLine).map((line) => line.text);
+	const after = lines.slice(item.titleLine, Math.max(item.endLine, to)).map((line) => line.text);
+	after.splice(from - item.titleLine, to - from, ...run);
+	while (after.length > 1 && isBlank(after[after.length - 1] as string)) after.pop();
+	return { removed: [blockKey('item', before)], added: [blockKey('item', after)] };
 }
 
 // After an outside change: the piece's lines where it put them, or null when it changed any of them.
