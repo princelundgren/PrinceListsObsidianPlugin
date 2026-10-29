@@ -8,7 +8,7 @@ import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import { editInMarkdown } from '../obsidian/switch';
 import { addItem, followPlace } from './add-button';
-import { CARD_CLASS, focusCardTitle, isNewEmptyItem } from './card';
+import { CARD_CLASS, CARD_NOTES_CLASS, focusCardTitle, isNewEmptyItem } from './card';
 import { deleteHeadingAt, deleteItemAt } from './delete';
 import { addHeading, openHeadingField } from './heading-field';
 import { itemQuickMenu } from './item-quick-menu';
@@ -176,9 +176,10 @@ export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: H
 
 // Obsidian makes a contextmenu on mobile after a still hold, and holding a row or a heading opens no
 // menu (spec, "Touch on mobile"). The view's listener cancels it in the capture phase. WebKit
-// still sends a click when the finger lifts, which the view swallows.
+// still sends a click when the finger lifts, which the view swallows. A hold on the open card's notes
+// selects their text, and the system's own toolbar needs the contextmenu.
 export function cancelHoldMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
-	if (target.closest('textarea') || !target.closest(`.${ITEM_CLASS}, .${HEADING_CLASS}`)) return;
+	if (target.closest(`textarea, .${CARD_NOTES_CLASS}`) || !target.closest(`.${ITEM_CLASS}, .${HEADING_CLASS}`)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
 	view.swallowNextClick = true;

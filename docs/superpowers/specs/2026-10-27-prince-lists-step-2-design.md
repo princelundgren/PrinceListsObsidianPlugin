@@ -404,6 +404,9 @@ renderer, and only the part you click becomes a plain-text field.
 - **A block is drawn on its own:** a paragraph, a heading, a table, a code block, a quote or
   callout, a list, or HTML, as CommonMark splits the notes. Clicking one puts its Markdown in a
   field in its place, the caret where you clicked (step one's rules), and the rest stays drawn.
+  Dragging over drawn notes, or a long press on mobile, selects their text to copy, as in a note's
+  reading view, and opens no field, wherever the drag ends; a click that doesn't move opens the
+  block, on selected text too **(call)**.
 - **A list item opens alone,** with the items nested under it **(owner)**; the rest of its list
   stays drawn. The nth drawn item is the nth item CommonMark finds outside quotes and callouts, as
   with checkboxes. When the two counts differ, as an embed or a callout holding a list makes them,

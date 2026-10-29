@@ -120,6 +120,19 @@ textarea.princelists-title {
 	-webkit-touch-callout: none;
 }
 
+/* Obsidian's app turns selection off, so drawn notes turn it back on, as in a note's reading view. */
+.princelists-card-notes,
+.princelists-list-note-text {
+	-webkit-user-select: text;
+	user-select: text;
+}
+
+.princelists-card-notes > .princelists-placeholder,
+.princelists-list-note-text > .princelists-placeholder {
+	-webkit-user-select: none;
+	user-select: none;
+}
+
 /* The drop line while a row is dragged: under the row or heading the item will follow, or above the
    first row for the top of the list. Drawn inside the element, so nothing moves. */
 .princelists-drop-below {

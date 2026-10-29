@@ -28,6 +28,7 @@ import { openPieceAt, pieceBlur, pieceInput } from './note-piece-field';
 import { pieceBeforeInput, pieceKeyDown } from './note-piece-keys';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
 import { notesHostOf } from './notes-host';
+import { endsSelectingDrag, recordNotesPress } from './notes-selection';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
@@ -39,6 +40,7 @@ export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
 	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepNotesFocused(view, evt));
+	view.registerDomEvent(contentEl, 'mousedown', (evt) => recordNotesPress(view, evt));
 	view.registerDomEvent(contentEl, 'beforeinput', (evt) => onBeforeInput(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
@@ -63,7 +65,7 @@ function onChange(view: PrinceListView, evt: Event): void {
 
 function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
-	if (!target) return;
+	if (!target || endsSelectingDrag(view, evt)) return;
 	const arrow = target.closest<HTMLElement>(`.${COLLAPSE_CLASS}`);
 	if (arrow) {
 		const heading = arrow.closest(`.${HEADING_CLASS}`);
