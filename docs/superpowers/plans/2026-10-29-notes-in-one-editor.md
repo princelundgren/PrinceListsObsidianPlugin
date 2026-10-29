@@ -71,13 +71,13 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   the mobile `CapacitorAdapter` has only `@since 1.7.2`).
 - **CodeMirror APIs** this plan names, from its reference manual: `EditorView`,
   `EditorView.updateListener`, `EditorView.domEventHandlers`, `EditorView.lineWrapping`,
-  `EditorView.editorAttributes`, `EditorView.findFromDOM`, the `dispatchTransactions` option
+  `EditorView.editorAttributes`, `EditorView.findFromDOM`, `EditorView.posAtDOM`, the `dispatchTransactions` option
   (`@codemirror/view` 6.17.0), `EditorState.readOnly`,
   `EditorView.posAtCoords`, `EditorView.focusChangeEffect` (`@codemirror/view` 6.9.0, part of design
   risk 1's check), `EditorState.create`, `EditorState.changeFilter`, the `filter: false` transaction
   option, `Transaction.addToHistory`, `Transaction.newDoc`, `Annotation`, `Compartment`,
   `StateField`, `ViewPlugin`, `Decoration`,
-  `WidgetType`, `placeholder`, `keymap`, `history`, `historyKeymap`, `defaultKeymap`, `undo`, `redo`,
+  `WidgetType` with `updateDOM`, `placeholder`, `keymap`, `history`, `historyKeymap`, `defaultKeymap`, `undo`, `redo`,
   `indentMore`, `indentLess`, `indentUnit` and `syntaxTree`. Not `EditorView.setState` or `reset`:
   they redraw every widget.
 - **Interface text:** nothing new. The editor's placeholder is step one's "Notes"; a refused change
@@ -511,21 +511,33 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 ### Task 6: Put pictures after the caret's block, and keep their menu working
 
 **Files:**
-- Modify: `src/view/pictures.ts`, `src/view/picture-menu.ts`, `src/view/notes-drawing.ts`,
-  `src/view/notes-editor.ts`
+- Modify: `src/core/note-pieces.ts`, `tests/core/note-pieces.test.ts`, `src/view/pictures.ts`,
+  `src/view/picture-menu.ts`, `src/view/notes-drawing.ts`, `src/view/notes-editor.ts`,
+  `src/view/notes-links.ts`, `src/view/notes-widgets.ts`
 
 **Interfaces:**
 - Consumes: `blockAfter(markdown, range)` in `src/core/note-pieces.ts`, which stays; Task 3's
   picture widget.
-- A pasted picture's links go in a block of their own after the block the caret is in, or after its
-  whole list (`blockAfter` on the caret's line), as one change in the editor, and the caret moves to
-  an empty line below them (step one, "Where the links go"). A picture dropped on the notes goes
-  after the block it's dropped on, found with `posAtCoords`, and focuses the editor.
-- A picture widget carries its link's editor line and columns. The picture menu's Remove image and
-  Delete image use them as the `PictureLinkAt` for `planPictureRemove`: the file line is
-  `source.visitStart()` plus the editor line while a visit lasts, else `source.read().start` plus
-  it, and the columns are moved by the length of the indent the editor left off that line. So every
-  picture drawn from a link in the notes gets them. A picture inside a drawn embed gets none.
+- Produces, in `src/core/note-pieces.ts`, with tests first: `blockBelow(markdown, line, block):
+  { change: NotesChange; caret: number }`. The block goes after the block at `line`, as `blockAfter`
+  places one, with an empty line between, or in place of an empty line between blocks, as step one's
+  links take an empty new block's place. The caret goes to the empty line right below it, which is
+  a new one at the end of the notes.
+- Produces, in `src/view/notes-editor.ts`: `addNotesBlock(editor, line, block): boolean`, in place
+  of Task 2's `appendNotesBlock`: it focuses the editor and makes `blockBelow`'s change as one
+  editor change, so it saves as typing does. A pasted picture's links go below the caret's line
+  (step one, "Where the links go"). A dropped one's go below the line `posAtCoords` finds under the
+  pointer, or below the last line for a drop elsewhere on the card. Either line is found once the
+  pictures are saved.
+- A picture widget carries its link's column. Its line comes from `posAtDOM`, so a change that moves
+  lines doesn't redraw the pictures below it, and `updateDOM` keeps the drawn picture when only the
+  column changes. The picture menu's Remove image and Delete image build the `PictureLinkAt` for
+  `planPictureRemove` from them: the file line is `source.visitStart()` plus the editor line while a
+  visit lasts, else `source.read().start` plus it, and the columns are moved by the length of the
+  indent the editor left off that line. A picture that Obsidian's renderer drew in a drawn block,
+  such as a callout, is lined up with the block's picture links, as step two did for a drawn piece.
+  So every picture drawn from a link in the notes gets them, while the editor shows the notes as
+  they read. A picture inside a drawn embed gets none.
 
 - [ ] **Step 1: Build it.**
 - [ ] **Step 2: Run** `npm run lint && npm run build && npm test`. Expected: PASS.

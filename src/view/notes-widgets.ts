@@ -48,26 +48,47 @@ export class RuleWidget extends WidgetType {
 	}
 }
 
-/** A picture from the vault at `src`, with the alt text and size its Markdown gives. */
+export const NOTES_PICTURE_CLASS = 'princelists-notes-picture';
+
+const pictureColumns = new WeakMap<Element, number>();
+
+/** The column its link starts at, in its line of the notes, for a picture the editor drew from the vault. */
+export function drawnPictureColumn(el: Element): number | undefined {
+	return pictureColumns.get(el);
+}
+
+/**
+ * A picture from the vault at `src`, with the alt text and size its Markdown gives, drawn from the link
+ * at `column` of its line. A change of column alone keeps the drawn picture, so it doesn't load again.
+ */
 export class PictureWidget extends WidgetType {
 	constructor(
 		readonly src: string,
 		readonly look: PictureLook,
+		readonly column: number,
 	) {
 		super();
 	}
 
 	eq(other: PictureWidget): boolean {
-		return other.src === this.src && other.look.alt === this.look.alt && other.look.size === this.look.size;
+		return other.src === this.src && other.look.alt === this.look.alt && other.look.size === this.look.size && other.column === this.column;
 	}
 
 	toDOM(): HTMLElement {
-		const img = createEl('img', { cls: 'princelists-notes-picture', attr: { src: this.src } });
-		if (this.look.alt !== null) img.setAttr('alt', this.look.alt);
-		const [width, height] = this.look.size?.split('x') ?? [];
-		if (width) img.setAttr('width', width);
-		if (height) img.setAttr('height', height);
+		const img = createEl('img', { cls: NOTES_PICTURE_CLASS });
+		this.updateDOM(img);
 		return img;
+	}
+
+	updateDOM(dom: HTMLElement): boolean {
+		const [width, height] = this.look.size?.split('x') ?? [];
+		const attrs = { src: this.src, alt: this.look.alt, width: width || null, height: height || null };
+		for (const [name, value] of Object.entries(attrs)) {
+			if (value === null) dom.removeAttribute(name);
+			else if (dom.getAttr(name) !== value) dom.setAttr(name, value);
+		}
+		pictureColumns.set(dom, this.column);
+		return true;
 	}
 }
 
