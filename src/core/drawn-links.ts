@@ -14,6 +14,7 @@ export interface PictureLook {
 const URL_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 const UNSAFE_SCHEME = /^(javascript|vbscript|data):/i;
 const SIZE = /^\d+(x\d+)?$/;
+const WEB_ADDRESS = /^https?:/i;
 const WIKI_EMBED = /^!\[\[([^|\]]*)(?:\|([^\]]*))?\]\]$/;
 const MARKDOWN_IMAGE = /^!\[([^\]]*)\]/;
 
@@ -27,6 +28,11 @@ export function linkTarget(address: string): LinkTarget {
 	} catch {
 		return { kind: 'vault', linktext: unwrapped };
 	}
+}
+
+/** Whether `href` is an http or https address, the only kind the notes editor opens itself. */
+export function isWebAddress(href: string): boolean {
+	return WEB_ADDRESS.test(href);
 }
 
 /**

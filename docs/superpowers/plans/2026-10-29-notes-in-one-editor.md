@@ -372,7 +372,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     own handlers leave links to them, so a link opens once. The editor's `mousedown` handler on a
     drawn link returns true and prevents the default, so the caret stays put and the link stays
     drawn for the click. The browser follows no link in editable content, so `handleLinkClick`
-    opens an external link there with `window.open`, which Obsidian handles as a clicked link.
+    opens a web address there with `window.open`, which Obsidian handles as a clicked link.
+    `isWebAddress` limits it to http and https: `window.open` doesn't hand other schemes, such as
+    `obsidian://`, on as a clicked link does, so they stay unopened in the editor.
   - Tags, footnotes, `%%` comments and anything else show as typed.
 
 - [ ] **Step 1: Write the failing tests** for `wikiLinks`: `[[a]]`, `[[a|b]]`, `[[a#h|b]]`,

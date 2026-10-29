@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { linkTarget, pictureLook } from '../../src/core/drawn-links';
+import { isWebAddress, linkTarget, pictureLook } from '../../src/core/drawn-links';
 
 describe('linkTarget', () => {
 	test('reads an address with a scheme as a web link', () => {
@@ -51,5 +51,19 @@ describe('pictureLook', () => {
 	test('gives a Markdown picture without alt text none', () => {
 		expect(pictureLook('![](p.png)')).toEqual({ alt: null, size: null });
 		expect(pictureLook('![|60x30](p.png)')).toEqual({ alt: null, size: '60x30' });
+	});
+});
+
+describe('isWebAddress', () => {
+	test('accepts http and https addresses, in any case', () => {
+		expect(isWebAddress('https://example.com')).toBe(true);
+		expect(isWebAddress('HTTP://example.com')).toBe(true);
+	});
+
+	test('refuses every other scheme', () => {
+		expect(isWebAddress('file:///tmp/x')).toBe(false);
+		expect(isWebAddress('obsidian://open?vault=x')).toBe(false);
+		expect(isWebAddress('mailto:a@b.c')).toBe(false);
+		expect(isWebAddress('javascript:alert(1)')).toBe(false);
 	});
 });
