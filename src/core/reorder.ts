@@ -1,4 +1,4 @@
-import { blockKeys, sameBlocks, UnsafeEditError } from './edit-check';
+import { blockKeys, modelBlockKeys, sameBlocks, UnsafeEditError } from './edit-check';
 import { isBlankAt } from './edit-lines';
 import { dominantEol, spliceLines, type Line } from './lines';
 import type { ListModel } from './parse';
@@ -13,7 +13,7 @@ export function reorderChecked(
 	order: readonly number[],
 ): { lines: Line[]; moved: (number | null)[] } {
 	const reordered = order.map((i) => lines[i] as Line);
-	const before = blockKeys(lines, model.contentStart).map((b) => b.key);
+	const before = modelBlockKeys(lines, model).map((b) => b.key);
 	// A move keeps every line, so the boundaries it makes are where two non-blank lines that weren't
 	// neighbors meet. Each index is that of the lower line in `reordered`.
 	const boundaries = order.flatMap((was, at) =>

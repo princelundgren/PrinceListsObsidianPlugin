@@ -16,7 +16,7 @@ for (let h = 0; h < 10; h++) {
 }
 text += CASCADE;
 
-// Each edit parses the whole file at least twice, so these catch a regression in that cost. The
+// Each edit parses the whole file at least once, as edited, so these catch a regression in that cost. The
 // bounds leave room for a slow CI machine. The fastest of several runs counts: on a busy machine
 // one run can be paused for longer than a bound, while a real regression slows every run.
 function timed<T>(edit: () => T): { result: T; ms: number } {
