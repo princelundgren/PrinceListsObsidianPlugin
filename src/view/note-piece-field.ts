@@ -1,15 +1,14 @@
 import { holdsSeparatorLine } from '../core/edit-lines';
 import type { LineRange } from '../core/follow';
-import { blockAfter, holdsOnly } from '../core/note-pieces';
+import { holdsOnly } from '../core/note-pieces';
 import { NOTES_EDITOR_CLASS, sayFieldLost } from './card';
 import { caretAtClick } from './click-caret';
 import { fitHeight, targetOf } from './dom';
-import { changeField } from './field-undo';
 import { FIELD_CLASS } from './fields';
 import { buildFormatBar } from './format';
 import type { PrinceListView } from './list-view';
 import { coverField, hideField, putField, removeField, showField } from './note-piece-slot';
-import { NOTE_PIECE_CLASS, shift, type PiecePlace } from './note-piece-state';
+import { NOTE_PIECE_CLASS, type PiecePlace } from './note-piece-state';
 import { drawNotes, notesEnd, placeAt } from './note-pieces';
 import { notesHostOf, type NotesHost } from './notes-host';
 
@@ -60,11 +59,6 @@ export function openPieceAt(view: PrinceListView, host: NotesHost, click: MouseE
 	const at = placeAt(target, found.notes);
 	if (at === 'stale') drawPieces(view, host);
 	else if (at) openPiece(view, host, at.place, at.range, click);
-}
-
-/** A new piece after the last, as a dropped picture opens. */
-export function openNewPiece(view: PrinceListView, host: NotesHost): HTMLTextAreaElement | null {
-	return openPiece(view, host, { kind: 'end' }, null);
 }
 
 export function pieceInput(view: PrinceListView, field: HTMLTextAreaElement): void {
@@ -130,37 +124,6 @@ export function movePiece(view: PrinceListView, from: HTMLTextAreaElement, to: P
 	fitHeight(field);
 	drawPieces(view, host);
 	return field;
-}
-
-/**
- * Saves `markdown` as a block of its own and moves typing to a new empty block below it, so the
- * block is drawn at once. The block takes the place of `field` when that is an empty new block, and
- * otherwise goes after the open piece (core's blockAfter). False when no field took `markdown`; once
- * one has, a save it refuses or loses says so as typing does.
- */
-export function addBlockBelow(view: PrinceListView, field: HTMLTextAreaElement, markdown: string): boolean {
-	const host = notesHostOf(view, field);
-	const range = host?.range();
-	const found = host?.notes();
-	if (!host || !range || !found) return false;
-	const { notes } = found;
-	const takesPlace = field.value.trim() === '' && (newBlocks.has(field) || notesEnd(notes) === null);
-	let block: HTMLTextAreaElement | null = field;
-	if (takesPlace) {
-		changeField(field, () => (field.value = markdown));
-	} else {
-		const end = notes.start + blockAfter(notes.markdown, shift(range, -notes.start));
-		block = movePiece(view, field, { place: placeAfter(field), range: { start: end, end }, isNew: true, text: markdown, caret: 'end' });
-	}
-	if (!block) return false;
-	const saved = typePiece(view, block, markdown) ? host.range() : null;
-	if (saved) movePiece(view, block, { place: placeAfter(block), range: { start: saved.end, end: saved.end }, isNew: true, caret: 'end' });
-	return true;
-}
-
-// After the drawn piece the field stands in, or after the field itself.
-function placeAfter(field: HTMLTextAreaElement): PiecePlace {
-	return { kind: 'after', el: field.closest<HTMLElement>(`.${NOTE_PIECE_CLASS}`) ?? field };
 }
 
 // `range` null opens a new piece after the last, after an empty line unless it is the first.

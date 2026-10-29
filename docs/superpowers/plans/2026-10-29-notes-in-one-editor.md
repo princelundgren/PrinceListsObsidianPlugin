@@ -55,7 +55,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - **Everything in the earlier plans' Global Constraints still holds,** and so does `AGENTS.md`.
 - **Dependencies:** `@codemirror/lang-markdown` `^6.5.2` and `@lezer/markdown` `^1.8.1` in
   `dependencies`. `@codemirror/language` and `@codemirror/commands` in `devDependencies`, for their
-  types; `@codemirror/state` and `view` already come with `obsidian`. `esbuild.config.mjs`'s
+  types, and `@codemirror/state` and `view` at the exact versions `obsidian` names as peers, since
+  the lint wants every imported package listed. `esbuild.config.mjs`'s
   `external` already holds every `@codemirror/*` package these import (`autocomplete` included) and
   `@lezer/common`, `@lezer/highlight` and `@lezer/lr`, so the syntax tree's `NodeProp`s and `Tag`s
   are Obsidian's own; it stays so, and only `@codemirror/lang-markdown` and `@lezer/markdown` are
@@ -63,13 +64,15 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   `insertNewlineContinueMarkupCommand` and `deleteMarkupBackward`, never `markdown()`.
 - **`main.js` grows by about 42 kB** minified, less what Task 8 removes. Each pull request that
   adds editor code says the size before and after.
-- **The manifest:** `minAppVersion` stays `1.5.7` (design risk 1). Obsidian APIs this plan names,
-  checked in `obsidian.d.ts` 1.14.4: `MarkdownRenderer.render`, `Workspace.openLinkText` and
-  `MetadataCache.getFirstLinkpathDest`, already used; and `Vault.getResourcePath(file)`, `@since
-  0.9.7`, new here (not `DataAdapter.getResourcePath`, which the mobile `CapacitorAdapter` has only
-  `@since 1.7.2`).
+- **The manifest:** Task 2 raises `minAppVersion` from `1.5.7` to `1.13.4` (design risk 1).
+  Obsidian APIs this plan names, checked in `obsidian.d.ts` 1.14.4: `MarkdownRenderer.render`,
+  `Workspace.openLinkText` and `MetadataCache.getFirstLinkpathDest`, already used; and
+  `Vault.getResourcePath(file)`, `@since 0.9.7`, new here (not `DataAdapter.getResourcePath`, which
+  the mobile `CapacitorAdapter` has only `@since 1.7.2`).
 - **CodeMirror APIs** this plan names, from its reference manual: `EditorView`,
   `EditorView.updateListener`, `EditorView.domEventHandlers`, `EditorView.lineWrapping`,
+  `EditorView.editorAttributes`, `EditorView.findFromDOM`, the `dispatchTransactions` option
+  (`@codemirror/view` 6.17.0), `EditorState.readOnly`,
   `EditorView.posAtCoords`, `EditorView.focusChangeEffect` (`@codemirror/view` 6.9.0, part of design
   risk 1's check), `EditorState.create`, `EditorState.changeFilter`, the `filter: false` transaction
   option, `Transaction.addToHistory`, `Transaction.newDoc`, `Annotation`, `Compartment`,
@@ -213,7 +216,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   keymap and the format bar's actions), `src/view/notes-source.ts`
 - Modify: `package.json`, `package-lock.json`, `AGENTS.md` (the dependency line),
   `THIRD_PARTY_NOTICES`, `README.md` (its license line), `src/view/card.ts`, `src/view/events.ts`,
-  `src/view/format.ts`, `src/view/pictures.ts`, `src/view/redraw.ts`, `styles.css`
+  `src/view/format.ts`, `src/view/pictures.ts`, `src/view/menus.ts`, `src/view/notes-host.ts`,
+  `src/view/note-piece-field.ts`, `styles.css`, and the `minAppVersion` lines of `manifest.json`,
+  the designs and `src/view/delete.ts`
 
 **Interfaces:**
 - Consumes: Task 1.
@@ -242,19 +247,31 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     focus, after an outside change, the list's undo or redo, or a tick from elsewhere, with
     `source.visitText()`, or with `source.read()` and a new visit when that is null. On focus,
     `source.open()` starts a visit, and the editor syncs to the text it returns, which is the text it
-    already holds unless the file changed unseen. Focus comes from `EditorView.focusChangeEffect`.
+    already holds unless the file changed unseen. Focus comes from the DOM's `focus` and `blur`,
+    through `EditorView.domEventHandlers`: CodeMirror sends `focusChangeEffect`'s transaction a
+    moment later, after an update that carries a keystroke, so the first keystroke could be saved
+    before the visit opened.
     Moving to another window or app doesn't end a visit, as `onFocusOut` in `events.ts` keeps the
     list title's field.
   - An `EditorState.changeFilter` returns true when `!tr.docChanged`; otherwise it stops the change
     when `source.fits` is false for `changedLines(tr.startState.doc.toString(),
     tr.newDoc.toString())`, and shows step one's notice once per visit, so a refused change never
-    reaches the document or the editor's history (design, "Saving").
-  - Saving, from an `EditorView.updateListener`: for each transaction in `update.transactions` that
-    changed the doc and isn't a sync, `changedLines(tr.startState.doc.toString(),
+    reaches the document or the editor's history (design, "Saving"). A change with no visit open,
+    as a drop from another app makes without a focus event, opens one, and is refused when the
+    notes no longer read as the editor shows them; that visit ends after the change, with a sync,
+    unless the editor has focus by then.
+  - Saving, from the editor's `dispatchTransactions`, after `editor.update(trs)`: for each
+    transaction that changed the doc and isn't a sync, `changedLines(tr.startState.doc.toString(),
     tr.state.doc.toString())` to `source.save`, then `view.handleTyped`, so a sync batched into the
-    same update is never saved. A lost or refused one syncs, and when the item itself is gone the
-    card closes as step one says, with its "Copy text".
-- Produces, in `src/view/notes-keys.ts`: `notesKeymap(view: PrinceListView)`, then
+    same update is never saved. A lost or refused one syncs at once, which an update listener
+    can't, since it may not dispatch during an update. When the item itself is gone the card
+    closes as step one says, with its "Copy text", and `lockNotesEditor(editor)` makes the editor
+    read-only as `cardLost` makes the card's fields.
+  - `appendNotesBlock(editor, markdown): boolean` focuses the editor and adds a block at the end of
+    the notes through it, in place of notes that are only blank. Pictures use it until Task 6.
+  - `EditorView.contentAttributes` turns spell check, autocorrect, capitals and writing suggestions
+    back on, as a textarea has them, since CodeMirror turns them off.
+- Produces, in `src/view/notes-keys.ts`: `notesKeymap()`, then
   `historyKeymap`, then `defaultKeymap` without its `Mod-Enter`, `Escape`, `Mod-[` and `Mod-]`
   bindings, filtered by `key`: Cmd+Enter stays the list's add, Escape the view's, which closes the
   card, and only Tab indents, on list items.
@@ -278,8 +295,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - [ ] **Step 1: Add the dependencies** with `npm install @codemirror/lang-markdown@^6.5.2
   @lezer/markdown@^1.8.1` and `npm install --save-dev @codemirror/language @codemirror/commands`.
   Check design risk 1: `npm view @codemirror/lang-markdown@6.5.2 dependencies` against the
-  `@codemirror/*` and `@lezer/common` that Obsidian `1.5.7` and the current Obsidian provide, and
-  load the editor in both. If `1.5.7` can't load it, stop and raise it in the pull request: a new
+  `@codemirror/*` and `@lezer/common` that Obsidian at `minAppVersion` and the current Obsidian
+  provide, and load the editor in both. If the older can't load it, stop and raise it: a new
   `minAppVersion` is the owner's call. After `npm run build`, check that `main.js` bundles no
   `@lezer/common`, `@lezer/lr` or `@lezer/highlight` (it `require`s them), so the parser's
   `NodeProp`s are Obsidian's single copy.
@@ -514,9 +531,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   designs
 
 **Interfaces:**
-- Goes from `ListEditing`: `openNotesPiece`, `typeNotesPiece`, `notesPieceRange`,
-  `notesPieceOutdent`, `openListNote`, `typeListNote`, `listNoteRange`, `listNoteOutdent` and
-  `listNoteAsTyped`. Goes from `src/core/note-pieces.ts`: `pieceEnter`, `nextItemMarker`,
+- Goes from `ListEditing`: `openNotesPiece`, `typeNotesPiece`, `notesPieceOutdent`, `openListNote`,
+  `typeListNote`, `listNoteRange`, `listNoteOutdent` and `listNoteAsTyped`. `notesPieceRange`
+  stays, since the card's `visitStart` reads the visit's range through it. Goes from `src/core/note-pieces.ts`: `pieceEnter`, `nextItemMarker`,
   `neighborPiece`, `outdentMarker`, `itemPieces`, `pieceText` and `holdsOnly`, unless something
   that stays still calls one. `notePieces`, `blockAfter` and `pieceAround` stay. Goes too, unless
   something that stays still calls it: `listNoteWithPiece` in `edit-list-note.ts`,
@@ -562,8 +579,7 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - [ ] **Step 4: Set the design's status** to `live` once the owner confirms it, and step two's
   pointer in "Editing notes a block at a time" to the past tense.
 - [ ] **Step 5: When the owner says,** bump the version with `npm version minor
-  --no-git-tag-version`, which gives `1.1.0` and adds `"1.1.0": "1.5.7"` to `versions.json` unless
-  Task 2 raised `minAppVersion`.
+  --no-git-tag-version`, which gives `1.1.0` and adds `"1.1.0": "1.13.4"` to `versions.json`.
 - [ ] **Step 6: Commit** the notes, the designs, `README.md` and the version files with the message
   "Finish notes in one editor". The owner merges it, tags `1.1.0` and publishes the release
   (`AGENTS.md`, "Releases").

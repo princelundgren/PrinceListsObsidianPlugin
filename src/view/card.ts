@@ -1,4 +1,5 @@
-import { Notice, setIcon, type Component, type TFile } from 'obsidian';
+import type { EditorView } from '@codemirror/view';
+import { Notice, setIcon, type TFile } from 'obsidian';
 import { isShown, itemRow, type ItemRow } from '../core/display';
 import { UnsafeEditError } from '../core/edit-check';
 import { isEmptyItem, planRemoval, type InsertedItem, type Removal } from '../core/empty-item';
@@ -11,8 +12,8 @@ import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
-import { drawPieces } from './note-piece-field';
-import { cardNotesHost } from './notes-host';
+import { lockNotesEditor, showNotesEditor } from './notes-editor';
+import { cardNotesSource } from './notes-source';
 import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
@@ -25,8 +26,8 @@ export const CARD_STAR_CLASS = 'princelists-card-star';
 
 export interface Card {
 	el: HTMLElement;
-	/** The drawn notes' Component. */
-	notes: Component | null;
+	/** The notes' editor. */
+	editor: EditorView | null;
 	/** Set when this card's own insert created its item, so closing it may remove the item again. */
 	inserted: InsertedItem | null;
 	/**
@@ -43,7 +44,7 @@ export interface Card {
 export function openCard(view: PrinceListView, titleLine: number, focusTitle = false, inserted?: InsertedItem): void {
 	closeCard(view);
 	view.editing.open(titleLine);
-	const card: Card = { el: createCardElement(), notes: null, inserted: inserted ?? null, lostAt: null };
+	const card: Card = { el: createCardElement(), editor: null, inserted: inserted ?? null, lostAt: null };
 	view.card = card;
 	// A new item has no row yet, nor does one that is hidden, so the view draws the card in its place.
 	const row = view.contentEl.querySelector<HTMLElement>(`.${ITEM_CLASS}:not(.${CARD_CLASS})[${LINE_ATTR}="${titleLine}"]`);
@@ -119,7 +120,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (notes) drawPieces(view, cardNotesHost(view, card, notes));
+	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes);
 }
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {
@@ -146,11 +147,16 @@ export function cardLost(view: PrinceListView, card: Card, line: number): void {
 		card.lostAt = line;
 		setLine(card.el, null);
 		for (const field of card.el.querySelectorAll('textarea')) field.readOnly = true;
-		const typed = focused?.instanceOf(HTMLTextAreaElement) ? focused.value : '';
-		sayFieldLost(view, typed, focused?.hasClass(CARD_TITLE_CLASS) ? 'title' : 'notes');
+		if (card.editor) lockNotesEditor(card.editor);
+		sayFieldLost(view, focusedText(card, focused), focused?.hasClass(CARD_TITLE_CLASS) ? 'title' : 'notes');
 	} else {
 		dismissCard(view);
 	}
+}
+
+function focusedText(card: Card, focused: Element | null): string {
+	if (card.editor?.dom.contains(focused)) return card.editor.state.doc.toString();
+	return focused?.instanceOf(HTMLTextAreaElement) ? focused.value : '';
 }
 
 // For a field whose lines an outside change took: its typing can be copied if the file lost it.
@@ -162,8 +168,8 @@ export function sayFieldLost(view: PrinceListView, typed: string, field: 'title'
 function endCard(view: PrinceListView, card: Card): void {
 	view.card = null;
 	view.editing.close();
-	if (card.notes) view.removeChild(card.notes);
-	card.notes = null;
+	card.editor?.destroy();
+	card.editor = null;
 }
 
 function createCardElement(): HTMLElement {
