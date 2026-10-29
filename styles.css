@@ -266,7 +266,7 @@ textarea.princelists-title {
 }
 
 /* A new block's field holds the empty line above it, in place of the block's own margin. */
-.princelists-note-piece:has(+ .princelists-new-block) > :last-child {
+.princelists-above-new-block > :last-child {
 	margin-bottom: 0;
 }
 
