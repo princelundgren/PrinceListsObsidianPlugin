@@ -53,8 +53,8 @@ class NotesDrawing {
 			to,
 			enter: (node) => {
 				// The parser reads `[[a]]` as a link in brackets: the wikilink drawing has it.
-				const isInWiki = wikiSpans.some((span) => node.from < span.to && node.to > span.from);
-				if ((node.name === 'Link' || node.name === 'Image') && isInWiki) return false;
+				const isLinkNode = node.name === 'Link' || node.name === 'Image';
+				if (isLinkNode && wikiSpans.some((span) => node.from < span.to && node.to > span.from)) return false;
 				return drawNode(drawing, node.node);
 			},
 		});
