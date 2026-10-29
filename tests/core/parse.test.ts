@@ -19,6 +19,7 @@ test('finds the list note, sections and items of the design example', () => {
 			{ headingLine: 19, items: [item(20, 21)], endLine: 21 },
 		],
 		untouched: [],
+		blocks: topLevelBlocks(lines, 3),
 	});
 	expect(lines[3]?.text).toMatch(/^Stuff for the new apartment/);
 	expect(lines[9]?.text).toMatch(/^- \[ \] freezer storage boxes/);
@@ -39,6 +40,7 @@ test('keeps every kind of Markdown in the notes inside the item', () => {
 		listNote: { start: 0, end: 0 },
 		sections: [{ headingLine: null, items: [item(0, 19)], endLine: 19 }],
 		untouched: [],
+		blocks: topLevelBlocks(lines, 0),
 	});
 });
 
@@ -140,7 +142,7 @@ test('a comment that never closes hides every item below it', () => {
 });
 
 test('a section ends after its last content, and an empty top section where the list note ends', () => {
-	expect(parse('---\nprincelists: true\n---\nNote\n\n## H\n- [ ] a\n\nkept\n\n## K\n', 3)).toEqual({
+	expect(parse('---\nprincelists: true\n---\nNote\n\n## H\n- [ ] a\n\nkept\n\n## K\n', 3)).toMatchObject({
 		contentStart: 3,
 		listNote: { start: 3, end: 4 },
 		sections: [
@@ -155,7 +157,7 @@ test('a section ends after its last content, and an empty top section where the 
 });
 
 test('a bullet without a checkbox before the first item belongs to the list note', () => {
-	expect(parse('- plain\n- [ ] a\n')).toEqual({
+	expect(parse('- plain\n- [ ] a\n')).toMatchObject({
 		contentStart: 0,
 		listNote: { start: 0, end: 1 },
 		sections: [{ headingLine: null, items: [item(1, 2)], endLine: 2 }],
@@ -244,7 +246,7 @@ test('a link reference definition that no CommonMark node covers is untouched co
 		{ start: 4, end: 5 },
 	]);
 	expect(parse('- [ ] a\n\n[x]: /x\n').untouched).toEqual([{ start: 2, end: 3 }]);
-	expect(parse('[x]: /x\n\n- [ ] a\n')).toEqual({
+	expect(parse('[x]: /x\n\n- [ ] a\n')).toMatchObject({
 		contentStart: 0,
 		listNote: { start: 0, end: 1 },
 		sections: [{ headingLine: null, items: [item(2, 3)], endLine: 3 }],
@@ -253,7 +255,7 @@ test('a link reference definition that no CommonMark node covers is untouched co
 });
 
 test('a setext heading starts after the link reference definitions its paragraph opens with', () => {
-	expect(parse('- [ ] a\n\n[x]: https://example.com\nKitchen\n---\n- [ ] b\n')).toEqual({
+	expect(parse('- [ ] a\n\n[x]: https://example.com\nKitchen\n---\n- [ ] b\n')).toMatchObject({
 		contentStart: 0,
 		listNote: { start: 0, end: 0 },
 		sections: [
