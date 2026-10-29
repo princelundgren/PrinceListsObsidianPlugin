@@ -80,14 +80,14 @@ function stopAtBlock(field: StateField<DrawnBlocks>, forward: boolean): Command 
 	};
 }
 
+// Each block's own lines go to pieceText, which splits what it's given: the whole notes per block costs
+// time by the square of their length.
 function placedBlocks(doc: Text): PlacedBlock[] {
-	const text = doc.toString();
-	return drawnBlocks(text).map(({ lines, kind }) => ({
-		from: doc.line(lines.start + 1).from,
-		to: doc.line(lines.end).to,
-		kind,
-		markdown: pieceText(text, lines).text,
-	}));
+	return drawnBlocks(doc.toString()).map(({ lines, kind }) => {
+		const from = doc.line(lines.start + 1).from;
+		const to = doc.line(lines.end).to;
+		return { from, to, kind, markdown: pieceText(doc.sliceString(from, to), { start: 0, end: lines.end - lines.start }).text };
+	});
 }
 
 // Drawn again only when its own Markdown changes, so typing elsewhere leaves it, and its embeds, be.
