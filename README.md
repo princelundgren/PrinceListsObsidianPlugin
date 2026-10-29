@@ -1,79 +1,107 @@
-# PrinceLists
+<h1 align="center">PrinceLists</h1>
 
-Todo lists for Obsidian, kept as plain Markdown notes.
+<p align="center"><b>Todo lists for Obsidian, kept as plain Markdown notes.</b></p>
 
-> **Work in progress.** Step one's two parts are built and checked on macOS and an iPhone: 1a in
-> `0.1.0`, and 1b, which adds dragging by touch, pictures in cards and Cmd+Z undo (Ctrl+Z on
-> Windows and Linux), in `0.2.0`. `0.3.0` adds small fixes from first use with a real list.
-> `0.4.0` adds step two: the star, an item's date and the Schedule view, a list inside another
-> note, and the rest listed below, checked on macOS and an Android emulator. `0.4.1` fixes what a
-> review before the community directory submission found. You can follow along
-> in the designs for [step one](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and
-> [step two](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md), and in the pull
-> requests.
+<p align="center">
+  <a href="https://github.com/princelundgren/PrinceListsObsidianPlugin/releases/latest"><img src="https://img.shields.io/github/v/release/princelundgren/PrinceListsObsidianPlugin" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/princelundgren/PrinceListsObsidianPlugin" alt="MIT license"></a>
+</p>
 
-## What it does
+PrinceLists turns a note into a todo list, and a Schedule view shows what's coming up across all
+your lists. It's simple to use, and powerful when you need it.
 
-- **Each list is an ordinary note** with `princelists: true` at the top. Open it and you see a
-  clean todo list. Turn the plugin off and it is still a readable note. The "Create new list"
-  command and ribbon icon, or "New list" in a folder's menu, make one, and "Turn into list" makes
-  one of a note you already have.
-- **Headings make sections, and checkboxes are items.** Anything indented under an item is that
-  item's notes, and notes can hold any Markdown: links, pictures, bullet lists.
-- **Headings drag and collapse.** Drag a heading to move its whole section, and click the arrow
-  beside it to fold the section away. A heading's menu collapses or expands them all at once.
-- **Ticking an item** grays it out where it is. Twenty-four hours later it's archived and hidden,
-  and the checkbox icon in the pane's header, or "Show archived" in its ⋯ menu, brings archived
-  items back.
-- **It's built for desktop and mobile.** Use the "+" in the pane's header to add items, or on
-  mobile the floating "+" too. On desktop, right-click for actions and drag items with the mouse.
-  On mobile, hold an item for half a second and drag it; item actions are in the ⋯ button on an
-  open item, and tapping a heading opens its menu. Step one has been checked on macOS and an
-  iPhone, and step two on macOS and an Android emulator. Step two isn't checked on an iPhone yet,
-  and neither step on Windows, Linux or an iPad.
-- **Star an item** with the star in its card, and the row shows it.
-- **Give an item a date** with the calendar icon in its card. The row shows the day, and the
-  Schedule view ("Open schedule", from the ribbon or the list's ⋯ menu) gathers the dated items of
-  every list under Today, Tomorrow, Next 7 days and Later. Tick them there too.
-- **Cmd+F** (Ctrl+F on Windows and Linux) filters the list to the items that match. On mobile, use
-  the "Find in list" command.
-- **Checklists in an item's notes** tick right in the open card.
-- **Notes are edited a block at a time.** Click a paragraph, a table or a list item and only that
-  part turns into its Markdown; the rest stays drawn as in a note. Enter continues a list, and Up
-  and Down move between the parts.
-- **Formatting in a card:** Cmd+B, Cmd+I and Cmd+K (Ctrl on Windows and Linux) make the selection
-  bold, italic or a link, and a format bar under the part you're editing has the rest, from
-  strikethrough to tables. "Edit in Markdown", in an item's or a heading's menu, opens the list as
-  Markdown at that line, where Obsidian's own tools work.
-- **Right-click menus:** an item and a heading have their own, and on desktop the list's background
-  has New item, New heading, Edit in Markdown, Show archived, Collapse or Expand all headings, and
-  Open schedule.
-- **A list inside another note:** a `princelists` code block naming a list shows its items, to tick
-  and edit there. Renaming the list doesn't change the name in the block, so type the new one in.
+![In a todo list in Obsidian, a new item gets a title, notes with a link and a pasted picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
-  ````markdown
-  ```princelists
-  [[Groceries]]
-  ```
-  ````
+Make a list from the ribbon, a folder, or a note you already have.
 
-- **Pictures:** paste or drop one into an open item's notes. It's saved where Obsidian saves
-  attachments, and the notes link to it.
-- **Cmd+Z and Cmd+Shift+Z** (Ctrl+Z and Ctrl+Shift+Z on Windows and Linux) undo and redo the
-  list's own edits on desktop. After a delete, an Undo button brings the item back on any device.
+| Click the list icon in the ribbon | Right-click a folder in the sidebar | Right-click a note to turn it into a list |
+| --- | --- | --- |
+| <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.webp" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.webp" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.webp" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
-## Installing
+Ticked items hide after a day. Show archived brings them back, with blue checkboxes.
 
-PrinceLists isn't in Obsidian's community plugins yet, so it's installed by hand from a release:
+![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
+
+Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
+
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.webp" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the line being edited" width="520">
+
+The Schedule shows the dated items from all your lists.
+
+![The Schedule opens from the ribbon and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
+
+It works great on your phone too.
+
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, stars and a floating add button, an item is ticked, then another is held and dragged into a different section" width="300">
+
+You can embed lists in normal notes.
+
+````markdown
+```princelists
+[[Hardware store]]
+```
+````
+
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.webp" alt="An ordinary note with a paragraph above and below the Hardware store list, shown with its checkboxes, a star and a New item button" width="540">
+
+## Full feature list
+
+**Lists**
+
+- **Any note can be a list:** make a new one, or turn a note with checkboxes into one.
+- **Back to Markdown** any time with **Open as Markdown**.
+- **Sections** come from headings. Drag them, collapse one, or collapse them all.
+- **A note for the list** sits under its title.
+
+**Items**
+
+- **Add** with the **+** or Cmd+Enter, and **drag** to reorder.
+- **Star** an item and give it a date.
+- **Tick and forget:** ticked items hide after a day.
+- **Delete** with Undo.
+
+**Notes on an item**
+
+- **Any Markdown:** links, checklists, tables and code.
+- **A toolbar** for bold, italic, links, lists, tables and more.
+- **Pictures:** paste or drop them in.
+
+**Across lists**
+
+- **The Schedule** sorts dated items into Today (with anything overdue), Tomorrow, Next 7 days and
+  Later.
+- **A list inside another note** can be ticked and edited there. If you rename the list, update
+  the block.
+- **Works with Tasks:** dates use the Tasks plugin's format.
+
+**Keys and devices**
+
+- **Shortcuts:** Cmd+F filters, Cmd+Z undoes, and Cmd+B, Cmd+I and Cmd+K format. Use Ctrl on
+  Windows and Linux.
+- **Right-click menus** on items, headings, pictures and the list.
+- **Made for touch:** a floating **+**, finger-sized buttons, and hold to drag.
+- **Fits your theme,** light or dark.
+
+## Quick start
+
+1. **Install** PrinceLists from Settings → Community plugins → Browse, and enable it.
+2. **Make a list** with the list icon in the ribbon, or right-click a folder and choose
+   **New list**.
+3. **Add items** with the **+**. Click one to add notes, a star or a date.
+
+Already have a note with checkboxes? Right-click it and choose **Turn into list**. Items already
+ticked hide at once, and **Show archived** shows them.
+
+<details>
+<summary>Install by hand instead</summary>
 
 1. Download `main.js`, `manifest.json` and `styles.css` from the
-   [releases page](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases).
+   [latest release](https://github.com/princelundgren/PrinceListsObsidianPlugin/releases/latest).
 2. Put them in `<vault>/.obsidian/plugins/princelists/`, where `<vault>` is your vault's folder.
-3. In Obsidian, open Settings → Community plugins, turn on community plugins if Restricted mode is
-   on, and enable PrinceLists under Installed plugins.
+3. In Settings → Community plugins, turn on community plugins if Restricted mode is on, and enable
+   PrinceLists under Installed plugins.
 
-To get it on your other devices through Obsidian Sync, turn on Sync's "Active community plugin
-list" and "Installed community plugin list".
+</details>
 
 ## How a list is stored
 
@@ -93,35 +121,40 @@ Stuff for the new apartment.
 - [x] glass jars 1 l ✔ 2026-10-20 23:55
 ```
 
-- **Dates use the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's format,**
-  so Tasks and other tools can still read them.
-- **A ticked item gets `✔` with the date and time.** This is PrinceLists' own field, because Tasks'
-  `✅` holds only a date. The plugin uses it to hide the item 24 hours later. Tasks still sees the
-  item as done, but not when, and shows the `✔` text as part of the item.
-- **The plugin changes only the lines you edit.** Everything else in the note stays exactly as you
-  wrote it.
+- **`princelists: true`** makes a note a list.
+- **Headings** are sections, **checkboxes** are items, and lines indented under an item are its
+  notes.
+- **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks)
+  plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are.
+- **`✔` with a time** marks when you ticked an item. Tasks still sees it as done.
+- **Only the lines you edit change.** The rest of the note stays as you wrote it.
 
-The full format is in the [design](docs/superpowers/specs/2026-10-20-prince-lists-design.md#file-format).
+The full format is in the
+[design](docs/superpowers/specs/2026-10-20-prince-lists-design.md#file-format).
 
-## Syncing
+## Good to know
 
-If you edit the same list on two devices within a few seconds of each other, Obsidian Sync's
-automatic merge can lose a change, as it can in any note. If that takes text you were typing in an
-item, PrinceLists offers to copy it. Sync's "Create conflict file" setting avoids silent merges; the
-conflict copies show up as extra lists.
-
-## Privacy
-
-PrinceLists works only on notes in Obsidian: the notes in your vault, and on desktop a note opened
-from outside it (checked on macOS). It makes no network requests of its own, collects no data, and
-needs no account. A list's notes are rendered by Obsidian, so a picture from the web in them loads
-as it does in any note.
+- **Private:** PrinceLists works only on notes Obsidian opens: your vault's, and on desktop a
+  note you open from outside it. No network requests of its own, no data collected, no account. A
+  picture linked from the web loads as in any note.
+- **Obsidian Sync:** turn on Sync's "Active community plugin list" and "Installed community plugin
+  list" to get PrinceLists on your other devices. If two devices edit a list within seconds, Sync
+  can drop one change, as in any note. Sync's "Create conflict file" setting keeps both, as extra
+  lists.
+- **Made for** Obsidian on macOS, iOS, Android and Windows. If something looks wrong,
+  [open an issue](https://github.com/princelundgren/PrinceListsObsidianPlugin/issues).
 
 ## Contributing
 
-Ideas, bug reports and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md), the rules
-in [AGENTS.md](AGENTS.md#rules-that-are-never-broken) and the [code of conduct](CODE_OF_CONDUCT.md).
-To report a security problem, see [SECURITY.md](SECURITY.md).
+Bug reports, ideas and pull requests are welcome.
+
+- Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the
+  [rules in AGENTS.md](AGENTS.md#rules-that-are-never-broken).
+- Be kind: see the [code of conduct](CODE_OF_CONDUCT.md).
+- The designs for [step one](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and
+  [step two](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md) say what the plugin
+  does and why.
+- To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ## License
 
