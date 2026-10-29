@@ -29,6 +29,7 @@ export interface PieceMove {
 const QUIET_PLACEHOLDER_CLASS = 'princelists-quiet-placeholder';
 // A new block's field, flush under the block above while it holds the empty line between them.
 const NEW_BLOCK_CLASS = 'princelists-new-block';
+const ABOVE_NEW_BLOCK_CLASS = 'princelists-above-new-block';
 const newBlocks = new WeakSet<HTMLTextAreaElement>();
 
 // Fields that handed typing on to another, which removes them itself.
@@ -40,6 +41,7 @@ export function drawPieces(view: PrinceListView, host: NotesHost): void {
 	if (!found) return;
 	const open = host.range();
 	host.keep(drawNotes(view, view.sourcePath, host.area, found.notes, found.checklist, open));
+	markPieceAbove(host.area);
 	const field = host.area.querySelector<HTMLTextAreaElement>(`.${NOTES_EDITOR_CLASS}`);
 	if (field && !field.readOnly && open === null) pieceLost(view, field);
 	else if (field) showPlaceholder(field, host);
@@ -74,6 +76,14 @@ export function pieceInput(view: PrinceListView, field: HTMLTextAreaElement): vo
 // The empty line is saved either way; once the field no longer shows it, the block's gap does.
 function showNewBlock(field: HTMLTextAreaElement): void {
 	field.toggleClass(NEW_BLOCK_CLASS, newBlocks.has(field) && holdsSeparatorLine(field.value));
+	if (field.parentElement) markPieceAbove(field.parentElement);
+}
+
+// Marks the piece right above a new block's field, as :has() would; Obsidian's CSS review flags :has().
+function markPieceAbove(area: HTMLElement): void {
+	area.querySelector(`.${ABOVE_NEW_BLOCK_CLASS}`)?.removeClass(ABOVE_NEW_BLOCK_CLASS);
+	const above = area.querySelector(`.${NEW_BLOCK_CLASS}`)?.previousElementSibling;
+	if (above?.hasClass(NOTE_PIECE_CLASS)) above.addClass(ABOVE_NEW_BLOCK_CLASS);
 }
 
 /** Saves `markdown` as the open piece, as typing it would; false when it wasn't saved. */
@@ -164,9 +174,9 @@ function openPiece(view: PrinceListView, host: NotesHost, place: PiecePlace, ran
 	const caret = click && clicked ? caretAtClick(clicked, click, text) : text.length;
 	const field = pieceField(text);
 	if (isNew) newBlocks.add(field);
-	showNewBlock(field);
 	showPlaceholder(field, host);
 	showField(host.area, place, field);
+	showNewBlock(field);
 	buildFormatBar(field);
 	field.focus();
 	field.setSelectionRange(caret, caret);
