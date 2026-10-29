@@ -616,8 +616,9 @@ stays, and the blank line stays with it.
   - **Dropping (call):** a picture file dropped on an open card is saved and linked. Any other drag
     leaves the card alone. Where the platform hides a drag's file kinds until the drop, as iOS does,
     the card accepts any file drag and checks each file when it lands **(owner, 2026-10-27)**.
-    On iOS 18.7 a picture dragged from Photos lands with no file, in Obsidian's own editor too,
-    so the card says none came and to paste it instead **(owner, 2026-10-29)**.
+    A file drag that lands with no file shows "No picture came with that drop. Paste it instead."
+    **(owner, 2026-10-29)**. On iOS 18.7 a picture from Photos has done so, in Obsidian's own
+    editor too.
   - **Names (call):** a pasted picture is named `Pasted image YYYYMMDDHHmmss.<ext>` in local time,
     as Obsidian names its own. A dropped one keeps its name, with `#`, `^`, `|`, `[` and `]`
     replaced by `-`, since in a link they start a heading, a block, an alias or the brackets.
@@ -1372,6 +1373,7 @@ Checked 2026-10-20.
   - `file.parent` being `null` for a note outside the vault
   - the `--view-bottom-spacing` CSS variable, set on an iPhone and unset on macOS
   - iOS (1.14.5) showing a drag's types only as `Files` until the drop
+  - iOS 18.7 (1.14.5) delivering a drop from Photos with `types` `['Files']` and no files or items
   - Obsidian's own `dragover` listener making a drop a move unless the view sets `dropEffect`
   - the browser not counting the plugin's `setRangeText` insert as typing for its undo
 - **Not yet measured on a device:** the 800 ms of the iOS `contextmenu` hold; 1a confirmed the

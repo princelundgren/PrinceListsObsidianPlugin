@@ -62,7 +62,7 @@ function onDrop(view: PrinceListView, evt: DragEvent): void {
 	evt.preventDefault();
 	evt.stopPropagation();
 	const files = Array.from(evt.dataTransfer?.files ?? []);
-	// iOS 18.7 drops a picture from Photos with the type `Files` and no file.
+	// On iOS 18.7, a picture dropped from Photos can arrive with the type `Files` and no file.
 	if (files.length === 0) {
 		new Notice(EMPTY_DROP_NOTICE);
 		return;
