@@ -55,8 +55,11 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - **Everything in the earlier plans' Global Constraints still holds,** and so does `AGENTS.md`.
 - **Dependencies:** `@codemirror/lang-markdown` `^6.5.2` and `@lezer/markdown` `^1.8.1` in
   `dependencies`. `@codemirror/language` and `@codemirror/commands` in `devDependencies`, for their
-  types; `@codemirror/state` and `view` already come with `obsidian`. All four stay in
-  `esbuild.config.mjs`'s `external`. From `@codemirror/lang-markdown` import only `markdownLanguage`,
+  types; `@codemirror/state` and `view` already come with `obsidian`. `esbuild.config.mjs`'s
+  `external` already holds every `@codemirror/*` package these import (`autocomplete` included) and
+  `@lezer/common`, `@lezer/highlight` and `@lezer/lr`, so the syntax tree's `NodeProp`s and `Tag`s
+  are Obsidian's own; it stays so, and only `@codemirror/lang-markdown` and `@lezer/markdown` are
+  bundled. From `@codemirror/lang-markdown` import only `markdownLanguage`,
   `insertNewlineContinueMarkupCommand` and `deleteMarkupBackward`, never `markdown()`.
 - **`main.js` grows by about 42 kB** minified, less what Task 8 removes. Each pull request that
   adds editor code says the size before and after.
@@ -220,7 +223,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   close(): void }`, the notes an editor holds, and `cardNotesSource(view: PrinceListView, card:
   Card): NotesSource`. `read` gives the notes as parsed, `open` starts a visit, `visitText` and
   `fits` are Task 1's, `visitStart` is the visit's `range.start` or null outside one, `save` goes
-  through `saveNotes` (`saveListNote` with its warnings in Task 7).
+  through `saveNotes` and returns its `Typed` to the editor, which passes it to `view.handleTyped`.
+  A source does anything else its save needs itself, so Task 7's list note source keeps
+  `saveListNote`'s `note` and checks its warnings inside `save`, and the interface stays as it is.
 - Produces, in `src/view/notes-editor.ts`:
   - `showNotesEditor(view: PrinceListView, source: NotesSource, area: HTMLElement): EditorView`:
     creates the editor in `area` once, or, for the one already there, syncs it. The card keeps it
@@ -275,7 +280,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   Check design risk 1: `npm view @codemirror/lang-markdown@6.5.2 dependencies` against the
   `@codemirror/*` and `@lezer/common` that Obsidian `1.5.7` and the current Obsidian provide, and
   load the editor in both. If `1.5.7` can't load it, stop and raise it in the pull request: a new
-  `minAppVersion` is the owner's call.
+  `minAppVersion` is the owner's call. After `npm run build`, check that `main.js` bundles no
+  `@lezer/common`, `@lezer/lr` or `@lezer/highlight` (it `require`s them), so the parser's
+  `NodeProp`s are Obsidian's single copy.
 - [ ] **Step 2: Update** `AGENTS.md`'s dependency line to name the two new runtime packages,
   `THIRD_PARTY_NOTICES` with their MIT licenses, and the README's license line.
 - [ ] **Step 3: Build it.** The rules are Task 1's tested functions.
@@ -476,8 +483,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 - Produces, in `src/view/notes-source.ts`: `listNoteSource(view: PrinceListView): NotesSource`:
   `read` through `getListNote` from the list note's first line with text, as Task 1's
   `openNotes('listNote')` starts, `open` through `openNotes('listNote')` and `save` through
-  `saveListNote`, which checks `warnListNote` on the whole note as saved, as `fields.ts` does for a
-  piece. Leaving the note still draws the whole list again when it warned or rows were held back,
+  `saveListNote`: it checks `warnListNote` on the returned `note`, the whole note as saved, as
+  `fields.ts` does for a piece, and returns the result as `Typed` without its `note`. Leaving the note still draws the whole list again when it warned or rows were held back,
   as `closeListNote` in `fields.ts` does now, alongside the sync on blur.
 - `buildListNote` and `refreshListNote` show the list note's editor with `showNotesEditor`; the
   view keeps it in place of `listNoteNotes` and destroys it in `onClose` and when the note stops
