@@ -255,14 +255,30 @@ textarea.princelists-title {
 	padding: 0;
 }
 
-/* A card's notes are at least three lines tall, empty or not, so they are easy to tap: below the last
-   piece, a strip opens a new one. */
-.princelists-card-notes > .princelists-placeholder {
-	min-height: calc(3em * var(--line-height-normal));
+/* A card's notes editor reads as the card's text, as Obsidian's own small editors do: the card's font,
+   Obsidian's caret, and no focus ring. It is at least three lines tall, empty or not, so it is easy
+   to tap. */
+.princelists-card-notes .cm-scroller {
+	font-family: inherit;
+	line-height: var(--line-height-normal);
 }
 
-.princelists-notes-end {
-	min-height: calc(2em * var(--line-height-normal));
+.princelists-card-notes .cm-content {
+	min-height: calc(3em * var(--line-height-normal));
+	padding: 0;
+	caret-color: var(--caret-color);
+}
+
+.princelists-card-notes .cm-line {
+	padding: 0;
+}
+
+.princelists-card-notes .cm-focused {
+	outline: none;
+}
+
+.princelists-card-notes .cm-placeholder {
+	color: var(--text-faint);
 }
 
 /* A new block's field holds the empty line above it, in place of the block's own margin. */
@@ -270,8 +286,7 @@ textarea.princelists-title {
 	margin-bottom: 0;
 }
 
-.princelists-list-note-text > .princelists-note-piece:first-child > :first-child,
-.princelists-card-notes > .princelists-note-piece:first-child > :first-child {
+.princelists-list-note-text > .princelists-note-piece:first-child > :first-child {
 	margin-top: 0;
 }
 
@@ -373,13 +388,27 @@ button.princelists-new-item {
 	gap: var(--size-2-1);
 }
 
-/* Under the notes editor while it's open. On a narrow card, such as a phone's, whole groups move to
-   a second row, so every button stays in sight. */
+/* Under the notes editor while it has focus. On a narrow card, whole groups move to a second row, so
+   every button stays in sight. On mobile it is one row, which scrolls sideways. */
 .princelists-format-bar {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--size-2-1) var(--size-4-3);
 	margin-top: var(--size-4-1);
+}
+
+.princelists-notes-codemirror:not(.cm-focused) + .princelists-format-bar {
+	display: none;
+}
+
+.princelists-is-mobile .princelists-format-bar {
+	flex-wrap: nowrap;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.princelists-is-mobile .princelists-format-bar::-webkit-scrollbar {
+	display: none;
 }
 
 .princelists-format-group {

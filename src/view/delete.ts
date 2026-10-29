@@ -39,8 +39,7 @@ function offerUndo(view: PrinceListView, file: TFile, undo: PlannedDelete['undo'
 	showUndoNotice(message, () => void view.enqueue(() => undoDelete(view, file, undo)));
 }
 
-// A notice with an Undo button for a few seconds (spec, "Item actions"). Built in a fragment, since
-// Notice.messageEl is newer than minAppVersion.
+// A notice with an Undo button for a few seconds (spec, "Item actions").
 export function showUndoNotice(message: string, onUndo: () => void): void {
 	const fragment = createFragment();
 	fragment.createSpan({ text: message });

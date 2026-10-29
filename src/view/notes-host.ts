@@ -1,16 +1,13 @@
 import type { Component } from 'obsidian';
-import { checklistOf, listNoteChecklist, type ChecklistLine } from '../core/checklist';
-import { getItemNotes, notesStartLine } from '../core/edit-items';
+import { listNoteChecklist, type ChecklistLine } from '../core/checklist';
 import { getListNote } from '../core/edit-list-note';
 import type { Typed } from '../core/editing';
 import type { LineRange } from '../core/follow';
-import { itemAt } from '../core/parse';
-import { CARD_NOTES_CLASS, type Card } from './card';
 import { closeListNote, LIST_NOTE_AREA_CLASS, openListNote, warnListNote } from './fields';
 import type { PrinceListView } from './list-view';
 import type { Notes } from './note-piece-state';
 
-/** Notes drawn a piece at a time, one piece open in a field: the open card's, or the list note. */
+/** Notes drawn a piece at a time, one piece open in a field: the list note. */
 export interface NotesHost {
 	/** The element the pieces are drawn in. */
 	area: HTMLElement;
@@ -30,36 +27,11 @@ export interface NotesHost {
 	keep(drawn: Component): void;
 }
 
-/** The notes `el` is in, or null when it is in neither the open card's nor the list note. */
+/** The list note's notes when `el` is in them, or null. */
 export function notesHostOf(view: PrinceListView, el: Element): NotesHost | null {
-	const card = view.card;
-	const cardArea = el.closest<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (card && cardArea && card.el.contains(cardArea)) return cardNotesHost(view, card, cardArea);
 	const noteArea = el.closest<HTMLElement>(`.${LIST_NOTE_AREA_CLASS}`);
 	if (noteArea && view.listNoteEl?.contains(noteArea)) return listNoteHost(view, noteArea);
 	return null;
-}
-
-export function cardNotesHost(view: PrinceListView, card: Card, area: HTMLElement): NotesHost {
-	return {
-		area,
-		kind: 'card',
-		notes: () => {
-			const { lines, model } = view.parse();
-			const item = card.lostAt === null && view.selected !== null ? itemAt(model, view.selected) : undefined;
-			if (!item) return null;
-			return { notes: { markdown: getItemNotes(lines, item), start: notesStartLine(lines, item) }, checklist: checklistOf(lines, item) };
-		},
-		range: () => view.editing.notesPieceRange(),
-		open: (range, isNew, indent) => view.editing.openNotesPiece(range, isNew, indent),
-		outdent: (text) => view.editing.notesPieceOutdent(text),
-		type: (markdown) => view.editing.typeNotesPiece(markdown),
-		close: () => view.editing.closeNotes(),
-		keep: (drawn) => {
-			if (card.notes && card.notes !== drawn) view.removeChild(card.notes);
-			card.notes = drawn;
-		},
-	};
 }
 
 export function listNoteHost(view: PrinceListView, area: HTMLElement): NotesHost {

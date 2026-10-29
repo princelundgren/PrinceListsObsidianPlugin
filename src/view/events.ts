@@ -28,6 +28,7 @@ import { openPieceAt, pieceBlur, pieceInput } from './note-piece-field';
 import { pieceBeforeInput, pieceKeyDown } from './note-piece-keys';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR } from './notes';
 import { notesHostOf } from './notes-host';
+import { runNotesBarAction } from './notes-keys';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
@@ -79,8 +80,10 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	}
 	const action = barActionAt(target);
 	if (action) {
-		const field = notesHostOf(view, target)?.area.querySelector('textarea');
-		if (field) runBarAction(field, action);
+		const editor = view.card?.el.contains(target) ? view.card.editor : null;
+		const field = editor ? null : notesHostOf(view, target)?.area.querySelector('textarea');
+		if (editor) runNotesBarAction(editor, action);
+		else if (field) runBarAction(field, action);
 		return;
 	}
 	if (target.closest(`.${OPEN_AS_MARKDOWN_CLASS}`)) {

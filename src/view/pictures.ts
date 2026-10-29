@@ -1,10 +1,9 @@
 import { Notice } from 'obsidian';
 import { pictureName } from '../core/picture';
-import { CARD_NOTES_CLASS, NOTES_EDITOR_CLASS, type Card } from './card';
+import type { Card } from './card';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
-import { addBlockBelow, openNewPiece } from './note-piece-field';
-import { cardNotesHost } from './notes-host';
+import { appendNotesBlock } from './notes-editor';
 
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";
 const FAILED_NOTICE = "Couldn't add the picture.";
@@ -29,17 +28,16 @@ export function registerPictureEvents(view: PrinceListView): void {
 	view.registerDomEvent(contentEl.doc, 'drop', () => (dragFromPage = false));
 }
 
-// A ClipboardEvent has no targetNode, so the field is found among the view's own textareas.
+// A paste goes where focus is, so it is in the notes while their editor has it.
 function onPaste(view: PrinceListView, evt: ClipboardEvent): void {
 	const card = view.card;
-	const editor = Array.from(view.contentEl.querySelectorAll('textarea')).find((field) => field === evt.target);
-	if (!card || card.lostAt !== null || !editor?.hasClass(NOTES_EDITOR_CLASS) || !card.el.contains(editor)) return;
+	if (!card || card.lostAt !== null || !card.editor?.hasFocus) return;
 	// Spreadsheets and word processors copy a picture of their text along with it; the text wins.
 	if (evt.clipboardData?.getData('text/plain')) return;
 	const pictures = Array.from(evt.clipboardData?.files ?? []).filter((file) => file.type.startsWith('image/'));
 	if (pictures.length === 0) return;
 	evt.preventDefault();
-	void addPictures(view, card, pictures, { pasted: true, into: editor });
+	void addPictures(view, card, pictures, true);
 }
 
 function onDragOver(view: PrinceListView, evt: DragEvent): void {
@@ -55,9 +53,7 @@ function onDrop(view: PrinceListView, evt: DragEvent): void {
 	if (!card || !inOpenCard(view, evt) || !mayHoldPicture(evt)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
-	const field = targetOf(evt)?.closest('textarea');
-	const into = field?.hasClass(NOTES_EDITOR_CLASS) ? field : null;
-	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), { pasted: false, into });
+	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), false);
 }
 
 function inOpenCard(view: PrinceListView, evt: DragEvent): boolean {
@@ -72,14 +68,8 @@ function mayHoldPicture(evt: DragEvent): boolean {
 	return items.some((item) => item.kind === 'file' && item.type.startsWith('image/'));
 }
 
-// The pictures go in a block of their own (addBlockBelow) from `into`, the open piece's field they were
-// pasted or dropped in, while it is still open. Otherwise they go in a new piece at the end.
-async function addPictures(
-	view: PrinceListView,
-	card: Card,
-	files: File[],
-	{ pasted, into }: { pasted: boolean; into: HTMLTextAreaElement | null },
-): Promise<void> {
+// The pictures go in a block of their own at the end of the notes.
+async function addPictures(view: PrinceListView, card: Card, files: File[], pasted: boolean): Promise<void> {
 	const list = view.file;
 	if (!list) return;
 	// A note outside the vault has no parent (observed in 1.14.4), and its picture links can't resolve.
@@ -114,16 +104,5 @@ async function addPictures(
 		new Notice(`The card closed before the picture was added. It's saved as ${paths.join(', ')}.`);
 		return;
 	}
-	if (!insertLinks(view, card, links.join('\n'), into)) new Notice(`Couldn't add the picture to the notes. It's saved as ${paths.join(', ')}.`);
-}
-
-// False when no field took the links.
-function insertLinks(view: PrinceListView, card: Card, text: string, into: HTMLTextAreaElement | null): boolean {
-	const area = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (!area) return false;
-	if (into?.isConnected && !into.readOnly) return addBlockBelow(view, into, text);
-	// Blurred, an open field closes and its piece is drawn, before the new piece opens.
-	area.querySelector('textarea')?.blur();
-	const field = openNewPiece(view, cardNotesHost(view, card, area));
-	return field !== null && addBlockBelow(view, field, text);
+	if (!card.editor || !appendNotesBlock(card.editor, links.join('\n'))) new Notice(`Couldn't add the picture to the notes. It's saved as ${paths.join(', ')}.`);
 }

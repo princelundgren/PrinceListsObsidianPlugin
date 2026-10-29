@@ -548,4 +548,4 @@ Smallest first, each feature its own group of plan tasks that can be released al
 list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, dragging and collapsing
 headings, When on rows and in the card, the Schedule view, then lists inside other notes. Then,
 before 0.4.0 **(owner, 2026-10-28)**: the two new format buttons, the right-click menus, and
-editing notes a block at a time. No API here is newer than 1.5.7, the current `minAppVersion`.
+editing notes a block at a time. No API here is newer than 1.5.7, step two's `minAppVersion`.

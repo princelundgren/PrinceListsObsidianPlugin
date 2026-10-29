@@ -63,9 +63,11 @@ this project.
 - **Stable IDs:** never change the plugin `id` (`princelists`), command IDs or the view type once
   they're released.
 - **No default hotkeys** on commands (Obsidian's plugin guidelines).
-- **Dependencies:** no UI framework, and `commonmark` is the only runtime dependency. Adding one
-  needs an issue or a plan task that names it. The design allows one small drag library if touch
-  dragging needs it.
+- **Dependencies:** no UI framework. The runtime dependencies are `commonmark`, and
+  `@codemirror/lang-markdown` and `@lezer/markdown` for the notes editor. Adding one needs an issue
+  or a plan task that names it. The design allows one small drag library if touch dragging needs it.
+  A bump of either editor package reruns the notes design's risk 1: the packages they need from
+  Obsidian must ship with Obsidian at `minAppVersion`.
 - **`minAppVersion`:** using an API whose `@since` is newer than `minAppVersion` in
   `manifest.json` means raising it. Say so in the pull request.
 - **Code style:** follow `.editorconfig`: tabs and single quotes in code. Snippets in the plan

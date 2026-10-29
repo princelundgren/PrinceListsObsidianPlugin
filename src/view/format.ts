@@ -5,7 +5,7 @@ import { changeField, stepField } from './field-undo';
 export const FORMAT_BAR_CLASS = 'princelists-format-bar';
 const ACTION_ATTR = 'data-format';
 
-type BarAction = Format | 'undo' | 'redo';
+export type BarAction = Format | 'undo' | 'redo';
 
 const GROUPS: readonly (readonly { action: BarAction; icon: string; label: string }[])[] = [
 	[
@@ -34,10 +34,10 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 ];
 const ACTIONS = GROUPS.flat().map((button) => button.action);
 
-// Shown right under the open piece of a card's notes.
-export function buildFormatBar(field: HTMLTextAreaElement): void {
+// Shown right under `after`: a card's notes editor, or the list note's open piece.
+export function buildFormatBar(after: HTMLElement): void {
 	const bar = createDiv({ cls: FORMAT_BAR_CLASS });
-	field.after(bar);
+	after.after(bar);
 	for (const group of GROUPS) {
 		const groupEl = bar.createDiv({ cls: 'princelists-format-group' });
 		for (const { action, icon, label } of group) {

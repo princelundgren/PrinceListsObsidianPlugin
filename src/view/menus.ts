@@ -14,6 +14,7 @@ import { addHeading, openHeadingField } from './heading-field';
 import { itemQuickMenu } from './item-quick-menu';
 import type { PrinceListView } from './list-view';
 import { atLine, trackWhileShown } from './menu-anchor';
+import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
 import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
@@ -167,7 +168,7 @@ function headingLinesOf(model: ListModel): number[] {
 // A right-click on desktop: a row's or a heading's menu, else the list's. A field keeps the menu it
 // has of its own.
 export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
-	if (target.closest('textarea, input:not([type="checkbox"])')) return;
+	if (target.closest(`textarea, input:not([type="checkbox"]), .${NOTES_CODEMIRROR_CLASS}`)) return;
 	const menu = menuAt(view, target) ?? backgroundMenu(view, evt);
 	if (!menu) return;
 	evt.preventDefault();
@@ -178,7 +179,7 @@ export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: H
 // menu (spec, "Touch on mobile"). The view's listener cancels it in the capture phase. WebKit
 // still sends a click when the finger lifts, which the view swallows.
 export function cancelHoldMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
-	if (target.closest('textarea') || !target.closest(`.${ITEM_CLASS}, .${HEADING_CLASS}`)) return;
+	if (target.closest(`textarea, .${NOTES_CODEMIRROR_CLASS}`) || !target.closest(`.${ITEM_CLASS}, .${HEADING_CLASS}`)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
 	view.swallowNextClick = true;
