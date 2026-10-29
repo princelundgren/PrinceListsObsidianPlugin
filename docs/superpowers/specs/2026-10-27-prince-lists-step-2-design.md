@@ -396,6 +396,9 @@ put its editor in a plugin's view.
 
 ### Editing notes a block at a time (owner, 2026-10-28)
 
+**Being replaced (owner, 2026-10-29):** [notes in one editor](2026-10-29-notes-in-one-editor-design.md)
+replaces this section once it's built (#182). Until then, notes edit as this section says.
+
 Clicking a card's notes or the list note switched the whole text to its Markdown, so a table
 showed its pipes and a checklist its brackets: a step down from a note. Obsidian documents no way
 to put its own editor, with Live Preview, in a plugin's view. So the notes stay drawn by Obsidian's
