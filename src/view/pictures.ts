@@ -61,12 +61,15 @@ function onDrop(view: PrinceListView, evt: DragEvent): void {
 	if (!card || !inOpenCard(view, evt) || !mayHoldPicture(evt)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
-	// The pointer's coordinates name a line only now, before the pictures are saved and the notes may move.
-	const line = card.editor ? droppedLine(card.editor, evt) : 0;
 	const files = Array.from(evt.dataTransfer?.files ?? []);
 	// iOS 18.7 drops a picture from Photos with the type `Files` and no file.
-	if (files.length === 0) new Notice(EMPTY_DROP_NOTICE);
-	else void addPictures(view, card, files, false, () => line);
+	if (files.length === 0) {
+		new Notice(EMPTY_DROP_NOTICE);
+		return;
+	}
+	// The pointer's coordinates name a line only now, before the pictures are saved and the notes may move.
+	const line = card.editor ? droppedLine(card.editor, evt) : 0;
+	void addPictures(view, card, files, false, () => line);
 }
 
 // The notes' line dropped on, or their last line for a drop elsewhere on the card.
