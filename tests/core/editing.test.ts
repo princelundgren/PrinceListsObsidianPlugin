@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { visibleSections, withoutRange } from '../../src/core/display';
 import { ListEditing, type Typed } from '../../src/core/editing';
+import { getItemNotes } from '../../src/core/edit-items';
 import { NO_LINES_MOVED, ownEdit } from '../../src/core/follow';
 import { planItemMove, type PlannedMove } from '../../src/core/list-actions';
 import { toggleLine } from '../../src/core/item-line';
@@ -407,5 +408,90 @@ describe("selected follows the view's own writes", () => {
 		const removed = `${FRONTMATTER}- [ ] \n`;
 		state.applyOwn(removed, ownEdit(3, two, removed, 'delete'));
 		expect(state.selected).toBe(3);
+	});
+});
+
+describe('a visit to the notes', () => {
+	test("opens a card's notes and the list note exactly as parsed, without the empty lines around them", () => {
+		const text = `${FRONTMATTER}\n\nNote\n\n\n- [ ] a\n\n\n\tA\n\n\tB\n\n\n- [ ] b\n`;
+		const state = editing(text);
+		expect(state.openNotes('listNote')).toBe('Note');
+		state.open(8);
+		const { lines, item } = list(text);
+		expect(state.openNotes('item')).toBe(getItemNotes(lines, item(0)));
+		expect(state.notesPieceRange()).toEqual({ start: 11, end: 14 });
+	});
+
+	test('opens no visit when the card has no item', () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n`);
+		expect(state.openNotes('item')).toBeNull();
+		expect(state.visitText()).toBeNull();
+	});
+
+	test('notesChangeFits says whether the layout can take a change, and changes nothing', () => {
+		const text = `${FRONTMATTER}Old\n  - [ ] a\n`;
+		const state = editing(text);
+		state.openNotes('listNote');
+		expect(state.notesChangeFits({ from: 0, to: 1, lines: ['- a'] })).toBe(false);
+		expect(state.text).toBe(text);
+		expect(state.notesChangeFits({ from: 0, to: 1, lines: ['ab'] })).toBe(true);
+		expect(state.text).toBe(text);
+		expect(state.saveListNote({ from: 0, to: 1, lines: ['- a'] })).toEqual({ refused: true, firstRefusal: true });
+		expect(state.saveListNote({ from: 0, to: 1, lines: ['- a'] })).toEqual({ refused: true, firstRefusal: false });
+		expect(state.text).toBe(text);
+	});
+
+	test("a line tracked at an empty list note's start follows the note's first text", () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n`);
+		const first = state.track(3);
+		state.openNotes('listNote');
+		expect(state.saveListNote({ from: 0, to: 1, lines: ['N'] })).toEqual({ edit: { start: 3, delta: 2, kind: 'insert' }, note: 'N' });
+		expect(first.line).toBe(5);
+	});
+
+	test("a card's save is a change at its item's title line", () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n\tx\n`);
+		state.open(3);
+		state.openNotes('item');
+		expect(state.saveNotes({ from: 0, to: 1, lines: ['x', 'y'] })).toEqual({ edit: { start: 3, delta: 1, kind: 'change' } });
+	});
+
+	test("a visit's saves are one step of the list's undo", () => {
+		const text = `${FRONTMATTER}- [ ] a\n\tx\n- [ ] b\n`;
+		const state = editing(text);
+		state.open(3);
+		state.openNotes('item');
+		state.saveNotes({ from: 0, to: 1, lines: ['xy'] });
+		state.saveNotes({ from: 1, to: 1, lines: ['z'] });
+		state.saveNotes({ from: 0, to: 1, lines: ['x'] });
+		state.closeNotes();
+		const undo = state.history.undo(state.text);
+		expect(undo?.next).toBe(text);
+		state.applyOwn(text, (undo as NonNullable<typeof undo>).edit);
+		expect(state.history.undo(state.text)).toBeNull();
+	});
+
+	test('follows an outside change above the notes, and is lost to one of its own lines', () => {
+		const text = `${FRONTMATTER}- [ ] a\n\tx\n- [ ] b\n`;
+		const state = editing(text);
+		state.open(3);
+		state.openNotes('item');
+		state.saveNotes({ from: 1, to: 1, lines: [''] });
+		state.outsideChange(`${FRONTMATTER}- [ ] top\n${state.text.slice(FRONTMATTER.length)}`);
+		expect(state.visitText()).toBe('x\n');
+		expect(saved(state.saveNotes({ from: 1, to: 2, lines: ['y'] }))).toBe(true);
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] top\n- [ ] a\n\tx\n\ty\n- [ ] b\n`);
+		state.outsideChange(state.text.replace('\tx', '\tx from the phone'));
+		expect(state.saveNotes({ from: 0, to: 1, lines: ['mine'] })).toEqual({ lost: true });
+		expect(state.visitText()).toBeNull();
+	});
+
+	test('a change outside the lines the visit holds throws, as the editor and the file are out of step', () => {
+		const state = editing(`${FRONTMATTER}- [ ] a\n\tx\n- [ ] b\n`);
+		state.open(3);
+		state.openNotes('item');
+		const stale = { from: 1, to: 2, lines: ['y'] };
+		expect(() => state.notesChangeFits(stale)).toThrow('Lines 1 to 2 are not in the 1 lines of these notes');
+		expect(() => state.saveNotes(stale)).toThrow('Lines 1 to 2 are not in the 1 lines of these notes');
 	});
 });
