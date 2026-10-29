@@ -100,8 +100,10 @@ export function pieceBlur(view: PrinceListView, field: HTMLTextAreaElement, focu
 	if (handedOn.has(field)) return;
 	const host = notesHostOf(view, field);
 	host?.close(focusing);
+	const area = field.parentElement;
 	hideField(field);
 	removeField(field);
+	if (area) markPieceAbove(area);
 	if (host?.area.isConnected) drawPieces(view, host);
 }
 
