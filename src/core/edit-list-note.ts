@@ -56,9 +56,12 @@ export function listNoteAround(
 	run: readonly Line[],
 ): { before: Line[]; after: Line[] } {
 	const noteEnd = Math.max(model.listNote.end, to);
+	const after = [...lines.slice(model.listNote.start, from), ...run, ...lines.slice(to, noteEnd)];
+	// The file's last line, without an ending, can come before the run's lines, which it would join.
+	const eol = dominantEol(lines);
 	return {
 		before: lines.slice(model.listNote.start, noteEnd),
-		after: [...lines.slice(model.listNote.start, from), ...run, ...lines.slice(to, noteEnd)],
+		after: after.map((line, i) => (line.eol === '' && i < after.length - 1 ? { ...line, eol } : line)),
 	};
 }
 

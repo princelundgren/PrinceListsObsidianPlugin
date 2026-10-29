@@ -7,6 +7,8 @@ import { mapLine } from './guard';
 import { EditHistory } from './history';
 import { parseItemLine } from './item-line';
 import { joinLines, splitLines, type Line } from './lines';
+import type { NotesChange } from './notes-lines';
+import { fitsInVisit, openVisit, saveInVisit, visitText, type NotesVisit } from './notes-visit';
 import { outdentMarker, pieceText } from './note-pieces';
 import { itemAt, parseList, type ItemBlock, type ListModel } from './parse';
 import { startTitleField, syncTitleField, typeTitle, type TitleField } from './title-field';
@@ -40,7 +42,7 @@ export class ListEditing {
 	private readonly tracked = new Set<TrackedLine>();
 	// `field` changes with every keystroke; the object around it is the typing session.
 	private title: { field: TitleField } | null = null;
-	private piece: OpenPiece | null = null;
+	private piece: OpenPiece | NotesVisit | null = null;
 
 	constructor(private readonly contentStartOf: (text: string) => number) {}
 
@@ -130,7 +132,7 @@ export class ListEditing {
 	typeNotesPiece(markdown: string): Typed {
 		const found = this.selectedItem();
 		const session = this.piece;
-		if (!found || session?.notes !== 'item') return { lost: true };
+		if (!found || session?.notes !== 'item' || 'visit' in session) return { lost: true };
 		const { lines, model, item } = found;
 		return this.refusable(session, () => {
 			const result = setNotesPiece(lines, model, item, session.piece, markdown);
@@ -172,7 +174,7 @@ export class ListEditing {
 
 	typeListNote(markdown: string): TypedListNote {
 		const session = this.piece;
-		if (session?.notes !== 'listNote') return { lost: true };
+		if (session?.notes !== 'listNote' || 'visit' in session) return { lost: true };
 		const { lines, model } = this.parse();
 		return this.refusable(session, () => {
 			const { range, separator } = session.piece;
@@ -184,6 +186,42 @@ export class ListEditing {
 			const start = separator ? range.start - 1 : range.start;
 			return { edit: this.apply(joinLines(result.lines), start, isInsert ? 'insert' : 'change', session), note: result.note };
 		});
+	}
+
+	/**
+	 * Starts a visit to the open card's notes or to the list note, ending any other visit or piece. It
+	 * returns the notes as parsed, without their indent, or null when the card's item is gone.
+	 */
+	openNotes(notes: NotesVisit['notes']): string | null {
+		this.piece = null;
+		const found = notes === 'item' ? this.selectedItem() : { ...this.parse(), item: null };
+		if (!found) return null;
+		const visit = openVisit(found.lines, found.model, found.item);
+		this.piece = visit;
+		return visitText(found.lines, visit);
+	}
+
+	/** The visit's own lines as its editor holds them, or null once an outside change took them. */
+	visitText(): string | null {
+		const visit = this.piece;
+		return visit && 'visit' in visit ? visitText(splitLines(this.text), visit) : null;
+	}
+
+	/** Whether the visit's notes can take `change`. It changes nothing. Without a visit, a save says so. */
+	notesChangeFits(change: NotesChange): boolean {
+		const found = this.visited();
+		return !found || fitsInVisit(found.lines, found.model, found.item, found.visit, change);
+	}
+
+	/** Saves `change` to the card's notes. All of a visit's saves are one step of the list's undo. */
+	saveNotes(change: NotesChange): Typed {
+		const typed = this.saveVisit('item', change);
+		return 'edit' in typed ? { edit: typed.edit } : typed;
+	}
+
+	/** As saveNotes, for the list note. */
+	saveListNote(change: NotesChange): TypedListNote {
+		return this.saveVisit('listNote', change);
 	}
 
 	// One of the view's own one-off writes landed, such as a tick or a removal.
@@ -213,6 +251,24 @@ export class ListEditing {
 			if (mapped && session.notes === 'listNote') session.piece.blankAfter &&= mapLine(oldLines, newLines, range.end) === mapped.end;
 		}
 		return { lostSelected: hadSelected && this.selected === null };
+	}
+
+	private saveVisit(notes: NotesVisit['notes'], change: NotesChange): TypedListNote {
+		const found = this.visited(notes);
+		if (!found) return { lost: true };
+		const { lines, model, item, visit } = found;
+		return this.refusable(visit, () => {
+			const save = saveInVisit(lines, model, item, visit, change);
+			visit.piece = save.span;
+			return { edit: this.apply(joinLines(save.lines), save.start, save.kind, visit), note: save.note ?? '' };
+		});
+	}
+
+	private visited(notes?: NotesVisit['notes']) {
+		const visit = this.piece;
+		if (!visit || !('visit' in visit) || (notes && visit.notes !== notes)) return null;
+		const found = visit.notes === 'item' ? this.selectedItem() : { ...this.parse(), item: null };
+		return found && { ...found, visit };
 	}
 
 	private refusable<T extends Typed>(session: { refused: boolean }, save: () => T): T | Exclude<Typed, { edit: OwnEdit }> {

@@ -194,7 +194,7 @@ function gapThatMoves(lines: readonly Line[], section: Section, item: ItemBlock)
 // Removes up to `width` columns of indentation, a tab moving to the next multiple of 4. A tab that
 // crosses `width` leaves its remaining columns as spaces, as CommonMark does. A lazy line is indented
 // less than the content column, which `width` always reaches, so it loses all its indentation.
-function stripIndent(text: string, width: number): string {
+export function stripIndent(text: string, width: number): string {
 	let column = 0;
 	let i = 0;
 	for (; column < width && (text[i] === ' ' || text[i] === '\t'); i++) {

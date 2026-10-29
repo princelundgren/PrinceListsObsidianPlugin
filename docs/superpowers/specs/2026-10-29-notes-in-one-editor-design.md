@@ -1,5 +1,7 @@
 ---
-status: draft
+status: building
+verified: 2026-10-29
+governs: [src/**, styles.css, manifest.json]
 ---
 
 # PrinceLists for Obsidian: notes in one editor
@@ -132,16 +134,23 @@ Compared with Obsidian's own editor side by side on desktop:
 ## Saving
 
 - **After each change, only the lines it touched (call).** From the change's first touched line to
-  its last, the lines are written back with the item's indent, through the core's existing piece
-  save (`setNotesPiece`, `setListNotePiece`) and its check that the list's layout can take them.
-  The notes' other lines keep every byte. The core saves a given line range directly, with no
-  open, type and close session around each change.
+  its last, the lines are written back, one file line per editor line, through the piece save's
+  check that the list's layout can take them (`replaceRun` with the notes' block keys), not
+  through `setNotesPiece` itself, which drops empty lines at the end of what it saves. A touched
+  line keeps its own indent, and a new line takes the item's; so does a touched lazy line, short
+  of the item's indent, so a list marker typed on it stays in the notes. The notes' other lines
+  keep every byte. The core saves a given line range directly, with no open, type and close
+  session around each change.
 - **Empty notes** get the empty line under the title with their first text, so it can't join the
   title, as the block fields did.
-- **A refused change is taken back in the editor at once (call),** outside its history, so Redo
-  can't bring it back, with step one's notice that the list's layout can't take that change, once
-  per visit to the notes. So the editor never holds lines the file doesn't, and nothing is left to
-  save when the card closes.
+- **Empty lines typed at the end of a file without a final newline** can't stay in the file, which
+  drops them (AGENTS.md). The editor keeps them, and the text typed after them writes them back
+  **(call)**.
+- **A refused change never lands (call):** an `EditorState.changeFilter` asks the core whether
+  the list's layout can take it and stops it when it can't, so it never reaches the editor's text
+  or its history, with step one's notice that the list's layout can't take that change, once per
+  visit to the notes. Taking it back after it landed let undo restore a refused deletion twice. So
+  the editor never holds lines the file doesn't, and nothing is left to save when the card closes.
 - **Outside changes** show in the editor at once, mapped so the caret stays on its text. Step one's
   rule that an outside change to the open block's lines leaves the field unable to save goes: there
   is no unsaved field. An outside change that loses track of the item still closes the card as step
@@ -209,7 +218,8 @@ Compared with Obsidian's own editor side by side on desktop:
 3. **The save cases the block fields got wrong** become tests: emptying a block in the middle, at
    the end and at the start of the notes, and the same in the list note.
 4. **Empty lines at the end of the notes:** one typed there stays in the editor and in the file,
-   and the next parse still ends the notes where the editor does.
+   except at the end of a file without a final newline ("Saving"), and the next parse still ends
+   the notes where the editor does.
 5. **iOS:** Backspace on an empty line, the keyboard's autocorrect and dictation, a Japanese input
    method's Enter, which only confirms a word, and a refused change taken back mid-word.
 6. **Android:** the on-screen keyboard's Backspace and Enter, and the format bar above it.
