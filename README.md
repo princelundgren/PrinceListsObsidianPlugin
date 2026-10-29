@@ -141,8 +141,7 @@ The full format is in the
   list" to get PrinceLists on your other devices. If two devices edit a list within seconds, Sync
   can drop one change, as in any note. Sync's "Create conflict file" setting keeps both, as extra
   lists.
-- **Tested** mainly on macOS and iOS, and lightly on Android and Windows. It should work well
-  elsewhere too. If something looks wrong,
+- **Made for** Obsidian on macOS, iOS, Android and Windows. If something looks wrong,
   [open an issue](https://github.com/princelundgren/PrinceListsObsidianPlugin/issues).
 
 ## Contributing
