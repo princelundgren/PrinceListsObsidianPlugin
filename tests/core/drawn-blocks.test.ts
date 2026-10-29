@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { drawnBlocks, spanCrossed } from '../../src/core/drawn-blocks';
+import { blockMarkdown, drawnBlocks, spanCrossed } from '../../src/core/drawn-blocks';
 
 describe('drawnBlocks', () => {
 	test('draws a table, header to last row', () => {
@@ -116,5 +116,17 @@ describe('spanCrossed', () => {
 		expect(spanCrossed(spans, 10, 25)).toBeUndefined();
 		expect(spanCrossed(spans, 20, 5)).toBeUndefined();
 		expect(spanCrossed(spans, 25, 25)).toBeUndefined();
+	});
+});
+
+describe('blockMarkdown', () => {
+	test("gives a block's lines without the indent they share", () => {
+		expect(blockMarkdown('  ```js\n  x\n    y\n  ```', 'code')).toBe('```js\nx\n  y\n```');
+		expect(blockMarkdown('  | a | b |\n  | - | - |', 'table')).toBe('| a | b |\n| - | - |');
+	});
+
+	test('keeps indented code as code', () => {
+		expect(blockMarkdown('    code\n\n      more', 'code')).toBe('    code\n    \n      more');
+		expect(blockMarkdown('      %%\n      hidden\n      %%', 'code')).toBe('    %%\n    hidden\n    %%');
 	});
 });

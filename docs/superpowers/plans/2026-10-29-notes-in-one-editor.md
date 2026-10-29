@@ -465,7 +465,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   - One `Decoration.replace({ block: true })` over each block's lines, except the blocks the
     selection touches while the editor has focus. The field learns of focus from
     `EditorView.focusChangeEffect`, since a `StateField` can't read the view.
-  - A widget renders its Markdown, less its first line's indent, with `MarkdownRenderer.render`
+  - A widget renders its Markdown, less its first line's indent (`blockMarkdown` in
+    `drawn-blocks.ts`, which keeps indented code's four spaces, so it still draws as code), with
+    `MarkdownRenderer.render`
     and a `Component` of its own, a child of the list view, removed in the widget's `destroy`. Its
     `eq` compares the Markdown and kind, so typing elsewhere doesn't redraw it.
   - A mousedown on a drawn block puts the caret at the start of its first line and focuses the

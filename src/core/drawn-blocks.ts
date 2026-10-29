@@ -1,6 +1,7 @@
 import { Parser, type Node } from 'commonmark';
 import type { LineRange } from './follow';
 import { splitLines } from './lines';
+import { pieceText } from './note-pieces';
 import { isBlank, maskBlocks } from './parse';
 import { pictureLinks } from './picture-links';
 import { wikiLinks } from './wiki-links';
@@ -13,6 +14,8 @@ export interface DrawnBlock {
 
 const CALLOUT = /^[ \t]*>[ \t]*\[![^\]]+\]/;
 const HTML_COMMENT = /^[ \t]*<!--/;
+const FENCE = /^(`{3,}|~{3,})/;
+const CODE_INDENT = '    ';
 // GFM's delimiter row, as @lezer/markdown, the notes editor's parser, reads it.
 const TABLE_DELIMITER = /^\s*\|?(\s*:?-+:?\s*\|)+(\s*:?-+:?\s*)?$/;
 
@@ -129,4 +132,18 @@ function endOfBlock(texts: readonly string[], start: number, endLine: number): n
 export function spanCrossed<S extends { from: number; to: number }>(spans: readonly S[], from: number, to: number): S | undefined {
 	if (to > from) return spans.find((span) => span.from > from && span.from <= to);
 	return [...spans].reverse().find((span) => span.to < from && span.to >= to);
+}
+
+/**
+ * The Markdown the renderer draws for a block of `kind` whose lines are `text`: without the indent its
+ * lines share, so a block in a list item draws as at the left margin, except that indented code keeps
+ * the four spaces that make it code.
+ */
+export function blockMarkdown(text: string, kind: DrawnBlock['kind']): string {
+	const unindented = pieceText(text, { start: 0, end: splitLines(text).length }).text;
+	if (kind !== 'code' || FENCE.test(unindented)) return unindented;
+	return unindented
+		.split('\n')
+		.map((line) => CODE_INDENT + line)
+		.join('\n');
 }

@@ -1,7 +1,6 @@
 import { EditorSelection, Prec, StateEffect, StateField, type Range, type Text } from '@codemirror/state';
 import { Decoration, EditorView, keymap, WidgetType, type Command, type DecorationSet } from '@codemirror/view';
-import { drawnBlocks, spanCrossed, type DrawnBlock } from '../core/drawn-blocks';
-import { pieceText } from '../core/note-pieces';
+import { blockMarkdown, drawnBlocks, spanCrossed, type DrawnBlock } from '../core/drawn-blocks';
 import type { PrinceListView } from './list-view';
 import { renderIntoWidget, unloadWidget } from './notes-widgets';
 
@@ -79,13 +78,13 @@ function stopAtBlock(field: StateField<DrawnBlocks>, forward: boolean): Command 
 	};
 }
 
-// Each block's own lines go to pieceText, which splits what it's given: the whole notes per block costs
-// time by the square of their length.
+// Each block's own lines are sliced out: splitting the whole notes per block costs time by the square of
+// their length.
 function placedBlocks(doc: Text): PlacedBlock[] {
 	return drawnBlocks(doc.toString()).map(({ lines, kind }) => {
 		const from = doc.line(lines.start + 1).from;
 		const to = doc.line(lines.end).to;
-		return { from, to, kind, markdown: pieceText(doc.sliceString(from, to), { start: 0, end: lines.end - lines.start }).text };
+		return { from, to, kind, markdown: blockMarkdown(doc.sliceString(from, to), kind) };
 	});
 }
 
