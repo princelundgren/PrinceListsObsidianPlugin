@@ -86,6 +86,10 @@ Compared with Obsidian's own editor side by side on desktop:
   focus is its own change, in its history, saved like typing. A tick while it hasn't is the list's,
   as a tick on a row is: the list's Cmd+Z takes it back, and it clears the editor's history like
   any change the editor didn't make.
+- **It looks as in Live Preview:** the box takes the place of a bullet's `- [ ]`, and a numbered
+  item keeps its number. A ticked line's text is struck through.
+- **A box in a quote shows as typed (call),** as Live Preview shows it: the plugin reads no checklist
+  line that starts with `>`, so a tick there couldn't be saved.
 - **A box inside a drawn big block,** such as a callout, ticks by step two's "Ticking checklists"
   rules, counted within that block: the nth drawn box is the nth checklist line in it, and every box
   in the block stays disabled when the two disagree or the block holds `%%` or `$$`.

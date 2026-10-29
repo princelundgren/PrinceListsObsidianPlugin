@@ -50,6 +50,11 @@ export function toggleChecklistLine(text: string): string {
 	return joinItemLine({ ...parts, status: parts.status === ' ' ? 'x' : ' ' });
 }
 
+/** The column of a checklist line's status, the character between its `[` and `]`, or null for any other line. */
+export function checklistStatusAt(text: string): number | null {
+	return parseItemLine(text)?.before.length ?? null;
+}
+
 // The browser flips a box before its click is handled, and the view cancels that, so the box's
 // state says nothing: the file decides which way the line goes. `lineText` is the line as it was at
 // the click; if it reads differently now, the box no longer stands for it.
@@ -71,10 +76,34 @@ export function planListNoteTick(text: string, contentStart: number, index: numb
 	return tickIn(lines, listNoteChecklist(lines, parseList(lines, contentStart)), index, lineText);
 }
 
+/**
+ * Ticks file line `line`, a box the notes editor drew, in the notes of the item at title line
+ * `notesOf` or in the list note. null when the line no longer reads `lineText`, lies outside those
+ * notes or isn't a checklist line. Nothing is counted, so `%%` and `$$` in the notes don't stop it.
+ */
+export function planNotesLineTick(
+	text: string,
+	contentStart: number,
+	notesOf: number | 'listNote',
+	line: number,
+	lineText: string,
+): PlannedLineEdit | null {
+	const lines = splitLines(text);
+	const model = parseList(lines, contentStart);
+	const item = notesOf === 'listNote' ? undefined : itemAt(model, notesOf);
+	const notes = notesOf === 'listNote' ? model.listNote : item && { start: item.titleLine + 1, end: item.endLine };
+	if (!notes || line < notes.start || line >= notes.end || !parseItemLine(lineText)) return null;
+	return tickLine(lines, line, lineText);
+}
+
 function tickIn(lines: readonly Line[], checklist: ChecklistLine[] | null, index: number, lineText: string): PlannedLineEdit | null {
 	const entry = checklist?.[index];
-	const line = entry ? lines[entry.line] : undefined;
-	if (!entry || !line || line.text !== lineText) return null;
-	const next = joinLines(spliceLines(lines, entry.line, 1, [{ text: toggleChecklistLine(line.text), eol: line.eol }]));
-	return { next, edit: { start: entry.line, delta: 0, kind: 'change' } };
+	return entry ? tickLine(lines, entry.line, lineText) : null;
+}
+
+function tickLine(lines: readonly Line[], at: number, lineText: string): PlannedLineEdit | null {
+	const line = lines[at];
+	if (!line || line.text !== lineText) return null;
+	const next = joinLines(spliceLines(lines, at, 1, [{ text: toggleChecklistLine(line.text), eol: line.eol }]));
+	return { next, edit: { start: at, delta: 0, kind: 'change' } };
 }

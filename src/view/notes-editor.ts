@@ -4,10 +4,13 @@ import { indentUnit } from '@codemirror/language';
 import { Annotation, Compartment, EditorState, Transaction, type ChangeSpec, type Text } from '@codemirror/state';
 import { EditorView, placeholder } from '@codemirror/view';
 import { Notice } from 'obsidian';
+import { checklistStatusAt } from '../core/checklist';
 import { changedLines, type NotesChange } from '../core/notes-lines';
+import { notesBoxClick } from './checklist';
 import { targetOf } from './dom';
 import { buildFormatBar } from './format';
 import type { PrinceListView } from './list-view';
+import { NOTES_CHECKBOX_SELECTOR } from './notes';
 import { notesDrawing } from './notes-drawing';
 import { notesKeymap } from './notes-keys';
 import type { NotesSource } from './notes-source';
@@ -95,11 +98,28 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 						current.close();
 						sync(editor);
 					},
-					// A drawn link follows on its click, through the view's own listener, as in Live Preview:
-					// the caret stays where it was, and the link stays drawn.
+					// A drawn link follows on its click, through the view's own listener, as in Live Preview, and
+					// a box ticks on its own: the caret stays where it was, and a phone's keyboard stays down.
 					mousedown: (evt) => {
-						if (!targetOf(evt)?.closest('a')) return false;
+						if (!targetOf(evt)?.closest(`a, ${NOTES_CHECKBOX_SELECTOR}`)) return false;
 						evt.preventDefault();
+						return true;
+					},
+					// During a visit, a tick is the editor's own change, in its history, and changes only the
+					// status, so the caret stays; outside one, it's the list's.
+					click: (evt, editor) => {
+						const box = targetOf(evt)?.closest<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR);
+						if (!box) return false;
+						evt.preventDefault();
+						const line = editor.state.doc.lineAt(editor.posAtDOM(box));
+						const at = checklistStatusAt(line.text);
+						if (at === null) return true;
+						if (editor.hasFocus || current.visitStart() !== null) {
+							const status = line.text[at] === ' ' ? 'x' : ' ';
+							editor.dispatch({ changes: { from: line.from + at, to: line.from + at + 1, insert: status }, userEvent: 'input' });
+						} else {
+							notesBoxClick(view, current, editor.state.doc.toString(), line.number - 1);
+						}
 						return true;
 					},
 					// A file is never text in the notes: pictures go through the view's own listeners.

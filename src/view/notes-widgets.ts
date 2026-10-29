@@ -2,7 +2,7 @@ import { WidgetType } from '@codemirror/view';
 import type { Component } from 'obsidian';
 import type { PictureLook } from '../core/drawn-links';
 import type { PrinceListView } from './list-view';
-import { renderNotes } from './notes';
+import { NOTES_CHECKBOX_CLASS, renderNotes } from './notes';
 
 /** A list item's `-`, `*` or `+`, drawn as a bullet. */
 export class BulletWidget extends WidgetType {
@@ -12,6 +12,28 @@ export class BulletWidget extends WidgetType {
 
 	toDOM(): HTMLElement {
 		return createSpan({ cls: 'princelists-notes-bullet' });
+	}
+}
+
+/** A checklist line's `[ ]` or `[x]`, drawn as Obsidian's box. */
+export class CheckboxWidget extends WidgetType {
+	constructor(readonly isTicked: boolean) {
+		super();
+	}
+
+	eq(other: CheckboxWidget): boolean {
+		return other.isTicked === this.isTicked;
+	}
+
+	toDOM(): HTMLElement {
+		const box = createEl('input', { cls: NOTES_CHECKBOX_CLASS, type: 'checkbox' });
+		box.checked = this.isTicked;
+		return box;
+	}
+
+	// The editor's own handlers tick it.
+	ignoreEvent(): boolean {
+		return false;
 	}
 }
 
