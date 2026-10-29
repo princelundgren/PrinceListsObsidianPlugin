@@ -19,6 +19,11 @@ const context = await esbuild.context({
 	},
 	entryPoints: ['src/main.ts'],
 	bundle: true,
+	// commonmark imports only decodeHTMLStrict, and entities' CommonJS index would bundle its encoder too.
+	// Being CommonJS, a missing export fails only at runtime: recheck when commonmark's imports change.
+	alias: {
+		entities: 'entities/lib/decode.js',
+	},
 	external: [
 		'obsidian',
 		'electron',
