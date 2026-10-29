@@ -3,6 +3,7 @@ import type { EditorState, Extension, Range, SelectionRange } from '@codemirror/
 import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate } from '@codemirror/view';
 import type { SyntaxNode } from '@lezer/common';
 import { getLinkpath, type App } from 'obsidian';
+import { linkTarget, pictureLook, type PictureLook } from '../core/drawn-links';
 import { pictureLinks } from '../core/picture-links';
 import { wikiLinks } from '../core/wiki-links';
 import type { PrinceListView } from './list-view';
@@ -19,9 +20,6 @@ const INLINE = {
 } as const;
 const HEADING = /^ATXHeading([1-6])$/;
 const CODE_NODES = new Set(['InlineCode', 'FencedCode', 'CodeBlock']);
-const URL_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
-// Schemes that run or hold code: as in Obsidian's own notes, such a link gets no address.
-const UNSAFE_SCHEME = /^(javascript|vbscript|data):/i;
 
 /**
  * Draws the notes as Obsidian's Live Preview draws a note: inline marks, links and pictures show their
@@ -136,8 +134,8 @@ function drawLineLinks(drawing: Drawing, from: number, to: number, links: LinkRe
 		const wikis = wikiLinks(line.text).filter((wiki) => !isCode(wiki.from));
 		for (const picture of pictureLinks([line.text])) {
 			if (isCode(picture.from)) continue;
-			const size = wikis.find((wiki) => wiki.from === picture.from)?.display ?? null;
-			drawPicture(drawing, line.from + picture.from, line.from + picture.to, links.picture(picture.linkpath), size);
+			const look = pictureLook(line.text.slice(picture.from, picture.to));
+			drawPicture(drawing, line.from + picture.from, line.from + picture.to, links.picture(picture.linkpath), look);
 		}
 		for (const wiki of wikis) {
 			spans.push({ from: line.from + wiki.from, to: line.from + wiki.to });
@@ -238,7 +236,7 @@ function drawAddress(drawing: Drawing, node: SyntaxNode): void {
 	const url = node.name === 'URL' ? node : node.getChild('URL');
 	if (!url || node.parent?.name === 'Link') return;
 	const address = drawing.state.sliceDoc(url.from, url.to);
-	if (!URL_SCHEME.test(address)) return;
+	if (linkTarget(address).kind === 'vault') return;
 	drawLink(drawing, node.from, url.from, url.to, node.to, linkLook(address));
 }
 
@@ -253,28 +251,23 @@ function drawLink(drawing: Drawing, from: number, textFrom: number, textTo: numb
 	drawing.add(HIDDEN, textTo, to);
 }
 
-// As Obsidian draws links in a note: an address with a scheme is an external link, and any other a
-// path in the vault.
 function linkLook(address: string): Decoration {
-	const unwrapped = address.startsWith('<') && address.endsWith('>') ? address.slice(1, -1) : address;
-	if (UNSAFE_SCHEME.test(unwrapped)) return Decoration.mark({ tagName: 'a', class: 'external-link' });
-	if (URL_SCHEME.test(unwrapped)) {
-		return Decoration.mark({ tagName: 'a', class: 'external-link', attributes: { href: unwrapped, target: '_blank', rel: 'noopener nofollow' } });
+	const target = linkTarget(address);
+	switch (target.kind) {
+		case 'web':
+			return Decoration.mark({ tagName: 'a', class: 'external-link', attributes: { href: target.href, target: '_blank', rel: 'noopener nofollow' } });
+		case 'unsafe':
+			return Decoration.mark({ tagName: 'a', class: 'external-link' });
+		case 'vault':
+			return Decoration.mark({ tagName: 'a', class: 'internal-link', attributes: { 'data-href': target.linktext } });
 	}
-	let linktext = unwrapped;
-	try {
-		linktext = decodeURIComponent(unwrapped);
-	} catch {
-		// A stray % reads as written.
-	}
-	return Decoration.mark({ tagName: 'a', class: 'internal-link', attributes: { 'data-href': linktext } });
 }
 
 // A picture from the vault, which shows its Markdown before it while the selection touches it. One
-// with no file shows as typed. `size` is an embed's `100` or `100x80`, in pixels.
-function drawPicture(drawing: Drawing, from: number, to: number, src: string | null, size: string | null): void {
+// with no file shows as typed.
+function drawPicture(drawing: Drawing, from: number, to: number, src: string | null, look: PictureLook): void {
 	if (src === null) return;
-	const widget = new PictureWidget(src, /^\d+(x\d+)?$/.test(size ?? '') ? size : null);
+	const widget = new PictureWidget(src, look);
 	if (drawing.touches(from, to)) drawing.widget(Decoration.widget({ widget, side: 1 }), to);
 	else drawing.add(Decoration.replace({ widget }), from, to);
 }

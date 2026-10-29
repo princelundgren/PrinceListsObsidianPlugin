@@ -1,4 +1,5 @@
 import { WidgetType } from '@codemirror/view';
+import type { PictureLook } from '../core/drawn-links';
 
 /** A list item's `-`, `*` or `+`, drawn as a bullet. */
 export class BulletWidget extends WidgetType {
@@ -22,22 +23,23 @@ export class RuleWidget extends WidgetType {
 	}
 }
 
-/** A picture from the vault at `src`; `size` is `width` or `widthxheight` in pixels, or null for its own. */
+/** A picture from the vault at `src`, with the alt text and size its Markdown gives. */
 export class PictureWidget extends WidgetType {
 	constructor(
 		readonly src: string,
-		readonly size: string | null,
+		readonly look: PictureLook,
 	) {
 		super();
 	}
 
 	eq(other: PictureWidget): boolean {
-		return other.src === this.src && other.size === this.size;
+		return other.src === this.src && other.look.alt === this.look.alt && other.look.size === this.look.size;
 	}
 
 	toDOM(): HTMLElement {
 		const img = createEl('img', { cls: 'princelists-notes-picture', attr: { src: this.src } });
-		const [width, height] = this.size?.split('x') ?? [];
+		if (this.look.alt !== null) img.setAttr('alt', this.look.alt);
+		const [width, height] = this.look.size?.split('x') ?? [];
 		if (width) img.setAttr('width', width);
 		if (height) img.setAttr('height', height);
 		return img;

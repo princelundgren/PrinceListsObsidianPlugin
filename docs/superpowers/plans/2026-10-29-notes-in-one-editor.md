@@ -335,7 +335,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 
 **Files:**
 - Create: `src/core/wiki-links.ts`, `tests/core/wiki-links.test.ts`, `src/view/notes-drawing.ts`,
-  `src/view/notes-widgets.ts` (the bullet, rule and picture widgets)
+  `src/view/notes-widgets.ts` (the bullet, rule and picture widgets), and `src/core/drawn-links.ts`
+  with `tests/core/drawn-links.test.ts` (`linkTarget` and `pictureLook`)
 - Modify: `src/view/notes-editor.ts`, `styles.css`
 
 **Interfaces:**
@@ -357,12 +358,14 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   - A picture (`Image`, or an embed whose path has a `PICTURE_EXTENSIONS` extension) is an `<img>`
     from `getFirstLinkpathDest` and `getResourcePath`; a link it can't find shows as typed. The
     drawing finds pictures with `pictureLinks`, as the picture menu does, so a picture from the web
-    shows as typed. An embed's `|100` or `|100x80` sets its size, as in a note. While the selection
-    touches a picture, its Markdown shows with the picture after it.
+    shows as typed. As in a note, a last `|` part such as `100` or `100x80` sets a picture's size and
+    the caption before it is its alt text; a wiki embed without one has its path as alt text. While
+    the selection touches a picture, its Markdown shows with the picture after it.
   - The parser reads `[[a]]` as a link in brackets and `![[a]]` as an image, so the drawing skips
     `Link` and `Image` nodes that overlap a wikilink. A link without an address, `[a]`, shows as
     typed, and so does one split across lines: a view plugin can't hide a line break.
   - A `javascript:`, `vbscript:` or `data:` link gets no `href`, as in Obsidian's own notes.
+    `linkTarget` decides, and `pictureLook` reads a picture's alt text and size.
   - A link is an `a` mark (`Decoration.mark({ tagName: 'a' })`) with `internal-link` and
     `data-href`, or `external-link` and `href`. The view's delegated click and right-click listeners
     in `events.ts` already follow it with `handleLinkClick` and show `handleLinkMenu`; the editor's
