@@ -66,12 +66,18 @@ Compared with Obsidian's own editor side by side on desktop:
   bullets are drawn, and show their Markdown only while the selection touches them.
 - **By line:** headings, quotes and horizontal rules show their Markdown while the cursor is on
   their line.
-- **Big blocks:** a table, a code block, a callout, a `$$` math block, an embedded note and an HTML
-  block are drawn by `MarkdownRenderer.render`, each into a block widget with its own `Component`,
-  until the cursor or selection enters it; then the whole block shows its Markdown.
+- **Big blocks:** a table, a code block, a callout, a `$$` math block at the notes' own left margin
+  (where the save reads one), an embed alone on its line that isn't a picture, such as a note or a
+  PDF, and an HTML block other than a comment are drawn by `MarkdownRenderer.render`, each into a
+  block widget with its own `Component`, until the cursor or selection enters it; then the whole
+  block shows its Markdown.
   - The widgets come from a `StateField`: CodeMirror takes block decorations only from state, not
     from a view plugin.
-  - A click on a drawn block puts the caret at the start of its first line **(call)**.
+  - A click on a drawn block puts the caret at the start of its first line **(call)**; with Shift or
+    another modifier held, it selects as anywhere in the editor. A link in it opens, and a button
+    the renderer draws, such as a code block's copy button, works as in a note.
+  - Up and Down onto a drawn block stop at its start or end, as Live Preview's arrow keys enter a
+    block **(call)**: CodeMirror's own vertical motion passes a block widget by.
   - A widget is drawn again only when its own Markdown changes, so typing elsewhere doesn't redraw
     it **(call)**.
 - **While the editor isn't focused,** nothing shows its Markdown, wherever the selection was left.
@@ -90,15 +96,16 @@ Compared with Obsidian's own editor side by side on desktop:
   item keeps its number. A ticked line's text is struck through.
 - **A box in a quote shows as typed (call),** as Live Preview shows it: the plugin reads no checklist
   line that starts with `>`, so a tick there couldn't be saved.
-- **A box inside a drawn big block,** such as a callout, ticks by step two's "Ticking checklists"
-  rules, counted within that block: the nth drawn box is the nth checklist line in it, and every box
-  in the block stays disabled when the two disagree or the block holds `%%` or `$$`.
+- **A box inside a drawn big block draws disabled (owner),** such as one in a callout or an embedded
+  note: step two's count in "Ticking checklists" can't line it up with its line, since it reads no
+  list item behind `>`, and tables, code, math, HTML and another note's embed hold no checklist line
+  of these notes. A click on one shows the block's Markdown, where its `[ ]` can be typed.
 
 ## Keys and touch
 
-- **CodeMirror's own:** arrow keys across the whole notes, Shift and the arrows, Cmd+A for all the
-  notes, word and line moves, double and triple clicks, Backspace and Delete joining lines, and
-  input methods.
+- **CodeMirror's own:** arrow keys across the whole notes, except that Up and Down stop on a drawn
+  block ("Big blocks"), Shift and the arrows, Cmd+A for all the notes, word and line moves, double
+  and triple clicks, Backspace and Delete joining lines, and input methods.
 - **Lists, as in a note:** Enter continues a list item of its kind
   (`insertNewlineContinueMarkupCommand`): a checklist's starts unticked, a numbered one counts on
   and renumbers the items after it. Enter on an empty nested item moves it one level out, and on a
@@ -200,7 +207,8 @@ Compared with Obsidian's own editor side by side on desktop:
     on the drawn notes included.
   - "Formatting in a card" points its format bar and keys here, and drops the wrapped rows on
     mobile.
-  - "Ticking checklists" applies only to boxes inside a drawn big block.
+  - "Ticking checklists" no longer applies to the notes: a drawn box ticks its own line, and one
+    inside a drawn big block is disabled ("Checkboxes").
   - "Right-click menus": the background no longer includes the list note, and Remove and Delete
     image no longer wait for pictures to line up with links.
 

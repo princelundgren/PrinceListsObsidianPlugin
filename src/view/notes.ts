@@ -5,6 +5,9 @@ import { asInline, needsMarkdown } from '../core/inline';
 const INTERNAL_LINK = 'a.internal-link';
 export const NOTES_CHECKBOX_CLASS = 'task-list-item-checkbox';
 export const NOTES_CHECKBOX_SELECTOR = `.${NOTES_CHECKBOX_CLASS}`;
+/** The boxes the notes editor draws for its checklist lines, which it ticks, apart from rendered ones. */
+export const NOTES_DRAWN_CHECKBOX_CLASS = 'princelists-notes-checkbox';
+export const NOTES_DRAWN_CHECKBOX_SELECTOR = `.${NOTES_DRAWN_CHECKBOX_CLASS}`;
 
 // What rendering Markdown needs: the app, and a component that each rendered block becomes a child of.
 export interface MarkdownHost {

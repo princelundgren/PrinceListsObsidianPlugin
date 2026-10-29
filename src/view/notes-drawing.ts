@@ -1,5 +1,5 @@
 import { syntaxTree } from '@codemirror/language';
-import type { EditorState, Extension, Range, SelectionRange } from '@codemirror/state';
+import type { EditorState, Extension, StateField } from '@codemirror/state';
 import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate, type WidgetType } from '@codemirror/view';
 import type { SyntaxNode } from '@lezer/common';
 import { isWebAddress, linkTarget, pictureLook } from '../core/drawn-links';
@@ -8,10 +8,10 @@ import { pictureLinks } from '../core/picture-links';
 import { wikiLinks } from '../core/wiki-links';
 import type { PrinceListView } from './list-view';
 import { notesLinks, type NotesLinks } from './notes-links';
+import type { DrawnBlocks } from './notes-blocks';
+import { Drawing, HIDDEN } from './notes-decorations';
 import { BulletWidget, CheckboxWidget, RuleWidget } from './notes-widgets';
 
-const HIDDEN = Decoration.replace({});
-const FAINT = Decoration.mark({ class: 'princelists-notes-markup' });
 const LIST_NUMBER = Decoration.mark({ class: 'princelists-notes-list-number' });
 const INLINE = {
 	Emphasis: { mark: 'EmphasisMark', look: Decoration.mark({ tagName: 'em' }) },
@@ -26,9 +26,10 @@ const CODE_NODES = new Set(['InlineCode', 'FencedCode', 'CodeBlock']);
  * Draws the notes as Obsidian's Live Preview draws a note: inline marks, links and pictures show their
  * Markdown only while the selection touches them, and headings, quotes and rules only while it is on
  * their line. Without focus, nothing shows its Markdown. Links in `sourcePath` resolve as in that note.
+ * It leaves the lines of the blocks that `blocks` draws whole to it.
  */
-export function notesDrawing(view: PrinceListView, sourcePath: string): Extension {
-	return ViewPlugin.define((editor) => new NotesDrawing(editor, notesLinks(view, sourcePath)), { decorations: (drawing) => drawing.decorations });
+export function notesDrawing(view: PrinceListView, sourcePath: string, blocks: StateField<DrawnBlocks>): Extension {
+	return ViewPlugin.define((editor) => new NotesDrawing(editor, notesLinks(view, sourcePath), blocks), { decorations: (drawing) => drawing.decorations });
 }
 
 class NotesDrawing {
@@ -36,17 +37,20 @@ class NotesDrawing {
 	constructor(
 		editor: EditorView,
 		private readonly links: NotesLinks,
+		private readonly blocks: StateField<DrawnBlocks>,
 	) {
 		this.decorations = this.draw(editor);
 	}
 
 	update(update: ViewUpdate): void {
 		const isTreeNew = syntaxTree(update.startState) !== syntaxTree(update.state);
-		if (update.docChanged || update.selectionSet || update.focusChanged || update.viewportChanged || isTreeNew) this.decorations = this.draw(update.view);
+		const areBlocksNew = update.startState.field(this.blocks) !== update.state.field(this.blocks);
+		if (update.docChanged || update.selectionSet || update.focusChanged || update.viewportChanged || isTreeNew || areBlocksNew) this.decorations = this.draw(update.view);
 	}
 
 	private draw(editor: EditorView): DecorationSet {
-		const drawing = new Drawing(editor.state, editor.hasFocus ? editor.state.selection.ranges : []);
+		const { spans } = editor.state.field(this.blocks);
+		const drawing = new Drawing(editor.state, editor.hasFocus ? editor.state.selection.ranges : [], spans);
 		const { from, to } = editor.viewport;
 		const wikiSpans = drawLineLinks(drawing, from, to, this.links);
 		syntaxTree(editor.state).iterate({
@@ -60,46 +64,6 @@ class NotesDrawing {
 			},
 		});
 		return Decoration.set(drawing.ranges, true);
-	}
-}
-
-// The decorations so far, and what the selection shows as typed.
-class Drawing {
-	readonly ranges: Range<Decoration>[] = [];
-
-	constructor(
-		readonly state: EditorState,
-		private readonly selection: readonly SelectionRange[],
-	) {}
-
-	touches(from: number, to: number): boolean {
-		return this.selection.some((range) => range.from <= to && range.to >= from);
-	}
-
-	touchesLine(pos: number): boolean {
-		const line = this.state.doc.lineAt(pos);
-		return this.touches(line.from, line.to);
-	}
-
-	// Nothing for an empty range: CodeMirror refuses an empty mark.
-	add(decoration: Decoration, from: number, to: number): void {
-		if (from < to) this.ranges.push(decoration.range(from, to));
-	}
-
-	widget(decoration: Decoration, at: number): void {
-		this.ranges.push(decoration.range(at));
-	}
-
-	// A node's own Markdown: faint while shown, hidden otherwise.
-	markup(from: number, to: number, isShown: boolean): void {
-		this.add(isShown ? FAINT : HIDDEN, from, to);
-	}
-
-	lineClass(from: number, to: number, className: string): void {
-		const { doc } = this.state;
-		for (let number = doc.lineAt(from).number; number <= doc.lineAt(to).number; number++) {
-			this.ranges.push(Decoration.line({ class: className }).range(doc.line(number).from));
-		}
 	}
 }
 
