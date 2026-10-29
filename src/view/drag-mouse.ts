@@ -3,7 +3,7 @@ import type { TrackedLine } from '../core/editing';
 import { targetOf } from './dom';
 import type { RowDragHost } from './drag-host';
 import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
-import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
+import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
 
 // Each row's drag carries a type of its own, this one with a random token added. Other drags, such as
 // a file's or a row's from another vault window, which has its own `current`, are left alone.
@@ -21,8 +21,8 @@ interface MouseDrag {
 }
 
 // The row's drag in progress, in whichever list pane of this window it started. A redraw during a
-// drag, such as when closing the card removed an empty item, detaches the row it started on, and its
-// dragend then never comes. The next drag start in any list pane ends it.
+// drag detaches the row it started on, and its dragend then never comes. The next drag start in any
+// list pane ends it.
 let current: MouseDrag | null = null;
 
 // Dragging rows and headings with the mouse, on desktop only (spec, "Dragging"). The host's rowsEl takes
@@ -75,8 +75,10 @@ function startDrag(host: RowDragHost, evt: DragEvent): MouseDrag | null {
 	const row = targetOf(evt);
 	const kind = row?.hasClass(ITEM_CLASS) ? 'item' : host.dragsHeadings && row?.hasClass(HEADING_CLASS) ? 'heading' : null;
 	const line = row && kind ? lineOf(row) : null;
-	if (!kind || line === null || !evt.dataTransfer) return null;
+	if (!row || !kind || line === null || !evt.dataTransfer) return null;
 	host.beforeLift();
+	// So a redraw detaches it, as it does a touch drag's row.
+	forgetDrawn(row);
 	const type = `${DRAG_TYPE}-${Math.random().toString(36).slice(2)}`;
 	evt.dataTransfer.setData(type, '');
 	evt.dataTransfer.effectAllowed = 'move';

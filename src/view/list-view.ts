@@ -134,6 +134,9 @@ export class PrinceListView extends TextFileView {
 		this.editing.text = '';
 		this.listTitle = null;
 		this.endListNote();
+		this.listNoteEl = null;
+		if (this.listNoteNotes) this.removeChild(this.listNoteNotes);
+		this.listNoteNotes = null;
 		this.headingField = null;
 		this.showArchived = false;
 		this.filter = null;
@@ -248,8 +251,8 @@ export class PrinceListView extends TextFileView {
 		this.blocks.delete(el);
 	}
 
-	// Draws everything again from the text, except the title, list note, card or heading field holding
-	// focus, or about to (`focusing`): those stay in place and update after blur.
+	// Draws everything from the text, moving what didn't change into place (redraw.ts); a field holding
+	// focus, or about to (`focusing`), stays in place and updates after blur.
 	render(focusing: Element | null = null): void {
 		redraw(this, focusing);
 		this.syncArchivedButton();

@@ -102,13 +102,7 @@ export function dismissCard(view: PrinceListView): void {
 	card.el.remove();
 }
 
-// For a redraw that didn't keep the card.
-export function redrawCard(view: PrinceListView, card: Card): void {
-	card.el = createCardElement();
-	refreshCard(view, card);
-}
-
-// Fills the card from the text, or, after a redraw that kept it, updates its line, its box and the
+// Fills the card from the text, or, after a redraw, updates its line, its box and the
 // fields without focus, which update after blur (spec, "Saving and outside changes").
 export function refreshCard(view: PrinceListView, card: Card): void {
 	// A lost card has no item to read: it keeps what it shows until it closes.

@@ -6,7 +6,7 @@ import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import type { RowDragHost } from './drag-host';
 import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
-import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
+import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 
 const LIFTED_CLASS = 'princelists-lifted';
 const LIFT_OFFSET = '--princelists-lift';
@@ -127,6 +127,8 @@ export function enableTouchDrag(host: RowDragHost): void {
 		const kind = current.row.hasClass(HEADING_CLASS) ? 'heading' : 'item';
 		current.lift = { item: host.track(line), kind, boxes, scrollAtLift: scrollTop(), shift, drop: null, marked: null, frame: null, fromX: current.x, fromY: current.y, armed: false };
 		current.row.addClass(LIFTED_CLASS);
+		// So a redraw detaches it, which ends the drag.
+		forgetDrawn(current.row);
 		// The release of a lifted press is never a tap.
 		host.swallowNextClick = true;
 		update(current);

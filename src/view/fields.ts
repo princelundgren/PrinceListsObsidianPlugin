@@ -113,7 +113,7 @@ export function buildListNote(view: PrinceListView, parent: HTMLElement): HTMLEl
 	return el;
 }
 
-// After a redraw that kept the list note, as typing in it left it.
+// After a redraw, which keeps the list note: its pieces are drawn again where they changed.
 export function refreshListNote(view: PrinceListView): void {
 	const area = view.listNoteEl?.querySelector<HTMLElement>(`.${LIST_NOTE_AREA_CLASS}`);
 	if (area) drawPieces(view, listNoteHost(view, area));
