@@ -410,9 +410,9 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   lines (of the item at title line `notesOf`, or of the list note) and `parseItemLine` reads it as a
   checklist item; null otherwise. Unlike `planChecklistTick`, it doesn't go through `checklistOf`,
   so `%%` and `$$` in the notes don't stop it.
-- The editor's `domEventHandlers` handle every box it draws, Task 5's disabled ones included;
-  `events.ts`'s `.task-list-item-checkbox` handling and `keepNotesFocused` leave boxes inside the
-  editor to it, so a click ticks once.
+- The editor's `domEventHandlers` handle every box it draws; `events.ts`'s
+  `.task-list-item-checkbox` handling and `keepNotesFocused` leave those boxes to it, so a click
+  ticks once. Task 5's boxes in drawn blocks are disabled, and a click on one reaches the block.
 - A `TaskMarker` outside a big block draws as a checkbox widget, Obsidian's
   `task-list-item-checkbox`, in place of the `[ ]` and a bullet's mark, unless the selection
   touches them; a ticked line is struck through with Obsidian's `--checklist-done-*` variables. A
@@ -440,17 +440,26 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 
 **Files:**
 - Create: `src/core/drawn-blocks.ts`, `tests/core/drawn-blocks.test.ts`,
-  `src/view/notes-blocks.ts`
-- Modify: `src/view/notes-editor.ts`, `src/view/notes-drawing.ts`, `src/view/events.ts`,
-  `styles.css`, `docs/superpowers/specs/2026-10-29-notes-in-one-editor-design.md` ("Checkboxes")
+  `src/view/notes-blocks.ts`, `src/view/notes-decorations.ts` (the drawing's decoration set, moved
+  out of `notes-drawing.ts` to keep it under 300 lines)
+- Modify: `src/view/notes-editor.ts`, `src/view/notes-drawing.ts`, `src/view/notes-widgets.ts`,
+  `src/view/notes.ts`, `src/view/events.ts`, `styles.css`, this plan's Task 5,
+  `docs/superpowers/specs/2026-10-29-notes-in-one-editor-design.md` ("Big blocks", "Checkboxes",
+  "Keys and touch")
 
 **Interfaces:**
 - Produces, in `src/core/drawn-blocks.ts`: `DrawnBlock { lines: LineRange; kind: 'table' | 'code'
   | 'callout' | 'math' | 'embed' | 'html' }` and `drawnBlocks(markdown: string): DrawnBlock[]`:
   each table, fenced or indented code block, callout (a quote whose first line is `> [!…]`), `$$`
-  block, embed of a note alone on its line, and HTML block in the notes, in order, at any depth of
-  list, but none inside another. It reads the notes as `notePieces` does, through `maskBlocks` and
-  CommonMark, so it agrees with the save's and the ticks' parse.
+  block, embed alone on its line that isn't a picture, and HTML block other than a comment (the
+  renderer draws one as nothing, which would hide its text) in the notes, in order, at any
+  depth of list, but none inside another, none inside a plain quote, and none that starts on a list
+  item's own line. It reads the notes as `notePieces` does, through `maskBlocks` and CommonMark, so
+  it agrees with the save's and the ticks' parse: a `$$` block is one `maskBlocks` finds, at the
+  notes' own column 0, and a `%%` comment is none. CommonMark has no tables, so a table is found in
+  a paragraph as `@lezer/markdown` finds one, from a line with a pipe followed by a delimiter row
+  with as many cells, to the paragraph's end: on the paragraph's first line, or on a later one when
+  the first has no pipe.
 - Produces, in `src/view/notes-blocks.ts`: `drawnBlocksField(view: PrinceListView, sourcePath:
   string)`, a `StateField` of block widgets (CodeMirror takes block decorations only from state):
   - One `Decoration.replace({ block: true })` over each block's lines, except the blocks the
@@ -460,13 +469,20 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     and a `Component` of its own, a child of the list view, removed in the widget's `destroy`. Its
     `eq` compares the Markdown and kind, so typing elsewhere doesn't redraw it.
   - A mousedown on a drawn block puts the caret at the start of its first line and focuses the
-    editor, without scrolling the card; on a link in it, the link opens instead.
+    editor, without scrolling the card; on a link in it, the link opens instead, and on a button
+    the renderer draws, such as a code block's copy button, the button works.
+  - CodeMirror's vertical motion passes a block widget by, so ArrowDown and ArrowUp, with one empty
+    cursor, run `moveVertically` and stop at the start or end of a drawn block it would pass,
+    keeping its goal column. A mousedown shows a block's Markdown only with the main button.
   - Its boxes draw disabled (owner): step two's count can't line one up with its line, since it
     doesn't read list items behind `>`, and tables, code, math, HTML and another note's embed hold
     no checklist line of these notes. A click on one shows the block's Markdown, where `[ ]` can be
     typed. This task updates the design's "Checkboxes" bullet on boxes in a drawn block to say so,
-    and why.
-  - Task 3's drawing skips the lines of the drawn blocks.
+    and why. `renderNotes` disables them, and they take no pointer events, so a click reaches the
+    block. The editor's handlers and `events.ts` match only the boxes `CheckboxWidget` draws, by a
+    class of their own, since `posAtDOM` on a box inside a block gives the block's start.
+  - Task 3's drawing skips the lines a block widget covers; a block that shows its Markdown is
+    drawn as Task 3 draws any lines.
 
 - [ ] **Step 1: Write the failing tests** on notes holding a table, a fence with an empty line
   inside, a callout holding a list and a table, a plain quote (not drawn), a `$$` block with an

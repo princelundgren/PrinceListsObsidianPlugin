@@ -365,6 +365,26 @@ textarea.princelists-title {
 	color: var(--checklist-done-color);
 }
 
+/* A block drawn whole by Obsidian's renderer, which lays out its own white space, not the editor's. */
+.princelists-notes-block {
+	white-space: normal;
+}
+
+/* The empty lines around it in the notes space it, as in Live Preview, in place of its own margins. */
+.princelists-notes-block > :first-child {
+	margin-top: 0;
+}
+
+.princelists-notes-block > :last-child {
+	margin-bottom: 0;
+}
+
+/* Its boxes draw disabled, and a disabled box takes no press: this one reaches the block, which shows
+   its Markdown. */
+.princelists-notes-block .task-list-item-checkbox {
+	pointer-events: none;
+}
+
 .princelists-notes-picture {
 	max-width: 100%;
 	vertical-align: bottom;

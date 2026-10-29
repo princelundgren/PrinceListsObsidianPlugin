@@ -10,7 +10,8 @@ import { notesBoxClick } from './checklist';
 import { targetOf } from './dom';
 import { buildFormatBar } from './format';
 import type { PrinceListView } from './list-view';
-import { NOTES_CHECKBOX_SELECTOR } from './notes';
+import { NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
+import { drawnBlocksField, NOTES_BLOCK_CLASS } from './notes-blocks';
 import { notesDrawing } from './notes-drawing';
 import { notesKeymap } from './notes-keys';
 import type { NotesSource } from './notes-source';
@@ -56,6 +57,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 	// A change can come without a focus event, as a drop from another app does: it opens the visit it
 	// saves in, which ends with the change unless the editor has focus by then.
 	let isVisitFromChange = false;
+	const blocks = drawnBlocksField(view, view.sourcePath);
 	const editor = new EditorView({
 		parent: area,
 		state: EditorState.create({
@@ -66,7 +68,8 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				markdownLanguage,
 				indentUnit.of('\t'),
 				notesKeymap(),
-				notesDrawing(view, view.sourcePath),
+				blocks,
+				notesDrawing(view, view.sourcePath, blocks),
 				placeholder('Notes'),
 				EditorView.lineWrapping,
 				EditorView.editorAttributes.of({ class: NOTES_CODEMIRROR_CLASS }),
@@ -99,16 +102,27 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 						sync(editor);
 					},
 					// A drawn link follows on its click, through the view's own listener, as in Live Preview, and
-					// a box ticks on its own: the caret stays where it was, and a phone's keyboard stays down.
-					mousedown: (evt) => {
-						if (!targetOf(evt)?.closest(`a, ${NOTES_CHECKBOX_SELECTOR}`)) return false;
+					// a box ticks on its own: the caret stays where it was, and a phone's keyboard stays down. So
+					// does a button that Obsidian's renderer draws in a block, such as a code block's copy button.
+					// Elsewhere on a drawn block, the caret goes to its start, which shows its Markdown.
+					mousedown: (evt, editor) => {
+						const target = targetOf(evt);
+						if (target?.closest(`a, button, ${NOTES_DRAWN_CHECKBOX_SELECTOR}`)) {
+							evt.preventDefault();
+							return true;
+						}
+						const block = target?.closest(`.${NOTES_BLOCK_CLASS}`);
+						// Only the main button, as CodeMirror's own mouse selection.
+						if (!block || evt.button !== 0) return false;
 						evt.preventDefault();
+						editor.dispatch({ selection: { anchor: editor.posAtDOM(block) } });
+						editor.focus();
 						return true;
 					},
 					// During a visit, a tick is the editor's own change, in its history, and changes only the
 					// status, so the caret stays; outside one, it's the list's.
 					click: (evt, editor) => {
-						const box = targetOf(evt)?.closest<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR);
+						const box = targetOf(evt)?.closest<HTMLInputElement>(NOTES_DRAWN_CHECKBOX_SELECTOR);
 						if (!box) return false;
 						evt.preventDefault();
 						const line = editor.state.doc.lineAt(editor.posAtDOM(box));
