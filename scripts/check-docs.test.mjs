@@ -157,22 +157,26 @@ test('reports missing files and headings, and passes good links', () => {
 	]);
 });
 
-test('reports a raw link to this repo whose file is missing, in Markdown or HTML', () => {
+test('reports a raw link to this repo\'s main whose file is missing, in Markdown or HTML', () => {
 	const raw = 'https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin';
+	const upperRaw = raw.replace('princelundgren', 'PrinceLundgren');
 	const docs = new Map([
 		['README.md', [
-			`![ok](${raw}/main/docs/images/a.gif) <img src="${raw}/a-branch/docs/images/b.webp" width="200">`,
-			`![gone](${raw}/main/docs/images/old.png) | <img src="${raw}/main/docs/images/c.webp"> |`,
-			`\`${raw}/main/NOPE.md\` ![other repo](https://raw.githubusercontent.com/someone/else/main/x.png)`,
+			`![ok](${raw}/main/docs/a.gif?raw=true#x) <img src="${raw}/refs/heads/main/docs/b.webp" width="200">`,
+			`![gone](${raw}/main/docs/old.png) | <img src="${raw}/main/docs/c.webp"> |`,
+			`![ok](${upperRaw}/main/docs/my%20pic.png) ![bad](${raw}/main/x%E0%A4%A.png)`,
+			`![other branch](${raw}/a-branch/NOPE.png) ![other repo](https://raw.githubusercontent.com/someone/else/main/x.png)`,
+			`\`${raw}/main/NOPE.md\``,
 			'```',
 			`${raw}/main/IN-A-FENCE.md`,
 			'```',
 		].join('\n')],
 	]);
-	const files = new Set(['README.md', 'docs/images/a.gif', 'docs/images/b.webp']);
+	const files = new Set(['README.md', 'docs/a.gif', 'docs/b.webp', 'docs/my pic.png']);
 	assert.deepEqual(lines(checkRawLinks(docs, files)), [
-		`README.md:2: broken link "${raw}/main/docs/images/old.png": no file docs/images/old.png`,
-		`README.md:2: broken link "${raw}/main/docs/images/c.webp": no file docs/images/c.webp`,
+		`README.md:2: broken link "${raw}/main/docs/old.png": no file docs/old.png`,
+		`README.md:2: broken link "${raw}/main/docs/c.webp": no file docs/c.webp`,
+		`README.md:3: broken link "${raw}/main/x%E0%A4%A.png": bad percent-encoding`,
 	]);
 });
 

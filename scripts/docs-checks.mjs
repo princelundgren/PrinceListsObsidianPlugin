@@ -204,16 +204,27 @@ export function checkLinks(docs, files) {
 	return findings;
 }
 
-const RAW_LINK = /https:\/\/raw\.githubusercontent\.com\/princelundgren\/PrinceListsObsidianPlugin\/[^/\s]+\/([^\s"'<>)]+)/g;
+const RAW_LINK = /https:\/\/raw\.githubusercontent\.com\/princelundgren\/PrinceListsObsidianPlugin\/(?:refs\/heads\/)?main\/([^\s"'<>)?#]+)/gi;
 
-// checkLinks skips URLs, but the README links its pictures by full raw URL for Obsidian's plugin browser.
+// Reports raw.githubusercontent.com links to this repo's main whose file isn't in files; checkLinks skips URLs.
 export function checkRawLinks(docs, files) {
 	const findings = [];
 	for (const [path, text] of docs) {
 		for (const [index, line] of proseLines(text)) {
-			for (const [url, target] of withoutCodeSpans(line).matchAll(RAW_LINK)) {
+			for (const [url, encoded] of withoutCodeSpans(line).matchAll(RAW_LINK)) {
+				const report = (problem) => findings.push(finding(path, index + 1, `broken link "${url}": ${problem}`));
+				let target;
+				try {
+					target = decodeURIComponent(encoded);
+				} catch (error) {
+					if (!(error instanceof URIError)) {
+						throw error;
+					}
+					report('bad percent-encoding');
+					continue;
+				}
 				if (!files.has(target)) {
-					findings.push(finding(path, index + 1, `broken link "${url}": no file ${target}`));
+					report(`no file ${target}`);
 				}
 			}
 		}
