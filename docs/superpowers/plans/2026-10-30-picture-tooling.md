@@ -50,9 +50,9 @@ vault made by the copy script, never in a vault with real notes, and the scripts
 - **The scripts reach Obsidian through its `app` global,** a debugging handle that `obsidian.d.ts`
   doesn't declare. Through it they call only what `obsidian.d.ts` documents (`app.workspace`,
   `app.vault`, `app.vault.adapter`), never `app.plugins`, `app.commands` or Obsidian's own DOM
-  beyond reading where an element is, and adding the drawn pointer or finger mark (`pointer.mjs`),
-  which takes no events and which `shoot.mjs` removes when the scene ends. Clicks, keys, touches
-  and drags are CDP input events.
+  beyond reading where an element is and which folders are open, and adding the drawn pointer or
+  finger mark (`pointer.mjs`), which takes no events and which `shoot.mjs` removes when the scene
+  ends. Clicks, keys, touches and drags are CDP input events.
 - **The published set is taken on macOS,** in English (dates follow Obsidian's language), so
   fonts and labels match from one release to the next. CDP sees only the page, so macOS's window
   buttons, which today's README GIFs show, are gone from the retakes; that's accepted.
@@ -64,8 +64,8 @@ vault made by the copy script, never in a vault with real notes, and the scripts
   |---|---|---|---|---|---|
   | `list-desktop.gif`, `archive.gif`, `schedule.gif` | README | 720 x 603 | none | 1 | dark |
   | `tick-and-drag.gif` | README | 390 x 844, phone | none | 1 | light |
-  | `embedded-list.webp` | README | 720 x 603 | 540 x 495, the note | 2 | dark |
-  | `notes.webp` | README | 720 x 603 | 520 x 610, the card | 2 | dark |
+  | `embedded-list.webp` | README | 644 x 640, left sidebar collapsed | 540 x 495, the note | 2 | dark |
+  | `notes.webp` | README | 644 x 760, left sidebar collapsed | 520 wide, the card's height | 2 | dark |
   | `new-list-ribbon.webp`, `new-list-folder.webp`, `turn-into-list.webp` | README | 720 x 603 | 220 x 170, the tooltip or menu | 2 | dark |
   | `desktop-1-groceries`, `-2-schedule`, `-3-rich-notes`, `-5-menu` | listing | 1200 x 800 | none | 2 | dark |
   | `phone-1-groceries`, `-2-collapsed`, `-3-schedule` | listing | 450 x 800, phone | none | 2 | dark |
@@ -170,8 +170,9 @@ test('a copy moves the dates, keeps the plugins folder and writes the marker', (
 ### Task 2: Take the README's stills through the DevTools protocol
 
 **Files:**
-- Create: `scripts/pictures/cdp.mjs`, `scripts/pictures/shoot.mjs`, `scripts/pictures/encode.mjs`,
-  `scripts/pictures/pointer.mjs`, `scripts/pictures/scenes/` (one module per picture)
+- Create: `scripts/pictures/cdp.mjs`, `scripts/pictures/shoot.mjs`, `scripts/pictures/page.mjs`,
+  `scripts/pictures/encode.mjs`, `scripts/pictures/pointer.mjs`, `scripts/pictures/scenes/` (one
+  module per picture)
 - Test: `scripts/pictures/cdp.test.mjs`
 - Modify: `docs/images/embedded-list.webp`, `new-list-ribbon.webp`, `new-list-folder.webp`,
   `turn-into-list.webp`, `notes.webp`; `README.md` (`notes.webp`'s alt text); `AGENTS.md`
@@ -188,8 +189,11 @@ test('a copy moves the dates, keeps the plugins folder and writes the marker', (
     - `connect(port: number): Promise<Session>`, a `Session` being `send(method, params)`,
       `on(event, handler)` for CDP events, `evaluate(expression)` (awaits a promise, returns the
       value, throws the page's exception text) and `close()`.
-    - `checkDemoVault(session): Promise<void>`: throws with the vault's name unless
-      `app.vault.adapter.exists('.princelists-demo')`.
+    - `checkDemoVault(session, theme): Promise<void>`: throws with the vault's name unless
+      `app.vault.adapter.exists('.princelists-demo')`, "Native menus" is off and the copy's theme
+      is the scene's (`vaultProblem` decides, and is tested).
+  - In `page.mjs`, what scenes do on the page: `boundsOf`, `hover`, `click`, `scroll`,
+    `pressEscape`, `showAlone`, `setFolders`, `openMenuOn` and `still`.
   - In `pointer.mjs`: `pointer(session, x, y, state: 'move' | 'down' | 'up' | 'hide')`: moves the
     drawn pointer, or on a phone page the finger mark, to `x, y` in CSS pixels.
   - A scene module: `export default { name, phone: boolean, page: {width, height}, clip?: {x, y,
