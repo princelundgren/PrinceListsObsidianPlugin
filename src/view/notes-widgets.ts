@@ -90,6 +90,11 @@ export class PictureWidget extends WidgetType {
 		pictureColumns.set(dom, this.column);
 		return true;
 	}
+
+	// The editor's mousedown handler keeps it drawn on a press of another button, for its menu.
+	ignoreEvent(event: Event): boolean {
+		return event.type !== 'mousedown' || (event as MouseEvent).button === 0;
+	}
 }
 
 /** A picture from the web, drawn from its Markdown by Obsidian's renderer, as in a note. */
