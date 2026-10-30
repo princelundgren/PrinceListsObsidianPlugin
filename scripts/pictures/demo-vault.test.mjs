@@ -88,6 +88,15 @@ test('a copy into a new folder writes the marker and leaves the pictures byte fo
 		readFileSync(new URL(`../../demo/vault/${picture}`, import.meta.url)));
 });
 
+test('a copy into a new vault keeps the settings the demo vault does not ship', (t) => {
+	const folder = tempFolder(t);
+	mkdirSync(join(folder, '.obsidian'));
+	writeFileSync(join(folder, '.obsidian', 'hotkeys.json'), '{}');
+	copyDemoVault(folder, { theme: 'dark', today: '2026-10-28' });
+	assert.equal(readFileSync(join(folder, '.obsidian', 'hotkeys.json'), 'utf8'), '{}');
+	assert.ok(existsSync(join(folder, '.obsidian', 'appearance.json')));
+});
+
 test('a copy with a day or theme that does not exist deletes nothing', (t) => {
 	const folder = tempFolder(t);
 	writeFileSync(join(folder, '.princelists-demo'), '');

@@ -42,8 +42,9 @@ export function checkTarget(folder) {
 
 /**
  * Writes the demo vault into `folder` with its dates moved from ANCHOR_DAY to `today` (`YYYY-MM-DD`)
- * and the theme `dark` or `light`. It first checks the folder, then deletes everything an earlier
- * copy left there but the marker and `.obsidian/plugins/`. Throws on a bad folder, day or theme.
+ * and the theme `dark` or `light`. It first checks the folder. Over an earlier copy it deletes
+ * everything but the marker and `.obsidian/plugins/`; in a new vault it only adds and overwrites the
+ * files the demo vault ships. Throws on a bad folder, day or theme.
  */
 export function copyDemoVault(folder, { theme, today }) {
 	if (!Object.hasOwn(THEMES, theme)) throw new Error(`The theme is dark or light, not ${theme}.`);
@@ -60,7 +61,7 @@ export function copyDemoVault(folder, { theme, today }) {
 }
 
 function removeEarlierCopy(folder) {
-	if (!existsSync(folder)) return;
+	if (!existsSync(join(folder, MARKER))) return;
 	for (const name of readdirSync(folder)) {
 		if (name !== CONFIG && name !== MARKER) rmSync(join(folder, name), { recursive: true, force: true });
 	}
