@@ -56,9 +56,9 @@ jobs:
                   printf '%s' "$PR_BODY" > .pr-text/description.md
 
             # The commits come from the API, since the checkout holds only the merge commit. Each
-            # size follows AGENTS.md: a deleted file is one line; lock files and snapshots are none.
-            # Past the API's 300 files a size is the commit's total, lock files included. A merge
-            # prints no size, since its size counts what the base brought in.
+            # size follows AGENTS.md: a deleted file is one line; `package-lock.json` and `.snap`
+            # files are none. Past the API's 300 files a size is the commit's total, lock files
+            # included. A merge prints no size, since its size counts what the base brought in.
             - name: Write the pull request's commits for Claude
               env:
                   GH_TOKEN: ${{ github.token }}
