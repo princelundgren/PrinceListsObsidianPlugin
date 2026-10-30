@@ -9,6 +9,7 @@ import { addNotesBlock, NOTES_CODEMIRROR_CLASS } from './notes-editor';
 const REFUSED_NOTICE = "Obsidian can't show that kind of picture, so it wasn't added.";
 const FAILED_NOTICE = "Couldn't add the picture.";
 const OUTSIDE_VAULT_NOTICE = "Pictures can't be added to a list outside the vault.";
+const EMPTY_DROP_NOTICE = 'No picture came with that drop. Paste it instead.';
 
 export function registerPictureEvents(view: PrinceListView): void {
 	const { contentEl } = view;
@@ -60,9 +61,15 @@ function onDrop(view: PrinceListView, evt: DragEvent): void {
 	if (!card || !inOpenCard(view, evt) || !mayHoldPicture(evt)) return;
 	evt.preventDefault();
 	evt.stopPropagation();
+	const files = Array.from(evt.dataTransfer?.files ?? []);
+	// On iOS 18.7, a picture dropped from Photos can arrive with the type `Files` and no file.
+	if (files.length === 0) {
+		new Notice(EMPTY_DROP_NOTICE);
+		return;
+	}
 	// The pointer's coordinates name a line only now, before the pictures are saved and the notes may move.
 	const line = card.editor ? droppedLine(card.editor, evt) : 0;
-	void addPictures(view, card, Array.from(evt.dataTransfer?.files ?? []), false, () => line);
+	void addPictures(view, card, files, false, () => line);
 }
 
 // The notes' line dropped on, or their last line for a drop elsewhere on the card.
