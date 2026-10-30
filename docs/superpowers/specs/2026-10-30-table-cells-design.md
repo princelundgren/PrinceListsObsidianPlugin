@@ -38,7 +38,8 @@ what has none is a **(call)**.
 - **A row with fewer cells than the table** gains its missing cells' pipes when one is first typed
   into. Cells past the table's width aren't drawn, and their bytes stay.
 - **Moving:** Tab and Shift+Tab go to the next and previous cell, Enter and Down to the cell below, Up
-  to the cell above. Past the table's edge, they leave it for the notes line there. Focus moves before
+  to the cell above. Past the table's edge, they leave it for the notes line there, except Enter (see
+  "Rows"). Focus moves before
   the old cell is drawn, so a phone's keyboard stays up.
 - **Escape** leaves the cell, with focus on the card, or on the list in the list note. A second Escape
   closes the card, as now. Cmd+A selects the cell's text.
@@ -50,7 +51,9 @@ what has none is a **(call)**.
 
 ## Rows, columns and the Markdown (owner, 2026-10-30)
 
-- **Rows:** Enter on the last row adds a row. Backspace in the first cell of an empty row removes it.
+- **Rows:** Enter on the last row adds a row, unless that row is empty: then Enter removes it and
+  leaves the table for the notes line below, as Enter ends a list. Backspace in the first cell of an
+  empty row removes it too.
 - **Columns** change only in the Markdown.
 - **The Markdown still shows** on Up and Down onto a table from the notes, as now, with a selection
   that enters or crosses it, and through a command that works on a phone too. The command has no
@@ -65,7 +68,7 @@ what has none is a **(call)**.
    the approach: if it drops, the maintainer weighs that against the decision above.
 2. **A selection from above the table into it,** by mouse and by touch.
 3. **The command** from the palette, on an iPhone and on Android.
-4. **Backspace in an empty cell,** and a Japanese input method's Enter in a cell, on both phones. The
+4. **Backspace in the first cell of an empty row,** and a Japanese input method's Enter in a cell, on both phones. The
    notes design's risk 5 is still open on an iPhone, and Enter here moves the caret.
 
 ## What a prototype showed
