@@ -201,14 +201,30 @@ test('a copy moves the dates, keeps the plugins folder and writes the marker', (
 - [ ] **Step 1: Write the failing tests**
 
 ```js
+const target = (type, url) => ({ type, url, webSocketDebuggerUrl: `ws://x/${url}` });
+const desktop = target('page', 'app://obsidian.md/index.html');
 test('pickPage takes the app page among DevTools and a worker', () => {
-	// [devtools page devtools://…, service_worker, page app://obsidian.md/index.html]: its URL
+	assert.equal(pickPage([target('page', 'devtools://devtools/inspector.html'),
+		target('service_worker', 'app://obsidian.md/sw.js'), desktop]), desktop.webSocketDebuggerUrl);
 });
-test('pickPage takes the Android app page', ...);   // page http://localhost/: its URL
-test('pickPage throws listing the targets when there is no app page', ...);
-test('pickPage throws listing the targets when there are two app pages', ...);
-test('checkDemoVault throws naming the vault when the marker is missing', ...);
-	// a fake session whose evaluate returns false for the marker and 'Notes' for the name
+test('pickPage takes the Android app page', () => {
+	const phone = target('page', 'http://localhost/');
+	assert.equal(pickPage([phone]), phone.webSocketDebuggerUrl);
+});
+test('pickPage throws listing the targets when there is no app page', () => {
+	assert.throws(() => pickPage([target('page', 'devtools://devtools/inspector.html')]),
+		/page devtools:\/\/devtools\/inspector\.html/);
+});
+test('pickPage throws listing the targets when there are two app pages', () => {
+	assert.throws(() => pickPage([desktop, desktop]), /page app:\/\/obsidian\.md\/index\.html/);
+});
+test('checkDemoVault throws naming the vault when the marker is missing', async () => {
+	// a fake session whose evaluate answers false for the marker and 'Notes' for the vault's name
+	await assert.rejects(checkDemoVault(fakeSession({ marker: false, name: 'Notes' })), /Notes/);
+});
+test('checkDemoVault passes a demo copy', async () => {
+	await checkDemoVault(fakeSession({ marker: true, name: 'Demo' }));
+});
 ```
 
 - [ ] **Step 2:** Run `node --test "scripts/pictures/*.test.mjs"`: FAIL. Write `cdp.mjs`, run
@@ -256,16 +272,26 @@ test('checkDemoVault throws naming the vault when the marker is missing', ...);
   - `export function filesToPush(folder: string): {path: string, base64: string}[]`, the vault's
     files with their paths inside it.
 
-- [ ] **Step 1:** Write the failing test for `filesToPush` (a temp copy: every file once, the
-  marker included, paths with `/`), then `push-vault.mjs`, and run the tests: PASS.
+- [ ] **Step 1:** Write the failing test, then `push-vault.mjs`, and run the tests: PASS.
+
+```js
+test('filesToPush lists every file once, with its path inside the vault', () => {
+	// a temp folder holding .princelists-demo, To do.md and Attachments/suitcase.jpg:
+	// the paths, sorted, are ['.princelists-demo', 'Attachments/suitcase.jpg', 'To do.md'],
+	// with '/' on every system, and suitcase.jpg's base64 decodes to its bytes
+});
+```
 - [ ] **Step 2:** Write `record.mjs`.
 - [ ] **Step 3:** The desktop scenes, each as its alt text says: `list-desktop` adds an item with a
   title, notes with a link and a picture, a star and a day, drags it into place and ticks another;
   `archive` ticks an item, then shows the archived items and hides them; `schedule` opens the
   Schedule from the ribbon and scrolls it. Rows drag with HTML drag and drop, and the picture comes
-  in by a drop, so both go through `Input.setInterceptDrags` and `Input.dispatchDragEvent` (the
-  picture as a file from `Attachments/`). Change `list-desktop.gif`'s alt text from "a pasted
-  picture" to "a dropped picture".
+  in by a drop, so both go through `Input.setInterceptDrags` and `Input.dispatchDragEvent`. The
+  dropped file is `demo/vault/Attachments/raised-bed.jpg` in the repository, its absolute path
+  found from the script's own (`import.meta.url`), since `DragData.files` takes paths on the
+  machine. If Obsidian ignores the synthetic drop, stop and raise it in the pull request, as
+  `AGENTS.md` asks, rather than working around it. Change `list-desktop.gif`'s alt text from "a
+  pasted picture" to "a dropped picture".
 - [ ] **Step 4:** The emulator, once: a Google Play system image, Obsidian from Play, a vault made
   in it by hand with community plugins on, and PrinceLists turned on after the first push. Then
   each time: `adb shell pidof md.obsidian`, `adb forward tcp:<port>
