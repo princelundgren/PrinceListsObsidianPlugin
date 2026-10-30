@@ -30,6 +30,9 @@ jobs:
             - name: Test the docs check
               run: node --test scripts/check-docs.test.mjs
 
+            - name: Test the picture scripts
+              run: node --test "scripts/pictures/*.test.mjs"
+
             # Only Dependabot skips the pull request text, because its pull requests don't use the
             # template. Agents' pull requests are checked. The author is pull_request.user;
             # github.actor is whoever triggered this run, such as someone who edited the

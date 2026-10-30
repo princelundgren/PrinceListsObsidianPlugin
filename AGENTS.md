@@ -95,6 +95,19 @@ The project's npm commands:
 | `npm run lint` | ESLint with `eslint-plugin-obsidianmd`, Obsidian's own lint rules for plugins. Any warning fails it |
 | `npm run install-vault -- <path>` | Copy the build into a vault's `.obsidian/plugins/princelists/` |
 
+The README's pictures and the community listing's screenshots are taken in a copy of the demo
+vault, `demo/vault/`. These need Node.js 22 or later too:
+
+| Command | What it does |
+|---|---|
+| `node scripts/pictures/demo-vault.mjs <folder> [--theme dark\|light] [--today YYYY-MM-DD]` | Copy the demo vault into `<folder>`, its dates moved from the day they were written for to today. It writes only into a folder with no notes or an earlier copy, never through a linked `.obsidian/`, and keeps `.obsidian/plugins/` |
+| `node --test "scripts/pictures/*.test.mjs"` | Run the picture scripts' tests. Quote the glob so Node expands it in every shell; a folder argument fails on Node 22 and 24 |
+
+To make a demo vault: close an earlier copy in Obsidian if it's open, run the copy script, then
+`npm run build` and `npm run install-vault -- <folder>`. The first time, open the folder in
+Obsidian with "Open folder as vault", trust it and turn on PrinceLists. After that,
+`obsidian://open?path=<absolute path to the folder's Groceries.md, URI-encoded>` opens it.
+
 ## Layout
 
 - **`src/main.ts`:** the plugin lifecycle only (load, unload, registering things).
