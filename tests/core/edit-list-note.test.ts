@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { UnsafeEditError } from '../../src/core/edit-check';
 import {
 	getListNote,
+	listNoteStartLine,
 	listNoteUnclosedBlock,
 	listNoteWithPiece,
 	listNoteWouldRestructure,
@@ -121,6 +122,20 @@ describe('getListNote', () => {
 	])('%j', (text, expected) => {
 		const { lines, model } = list(text);
 		expect(getListNote(lines, model)).toBe(expected);
+	});
+});
+
+describe('listNoteStartLine', () => {
+	test.each([
+		[`${FRONTMATTER}Stuff\n\nMore\n\n- [ ] a\n`, 3],
+		[`${FRONTMATTER}\n\n\tStuff\n- [ ] a\n`, 5],
+		// With no text, the note's end, where its first text goes.
+		[`${FRONTMATTER}\n\n- [ ] a\n`, 3],
+		[`${FRONTMATTER}- [ ] a\n`, 3],
+		['\nNote\n## H\n', 1],
+	])('%j', (text, expected) => {
+		const { lines, model } = list(text);
+		expect(listNoteStartLine(lines, model)).toBe(expected);
 	});
 });
 

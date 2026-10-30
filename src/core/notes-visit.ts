@@ -1,9 +1,10 @@
 import { UnsafeEditError } from './edit-check';
 import { notesStartLine } from './edit-items';
+import { listNoteStartLine } from './edit-list-note';
 import type { RunEdit } from './follow';
 import type { Line } from './lines';
 import { saveItemNotesLines, saveListNoteLines, spanLines, type NotesChange, type NotesSpan } from './notes-lines';
-import { isBlank, type ItemBlock, type ListModel } from './parse';
+import type { ItemBlock, ListModel } from './parse';
 
 /** A visit to a card's notes or to the list note, while its editor has focus. */
 export interface NotesVisit {
@@ -36,10 +37,8 @@ export function openVisit(lines: readonly Line[], model: ListModel, item: ItemBl
 		const span = { range: { start, end: item.endLine }, indent: item.notesIndent, separator: start === item.endLine, blankAfter: false };
 		return { notes: 'item', piece: span, refused: false, visit: true };
 	}
-	const { end } = model.listNote;
-	let start = model.listNote.start;
-	while (start < end && isBlank((lines[start] as Line).text)) start++;
-	return { notes: 'listNote', piece: { range: { start, end }, indent: '', separator: false, blankAfter: false }, refused: false, visit: true };
+	const range = { start: listNoteStartLine(lines, model), end: model.listNote.end };
+	return { notes: 'listNote', piece: { range, indent: '', separator: false, blankAfter: false }, refused: false, visit: true };
 }
 
 /** The visit's notes as its editor holds them. */

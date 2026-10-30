@@ -12,6 +12,14 @@ export function getListNote(lines: readonly Line[], model: ListModel): string {
 		.join('\n');
 }
 
+/** The list note's first line with text, where its editor starts, or its end when it has none. */
+export function listNoteStartLine(lines: readonly Line[], model: ListModel): number {
+	const { start, end } = model.listNote;
+	let line = start;
+	while (line < end && isBlank((lines[line] as Line).text)) line++;
+	return line;
+}
+
 /**
  * One open piece of the list note. `blankAfter`: the line under it is the blank line its last save
  * wrote, which goes again while it is still blank and the piece is erased.
