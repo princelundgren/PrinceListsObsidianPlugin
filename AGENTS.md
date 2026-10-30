@@ -22,8 +22,9 @@ this project.
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
   - The plans in `docs/superpowers/plans/` give the tasks, with exact interfaces and tests. The
-    latest one is [notes in one editor](docs/superpowers/plans/2026-10-29-notes-in-one-editor.md).
-    Implement a task as written, one task per pull request.
+    latest one for the plugin is [notes in one editor](docs/superpowers/plans/2026-10-29-notes-in-one-editor.md),
+    and [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
+    README's and the listing's pictures. Implement a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.
 
 ## Rules that are never broken
