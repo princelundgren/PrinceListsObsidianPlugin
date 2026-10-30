@@ -40,15 +40,6 @@ textarea.princelists-title {
 	color: var(--text-muted);
 }
 
-/* The space under the list note: below its last piece, a strip a line tall opens a new one. */
-.princelists-list-note-text > .princelists-notes-end {
-	min-height: calc(1em * var(--line-height-normal));
-}
-
-.princelists-list-note-text > .princelists-note-piece:nth-last-child(2) > :last-child {
-	margin-bottom: 0;
-}
-
 .princelists-untouched {
 	color: var(--text-muted);
 	white-space: pre-wrap;
@@ -148,19 +139,12 @@ textarea.princelists-title {
 	margin: 0;
 }
 
-.princelists-list-note-text > :first-child,
 .princelists-card-notes > :first-child {
 	margin-top: 0;
 }
 
-.princelists-list-note-text > :last-child,
 .princelists-card-notes > :last-child {
 	margin-bottom: 0;
-}
-
-/* After the rule above, which it overrides: an empty list note's "Notes" keeps a gap above the rows. */
-.princelists-list-note-text > .princelists-placeholder {
-	margin-bottom: var(--size-4-4);
 }
 
 /* The open card: raised above the list, in place of its row (spec, "Layout"). Its margins stay inside
@@ -197,19 +181,8 @@ textarea.princelists-title {
 	color: var(--checklist-done-color);
 }
 
-.princelists-placeholder {
-	color: var(--text-faint);
-	cursor: text;
-}
-
-/* A click in the rendered notes opens the editor there. */
-.princelists-list-note-text,
 .princelists-card-notes {
 	cursor: text;
-}
-
-.princelists-quiet-placeholder::placeholder {
-	opacity: 0;
 }
 
 /* A table in rendered notes, drawn as in a note: Obsidian's own table rules apply only inside its
@@ -483,20 +456,6 @@ textarea.princelists-title {
 	line-height: var(--h6-line-height);
 	letter-spacing: var(--h6-letter-spacing);
 	color: var(--h6-color);
-}
-
-/* A new block's field holds the empty line above it, in place of the block's own margin. */
-.princelists-above-new-block > :last-child {
-	margin-bottom: 0;
-}
-
-.princelists-list-note-text > .princelists-note-piece:first-child > :first-child {
-	margin-top: 0;
-}
-
-/* A list item open in a field shows its marker in the field. */
-.princelists-open-item {
-	list-style: none;
 }
 
 .princelists-field-warning {

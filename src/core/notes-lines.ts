@@ -39,8 +39,9 @@ export function changedLines(before: string, after: string): NotesChange | null 
  * `range` is empty notes, which the editor holds as one empty line that maps to no file line. Lines
  * past the file's end are empty lines that a file without a final newline can't keep at its end
  * (spliceLines). A new line takes `indent`. `separator`: the empty line above `range.start` is the
- * one the notes' first text wrote under the title, which emptying them takes again. `blankAfter` is
- * the list note's, as in ListNotePiece.
+ * one the notes' first text wrote under the title, which emptying them takes again. `blankAfter`,
+ * the list note's: the line under the span is the blank line its last save wrote, which goes again
+ * while it is still blank and the span is emptied.
  */
 export interface NotesSpan {
 	range: LineRange;

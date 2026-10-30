@@ -6,12 +6,13 @@ governs: [src/**, styles.css, manifest.json]
 
 # PrinceLists for Obsidian: notes in one editor
 
-A card's notes and the list note edit a block at a time: Obsidian's renderer draws them, and the
-block you click becomes a plain-text field (step two, "Editing notes a block at a time"). Hands-on
-testing on macOS, iOS and Android found that the seams between blocks are where notes break or
-stop feeling like a note: arrow keys, selecting across blocks, joining two blocks, and key handling
-that each platform needs its own fixes for (#182). This design puts the notes in one CodeMirror 6
-editor that looks like Obsidian's Live Preview, and the block fields go **(owner)**.
+A card's notes and the list note edited a block at a time: Obsidian's renderer drew them, and the
+block you clicked became a plain-text field (step two, "Editing notes a block at a time"). Hands-on
+testing on macOS, iOS and Android found that the seams between blocks are where notes broke or
+stopped feeling like a note: arrow keys, selecting across blocks, joining two blocks, and key
+handling that each platform needed its own fixes for (#182). This design puts the notes in one
+CodeMirror 6 editor that looks like Obsidian's Live Preview, and the block fields are gone
+**(owner)**.
 
 **How decisions are marked:** as in the [step one design](2026-10-20-prince-lists-design.md).
 **(owner)** means the owner decided it on 2026-10-29 unless another date is given; **(call)** means
@@ -149,15 +150,19 @@ Compared with Obsidian's own editor side by side on desktop:
 ## Saving
 
 - **After each change, only the lines it touched (call).** From the change's first touched line to
-  its last, the lines are written back, one file line per editor line, through the piece save's
-  check that the list's layout can take them (`replaceRun` with the notes' block keys), not
-  through `setNotesPiece` itself, which drops empty lines at the end of what it saves. A touched
-  line keeps its own indent, and a new line takes the item's; so does a touched lazy line, short
-  of the item's indent, so a list marker typed on it stays in the notes. The notes' other lines
-  keep every byte. The core saves a given line range directly, with no open, type and close
-  session around each change.
+  its last, the lines are written back, one file line per editor line, through the check that the
+  list's layout can take them (`replaceRun` with the notes' block keys), empty lines at the end
+  included. A touched line keeps its own indent, and a new line takes the item's; so does a touched
+  lazy line, short of the item's indent, so a list marker typed on it stays in the notes. The
+  notes' other lines keep every byte. The core saves a given line range directly, with no open,
+  type and close session around each change.
 - **Empty notes** get the empty line under the title with their first text, so it can't join the
   title, as the block fields did.
+- **Empty lines typed at the end of the notes (call)** stay in the file and in the editor while the
+  visit lasts. The parse ends the notes at their last line with text, as CommonMark ends a block,
+  so once the visit ends the editor leaves them out, and the file keeps them as empty lines after
+  the notes. Notes the editor holds as one empty line are empty; two or more are written as empty
+  lines.
 - **Empty lines typed at the end of a file without a final newline** can't stay in the file, which
   drops them (AGENTS.md). The editor keeps them, and the text typed after them writes them back
   **(call)**.
@@ -170,6 +175,11 @@ Compared with Obsidian's own editor side by side on desktop:
   rule that an outside change to the open block's lines leaves the field unable to save goes: there
   is no unsaved field. An outside change that loses track of the item still closes the card as step
   one says, with its "Copy text".
+  - While the editor has focus, it holds the lines its visit started with, and the lines typed
+    since **(call)**. An outside change to one of them ends the visit, and the editor shows the
+    notes as they now are. Lines added next to them show once the visit ends: the notes as parsed
+    can start or end on other lines than the visit's, so only the visit's own lines map one to one
+    to the editor's.
 - **The list note keeps its rules:** what would turn it into a heading or an item warns before it
   saves, checked on the whole note as it would be saved, and it takes no pictures.
 
@@ -187,15 +197,15 @@ Compared with Obsidian's own editor side by side on desktop:
   up with that block's picture links, and gets neither when they don't line up, as when one is in
   code; one in an embedded note still gets none.
 
-## What goes, and what changes in the other designs
+## What went, and what changed in the other designs
 
 - **The block-field view code:** the note-piece fields, their keys and slots, and drawing notes a
-  block at a time. Core functions that only served them, such as finding the neighbor block for Up
-  and Down, go with them.
-- **A new core entry point** saves a given line range of the notes through the piece save, in place
-  of the open, type and close session the fields used; it comes with its tests first, as every
-  change in `src/core/` does.
-- **Step one changes with the build:**
+  block at a time. Core functions that only served them went with them: finding the neighbor block
+  for Up and Down, the piece saves, placing the caret from a click's point, and counting rendered
+  checkboxes against checklist lines.
+- **A new core entry point** saves a given line range of the notes, in place of the open, type and
+  close session the fields used; it came with its tests first, as every change in `src/core/` does.
+- **Step one changed with the build:**
   - "Notes use Obsidian's own Markdown rendering" becomes: big blocks do, and the editor draws the
     rest.
   - "The piece's own field fits its text" goes.
@@ -206,7 +216,7 @@ Compared with Obsidian's own editor side by side on desktop:
     field", and a picture dropped on the notes goes after the block it's dropped on.
   - "An outside change to the lines of the block a focused field writes" is replaced by "Saving".
   - "Undo (1b, call)" points here for the notes.
-- **Step two changes with the build:**
+- **Step two changed with the build:**
   - "Editing notes a block at a time" is replaced by this design, its rule for a picture dropped
     on the drawn notes included.
   - "Formatting in a card" points its format bar and keys here, and drops the wrapped rows on
@@ -218,7 +228,7 @@ Compared with Obsidian's own editor side by side on desktop:
 
 ## What this costs (call)
 
-- **Size:** about 42 kB more `main.js`, minified, less the block-field code that goes.
+- **Size:** about 42 kB more `main.js`, minified, less the block-field code, about 21 kB.
 - **Our own Live Preview:** the drawn look is the plugin's, not Obsidian's, so it can differ from a
   note in small ways, and a theme that styles Obsidian's editor doesn't style this one.
 - **A CodeMirror update in Obsidian** could stop matching the bundled Markdown package. Risk 1
@@ -241,8 +251,8 @@ Compared with Obsidian's own editor side by side on desktop:
 3. **The save cases the block fields got wrong** become tests: emptying a block in the middle, at
    the end and at the start of the notes, and the same in the list note.
 4. **Empty lines at the end of the notes:** one typed there stays in the editor and in the file,
-   except at the end of a file without a final newline ("Saving"), and the next parse still ends
-   the notes where the editor does.
+   except at the end of a file without a final newline ("Saving"). The next parse ends the notes at
+   their last line with text, so the editor leaves it out once the visit ends ("Saving").
 5. **iOS:** Backspace on an empty line, the keyboard's autocorrect and dictation, a Japanese input
    method's Enter, which only confirms a word, and a refused change taken back mid-word.
 6. **Android:** the on-screen keyboard's Backspace and Enter, and the format bar above it.
@@ -253,7 +263,9 @@ Compared with Obsidian's own editor side by side on desktop:
 
 ## Order (call)
 
-One release, in plan tasks that each keep the plugin working: the editor for a card's notes with
-the inline and line drawing; saving with the refused-change rule and undo; keys, Tab and the format
-bar; checkboxes and big blocks; pictures; the list note; then removing the block-field code and
-updating step one's and step two's designs.
+One release, in plan tasks that each keep the plugin working: saving a line range in the core;
+the editor for a card's notes, with saving, the refused-change rule, undo, keys, Tab and the
+format bar; the inline and line drawing; checkboxes; big blocks; pictures; the list note; then
+removing the block-field code and updating step one's and step two's designs. The plan put saving,
+undo and keys with the first editor, so a card never held text that wasn't saved and no key
+regressed, and the drawing after it.

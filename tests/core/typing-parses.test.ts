@@ -42,15 +42,15 @@ describe('one letter typed parses the whole file twice, as it is and as edited',
 	test("in an item's notes", () => {
 		const state = editing();
 		state.open(6);
-		state.openNotesPiece({ start: 8, end: 9 }, false);
-		expect(wholeFileParses(() => state.typeNotesPiece('A note!'))).toBe(2);
+		state.openNotes('item');
+		expect(wholeFileParses(() => state.saveNotes({ from: 0, to: 1, lines: ['A note!'] }))).toBe(2);
 		expect(state.text).toContain('\tA note!\n');
 	});
 
 	test('in the list note', () => {
 		const state = editing();
-		state.openListNote({ start: 3, end: 4 }, false);
-		expect(wholeFileParses(() => state.typeListNote('The list note!'))).toBe(2);
+		state.openNotes('listNote');
+		expect(wholeFileParses(() => state.saveListNote({ from: 0, to: 1, lines: ['The list note!'] }))).toBe(2);
 		expect(state.text).toContain('\nThe list note!\n');
 	});
 });

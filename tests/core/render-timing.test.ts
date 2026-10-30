@@ -46,11 +46,12 @@ test("a keystroke in a card's notes on a list of 500 items takes under 20 ms", (
 	state.text = text;
 	const titleLine = splitLines(text).findIndex((line) => line.text.startsWith('- [ ] item 51 '));
 	state.open(titleLine);
-	state.openNotesPiece({ start: titleLine + 1, end: titleLine + 1 }, true);
+	state.openNotes('item');
 	let typed = '';
 	const ms = fastest(() => {
 		typed += 'x';
-		state.typeNotesPiece(typed);
+		state.saveNotes({ from: 0, to: 1, lines: [typed] });
 	});
+	expect(state.text).toContain(`\t${typed}\n`);
 	expect(ms).toBeLessThan(20);
 });

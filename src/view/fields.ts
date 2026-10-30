@@ -1,7 +1,6 @@
 import { normalizePath, Notice, type TFile } from 'obsidian';
 import { getListNote, listNoteUnclosedBlock, listNoteWouldRestructure } from '../core/edit-list-note';
 import { nameTaken } from '../core/file-name';
-import type { LineRange } from '../core/follow';
 import { oneLineTitle } from '../core/title-field';
 import { fitHeight } from './dom';
 import type { PrinceListView } from './list-view';
@@ -10,8 +9,6 @@ import { listNoteSource } from './notes-source';
 
 export const TITLE_CLASS = 'princelists-title';
 export const NOTE_CLASS = 'princelists-list-note';
-// Where the list note's pieces are drawn, apart from its warnings.
-export const LIST_NOTE_AREA_CLASS = 'princelists-list-note-text';
 // Every textarea in the view, which styles.css makes read as the text it edits.
 export const FIELD_CLASS = 'princelists-field';
 
@@ -127,14 +124,6 @@ export function visitListNote(view: PrinceListView): string | null {
 	return text;
 }
 
-/** Opens one piece of the list note, as ListEditing's openListNote does, with the note's warnings. */
-export function openListNote(view: PrinceListView, range: LineRange, isNew: boolean, indent?: string): string {
-	const text = view.editing.openListNote(range, isNew, indent);
-	beginListNote(view);
-	warnListNote(view, view.editing.listNoteAsTyped(text));
-	return text;
-}
-
 function beginListNote(view: PrinceListView): void {
 	const el = view.listNoteEl;
 	if (view.listNote || !el) return;
@@ -158,11 +147,11 @@ export function closeListNote(view: PrinceListView, focusing: Element | null): v
 	if (session.warned || view.rowsHeldBack) view.render(focusing);
 }
 
-// Checked on the whole note as saved, or as it reads with a piece just opened. While either shows,
-// the note still saves, so typing is never lost (spec, "The list note").
-export function warnListNote(view: PrinceListView, note: string | null): void {
+// Checked on the whole note as saved, or as it reads when a visit starts. While either shows, the
+// note still saves, so typing is never lost (spec, "The list note").
+export function warnListNote(view: PrinceListView, note: string): void {
 	const session = view.listNote;
-	if (!session || note === null) return;
+	if (!session) return;
 	const restructure = listNoteWouldRestructure(note);
 	const unclosed = listNoteUnclosedBlock(note);
 	session.warnings.restructure.toggle(restructure);

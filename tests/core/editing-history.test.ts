@@ -5,7 +5,7 @@ import { ownEdit, type OwnEdit } from '../../src/core/follow';
 import { textEdit } from '../../src/core/history';
 import { planItemInsert, type PlannedInsert } from '../../src/core/list-actions';
 import { splitLines } from '../../src/core/lines';
-import { contentStartOf, list } from './edit-helpers';
+import { contentStartOf, list, notesEditor } from './edit-helpers';
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
 
@@ -16,7 +16,7 @@ function editing(text: string): ListEditing {
 }
 
 // Each keystroke types the field's whole value so far, as the view passes the textarea's value.
-function typeEach(type: (value: string) => Typed, values: readonly string[]): Typed[] {
+function typeEach(type: (value: string) => Typed | null, values: readonly string[]): (Typed | null)[] {
 	return values.map((value) => type(value));
 }
 
@@ -48,8 +48,7 @@ describe('the undo history', () => {
 	test('a typing step undone can be redone, and undone again', () => {
 		const state = editing(text);
 		state.open(4);
-		state.openNotesPiece({ start: 5, end: 5 }, true);
-		typeEach((v) => state.typeNotesPiece(v), ['n', 'n\n', 'n\nm']);
+		typeEach(notesEditor(state, 'item').type, ['n', 'n\n', 'n\nm']);
 		state.closeNotes();
 		const typed = state.text;
 		const undo = state.history.undo(typed);
@@ -64,12 +63,10 @@ describe('the undo history', () => {
 	test("the notes' and the list note's keystrokes make a step for each session", () => {
 		const state = editing(text);
 		state.open(4);
-		state.openNotesPiece({ start: 5, end: 5 }, true);
-		typeEach((v) => state.typeNotesPiece(v), ['n', 'no', 'note']);
+		typeEach(notesEditor(state, 'item').type, ['n', 'no', 'note']);
 		state.closeNotes();
 		const noted = state.text;
-		state.openListNote({ start: 3, end: 3 }, false);
-		typeEach((v) => state.typeListNote(v), ['L', 'Li', 'List']);
+		typeEach(notesEditor(state, 'listNote').type, ['L', 'Li', 'List']);
 		const undo = state.history.undo(state.text);
 		expect(undo?.next).toBe(noted);
 		state.applyOwn(noted, (undo as { edit: OwnEdit }).edit);

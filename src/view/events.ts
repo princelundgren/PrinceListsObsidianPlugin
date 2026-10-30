@@ -10,25 +10,20 @@ import {
 	cardTitleInput,
 	closeCard,
 	dismissCard,
-	NOTES_EDITOR_CLASS,
 	openCard,
 } from './card';
 import { toggleCardStar } from './card-star';
 import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
-import { checklistClick } from './checklist';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, keepOneLine, TITLE_CLASS } from './fields';
 import { filterBlur, filterInput, filterKeyDown } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
-import { barActionAt, FORMAT_BAR_CLASS, runBarAction } from './format';
+import { barActionAt, FORMAT_BAR_CLASS } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
-import { openPieceAt, pieceBlur, pieceInput } from './note-piece-field';
-import { pieceBeforeInput, pieceKeyDown } from './note-piece-keys';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR, NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
-import { notesHostOf } from './notes-host';
 import { runNotesBarAction } from './notes-keys';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
@@ -40,7 +35,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
-	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepNotesFocused(view, evt));
+	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepNotesFocused(evt));
 	view.registerDomEvent(contentEl, 'beforeinput', (evt) => onBeforeInput(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
@@ -82,9 +77,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const action = barActionAt(target);
 	if (action) {
 		const editor = barEditor(view, target);
-		const field = editor ? null : notesHostOf(view, target)?.area.querySelector('textarea');
 		if (editor) runNotesBarAction(editor, action);
-		else if (field) runBarAction(field, action);
 		return;
 	}
 	if (target.closest(`.${OPEN_AS_MARKDOWN_CLASS}`)) {
@@ -95,11 +88,9 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	// The notes editor ticks the boxes it draws.
 	if (notesBox?.matches(NOTES_DRAWN_CHECKBOX_SELECTOR)) return;
 	if (notesBox) {
-		const host = notesHostOf(view, notesBox);
-		if (host) checklistClick(view, host, notesBox, evt);
 		// Any other rendered box, as in a title, is disabled, but an embed can render more after that.
 		// They would tick on screen and save nothing.
-		else evt.preventDefault();
+		evt.preventDefault();
 		return;
 	}
 	const box = target.closest(`.${CHECKBOX_CLASS}`);
@@ -117,12 +108,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 			return;
 		}
 		const actions = target.closest<HTMLElement>(`.${CARD_ACTIONS_CLASS}`);
-		if (actions) {
-			showCardMenu(view, actions);
-			return;
-		}
-		const notes = notesHostOf(view, target);
-		if (notes) openPieceAt(view, notes, evt);
+		if (actions) showCardMenu(view, actions);
 		return;
 	}
 	// Anything else is a click elsewhere, which only closes an open card (spec, "Selecting and adding").
@@ -136,9 +122,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		openCard(view, line);
 		return;
 	}
-	if (Platform.isMobile && showHeadingMenu(view, evt, target)) return;
-	const note = notesHostOf(view, target);
-	if (note) openPieceAt(view, note, evt);
+	if (Platform.isMobile) showHeadingMenu(view, evt, target);
 }
 
 // The notes editor whose format bar `target` is on: the open card's or the list note's.
@@ -147,13 +131,10 @@ function barEditor(view: PrinceListView, target: HTMLElement): EditorView | null
 	return view.listNoteEl?.contains(target) ? view.listNoteEditor : null;
 }
 
-// A press anywhere on the format bar, between its buttons too, or on a box in the open card or the
-// list note would take focus from the open piece's field, which closes it.
-function keepNotesFocused(view: PrinceListView, evt: MouseEvent): void {
-	const target = targetOf(evt);
-	const box = target?.closest(NOTES_CHECKBOX_SELECTOR);
-	const isNotesBox = !!box && !box.matches(NOTES_DRAWN_CHECKBOX_SELECTOR) && (!!view.card?.el.contains(box) || notesHostOf(view, box) !== null);
-	if (isNotesBox || target?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
+// A press anywhere on the format bar, between its buttons too, would take focus from the notes
+// editor, which ends its visit.
+function keepNotesFocused(evt: MouseEvent): void {
+	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
@@ -174,18 +155,14 @@ function swallowClick(view: PrinceListView, evt: MouseEvent): void {
 	evt.stopPropagation();
 }
 
-// A card field or a list note piece undoes from its own history. Elsewhere the page has one undo
-// history, so Cmd+Z in one field can reach typing in a field without focus, which nothing would save.
-// That undo's beforeinput targets the other field while focus is still in this one (observed in
-// Obsidian 1.14.4 on macOS); focus moves only with its input event.
+// A card field undoes from its own history. Elsewhere the page has one undo history, so Cmd+Z in one
+// field can reach typing in a field without focus, which nothing would save. That undo's beforeinput
+// targets the other field while focus is still in this one (observed in Obsidian 1.14.4 on macOS);
+// focus moves only with its input event.
 function onBeforeInput(view: PrinceListView, evt: InputEvent): void {
 	const focused = view.contentEl.doc.activeElement;
 	const field = focused?.instanceOf(HTMLTextAreaElement) ? focused : null;
 	const isHistory = evt.inputType === 'historyUndo' || evt.inputType === 'historyRedo';
-	if (field && evt.target === field && isPieceField(view, field)) {
-		pieceBeforeInput(view, field, evt);
-		if (evt.defaultPrevented) return;
-	}
 	if (!isHistory) {
 		if (field && evt.target === field) beforeFieldInput(field, evt.inputType);
 	} else if (field && stepField(field, evt.inputType === 'historyUndo' ? 'undo' : 'redo')) {
@@ -205,7 +182,6 @@ function onInput(view: PrinceListView, evt: Event): void {
 	const target = Array.from(view.contentEl.querySelectorAll('textarea')).find((field) => field === evt.target);
 	if (!target) return;
 	if (target.hasClass(CARD_TITLE_CLASS)) cardTitleInput(view, target);
-	else if (target.hasClass(NOTES_EDITOR_CLASS)) pieceInput(view, target);
 	else if (target.hasClass(TITLE_CLASS) || target.hasClass(HEADING_FIELD_CLASS)) keepOneLine(target);
 	afterFieldInput(target);
 }
@@ -214,10 +190,6 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	const target = evt.targetNode;
 	// A key that confirms an input method's composition isn't the user's Enter or Escape.
 	if (evt.isComposing || !target?.instanceOf(HTMLElement)) return;
-	if (target.instanceOf(HTMLTextAreaElement) && isPieceField(view, target)) {
-		pieceKeyDown(view, target, evt);
-		if (evt.defaultPrevented) return;
-	}
 	if (evt.key === 'Escape') {
 		if (target === view.filterEl) {
 			filterKeyDown(view, evt);
@@ -253,14 +225,10 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	}
 }
 
-function isPieceField(view: PrinceListView, field: HTMLTextAreaElement): boolean {
-	return field.hasClass(NOTES_EDITOR_CLASS) && notesHostOf(view, field) !== null;
-}
-
 function onFocusIn(view: PrinceListView, evt: FocusEvent): void {
 	const target = evt.targetNode;
 	if (!target?.instanceOf(HTMLTextAreaElement)) return;
-	if (view.card?.el.contains(target) || isPieceField(view, target)) startFieldHistory(target);
+	if (view.card?.el.contains(target)) startFieldHistory(target);
 	if (target.hasClass(CARD_TITLE_CLASS) && view.card?.el.contains(target)) view.editing.focusTitle();
 	else if (target.hasClass(TITLE_CLASS)) beginListTitle(view, target);
 }
@@ -285,7 +253,6 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 		// focus, which comes back to them on return, and commit when they lose it in the window.
 		const inWindow = target.doc.hasFocus();
 		if (inCard && target.hasClass(CARD_TITLE_CLASS)) cardTitleBlur(view, target);
-		else if (target.hasClass(NOTES_EDITOR_CLASS)) pieceBlur(view, target, focusing);
 		else if (target.hasClass(TITLE_CLASS) && inWindow) commitListTitle(view, target);
 		else if (target.hasClass(HEADING_FIELD_CLASS) && inWindow) headingFieldBlur(view, target);
 	}

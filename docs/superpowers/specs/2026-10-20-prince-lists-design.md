@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-29
+verified: 2026-10-30
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -306,20 +306,20 @@ follows is never lost:
   fenced block's checkbox lines become items.
 - **The save that closes the block** skips the check as well **(call)**. It brings them back as they
   were, unless it also makes the note take them in, as a list item in the note does with an
-  indented first item. Nothing is deleted then either, and leaving the field and coming back shows
-  those lines in the note.
+  indented first item. Nothing is deleted then either, and leaving the note and coming back shows
+  those lines in it.
 
 This is the one exception to refusing an edit that changes how the rest reads (see "Content the
 plugin leaves alone"). Any other note that would change what follows is refused **(call)**, as when
 a first item indented to a list item's content column would join that item.
 
-Each save replaces exactly the lines the open block's previous save wrote, not the list note as the
-file now parses **(call)**. Typing can change how the note's own lines parse: a `-` under text makes a
-heading, and an opening fence makes the rest of the file part of the note. Re-reading the note's
-extent from the file after such a keystroke would delete or repeat lines. That includes the blank
-line a save wrote under the note's last block, so a note typed and erased again leaves none behind,
-but only while it is still blank and directly under that block **(call)**: a line another device added there
-stays, and the blank line stays with it.
+Each save replaces exactly the lines the list note's editor holds, as its previous save left them,
+not the list note as the file now parses **(call)**. Typing can change how the note's own lines
+parse: a `-` under text makes a heading, and an opening fence makes the rest of the file part of the
+note. Re-reading the note's extent from the file after such a keystroke would delete or repeat
+lines. That includes the blank line a save wrote under the note's last block, so a note typed and
+erased again leaves none behind, but only while it is still blank and directly under that block
+**(call)**: a line another device added there stays, and the blank line stays with it.
 
 ### Sections
 
@@ -545,11 +545,12 @@ stays, and the blank line stays with it.
     desktop and mobile. A card in the page's own color, raised only by its shadow, can hardly be
     seen on a dark page, and on mobile's black one not at all. In light mode it keeps the page's
     color.
-  - Notes use Obsidian's own Markdown rendering, so pictures, links and embeds look the way they
-    do in any note.
+  - Notes are drawn as Live Preview draws a note, so pictures, links and embeds look the way they
+    do in any note: tables, code, callouts, math and embeds by Obsidian's own Markdown rendering,
+    the rest by the notes' editor ([notes in one
+    editor](2026-10-29-notes-in-one-editor-design.md), "What shows drawn").
   - **A card's notes are at least three lines tall (owner, 2026-10-27),** empty or not, and stay so
-    while a piece of them is typed in, so they're easy to tap. The piece's own field fits its text
-    (owner, 2026-10-28). Empty notes show a gray "Notes".
+    while they're typed in, so they're easy to tap. Empty notes show a gray "Notes".
   - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
     typed in reads as its text, as a title does.
   - Links in a card can be clicked.
@@ -582,19 +583,10 @@ stays, and the blank line stays with it.
   So does a name with `/` or `\`, which would move the list to another folder. A note outside the
   vault has no folder in the vault (observed in 1.14.4), so for one the name counts as taken only
   when Obsidian finds a file at exactly the new path.
-- **The list note and item notes (call):**
-  - Both are drawn as in a note, a block at a time. Clicking a block puts only its Markdown in a
-    plain-text field, without the item's indent (step two's design, "Editing notes a block at a
-    time").
-  - **Where the caret goes (owner, 2026-10-27):** on the character clicked, wherever the rendered
-    text matches the Markdown. On a link, a picture or another part the rendering draws or hides,
-    at the end of that source line. A click on a link still follows it. The rendered notes show a
-    text cursor.
-  - Where the browser has no `caretPositionFromPoint` (Chromium before 128, Safari and iOS before
-    26.2), a click goes to the end of the first line of the clicked paragraph or list item **(call)**.
-    The older `caretRangeFromPoint` would tell the character, but it's deprecated, and Obsidian's
-    lint rules don't allow deprecated APIs.
-  - Leaving the field draws its block again, and saving puts the indent back.
+- **The list note and item notes (owner, #182):** each is one editor, drawn as in a note, which
+  holds the notes without the item's indent; saving puts it back ([notes in one
+  editor](2026-10-29-notes-in-one-editor-design.md), "The editor"). A click puts the caret on the
+  character clicked, and a click on a link still follows it.
 - **Pictures (owner):**
   - Pictures show from 1a on.
   - Pasting or dropping a picture into a card comes in 1b. In 1a you add a picture through "Open
@@ -626,16 +618,15 @@ stays, and the blank line stays with it.
     jpg, png, svg and webp. Others, such as HEIC, would be linked but not shown, so a notice says
     they weren't added.
   - **Pictures show at once (owner, 2026-10-28):** the links go in a block of their own, which is
-    drawn straight away, and typing moves to a new empty block below it. A link left in the open
-    field would show as Markdown until the field closed.
-  - **Where the links go (call):** when the field a picture was pasted or dropped in is still open
-    once the last picture is saved, their block goes after the open block, or after its whole list
-    when the open block is one of its items, so the list stays whole. It also goes after any block
-    that follows with no empty line between, such as a paragraph right under a heading, so it never
-    runs into the next block. When that field is an empty new block, their block takes its place.
-    Otherwise, as for a picture dropped on the drawn notes, they go in a new block at the end (step
-    two's design, "Editing notes a block at a time"). They save as typing does, and Cmd+Z once the
-    field is left takes them out.
+    drawn straight away, and the caret moves to an empty line below it. Text typed there joins the
+    picture's paragraph, as in Live Preview **(owner, 2026-10-29)**.
+  - **Where the links go (call):** a pasted picture's block goes after the block the caret is in,
+    or after its whole list when that block is one of its items, so the list stays whole. It also
+    goes after any block that follows with no empty line between, such as a paragraph right under a
+    heading, so it never runs into the next block. On an empty line between blocks, their block
+    takes its place. A dropped picture's goes after the block it's dropped on, or at the end for a
+    drop elsewhere on the card ([notes in one editor](2026-10-29-notes-in-one-editor-design.md),
+    "Pictures"). They save as typing does, and Cmd+Z once the notes are left takes them out.
   - **A card that closed or lost its item first (call):** nothing is inserted, and a notice gives
     the saved path. So does a paste the notes couldn't take.
   - **A picture dragged from inside Obsidian (call)** isn't added: dropping a rendered picture back
@@ -865,10 +856,8 @@ needs no code.
   - A redraw moves the rows and headings that show the same, the list note and the card into place
     **(call)**, so pictures and embeds aren't loaded again. A title renders again only when its row
     changes, so a link drawn before its note existed keeps that look until then.
-  - An outside change to the lines of the block a focused field writes, in an item's notes or the
-    list note, leaves that field unable to save, with the notice and copy button of a card whose
-    item went (step two's design, "Editing notes a block at a time"). A change elsewhere in the
-    notes stays.
+  - An outside change to an item's notes or the list note while they're typed in shows in their
+    editor ([notes in one editor](2026-10-29-notes-in-one-editor-design.md), "Saving").
   - Text being typed in an open card is part of what the view reports to Obsidian, so Obsidian's
     own merge covers it.
 - **Sync conflicts can't be fully prevented.** If both devices edit the same list while offline,
@@ -900,9 +889,10 @@ needs no code.
     format bar's Undo and Redo (step two, "Formatting in a card").
   - The history is cleared when the file changes from outside, so undo never throws away someone
     else's change.
-  - Typing in a field makes one step for each time the field has focus. A write of the view's
-    own or an undo between keystrokes starts a new step, and typing that ends where it began
-    leaves none.
+  - Typing in a field makes one step for each time the field has focus, and so does each visit to
+    a card's notes or the list note ([notes in one
+    editor](2026-10-29-notes-in-one-editor-design.md), "Undo (call)"). A write of the view's own or an undo between keystrokes starts a new step, and
+    typing that ends where it began leaves none.
   - A new item's first edit, such as its title, or a new heading's name, with nothing between,
     joins the step that added it: one Cmd+Z takes the item or heading away, and Cmd+Shift+Z brings
     it back as it was. A new item or heading undone while still empty can't be redone, since it
@@ -916,16 +906,18 @@ needs no code.
     Once Cmd+Z has taken the delete back, the button does nothing while the list is as Cmd+Z left
     it.
   - In a card's title and notes, Cmd+Z and Cmd+Shift+Z step through that field's own history, not
-    the list's **(owner, 2026-10-27)**. The browser drops a field's undo once a script changes its
-    text, as a format bar button does, so the field keeps its own while it has focus: a run of
-    typing in one place is one step, and each change the plugin makes is another. Once the field has
-    nothing left to undo, Cmd+Z does nothing. Leaving the field, or the window, closes it and ends
-    its history; Cmd+Z after that steps through the list's history, as before.
-  - Other fields, such as the list's title and note, keep the browser's text undo. It changes only
+    the list's **(owner, 2026-10-27)**. The notes and the list note use their editor's ([notes in
+    one editor](2026-10-29-notes-in-one-editor-design.md), "Undo (call)"). The browser drops a
+    field's undo once a script changes its text, as Cmd+B does, so the title keeps its own while it
+    has focus: a run of typing in one place is one step, and each change the plugin makes is
+    another. Once the title has nothing left to undo, Cmd+Z does nothing. Leaving the title, or the
+    window, closes it and ends its history; Cmd+Z after that steps through the list's history, as
+    before.
+  - Other fields, such as the list's title, keep the browser's text undo. It changes only
     the field with focus. The browser keeps one text history for the whole page, so once the field
     has nothing left to undo, Cmd+Z does nothing rather than reach typing in another field, which
     nothing would save.
-  - The list's history and a card field's each hold 100 steps, and only text: undoing a picture's
+  - The list's history and a card title's each hold 100 steps, and only text: undoing a picture's
     link leaves the picture's file.
   - In 1a, the only undo is the Undo button shown after a delete.
 
@@ -1106,9 +1098,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     `menu.showAtMouseEvent(evt)`. The method returns a `boolean` whose meaning isn't documented,
     so don't depend on it.
 - **Disable `.task-list-item-checkbox` in rendered notes.** Otherwise it ticks on screen but saves
-  nothing. Step two enables a card's boxes, and the list note's, only when they match the checklist
-  parsed from those notes, in number and in each ticked state; a box in a callout, an embed or a
-  `%%` comment puts them out of step, and then every box stays disabled.
+  nothing. Step two enables a card's boxes and the list note's: the notes' editor ticks a box's own
+  line, and a box inside a block Obsidian's renderer draws stays disabled ([notes in one
+  editor](2026-10-29-notes-in-one-editor-design.md), "Checkboxes").
 
 ### Touch on mobile
 

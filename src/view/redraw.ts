@@ -49,8 +49,6 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		view.dropListNoteEditor();
 		view.headingField = null;
 		view.listNoteEl = null;
-		if (view.listNoteNotes) view.removeChild(view.listNoteNotes);
-		view.listNoteNotes = null;
 		view.filter = null;
 		view.filterEl = null;
 		view.rowsHeldBack = false;

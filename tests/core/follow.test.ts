@@ -1,9 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import { NO_LINES_MOVED, followLine, followRange, mapRange, moveEdit, ownEdit, type OwnEdit } from '../../src/core/follow';
 import { deleteItem, insertItem, setItemNotes, toggleItem } from '../../src/core/edit-items';
-import { setListNotePiece } from '../../src/core/edit-list-note';
 import { joinLines, splitLines } from '../../src/core/lines';
-import { list } from './edit-helpers';
+import { list, saveWholeListNote } from './edit-helpers';
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
 
@@ -82,14 +81,14 @@ describe('followLine agrees with a fresh parse after each own edit', () => {
 	test('a list note written where there was none shifts the first item, which sat at its start', () => {
 		const bare = `${FRONTMATTER}- [ ] a\n- [ ] b\n`;
 		const { lines, model } = list(bare);
-		const edited = joinLines(setListNotePiece(lines, model, { range: model.listNote, indent: '', separator: false, blankAfter: false }, 'A note\nover two lines').lines);
+		const edited = joinLines(saveWholeListNote(lines, model, 'A note\nover two lines').lines);
 		const edit = ownEdit(model.listNote.start, bare, edited, 'insert');
 		expect(titleLines(bare).map((line) => followLine(line, edit))).toEqual(titleLines(edited));
 	});
 
 	test('a list note that grows shifts every item', () => {
 		const { lines, model } = list(text);
-		const edited = joinLines(setListNotePiece(lines, model, { range: model.listNote, indent: '', separator: false, blankAfter: false }, 'A\n\nlonger\n\nnote').lines);
+		const edited = joinLines(saveWholeListNote(lines, model, 'A\n\nlonger\n\nnote').lines);
 		const edit = ownEdit(model.listNote.start, text, edited, 'change');
 		expect(titleLines(text).map((line) => followLine(line, edit))).toEqual(titleLines(edited));
 	});

@@ -40,8 +40,6 @@ export class PrinceListView extends TextFileView {
 	// sets text on while it loads the view, so a field of that name broke opening a list.
 	listTitleEl: HTMLTextAreaElement | null = null;
 	listNoteEl: HTMLElement | null = null;
-	/** The list note's drawn pieces. */
-	listNoteNotes: Component | null = null;
 	/** The list note's editor, there while the file is a list. */
 	listNoteEditor: EditorView | null = null;
 	headingField: HeadingField | null = null;
@@ -139,8 +137,6 @@ export class PrinceListView extends TextFileView {
 		this.endListNote();
 		this.dropListNoteEditor();
 		this.listNoteEl = null;
-		if (this.listNoteNotes) this.removeChild(this.listNoteNotes);
-		this.listNoteNotes = null;
 		this.headingField = null;
 		this.showArchived = false;
 		this.filter = null;

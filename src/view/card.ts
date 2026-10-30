@@ -20,7 +20,6 @@ import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, wri
 export const CARD_CLASS = 'princelists-card';
 export const CARD_TITLE_CLASS = 'princelists-card-title';
 export const CARD_NOTES_CLASS = 'princelists-card-notes';
-export const NOTES_EDITOR_CLASS = 'princelists-card-notes-editor';
 export const CARD_ACTIONS_CLASS = 'princelists-card-actions';
 export const CARD_STAR_CLASS = 'princelists-card-star';
 
@@ -160,7 +159,7 @@ function focusedText(card: Card, focused: Element | null): string {
 }
 
 // For a field whose lines an outside change took: its typing can be copied if the file lost it.
-export function sayFieldLost(view: PrinceListView, typed: string, field: 'title' | 'notes'): void {
+function sayFieldLost(view: PrinceListView, typed: string, field: 'title' | 'notes'): void {
 	if (missingTyping(view.text, typed, field)) showLostTypingNotice(view.contentEl.win, typed);
 	else new Notice(CHANGED_ELSEWHERE_NOTICE);
 }
