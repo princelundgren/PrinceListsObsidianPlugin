@@ -1,6 +1,6 @@
 // Copies the demo vault in demo/vault/ to a folder, moving its dates to today. Usage is in
 // AGENTS.md, under Commands.
-import { cpSync, existsSync, lstatSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, lstatSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -30,6 +30,7 @@ export function shiftDates(text, days) {
  */
 export function checkTarget(folder) {
 	if (!existsSync(folder)) return;
+	if (!statSync(folder).isDirectory()) throw new Error(`${folder} isn't a folder. Give a folder for the copy.`);
 	const config = join(folder, CONFIG);
 	if (lstatSync(config, { throwIfNoEntry: false })?.isSymbolicLink()) {
 		throw new Error(`${config} is a link, which may lead to another vault's settings. Give a folder of its own.`);

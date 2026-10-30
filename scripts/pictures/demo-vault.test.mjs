@@ -27,6 +27,12 @@ test('shiftDates leaves a longer run of digits alone', () => {
 	assert.equal(shiftDates('12026-10-280', 1), '12026-10-280');
 });
 
+test('checkTarget refuses a path that is a file', (t) => {
+	const file = join(tempFolder(t), 'note.md');
+	writeFileSync(file, 'mine');
+	assert.throws(() => checkTarget(file), /isn't a folder/);
+});
+
 test('checkTarget refuses a folder with a file and no marker', (t) => {
 	const folder = tempFolder(t);
 	writeFileSync(join(folder, 'note.md'), 'mine');
