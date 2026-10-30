@@ -370,8 +370,8 @@ Obsidian documents no way to put its editor in a plugin's view.
   else the key stays Obsidian's.
 - **A format bar under the notes** while their editor has focus: Undo and Redo; Bold, Italic,
   Strikethrough and Underline; Inline code and Link; Bulleted list, Numbered list and Checklist;
-  Code block and Table. A press keeps focus in the notes, so the phone's keyboard stays up. The
-  list note has it too.
+  Code block. A press keeps focus in the notes, so the phone's keyboard stays up. The list note
+  has it too. It has no Table button until a table can be edited well, #213 **(owner, 2026-10-30)**.
   - On a narrow desktop card, whole groups wrap to a second row, so every button stays in sight,
     with no menu to open **(call)**. On mobile it's one row that scrolls sideways ([notes in one
     editor](2026-10-29-notes-in-one-editor-design.md), "The format bar").
@@ -384,8 +384,6 @@ Obsidian documents no way to put its editor in a plugin's view.
     so Underline wraps it in HTML's `<u>` and `</u>` **(owner, 2026-10-28)**. Both take their
     marks off again, as Bold does. No key is added for them **(call)**.
   - The buttons can't be reached with Tab, which would leave the notes **(call)**.
-  - Table puts a two-column table in place of a blank line, or below the caret's line, a blank
-    line apart from the text around it, with its first header selected.
   - Undo and Redo step through the editor's own history ([notes in one
     editor](2026-10-29-notes-in-one-editor-design.md), "Undo (call)").
 - **A table and code in a card's notes are drawn as in a note,** with Obsidian's documented table

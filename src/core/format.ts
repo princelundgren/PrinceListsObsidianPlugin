@@ -1,6 +1,6 @@
 import { codeBlock, toggleLineFormat, type LineFormat } from './format-lines';
 
-export type Format = 'bold' | 'italic' | 'strikethrough' | 'underline' | 'code' | 'link' | 'codeBlock' | 'table' | LineFormat;
+export type Format = 'bold' | 'italic' | 'strikethrough' | 'underline' | 'code' | 'link' | 'codeBlock' | LineFormat;
 
 /** Replace `from`..`to` with `insert`, then select `selectionStart`..`selectionEnd` in the new text. */
 export interface FormatEdit {
@@ -10,9 +10,6 @@ export interface FormatEdit {
 	selectionStart: number;
 	selectionEnd: number;
 }
-
-const TABLE_HEADER = 'Column 1';
-const TABLE = `| ${TABLE_HEADER} | Column 2 |\n| --- | --- |\n|  |  |`;
 
 // What Cmd+B, Cmd+I, Cmd+K and the card's format bar do to a field's text, as in a note.
 export function formatSelection(text: string, start: number, end: number, format: Format): FormatEdit {
@@ -31,8 +28,6 @@ export function formatSelection(text: string, start: number, end: number, format
 			return link(text, start, end);
 		case 'codeBlock':
 			return codeBlock(text, start, end);
-		case 'table':
-			return table(text, start);
 		case 'bulleted':
 		case 'numbered':
 		case 'checklist':
@@ -108,20 +103,4 @@ function link(text: string, start: number, end: number): FormatEdit {
 	const selected = text.slice(start, end);
 	const caret = selected === '' ? start + 1 : start + selected.length + 3;
 	return { from: start, to: end, insert: `[${selected}]()`, selectionStart: caret, selectionEnd: caret };
-}
-
-// In place of a blank line, else on new lines after the caret's line, a blank line apart from any
-// text around it so it isn't read as part of a paragraph.
-function table(text: string, at: number): FormatEdit {
-	const lineStart = text.slice(0, at).lastIndexOf('\n') + 1;
-	const next = text.indexOf('\n', at);
-	const lineEnd = next < 0 ? text.length : next;
-	const nextLine = next < 0 ? null : text.slice(next + 1).split('\n', 1)[0] ?? '';
-	const after = nextLine !== null && nextLine.trim() !== '' ? '\n' : '';
-	const isBlank = text.slice(lineStart, lineEnd).trim() === '';
-	const lineBefore = lineStart === 0 ? null : text.slice(0, lineStart - 1).split('\n').pop() ?? '';
-	const before = !isBlank ? '\n\n' : lineBefore !== null && lineBefore.trim() !== '' ? '\n' : '';
-	const from = isBlank ? lineStart : lineEnd;
-	const selectionStart = from + before.length + 2;
-	return { from, to: lineEnd, insert: before + TABLE + after, selectionStart, selectionEnd: selectionStart + TABLE_HEADER.length };
 }

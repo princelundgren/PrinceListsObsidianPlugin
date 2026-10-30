@@ -167,19 +167,3 @@ describe('formatSelection: code block', () => {
 		expect(format('‸\n  ‸', 'codeBlock')).toBe('```\n‸\n```');
 	});
 });
-
-describe('formatSelection: table', () => {
-	const TABLE = '| ‸Column 1‸ | Column 2 |\n| --- | --- |\n|  |  |';
-
-	test('replaces a blank line, selecting the first header', () => {
-		expect(format('‸', 'table')).toBe(TABLE);
-	});
-
-	test('goes on new lines after a line with text, a blank line apart from the text around it', () => {
-		expect(format('a‸b\nnext', 'table')).toBe(`ab\n\n${TABLE}\n\nnext`);
-	});
-
-	test('keeps a blank line from the text above a blank line it replaces', () => {
-		expect(format('above\n‸', 'table')).toBe(`above\n\n${TABLE}`);
-	});
-});
