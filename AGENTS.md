@@ -176,15 +176,22 @@ demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
 
 Only the maintainer releases.
 
-1. **Bump the version in a pull request.** Set `minAppVersion` in `manifest.json` if it changes,
+1. **Check the pictures and the README, in the pull request that bumps the version.**
+   - Compare the README's pictures and `docs/listing/` with the release, and retake with the scripts
+     any whose view of the plugin changed. The README loads its pictures from `main`, so a retake
+     shows there once it merges.
+   - Compare the README's text (Full feature list, Good to know, Quick start) with the pull requests
+     merged since the last tag.
+2. **Bump the version in a pull request.** Set `minAppVersion` in `manifest.json` if it changes,
    then run `npm version patch|minor|major --no-git-tag-version`. That updates `package.json`,
    `package-lock.json`, `manifest.json` and `versions.json`.
-2. **Tag after the merge.** Tag that commit on `main` with exactly the version (`x.y.z`, no `v`)
+3. **Tag after the merge.** Tag that commit on `main` with exactly the version (`x.y.z`, no `v`)
    and push the tag. The release workflow waits for the maintainer's approval in the `release`
    environment, stops if the tag isn't `manifest.json`'s version, then builds a draft release with
    an attestation.
-3. **Publish.** The maintainer reviews the draft and publishes it.
-4. **Read the directory's review.** The directory checks for new releases periodically and
+4. **Publish.** The maintainer reviews the draft and publishes it, then uploads any changed
+   `docs/listing/` shot to the listing.
+5. **Read the directory's review.** The directory checks for new releases periodically and
    reviews each one. To see the review now, the maintainer signs in at
    [community.obsidian.md](https://community.obsidian.md), opens PrinceLists, selects **Check for
    new releases** in its **...** menu, then reads the results. An error is fixed in a patch
