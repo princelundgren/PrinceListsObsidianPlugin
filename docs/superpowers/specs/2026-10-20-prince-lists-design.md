@@ -955,9 +955,9 @@ From here on the document is for the builder.
   so the view follows light and dark mode and any theme. Obsidian's plugin guidelines warn that
   hard-coded styling stops themes and snippets from changing a plugin's look.
 - **Accessible names (call):** only the icon buttons and the card's date field carry
-  `aria-label`, since Obsidian shows every `aria-label` as a hover tooltip. A text field takes its name from a gray placeholder ("Title",
-  "Heading", "Notes"), seen only while it's empty, and a checkbox from a hidden copy of its item's
-  title.
+  `aria-label`, since Obsidian shows every `aria-label` as a hover tooltip. A text field takes its
+  name from a gray placeholder ("Title", "Heading", "Notes"), seen only while it's empty, and a
+  checkbox from a hidden copy of its item's title.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
   `@since` tag in `obsidian.d.ts`, and from the CodeMirror and Lezer packages the bundled code
   takes from Obsidian at runtime. Every device must run at least that version, mobile included.
