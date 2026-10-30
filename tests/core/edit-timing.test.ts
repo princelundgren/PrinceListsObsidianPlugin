@@ -1,10 +1,9 @@
 import { expect, test } from 'vitest';
 import { setHeadingText } from '../../src/core/edit-headings';
 import { moveItem, setItemNotes } from '../../src/core/edit-items';
-import { setListNotePiece } from '../../src/core/edit-list-note';
 import { joinLines, splitLines } from '../../src/core/lines';
 import type { ItemBlock, Section } from '../../src/core/parse';
-import { list } from './edit-helpers';
+import { list, saveWholeListNote } from './edit-helpers';
 
 // About 3,000 lines: 1,500 items under 10 headings, every other one with a note, then a section
 // where moving d below g needs two passes of empty lines.
@@ -37,9 +36,9 @@ test('setItemNotes, which runs on every keystroke, takes under 100 ms on a list 
 	expect(ms).toBeLessThan(100);
 });
 
-test('setListNotePiece, which runs on every keystroke, takes under 100 ms on a list of 3,000 lines', () => {
+test('saveListNoteLines, which runs on every keystroke, takes under 100 ms on a list of 3,000 lines', () => {
 	const { lines, model } = list(text);
-	const { result, ms } = timed(() => setListNotePiece(lines, model, { range: model.listNote, indent: '', separator: false, blankAfter: false }, 'Typed\n- a bullet'));
+	const { result, ms } = timed(() => saveWholeListNote(lines, model, 'Typed\n- a bullet'));
 	expect(joinLines(result.lines).startsWith('Typed\n- a bullet\n\n## Section 0\n')).toBe(true);
 	expect(ms).toBeLessThan(100);
 });

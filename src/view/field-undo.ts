@@ -1,7 +1,7 @@
 import { FieldHistory, type FieldState } from '../core/field-history';
 
-// A card field's or a list note piece's own undo, kept from focus to blur: while the field has no
-// focus an outside change can set its text, which an older step would then bring back.
+// A card field's own undo, kept from focus to blur: while the field has no focus an outside change
+// can set its text, which an older step would then bring back.
 const histories = new WeakMap<HTMLTextAreaElement, FieldHistory>();
 
 export function startFieldHistory(field: HTMLTextAreaElement): void {

@@ -6,7 +6,6 @@ import { targetOf } from './dom';
 import { openFilter } from './filter';
 import { applyFormat } from './format';
 import type { PrinceListView } from './list-view';
-import { notesHostOf } from './notes-host';
 import { redoKey, undoKey } from './undo';
 
 // The view's own keys, which apply only while the list has focus, so none is a default hotkey.
@@ -26,7 +25,7 @@ export function registerListKeys(view: PrinceListView): void {
 		openFilter(view);
 		return false;
 	});
-	// In a card's fields and the list note, as in a note. Anywhere else the key is Obsidian's.
+	// In the card's title, as in a note; the notes editor has its own. Anywhere else the key is Obsidian's.
 	view.scope.register(['Mod'], 'b', (evt) => formatKey(view, evt, 'bold'));
 	view.scope.register(['Mod'], 'i', (evt) => formatKey(view, evt, 'italic'));
 	view.scope.register(['Mod'], 'k', (evt) => formatKey(view, evt, 'link'));
@@ -35,7 +34,7 @@ export function registerListKeys(view: PrinceListView): void {
 function formatKey(view: PrinceListView, evt: KeyboardEvent, format: Format): boolean {
 	const field = targetOf(evt);
 	if (!field?.instanceOf(HTMLTextAreaElement)) return true;
-	if (!view.card?.el.contains(field) && !notesHostOf(view, field)) return true;
+	if (!view.card?.el.contains(field)) return true;
 	applyFormat(field, format);
 	return false;
 }

@@ -593,33 +593,48 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 **Files:**
 - Delete: `src/view/note-piece-field.ts`, `src/view/note-piece-keys.ts`,
   `src/view/note-piece-slot.ts`, `src/view/note-piece-state.ts`, `src/view/note-pieces.ts`,
-  `src/view/click-caret.ts`, `src/view/notes-host.ts`
+  `src/view/click-caret.ts`, `src/view/notes-host.ts`, and `src/core/source-caret.ts` with its
+  test, which only `click-caret.ts` used
 - Modify: `src/core/note-pieces.ts`, `src/core/editing.ts`, `src/core/edit-piece.ts`,
-  `src/core/edit-list-note.ts`, `src/core/edit-lines.ts` and their tests, `src/view/events.ts`,
+  `src/core/edit-list-note.ts`, `src/core/edit-lines.ts`, `src/core/checklist.ts`,
+  `src/core/notes-visit.ts`, `src/core/notes-lines.ts` and their tests, `src/view/events.ts`,
   `src/view/keys.ts`, `src/view/format.ts`, `src/view/field-undo.ts`, `src/view/fields.ts`,
-  `src/view/list-view.ts`, `src/view/redraw.ts`, `styles.css`, the three designs
+  `src/view/list-view.ts`, `src/view/redraw.ts`, `src/view/checklist.ts`, `src/view/card.ts`,
+  `styles.css`, the three designs
 
 **Interfaces:**
 - Goes from `ListEditing`: `openNotesPiece`, `typeNotesPiece`, `notesPieceOutdent`, `openListNote`,
-  `typeListNote`, `listNoteRange`, `listNoteOutdent` and `listNoteAsTyped`. `notesPieceRange`
-  stays, since the card's `visitStart` reads the visit's range through it. Goes from
+  `typeListNote`, `listNoteOutdent` and `listNoteAsTyped`. `notesPieceRange` stays, since the card's
+  `visitStart` reads the visit's range through it, and so does `listNoteRange`, which the list
+  note's `visitStart` reads and a redraw holds rows back by. The private field that held a piece
+  holds only a visit, so `isVisit` and the visit's tag go from `notes-visit.ts`. Goes from
   `src/core/note-pieces.ts`: `pieceEnter`, `nextItemMarker`, `neighborPiece`, `outdentMarker`,
   `itemPieces`, `pieceText` and `holdsOnly`, unless something that stays still calls one. `notePieces`, `blockAfter` and `pieceAround` stay. Goes too, unless
   something that stays still calls it: `listNoteWithPiece` in `edit-list-note.ts`,
   `holdsSeparatorLine`, `typedLines` and `withoutSeparatorLine` in `edit-lines.ts`, and
-  `setNotesPiece` and `setListNotePiece` themselves.
+  `setNotesPiece` and `setListNotePiece` themselves. `pieceText` stays for `drawn-blocks.ts`, and
+  `typedLines` for `edit-items.ts`. `replaceListNoteRun` loses the pieces it took from
+  `setListNotePiece`.
+- Goes from `src/core/checklist.ts`, with `checklistClick` in `src/view/checklist.ts`: the count of
+  rendered boxes against checklist lines, `planChecklistTick` and `planListNoteTick` (step two,
+  "Ticking checklists"). `planNotesLineTick` stays.
+- The tests of what goes go with it. Those that pin a rule that still holds move to visits: the
+  list note's whole-note table, its fixture and random-typing sessions, and the typing sessions in
+  `editing.test.ts`. A typed empty line at the end now stays in the file (the design's risk 4), so
+  two whole-note cases expect it.
 - `Typed`'s comment in `editing.ts` says a refused field keeps its text for the next keystroke;
   update it, since a refused change now never lands.
 - Goes from the view: the textarea paths of the format bar and `field-undo.ts` that only the
-  notes used; the card's title keeps its own. `keys.ts` finds the notes by the editor, not
-  `notesHostOf`. `openListNote` and `LIST_NOTE_AREA_CLASS` in `fields.ts`, and the view's
-  `listNoteNotes` with its lines in `clear()` and `redraw.ts`, which Task 7 left unreached.
+  notes used; the card's title keeps its own. `keys.ts` leaves the notes to the editor's own
+  keymap and keeps the card's title, so `notesHostOf` goes. `openListNote` and
+  `LIST_NOTE_AREA_CLASS` in `fields.ts`, and the view's `listNoteNotes` with its lines in `clear()`
+  and `redraw.ts`, which Task 7 left unreached.
 - `src/view/block-fields.ts` stays: it is the `princelists` code block's title field.
 
 - [ ] **Step 1: Remove the code,** and the tests of what goes.
 - [ ] **Step 2: Check nothing orphaned is left:** `grep -rn` each name above in `src/` finds no
   definition and no caller. Then run `npm run lint && npm run build && npm test`. Expected: PASS.
-- [ ] **Step 3: Update the designs** as the design's "What goes, and what changes in the other
+- [ ] **Step 3: Update the designs** as the design's "What went, and what changed in the other
   designs" lists, item by item: step one's "Notes use Obsidian's own Markdown rendering", "The
   piece's own field fits its text", "The list note and item notes", "Pictures show at once", "Where
   the links go", the outside change to a focused field's block, and "Undo (1b, call)"; step two's

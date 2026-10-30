@@ -3,7 +3,7 @@ import { ListEditing } from '../../src/core/editing';
 import { getItemNotes } from '../../src/core/edit-items';
 import { splitLines } from '../../src/core/lines';
 import { changedLines } from '../../src/core/notes-lines';
-import { contentStartOf, crlf, list } from './edit-helpers';
+import { contentStartOf, crlf, list, notesEditor as editor } from './edit-helpers';
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
 
@@ -12,23 +12,6 @@ function editing(text: string, selected?: number): ListEditing {
 	state.text = text;
 	if (selected !== undefined) state.open(selected);
 	return state;
-}
-
-// The editor: it opens a visit, and saves each change as changedLines gives it, as the view will.
-function editor(state: ListEditing, notes: 'item' | 'listNote') {
-	let text = state.openNotes(notes);
-	if (text === null) throw new Error('The card has no item');
-	return {
-		get text() {
-			return text as string;
-		},
-		type(next: string) {
-			const change = changedLines(text as string, next);
-			text = next;
-			if (!change) return null;
-			return notes === 'item' ? state.saveNotes(change) : state.saveListNote(change);
-		},
-	};
 }
 
 const saved = (typed: unknown) => typeof typed === 'object' && typed !== null && 'edit' in typed;

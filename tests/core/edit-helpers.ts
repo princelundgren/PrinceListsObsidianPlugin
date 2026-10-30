@@ -1,8 +1,11 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { HtmlRenderer, Parser, type Node } from 'commonmark';
 import { expect } from 'vitest';
+import type { ListEditing, Typed } from '../../src/core/editing';
 import { splitLines, type Line } from '../../src/core/lines';
-import { isBlank, maskBlocks, parseList, type ItemBlock, type Section } from '../../src/core/parse';
+import { changedLines, saveListNoteLines, spanLines } from '../../src/core/notes-lines';
+import { openVisit } from '../../src/core/notes-visit';
+import { isBlank, maskBlocks, parseList, type ItemBlock, type ListModel, type Section } from '../../src/core/parse';
 
 export const FIXTURES = readdirSync(new URL('../fixtures/', import.meta.url));
 export const readFixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8');
@@ -18,6 +21,36 @@ export function list(text: string) {
 	const item = (n: number) => items[n] as ItemBlock;
 	const section = (n: number) => model.sections[n] as Section;
 	return { lines, model, items, item, section };
+}
+
+/**
+ * Saves `markdown` as the whole list note, as a new visit's editor would with every line it holds
+ * replaced. Throws UnsafeEditError as the save does.
+ */
+export function saveWholeListNote(lines: readonly Line[], model: ListModel, markdown: string) {
+	const span = openVisit(lines, model, null).piece;
+	return saveListNoteLines(lines, model, span, { from: 0, to: spanLines(lines, span).length, lines: markdown.split('\n') });
+}
+
+/**
+ * The notes editor: it opens a visit, and saves each change as changedLines gives it, as the view
+ * does. A refused change never lands, so the editor keeps its text. Throws when the card has no item.
+ */
+export function notesEditor(state: ListEditing, notes: 'item' | 'listNote') {
+	let text = state.openNotes(notes);
+	if (text === null) throw new Error('The card has no item');
+	return {
+		get text() {
+			return text as string;
+		},
+		type: (next: string): Typed | null => {
+			const change = changedLines(text as string, next);
+			if (!change) return null;
+			const typed = notes === 'item' ? state.saveNotes(change) : state.saveListNote(change);
+			if (!('refused' in typed)) text = next;
+			return typed;
+		},
+	};
 }
 
 export const html = (text: string) => new HtmlRenderer().render(new Parser().parse(text));

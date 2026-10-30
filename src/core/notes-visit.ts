@@ -11,11 +11,7 @@ export interface NotesVisit {
 	notes: 'item' | 'listNote';
 	piece: NotesSpan;
 	refused: boolean;
-	visit: true;
 }
-
-/** Whether the notes' open piece is a visit. */
-export const isVisit = (piece: { notes: NotesVisit['notes'] } | null): piece is NotesVisit => piece !== null && 'visit' in piece;
 
 /** A save in a visit: where its edit starts and of what kind, and for the list note the whole note. */
 export interface VisitSave {
@@ -35,10 +31,10 @@ export function openVisit(lines: readonly Line[], model: ListModel, item: ItemBl
 	if (item) {
 		const start = notesStartLine(lines, item);
 		const span = { range: { start, end: item.endLine }, indent: item.notesIndent, separator: start === item.endLine, blankAfter: false };
-		return { notes: 'item', piece: span, refused: false, visit: true };
+		return { notes: 'item', piece: span, refused: false };
 	}
 	const range = { start: listNoteStartLine(lines, model), end: model.listNote.end };
-	return { notes: 'listNote', piece: { range, indent: '', separator: false, blankAfter: false }, refused: false, visit: true };
+	return { notes: 'listNote', piece: { range, indent: '', separator: false, blankAfter: false }, refused: false };
 }
 
 /** The visit's notes as its editor holds them. */
@@ -53,7 +49,8 @@ export function visitText(lines: readonly Line[], visit: NotesVisit): string {
 export function saveInVisit(lines: readonly Line[], model: ListModel, item: ItemBlock | null, visit: NotesVisit, change: NotesChange): VisitSave {
 	if (item) return { ...saveItemNotesLines(lines, model, item, visit.piece, change), start: item.titleLine, kind: 'change', note: null };
 	const saved = saveListNoteLines(lines, model, visit.piece, change);
-	// As typeListNote's: from the line above the lines it wrote, or before whatever is at their start.
+	// The edit starts at the unchanged line above the lines it wrote; with none above, it goes in before
+	// whatever is at their start.
 	const isAbove = saved.from > model.contentStart;
 	return { lines: saved.lines, span: saved.span, start: isAbove ? saved.from - 1 : saved.from, kind: isAbove ? 'change' : 'insert', note: saved.note };
 }

@@ -1,6 +1,6 @@
 import { setIcon } from 'obsidian';
 import { formatSelection, type Format, type FormatEdit } from '../core/format';
-import { changeField, stepField } from './field-undo';
+import { changeField } from './field-undo';
 
 export const FORMAT_BAR_CLASS = 'princelists-format-bar';
 const ACTION_ATTR = 'data-format';
@@ -34,7 +34,7 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 ];
 const ACTIONS = GROUPS.flat().map((button) => button.action);
 
-// Shown right under `after`: a card's notes editor, or the list note's open piece.
+// Shown right under `after`, a notes editor.
 export function buildFormatBar(after: HTMLElement): void {
 	const bar = createDiv({ cls: FORMAT_BAR_CLASS });
 	after.after(bar);
@@ -53,18 +53,13 @@ export function barActionAt(target: HTMLElement): BarAction | null {
 	return ACTIONS.find((known) => known === action) ?? null;
 }
 
-export function runBarAction(field: HTMLTextAreaElement, action: BarAction): void {
-	if (action === 'undo' || action === 'redo') stepField(field, action);
-	else applyFormat(field, action);
-}
-
 export function applyFormat(field: HTMLTextAreaElement, format: Format): void {
 	if (field.readOnly) return;
 	applyEdit(field, formatSelection(field.value, field.selectionStart, field.selectionEnd, format));
 }
 
 /** Makes `edit` in the field as one undo step, and saves it as typing would. */
-export function applyEdit(field: HTMLTextAreaElement, edit: FormatEdit): void {
+function applyEdit(field: HTMLTextAreaElement, edit: FormatEdit): void {
 	changeField(field, () => {
 		field.setRangeText(edit.insert, edit.from, edit.to);
 		field.setSelectionRange(edit.selectionStart, edit.selectionEnd);
