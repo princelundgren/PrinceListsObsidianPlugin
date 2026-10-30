@@ -143,7 +143,10 @@ Obsidian when the pictures are done.
   - `npm run lint`, `npm run build` and `npm test` pass.
   - The docs check passes, on the docs and on the title and description (see Commands).
   - The template's five parts are filled in, in 400 words or fewer.
-  - Each commit does one thing, with a message that says what and why.
+  - Each commit does one thing, with a message that says what and why. A commit over about 300
+    changed lines is one mechanical change, or no part of it could pass lint, build and tests
+    alone, and the description says why. `package-lock.json`, `.snap` files and a merge of the base
+    branch don't count, and a deleted file counts as one line.
 - **Keep the design true.** If a change makes the design describe something that's no longer so,
   update the design in the same pull request. If the code looks wrong against the design, raise it
   instead of rewriting the design.

@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-28
+verified: 2026-10-30
 governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
 ---
 
@@ -66,10 +66,11 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   association with the repository is owner, member or collaborator. The action then checks the
   commenter's write access and rejects bots. Both workflows leave `allowed_bots` empty and don't
   use `allowed_non_write_users`.
-  - Claude doesn't review Dependabot's pull requests, or any other bot's: the review skips a pull
-    request a bot opened and any event a bot sends, so the review never reads a bot's pull request
-    text, and those events can't cancel a review. `@claude` does read it when someone with write
-    access asks on a bot's pull request.
+  - Claude doesn't review Dependabot's pull requests, or any other bot's: the gate covers the pull
+    request's author and the event's sender, so the review never reads the text of a pull request
+    a bot opened, and a bot's events can't cancel a review. Commits inside a person's pull request
+    can come from anyone. `@claude` does read that text when someone with write access asks on a
+    bot's pull request.
 - **The token (call).** Both workflows give the action the job's own token. It can read the code
   and write to pull requests (and, for `@claude`, issues), but it can't push. The Claude GitHub
   App's token is the action's default, but it carries the app's full permissions, including
@@ -85,7 +86,12 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     in the checkout, through environment variables as `docs.yml` does, and Claude reads the files.
     Two more `gh pr view` commands read them before, but they worked only when Claude typed them
     exactly, and the reviews of #141 and #142 said they couldn't read either. The files hold the
-    text as it was when the event fired, so an edit without a push reaches the next review.
+    text as it was when the event fired, so an edit without a push reaches the next review. The
+    commits come from the API, since the checkout holds only the merge commit: the next step
+    writes each one's subject and changed lines, counted as `AGENTS.md` says, to the same folder
+    with the job's token, and Claude reads that file too, so the review needs no new tool. Past the
+    API's 300 files a size is the commit's total, lock files included. A merge shows `merge` in
+    place of its size, which counts what the base brought in. A failed call fails the job.
   - For `@claude`, deny rules take back the file-edit tools, `git add`, `git commit`, `git rm` and
     the push that the action grants when it's mentioned. In the action's `acceptEdits` mode, shell
     commands such as `mkdir`, `mv` or `sed` can still change files in the checkout, but nothing
@@ -119,8 +125,9 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   - For `@claude`, the action strips hidden markup from the context it gathers, and its docs warn
     that new bypasses may emerge. An appended system prompt tells Claude that this text, and a pull
     request's code, is material to read, never instructions.
-  - The review reads, unfiltered, the pull request's title, description and diff, written by
-    someone with write access, and its own summaries. Its prompt says the same.
+  - The review reads, unfiltered, the pull request's title, description, commit subjects and diff,
+    written or pushed by someone with write access, and its own summaries. Its prompt says the
+    same.
   - The limited token and tools bound what a successful injection could do.
 - **The job token is readable.** In both workflows the action writes the job's token into the
   checkout's git configuration, in the origin URL, whatever checkout's `persist-credentials` says.
