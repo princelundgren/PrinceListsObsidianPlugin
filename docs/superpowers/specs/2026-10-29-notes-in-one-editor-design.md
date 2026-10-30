@@ -128,7 +128,10 @@ Compared with Obsidian's own editor side by side on desktop:
   reaches a link with the arrow keys or a click beside it.
 - **Right-click on desktop:** on a link, Obsidian's link menu (step one); on a picture, the picture
   menu (step two, "Right-click menus"). Elsewhere in the notes the plugin opens no menu of its own,
-  and the list's background menu no longer covers the list note **(call)**.
+  and the list's background menu no longer covers the list note **(call)**. A press of a button
+  other than the main one on a picture the editor draws, or on a drawn block, leaves it drawn and
+  the editor's focus as it was: Windows opens the menu on release, after a focus would have shown
+  the Markdown.
 
 ## Undo (call)
 
