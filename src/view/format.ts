@@ -29,7 +29,6 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 	],
 	[
 		{ action: 'codeBlock', icon: 'square-code', label: 'Code block' },
-		{ action: 'table', icon: 'table', label: 'Table' },
 	],
 ];
 const ACTIONS = GROUPS.flat().map((button) => button.action);
