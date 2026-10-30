@@ -103,7 +103,8 @@ workspace files when it opens it. These need Node.js 22 or later too:
 |---|---|
 | `node scripts/pictures/demo-vault.mjs <folder> [--theme dark\|light] [--today YYYY-MM-DD]` | Copy the demo vault into `<folder>`, its dates moved from the day they were written for to today. It writes only into a folder with no notes or an earlier copy, never through a linked `.obsidian/`, and keeps `.obsidian/plugins/` |
 | `node --test "scripts/pictures/*.test.mjs"` | Run the picture scripts' tests. Quote the glob so Node expands it in every shell; a folder argument fails on Node 22 and 24 |
-| `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...` | Take the named scenes in `scripts/pictures/scenes/` from a demo vault that Obsidian has open with a DevTools port, writing each as `<scene>.webp` in `<folder>`. It needs `cwebp`, and stops unless the vault is a copy in the scene's theme with "Native menus" off |
+| `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...` | Take the named scenes in `scripts/pictures/scenes/` from a demo vault that Obsidian has open with a DevTools port, writing each as `<scene>.webp` or `<scene>.gif` in `<folder>`. It needs `cwebp` and `ffmpeg`, and stops unless the vault is a copy in the scene's theme with "Native menus" off |
+| `node scripts/pictures/push-vault.mjs --port <port> <folder>` | Write the copy in `<folder>` and the build into the vault Obsidian has open on an emulator, after removing everything in it but its plugins. It stops if the open vault has notes and isn't a copy |
 
 To make a demo vault: close an earlier copy in Obsidian if it's open, run the copy script, then
 `npm run build` and `npm run install-vault -- <folder>`. The first time, open the folder in
@@ -116,6 +117,19 @@ executable with the same flag. A DevTools port lets any program on the machine c
 with Node.js access, so open only the demo vault while it's on, in Obsidian's only window, and quit
 Obsidian when the pictures are done.
 
+The phone recording, `tick-and-drag`, runs on an Android emulator with Obsidian installed. The first
+time, make a new vault in Obsidian there and turn on community plugins. Then each time, with `adb`:
+
+1. Forward the port: `adb shell pidof md.obsidian`, then
+   `adb forward tcp:<port> localabstract:webview_devtools_remote_<pid>`.
+2. Make a copy with `--theme light` and run `push-vault.mjs` on it.
+3. Restart Obsidian, so it reads the files: `adb shell am force-stop md.obsidian`, then
+   `adb shell am start -n md.obsidian/.MainActivity`. After the first push, trust the vault there.
+4. Forward the port again, since the pid changed, and run `shoot.mjs` on it.
+
+The forward gives any program on the machine the same control as a DevTools port, so keep only the
+demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
+
 ## Layout
 
 - **`src/main.ts`:** the plugin lifecycle only (load, unload, registering things).
@@ -127,11 +141,11 @@ Obsidian when the pictures are done.
   pictures. The docs check reads its notes like any other doc.
 - **`scripts/`:** Node scripts that aren't part of the plugin, such as the docs check. Its
   `node:test` tests sit beside it, outside `tests/`, because vitest collects the test files there.
-  `scripts/pictures/` copies the demo vault and takes the README's stills, one scene module per
-  picture in `scenes/`. The scripts reach Obsidian through its `app` global, calling only what
-  `obsidian.d.ts` documents. They read the page only to find elements, where they are, which
-  folders are open and whether it's a phone's, act through DevTools input events, and add only the
-  drawn pointer (`pointer.mjs`).
+  `scripts/pictures/` copies the demo vault and takes the README's stills and GIFs, one scene module
+  per picture in `scenes/`. A scene that changes a note puts it back when it ends. The scripts reach
+  Obsidian through its `app` global, calling only what `obsidian.d.ts` documents. They read the page
+  only to find elements, where they are, which folders are open and whether it's a phone's, act
+  through DevTools input events, and add only the drawn pointer (`pointer.mjs`).
 - **File size:** keep each file under about 300 lines; split by responsibility.
 
 ## Working on a change

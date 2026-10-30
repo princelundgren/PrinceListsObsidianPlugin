@@ -10,7 +10,7 @@
 PrinceLists turns a note into a todo list, and a Schedule view shows what's coming up across all
 your lists. It's simple to use, and powerful when you need it.
 
-![In a todo list in Obsidian, a new item gets a title, notes with a link and a pasted picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
+![In a todo list in Obsidian, a new item gets a title, notes with a link and a dropped picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
 Make a list from the ribbon, a folder, or a note you already have.
 

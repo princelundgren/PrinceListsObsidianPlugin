@@ -58,7 +58,8 @@ vault made by the copy script, never in a vault with real notes, and the scripts
   buttons, which today's README GIFs show, are gone from the retakes; that's accepted.
 - **A DevTools port gives anyone on the machine control of Obsidian, with Node access.** Start
   Obsidian with one only on the demo vault, and quit it afterwards.
-- **Sizes:** each picture is taken at 2x its CSS size, except the GIFs, at 1x, and isn't scaled:
+- **Sizes:** each picture is taken at 2x its CSS size, except the GIFs, at 1x. Only the phone GIF
+  is scaled, down to its CSS size, since Android sends frames at its screen's pixels:
 
   | Picture | Where | Page (CSS px) | Clip (CSS px) | Scale | Theme |
   |---|---|---|---|---|---|
@@ -75,7 +76,8 @@ vault made by the copy script, never in a vault with real notes, and the scripts
   listing's.
 - **Encoding:** stills are `cwebp -lossless -z 9`, or `-near_lossless 60 -z 9` where that looks
   the same and is smaller. GIFs come from PNG frames through `ffmpeg`, one palette per GIF, each
-  frame shown for as long as it lasted when recorded.
+  frame shown for as long as it lasted when recorded. Frames too short for a GIF's 40 ms tick are
+  dropped, and the next frame takes their time.
 
 ## Review Focus
 
@@ -201,8 +203,8 @@ test('a copy moves the dates, keeps the plugins folder and writes the marker', (
     setup(session), shoot(session, out) }`.
   - `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...`
   - In `encode.mjs`: `toWebp(png: string, out: string)` and `toGif(frames: {file: string, ms:
-    number}[], out: string)`, running `cwebp` and `ffmpeg` and naming the tool that's missing if
-    one is.
+    number}[], out: string, page: {width, height}, screen: {width, height})`, running `cwebp` and
+    `ffmpeg` and naming the tool that's missing if one is.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -267,9 +269,10 @@ test('checkDemoVault passes a demo copy', async () => {
 **Interfaces:**
 - Consumes: `connect`, `checkDemoVault`, `pointer`, the scene shape and `toGif` from Task 2.
 - Produces:
-  - `record(session, act: () => Promise<void>, folder: string): Promise<{file, ms}[]>`: PNG frames
-    from `Page.startScreencast`, each acknowledged and saved with the time it arrived, while `act`
-    runs.
+  - `record(session, act: () => Promise<void>, folder: string): Promise<{frames: {file, ms}[],
+    screen: {width, height}}>`: PNG frames from `Page.startScreencast`, each acknowledged and saved
+    with the time it arrived, while `act` runs, and the screen they show in CSS pixels, since
+    Android sends the whole screen whatever the page's size.
   - `node scripts/pictures/push-vault.mjs --port <port> <folder>`: writes a copy made by Task 1,
     and the build's three files into `<configDir>/plugins/princelists/`, into the vault Obsidian
     has open on the emulator, through `app.vault.adapter`. It refuses a vault that holds files
@@ -298,11 +301,12 @@ test('filesToPush lists every file once, with its path inside the vault', () => 
   machine. If Obsidian ignores the synthetic drop, stop and raise it in the pull request, as
   `AGENTS.md` asks, rather than working around it. Change `list-desktop.gif`'s alt text from "a
   pasted picture" to "a dropped picture".
-- [ ] **Step 4:** The emulator, once: a Google Play system image, Obsidian from Play, a vault made
-  in it by hand with community plugins on, and PrinceLists turned on after the first push. Then
+- [ ] **Step 4:** The emulator, once: Obsidian installed on it, a vault made in it by hand with
+  community plugins on, and the vault trusted after the first push, which turns PrinceLists on. Then
   each time: `adb shell pidof md.obsidian`, `adb forward tcp:<port>
   localabstract:webview_devtools_remote_<pid>`, `push-vault.mjs` with a light copy, then `adb shell
-  am force-stop md.obsidian`, start it again, and forward again with the new pid.
+  am force-stop md.obsidian`, `adb shell am start -n md.obsidian/.MainActivity`, and forward again
+  with the new pid.
 - [ ] **Step 5:** The `tick-and-drag` scene on the 390 x 844 phone page: tick `bananas`, then hold
   `greek yogurt` and drag it onto `spinach` with `Input.dispatchTouchEvent`, the finger mark drawn.
 - [ ] **Step 6:** Record each against a fresh copy and look at every frame of each GIF: the pointer
