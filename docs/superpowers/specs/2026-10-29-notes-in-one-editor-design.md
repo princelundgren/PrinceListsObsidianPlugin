@@ -159,6 +159,11 @@ Compared with Obsidian's own editor side by side on desktop:
   lazy line, short of the item's indent, so a list marker typed on it stays in the notes. The
   notes' other lines keep every byte. The core saves a given line range directly, with no open,
   type and close session around each change.
+- **Notes directly under the title,** with no empty line between, as another editor can leave them,
+  stay so until a change would make a heading of the title, such as a `---` line, or a lone `-` as
+  the first key of a bullet. That change also writes the empty line under the title, as step one's
+  "Item notes" requires, and a lazy first line takes the notes' indent, or it would leave the item
+  **(call)**.
 - **Empty notes** get the empty line under the title with their first text, so it can't join the
   title, as the block fields did.
 - **Empty lines typed at the end of the notes (call)** stay in the file and in the editor while the

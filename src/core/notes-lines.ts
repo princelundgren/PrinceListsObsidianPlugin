@@ -1,3 +1,4 @@
+import { Parser } from 'commonmark';
 import { replaceRun } from './edit-check';
 import { stripIndent } from './edit-items';
 import { isBlankAt } from './edit-lines';
@@ -39,7 +40,7 @@ export function changedLines(before: string, after: string): NotesChange | null 
  * `range` is empty notes, which the editor holds as one empty line that maps to no file line. Lines
  * past the file's end are empty lines that a file without a final newline can't keep at its end
  * (spliceLines). A new line takes `indent`. `separator`: the empty line above `range.start` is the
- * one the notes' first text wrote under the title, which emptying them takes again. `blankAfter`,
+ * one a save wrote under the title, which emptying them takes again. `blankAfter`,
  * the list note's: the line under the span is the blank line its last save wrote, which goes again
  * while it is still blank and the span is emptied.
  */
@@ -69,8 +70,28 @@ export function saveItemNotesLines(
 	const write = planWrite(lines, span, change);
 	const { from, to, run } = fileRun(lines, write.from, write.to, write.texts);
 	const eol = dominantEol(lines);
-	const edited = replaceRun(lines, model, from, to, run.map((text) => ({ text, eol })), itemNotesKeys(lines, item, from, to, run));
-	return { lines: edited, span: { ...span, range: write.range } };
+	const heading = makesTitleHeading(lines, item, from, to, run);
+	const start = heading ? item.titleLine + 1 : from;
+	const above = heading ? [{ text: '', eol }, ...keptUnderTitle(lines.slice(start, from), span.indent, eol)] : [];
+	const written = [...above, ...run.map((text) => ({ text, eol }))];
+	const edited = replaceRun(lines, model, start, to, written, itemNotesKeys(lines, item, start, to, written.map((line) => line.text)));
+	if (!heading) return { lines: edited, span: { ...span, range: write.range } };
+	return { lines: edited, span: { ...span, range: { start: write.range.start + 1, end: write.range.end + 1 }, separator: true } };
+}
+
+// A `---`, `===` or lone `-` or `=` in notes directly under the title would make a setext heading of it.
+function makesTitleHeading(lines: readonly Line[], item: ItemBlock, from: number, to: number, run: readonly string[]): boolean {
+	const after = lines.slice(item.titleLine, Math.max(item.endLine, to)).map((line) => line.text);
+	after.splice(from - item.titleLine, to - from, ...run);
+	return new Parser().parse(after.join('\n')).firstChild?.firstChild?.firstChild?.type === 'heading';
+}
+
+// A lazy first line can't follow an empty line and stay in the item, so it takes the notes' indent.
+function keptUnderTitle(kept: Line[], indent: string, eol: Line['eol']): Line[] {
+	const [first, ...rest] = kept;
+	const width = columnOf(indent);
+	if (!first || columnOf(leadingSpace(first.text)) >= width) return kept;
+	return [{ text: newLine(indent, stripIndent(first.text, width)), eol: first.eol || eol }, ...rest];
 }
 
 /**
