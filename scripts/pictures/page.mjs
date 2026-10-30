@@ -214,7 +214,7 @@ export async function openMenuOn(session, row, item) {
 
 /**
  * Runs `act`, then puts the `note` back as it was and removes any file `act` added to `folder`, so
- * the next scene finds the vault as this one did.
+ * the next scene finds the vault as this one did. `folder` must exist.
  */
 export async function undoingChanges(session, note, folder, act) {
 	const path = JSON.stringify(note);
