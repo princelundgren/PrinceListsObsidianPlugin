@@ -1,5 +1,5 @@
 import { blockKey, replaceRun, UnsafeEditError } from './edit-check';
-import { gapEnd, hasLineBreak, isBlankAt, typedLines } from './edit-lines';
+import { gapEnd, hasLineBreak, isBlankAt } from './edit-lines';
 import { isDoneStatus, isRepeating, parseItemLine, setTitle, tickLine, untickLine } from './item-line';
 import { dominantEol, spliceLines, type Line } from './lines';
 import { columnOf, isBlank, type ItemBlock, type ListModel, type Section } from './parse';
@@ -91,27 +91,6 @@ export function getItemNotes(lines: readonly Line[], item: ItemBlock): string {
 		.slice(start, item.endLine)
 		.map((line) => stripIndent(line.text, width))
 		.join('\n');
-}
-
-// A field that saves on every keystroke passes the indent the notes had when it took focus. Re-parsed
-// after a save, notesIndent takes in spaces typed at the start of the notes, and the next save would
-// add them to every line, turning a paragraph into code.
-export function setItemNotes(
-	lines: readonly Line[],
-	model: ListModel,
-	item: ItemBlock,
-	markdown: string,
-	indent = item.notesIndent,
-): Line[] {
-	const texts = typedLines(markdown);
-	const eol = dominantEol(lines);
-	// The blank line after the title keeps a `---` in the notes from turning the title into a heading.
-	const notes = texts.length === 0 ? [] : ['', ...texts.map((text) => (isBlank(text) ? '' : indent + text))];
-	const title = (lines[item.titleLine] as Line).text;
-	return replaceRun(lines, model, item.titleLine + 1, item.endLine, notes.map((text) => ({ text, eol })), {
-		removed: [itemKey(lines, item)],
-		added: [blockKey('item', [title, ...notes])],
-	});
 }
 
 function replaceLine(lines: readonly Line[], at: number, text: string): Line[] {

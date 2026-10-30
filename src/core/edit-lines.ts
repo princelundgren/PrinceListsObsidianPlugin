@@ -1,13 +1,5 @@
-import { splitLines, type Line } from './lines';
+import type { Line } from './lines';
 import { isBlank } from './parse';
-
-// The lines of what a field holds, without the blank lines at its end. A field saves on every
-// keystroke, so an Enter at the end would otherwise leave a blank line outside the notes it typed.
-export function typedLines(markdown: string): string[] {
-	const texts = splitLines(markdown).map((line) => line.text);
-	while (texts.length > 0 && isBlank(texts[texts.length - 1] as string)) texts.pop();
-	return texts;
-}
 
 // Text for a single line, such as a title or a heading: a line break in it would write a second line
 // that nothing owns.

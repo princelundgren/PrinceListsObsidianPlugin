@@ -1,8 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import { NO_LINES_MOVED, followLine, followRange, mapRange, moveEdit, ownEdit, type OwnEdit } from '../../src/core/follow';
-import { deleteItem, insertItem, setItemNotes, toggleItem } from '../../src/core/edit-items';
+import { deleteItem, insertItem, toggleItem } from '../../src/core/edit-items';
+import { ListEditing } from '../../src/core/editing';
 import { joinLines, splitLines } from '../../src/core/lines';
-import { list, saveWholeListNote } from './edit-helpers';
+import { contentStartOf, list, notesEditor, saveWholeListNote } from './edit-helpers';
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
 
@@ -38,18 +39,26 @@ describe('ownEdit', () => {
 describe('followLine agrees with a fresh parse after each own edit', () => {
 	const text = `${FRONTMATTER}Note\n\n- [ ] a\n- [ ] b\n\n\tb's note\n- [ ] c\n## H\n- [ ] d\n`;
 
+	const typedInNotes = (titleLine: number, markdown: string) => {
+		const state = new ListEditing((t) => contentStartOf(splitLines(t)));
+		state.text = text;
+		state.open(titleLine);
+		notesEditor(state, 'item').type(markdown);
+		expect(state.text).not.toBe(text);
+		return state.text;
+	};
+
 	test('typing notes into b shifts c and d, and keeps a and b', () => {
-		const { lines, model, item } = list(text);
-		const b = item(1);
-		const edited = joinLines(setItemNotes(lines, model, b, 'one\ntwo\nthree', b.notesIndent));
-		const edit = ownEdit(b.titleLine, text, edited, 'change');
+		const titleLine = list(text).item(1).titleLine;
+		const edited = typedInNotes(titleLine, 'one\ntwo\nthree');
+		const edit = ownEdit(titleLine, text, edited, 'change');
 		expect(titleLines(text).map((line) => followLine(line, edit))).toEqual(titleLines(edited));
 	});
 
 	test("removing all of b's notes shifts the lines after it up", () => {
-		const { lines, model, item } = list(text);
-		const edited = joinLines(setItemNotes(lines, model, item(1), ''));
-		const edit = ownEdit(item(1).titleLine, text, edited, 'change');
+		const titleLine = list(text).item(1).titleLine;
+		const edited = typedInNotes(titleLine, '');
+		const edit = ownEdit(titleLine, text, edited, 'change');
 		expect(titleLines(text).map((line) => followLine(line, edit))).toEqual(titleLines(edited));
 	});
 

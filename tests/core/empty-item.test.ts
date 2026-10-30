@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { UnsafeEditError } from '../../src/core/edit-check';
-import { insertItem, setItemNotes, toggleItem } from '../../src/core/edit-items';
+import { insertItem, toggleItem } from '../../src/core/edit-items';
 import { ListEditing } from '../../src/core/editing';
 import { isEmptyItem, planRemoval, type Removal } from '../../src/core/empty-item';
 import { ownEdit } from '../../src/core/follow';
@@ -69,9 +69,12 @@ describe('planRemoval', () => {
 		const text = `${FRONTMATTER}- [ ] a\n`;
 		const { titleLine, inserted } = insertEmpty(text, 0);
 		expect(plan(`${FRONTMATTER}- [ ] a\n- [ ] typed\n`, titleLine, inserted)).toBeNull();
-		const { lines, model, item } = list(inserted.textAfter);
-		const noted = joinLines(setItemNotes(lines, model, item(1), 'a note'));
-		expect(plan(noted, titleLine, inserted)).toBeNull();
+		const state = new ListEditing((t) => contentStartOf(splitLines(t)));
+		state.text = inserted.textAfter;
+		state.open(titleLine);
+		state.openNotes('item');
+		state.saveNotes({ from: 0, to: 1, lines: ['a note'] });
+		expect(plan(state.text, titleLine, inserted)).toBeNull();
 	});
 
 	test('finds nothing to remove where no item is on that line', () => {

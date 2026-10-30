@@ -244,8 +244,8 @@ function headingContentStart(lines: readonly Line[], start: number, end: number)
 function indentForNotes(lines: readonly Line[], titleLine: number, endLine: number, contentColumn: number): string {
 	const firstNote = lines.slice(titleLine + 1, endLine).find((line) => !isBlank(line.text));
 	const indent = firstNote ? (/^[ \t]*/.exec(firstNote.text) as RegExpExecArray)[0] : '';
-	// A lazy line, indented less than the content column, can't lend its indent: written back after
-	// the blank line below the title, it would leave the item. Nor can indented code, 4 columns or
+	// A lazy line, indented less than the content column, can't lend its indent: a line written with it
+	// after an empty line would leave the item. Nor can indented code, 4 columns or
 	// more past it: every note written with that indent would become code.
 	const column = columnOf(indent);
 	if (firstNote && column >= contentColumn && column < contentColumn + 4) return indent;

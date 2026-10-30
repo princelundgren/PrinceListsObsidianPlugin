@@ -362,8 +362,8 @@ erased again leaves none behind, but only while it is still blank and directly u
     that indent either **(call)**: every note written with it would become code.
   - A tab reaches column 4. With `100. [ ] x` the content column is 5, so a tab-indented note
     there turns into a code block.
-  - A lazy line, indented less than the content column, still belongs to the item. Written back
-    after the blank line with its own indent, it would leave the item.
+  - A lazy line, indented less than the content column, still belongs to the item. A line written
+    with its indent after an empty line would leave the item.
   - While the notes editor is open, every save uses the indent the notes had when it opened
     **(call)**. Taken afresh from the file after each keystroke, a space typed at the start of the
     notes would widen it, and the next save would turn a paragraph into code.
