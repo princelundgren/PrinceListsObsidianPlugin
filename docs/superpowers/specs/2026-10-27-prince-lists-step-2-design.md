@@ -1,5 +1,5 @@
 ---
-status: building
+status: live
 verified: 2026-10-30
 governs: [src/**, styles.css, manifest.json]
 ---
@@ -41,7 +41,8 @@ only documented Obsidian APIs are used.
   "Still later").
 
 **Done when (call):** step two is released and the owner has moved their lists in from their
-current todo app. Step one's own "Done when" doesn't change.
+current todo app. Step one's own "Done when" doesn't change. The maintainer called
+this met on 2026-10-30 **(owner)**.
 
 ## What's written in the file
 
@@ -303,8 +304,8 @@ current todo app. Step one's own "Done when" doesn't change.
 - **On mobile only the heading lifts (call);** its rows stay in place until the drop redraws
   the list.
 - **The file (call):** the section's lines move as they are, and the move goes through step one's
-  check (`edit-check.ts`): if it would change how the rest of the list reads, such as a moved
-  setext heading joining the paragraph above it, one empty line goes before it, and if that
+  check (`src/core/edit-check.ts`): if it would change how the rest of the list reads, such as a
+  moved setext heading joining the paragraph above it, one empty line goes before it, and if that
   doesn't help, nothing is written and a message says so. The file keeps its line endings and
   final-newline rules. Dropped where it already is, the section stays as it is in the file.
 - **One Cmd+Z puts it back.** While Cmd+F filters the list, a section moves with its hidden rows.
