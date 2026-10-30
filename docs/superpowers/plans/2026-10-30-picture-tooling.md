@@ -203,8 +203,8 @@ test('a copy moves the dates, keeps the plugins folder and writes the marker', (
     setup(session), shoot(session, out) }`.
   - `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...`
   - In `encode.mjs`: `toWebp(png: string, out: string)` and `toGif(frames: {file: string, ms:
-    number}[], out: string, page, screen)`, running `cwebp` and `ffmpeg` and naming the tool that's missing if
-    one is.
+    number}[], out: string, page: {width, height}, screen: {width, height})`, running `cwebp` and
+    `ffmpeg` and naming the tool that's missing if one is.
 
 - [ ] **Step 1: Write the failing tests**
 
