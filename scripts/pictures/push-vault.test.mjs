@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { checkCopy, filesToPush, pushProblem } from './push-vault.mjs';
+import { checkCopy, filesToPush, pushProblem, vaultPath } from './push-vault.mjs';
 
 function tempFolder(t) {
 	const folder = mkdtempSync(join(tmpdir(), 'push-vault-'));
@@ -57,4 +57,10 @@ test('pushProblem takes an earlier copy', () => {
 test('pushProblem reads the config folder the vault uses', () => {
 	const vault = { name: 'Notes', marker: false, configDir: '.config', files: ['.obsidian/app.json'] };
 	assert.match(pushProblem(vault), /Notes/);
+});
+
+test('vaultPath moves a path into the config folder only when the path starts in .obsidian/', () => {
+	assert.equal(vaultPath('.obsidian/app.json', '.custom'), '.custom/app.json');
+	assert.equal(vaultPath('Backups/.obsidian/app.json', '.custom'), 'Backups/.obsidian/app.json');
+	assert.equal(vaultPath('x.obsidian/app.json', '.custom'), 'x.obsidian/app.json');
 });

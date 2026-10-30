@@ -38,6 +38,11 @@ export function pushProblem({ name, marker, configDir, files }) {
 	return `The vault "${name}" holds notes and isn't a copy of the demo vault (it has no ${MARKER}), so nothing was done. Open a new vault in Obsidian.`;
 }
 
+/** Returns where `path` goes in a vault whose config folder is `configDir`, which needn't be `.obsidian`. */
+export function vaultPath(path, configDir) {
+	return path.startsWith(`${CONFIG}/`) ? `${configDir}${path.slice(CONFIG.length)}` : path;
+}
+
 const describeVault = (session) => session.evaluate(`(async () => {
 	const { adapter, configDir } = app.vault;
 	const files = [];
@@ -62,8 +67,8 @@ const removeEarlierFiles = (session) => session.evaluate(`(async () => {
 })()`);
 
 const writeFile = (session, { path, base64 }) => session.evaluate(`(async () => {
-	const { adapter, configDir } = app.vault;
-	const path = ${JSON.stringify(path)}.replace(${JSON.stringify(`${CONFIG}/`)}, configDir + '/');
+	const { adapter } = app.vault;
+	const path = ${JSON.stringify(path)};
 	const folder = path.split('/').slice(0, -1).join('/');
 	if (folder && !(await adapter.exists(folder))) await adapter.mkdir(folder);
 	await adapter.writeBinary(path, Uint8Array.from(atob(${JSON.stringify(base64)}), (char) => char.charCodeAt(0)).buffer);
@@ -82,10 +87,11 @@ async function pushVault(port, folder) {
 	const files = [...filesToPush(folder), ...buildFiles()];
 	const session = await connect(port);
 	try {
-		const problem = pushProblem(await describeVault(session));
+		const vault = await describeVault(session);
+		const problem = pushProblem(vault);
 		if (problem) throw new Error(problem);
 		await removeEarlierFiles(session);
-		for (const file of files) await writeFile(session, file);
+		for (const { path, base64 } of files) await writeFile(session, { path: vaultPath(path, vault.configDir), base64 });
 	} finally {
 		session.close();
 	}
