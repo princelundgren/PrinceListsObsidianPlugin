@@ -24,7 +24,7 @@ Ticked items hide after a day. Show archived brings them back, with blue checkbo
 
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 
-<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.webp" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the line being edited" width="520">
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.webp" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the notes" width="520">
 
 The Schedule shows the dated items from all your lists.
 
