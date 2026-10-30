@@ -150,6 +150,11 @@ Only the maintainer releases.
    environment, stops if the tag isn't `manifest.json`'s version, then builds a draft release with
    an attestation.
 3. **Publish.** The maintainer reviews the draft and publishes it.
+4. **Have the directory check it.** The community directory may not pick up a release by itself:
+   after 1.1.0 it still showed 1.0.0. The maintainer signs in at
+   [community.obsidian.md](https://community.obsidian.md), opens PrinceLists and asks it to check
+   for a new release. That runs the directory's automated review on the new version. Read its
+   results, and fix anything it flags in a new release.
 
 Agents never push to `main`, merge pull requests, push tags or publish releases.
 
