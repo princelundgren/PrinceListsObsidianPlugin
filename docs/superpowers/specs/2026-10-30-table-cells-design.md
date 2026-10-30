@@ -4,14 +4,17 @@ status: draft
 
 # PrinceLists for Obsidian: table cells in the notes
 
-**On hold (owner, 2026-10-30):** this isn't enough without plus buttons, handles and a menu. #213 takes
-it over, with what a prototype showed on an iPhone, and the toolbar has no Table button until then.
+**On hold (owner, 2026-10-30):** this isn't enough without plus buttons, handles and a menu. #213
+takes it over, with what a prototype showed on an iPhone, and the toolbar has no Table button until
+then. Where this differs from #213 (Enter on a phone, columns, what has been checked on an iPhone),
+#213 holds.
 
 A table in the notes stays drawn while you edit it, and you type into its cells, as in a note's Live
 Preview **(owner, 2026-10-30)**. A table showing its Markdown once a click enters it is hard to read,
 most of all on a phone. So this changes "Big blocks" in the
 [notes in one editor design](2026-10-29-notes-in-one-editor-design.md) for tables at the notes' own
-left margin, in a card and in the list note. Issue #191, now part of #213. Tags mean what they mean in that design;
+left margin, in a card and in the list note. Issue #191, now part of
+#213. Tags mean what they mean in that design;
 what has none is a **(call)**.
 
 ## Drawing and focus
