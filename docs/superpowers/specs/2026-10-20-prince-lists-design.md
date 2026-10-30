@@ -1,5 +1,5 @@
 ---
-status: building
+status: live
 verified: 2026-10-30
 governs: [src/**, styles.css, manifest.json]
 ---
@@ -99,7 +99,8 @@ and data safety, and owner's advocate. Their findings are folded in.
 **Done when (owner):** one real list, moved in from another todo app, has lived only in Obsidian
 for two weeks, on desktop and mobile, without going back to the other app for it. The two
 weeks may start once 1a is in use, but step one isn't done until 1b has shipped too **(call)**.
-This finish line is what keeps step one from growing into a standalone app.
+This finish line is what keeps step one from growing into a standalone app. The maintainer called
+it met on 2026-10-30 **(owner)**.
 
 ## Anti-goals: failures even if it works
 
@@ -460,11 +461,13 @@ erased again leaves none behind, but only while it is still blank and directly u
 
 - **Several marks on one line (call),** for example after a Sync merge: the earliest mark whose
   time can be read and is no more than 24 hours ahead counts. When there is none, the line counts
-  as done long ago. The plugin collapses them the next time it edits that line, keeping the mark
-  with the earliest time that can be read, or the first one when none can be read.
+  as done long ago. The plugin collapses them the next time the line's title is edited, keeping the
+  mark with the earliest time that can be read, or the first one when none can be read. A date or
+  star edit changes only what it sets **(owner, 2026-10-30)**.
 - **The plugin never adds a `✔` to a line it didn't tick.** That would be a write the user didn't
   make in the view.
-- **A leftover `✔` on an open line** is ignored. It is removed the next time that line is edited.
+- **A leftover `✔` on an open line** is ignored. It is removed the next time the line's title is
+  edited or the line is ticked.
 
 ### Editing never rebuilds the file (call; this fixes a data-safety issue found in review)
 
@@ -573,8 +576,8 @@ erased again leaves none behind, but only while it is still blank and directly u
   you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was, except that doubled
   `✔` marks collapse to the earliest and a leftover `✔` on an open line is dropped (see
   Completion). Step two hides an item's star too, and saving puts it back once.
-- **An item's When (step two):** the calendar icon at the card's top right sets it, and the clear
-  button beside the day removes it.
+- **An item's When (step two):** the calendar icon at the card's top right sets it, and the
+  picker's own Clear or Reset removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
   not on every keystroke. Switching to another window or app doesn't leave the field. The rename
   uses `fileManager.renameFile`, which updates links according to the user's link settings. Escape
@@ -951,8 +954,8 @@ From here on the document is for the builder.
 - **Styling (call):** use only Obsidian's CSS variables and its built-in Lucide icons (`setIcon`),
   so the view follows light and dark mode and any theme. Obsidian's plugin guidelines warn that
   hard-coded styling stops themes and snippets from changing a plugin's look.
-- **Accessible names (call):** only the icon buttons carry `aria-label`, since Obsidian shows every
-  `aria-label` as a hover tooltip. A text field takes its name from a gray placeholder ("Title",
+- **Accessible names (call):** only the icon buttons and the card's date field carry
+  `aria-label`, since Obsidian shows every `aria-label` as a hover tooltip. A text field takes its name from a gray placeholder ("Title",
   "Heading", "Notes"), seen only while it's empty, and a checkbox from a hidden copy of its item's
   title.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
@@ -1113,7 +1116,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   - On an iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
     ([1a checks](../notes/2026-10-22-1a-checks.md)).
   - After a canceled hold, the next click is swallowed, as spike 2 does after a lift: WebKit still
-    sends one when the finger lifts. The next `touchstart` clears the flag.
+    sends one when the finger lifts. The next `pointerdown` clears the flag, so a mouse's
+    right-click, which sends no touch, can't eat a later click.
   - Obsidian's own haptic on a hold can't be turned off (no documented API), and it is accepted.
 - **Dragging uses Pointer Events with a hold timer.** Kanban uses 500 ms, canceled if the finger
   moves more than 5 px first. Spike 2 confirmed both values on an iPhone, with the rows'
