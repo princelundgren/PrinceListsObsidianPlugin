@@ -1,4 +1,4 @@
-// Encodes the scenes' PNGs for the README: stills as lossless WebP, recordings as GIFs.
+// Encodes the scenes' PNGs: stills as lossless WebP, recordings as GIFs.
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

@@ -14,7 +14,11 @@ For the big shop on Saturday. Check the pantry first.
 - [ ] tomatoes on the vine
 - [ ] fresh basil
 
-	For the [[Weeknight dinners#Ideas|tomato and lentil soup]].
+	For the [[Weeknight dinners#Ideas|tomato and lentil soup]] and a *pesto*.
+
+	- [x] check the windowsill first
+	- [ ] a **pot**, not cut leaves
+	- [ ] pine nuts
 - [x] avocados ✔ 2026-10-27 09:12
 
 ## Bakery

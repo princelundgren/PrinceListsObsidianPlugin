@@ -1,5 +1,5 @@
-// Takes the README's pictures in a demo vault that Obsidian has open with a DevTools port. Usage is
-// in AGENTS.md, under Commands.
+// Takes the README's and the listing's pictures in a demo vault that Obsidian has open with a
+// DevTools port. Usage is in AGENTS.md, under Commands.
 import { existsSync, realpathSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
