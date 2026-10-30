@@ -122,7 +122,7 @@ the other platforms.
 
 - **On the iPhone:** Enter on a Japanese keyboard that confirms a word, and a refused change in the
   middle of a word.
-- **On Windows:** switching apps during a visit.
+- **On Windows:** switching apps during a visit, and typing before a picture with this build.
 - **On desktop:** Enter on an empty nested list item, which moves it out.
 - **On Android:** a picture dropped into the notes.
 - **Linux.**
