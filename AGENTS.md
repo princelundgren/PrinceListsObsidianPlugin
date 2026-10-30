@@ -102,6 +102,8 @@ The project's npm commands:
   archived rule, parsing and edits. Every change here comes with unit tests.
 - **`src/obsidian/` and `src/view/`:** the Obsidian glue and the user interface.
 - **`tests/`:** vitest tests and Markdown fixtures.
+- **`demo/vault/`:** the demo vault the pictures are taken in: made-up lists, notes and drawn
+  pictures. The docs check reads its notes like any other doc.
 - **`scripts/`:** Node scripts that aren't part of the plugin, such as the docs check. Its
   `node:test` tests sit beside it, outside `tests/`, because vitest collects the test files there.
 - **File size:** keep each file under about 300 lines; split by responsibility.
