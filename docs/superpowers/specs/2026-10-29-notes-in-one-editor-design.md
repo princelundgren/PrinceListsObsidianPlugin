@@ -1,5 +1,5 @@
 ---
-status: building
+status: live
 verified: 2026-10-30
 governs: [src/**, styles.css, manifest.json]
 ---
@@ -45,7 +45,7 @@ used.
 - **Two new dependencies (owner, #182),** bundled: `@codemirror/lang-markdown` and
   `@lezer/markdown`, both MIT. Only `markdownLanguage`, `insertNewlineContinueMarkupCommand` and
   `deleteMarkupBackward` are imported: `markdown()` would bundle the HTML, CSS and JavaScript
-  parsers too, about 146 kB more. AGENTS.md's dependency line changes with the build.
+  parsers too, about 146 kB more. AGENTS.md's dependency line changed with the build.
 - **What it holds:** the notes line for line, without the item's indent, as the block fields held a
   block. Every line in the editor is one line in the file, so a change knows exactly which file
   lines it touched **(call)**.
@@ -128,7 +128,10 @@ Compared with Obsidian's own editor side by side on desktop:
   reaches a link with the arrow keys or a click beside it.
 - **Right-click on desktop:** on a link, Obsidian's link menu (step one); on a picture, the picture
   menu (step two, "Right-click menus"). Elsewhere in the notes the plugin opens no menu of its own,
-  and the list's background menu no longer covers the list note **(call)**.
+  and the list's background menu no longer covers the list note **(call)**. A press of a button
+  other than the main one on a picture the editor draws, or on a drawn block, leaves it drawn and
+  the editor's focus as it was: Windows opens the menu on release, after a focus would have shown
+  the Markdown.
 
 ## Undo (call)
 
@@ -254,7 +257,9 @@ Compared with Obsidian's own editor side by side on desktop:
    except at the end of a file without a final newline ("Saving"). The next parse ends the notes at
    their last line with text, so the editor leaves it out once the visit ends ("Saving").
 5. **iOS:** Backspace on an empty line, the keyboard's autocorrect and dictation, a Japanese input
-   method's Enter, which only confirms a word, and a refused change taken back mid-word.
+   method's Enter, which only confirms a word, and a refused change taken back mid-word. Checked
+   by hand on an iPhone for 1.1.0, but for the Japanese Enter and the refused change mid-word: the
+   maintainer set this design live with those two open.
 6. **Android:** the on-screen keyboard's Backspace and Enter, and the format bar above it.
 7. **A drawn block:** a click inside a drawn table or callout enters it without jumping the card's
    scroll, and a widget with an embedded note unloads when it's taken away.

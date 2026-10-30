@@ -22,8 +22,9 @@ this project.
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
   - The plans in `docs/superpowers/plans/` give the tasks, with exact interfaces and tests. The
-    current one is [notes in one editor](docs/superpowers/plans/2026-10-29-notes-in-one-editor.md).
-    Implement a task as written, one task per pull request.
+    latest one for the plugin is [notes in one editor](docs/superpowers/plans/2026-10-29-notes-in-one-editor.md),
+    and [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
+    README's and the listing's pictures. Implement a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.
 
 ## Rules that are never broken
@@ -94,6 +95,20 @@ The project's npm commands:
 | `npm run lint` | ESLint with `eslint-plugin-obsidianmd`, Obsidian's own lint rules for plugins. Any warning fails it |
 | `npm run install-vault -- <path>` | Copy the build into a vault's `.obsidian/plugins/princelists/` |
 
+The README's pictures and the community listing's screenshots are taken in a copy of the demo
+vault, `demo/vault/`. Never open `demo/vault/` itself in Obsidian, which rewrites a vault's
+workspace files when it opens it. These need Node.js 22 or later too:
+
+| Command | What it does |
+|---|---|
+| `node scripts/pictures/demo-vault.mjs <folder> [--theme dark\|light] [--today YYYY-MM-DD]` | Copy the demo vault into `<folder>`, its dates moved from the day they were written for to today. It writes only into a folder with no notes or an earlier copy, never through a linked `.obsidian/`, and keeps `.obsidian/plugins/` |
+| `node --test "scripts/pictures/*.test.mjs"` | Run the picture scripts' tests. Quote the glob so Node expands it in every shell; a folder argument fails on Node 22 and 24 |
+
+To make a demo vault: close an earlier copy in Obsidian if it's open, run the copy script, then
+`npm run build` and `npm run install-vault -- <folder>`. The first time, open the folder in
+Obsidian with "Open folder as vault", trust it and turn on PrinceLists. After that,
+`obsidian://open?path=<absolute path to the folder's Groceries.md, URI-encoded>` opens it.
+
 ## Layout
 
 - **`src/main.ts`:** the plugin lifecycle only (load, unload, registering things).
@@ -101,6 +116,8 @@ The project's npm commands:
   archived rule, parsing and edits. Every change here comes with unit tests.
 - **`src/obsidian/` and `src/view/`:** the Obsidian glue and the user interface.
 - **`tests/`:** vitest tests and Markdown fixtures.
+- **`demo/vault/`:** the demo vault the pictures are taken in: made-up lists, notes and drawn
+  pictures. The docs check reads its notes like any other doc.
 - **`scripts/`:** Node scripts that aren't part of the plugin, such as the docs check. Its
   `node:test` tests sit beside it, outside `tests/`, because vitest collects the test files there.
 - **File size:** keep each file under about 300 lines; split by responsibility.
@@ -136,6 +153,12 @@ Only the maintainer releases.
    environment, stops if the tag isn't `manifest.json`'s version, then builds a draft release with
    an attestation.
 3. **Publish.** The maintainer reviews the draft and publishes it.
+4. **Read the directory's review.** The directory checks for new releases periodically and
+   reviews each one. To see the review now, the maintainer signs in at
+   [community.obsidian.md](https://community.obsidian.md), opens PrinceLists, selects **Check for
+   new releases** in its **...** menu, then reads the results. An error is fixed in a patch
+   release, from step 1, and a warning where it can be. A recommendation the README's "Good to
+   know" already discloses stays.
 
 Agents never push to `main`, merge pull requests, push tags or publish releases.
 

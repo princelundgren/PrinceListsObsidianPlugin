@@ -112,8 +112,8 @@ class BlockWidget extends WidgetType {
 		unloadWidget(this.view, dom);
 	}
 
-	// The editor's mousedown handler shows the block's Markdown, leaves a link or button in it be, or
-	// hands a modified press on to CodeMirror's own.
+	// The editor's mousedown handler shows the block's Markdown, leaves a link or button in it be, keeps
+	// it drawn on a press of another button, or hands a modified press on to CodeMirror's own.
 	ignoreEvent(event: Event): boolean {
 		return event.type !== 'mousedown';
 	}

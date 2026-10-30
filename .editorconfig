@@ -26,3 +26,8 @@ indent_style = unset
 insert_final_newline = unset
 end_of_line = unset
 trim_trailing_whitespace = false
+
+# The demo vault's notes are data: their item notes are tab-indented, as PrinceLists writes them.
+[demo/vault/**]
+indent_style = unset
+insert_final_newline = unset

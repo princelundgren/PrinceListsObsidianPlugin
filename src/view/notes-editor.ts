@@ -16,6 +16,7 @@ import { drawnBlocksField, NOTES_BLOCK_CLASS } from './notes-blocks';
 import { notesDrawing } from './notes-drawing';
 import { notesKeymap } from './notes-keys';
 import type { NotesSource } from './notes-source';
+import { NOTES_PICTURE_CLASS } from './notes-widgets';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
 export const NOTES_CODEMIRROR_CLASS = 'princelists-notes-codemirror';
@@ -112,10 +113,15 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 							evt.preventDefault();
 							return true;
 						}
+						// Windows opens the context menu on release, after a focus would have shown this Markdown.
+						if (evt.button !== 0 && target?.closest(`.${NOTES_BLOCK_CLASS}, .${NOTES_PICTURE_CLASS}`)) {
+							evt.preventDefault();
+							return true;
+						}
 						const block = target?.closest(`.${NOTES_BLOCK_CLASS}`);
 						// A plain press of the main button only: Shift extends the selection and Mod adds a cursor, as
 						// anywhere in the editor.
-						if (!block || evt.button !== 0 || evt.shiftKey || evt.ctrlKey || evt.metaKey || evt.altKey) return false;
+						if (!block || evt.shiftKey || evt.ctrlKey || evt.metaKey || evt.altKey) return false;
 						evt.preventDefault();
 						editor.dispatch({ selection: { anchor: editor.posAtDOM(block) } });
 						editor.focus();

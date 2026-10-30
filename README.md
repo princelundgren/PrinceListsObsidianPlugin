@@ -62,6 +62,8 @@ You can embed lists in normal notes.
 
 **Notes on an item**
 
+- **Edited like a note:** Markdown shows only where the cursor is, as in Obsidian's Live Preview.
+  The list's own note edits the same way.
 - **Any Markdown:** links, checklists, tables and code.
 - **A toolbar** for bold, italic, links, lists, tables and more.
 - **Pictures:** paste or drop them in. On iOS, a picture dropped from Photos may not reach
