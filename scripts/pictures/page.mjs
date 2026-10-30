@@ -1,10 +1,15 @@
-// What scenes do on Obsidian's page: find where an element is, move, click, scroll and press keys
-// through CDP input events, open a note or list, and save a still.
+// What scenes do on Obsidian's page: find where an element is, move, click, scroll, type and press
+// keys through CDP input events, open a note or list, and save a still.
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { toWebp } from './encode.mjs';
 import { pointer } from './pointer.mjs';
+
+const TYPING_MS = 35;
+const GLIDE_STEP_MS = 16;
+const DRAG_START_MS = 2000;
+const FINGER_LINGER_MS = 200;
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -25,6 +30,9 @@ export async function boundsOf(session, selector, text) {
 	return bounds;
 }
 
+/** Returns the middle of `bounds`. */
+export const middleOf = ({ x, y, width, height }) => ({ x: x + width / 2, y: y + height / 2 });
+
 /** Moves the mouse to `x, y`, drawing the pointer there when `drawn` is true. */
 export async function hover(session, x, y, { drawn = false } = {}) {
 	await session.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
@@ -39,15 +47,131 @@ export async function click(session, x, y, button = 'left') {
 	}
 }
 
+/**
+ * A mouse for recordings, starting at `x, y`: each input moves the drawn pointer too. `glide` moves
+ * in steps over `ms`, so the pointer travels on screen; `press`, `release` and `click` act where it
+ * is; `drag` drags what's under it to `x, y` with HTML drag and drop, rejecting if no drag starts.
+ */
+export function drawnMouse(session, x, y) {
+	const at = { x, y };
+	const sendMove = () => session.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at, ...held });
+	const button = (type) => session.send('Input.dispatchMouseEvent', { type, ...at, button: 'left', clickCount: 1 });
+	// Chromium starts a drag only from moves that say the button is down.
+	let held = {};
+	const glide = async (toX, toY, ms, sendStep) => {
+		const start = { ...at };
+		const steps = Math.max(1, Math.round(ms / GLIDE_STEP_MS));
+		for (let step = 1; step <= steps; step++) {
+			// Eases out, as a hand slows onto its target.
+			const done = 1 - (1 - step / steps) ** 3;
+			at.x = Math.round(start.x + (toX - start.x) * done);
+			at.y = Math.round(start.y + (toY - start.y) * done);
+			await sendStep();
+			await pointer(session, at.x, at.y, 'move');
+			await sleep(GLIDE_STEP_MS);
+		}
+	};
+	const mouse = {
+		at,
+		glide: (toX, toY, ms = 500) => glide(toX, toY, ms, sendMove),
+		async press() {
+			await button('mousePressed');
+			held = { button: 'left', buttons: 1 };
+		},
+		async release() {
+			await button('mouseReleased');
+			held = {};
+		},
+		async click() {
+			await mouse.press();
+			await mouse.release();
+		},
+		async drag(toX, toY, ms = 900) {
+			await session.send('Input.setInterceptDrags', { enabled: true });
+			try {
+				const started = new Promise((resolve) => session.on('Input.dragIntercepted', ({ data }) => resolve(data)));
+				await mouse.press();
+				await sleep(120);
+				await mouse.glide(at.x + 4, at.y + 8, 80);
+				const data = await withinDragStart(started, at);
+				const dragEvent = (type) => session.send('Input.dispatchDragEvent', { type, ...at, data });
+				await dragEvent('dragEnter');
+				await glide(toX, toY, ms, () => dragEvent('dragOver'));
+				await sleep(300);
+				await dragEvent('drop');
+			} finally {
+				await mouse.release();
+				await session.send('Input.setInterceptDrags', { enabled: false });
+			}
+		},
+	};
+	return mouse;
+}
+
+async function withinDragStart(started, { x, y }) {
+	let timer;
+	const late = new Promise((_, reject) => {
+		timer = setTimeout(() => reject(new Error(`No drag started at ${x}, ${y}.`)), DRAG_START_MS);
+	});
+	try {
+		return await Promise.race([started, late]);
+	} finally {
+		clearTimeout(timer);
+	}
+}
+
+const sendTouch = (session, type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] });
+
+/** Puts a finger on the page at `x, y`, drawing the finger mark there. */
+export async function fingerDown(session, x, y) {
+	await pointer(session, x, y, 'down');
+	await sendTouch(session, 'touchStart', { x, y });
+}
+
+/** Slides the finger from `from` to `to` in small steps, over about `ms`. */
+export async function fingerSlide(session, from, to, ms) {
+	const steps = Math.max(1, Math.round(ms / GLIDE_STEP_MS));
+	for (let step = 1; step <= steps; step++) {
+		const x = Math.round(from.x + ((to.x - from.x) * step) / steps);
+		const y = Math.round(from.y + ((to.y - from.y) * step) / steps);
+		await pointer(session, x, y, 'down');
+		await sendTouch(session, 'touchMove', { x, y });
+		await sleep(GLIDE_STEP_MS);
+	}
+}
+
+/** Lifts the finger from `x, y`, and the finger mark fades a moment later. */
+export async function fingerUp(session, x, y) {
+	await pointer(session, x, y, 'up');
+	await sendTouch(session, 'touchEnd');
+	await sleep(FINGER_LINGER_MS);
+	await pointer(session, x, y, 'hide');
+}
+
 /** Turns the mouse wheel at `x, y` by `deltaY` CSS pixels, down when positive. */
 export async function scroll(session, x, y, deltaY) {
 	await session.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x, y, deltaX: 0, deltaY });
 }
 
+/** Presses `key`, by its CDP name, typing `text` when one is given. */
+export async function pressKey(session, key, text) {
+	const code = { Escape: 27, Enter: 13, ArrowRight: 39 }[key];
+	await session.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code: key, windowsVirtualKeyCode: code, text });
+	await session.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key, windowsVirtualKeyCode: code });
+}
+
 /** Presses Escape, which closes an open menu. */
-export async function pressEscape(session) {
-	for (const type of ['keyDown', 'keyUp']) {
-		await session.send('Input.dispatchKeyEvent', { type, key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+export const pressEscape = (session) => pressKey(session, 'Escape');
+
+/** Presses Enter. */
+export const pressEnter = (session) => pressKey(session, 'Enter', '\r');
+
+/** Types `text` a key at a time into what has focus. */
+export async function type(session, text) {
+	for (const char of text) {
+		await session.send('Input.dispatchKeyEvent', { type: 'keyDown', text: char, key: char });
+		await session.send('Input.dispatchKeyEvent', { type: 'keyUp', key: char });
+		await sleep(TYPING_MS);
 	}
 }
 
@@ -86,6 +210,25 @@ export async function openMenuOn(session, row, item) {
 	const entry = await boundsOf(session, '.menu .menu-item', item);
 	await hover(session, entry.x + entry.width - 14, entry.y + entry.height / 2);
 	await sleep(500);
+}
+
+/**
+ * Runs `act`, then puts the `note` back as it was and removes any file `act` added to `folder`, so
+ * the next scene finds the vault as this one did.
+ */
+export async function undoingChanges(session, note, folder, act) {
+	const path = JSON.stringify(note);
+	const listFiles = () => session.evaluate(`app.vault.adapter.list(${JSON.stringify(folder)}).then(({ files }) => files)`);
+	const text = await session.evaluate(`app.vault.adapter.read(${path})`);
+	const filesBefore = await listFiles();
+	try {
+		await act();
+	} finally {
+		await session.evaluate(`app.vault.adapter.write(${path}, ${JSON.stringify(text)})`);
+		for (const file of await listFiles()) {
+			if (!filesBefore.includes(file)) await session.evaluate(`app.vault.adapter.remove(${JSON.stringify(file)})`);
+		}
+	}
 }
 
 /** Saves the scene's clip as `<out>/<scene name>.webp`. */
