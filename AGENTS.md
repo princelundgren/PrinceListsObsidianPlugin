@@ -129,9 +129,9 @@ Obsidian when the pictures are done.
   `node:test` tests sit beside it, outside `tests/`, because vitest collects the test files there.
   `scripts/pictures/` copies the demo vault and takes the README's stills, one scene module per
   picture in `scenes/`. The scripts reach Obsidian through its `app` global, calling only what
-  `obsidian.d.ts` documents. They read the page only to find elements, where they are and which
-  folders are open, act through DevTools input events, and add only the drawn pointer
-  (`pointer.mjs`).
+  `obsidian.d.ts` documents. They read the page only to find elements, where they are, which
+  folders are open and whether it's a phone's, act through DevTools input events, and add only the
+  drawn pointer (`pointer.mjs`).
 - **File size:** keep each file under about 300 lines; split by responsibility.
 
 ## Working on a change

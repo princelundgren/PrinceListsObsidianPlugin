@@ -13,7 +13,7 @@ const SCENES = new URL('./scenes/', import.meta.url);
 /** Returns the URL of the scene module `name`, throwing when `scenes/` has none by that name. */
 function sceneModule(name) {
 	const module = new URL(`${name}.mjs`, SCENES);
-	if (!/^[a-z-]+$/.test(name) || !existsSync(module)) throw new Error(`There's no scene "${name}" in scripts/pictures/scenes/.`);
+	if (!/^[a-z0-9-]+$/.test(name) || !existsSync(module)) throw new Error(`There's no scene "${name}" in scripts/pictures/scenes/.`);
 	return module;
 }
 
