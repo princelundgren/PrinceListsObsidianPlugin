@@ -3,7 +3,8 @@ import { ListEditing } from '../../src/core/editing';
 import { getItemNotes } from '../../src/core/edit-items';
 import { splitLines } from '../../src/core/lines';
 import { changedLines } from '../../src/core/notes-lines';
-import { contentStartOf, crlf, list, notesEditor as editor } from './edit-helpers';
+import type { ItemBlock } from '../../src/core/parse';
+import { FIXTURES, JOINING_CASES, contentStartOf, crlf, expectRestKept, itemBlock, list, notesEditor as editor, readFixture } from './edit-helpers';
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
 
@@ -168,6 +169,49 @@ describe("a visit to a card's notes", () => {
 		notes.type('a\n\nb');
 		expect(state.text).toBe(`${FRONTMATTER}- [ ] t\n\ta\n\n\tb`);
 		expect(state.visitText()).toBe(notes.text);
+	});
+});
+
+describe("a save of a card's notes, over every line", () => {
+	const typed = (text: string, titleLine: number, markdown: string) => {
+		const state = editing(text, titleLine);
+		const outcome = editor(state, 'item').type(markdown);
+		return { text: state.text, outcome };
+	};
+
+	test('writes the notes after an empty line at the item\'s notes column, and blank lines empty', () => {
+		expect(typed('- [ ] a\n- [ ] b\n', 0, 'Buy 6:\n- one\n\nlast').text).toBe('- [ ] a\n\n\tBuy 6:\n\t- one\n\n\tlast\n- [ ] b\n');
+		expect(typed('100. [ ] x\n', 0, 'n').text).toBe('100. [ ] x\n\n     n\n');
+	});
+
+	test('writes the file\'s line ending', () => {
+		expect(typed('- [ ] a\r\n- [ ] b\r\n', 0, 'x\n\ny').text).toBe('- [ ] a\r\n\r\n\tx\r\n\r\n\ty\r\n- [ ] b\r\n');
+	});
+
+	test('emptying notes the visit found takes their lines, and leaves the empty line above them', () => {
+		expect(typed('- [ ] a\n\n\tnote\n- [ ] b\n', 0, '').text).toBe('- [ ] a\n\n- [ ] b\n');
+	});
+
+	test('writes an empty line after the notes where the text below would join the item', () => {
+		const text = '- [ ] a\n\n\t```\n\tx\n\t```\nText\n';
+		expect(typed(text, 0, 'para').text).toBe('- [ ] a\n\n\tpara\n\nText\n');
+		expect(typed(crlf(text), 0, 'para').text).toBe(crlf('- [ ] a\n\n\tpara\n\nText\n'));
+	});
+
+	test('leaves every other item, heading and untouched block as it parsed', () => {
+		for (const text of [...Object.values(JOINING_CASES), ...FIXTURES.map(readFixture)]) {
+			const { lines, items } = list(text);
+			for (const it of items) {
+				for (const markdown of ['para', '', '```\nx\n```', 'a\n---']) {
+					const after = typed(text, it.titleLine, markdown);
+					// Null: the notes already hold this text.
+					if (after.outcome === null) continue;
+					expect(saved(after.outcome), `${JSON.stringify(text)}:${it.titleLine}:${markdown}`).toBe(true);
+					const edited = list(after.text).items.find((i) => i.titleLine === it.titleLine) as ItemBlock;
+					expectRestKept(text, after.text, { removed: [itemBlock(lines, it)], added: [itemBlock(list(after.text).lines, edited)] });
+				}
+			}
+		}
 	});
 });
 

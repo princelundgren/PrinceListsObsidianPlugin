@@ -6,20 +6,17 @@ import {
 	getItemNotes,
 	insertItem,
 	insertItemInSection,
-	setItemNotes,
 	setItemTitle,
 	toggleItem,
 } from '../../src/core/edit-items';
 import { parseItemLine } from '../../src/core/item-line';
 import { joinLines, type Line } from '../../src/core/lines';
-import { isBlank, type ItemBlock } from '../../src/core/parse';
 import {
 	FIXTURES,
 	JOINING_CASES,
 	REFUSED_CASES,
 	crlf,
 	expectRestKept,
-	html,
 	itemBlock,
 	list,
 	readFixture,
@@ -186,50 +183,8 @@ describe('deleteItem', () => {
 	});
 });
 
-describe('item notes', () => {
-	const setNotes = (text: string, n: number, markdown: string) => {
-		const { lines, model, item } = list(text);
-		return joinLines(setItemNotes(lines, model, item(n), markdown));
-	};
-	const roundTrip = (text: string, n = 0) => {
-		const { lines, model, item } = list(text);
-		return joinLines(setItemNotes(lines, model, item(n), getItemNotes(lines, item(n))));
-	};
-	test('writes notes after a blank line with the item notes indent, and blank lines empty', () => {
-		expect(setNotes('- [ ] a\n- [ ] b\n', 0, 'Buy 6:\n- one\n\nlast')).toBe('- [ ] a\n\n\tBuy 6:\n\t- one\n\n\tlast\n- [ ] b\n');
-		expect(setNotes('* [ ] a\n\n    old\n', 0, 'x')).toBe('* [ ] a\n\n    x\n');
-		expect(setNotes('100. [ ] x\n', 0, 'n')).toBe('100. [ ] x\n\n     n\n');
-	});
-	test('writes notes with the file ending', () => {
-		expect(setNotes('- [ ] a\r\n- [ ] b\r\n', 0, 'x\n\ny')).toBe('- [ ] a\r\n\r\n\tx\r\n\r\n\ty\r\n- [ ] b\r\n');
-	});
-	test('empty notes remove the notes and the blank line before them', () => {
-		expect(setNotes('- [ ] a\n\n\tnote\n- [ ] b\n', 0, '')).toBe('- [ ] a\n- [ ] b\n');
-	});
-	test('drops trailing blank lines from the notes', () => {
-		expect(setNotes('- [ ] a\n- [ ] b\n', 0, 'x\n\n')).toBe('- [ ] a\n\n\tx\n- [ ] b\n');
-		expect(setNotes('- [ ] a\n- [ ] b\n', 0, 'x\n \n')).toBe(setNotes('- [ ] a\n- [ ] b\n', 0, 'x'));
-	});
-	test('writes an empty line after the notes where the text below would join the item', () => {
-		const text = '- [ ] a\n\n\t```\n\tx\n\t```\nText\n';
-		expect(setNotes(text, 0, 'para')).toBe('- [ ] a\n\n\tpara\n\nText\n');
-		expect(setNotes(text, 0, '')).toBe('- [ ] a\n\nText\n');
-		expect(setNotes(text, 0, '```\nx\n```')).toBe(text);
-		expect(setNotes(crlf(text), 0, 'para')).toBe(crlf('- [ ] a\n\n\tpara\n\nText\n'));
-	});
-	test('leaves every other item, heading and untouched block as it parsed', () => {
-		for (const text of [...Object.values(JOINING_CASES), ...FIXTURES.map(readFixture)]) {
-			const { lines, model, items } = list(text);
-			for (const it of items) {
-				for (const markdown of [getItemNotes(lines, it), 'para', '', '```\nx\n```', 'a\n---']) {
-					const after = joinLines(setItemNotes(lines, model, it, markdown));
-					const edited = list(after).items.find((i) => i.titleLine === it.titleLine) as ItemBlock;
-					expectRestKept(text, after, { removed: [itemBlock(lines, it)], added: [itemBlock(list(after).lines, edited)] });
-				}
-			}
-		}
-	});
-	test('getItemNotes strips the notes indent by columns, a tab and 4 spaces alike', () => {
+describe('getItemNotes', () => {
+	test('strips the notes indent by columns, a tab and 4 spaces alike', () => {
 		const { lines, item } = list('- [ ] a\n\n\tone\n    two\n\t\tcode\n');
 		expect(getItemNotes(lines, item(0))).toBe('one\ntwo\n\tcode');
 	});
@@ -238,51 +193,7 @@ describe('item notes', () => {
 		expect(item(0).notesIndent).toBe('  ');
 		expect(getItemNotes(lines, item(0))).toBe('one\n  code');
 	});
-	test('writing back what getItemNotes reads leaves every fixture byte-identical', () => {
-		for (const name of FIXTURES) {
-			const text = readFixture(name);
-			const { lines, items } = list(text);
-			for (const item of items) {
-				if (!notesStartAfterBlank(lines, item.titleLine, item.endLine)) continue;
-				expect(roundTrip(text, items.indexOf(item)), `${name}:${item.titleLine}`).toBe(text);
-			}
-		}
-	});
-	test.each([
-		[readFixture('lazy.md'), '- [ ] a\n\n\tlazy line\n- [ ] b'],
-		[readFixture('title-heading.md'), '- [ ] a\n\n\t---\n- [ ] b'],
-		['- [ ] c\n lazy\n', '- [ ] c\n\n\tlazy\n'],
-		['100. [ ] x\n\tlazy\n', '100. [ ] x\n\n     lazy\n'],
-		['- [ ] a\n\n\tnote\n\n    more\n', '- [ ] a\n\n\tnote\n\n\tmore\n'],
-		// Notes that open with indented code keep it code.
-		['- [ ] a\n\n\t\tcode\n\n\tpara\n', '- [ ] a\n\n\t\tcode\n\n\tpara\n'],
-		['- [ ] a\n\n      code\n\n    para\n', '- [ ] a\n\n\t  code\n\n\tpara\n'],
-	])('writing back the notes of %j gives %j', (text, expected) => {
-		expect(roundTrip(text)).toBe(expected);
-	});
-	test('notes written back render the same, for every fixture item whose notes follow a blank line', () => {
-		const cases = [
-			...FIXTURES.map(readFixture),
-			'- [ ] a\n\n\tnote\n\n    more\n',
-			'- [ ] a\n\n\t\tcode\n\n\tpara\n',
-			'- [ ] a\n\n      code\n\n    para\n',
-			'- [ ] a\n\n  one\n \tcode\n',
-		];
-		for (const text of cases) {
-			const { lines, items } = list(text);
-			items.forEach((item, n) => {
-				if (!notesStartAfterBlank(lines, item.titleLine, item.endLine)) return;
-				expect(html(roundTrip(text, n)), `${JSON.stringify(text)}:${item.titleLine}`).toBe(html(text));
-			});
-		}
-	});
 });
-
-// Notes that continue the title without a blank line are written back after one, which is meant to
-// change how they parse (see "Item notes" in the design).
-function notesStartAfterBlank(lines: readonly Line[], titleLine: number, endLine: number): boolean {
-	return endLine === titleLine + 1 || isBlank((lines[titleLine + 1] as Line).text);
-}
 
 describe('setItemTitle', () => {
 	test('setting the current title leaves every fixture byte-identical', () => {

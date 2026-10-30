@@ -1,7 +1,9 @@
 import { expect, test } from 'vitest';
 import { setHeadingText } from '../../src/core/edit-headings';
-import { moveItem, setItemNotes } from '../../src/core/edit-items';
+import { moveItem } from '../../src/core/edit-items';
 import { joinLines, splitLines } from '../../src/core/lines';
+import { saveItemNotesLines } from '../../src/core/notes-lines';
+import { openVisit } from '../../src/core/notes-visit';
 import type { ItemBlock, Section } from '../../src/core/parse';
 import { list, saveWholeListNote } from './edit-helpers';
 
@@ -29,10 +31,13 @@ function timed<T>(edit: () => T): { result: T; ms: number } {
 	return { result, ms };
 }
 
-test('setItemNotes, which runs on every keystroke, takes under 100 ms on a list of 3,000 lines', () => {
+test('saveItemNotesLines, which runs on every keystroke, takes under 100 ms on a list of 3,000 lines', () => {
 	const { lines, model, items } = list(text);
 	expect(lines.length).toBeGreaterThan(3000);
-	const { ms } = timed(() => setItemNotes(lines, model, items[760] as ItemBlock, 'Typed\n- a bullet'));
+	const item = items[760] as ItemBlock;
+	const span = openVisit(lines, model, item).piece;
+	const { result, ms } = timed(() => saveItemNotesLines(lines, model, item, span, { from: 0, to: 1, lines: ['Typed', '- a bullet'] }));
+	expect(result.lines[item.titleLine + 2]?.text).toBe('\tTyped');
 	expect(ms).toBeLessThan(100);
 });
 
