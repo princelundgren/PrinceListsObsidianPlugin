@@ -80,11 +80,9 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 					if (!tr.docChanged) return true;
 					if (current.visitStart() === null) {
 						isVisitFromChange = true;
-						// The notes changed since the editor last showed them: the sync after the change shows them.
-						if (openVisit() !== tr.startState.doc.toString()) {
-							current.close();
-							return false;
-						}
+						// The notes changed since the editor last showed them: the sync after the change shows them,
+						// and ends the visit there: ending the list note's can draw the list, syncing inside this transaction.
+						if (openVisit() !== tr.startState.doc.toString()) return false;
 					}
 					const change = changedLines(tr.startState.doc.toString(), tr.newDoc.toString());
 					if (!change || current.fits(change)) return true;
@@ -96,10 +94,12 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				// focusChangeEffect can come after the first one.
 				EditorView.domEventHandlers({
 					focus: (_evt, editor) => sync(editor),
-					blur: (_evt, editor) => {
+					blur: (evt, editor) => {
 						// Moving to another window or app keeps the visit, and focus comes back to it.
 						if (!editor.dom.doc.hasFocus()) return;
-						current.close();
+						// FocusEvent types it as an EventTarget; between elements it is an Element or null.
+						const related = evt.relatedTarget as Node | null;
+						current.close(related?.instanceOf(HTMLElement) ? related : null);
 						sync(editor);
 					},
 					// A drawn link follows on its click, through the view's own listener, as in Live Preview, and
@@ -159,7 +159,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 			}
 			if (!isVisitFromChange) return;
 			isVisitFromChange = false;
-			if (!editor.hasFocus) current.close();
+			if (!editor.hasFocus) current.close(null);
 			sync(editor);
 		},
 	});

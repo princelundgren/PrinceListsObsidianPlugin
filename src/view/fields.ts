@@ -1,12 +1,12 @@
 import { normalizePath, Notice, type TFile } from 'obsidian';
-import { listNoteUnclosedBlock, listNoteWouldRestructure } from '../core/edit-list-note';
+import { getListNote, listNoteUnclosedBlock, listNoteWouldRestructure } from '../core/edit-list-note';
 import { nameTaken } from '../core/file-name';
 import type { LineRange } from '../core/follow';
 import { oneLineTitle } from '../core/title-field';
 import { fitHeight } from './dom';
 import type { PrinceListView } from './list-view';
-import { drawPieces } from './note-piece-field';
-import { listNoteHost } from './notes-host';
+import { showNotesEditor } from './notes-editor';
+import { listNoteSource } from './notes-source';
 
 export const TITLE_CLASS = 'princelists-title';
 export const NOTE_CLASS = 'princelists-list-note';
@@ -21,7 +21,7 @@ export interface ListTitleSession {
 	before: string;
 }
 
-/** The list note while one of its pieces is open, moving from piece to piece included. */
+/** The list note while it is being edited. */
 export interface ListNoteSession {
 	warnings: { restructure: HTMLElement; unclosed: HTMLElement };
 	/** Whether a warning showed while it was open, so the list may now parse differently. */
@@ -106,33 +106,44 @@ function isTaken(view: PrinceListView, file: TFile, fileName: string, path: stri
 	return other !== null && other !== file;
 }
 
-// The list note drawn a piece at a time, or, while it is empty, a gray "Notes" to click to add one.
+// The list note's editor, with its warnings under it while it is being edited.
 export function buildListNote(view: PrinceListView, parent: HTMLElement): HTMLElement {
 	const el = parent.createDiv({ cls: NOTE_CLASS });
-	drawPieces(view, listNoteHost(view, el.createDiv({ cls: LIST_NOTE_AREA_CLASS })));
+	view.listNoteEditor = showNotesEditor(view, listNoteSource(view), el);
 	return el;
 }
 
-// After a redraw, which keeps the list note: its pieces are drawn again where they changed.
+// After a redraw, which keeps the list note: its editor syncs to the note.
 export function refreshListNote(view: PrinceListView): void {
-	const area = view.listNoteEl?.querySelector<HTMLElement>(`.${LIST_NOTE_AREA_CLASS}`);
-	if (area) drawPieces(view, listNoteHost(view, area));
+	if (view.listNoteEl) view.listNoteEditor = showNotesEditor(view, listNoteSource(view), view.listNoteEl);
+}
+
+/** Starts a visit to the list note, as ListEditing's openNotes does, with the note's warnings. */
+export function visitListNote(view: PrinceListView): string | null {
+	beginListNote(view);
+	const text = view.editing.openNotes('listNote');
+	const { lines, model } = view.parse();
+	warnListNote(view, getListNote(lines, model));
+	return text;
 }
 
 /** Opens one piece of the list note, as ListEditing's openListNote does, with the note's warnings. */
 export function openListNote(view: PrinceListView, range: LineRange, isNew: boolean, indent?: string): string {
 	const text = view.editing.openListNote(range, isNew, indent);
-	const el = view.listNoteEl;
-	if (!view.listNote && el) {
-		const warning = (text: string) => el.createDiv({ cls: 'princelists-field-warning', text });
-		const warnings = {
-			restructure: warning('A heading or checkbox line here becomes a section or item when saved.'),
-			unclosed: warning('An unclosed block here hides the items below it.'),
-		};
-		view.listNote = { warnings, warned: false };
-	}
+	beginListNote(view);
 	warnListNote(view, view.editing.listNoteAsTyped(text));
 	return text;
+}
+
+function beginListNote(view: PrinceListView): void {
+	const el = view.listNoteEl;
+	if (view.listNote || !el) return;
+	const warning = (text: string) => el.createDiv({ cls: 'princelists-field-warning', text });
+	const warnings = {
+		restructure: warning('A heading or checkbox line here becomes a section or item when saved.'),
+		unclosed: warning('An unclosed block here hides the items below it.'),
+	};
+	view.listNote = { warnings, warned: false };
 }
 
 // After a warning the note's lines may have become sections or items, or hidden the ones below, and a

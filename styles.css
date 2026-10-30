@@ -36,6 +36,7 @@ textarea.princelists-title {
 }
 
 .princelists-list-note {
+	margin-bottom: var(--size-4-4);
 	color: var(--text-muted);
 }
 
@@ -213,7 +214,8 @@ textarea.princelists-title {
 
 /* A table in rendered notes, drawn as in a note: Obsidian's own table rules apply only inside its
    views. One wider than the card scrolls inside it, as code does, so the list never scrolls sideways. */
-.princelists-card-notes table {
+.princelists-card-notes table,
+.princelists-list-note table {
 	display: block;
 	width: max-content;
 	max-width: 100%;
@@ -223,19 +225,22 @@ textarea.princelists-title {
 }
 
 .princelists-card-notes th,
-.princelists-card-notes td {
+.princelists-card-notes td,
+.princelists-list-note th,
+.princelists-list-note td {
 	padding: var(--size-2-2) var(--size-4-2);
 	border: var(--table-border-width) solid var(--table-border-color);
 }
 
-.princelists-card-notes th {
+.princelists-card-notes th,
+.princelists-list-note th {
 	border: var(--table-header-border-width) solid var(--table-header-border-color);
 	font-weight: var(--table-header-weight);
 }
 
-/* Obsidian styles code only inside its own views, so a card's notes take its documented code
-   variables. */
-.princelists-card-notes code {
+/* Obsidian styles code only inside its own views, so the notes take its documented code variables. */
+.princelists-card-notes code,
+.princelists-list-note code {
 	padding: var(--size-2-1) var(--size-4-1);
 	border-radius: var(--radius-s);
 	background: var(--code-background);
@@ -243,7 +248,8 @@ textarea.princelists-title {
 	font-size: var(--code-size);
 }
 
-.princelists-card-notes pre {
+.princelists-card-notes pre,
+.princelists-list-note pre {
 	padding: var(--size-4-2) var(--size-4-3);
 	border-radius: var(--radius-s);
 	background: var(--code-background);
@@ -251,33 +257,46 @@ textarea.princelists-title {
 	overflow-x: auto;
 }
 
-.princelists-card-notes pre code {
+.princelists-card-notes pre code,
+.princelists-list-note pre code {
 	padding: 0;
 }
 
-/* A card's notes editor reads as the card's text, as Obsidian's own small editors do: the card's font,
-   Obsidian's caret, and no focus ring. It is at least three lines tall, empty or not, so it is easy
-   to tap. */
-.princelists-card-notes .cm-scroller {
+/* A notes editor reads as the text around it, as Obsidian's own small editors do: its font, Obsidian's
+   caret, and no focus ring. A card's is at least three lines tall, empty or not, so it is easy to tap. */
+.princelists-card-notes .cm-scroller,
+.princelists-list-note .cm-scroller {
 	font-family: inherit;
 	line-height: var(--line-height-normal);
 }
 
-.princelists-card-notes .cm-content {
-	min-height: calc(3em * var(--line-height-normal));
+.princelists-card-notes .cm-content,
+.princelists-list-note .cm-content {
 	padding: 0;
 	caret-color: var(--caret-color);
 }
 
-.princelists-card-notes .cm-line {
+.princelists-card-notes .cm-content {
+	min-height: calc(3em * var(--line-height-normal));
+}
+
+.princelists-card-notes .cm-line,
+.princelists-list-note .cm-line {
 	padding: 0;
 }
 
-.princelists-card-notes .cm-focused {
+.princelists-card-notes .cm-focused,
+.princelists-list-note .cm-focused {
 	outline: none;
 }
 
-.princelists-card-notes .cm-placeholder {
+/* Gray as the rest of the list note, and the text's own color while it is edited. */
+.princelists-list-note .cm-focused {
+	color: var(--text-normal);
+}
+
+.princelists-card-notes .cm-placeholder,
+.princelists-list-note .cm-placeholder {
 	color: var(--text-faint);
 }
 

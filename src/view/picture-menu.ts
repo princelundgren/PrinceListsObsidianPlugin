@@ -8,11 +8,8 @@ import { contentStartLine } from '../obsidian/marker';
 import type { Card } from './card';
 import type { PrinceListView } from './list-view';
 import { NOTES_BLOCK_CLASS } from './notes-blocks';
-import { notesHostOf, type NotesHost } from './notes-host';
-import { cardNotesSource, type NotesSource } from './notes-source';
+import { cardNotesSource, listNoteSource, type NotesSource } from './notes-source';
 import { drawnPictureColumn, NOTES_PICTURE_CLASS } from './notes-widgets';
-import { placeAt } from './note-pieces';
-import { drawnPieces, NOTE_PIECE_CLASS } from './note-piece-state';
 import { CHANGED_ELSEWHERE_NOTICE, enqueueAt, writePlanned } from './write';
 
 // Obsidian draws `![[…]]` and `![…](…)` pictures from the vault alike, with the link in `src`.
@@ -65,19 +62,29 @@ interface MenuPicture {
 	removable: RemovableLink | null;
 }
 
-// A picture the open card's notes editor drew, or Obsidian's renderer drew in one of its blocks.
 function cardPicture(view: PrinceListView, target: HTMLElement): MenuPicture | null {
 	const card = view.card;
-	const editor = card?.editor;
+	return card?.editor ? editorPicture(view, card.editor, cardNotesSource(view, card), card, target) : null;
+}
+
+function listNotePicture(view: PrinceListView, target: HTMLElement): MenuPicture | null {
+	const editor = view.listNoteEditor;
+	return editor ? editorPicture(view, editor, listNoteSource(view), null, target) : null;
+}
+
+// A picture a notes editor drew, or Obsidian's renderer drew in one of its blocks: in the open card's
+// notes, `card`, or in the list note, with `card` null.
+function editorPicture(view: PrinceListView, editor: EditorView, source: NotesSource, card: Card | null, target: HTMLElement): MenuPicture | null {
 	const picture = target.closest<HTMLElement>(`${PICTURE}, .${NOTES_PICTURE_CLASS}`);
 	// A picture in an embedded note belongs to that note.
-	if (!card || !editor || !picture || !editor.contentDOM.contains(picture) || picture.closest(EMBEDDED_NOTE)) return null;
+	if (!picture || !editor.contentDOM.contains(picture) || picture.closest(EMBEDDED_NOTE)) return null;
 	const link = editorLink(editor, picture);
 	// Obsidian's renderer gives its pictures their link text in `src`; the editor's hold a resource URL.
 	const linktext = link?.linkpath ?? (picture.matches(PICTURE) ? picture.getAttr('src') : null);
 	if (!linktext) return null;
-	const at = link ? fileLink(view, cardNotesSource(view, card), editor, link) : null;
-	const removable = at && { link: at, isListNote: false, card, titleLine: view.selected, seen: view.outsideChanges };
+	const at = link ? fileLink(view, source, editor, link) : null;
+	const titleLine = card ? view.selected : null;
+	const removable = at && { link: at, isListNote: card === null, card, titleLine, seen: view.outsideChanges };
 	return { linktext, removable: removable && canRemove(view, removable) ? removable : null };
 }
 
@@ -116,37 +123,6 @@ function fileLink(view: PrinceListView, source: NotesSource, editor: EditorView,
 	const indent = lineText === undefined ? 0 : lineText.length - shown.length;
 	if (lineText === undefined || lineText.slice(link.from + indent) !== shown.slice(link.from)) return null;
 	return { line, lineText, from: link.from + indent, to: link.to + indent };
-}
-
-// A picture drawn in the list note.
-function listNotePicture(view: PrinceListView, target: HTMLElement): MenuPicture | null {
-	const picture = target.closest<HTMLElement>(PICTURE);
-	const host = picture ? notesHostOf(view, picture) : null;
-	const linktext = picture?.getAttr('src');
-	if (!picture || !host || !linktext || picture.closest(EMBEDDED_NOTE)) return null;
-	return { linktext, removable: removableLink(view, host, picture, linktext) };
-}
-
-// The picture's link when it can be taken out now: the drawn pictures of its piece, in order, line
-// up one to one with the piece's picture links, and the edit is safe.
-function removableLink(view: PrinceListView, host: NotesHost, picture: HTMLElement, linktext: string): RemovableLink | null {
-	const found = host.notes();
-	const pieceEl = picture.closest<HTMLElement>(`.${NOTE_PIECE_CLASS}`);
-	const drawn = pieceEl ? drawnPieces.get(pieceEl) : undefined;
-	if (!found || !pieceEl || !drawn || placeAt(picture, found.notes) === 'stale') return null;
-	const pictures = Array.from(pieceEl.querySelectorAll(PICTURE)).filter((el) => !el.closest(EMBEDDED_NOTE));
-	const texts = view.lines().slice(drawn.range.start, drawn.range.end).map((line) => line.text);
-	const links = pictureLinks(texts);
-	const link = links[pictures.indexOf(picture)];
-	if (links.length !== pictures.length || link?.linkpath !== linktext) return null;
-	const removable = {
-		link: { line: drawn.range.start + link.line, lineText: texts[link.line] ?? '', from: link.from, to: link.to },
-		isListNote: host.kind === 'listNote',
-		card: host.kind === 'card' ? view.card : null,
-		titleLine: host.kind === 'card' ? view.selected : null,
-		seen: view.outsideChanges,
-	};
-	return canRemove(view, removable) ? removable : null;
 }
 
 // The removal, planned on `text` for the item now at `titleLine`, which its own edits may have moved.

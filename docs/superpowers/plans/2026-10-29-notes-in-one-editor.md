@@ -230,7 +230,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   `fits` are Task 1's, `visitStart` is the visit's `range.start` or null outside one, `save` goes
   through `saveNotes` and returns its `Typed` to the editor, which passes it to `view.handleTyped`.
   A source does anything else its save needs itself, so Task 7's list note source keeps
-  `saveListNote`'s `note` and checks its warnings inside `save`, and the interface stays as it is.
+  `saveListNote`'s `note` and checks its warnings inside `save`, and the interface stays as it is,
+  but for Task 7's `close(focusing)`.
 - Produces, in `src/view/notes-editor.ts`:
   - `showNotesEditor(view: PrinceListView, source: NotesSource, area: HTMLElement): EditorView`:
     creates the editor in `area` once, or, for the one already there, syncs it. The card keeps it
@@ -257,7 +258,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
     when `source.fits` is false for `changedLines(tr.startState.doc.toString(),
     tr.newDoc.toString())`, and shows step one's notice once per visit, so a refused change never
     reaches the document or the editor's history (design, "Saving"). A change with no visit open,
-    as a drop from another app makes without a focus event, opens one, and is refused, closing it,
+    as a drop from another app makes without a focus event, opens one, and is refused (the sync after
+    it ends the visit, since Task 7),
     when the notes no longer read as the editor shows them. After the change the editor syncs, and
     the visit ends unless the editor has focus by then.
   - Saving, from the editor's `dispatchTransactions`, after `editor.update(trs)`: for each
@@ -553,24 +555,29 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
 ### Task 7: Edit the list note in one editor
 
 **Files:**
-- Modify: `src/view/notes-source.ts`, `src/view/fields.ts`, `src/view/redraw.ts`,
-  `src/view/list-view.ts`, `src/view/events.ts`, `src/view/menus.ts`, `src/view/checklist.ts`,
-  `styles.css`
+- Modify: `src/core/edit-list-note.ts`, `tests/core/edit-list-note.test.ts`,
+  `src/core/notes-visit.ts`, `src/view/notes-source.ts`, `src/view/notes-editor.ts`,
+  `src/view/fields.ts`, `src/view/redraw.ts`, `src/view/list-view.ts`, `src/view/events.ts`,
+  `src/view/menus.ts`, `src/view/picture-menu.ts`, `styles.css`
 
 **Interfaces:**
 - Consumes: Tasks 1 to 6.
+- Produces, in `src/core/edit-list-note.ts`, with tests first: `listNoteStartLine(lines, model):
+  number`, the list note's first line with text, or its end when it has none, where
+  `openNotes('listNote')` starts.
 - Produces, in `src/view/notes-source.ts`: `listNoteSource(view: PrinceListView): NotesSource`:
-  `read` through `getListNote` from the list note's first line with text, as Task 1's
-  `openNotes('listNote')` starts, `open` through `openNotes('listNote')` and `save` through
+  `read` from `listNoteStartLine`, `open` through `openNotes('listNote')` and `save` through
   `saveListNote`: it checks `warnListNote` on the returned `note`, the whole note as saved, as
   `fields.ts` does for a piece, and returns the result as `Typed` without its `note`. Leaving the
   note still draws the whole list again when it warned or rows were held back, as `closeListNote`
-  in `fields.ts` does now, alongside the sync on blur.
+  in `fields.ts` does now, alongside the sync on blur. So `close` takes the element focus is going
+  to, which that redraw keeps in place, and the change filter no longer ends a visit: a redraw
+  there would sync the editor inside the change's own transaction. The sync after the change ends it.
 - `buildListNote` and `refreshListNote` show the list note's editor with `showNotesEditor`; the
-  view keeps it in place of `listNoteNotes` and destroys it in `onClose` and when the note stops
-  being a list.
+  view keeps it beside `listNoteNotes`, which Task 8 removes, and destroys it in `onClose` and
+  when the note stops being a list.
 - It takes no pictures: paste and drop do nothing in it. Its boxes tick as a card's do, with
-  `'listNote'` for `notesOf`.
+  `'listNote'` for `notesOf`. Its pictures keep the picture menu through the editor, as a card's do.
 - The list's background menu (step two, "Right-click menus") no longer opens over the list note.
 
 - [ ] **Step 1: Build it.**
@@ -589,8 +596,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   `src/view/click-caret.ts`, `src/view/notes-host.ts`
 - Modify: `src/core/note-pieces.ts`, `src/core/editing.ts`, `src/core/edit-piece.ts`,
   `src/core/edit-list-note.ts`, `src/core/edit-lines.ts` and their tests, `src/view/events.ts`,
-  `src/view/keys.ts`, `src/view/format.ts`, `src/view/field-undo.ts`, `styles.css`, the three
-  designs
+  `src/view/keys.ts`, `src/view/format.ts`, `src/view/field-undo.ts`, `src/view/fields.ts`,
+  `src/view/list-view.ts`, `src/view/redraw.ts`, `styles.css`, the three designs
 
 **Interfaces:**
 - Goes from `ListEditing`: `openNotesPiece`, `typeNotesPiece`, `notesPieceOutdent`, `openListNote`,
@@ -605,7 +612,8 @@ never holds text that isn't saved and no key regresses; drawing follows in Tasks
   update it, since a refused change now never lands.
 - Goes from the view: the textarea paths of the format bar and `field-undo.ts` that only the
   notes used; the card's title keeps its own. `keys.ts` finds the notes by the editor, not
-  `notesHostOf`.
+  `notesHostOf`. `openListNote` and `LIST_NOTE_AREA_CLASS` in `fields.ts`, and the view's
+  `listNoteNotes` with its lines in `clear()` and `redraw.ts`, which Task 7 left unreached.
 - `src/view/block-fields.ts` stays: it is the `princelists` code block's title field.
 
 - [ ] **Step 1: Remove the code,** and the tests of what goes.
