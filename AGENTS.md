@@ -103,7 +103,7 @@ workspace files when it opens it. These need Node.js 22 or later too:
 |---|---|
 | `node scripts/pictures/demo-vault.mjs <folder> [--theme dark\|light] [--today YYYY-MM-DD]` | Copy the demo vault into `<folder>`, its dates moved from the day they were written for to today. It writes only into a folder with no notes or an earlier copy, never through a linked `.obsidian/`, and keeps `.obsidian/plugins/` |
 | `node --test "scripts/pictures/*.test.mjs"` | Run the picture scripts' tests. Quote the glob so Node expands it in every shell; a folder argument fails on Node 22 and 24 |
-| `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...` | Take the named scenes in `scripts/pictures/scenes/` from a demo vault that Obsidian has open with a DevTools port, writing each as `<scene>.webp` in `<folder>`. It needs `cwebp`, and stops unless the vault is a copy in the scene's theme with "Native menus" off |
+| `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...` | Take the named scenes in `scripts/pictures/scenes/` from a demo vault that Obsidian has open with a DevTools port, writing each as `<scene>.webp` or `<scene>.gif` in `<folder>`. It needs `cwebp` and `ffmpeg`, and stops unless the vault is a copy in the scene's theme with "Native menus" off |
 | `node scripts/pictures/push-vault.mjs --port <port> <folder>` | Write the copy in `<folder>` and the build into the vault Obsidian has open on an emulator, after removing everything in it but its plugins. It stops if the open vault has notes and isn't a copy |
 
 To make a demo vault: close an earlier copy in Obsidian if it's open, run the copy script, then
@@ -141,11 +141,11 @@ demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
   pictures. The docs check reads its notes like any other doc.
 - **`scripts/`:** Node scripts that aren't part of the plugin, such as the docs check. Its
   `node:test` tests sit beside it, outside `tests/`, because vitest collects the test files there.
-  `scripts/pictures/` copies the demo vault and takes the README's stills, one scene module per
-  picture in `scenes/`. The scripts reach Obsidian through its `app` global, calling only what
-  `obsidian.d.ts` documents. They read the page only to find elements, where they are, which
-  folders are open and whether it's a phone's, act through DevTools input events, and add only the
-  drawn pointer (`pointer.mjs`).
+  `scripts/pictures/` copies the demo vault and takes the README's stills and GIFs, one scene module
+  per picture in `scenes/`. A scene that changes a note puts it back when it ends. The scripts reach
+  Obsidian through its `app` global, calling only what `obsidian.d.ts` documents. They read the page
+  only to find elements, where they are, which folders are open and whether it's a phone's, act
+  through DevTools input events, and add only the drawn pointer (`pointer.mjs`).
 - **File size:** keep each file under about 300 lines; split by responsibility.
 
 ## Working on a change
