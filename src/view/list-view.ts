@@ -1,3 +1,4 @@
+import type { EditorView } from '@codemirror/view';
 import { type Component, type Menu, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { CollapsedHeadings } from '../core/collapsed';
@@ -41,6 +42,8 @@ export class PrinceListView extends TextFileView {
 	listNoteEl: HTMLElement | null = null;
 	/** The list note's drawn pieces. */
 	listNoteNotes: Component | null = null;
+	/** The list note's editor, there while the file is a list. */
+	listNoteEditor: EditorView | null = null;
 	headingField: HeadingField | null = null;
 	/** Cmd+F's query, or null while its field is closed. Like showArchived, nothing restores it. */
 	filter: string | null = null;
@@ -134,6 +137,7 @@ export class PrinceListView extends TextFileView {
 		this.editing.text = '';
 		this.listTitle = null;
 		this.endListNote();
+		this.dropListNoteEditor();
 		this.listNoteEl = null;
 		if (this.listNoteNotes) this.removeChild(this.listNoteNotes);
 		this.listNoteNotes = null;
@@ -164,6 +168,8 @@ export class PrinceListView extends TextFileView {
 
 	protected async onClose(): Promise<void> {
 		this.viewClosed = true;
+		this.endListNote();
+		this.dropListNoteEditor();
 		await super.onClose();
 	}
 
@@ -266,6 +272,11 @@ export class PrinceListView extends TextFileView {
 	endListNote(): void {
 		this.listNote = null;
 		this.editing.closeListNote();
+	}
+
+	dropListNoteEditor(): void {
+		this.listNoteEditor?.destroy();
+		this.listNoteEditor = null;
 	}
 
 	// The header's checkbox shows only on a list, and is lit while archived items show.

@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-29
+verified: 2026-10-30
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -50,8 +50,8 @@ used.
   lines it touched **(call)**.
 - **It's always there:** the card's notes and the list note are the editor itself, focused or not;
   a click puts the caret where it lands, so step one's `caretPositionFromPoint` rule goes. Empty
-  notes show the gray "Notes" and stay three lines tall (step one, "A card's notes are at least
-  three lines tall").
+  notes show the gray "Notes", and a card's stay three lines tall (step one, "A card's notes are at
+  least three lines tall").
 - **Each open card has one,** and the list note one; the Schedule view and a list inside another
   note have no cards and no editor. Closing the card or the view destroys it.
 - **Listeners:** clicks on drawn checkboxes, links and blocks go through one

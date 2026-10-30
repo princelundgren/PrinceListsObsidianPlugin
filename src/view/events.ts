@@ -1,3 +1,4 @@
+import type { EditorView } from '@codemirror/view';
 import { Keymap, Platform } from 'obsidian';
 import { openAsMarkdown } from '../obsidian/switch';
 import { addItem, addItemBelowCard, hasNoItems } from './add-button';
@@ -80,7 +81,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	}
 	const action = barActionAt(target);
 	if (action) {
-		const editor = view.card?.el.contains(target) ? view.card.editor : null;
+		const editor = barEditor(view, target);
 		const field = editor ? null : notesHostOf(view, target)?.area.querySelector('textarea');
 		if (editor) runNotesBarAction(editor, action);
 		else if (field) runBarAction(field, action);
@@ -138,6 +139,12 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	if (Platform.isMobile && showHeadingMenu(view, evt, target)) return;
 	const note = notesHostOf(view, target);
 	if (note) openPieceAt(view, note, evt);
+}
+
+// The notes editor whose format bar `target` is on: the open card's or the list note's.
+function barEditor(view: PrinceListView, target: HTMLElement): EditorView | null {
+	if (view.card?.el.contains(target)) return view.card.editor;
+	return view.listNoteEl?.contains(target) ? view.listNoteEditor : null;
 }
 
 // A press anywhere on the format bar, between its buttons too, or on a box in the open card or the
