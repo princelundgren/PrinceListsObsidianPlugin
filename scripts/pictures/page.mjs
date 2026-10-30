@@ -1,5 +1,5 @@
 // What scenes do on Obsidian's page: find where an element is, move, click, scroll, type and press
-// keys through CDP input events, open a note or list, and save a still.
+// keys through CDP input events, open a note, list or the Schedule, and save a still.
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,6 +10,7 @@ const TYPING_MS = 35;
 const GLIDE_STEP_MS = 16;
 const DRAG_START_MS = 2000;
 const FINGER_LINGER_MS = 200;
+const TAP_MS = 100;
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -148,6 +149,13 @@ export async function fingerUp(session, x, y) {
 	await pointer(session, x, y, 'hide');
 }
 
+/** Taps the page at `x, y`, as a finger would. */
+export async function tap(session, x, y) {
+	await fingerDown(session, x, y);
+	await sleep(TAP_MS);
+	await fingerUp(session, x, y);
+}
+
 /** Turns the mouse wheel at `x, y` by `deltaY` CSS pixels, down when positive. */
 export async function scroll(session, x, y, deltaY) {
 	await session.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x, y, deltaX: 0, deltaY });
@@ -176,8 +184,15 @@ export async function type(session, text) {
 }
 
 /** Shows `file` alone in the main area, as a list (`princelists-view`) or as a note in reading view. */
-export async function showAlone(session, file, view) {
-	const state = view === 'list' ? { type: 'princelists-view', state: { file } } : { type: 'markdown', state: { file, mode: 'preview' } };
+export const showAlone = (session, file, view) => showStateAlone(
+	session,
+	view === 'list' ? { type: 'princelists-view', state: { file } } : { type: 'markdown', state: { file, mode: 'preview' } },
+);
+
+/** Shows the Schedule alone in the main area. */
+export const showScheduleAlone = (session) => showStateAlone(session, { type: 'princelists-schedule' });
+
+async function showStateAlone(session, state) {
 	await session.evaluate(`(async () => {
 		const leaf = app.workspace.getLeaf(true);
 		await leaf.setViewState(${JSON.stringify(state)});
