@@ -51,8 +51,8 @@ vault made by the copy script, never in a vault with real notes, and the scripts
   doesn't declare. Through it they call only what `obsidian.d.ts` documents (`app.workspace`,
   `app.vault`, `app.vault.adapter`), never `app.plugins`, `app.commands` or Obsidian's own DOM
   beyond reading where an element is, and adding the drawn pointer or finger mark (`pointer.mjs`),
-  which takes no events and which `shoot.mjs` removes when the scene ends. Clicks, keys, touches and drags are CDP
-  input events.
+  which takes no events and which `shoot.mjs` removes when the scene ends. Clicks, keys, touches
+  and drags are CDP input events.
 - **The published set is taken on macOS,** in English (dates follow Obsidian's language), so
   fonts and labels match from one release to the next. CDP sees only the page, so macOS's window
   buttons, which today's README GIFs show, are gone from the retakes; that's accepted.
