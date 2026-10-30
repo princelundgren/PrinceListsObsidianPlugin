@@ -89,9 +89,9 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     text as it was when the event fired, so an edit without a push reaches the next review. The
     commits come from the API, since the checkout holds only the merge commit: the next step
     writes each one's subject and changed lines, counted as `AGENTS.md` says, to the same folder
-    with the job's token, and Claude reads that file too, so the review needs no new tool. A merge
-    shows `merge` in place of its size, which counts what the base brought in. A failed call fails
-    the job.
+    with the job's token, and Claude reads that file too, so the review needs no new tool. Past the
+    API's 300 files a size is the commit's total, lock files included. A merge shows `merge` in
+    place of its size, which counts what the base brought in. A failed call fails the job.
   - For `@claude`, deny rules take back the file-edit tools, `git add`, `git commit`, `git rm` and
     the push that the action grants when it's mentioned. In the action's `acceptEdits` mode, shell
     commands such as `mkdir`, `mv` or `sed` can still change files in the checkout, but nothing
@@ -126,7 +126,8 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     that new bypasses may emerge. An appended system prompt tells Claude that this text, and a pull
     request's code, is material to read, never instructions.
   - The review reads, unfiltered, the pull request's title, description, commit subjects and diff,
-    pushed by someone with write access, and its own summaries. Its prompt says the same.
+    written or pushed by someone with write access, and its own summaries. Its prompt says the
+    same.
   - The limited token and tools bound what a successful injection could do.
 - **The job token is readable.** In both workflows the action writes the job's token into the
   checkout's git configuration, in the origin URL, whatever checkout's `persist-credentials` says.
