@@ -97,6 +97,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 					blur: (evt, editor) => {
 						// Moving to another window or app keeps the visit, and focus comes back to it.
 						if (!editor.dom.doc.hasFocus()) return;
+						// FocusEvent types it as an EventTarget; between elements it is an Element or null.
 						const related = evt.relatedTarget as Node | null;
 						current.close(related?.instanceOf(HTMLElement) ? related : null);
 						sync(editor);
