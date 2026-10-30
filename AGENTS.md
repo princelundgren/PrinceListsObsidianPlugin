@@ -96,7 +96,8 @@ The project's npm commands:
 | `npm run install-vault -- <path>` | Copy the build into a vault's `.obsidian/plugins/princelists/` |
 
 The README's pictures and the community listing's screenshots are taken in a copy of the demo
-vault, `demo/vault/`. These need Node.js 22 or later too:
+vault, `demo/vault/`. Never open `demo/vault/` itself in Obsidian, which rewrites a vault's
+workspace files when it opens it. These need Node.js 22 or later too:
 
 | Command | What it does |
 |---|---|

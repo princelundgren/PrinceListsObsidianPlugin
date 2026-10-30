@@ -1,7 +1,7 @@
 // Copies the demo vault in demo/vault/ to a folder, moving its dates to today. Usage is in
 // AGENTS.md, under Commands.
 import { cpSync, existsSync, lstatSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
@@ -50,7 +50,15 @@ export function copyDemoVault(folder, { theme, today }) {
 	if (!Object.hasOwn(THEMES, theme)) throw new Error(`The theme is dark or light, not ${theme}.`);
 	if (!isDay(today)) throw new Error(`${today} isn't a day in the form YYYY-MM-DD.`);
 	checkTarget(folder);
-	removeEarlierCopy(folder);
+	try {
+		removeEarlierCopy(folder);
+		writeCopy(folder, { theme, today });
+	} catch (error) {
+		throw new Error(`The copy into ${folder} stopped partway: ${error.message}. Close the vault in Obsidian and run the script again to finish it.`, { cause: error });
+	}
+}
+
+function writeCopy(folder, { theme, today }) {
 	const days = Math.round((utcOf(today) - utcOf(ANCHOR_DAY)) / DAY_MS);
 	cpSync(SOURCE, folder, { recursive: true });
 	for (const path of markdownFiles(folder)) writeFileSync(path, shiftDates(readFileSync(path, 'utf8'), days));
@@ -74,7 +82,7 @@ function removeEarlierCopy(folder) {
 
 function markdownFiles(folder) {
 	return readdirSync(folder, { recursive: true })
-		.filter((path) => path.endsWith('.md') && !path.startsWith(CONFIG))
+		.filter((path) => path.endsWith('.md') && path.split(sep)[0] !== CONFIG)
 		.map((path) => join(folder, path));
 }
 
