@@ -1,7 +1,7 @@
 // Fresh basil's notes in the editor: formatted text, a link and a checklist, with the caret on the
 // last line of the checklist, which draws its box.
 import { DESKTOP, RESTING_POINT, showGroceriesWithFolders, titleOf, withTickedGroceries } from '../listing.mjs';
-import { click, hover, pressEscape, sleep, still } from '../page.mjs';
+import { click, hover, middleOf, pressEscape, sleep, still } from '../page.mjs';
 
 const scene = {
 	name: 'desktop-3-rich-notes',
@@ -9,8 +9,8 @@ const scene = {
 	setup: showGroceriesWithFolders,
 	async shoot(session, out) {
 		await withTickedGroceries(session, click, async () => {
-			const title = await titleOf(session, 'fresh basil');
-			await click(session, title.x + 40, title.y + title.height / 2);
+			const { x, y } = middleOf(await titleOf(session, 'fresh basil'));
+			await click(session, x, y);
 			await sleep(800);
 			const end = await session.evaluate(`(() => {
 				const { right, y, height } = [...document.querySelectorAll('.princelists-card .cm-line')].at(-1).getBoundingClientRect();
