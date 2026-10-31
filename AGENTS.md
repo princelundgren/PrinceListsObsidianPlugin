@@ -223,7 +223,7 @@ One sentence on what this release gives you.
 ### Removed
 - What's gone, and why (#123)
 
-Checked by hand with Obsidian x.y.z on macOS, Windows, Android and an iPhone.
+Checked by hand with Obsidian x.y.z on <the platforms checked>.
 
 **Install:** in Obsidian, go to Settings → Community plugins → Browse and search for PrinceLists, or open its [listing](https://community.obsidian.md/plugins/princelists).
 
