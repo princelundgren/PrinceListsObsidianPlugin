@@ -189,8 +189,8 @@ Only the maintainer releases.
    and push the tag. The release workflow waits for the maintainer's approval in the `release`
    environment, stops if the tag isn't `manifest.json`'s version, then builds a draft release with
    an attestation.
-4. **Publish.** The maintainer reviews the draft and publishes it, then uploads any changed
-   `docs/listing/` shot to the listing.
+4. **Publish.** The maintainer adds the release notes to the draft, reviews it and publishes it,
+   then uploads any changed `docs/listing/` shot to the listing.
 5. **Read the directory's review.** The directory checks for new releases periodically and
    reviews each one. To see the review now, the maintainer signs in at
    [community.obsidian.md](https://community.obsidian.md), opens PrinceLists, selects **Check for
@@ -199,6 +199,38 @@ Only the maintainer releases.
    know" already discloses stays.
 
 Agents never push to `main`, merge pull requests, push tags or publish releases.
+
+### Release notes
+
+The notes live only in the GitHub release, and are written for people using the plugin. Leave out a
+section with nothing in it, and any change they wouldn't notice, such as docs, tests or tooling.
+Name only the checks that ran on this release.
+
+```markdown
+One sentence on what this release gives you.
+
+**Before you update:** only when something needs it, such as a new minimum Obsidian version.
+
+### New
+- What you can now do (#123)
+
+### Improved
+- What works better (#123)
+
+### Fixed
+- What no longer goes wrong (#123)
+
+### Removed
+- What's gone, and why (#123)
+
+Checked by hand with Obsidian x.y.z on <the platforms checked>.
+
+**Install:** in Obsidian, go to Settings → Community plugins → Browse and search for PrinceLists, or open its [listing](https://community.obsidian.md/plugins/princelists).
+
+**Install by hand instead:** put `main.js`, `manifest.json` and `styles.css` in `<vault>/.obsidian/plugins/princelists/`, replacing any old files, then reload Obsidian or turn PrinceLists off and on.
+
+The files carry a build attestation: `gh attestation verify main.js --repo princelundgren/PrinceListsObsidianPlugin`
+```
 
 ## References
 
