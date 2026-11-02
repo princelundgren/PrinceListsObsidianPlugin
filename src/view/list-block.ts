@@ -149,6 +149,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private drawWith(sections: SectionRows[] | null): void {
 		this.drawnText = this.editing.text;
 		this.drawnRows = null;
+		// A drag whose row this detaches may never end here: a drop outside the block, or Escape,
+		// sends rowsEl nothing.
+		this.dragging = false;
 		this.removeBlocks();
 		this.rootEl.empty();
 		const { file } = this;
