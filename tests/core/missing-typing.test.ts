@@ -38,6 +38,21 @@ describe('missingTyping', () => {
 		expect(missingTyping('- [ ] buy\n', 'buy #milk', 'title')).toBe(true);
 	});
 
+	test('finds a typed title whose ending tag or Tasks field the file reads as the tail', () => {
+		expect(missingTyping('- [ ] Buy milk #shop\n', 'Buy milk #shop', 'title')).toBe(false);
+		expect(missingTyping('- [ ] Pay rent 📅 2026-11-30\n', 'Pay rent 📅 2026-11-30', 'title')).toBe(false);
+		expect(missingTyping('- [ ] Buy #shop 📅 2026-11-01\n', 'Buy #shop', 'title')).toBe(false);
+	});
+
+	test('finds a typed title ending in a tag on an item ticked while its title was open', () => {
+		expect(missingTyping('- [x] Buy ✔ 2026-11-02 10:00 #shop\n', 'Buy #shop', 'title')).toBe(false);
+	});
+
+	test('still misses a typed title the file holds only part of, or inside a longer title', () => {
+		expect(missingTyping('- [ ] buy #milk\n', 'buy #mi', 'title')).toBe(true);
+		expect(missingTyping('- [ ] buy eggs #shop\n', 'buy', 'title')).toBe(true);
+	});
+
 	test('reads a CRLF file', () => {
 		const text = '- [ ] fix\r\n\tfirst line\r\n\tsecond line\r\n';
 		expect(missingTyping(text, 'first line\nsecond line', 'notes')).toBe(false);
