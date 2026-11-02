@@ -322,6 +322,14 @@ lines. That includes the blank line a save wrote under the note's last block, so
 erased again leaves none behind, but only while it is still blank and directly under that block
 **(call)**: a line another device added there stays, and the blank line stays with it.
 
+A line typed between two of the note's lines can read as a heading for a moment, as a lone `-`
+under text or a `#` does, and the lines below it then parse as a section's. The keystroke that makes
+it text again, such as the `f` of `#f` or the `e` of `- e`, gets one empty line after that line,
+which keeps the lines below as they parsed (see "Content the plugin leaves alone"). The editor shows
+that empty line too, so it holds exactly the lines the save wrote and the next keystroke below lands
+on its own line **(owner, 2026-11-02)**. The editor adds it outside its undo history, so undo takes
+back only what was typed and leaves the empty line, which can be deleted like any other **(call)**.
+
 ### Sections
 
 - **A heading that isn't inside an item starts a section (owner).**

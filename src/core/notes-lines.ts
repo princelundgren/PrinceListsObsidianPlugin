@@ -5,7 +5,7 @@ import { isBlankAt } from './edit-lines';
 import { listNoteAround, noteText, replaceListNoteRun, writesBlankAfter } from './edit-list-note';
 import { itemNotesKeys } from './edit-piece';
 import type { LineRange } from './follow';
-import { dominantEol, type Line } from './lines';
+import { dominantEol, spliceLines, type Line } from './lines';
 import { columnOf, isBlank, type ItemBlock, type ListModel } from './parse';
 
 /**
@@ -115,7 +115,10 @@ export function saveListNoteLines(
 	const run = texts.map((text) => ({ text, eol }));
 	const note = listNoteAround(lines, model, from, end, run);
 	const edited = replaceListNoteRun(lines, model, from, end, run, note);
-	const next = { ...span, range: write.range, blankAfter: !write.emptied && (blankAfter || writesBlank) };
+	// The empty line replaceRun can add after the run is the editor's too while the span's lines go on below it.
+	const added = end < range.end ? edited.length - spliceLines(lines, from, end - from, run).length : 0;
+	const written = { start: write.range.start, end: write.range.end + added };
+	const next = { ...span, range: written, blankAfter: !write.emptied && (blankAfter || writesBlank) };
 	return { lines: edited, span: next, note: noteText(note.after), from };
 }
 

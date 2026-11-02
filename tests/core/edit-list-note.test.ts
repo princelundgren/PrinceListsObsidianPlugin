@@ -142,29 +142,39 @@ describe('a visit saving the whole list note', () => {
 });
 
 // A visit saves the list note on every keystroke: the lines that changed since the editor's last
-// save, at the span that save left, on the text re-parsed. A refused change never lands in the
-// editor, which keeps its text and the span, and the next keystroke tries again.
+// save, at the span that save left, on the text re-parsed. A save can add an empty line, which the
+// editor then shows too, as the view does. A refused change never lands in the editor, which keeps
+// its text and the span, and the next keystroke tries again.
 function typeInto(text: string, typed: readonly string[]) {
+	const session = typingSession(text);
+	return typed.map((markdown) => session.type(markdown));
+}
+
+function typingSession(text: string) {
 	const { lines: openLines, model: openModel } = list(text);
 	const visit = openVisit(openLines, openModel, null);
-	let span = visit.piece;
 	let held = visitText(openLines, visit);
 	let current = text;
-	return typed.map((markdown) => {
-		const { lines, model } = list(current);
-		const change = changedLines(held, markdown);
-		if (!change) return { markdown, text: current, range: span.range, refused: false };
-		try {
-			const result = saveListNoteLines(lines, model, span, change);
-			current = joinLines(result.lines);
-			span = result.span;
-			held = markdown;
-			return { markdown, text: current, range: span.range, refused: false };
-		} catch (error) {
-			if (!(error instanceof UnsafeEditError)) throw error;
-			return { markdown, text: current, range: span.range, refused: true };
-		}
-	});
+	return {
+		get shown() {
+			return held;
+		},
+		type(markdown: string) {
+			const { lines, model } = list(current);
+			const change = changedLines(held, markdown);
+			if (!change) return { markdown, text: current, range: visit.piece.range, shown: held, refused: false };
+			try {
+				const result = saveListNoteLines(lines, model, visit.piece, change);
+				current = joinLines(result.lines);
+				visit.piece = result.span;
+				held = visitText(result.lines, visit);
+				return { markdown, text: current, range: visit.piece.range, shown: held, refused: false };
+			} catch (error) {
+				if (!(error instanceof UnsafeEditError)) throw error;
+				return { markdown, text: current, range: visit.piece.range, shown: held, refused: true };
+			}
+		},
+	};
 }
 
 // Each value the field holds while `typed` is typed after `from`, one character at a time.
@@ -173,10 +183,18 @@ const keystrokes = (from: string, typed: string) =>
 
 const texts = (lines: readonly Line[]) => lines.map((line) => line.text);
 
+function trailingEmpty(lines: readonly string[]): number {
+	let count = 0;
+	while (count < lines.length && lines[lines.length - 1 - count] === '') count++;
+	return count;
+}
+
 // The lines before the range never change. The lines after it are the ones after the note when the
 // session started, with one blank line in front when the note's first save added it. A saved range
 // holds exactly what was typed, with a blank line written empty and empty lines typed at its end
-// kept (the notes design's risk 4), and nothing once the editor holds one empty line.
+// kept (the notes design's risk 4), and nothing once the editor holds one empty line; the only
+// lines it can add are the empty lines a save writes to keep what follows apart, which the editor
+// then shows.
 function expectSessionKeepsRest(text: string, steps: ReturnType<typeof typeInto>) {
 	const { lines, model } = list(text);
 	const before = texts(lines.slice(0, openVisit(lines, model, null).piece.range.start));
@@ -191,7 +209,11 @@ function expectSessionKeepsRest(text: string, steps: ReturnType<typeof typeInto>
 		if (step.refused) continue;
 		const typedLines = step.markdown.split('\n').map((line) => (isBlank(line) ? '' : line));
 		if (typedLines.length === 1 && typedLines[0] === '') typedLines.length = 0;
-		expect(texts(now.slice(step.range.start, step.range.end)), label).toEqual(typedLines);
+		const saved = texts(now.slice(step.range.start, step.range.end));
+		const added = changedLines(typedLines.join('\n'), saved.join('\n'));
+		if (added) expect(added, label).toMatchObject({ to: added.from, lines: added.lines.map(() => '') });
+		// An added line always has text below it, so the range ends in the empty lines typed and no more.
+		expect(trailingEmpty(saved), label).toBe(trailingEmpty(typedLines));
 	}
 }
 
@@ -233,6 +255,49 @@ describe('a visit to the list note across a typing session', () => {
 		const steps = typeInto(text, keystrokes(from, typed));
 		expectSessionKeepsRest(text, steps);
 		expect((steps[steps.length - 1] as (typeof steps)[number]).text).toBe(expected);
+	});
+	// A line typed between two of the note's lines reads as a heading for a moment, which makes the
+	// lines below it a section's. The keystroke that takes the heading back gets an empty line after
+	// it, which keeps those lines apart, and the editor shows it, so the next keystroke below lands on
+	// its own line.
+	test.each([
+		[
+			`${FRONTMATTER}Stuff for the flat\nCheck second-hand first\n\n- [ ] chair\n`,
+			['Stuff for the flat\n#\nCheck second-hand first', 'Stuff for the flat\n#f\nCheck second-hand first'],
+			'Stuff for the flat\n#f\n\nCheck second-hand first',
+			['Stuff for the flat\n#f\n\nCheck second-hand first!'],
+			`${FRONTMATTER}Stuff for the flat\n#f\n\nCheck second-hand first!\n\n- [ ] chair\n`,
+		],
+		[
+			`${FRONTMATTER}only note\nx\n1. one`,
+			['only note\n## h\nx\n1. one', 'only note\nx\n1. one'],
+			'only note\n\nx\n1. one',
+			['only note\n\nx\n1. onez'],
+			`${FRONTMATTER}only note\n\nx\n1. onez`,
+		],
+		[
+			`${FRONTMATTER}Weekend\nmore\n\n- [ ] milk\n`,
+			['Weekend\n\nmore', 'Weekend\n-\nmore', 'Weekend\n- \nmore', 'Weekend\n- e\nmore'],
+			'Weekend\n- e\n\nmore',
+			['Weekend\n- eg\n\nmore', 'Weekend\n- eg\n\nmore!'],
+			`${FRONTMATTER}Weekend\n- eg\n\nmore!\n\n- [ ] milk\n`,
+		],
+	])('%j: typing %j saves every keystroke, and the editor shows the empty line the last one adds', (text, typed, shown, next, expected) => {
+		const steps = typeInto(text, [...typed, ...next]);
+		expectSessionKeepsRest(text, steps);
+		expect(steps.filter((step) => step.refused)).toEqual([]);
+		expect(steps[typed.length - 1]?.shown).toBe(shown);
+		expect(steps[steps.length - 1]?.text).toBe(expected);
+	});
+	// The editor's undo, which doesn't hold the added line, one keystroke at a time: the finest steps it takes.
+	test('undoing those keystrokes saves each step and keeps the added empty line', () => {
+		const text = `${FRONTMATTER}Weekend\nmore\n\n- [ ] milk\n`;
+		const typed = ['Weekend\n\nmore', 'Weekend\n-\nmore', 'Weekend\n- \nmore', 'Weekend\n- e\nmore'];
+		const undone = ['Weekend\n- \n\nmore', 'Weekend\n-\n\nmore', 'Weekend\n\n\nmore', 'Weekend\n\nmore'];
+		const steps = typeInto(text, [...typed, ...undone]);
+		expectSessionKeepsRest(text, steps);
+		expect(steps.filter((step) => step.refused)).toEqual([]);
+		expect(steps[steps.length - 1]?.text).toBe(`${FRONTMATTER}Weekend\n\nmore\n\n- [ ] milk\n`);
 	});
 	test('a range that an outside change moved down keeps the blocks above it', () => {
 		// The field took focus on a list with no note. Sync then adds a paragraph above the item, and
@@ -300,6 +365,30 @@ describe('a visit to the list note across a typing session', () => {
 					typed.push(field);
 				}
 				expectSessionKeepsRest(text, typeInto(text, typed));
+			}
+		}
+	});
+	test('random typing anywhere in the note, new lines included, keeps the editor one to one with the file', () => {
+		const random = seeded(11);
+		const pick = <T>(from: readonly T[]) => from[Math.floor(random() * from.length)] as T;
+		const keys = ['`', '%', '$', '<', '!', '-', '>', '#', ' ', 'x', '=', '[', ']', '*', '1', '.', '\t'];
+		const starts = ['', '#', '-', '- ', '## h', '1. ', '=', '---', '> ', '* '];
+		const cases = [...Object.values(JOINING_CASES), ...Object.values(REFUSED_CASES), ...FIXTURES.map(readFixture), UNDER_EMPTY_LINE];
+		for (const text of cases) {
+			for (let round = 0; round < 8; round++) {
+				const session = typingSession(text);
+				const steps: ReturnType<typeof typeInto> = [];
+				for (let k = 0; k < 24; k++) {
+					const lines = session.shown.split('\n');
+					const at = Math.floor(random() * lines.length);
+					const action = random();
+					if (action < 0.2) lines[at] = (lines[at] as string).slice(0, -1);
+					else if (action < 0.3) lines.splice(at, 1);
+					else if (action < 0.5) lines.splice(at, 0, pick(starts));
+					else lines[at] = (lines[at] as string) + pick(keys);
+					steps.push(session.type(lines.join('\n')));
+				}
+				expectSessionKeepsRest(text, steps);
 			}
 		}
 	});

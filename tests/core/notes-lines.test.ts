@@ -259,6 +259,15 @@ describe('a visit to the list note', () => {
 		expect(state.visitText()).toBe(notes.text);
 	});
 
+	test('erasing the last line of a file without a final newline keeps the empty line typed after it', () => {
+		const state = editing(`${FRONTMATTER}a\nb`);
+		const notes = editor(state, 'listNote');
+		notes.type('a\nb\n');
+		expect(saved(notes.type('a\n\n'))).toBe(true);
+		expect(state.text).toBe(`${FRONTMATTER}a`);
+		expect(state.visitText()).toBe(notes.text);
+	});
+
 	test('the first text in an empty note writes a blank line before the items, and erasing it takes both again', () => {
 		const text = `${FRONTMATTER}- [ ] a\n`;
 		const state = editing(text);
