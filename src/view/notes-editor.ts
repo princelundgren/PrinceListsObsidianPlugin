@@ -7,6 +7,7 @@ import { Notice } from 'obsidian';
 import { checklistStatusAt } from '../core/checklist';
 import { blockBelow } from '../core/note-pieces';
 import { changedLines, type NotesChange } from '../core/notes-lines';
+import { isBlank } from '../core/parse';
 import { notesBoxClick } from './checklist';
 import { targetOf } from './dom';
 import { buildFormatBar } from './format';
@@ -150,7 +151,8 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				}),
 			],
 		}),
-		// A save that is lost or refused syncs the editor, which an update listener can't do.
+		// A save that is lost or refused syncs the editor, which an update listener can't do, and so does
+		// one that added lines the editor doesn't hold.
 		dispatchTransactions: (trs, editor) => {
 			editor.update(trs);
 			const changes = trs.filter((tr) => tr.docChanged && !tr.annotation(isSync));
@@ -159,7 +161,14 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				if (!change) continue;
 				const typed = current.save(change);
 				view.handleTyped(typed);
-				if ('edit' in typed) continue;
+				if ('edit' in typed) {
+					const added = addedLines(tr.state.doc.toString(), current.visitText());
+					if (!added) continue;
+					// Later changes in the same batch don't count the added lines, so they go as a refused one does.
+					if (tr.state.doc.eq(editor.state.doc)) showAddedLines(editor, added);
+					else sync(editor);
+					break;
+				}
 				sync(editor);
 				break;
 			}
@@ -190,6 +199,24 @@ export function syncNotesEditor(editor: EditorView, markdown: string): void {
 	// Both in one transaction would leave the history in place.
 	editor.dispatch({ effects: historySlot.reconfigure([]) });
 	editor.dispatch({ effects: historySlot.reconfigure(history()) });
+}
+
+// The empty lines a save added to the lines the editor holds, such as the one that keeps the list
+// note's text apart from what followed it, or null when there are none. A line of spaces is saved
+// empty, so it counts as held.
+function addedLines(held: string, saved: string | null): NotesChange | null {
+	if (saved === null) return null;
+	const blankEmpty = (text: string) => text.split('\n').map((line) => (isBlank(line) ? '' : line));
+	const change = changedLines(blankEmpty(held).join('\n'), blankEmpty(saved).join('\n'));
+	return change && change.to === change.from && change.lines.every((line) => line === '') ? change : null;
+}
+
+// A caret where they go stays on its own text, below them. Outside the history, so undo takes back
+// only what was typed, and as a sync, so it isn't saved again.
+function showAddedLines(editor: EditorView, change: NotesChange): void {
+	const { state } = editor;
+	const changes = state.changes(lineChange(state.doc, change));
+	editor.dispatch({ changes, selection: state.selection.map(changes, 1), annotations: [isSync.of(true), Transaction.addToHistory.of(false)], filter: false });
 }
 
 /** Takes no more typing: the notes' item is gone, and what the editor holds can only be copied. */

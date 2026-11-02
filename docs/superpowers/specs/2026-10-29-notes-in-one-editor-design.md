@@ -142,6 +142,9 @@ Compared with Obsidian's own editor side by side on desktop:
 - **Any change the editor didn't make** clears its history, as an outside change clears the list's:
   an outside change, the list's undo, or a tick from elsewhere. So the editor's undo never takes
   back a change it didn't make.
+- **The empty line a save adds to the list note** (step one, "The list note") keeps the history:
+  the editor adds it outside the history, and the history maps through it, so undo takes back what
+  was typed and leaves that line.
 
 ## The format bar
 
