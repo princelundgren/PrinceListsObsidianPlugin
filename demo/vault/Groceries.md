@@ -19,7 +19,7 @@ For the big shop on Saturday. Check the pantry first.
 	- [x] check the windowsill first
 	- [ ] a **pot**, not cut leaves
 	- [ ] pine nuts
-- [x] avocados ✔ 2026-10-27 09:12
+- [x] avocados ✔ 2026-10-26 09:12
 
 ## Bakery
 - [ ] sourdough loaf

@@ -11,7 +11,7 @@ Weekly chores. Tick one when it's done; it hides a day later.
 - [ ] water the plants ⭐ ⏳ 2026-10-27
 
 	The fern twice a week, the cactus *once a month*.
-- [x] take out the recycling ✔ 2026-10-27 07:45
+- [x] take out the recycling ✔ 2026-10-26 07:45
 
 ## Monthly
 - [ ] clean the oven ⏳ 2026-11-08
