@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { parseItemLine } from '../../src/core/item-line';
 import { isStarred, keepStar, setStar, splitStar } from '../../src/core/star';
 
 const F = '️';
@@ -20,6 +21,13 @@ test('setStar puts the star at the end of the title and nowhere else', () => {
 	expect(setStar(done, true)).toBe(starred);
 	expect(setStar(starred, false)).toBe(done);
 	expect(setStar('- [ ] a📅 2026-10-30', true)).toBe('- [ ] a ⭐📅 2026-10-30');
+});
+
+test('setStar keeps a tag after an empty title a tag', () => {
+	const starred = setStar('- [ ] #errand', true);
+	expect(starred).toBe('- [ ]  ⭐ #errand');
+	expect(isStarred(starred)).toBe(true);
+	expect(parseItemLine(starred)?.tail).toBe(' #errand');
 });
 
 test('setStar removes the space, the star and its U+FE0F, keeping the tail as it is', () => {
