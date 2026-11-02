@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-10-30
+verified: 2026-11-02
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -116,9 +116,12 @@ Compared with Obsidian's own editor side by side on desktop:
   top-level one takes its marker off. A tight list stays tight (`nonTightLists: false`), as in a
   note **(call)**. Backspace right after a marker turns it into spaces, and a second Backspace
   takes them (`deleteMarkupBackward`).
-- **Tab and Shift+Tab** indent and outdent the list items the selection is on, by one tab,
-  Obsidian's default indent **(call)**. On other lines Tab leaves the editor, as from any field, so
-  a keyboard user can get out **(call)**.
+- **Tab and Shift+Tab** indent and outdent the list items the selection is on. In the list note
+  and in notes whose indent ends in a tab, they use one tab, Obsidian's default indent **(call)**.
+  In other notes, such as new notes' 2 or 3 spaces, they use 4 spaces **(owner, 2026-11-02)**: a
+  tab typed after a 2- or 3-space indent stops at column 4 of the file, short of where the card
+  shows it, while 4 spaces nest a list under `- `, `1. ` or `10. ` as a tab does. On other lines
+  Tab leaves the editor, as from any field, so a keyboard user can get out **(call)**.
 - **Cmd+B, Cmd+I and Cmd+K** make the selection bold, italic or a link, as before, now in the
   editor's own keymap.
 - **Escape** leaves the notes, as before. **Cmd+F** stays the list's filter: CodeMirror's search

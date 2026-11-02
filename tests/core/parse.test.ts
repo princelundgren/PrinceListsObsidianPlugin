@@ -6,7 +6,7 @@ import { maskBlocks, parseList, topLevelBlocks } from '../../src/core/parse';
 const readFixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8');
 const fixture = (name: string) => splitLines(readFixture(name));
 const parse = (text: string, contentStart = 0) => parseList(splitLines(text), contentStart);
-const item = (titleLine: number, endLine: number, notesIndent = '\t') => ({ titleLine, endLine, notesIndent });
+const item = (titleLine: number, endLine: number, notesIndent = '  ') => ({ titleLine, endLine, notesIndent });
 
 test('finds the list note, sections and items of the design example', () => {
 	const lines = fixture('example.md');
@@ -15,7 +15,7 @@ test('finds the list note, sections and items of the design example', () => {
 		listNote: { start: 3, end: 4 },
 		sections: [
 			{ headingLine: null, items: [item(5, 6)], endLine: 6 },
-			{ headingLine: 7, items: [item(8, 9), item(9, 17), item(17, 18)], endLine: 18 },
+			{ headingLine: 7, items: [item(8, 9), item(9, 17, '\t'), item(17, 18)], endLine: 18 },
 			{ headingLine: 19, items: [item(20, 21)], endLine: 21 },
 		],
 		untouched: [],
@@ -38,7 +38,7 @@ test('keeps every kind of Markdown in the notes inside the item', () => {
 	expect(parseList(lines, 0)).toEqual({
 		contentStart: 0,
 		listNote: { start: 0, end: 0 },
-		sections: [{ headingLine: null, items: [item(0, 19)], endLine: 19 }],
+		sections: [{ headingLine: null, items: [item(0, 19, '\t')], endLine: 19 }],
 		untouched: [],
 		blocks: topLevelBlocks(lines, 0),
 	});
@@ -62,7 +62,7 @@ test('accepts every marker and checkbox character, and indents notes to a wide c
 	expect(items).toEqual([
 		item(0, 1),
 		item(1, 2),
-		item(2, 3),
+		item(2, 3, '   '),
 		item(3, 4),
 		item(4, 5),
 		item(5, 6),
@@ -89,33 +89,35 @@ test('topLevelBlocks splits lists into items, masks %% regions and ends blocks b
 	]);
 });
 
-test('notes that open with indented code take the content-column indent, not the code indent', () => {
-	expect(parse('- [ ] a\n\n\t\tcode\n\n\tpara\n').sections[0]?.items).toEqual([item(0, 5)]);
-	expect(parse('- [ ] a\n\n      code\n\n    para\n').sections[0]?.items).toEqual([item(0, 5)]);
+test('notes that open with indented code or a lazy line take the indent of their first line at the content column', () => {
+	expect(parse('- [ ] a\n\n\t\tcode\n\n\tpara\n').sections[0]?.items).toEqual([item(0, 5, '\t')]);
+	expect(parse('- [ ] a\n\n      code\n\n    para\n').sections[0]?.items).toEqual([item(0, 5, '    ')]);
+	expect(parse('- [ ] a\nlazy\n\n\tmore\n- [ ] b\n').sections[0]?.items).toEqual([item(0, 4, '\t'), item(4, 5)]);
+	expect(parse('- [ ] a\n\n\t\tcode\n').sections[0]?.items).toEqual([item(0, 3)]);
 	expect(parse('- [ ] a\n\n     five\n').sections[0]?.items).toEqual([item(0, 3, '     ')]);
 	expect(parse('100. [ ] x\n\n         code\n').sections[0]?.items).toEqual([item(0, 3, ' '.repeat(5))]);
 });
 
 test('notes that reach the content column exactly keep their indent, and column 4 takes a tab', () => {
 	expect(parse('- [ ] a\n\n  note\n').sections[0]?.items).toEqual([item(0, 3, '  ')]);
-	expect(parse('10. [ ] x\n').sections[0]?.items).toEqual([item(0, 1)]);
+	expect(parse('10. [ ] x\n').sections[0]?.items).toEqual([item(0, 1, '\t')]);
 });
 
 test('a title that CommonMark turns into a heading is still an item', () => {
 	const model = parseList(fixture('title-heading.md'), 0);
-	expect(model.sections).toEqual([{ headingLine: null, items: [item(0, 2), item(2, 3)], endLine: 3 }]);
+	expect(model.sections).toEqual([{ headingLine: null, items: [item(0, 2, '\t'), item(2, 3)], endLine: 3 }]);
 });
 
 test('ends an item before trailing blank lines, counting a spaces-only line as blank', () => {
 	const text = readFixture('trailing-whitespace.md');
 	expect(text).toBe('- [ ] a  \n\n\tnote \t\n  \n- [ ] b\t\n');
-	expect(parse(text).sections[0]?.items).toEqual([item(0, 3), item(4, 5)]);
+	expect(parse(text).sections[0]?.items).toEqual([item(0, 3, '\t'), item(4, 5)]);
 });
 
 test('ends an item before trailing blank lines when its notes leave a block open', () => {
 	// CommonMark closes the open block where the item ends, so its range takes in the blank lines.
-	expect(parse('- [ ] a\n\n\t```\n\tcode\n\n- [ ] b\n').sections[0]?.items).toEqual([item(0, 4), item(5, 6)]);
-	expect(parse('- [ ] a\n\n\t<!--\n\tnote\n\n  \n- [ ] b\n').sections[0]?.items).toEqual([item(0, 4), item(6, 7)]);
+	expect(parse('- [ ] a\n\n\t```\n\tcode\n\n- [ ] b\n').sections[0]?.items).toEqual([item(0, 4, '\t'), item(5, 6)]);
+	expect(parse('- [ ] a\n\n\t<!--\n\tnote\n\n  \n- [ ] b\n').sections[0]?.items).toEqual([item(0, 4, '\t'), item(6, 7)]);
 	expect(parse('- [ ] a\n\n```\ncode\n\n\n').untouched).toEqual([{ start: 2, end: 4 }]);
 });
 

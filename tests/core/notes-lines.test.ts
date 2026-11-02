@@ -131,12 +131,12 @@ describe("a visit to a card's notes", () => {
 		const notes = editor(state, 'item');
 		expect(notes.text).toBe('');
 		notes.type('x');
-		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n\tx\n- [ ] b\n`);
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n  x\n- [ ] b\n`);
 		expect(state.notesPieceRange()).toEqual({ start: 5, end: 6 });
 		notes.type('');
 		expect(state.text).toBe(text);
 		notes.type('y');
-		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n\ty\n- [ ] b\n`);
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n  y\n- [ ] b\n`);
 	});
 
 	test('Enter in empty notes, then text on the second line, writes both lines under the empty one', () => {
@@ -144,7 +144,7 @@ describe("a visit to a card's notes", () => {
 		const notes = editor(state, 'item');
 		notes.type('\n');
 		notes.type('\nx');
-		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n\n\tx\n- [ ] b\n`);
+		expect(state.text).toBe(`${FRONTMATTER}- [ ] a\n\n\n  x\n- [ ] b\n`);
 		expect(state.visitText()).toBe(notes.text);
 	});
 
@@ -180,12 +180,12 @@ describe("a save of a card's notes, over every line", () => {
 	};
 
 	test('writes the notes after an empty line at the item\'s notes column, and blank lines empty', () => {
-		expect(typed('- [ ] a\n- [ ] b\n', 0, 'Buy 6:\n- one\n\nlast').text).toBe('- [ ] a\n\n\tBuy 6:\n\t- one\n\n\tlast\n- [ ] b\n');
+		expect(typed('- [ ] a\n- [ ] b\n', 0, 'Buy 6:\n- one\n\nlast').text).toBe('- [ ] a\n\n  Buy 6:\n  - one\n\n  last\n- [ ] b\n');
 		expect(typed('100. [ ] x\n', 0, 'n').text).toBe('100. [ ] x\n\n     n\n');
 	});
 
 	test('writes the file\'s line ending', () => {
-		expect(typed('- [ ] a\r\n- [ ] b\r\n', 0, 'x\n\ny').text).toBe('- [ ] a\r\n\r\n\tx\r\n\r\n\ty\r\n- [ ] b\r\n');
+		expect(typed('- [ ] a\r\n- [ ] b\r\n', 0, 'x\n\ny').text).toBe('- [ ] a\r\n\r\n  x\r\n\r\n  y\r\n- [ ] b\r\n');
 	});
 
 	test('emptying notes the visit found takes their lines, and leaves the empty line above them', () => {

@@ -82,17 +82,17 @@ describe('notes directly under the title', () => {
 	});
 
 	test.each([
-		['a lazy line', '- [ ] c\nlazy\n- [ ] d\n', 'lazy\n-', '- [ ] c\n\n\tlazy\n\t-\n- [ ] d\n'],
-		['only the first of two lazy lines', '- [ ] c\none\ntwo\n', 'one\ntwo\n---', '- [ ] c\n\n\tone\ntwo\n\t---\n'],
+		['a lazy line', '- [ ] c\nlazy\n- [ ] d\n', 'lazy\n-', '- [ ] c\n\n  lazy\n  -\n- [ ] d\n'],
+		['only the first of two lazy lines', '- [ ] c\none\ntwo\n', 'one\ntwo\n---', '- [ ] c\n\n  one\ntwo\n  ---\n'],
 		['a line short of an ordered item\'s column', '10. [ ] c\n  note\n', 'note\n---', '10. [ ] c\n\n\tnote\n\t---\n'],
 	])('%s takes the notes\' indent, so it stays in the item', (_, text, typed, expected) => {
 		expect(typedInTurn(text, typed).text).toBe(expected);
 	});
 
 	test.each([
-		['the end of a file without a final newline', '- [ ] c\nlazy', 'lazy\n-', '- [ ] c\n\n\tlazy\n\t-'],
-		['the same in CRLF', '- [ ] c\r\nlazy', 'lazy\n---', '- [ ] c\r\n\r\n\tlazy\r\n\t---'],
-		['a line with its own ending', '- [ ] c\r\nlazy\n- [ ] d\r\n- [ ] e\r\n', 'lazy\n---', '- [ ] c\r\n\r\n\tlazy\n\t---\r\n- [ ] d\r\n- [ ] e\r\n'],
+		['the end of a file without a final newline', '- [ ] c\nlazy', 'lazy\n-', '- [ ] c\n\n  lazy\n  -'],
+		['the same in CRLF', '- [ ] c\r\nlazy', 'lazy\n---', '- [ ] c\r\n\r\n  lazy\r\n  ---'],
+		['a line with its own ending', '- [ ] c\r\nlazy\n- [ ] d\r\n- [ ] e\r\n', 'lazy\n---', '- [ ] c\r\n\r\n  lazy\n  ---\r\n- [ ] d\r\n- [ ] e\r\n'],
 	])('a lazy line at %s saves, with the right ending', (_, text, typed, expected) => {
 		expect(typedInTurn(text, typed).text).toBe(expected);
 	});
