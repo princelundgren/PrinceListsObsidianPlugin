@@ -15,13 +15,14 @@ export function missingTyping(text: string, typed: string, field: 'title' | 'not
 }
 
 // A #tag or Tasks field typed at the end of a title reads as the item's tail, so a typed title also
-// counts when it is the whole title, star aside, followed by the start of the tail.
+// counts when it is the whole title, star aside, followed by the start of the tail; a tick's ✔ mark
+// between them is left out.
 function isItemTitle(line: string, typed: string): boolean {
 	const parts = parseItemLine(line);
 	if (!parts) return false;
 	const title = splitStar(parts.title).plain.trim();
 	if (title === typed) return true;
-	const rest = title + parts.marks + parts.tail;
+	const rest = title + parts.tail;
 	return typed.length > title.length && rest.startsWith(typed) && /^(\s|$)/.test(rest.slice(typed.length));
 }
 
