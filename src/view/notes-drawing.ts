@@ -2,6 +2,7 @@ import { syntaxTree } from '@codemirror/language';
 import { StateEffect, type EditorState, type Extension, type StateField } from '@codemirror/state';
 import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate, type WidgetType } from '@codemirror/view';
 import type { SyntaxNode } from '@lezer/common';
+import { debounce } from 'obsidian';
 import { isWebAddress, linkTarget, pictureLook } from '../core/drawn-links';
 import { parseItemLine } from '../core/item-line';
 import { pictureLinks } from '../core/picture-links';
@@ -34,17 +35,23 @@ export function notesDrawing(view: PrinceListView, sourcePath: string, blocks: S
 }
 
 /**
- * Draws the links and pictures in the view's notes again each time a file is added, deleted or
- * renamed, since that can give a link its file or take it away. It changes no text.
+ * Draws the links and pictures in the view's notes again once files stop being added, deleted,
+ * renamed or resolved, since that can give a link its file or take it away. It changes no text.
  */
 export function registerFileRedraws(view: PrinceListView): void {
-	const redraw = () => {
-		for (const editor of [view.listNoteEditor, view.card?.editor]) editor?.dispatch({ effects: filesChanged.of(null) });
-	};
-	const { vault } = view.app;
+	const redraw = debounce(
+		() => {
+			for (const editor of [view.listNoteEditor, view.card?.editor]) editor?.dispatch({ effects: filesChanged.of(null) });
+		},
+		100,
+		true,
+	);
+	const { metadataCache, vault } = view.app;
 	view.registerEvent(vault.on('create', redraw));
 	view.registerEvent(vault.on('delete', redraw));
 	view.registerEvent(vault.on('rename', redraw));
+	view.registerEvent(metadataCache.on('resolved', redraw));
+	view.register(() => redraw.cancel());
 }
 
 class NotesDrawing {
