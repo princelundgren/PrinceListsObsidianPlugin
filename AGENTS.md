@@ -219,8 +219,6 @@ One sentence on what this release gives you.
 
 ### Fixed
 - What no longer goes wrong (#123)
-
-### Removed
 - What's gone, and why (#123)
 
 Checked by hand with Obsidian x.y.z on <the platforms checked>.
