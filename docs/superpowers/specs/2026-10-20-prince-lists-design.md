@@ -1090,7 +1090,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   changed elsewhere and closes once it loses focus. What was typed until then is usually in the
   file. When it isn't, the notice instead offers "Copy text", which copies the field's text, and
   stays until dismissed (owner, 2026-10-22). Typed notes count as in the file only as whole lines,
-  and a typed title only as an item's title **(call)**.
+  and a typed title only as an item's title **(call)**. A `#tag` or Tasks field typed at the end of
+  a title, which the file reads as the item's tail, counts as part of that title.
 
 ### Rendering notes in the card
 

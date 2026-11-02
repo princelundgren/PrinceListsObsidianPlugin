@@ -43,11 +43,13 @@ export function hasNoItems(view: PrinceListView): boolean {
 	return isListText(view.text) && view.parse().model.sections.every((section) => section.items.length === 0);
 }
 
-// Closes the open card, then adds an empty item at `place` and opens it with the cursor in its title.
+// Expands the section `place` is in, so the open card closes to its row there rather than redrawing the
+// section collapsed, closes the card, then adds an empty item at `place` and opens it with the cursor
+// in its title.
 // The insert queues behind the removal of an empty item that closing the card may start.
 export function addItem(view: PrinceListView, place: ItemPlace): void {
-	closeCard(view);
 	expandFor(view, place);
+	closeCard(view);
 	const anchor = place === 'first' ? null : 'after' in place ? place.after : place.firstUnder;
 	enqueueAt(view, anchor, async (pending) => {
 		const added = await writePlanned(view, (text) => {

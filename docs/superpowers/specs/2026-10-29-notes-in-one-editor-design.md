@@ -64,7 +64,10 @@ used.
 Compared with Obsidian's own editor side by side on desktop:
 
 - **Inline:** bold, italic, strikethrough, `<u>`, inline code, links, pictures, checkboxes and list
-  bullets are drawn, and show their Markdown only while the selection touches them.
+  bullets are drawn, and show their Markdown only while the selection touches them. Links and
+  pictures are drawn again once files stop being added, deleted or renamed, or Obsidian's links
+  are resolved again after a change, so a picture whose file comes after its link shows, and one
+  whose file is deleted shows as typed.
 - **By line:** headings, quotes and horizontal rules show their Markdown while the cursor is on
   their line.
 - **Big blocks:** a table, a code block, a callout, a `$$` math block at the notes' own left margin

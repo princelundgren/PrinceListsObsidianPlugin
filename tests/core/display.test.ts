@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { headingText, itemRow, matchesQuery, visibleSections } from '../../src/core/display';
+import { headingText, isItemVisible, itemRow, matchesQuery, visibleSections } from '../../src/core/display';
 import { tickLine } from '../../src/core/item-line';
 import { list, readFixture } from './edit-helpers';
 
@@ -218,5 +218,30 @@ describe('visibleSections, collapsed', () => {
 
 	test("the open card's item shows in a collapsed section", () => {
 		expect(sectionsOf(text, now, false, '', 5, collapsed)[1]?.rows).toEqual([row(5, 'b')]);
+	});
+});
+
+describe('isItemVisible', () => {
+	const now = new Date(2026, 9, 21, 12, 0);
+	const text = '---\nprincelists: true\n---\n- [ ] a\n## B\n- [ ] b\n## C\n- [ ] c\n- [x] old ✔ 2026-10-01 10:00\n';
+	const visible = (titleLine: number, query = '', collapsed: ReadonlySet<number> = new Set()) => {
+		const { lines, model } = list(text);
+		return isItemVisible(lines, model, now, { showArchived: false, query, keepLine: null, collapsed }, titleLine);
+	};
+
+	test('an item in an open section, with no filter, is visible', () => {
+		expect(visible(5)).toBe(true);
+	});
+
+	test('an item in a collapsed section is hidden', () => {
+		expect(visible(5, '', new Set([4]))).toBe(false);
+	});
+
+	test('an item the query does not match is hidden', () => {
+		expect(visible(5, 'c')).toBe(false);
+	});
+
+	test('an archived item is hidden while archived items are hidden', () => {
+		expect(visible(8)).toBe(false);
 	});
 });
