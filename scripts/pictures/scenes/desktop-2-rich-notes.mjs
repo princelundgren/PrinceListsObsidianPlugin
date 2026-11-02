@@ -4,7 +4,7 @@ import { DESKTOP, RESTING_POINT, showGroceriesWithFolders, titleOf, withTickedGr
 import { click, hover, middleOf, pressEscape, sleep, still } from '../page.mjs';
 
 const scene = {
-	name: 'desktop-3-rich-notes',
+	name: 'desktop-2-rich-notes',
 	...DESKTOP,
 	setup: showGroceriesWithFolders,
 	async shoot(session, out) {
