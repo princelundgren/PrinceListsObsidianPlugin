@@ -1,6 +1,6 @@
 import type { EditorView } from '@codemirror/view';
 import { Notice, setIcon, type TFile } from 'obsidian';
-import { isShown, itemRow, type ItemRow } from '../core/display';
+import { isItemVisible, itemRow, type ItemRow } from '../core/display';
 import { UnsafeEditError } from '../core/edit-check';
 import { isEmptyItem, planRemoval, type InsertedItem, type Removal } from '../core/empty-item';
 import type { TrackedLine } from '../core/editing';
@@ -14,7 +14,7 @@ import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
 import { cardNotesSource } from './notes-source';
-import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, setLine, showDone } from './render-list';
+import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
 export const CARD_CLASS = 'princelists-card';
@@ -77,10 +77,13 @@ export function closeCard(view: PrinceListView): void {
 		return;
 	}
 	const row = rowAt(view, line);
-	if (row && isShown(row, view.showArchived)) {
+	if (row && isRowVisible(view, row)) {
 		card.el.replaceWith(buildRow(view, view.sourcePath, row, view.blocks));
 	} else {
 		card.el.remove();
+		// The item may have shown only while its card was open, in a collapsed section or past the
+		// filter, and its heading with it.
+		if (row) view.render();
 	}
 }
 
@@ -195,6 +198,11 @@ function showStar(cardEl: HTMLElement, starred: boolean): void {
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {
 	const text = line === null ? undefined : view.lines()[line]?.text;
 	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line, new Date()) : null;
+}
+
+function isRowVisible(view: PrinceListView, row: ItemRow): boolean {
+	const { lines, model } = view.parse();
+	return isItemVisible(lines, model, new Date(), rowFilter(view, null), row.titleLine);
 }
 
 function isEmptyAt(view: PrinceListView, line: number): boolean {

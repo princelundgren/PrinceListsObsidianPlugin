@@ -81,6 +81,11 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 	});
 }
 
+/** Whether visibleSections draws the item on `titleLine` as a row. */
+export function isItemVisible(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter, titleLine: number): boolean {
+	return visibleSections(lines, model, now, filter).some(({ rows }) => rows.some((row) => row.kind === 'item' && row.titleLine === titleLine));
+}
+
 // As typed: no Unicode normalization, and Markdown matched as written.
 export function matchesQuery(title: string, notes: string, query: string): boolean {
 	const lowered = query.toLowerCase();
@@ -92,7 +97,7 @@ function itemMatches(lines: readonly Line[], item: ItemBlock, row: ItemRow, quer
 }
 
 // A done item is hidden once it is archived, unless "Show archived" is on.
-export function isShown(row: ItemRow, showArchived: boolean): boolean {
+function isShown(row: ItemRow, showArchived: boolean): boolean {
 	return showArchived || !row.archived;
 }
 
