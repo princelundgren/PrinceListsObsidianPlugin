@@ -3,6 +3,7 @@ import { headingText } from '../core/display';
 import { planHeadingRemoval, saveHeadingName, type HeadingFieldStart, type HeadingSave } from '../core/heading-field';
 import { planHeadingInsert, type HeadingPlace } from '../core/list-actions';
 import { contentStartLine } from '../obsidian/marker';
+import { addCollapseArrow } from './collapse';
 import { fitHeight } from './dom';
 import { FIELD_CLASS } from './fields';
 import type { PrinceListView } from './list-view';
@@ -139,5 +140,7 @@ function showHeading(view: PrinceListView, field: HeadingField, line: number | n
 		view.render();
 		return;
 	}
-	field.el.replaceWith(buildHeading(view, view.sourcePath, { line: at, text: headingText(lines, at) }, view.blocks));
+	const headingEl = buildHeading(view, view.sourcePath, { line: at, text: headingText(lines, at) }, view.blocks);
+	addCollapseArrow(headingEl, view.collapsed.lines().has(at));
+	field.el.replaceWith(headingEl);
 }
