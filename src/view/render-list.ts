@@ -1,5 +1,5 @@
 import { Platform, type Component } from 'obsidian';
-import { visibleSections, withoutRange, type ItemRow, type SectionRows } from '../core/display';
+import { visibleSections, withoutRange, type ItemRow, type RowFilter, type SectionRows } from '../core/display';
 import type { LineRange } from '../core/follow';
 import type { Line } from '../core/lines';
 import type { ListModel } from '../core/parse';
@@ -116,7 +116,7 @@ export function renderList(
 	};
 	const sourcePath = view.sourcePath;
 	const today = dayOf(new Date());
-	const sections = visibleSections(lines, model, new Date(), { showArchived: view.showArchived, query: view.filter ?? '', keepLine: view.selected, collapsed: view.collapsed.lines() });
+	const sections = visibleSections(lines, model, new Date(), rowFilter(view, view.selected));
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {
 		if (section.heading) {
@@ -153,6 +153,12 @@ export function renderList(
 	if (!placed && card) items().append(card.el);
 	if (!fieldPlaced && field) el.append(field.el);
 	return drawnCount(shown) < drawnCount(sections);
+}
+
+// What hides rows in the view: archived items, Cmd+F's query and collapsed headings, with the item on
+// `keepLine` shown regardless of the last two.
+export function rowFilter(view: PrinceListView, keepLine: number | null): RowFilter {
+	return { showArchived: view.showArchived, query: view.filter ?? '', keepLine, collapsed: view.collapsed.lines() };
 }
 
 export function buildHeading(
