@@ -3,7 +3,7 @@ import { DESKTOP, RESTING_POINT, showGroceries, withTickedGroceries } from '../l
 import { click, hover, sleep, still } from '../page.mjs';
 
 const scene = {
-	name: 'desktop-2-schedule',
+	name: 'desktop-3-schedule',
 	...DESKTOP,
 	setup: showGroceries,
 	async shoot(session, out) {
