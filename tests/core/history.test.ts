@@ -226,6 +226,18 @@ describe('EditHistory', () => {
 			expect(history.redo(before)).toEqual({ next: copy, edit: { start: 1, delta: 1, kind: 'insert', history: 'redo' } });
 		});
 
+		test('its redo moves the lines below by every line it brings back, with the notes that joined it', () => {
+			const noted = '- [ ] a\n- [ ] \n\n\tx\n- [ ] b\n';
+			const history = new EditHistory();
+			history.wrote(t0, added, insert);
+			history.typed(s, added, noted, typing(added, noted));
+			const undo = history.undo(noted) as { next: string; edit: OwnEdit };
+			history.wrote(noted, t0, undo.edit);
+			const redo = history.redo(t0) as { next: string; edit: OwnEdit };
+			expect(redo).toEqual({ next: noted, edit: { start: 1, delta: 3, kind: 'insert', history: 'redo' } });
+			expect(followLine(1, redo.edit)).toBe(4);
+		});
+
 		test("one nothing joined can't be redone once undone, since it would come back empty", () => {
 			const history = new EditHistory();
 			history.wrote(t2, t0, textEdit(t2, t0));

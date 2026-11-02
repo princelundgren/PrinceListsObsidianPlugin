@@ -1,7 +1,8 @@
 import { syntaxTree } from '@codemirror/language';
-import type { EditorState, Extension, StateField } from '@codemirror/state';
+import { StateEffect, type EditorState, type Extension, type StateField } from '@codemirror/state';
 import { Decoration, ViewPlugin, type DecorationSet, type EditorView, type ViewUpdate, type WidgetType } from '@codemirror/view';
 import type { SyntaxNode } from '@lezer/common';
+import { debounce } from 'obsidian';
 import { isWebAddress, linkTarget, pictureLook } from '../core/drawn-links';
 import { parseItemLine } from '../core/item-line';
 import { pictureLinks } from '../core/picture-links';
@@ -21,6 +22,7 @@ const INLINE = {
 } as const;
 const HEADING = /^ATXHeading([1-6])$/;
 const CODE_NODES = new Set(['InlineCode', 'FencedCode', 'CodeBlock']);
+const filesChanged = StateEffect.define<null>();
 
 /**
  * Draws the notes as Obsidian's Live Preview draws a note: inline marks, links and pictures show their
@@ -30,6 +32,26 @@ const CODE_NODES = new Set(['InlineCode', 'FencedCode', 'CodeBlock']);
  */
 export function notesDrawing(view: PrinceListView, sourcePath: string, blocks: StateField<DrawnBlocks>): Extension {
 	return ViewPlugin.define((editor) => new NotesDrawing(editor, notesLinks(view, sourcePath), blocks), { decorations: (drawing) => drawing.decorations });
+}
+
+/**
+ * Draws the links and pictures in the view's notes again once files stop being added, deleted,
+ * renamed or resolved, since that can give a link its file or take it away. It changes no text.
+ */
+export function registerFileRedraws(view: PrinceListView): void {
+	const redraw = debounce(
+		() => {
+			for (const editor of [view.listNoteEditor, view.card?.editor]) editor?.dispatch({ effects: filesChanged.of(null) });
+		},
+		100,
+		true,
+	);
+	const { metadataCache, vault } = view.app;
+	view.registerEvent(vault.on('create', redraw));
+	view.registerEvent(vault.on('delete', redraw));
+	view.registerEvent(vault.on('rename', redraw));
+	view.registerEvent(metadataCache.on('resolved', redraw));
+	view.register(() => redraw.cancel());
 }
 
 class NotesDrawing {
@@ -45,7 +67,8 @@ class NotesDrawing {
 	update(update: ViewUpdate): void {
 		const isTreeNew = syntaxTree(update.startState) !== syntaxTree(update.state);
 		const areBlocksNew = update.startState.field(this.blocks) !== update.state.field(this.blocks);
-		if (update.docChanged || update.selectionSet || update.focusChanged || update.viewportChanged || isTreeNew || areBlocksNew) this.decorations = this.draw(update.view);
+		const areFilesNew = update.transactions.some((tr) => tr.effects.some((effect) => effect.is(filesChanged)));
+		if (update.docChanged || update.selectionSet || update.focusChanged || update.viewportChanged || isTreeNew || areBlocksNew || areFilesNew) this.decorations = this.draw(update.view);
 	}
 
 	private draw(editor: EditorView): DecorationSet {

@@ -14,13 +14,16 @@ export function isStarred(line: string): boolean {
 	return title !== undefined && splitStar(title).star !== '';
 }
 
-// Only the title changes: the ✔ marks and the tail after it stay as written, spacing included.
+// Only the title changes: the ✔ marks and the tail after it stay as written, spacing included,
+// except that a tag the star would touch gets the space a tag needs.
 export function setStar(line: string, starred: boolean): string {
 	const parts = parseItemLine(line);
 	if (!parts) return line;
 	const { plain, star } = splitStar(parts.title);
 	if (starred === (star !== '')) return line;
-	return joinItemLine({ ...parts, title: starred ? parts.title + STAR : plain });
+	if (!starred) return joinItemLine({ ...parts, title: plain });
+	const tail = parts.tail.startsWith('#') ? ` ${parts.tail}` : parts.tail;
+	return joinItemLine({ ...parts, title: parts.title + STAR, tail });
 }
 
 // The title field shows the title without its star, so saving puts the saved star back, once.
