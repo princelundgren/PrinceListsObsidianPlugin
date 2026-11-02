@@ -21,6 +21,7 @@ import { registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
+import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
 import { UNSAFE_EDIT_NOTICE } from './write';
@@ -296,7 +297,7 @@ export class PrinceListView extends TextFileView {
 
 	private shiftLines(edit: OwnEdit): void {
 		if (edit.kind === 'change' && edit.delta === 0) return;
-		for (const el of this.contentEl.querySelectorAll(`[${LINE_ATTR}]`)) {
+		for (const el of ownElements(this.contentEl, `[${LINE_ATTR}]`)) {
 			setLine(el, followLine(lineOf(el) as number, edit));
 		}
 	}

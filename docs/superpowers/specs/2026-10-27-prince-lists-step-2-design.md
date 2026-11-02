@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-10-30
+verified: 2026-11-02
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -185,6 +185,11 @@ this met on 2026-10-30 **(owner)**.
   listeners belong to a `MarkdownRenderChild`, so they go when the block does. The metadata cache
   reports each of the block's own writes, sometimes only after a later one has landed; a late report
   is the block's own write, not a change from outside.
+- **In a list's own notes (owner, 2026-11-02):** a block in the list note or an item's notes draws
+  its rows with the list view's classes and line attribute, for its own list's lines. The list
+  view finds, renumbers and aims drops at only its own rows, and never acts on the block's rows:
+  a click, right-click or drag on them is the block's. A click in a block in the list note still
+  closes an open card, as any click on the list note does.
 - **A link to no file, or to a note without the marker,** shows a gray line saying so, naming the
   link. So does a block that names the note it's in **(call)**: that note may be open in an editor
   with typing not yet saved. A note from outside the vault can't be linked, so it can't be shown

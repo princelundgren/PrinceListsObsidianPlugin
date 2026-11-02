@@ -16,6 +16,7 @@ import { itemQuickMenu } from './item-quick-menu';
 import type { PrinceListView } from './list-view';
 import { atLine, trackWhileShown } from './menu-anchor';
 import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
+import { ownElements } from './own-rows';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
 import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
@@ -230,7 +231,7 @@ function backgroundMenu(view: PrinceListView, evt: MouseEvent): Menu | null {
 	if (!isListText(view.text)) return null;
 	const { model } = view.parse();
 	let section = model.sections[0] as Section;
-	for (const heading of view.contentEl.querySelectorAll<HTMLElement>(`.${HEADING_CLASS}`)) {
+	for (const heading of ownElements(view.contentEl, `.${HEADING_CLASS}`)) {
 		if (heading.getBoundingClientRect().top > evt.clientY) break;
 		const line = lineOf(heading);
 		if (line !== null) section = model.sections.find((s) => s.headingLine === line) ?? section;

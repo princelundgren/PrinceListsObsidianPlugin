@@ -3,6 +3,7 @@ import type { TrackedLine } from '../core/editing';
 import { targetOf } from './dom';
 import type { RowDragHost } from './drag-host';
 import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
+import { isInNestedBlock, ownClosest } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
 
 // Each row's drag carries a type of its own, this one with a random token added. Other drags, such as
@@ -33,6 +34,9 @@ export function enableMouseDrag(host: RowDragHost): void {
 	const ownDrag = (evt: DragEvent) =>
 		current?.host === host && evt.dataTransfer?.types.includes(current.type) ? current : null;
 	component.registerDomEvent(rowsEl, 'dragstart', (evt) => {
+		// A list block in the notes drags its own rows, and its drag mustn't end here.
+		const target = targetOf(evt);
+		if (target && isInNestedBlock(rowsEl, target)) return;
 		endDrag();
 		current = startDrag(host, evt);
 	});
@@ -100,7 +104,8 @@ function dragOver(drag: MouseDrag, evt: DragEvent): void {
 // the drop line stays where it was.
 function aim(drag: MouseDrag, evt: DragEvent): void {
 	const dragged = drag.row.line;
-	const over = targetOf(evt)?.closest<HTMLElement>(`[${LINE_ATTR}]`);
+	const target = targetOf(evt);
+	const over = target && ownClosest(drag.host.rowsEl, target, `[${LINE_ATTR}]`);
 	const line = over ? lineOf(over) : null;
 	if (dragged === null || !over || line === null) return;
 	const { top, height } = over.getBoundingClientRect();

@@ -6,6 +6,7 @@ import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import type { RowDragHost } from './drag-host';
 import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
+import { ownClosest, ownElements } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 
 const LIFTED_CLASS = 'princelists-lifted';
@@ -120,7 +121,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 		if (scrollEl) scrollEl.scrollTop += current.row.getBoundingClientRect().top - rowTop;
 		const shift = rowTop - current.row.getBoundingClientRect().top;
 		const top = originTop();
-		const boxes = Array.from(rowsEl.querySelectorAll<HTMLElement>(`[${LINE_ATTR}]`), (el) => {
+		const boxes = ownElements(rowsEl, `[${LINE_ATTR}]`).map((el) => {
 			const rect = el.getBoundingClientRect();
 			return { el, top: rect.top - top + scrollTop(), bottom: rect.bottom - top + scrollTop() };
 		});
@@ -140,7 +141,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 		endPress();
 		// A heading lifts alone; its rows stay until the drop redraws.
 		const target = targetOf(evt);
-		const row = target?.closest<HTMLElement>(host.dragsHeadings ? `.${ITEM_CLASS}, .${HEADING_CLASS}` : `.${ITEM_CLASS}`);
+		const row = target && ownClosest(rowsEl, target, host.dragsHeadings ? `.${ITEM_CLASS}, .${HEADING_CLASS}` : `.${ITEM_CLASS}`);
 		if (!row || row.hasClass(CARD_CLASS) || target?.closest(`.${COLLAPSE_CLASS}`) || target?.closest('textarea')) return;
 		const started: Press = { pointerId: evt.pointerId, row, startX: evt.clientX, startY: evt.clientY, x: evt.clientX, y: evt.clientY, timer: null, lift: null };
 		started.timer = window.setTimeout(() => lift(started), HOLD_MS);

@@ -5,6 +5,7 @@ import { contentStartLine } from '../obsidian/marker';
 import { followPlace } from './add-button';
 import { expandFor } from './collapse';
 import type { PrinceListView } from './list-view';
+import { ownElement, ownElements } from './own-rows';
 import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, writePlanned } from './write';
 
@@ -13,7 +14,7 @@ const DROP_BELOW = 'princelists-drop-below';
 
 // In the order they show. Every row and heading carries its line, and hidden rows aren't drawn.
 export function shownRows(listEl: HTMLElement): ShownRow[] {
-	return Array.from(listEl.querySelectorAll<HTMLElement>(`[${LINE_ATTR}]`), (el) => ({
+	return ownElements(listEl, `[${LINE_ATTR}]`).map((el) => ({
 		line: lineOf(el) as number,
 		kind: el.hasClass(HEADING_CLASS) ? 'heading' : el.hasClass(ITEM_CLASS) ? 'item' : 'untouched',
 	}));
@@ -36,7 +37,7 @@ export function markDrop(listEl: HTMLElement, marked: HTMLElement | null, drop: 
 	marked?.removeClass(DROP_ABOVE, DROP_BELOW);
 	if (!drop) return null;
 	const { line, above } = 'item' in drop ? drop.item : drop.section;
-	const next = listEl.querySelector<HTMLElement>(`[${LINE_ATTR}="${line}"]`);
+	const next = ownElement(listEl, `[${LINE_ATTR}="${line}"]`);
 	next?.addClass(above ? DROP_ABOVE : DROP_BELOW);
 	return next;
 }
