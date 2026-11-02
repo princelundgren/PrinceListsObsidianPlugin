@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { parseItemLine } from '../../src/core/item-line';
-import { isStarred, keepStar, setStar, splitStar } from '../../src/core/star';
+import { isStarred, setStar, setTitleKeepingStar, splitStar } from '../../src/core/star';
 
 const F = '️';
 
@@ -38,11 +38,46 @@ test('setStar leaves a starred item starred', () => {
 	expect(setStar('- [ ] a ⭐', true)).toBe('- [ ] a ⭐');
 });
 
-test('keepStar puts the saved star back on what was typed', () => {
-	expect(keepStar('milk ⭐', 'oat milk')).toBe('oat milk ⭐');
-	expect(keepStar('milk ⭐', 'oat milk ⭐')).toBe('oat milk ⭐');
-	expect(keepStar('milk ⭐' + F, 'oat')).toBe('oat ⭐' + F);
-	expect(keepStar('milk', 'milk ⭐')).toBe('milk ⭐');
+test('setTitleKeepingStar puts the star of the line back on what was typed, once', () => {
+	expect(setTitleKeepingStar('- [ ] milk ⭐', 'oat milk')).toBe('- [ ] oat milk ⭐');
+	expect(setTitleKeepingStar('- [ ] milk ⭐', 'oat milk ⭐')).toBe('- [ ] oat milk ⭐');
+	expect(setTitleKeepingStar('- [ ] milk ⭐' + F, 'oat')).toBe('- [ ] oat ⭐' + F);
+	expect(setTitleKeepingStar('- [ ] milk', 'milk ⭐')).toBe('- [ ] milk ⭐');
+});
+
+test('setTitleKeepingStar puts the star before a tag or Tasks field typed at the end of the title', () => {
+	const tagged = setTitleKeepingStar('- [ ] Buy ⭐', 'Buy #shop');
+	expect(tagged).toBe('- [ ] Buy ⭐ #shop');
+	expect(isStarred(tagged)).toBe(true);
+	expect(parseItemLine(tagged)?.tail).toBe(' #shop');
+	expect(setTitleKeepingStar('- [ ] Pay ⭐', 'Pay rent 📅 2026-11-30')).toBe('- [ ] Pay rent ⭐ 📅 2026-11-30');
+	expect(setTitleKeepingStar('- [ ] milk ⭐ 📅 2026-11-30', 'milk #shop')).toBe('- [ ] milk ⭐ #shop 📅 2026-11-30');
+});
+
+test('setTitleKeepingStar adds no second star for a star typed before a typed tag or Tasks field', () => {
+	expect(setTitleKeepingStar('- [ ] Buy ⭐', 'Buy ⭐ #shop')).toBe('- [ ] Buy ⭐ #shop');
+	expect(setTitleKeepingStar('- [ ] Buy ⭐', 'Buy ⭐ 📅 2026-11-30')).toBe('- [ ] Buy ⭐ 📅 2026-11-30');
+});
+
+test('setTitleKeepingStar keeps a typed block ID after the star', () => {
+	expect(setTitleKeepingStar('- [ ] Buy ⭐', 'Buy ^abc')).toBe('- [ ] Buy ⭐ ^abc');
+});
+
+test('setTitleKeepingStar keeps a tag typed as the whole title a tag', () => {
+	expect(setTitleKeepingStar('- [ ] Buy ⭐', '#shop')).toBe('- [ ]  ⭐ #shop');
+});
+
+test('setTitleKeepingStar leaves a tag typed mid-title in the title, and keeps the tail of the line', () => {
+	expect(setTitleKeepingStar('- [ ] Buy ⭐', 'Buy #shop milk')).toBe('- [ ] Buy #shop milk ⭐');
+	expect(setTitleKeepingStar('- [ ] milk ⭐ #shop 📅 2026-11-30', 'oat milk')).toBe('- [ ] oat milk ⭐ #shop 📅 2026-11-30');
+});
+
+test('setTitleKeepingStar keeps a done item starred, a typed tag before its mark as on an unstarred one', () => {
+	const done = setTitleKeepingStar('- [x] milk ⭐ ✔ 2026-10-27 18:05 ⏳ 2026-10-30', 'oat #shop');
+	expect(done).toBe('- [x] oat #shop ⭐ ✔ 2026-10-27 18:05 ⏳ 2026-10-30');
+	expect(isStarred(done)).toBe(true);
+	const unstarred = setTitleKeepingStar('- [x] milk ✔ 2026-10-27 18:05 ⏳ 2026-10-30', 'oat #shop');
+	expect(unstarred).toBe('- [x] oat #shop ✔ 2026-10-27 18:05 ⏳ 2026-10-30');
 });
 
 test('isStarred reads the star on an item line only', () => {
@@ -52,9 +87,9 @@ test('isStarred reads the star on an item line only', () => {
 });
 
 test('a starred item whose title is cleared stays starred', () => {
-	const title = keepStar('milk ⭐', '');
-	expect(title).toBe(' ⭐');
-	expect(isStarred(`- [ ] ${title}`)).toBe(true);
+	const line = setTitleKeepingStar('- [ ] milk ⭐', '');
+	expect(line).toBe('- [ ]  ⭐');
+	expect(isStarred(line)).toBe(true);
 });
 
 test('a star before trailing spaces still counts', () => {

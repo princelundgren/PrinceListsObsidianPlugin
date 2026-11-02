@@ -1,11 +1,11 @@
 import { Menu, Notice, setIcon } from 'obsidian';
 import type { TrackedLine } from '../core/editing';
 import { planRemoval, type InsertedItem } from '../core/empty-item';
-import { parseItemLine, setTitle } from '../core/item-line';
+import { parseItemLine } from '../core/item-line';
 import { splitLines } from '../core/lines';
 import { planItemDelete, planItemInsert, planItemLineEdit, type ItemPlace, type PlannedDelete } from '../core/list-actions';
 import { lostFieldNotice } from '../core/missing-typing';
-import { keepStar, splitStar } from '../core/star';
+import { setTitleKeepingStar, splitStar } from '../core/star';
 import { joinTypedLines } from '../core/title-field';
 import { contentStartLine } from '../obsidian/marker';
 import { followPlace } from './add-button';
@@ -167,7 +167,7 @@ export function showBlockItemMenu(block: ListBlock, evt: MouseEvent, titleLine: 
 async function saveTitle(block: ListBlock, titleLine: number, typed: string): Promise<void> {
 	const text = block.editing.text;
 	const planned = tryEdit(() =>
-		planItemLineEdit(text, contentStartLine(text), titleLine, (line) => setTitle(line, keepStar(parseItemLine(line)?.title ?? '', typed))),
+		planItemLineEdit(text, contentStartLine(text), titleLine, (line) => setTitleKeepingStar(line, typed)),
 	);
 	if (planned) await block.write(planned.next, text, planned.edit);
 }

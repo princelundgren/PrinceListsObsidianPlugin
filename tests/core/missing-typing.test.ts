@@ -44,6 +44,10 @@ describe('missingTyping', () => {
 		expect(missingTyping('- [ ] Buy #shop 📅 2026-11-01\n', 'Buy #shop', 'title')).toBe(false);
 	});
 
+	test('finds a tag typed as the whole title of a starred item', () => {
+		expect(missingTyping('- [ ]  ⭐ #shop\n', '#shop', 'title')).toBe(false);
+	});
+
 	test('finds a typed title ending in a tag on an item ticked while its title was open', () => {
 		expect(missingTyping('- [x] Buy ✔ 2026-11-02 10:00 #shop\n', 'Buy #shop', 'title')).toBe(false);
 	});

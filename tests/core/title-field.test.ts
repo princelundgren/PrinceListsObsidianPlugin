@@ -73,6 +73,15 @@ describe('typeTitle across a typing session', () => {
 		expect(typeChars(text, 0, 'oat milk').line).toBe('- [x] oat milk ⭐ ✔ 2026-10-27 18:05 ⏳ 2026-10-30');
 	});
 
+	test('a starred item keeps its star before a tag typed at the end of the title', () => {
+		expect(typeChars('- [ ] Buy ⭐\n', 0, 'Buy #shop').line).toBe('- [ ] Buy ⭐ #shop');
+	});
+
+	test('a starred item keeps its star before a typed Tasks field, in a CRLF file', () => {
+		const { text } = typeChars('- [ ] a\r\n- [ ] Pay ⭐\r\n', 1, 'Pay rent 📅 2026-11-30');
+		expect(text).toBe('- [ ] a\r\n- [ ] Pay rent ⭐ 📅 2026-11-30\r\n');
+	});
+
 	test('a done item keeps its mark after the typed title', () => {
 		const text = '- [x] old ✔ 2026-10-20 09:00 #home\n';
 		expect(typeChars(text, 0, 'new').line).toBe('- [x] new ✔ 2026-10-20 09:00 #home');
