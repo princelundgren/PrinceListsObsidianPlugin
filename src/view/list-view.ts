@@ -18,6 +18,7 @@ import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
 import { registerListKeys } from './keys';
+import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
 import { redraw } from './redraw';
@@ -151,6 +152,7 @@ export class PrinceListView extends TextFileView {
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
 		registerFieldEvents(this);
+		registerFileRedraws(this);
 		// The collapse arrows always show where there's no hover.
 		this.contentEl.toggleClass('princelists-is-mobile', Platform.isMobile);
 		const dragHost = listDragHost(this);

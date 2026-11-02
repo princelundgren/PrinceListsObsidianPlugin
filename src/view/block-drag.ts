@@ -26,8 +26,9 @@ export function blockDragHost(block: ListBlock): RowDragHost {
 			block.swallowNextClick = value;
 		},
 		beforeLift: () => closeBlockField(block, true),
-		// A drag holds its row from track to untrack. The block doesn't draw in between, so a field the
-		// lift closed and saved can't end the drag; it draws once the drag is over.
+		// A drag holds its row from track to untrack, or until a draw detaches it, such as a tick's or
+		// a change from outside's. drawIfChanged waits while it holds one, so a field the lift closed and
+		// saved can't end the drag; it draws once the drag is over.
 		// Out-of-date rows give a line already gone, so the drag ends without a drop.
 		track: (line) => {
 			block.dragging = true;

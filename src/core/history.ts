@@ -89,7 +89,7 @@ export class EditHistory {
 	redo(text: string): HistoryWrite | null {
 		const step = this.redoSteps[this.redoSteps.length - 1];
 		if (step?.before !== text) return null;
-		const edit = step.edit ?? textEdit(step.before, step.after);
+		const edit = step.edit ? redone(step.edit, step.before, step.after) : textEdit(step.before, step.after);
 		return { next: step.after, edit: { ...edit, history: 'redo' } };
 	}
 
@@ -140,6 +140,12 @@ function inverse(edit: OwnEdit, after: string, before: string): OwnEdit {
 	if (edit.kind === 'move') return moveEdit(movedBack(edit, after));
 	const kind = edit.kind === 'insert' ? 'delete' : edit.kind === 'delete' ? 'insert' : 'change';
 	return ownEdit(edit.start, after, before, kind);
+}
+
+// The step's edit again, its delta from the texts: an edit that joined the step can add lines.
+function redone(edit: OwnEdit, before: string, after: string): OwnEdit {
+	if (edit.kind === 'move') return edit;
+	return ownEdit(edit.start, before, after, edit.kind);
 }
 
 // For each line after the move, the line it came from; null for a line the move added.

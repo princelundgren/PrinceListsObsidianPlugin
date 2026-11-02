@@ -91,6 +91,25 @@ describe('the undo history', () => {
 		expect(state.history.undo(ticked)).toBeNull();
 	});
 
+	test("a redone new item moves a tracked line below it past the notes typed in its card", () => {
+		const state = editing(text);
+		const b = state.track(4);
+		const added = planItemInsert(state.text, 3, { after: 3 }) as PlannedInsert;
+		state.applyOwn(added.next, added.edit);
+		state.open(added.line);
+		notesEditor(state, 'item').type('x');
+		state.closeNotes();
+		state.close();
+		const noted = state.text;
+		const undo = state.history.undo(noted) as { next: string; edit: OwnEdit };
+		state.applyOwn(undo.next, undo.edit);
+		expect(b.line).toBe(4);
+		const redo = state.history.redo(state.text) as { next: string; edit: OwnEdit };
+		state.applyOwn(redo.next, redo.edit);
+		expect(state.text).toBe(noted);
+		expect(splitLines(state.text)[b.line as number]?.text).toBe('- [ ] b');
+	});
+
 	// "+", a title typed, the card closed: then Cmd+Z, Cmd+Z and Cmd+Shift+Z. The card is gone, so a
 	// second Cmd+Z pressed before the first lands is a history undo too.
 	test('undo and redo never leave an empty new item without its card', () => {
