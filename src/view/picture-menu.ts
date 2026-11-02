@@ -174,7 +174,7 @@ async function deletePicture(view: PrinceListView, removable: RemovableLink, fil
 // The clipboard takes pictures as PNG only, so any other format is drawn into one first.
 function copyPicture(view: PrinceListView, file: TFile): void {
 	const png = view.app.vault.readBinary(file).then((data) => asPng(new Blob([data], { type: mimeType(file.extension) })));
-	navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]).catch((error: unknown) => {
+	view.contentEl.win.navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]).catch((error: unknown) => {
 		console.error(error);
 		new Notice("Couldn't copy the image.");
 	});
