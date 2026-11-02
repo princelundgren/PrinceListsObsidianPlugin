@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-10-30
+verified: 2026-11-02
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -175,6 +175,14 @@ this met on 2026-10-30 **(owner)**.
   hold-and-move on mobile, with the list view's drop rules. Lifting an item closes an open
   title field and saves it. A hold on an item opens no menu, and a swipe that starts no lift
   scrolls the note.
+  - **The item lands where the drop line showed (owner, 2026-11-02),** even when that save
+    removes an empty new item and so moves the lines below it: the drag aims with the rows as
+    drawn, and the move follows each drawn row's line to where it is now. A drop under the row
+    that save removed goes under the row above it, as if that row had never shown **(call)**. A
+    change from elsewhere between the drop and the move writes nothing and shows "This list
+    changed elsewhere. Try again.", as a tick does **(call)**. A draw during the drag, such as for
+    a change from elsewhere, ends it with nothing written, with the mouse as with a finger
+    **(call)**.
 - **No edge scrolling in a block (call):** the block sits in the note's scroller, which is
   Obsidian's, and the plugin doesn't reach into Obsidian's own elements. A drop beyond what shows
   needs the list view.

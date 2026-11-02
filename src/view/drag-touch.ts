@@ -12,7 +12,7 @@ const LIFTED_CLASS = 'princelists-lifted';
 const LIFT_OFFSET = '--princelists-lift';
 
 interface Lift {
-	/** The dragged item's title line, or heading's line. It follows edits that land during the drag. */
+	/** The dragged item's title line, or heading's line, as the drawn rows number it; null once it can't drop. */
 	item: TrackedLine;
 	kind: ShownRow['kind'];
 	/** Every row and heading with its extent at the lift, in the scroller's content coordinates, or from rowsEl's top without one. */
