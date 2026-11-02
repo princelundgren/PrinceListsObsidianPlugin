@@ -1,8 +1,6 @@
 import { setItemTitle } from './edit-items';
-import { parseItemLine } from './item-line';
 import { spliceLines, type Line } from './lines';
 import type { ItemBlock } from './parse';
-import { keepStar } from './star';
 
 /**
  * An item's title field while it has focus. `saved` is the title line as it was when the field took
@@ -40,8 +38,7 @@ export function typeTitle(
 ): { lines: Line[]; field: TitleField } {
 	const { eol } = lines[item.titleLine] as Line;
 	const withSaved = spliceLines(lines, item.titleLine, 1, [{ text: field.saved, eol }]);
-	const savedTitle = parseItemLine(field.saved)?.title ?? '';
-	const edited = setItemTitle(withSaved, item, keepStar(savedTitle, oneLineTitle(typed)));
+	const edited = setItemTitle(withSaved, item, oneLineTitle(typed));
 	return { lines: edited, field: { saved: field.saved, written: (edited[item.titleLine] as Line).text } };
 }
 

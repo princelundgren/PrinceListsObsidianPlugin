@@ -1,4 +1,4 @@
-import { joinItemLine, parseItemLine } from './item-line';
+import { joinItemLine, parseItemLine, setTitle, type ItemLineParts } from './item-line';
 
 const STAR = ' ⭐';
 // A star counts only after a space, so `5⭐` is a title, not a starred `5`.
@@ -21,13 +21,23 @@ export function setStar(line: string, starred: boolean): string {
 	if (!parts) return line;
 	const { plain, star } = splitStar(parts.title);
 	if (starred === (star !== '')) return line;
-	if (!starred) return joinItemLine({ ...parts, title: plain });
-	const tail = parts.tail.startsWith('#') ? ` ${parts.tail}` : parts.tail;
-	return joinItemLine({ ...parts, title: parts.title + STAR, tail });
+	return starred ? withStar(parts, STAR) : joinItemLine({ ...parts, title: plain });
 }
 
-// The title field shows the title without its star, so saving puts the saved star back, once.
-export function keepStar(savedTitle: string, typed: string): string {
-	const { star } = splitStar(savedTitle);
-	return star === '' ? typed : splitStar(typed).plain + star;
+/**
+ * The line with its title set to `typed`, as `setTitle` sets it, and its star, if it had one, put back
+ * once at the end of the new title. The title field shows the title without its star, and a `#tag` or
+ * Tasks field typed at the end of the title stays the item's tail.
+ */
+export function setTitleKeepingStar(line: string, typed: string): string {
+	const { star } = splitStar(parseItemLine(line)?.title ?? '');
+	if (star === '') return setTitle(line, typed);
+	const titled = setTitle(line, splitStar(typed).plain);
+	const parts = parseItemLine(titled);
+	return parts ? withStar({ ...parts, title: splitStar(parts.title).plain }, star) : titled;
+}
+
+function withStar(parts: ItemLineParts, star: string): string {
+	const tail = parts.tail.startsWith('#') ? ` ${parts.tail}` : parts.tail;
+	return joinItemLine({ ...parts, title: parts.title + star, tail });
 }
