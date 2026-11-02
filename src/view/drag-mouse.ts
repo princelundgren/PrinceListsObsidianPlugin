@@ -1,7 +1,7 @@
 import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { targetOf } from './dom';
-import type { RowDragHost } from './drag-host';
+import { liftInPlace, type RowDragHost } from './drag-host';
 import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
 
@@ -76,9 +76,12 @@ function startDrag(host: RowDragHost, evt: DragEvent): MouseDrag | null {
 	const kind = row?.hasClass(ITEM_CLASS) ? 'item' : host.dragsHeadings && row?.hasClass(HEADING_CLASS) ? 'heading' : null;
 	const line = row && kind ? lineOf(row) : null;
 	if (!row || !kind || line === null || !evt.dataTransfer) return null;
-	host.beforeLift();
-	// So a redraw detaches it, as it does a touch drag's row.
-	forgetDrawn(row);
+	// After dragstart returns: Chromium cancels the drag if the row has moved from under the press (spec, "Dragging").
+	window.setTimeout(() => {
+		liftInPlace(host, row);
+		// Not before the lift, whose own redraw keeps the row; a later redraw detaches it, as touch's does.
+		forgetDrawn(row);
+	});
 	const type = `${DRAG_TYPE}-${Math.random().toString(36).slice(2)}`;
 	evt.dataTransfer.setData(type, '');
 	evt.dataTransfer.effectAllowed = 'move';
