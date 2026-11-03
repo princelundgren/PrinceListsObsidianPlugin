@@ -1,8 +1,11 @@
 import { EditorSelection, Prec, StateEffect, StateField, type Range, type Text } from '@codemirror/state';
 import { Decoration, EditorView, keymap, WidgetType, type Command, type DecorationSet } from '@codemirror/view';
 import { drawnBlocks, spanCrossed, type DrawnBlock } from '../core/drawn-blocks';
+import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { renderIntoWidget, unloadWidget } from './notes-widgets';
+import { LIST_BLOCK_CLASS } from './own-rows';
+import { ITEM_CLASS } from './render-list';
 
 export const NOTES_BLOCK_CLASS = 'princelists-notes-block';
 
@@ -102,8 +105,10 @@ class BlockWidget extends WidgetType {
 		return other.markdown === this.markdown && other.kind === this.kind;
 	}
 
+	// Focusable, so a press left to a list block's row focuses the block and not the editor, whose
+	// focus would show the block's Markdown under the press.
 	toDOM(): HTMLElement {
-		const el = createDiv({ cls: NOTES_BLOCK_CLASS });
+		const el = createDiv({ cls: NOTES_BLOCK_CLASS, attr: { tabindex: -1 } });
 		renderIntoWidget(this.view, this.sourcePath, el, this.markdown);
 		return el;
 	}
@@ -113,8 +118,13 @@ class BlockWidget extends WidgetType {
 	}
 
 	// The editor's mousedown handler shows the block's Markdown, leaves a link or button in it be, keeps
-	// it drawn on a press of another button, or hands a modified press on to CodeMirror's own.
+	// it drawn on a press of another button, or hands a modified press on to CodeMirror's own. A plain
+	// press of the main button on a list block's item is the block's, as in a note, and the browser's
+	// own, so the row can drag: CodeMirror prevents the default of any press its handlers take.
 	ignoreEvent(event: Event): boolean {
-		return event.type !== 'mousedown';
+		if (event.type !== 'mousedown') return true;
+		const press = event as MouseEvent;
+		if (press.button !== 0 || press.shiftKey || press.ctrlKey || press.metaKey || press.altKey) return false;
+		return !!targetOf(press)?.closest(`.${LIST_BLOCK_CLASS} .${ITEM_CLASS}`);
 	}
 }

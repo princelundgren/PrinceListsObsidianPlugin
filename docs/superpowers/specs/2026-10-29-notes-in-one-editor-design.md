@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-02
+verified: 2026-11-03
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -80,6 +80,11 @@ Compared with Obsidian's own editor side by side on desktop:
   - A click on a drawn block puts the caret at the start of its first line **(call)**; with Shift or
     another modifier held, it selects as anywhere in the editor. A link in it opens, and a button
     the renderer draws, such as a code block's copy button, works as in a note.
+  - A press of the main button with no modifier on a list block's item is the block's instead, as
+    in a note (step two, "A list inside another note"): its box ticks, its title opens a field and
+    the row drags. With Shift or another modifier held, it selects as anywhere in the editor. The
+    press focuses the drawn block, not the editor **(call)**: the editor's focus would show the
+    block's Markdown whenever the caret sits at its start or end.
   - Up and Down onto a drawn block stop at its start or end, as Live Preview's arrow keys enter a
     block **(call)**: CodeMirror's own vertical motion passes a block widget by.
   - A widget is drawn again only when its own Markdown changes, so typing elsewhere doesn't redraw
