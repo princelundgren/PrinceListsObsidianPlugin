@@ -89,7 +89,7 @@ describe('Tab and Shift+Tab in new notes', () => {
 		card.press(indentMore);
 		expect(typedHtml(card.markdown)).toMatch(/<\/li>\n<\/[ou]l>\n<\/li>/);
 		expect(notesHtml(card.file)).toBe(typedHtml(card.markdown));
-		expect(card.markdown).toBe(typed.replace('\n', '\n    '));
+		expect(card.markdown).toBe(typed.replace(/\n/g, '\n    '));
 	});
 
 	test.each(NEW_ITEMS)('%j: Enter in a nested item continues it in spaces, still nested', (text) => {
