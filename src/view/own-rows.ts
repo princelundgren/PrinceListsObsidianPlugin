@@ -31,3 +31,20 @@ export function ownClosest(root: Element, target: Element, selector: string): HT
 	const match = target.closest<HTMLElement>(selector);
 	return match && root.contains(match) ? match : null;
 }
+
+/**
+ * The elements under `root` that `evt`'s dispatch runs through, target first, from the path dispatch
+ * fixes before any listener runs: one a listener has since removed, such as a list block's title that
+ * its field replaced, still counts. Empty when the event isn't under `root`.
+ */
+export function pathUnder(root: Element, evt: Event): HTMLElement[] {
+	const path = evt.composedPath();
+	const at = path.indexOf(root);
+	if (at === -1) return [];
+	return (path.slice(0, at) as Node[]).filter((node): node is HTMLElement => node.instanceOf(HTMLElement));
+}
+
+/** Whether `evt` reached `root` through a list block drawn inside it, as `isInNestedBlock`, from its path. */
+export function eventInNestedBlock(root: Element, evt: Event): boolean {
+	return pathUnder(root, evt).some((el) => el.hasClass(LIST_BLOCK_CLASS));
+}

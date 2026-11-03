@@ -109,7 +109,9 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 					// A drawn link follows on its click, through the view's own listener, as in Live Preview, and
 					// a box ticks on its own: the caret stays where it was, and a phone's keyboard stays down. So
 					// does a button that Obsidian's renderer draws in a block, such as a code block's copy button.
-					// Elsewhere on a drawn block, the caret goes to its start, which shows its Markdown.
+					// Elsewhere on a drawn block, the caret goes to its start, which shows its Markdown. A plain
+					// main-button press on a list block's item doesn't come here: it is the block's
+					// (BlockWidget.ignoreEvent).
 					mousedown: (evt, editor) => {
 						const target = targetOf(evt);
 						if (target?.closest(`a, .${NOTES_BLOCK_CLASS} button, ${NOTES_DRAWN_CHECKBOX_SELECTOR}`)) {
