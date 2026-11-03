@@ -1,5 +1,6 @@
-import { Scope, type Modifier } from 'obsidian';
+import { Platform, Scope, type Modifier } from 'obsidian';
 import type { Format } from '../core/format';
+import { modKeyName } from '../core/key-name';
 import { isListText } from '../obsidian/marker';
 import { newItem } from './add-button';
 import { targetOf } from './dom';
@@ -8,6 +9,11 @@ import { applyFormat } from './format';
 import type { PrinceListView } from './list-view';
 import { eventInDrawnListBlock } from './notes-blocks';
 import { redoKey, undoKey } from './undo';
+
+const ADD_KEY = 'Enter';
+
+/** The add key's name on this platform, as "Cmd+Enter", or null on mobile. */
+export const ADD_KEY_NAME = modKeyName(Platform, ADD_KEY);
 
 // The view's own keys, which apply only while the list has focus, so none is a default hotkey.
 export function registerListKeys(view: PrinceListView): void {
@@ -21,7 +27,7 @@ export function registerListKeys(view: PrinceListView): void {
 	register(['Mod'], 'z', (evt) => undoKey(view, evt));
 	register(['Mod', 'Shift'], 'z', (evt) => redoKey(view, evt));
 	// In every field too, a card's included, as "+" would. In a note that isn't a list, the key is Obsidian's.
-	register(['Mod'], 'Enter', () => {
+	register(['Mod'], ADD_KEY, () => {
 		if (!isListText(view.text)) return true;
 		newItem(view);
 		return false;

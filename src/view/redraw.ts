@@ -1,10 +1,10 @@
-import { Platform } from 'obsidian';
 import { isListText } from '../obsidian/marker';
 import { hasNoItems } from './add-button';
 import { dismissCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
 import { buildListNote, buildListTitle, refreshListNote } from './fields';
 import { buildFilterField } from './filter';
+import { ADD_KEY_NAME } from './keys';
 import type { PrinceListView } from './list-view';
 import { drawnRows, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
 
@@ -65,10 +65,8 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	listScrollEl.scrollTop = scrollTop;
 }
 
-// A tablet with a keyboard still reads "Tap": a phone or tablet usually has none.
 function emptyHint(): string {
-	if (Platform.isMobile) return 'Tap + to add an item';
-	return Platform.isMacOS ? 'Press Cmd+Enter or + to add an item' : 'Press Ctrl+Enter or + to add an item';
+	return ADD_KEY_NAME === null ? 'Tap + to add an item' : `Press ${ADD_KEY_NAME} or + to add an item`;
 }
 
 // Where a redraw puts the card: a slot for the card that keeps focus, or the card, updated.

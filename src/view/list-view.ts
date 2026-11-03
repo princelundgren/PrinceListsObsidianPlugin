@@ -4,6 +4,7 @@ import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants'
 import { CollapsedHeadings } from '../core/collapsed';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
+import { labelWithKey } from '../core/key-name';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
@@ -17,7 +18,7 @@ import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
-import { registerListKeys } from './keys';
+import { ADD_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
@@ -160,7 +161,7 @@ export class PrinceListView extends TextFileView {
 		enableMouseDrag(dragHost);
 		if (Platform.isMobile) enableTouchDrag(dragHost);
 		if (Platform.isMobile) this.newItemButton = buildNewItemButton(this);
-		this.newItemAction = this.addAction('plus', 'New item', () => newItem(this));
+		this.newItemAction = this.addAction('plus', labelWithKey('New item', ADD_KEY_NAME), () => newItem(this));
 		this.archivedButton = this.addAction('square-check-big', 'Show archived', () => this.toggleArchived());
 		this.syncArchivedButton();
 	}
