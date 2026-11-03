@@ -8,9 +8,9 @@ export interface ItemBlock {
 	titleLine: number;
 	endLine: number;
 	/**
-	 * The indent new or rewritten notes take: the notes' own when it reaches the content column, where
-	 * the title's `[` starts, but not 4 columns past it. Otherwise a tab when that column is 4 or less,
-	 * else that many spaces.
+	 * The indent new or rewritten notes take: that of the notes' first line that reaches the content
+	 * column, where the title's `[` starts, but not 4 columns past it. With no such line, a tab when
+	 * that column is 4, else that many spaces.
 	 */
 	notesIndent: string;
 }
@@ -242,14 +242,15 @@ function headingContentStart(lines: readonly Line[], start: number, end: number)
 }
 
 function indentForNotes(lines: readonly Line[], titleLine: number, endLine: number, contentColumn: number): string {
-	const firstNote = lines.slice(titleLine + 1, endLine).find((line) => !isBlank(line.text));
-	const indent = firstNote ? (/^[ \t]*/.exec(firstNote.text) as RegExpExecArray)[0] : '';
 	// A lazy line, indented less than the content column, can't lend its indent: a line written with it
 	// after an empty line would leave the item. Nor can indented code, 4 columns or
 	// more past it: every note written with that indent would become code.
-	const column = columnOf(indent);
-	if (firstNote && column >= contentColumn && column < contentColumn + 4) return indent;
-	return contentColumn <= 4 ? '\t' : ' '.repeat(contentColumn);
+	for (const line of lines.slice(titleLine + 1, endLine)) {
+		const indent = (/^[ \t]*/.exec(line.text) as RegExpExecArray)[0];
+		const column = columnOf(indent);
+		if (!isBlank(line.text) && column >= contentColumn && column < contentColumn + 4) return indent;
+	}
+	return contentColumn === 4 ? '\t' : ' '.repeat(contentColumn);
 }
 
 // The column after `prefix`, with a tab moving to the next multiple of 4, as in CommonMark.

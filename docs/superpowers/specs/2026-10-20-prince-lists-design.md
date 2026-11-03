@@ -365,14 +365,19 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - The cost: once any item has notes, the whole list it belongs to (usually its section)
     renders spaced out in reading view, because CommonMark makes it a loose list.
 - **Indentation:** the plugin keeps whatever indent the item's notes already use, when it reaches
-  the item's content column. Otherwise, as for new notes, it uses one tab, which is Obsidian's
-  default, or spaces up to the item's content column when that is wider.
+  the item's content column. Otherwise, as for new notes, it uses spaces up to the content column,
+  or one tab, Obsidian's default, when the content column is 4 **(owner, 2026-11-02)**.
+  - The card's notes start at the editor's column 0, which spaces up to the content column make
+    CommonMark's, so the card and the rendered note agree. A tab always reaches column 4: under
+    `- [ ] x`, at column 2, a line typed with 2 leading spaces would save as code, and under
+    `100. [ ] x`, at column 5, a tab-indented paragraph after an empty line leaves the item as code.
   - Notes that open with indented code, 4 or more columns past the content column, don't lend
     that indent either **(call)**: every note written with it would become code.
-  - A tab reaches column 4. With `100. [ ] x` the content column is 5, so a tab-indented note
-    there turns into a code block.
   - A lazy line, indented less than the content column, still belongs to the item. A line written
     with its indent after an empty line would leave the item.
+  - Notes that open with a lazy line or indented code borrow the indent of their first line that
+    reaches the content column without going 4 past it **(call)**, so a tab-indented note keeps its
+    tab. Only notes with no such line take the new notes' indent.
   - While the notes editor is open, every save uses the indent the notes had when it opened
     **(call)**. Taken afresh from the file after each keystroke, a space typed at the start of the
     notes would widen it, and the next save would turn a paragraph into code.

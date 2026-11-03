@@ -25,6 +25,8 @@ export interface NotesSource {
 	save(change: NotesChange): Typed;
 	/** Ends the visit, with focus going to `focusing`, which a redraw keeps in place. */
 	close(focusing: Element | null): void;
+	/** The unit Tab indents the notes by. */
+	indentUnit(): string;
 }
 
 export function cardNotesSource(view: PrinceListView, card: Card): NotesSource {
@@ -41,6 +43,7 @@ export function cardNotesSource(view: PrinceListView, card: Card): NotesSource {
 		fits: (change) => view.editing.notesChangeFits(change),
 		save: (change) => view.editing.saveNotes(change),
 		close: () => view.editing.closeNotes(),
+		indentUnit: () => view.editing.notesIndentUnit('item'),
 	};
 }
 
@@ -71,5 +74,6 @@ export function listNoteSource(view: PrinceListView): NotesSource {
 			return { edit: typed.edit };
 		},
 		close: (focusing) => closeListNote(view, focusing),
+		indentUnit: () => view.editing.notesIndentUnit('listNote'),
 	};
 }

@@ -6,7 +6,7 @@ import { EditHistory } from './history';
 import { parseItemLine } from './item-line';
 import { joinLines, splitLines, type Line } from './lines';
 import type { NotesChange } from './notes-lines';
-import { fitsInVisit, openVisit, saveInVisit, visitText, type NotesVisit } from './notes-visit';
+import { fitsInVisit, indentUnitFor, openVisit, saveInVisit, visitText, type NotesVisit } from './notes-visit';
 import { itemAt, parseList, type ItemBlock, type ListModel } from './parse';
 import { startTitleField, syncTitleField, typeTitle, type TitleField } from './title-field';
 import { splitStar } from './star';
@@ -100,6 +100,13 @@ export class ListEditing {
 	/** The lines the visit to the card's notes holds, while one is open. */
 	notesPieceRange(): LineRange | null {
 		return this.visit?.notes === 'item' ? this.visit.piece.range : null;
+	}
+
+	/** The unit Tab indents the card's notes or the list note by: the open visit's, else the next one's. */
+	notesIndentUnit(notes: NotesVisit['notes']): string {
+		if (notes === 'listNote') return indentUnitFor('');
+		const indent = this.visit?.notes === 'item' ? this.visit.piece.indent : this.selectedItem()?.item.notesIndent;
+		return indentUnitFor(indent ?? '');
 	}
 
 	closeListNote(): void {

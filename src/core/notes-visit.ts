@@ -6,6 +6,15 @@ import type { Line } from './lines';
 import { saveItemNotesLines, saveListNoteLines, spanLines, type NotesChange, type NotesSpan } from './notes-lines';
 import type { ItemBlock, ListModel } from './parse';
 
+/**
+ * The unit the notes editor's Tab indents by, for notes saved with `indent`: a tab when `indent` is
+ * empty or ends in one, so a tab typed in the editor stops where it does in the file; otherwise 4
+ * spaces, which nest a list under `- `, `1. ` or `10. ` as a tab does.
+ */
+export function indentUnitFor(indent: string): string {
+	return indent === '' || indent.endsWith('\t') ? '\t' : '    ';
+}
+
 /** A visit to a card's notes or to the list note, while its editor has focus. */
 export interface NotesVisit {
 	notes: 'item' | 'listNote';

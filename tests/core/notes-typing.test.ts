@@ -40,12 +40,36 @@ describe("a card's notes across a typing session", () => {
 			expect(notesHtml(step.text), JSON.stringify(step)).toBe(render(children(new Parser().parse(step.markdown))));
 		}
 	});
+	test.each(
+		['- [ ] a\n- [ ] b\n', '1. [ ] a\n2. [ ] b\n'].flatMap((text) =>
+			['  x', '   x', '    code', 'para\n\n  indented para'].map((typed) => [text, typed]),
+		),
+	)('%j: new notes %j render as typed', (text, typed) => {
+		const [step] = typeNotes(text, 0, [typed]);
+		expect(notesHtml(step?.text ?? '')).toBe(render(children(new Parser().parse(typed))));
+	});
+	test.each([
+		['- [ ] a\n- [ ] b\n', 'para\n- sub\n\n  more', '- [ ] a\n\n  para\n  - sub\n\n    more\n- [ ] b\n'],
+		['1. [ ] a\n2. [ ] b\n', 'para\n- sub', '1. [ ] a\n\n   para\n   - sub\n2. [ ] b\n'],
+	])('%j: space-indented notes %j stay the item\'s notes, a bullet in them too', (text, typed, saved) => {
+		const [step] = typeNotes(text, 0, [typed]);
+		expect(step?.text).toBe(saved);
+		const { lines, items, item } = list(saved);
+		expect(items).toHaveLength(2);
+		expect(getItemNotes(lines, item(0))).toBe(typed);
+	});
+	test.each([
+		['100. [ ] a\n- [ ] b\n', 'x\ny', '100. [ ] a\n\n     x\n     y\n- [ ] b\n'],
+		['- [ ] a\n\n\tnote\n- [ ] b\n', 'note\nmore', '- [ ] a\n\n\tnote\n\tmore\n- [ ] b\n'],
+	])('%j keeps its indent when %j is typed', (text, typed, saved) => {
+		expect(typeNotes(text, 0, [typed])[0]?.text).toBe(saved);
+	});
 	test('the notes read back as typed, after the leading spaces that render alike', () => {
 		const steps = typeNotes('- [ ] a\n- [ ] b\n', 0, [' x', ' xy', ' xyz']);
 		expect(steps.map((step) => step.text)).toEqual([
-			'- [ ] a\n\n\t x\n- [ ] b\n',
-			'- [ ] a\n\n\t xy\n- [ ] b\n',
-			'- [ ] a\n\n\t xyz\n- [ ] b\n',
+			'- [ ] a\n\n   x\n- [ ] b\n',
+			'- [ ] a\n\n   xy\n- [ ] b\n',
+			'- [ ] a\n\n   xyz\n- [ ] b\n',
 		]);
 		const { lines, item } = list(steps[2]?.text ?? '');
 		expect(getItemNotes(lines, item(0)).trimStart()).toBe('xyz');

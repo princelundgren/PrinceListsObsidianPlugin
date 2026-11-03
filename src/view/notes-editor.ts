@@ -25,6 +25,7 @@ export const NOTES_CODEMIRROR_CLASS = 'princelists-notes-codemirror';
 const isSync = Annotation.define<true>();
 const historySlot = new Compartment();
 const lockSlot = new Compartment();
+const unitSlot = new Compartment();
 
 // Each editor's sync, for the next redraw's source.
 const resyncs = new WeakMap<EditorView, (source: NotesSource) => void>();
@@ -56,6 +57,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 	const sync = (editor: EditorView): void => {
 		const markdown = sourceText(editor);
 		if (markdown !== null) syncNotesEditor(editor, markdown);
+		syncIndentUnit(editor, current.indentUnit());
 	};
 	// A change can come without a focus event, as a drop from another app does: it opens the visit it
 	// saves in, which ends with the change unless the editor has focus by then.
@@ -69,7 +71,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				historySlot.of(history()),
 				lockSlot.of([]),
 				markdownLanguage,
-				indentUnit.of('\t'),
+				unitSlot.of(indentUnit.of(current.indentUnit())),
 				notesKeymap(),
 				blocks,
 				notesDrawing(view, view.sourcePath, blocks),
@@ -217,6 +219,11 @@ function showAddedLines(editor: EditorView, change: NotesChange): void {
 	const { state } = editor;
 	const changes = state.changes(lineChange(state.doc, change));
 	editor.dispatch({ changes, selection: state.selection.map(changes, 1), annotations: [isSync.of(true), Transaction.addToHistory.of(false)], filter: false });
+}
+
+// Tab indents by the unit the notes are saved with, which a visit can change.
+function syncIndentUnit(editor: EditorView, unit: string): void {
+	if (editor.state.facet(indentUnit) !== unit) editor.dispatch({ effects: unitSlot.reconfigure(indentUnit.of(unit)) });
 }
 
 /** Takes no more typing: the notes' item is gone, and what the editor holds can only be copied. */
