@@ -22,7 +22,7 @@ function isItemTitle(line: string, typed: string): boolean {
 	if (!parts) return false;
 	const title = splitStar(parts.title).plain.trim();
 	if (title === typed) return true;
-	const rest = title + parts.tail;
+	const rest = (title + parts.tail).trimStart();
 	return typed.length > title.length && rest.startsWith(typed) && /^(\s|$)/.test(rest.slice(typed.length));
 }
 

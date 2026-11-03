@@ -1,9 +1,10 @@
 import { blockKey, replaceRun, UnsafeEditError } from './edit-check';
 import { gapEnd, hasLineBreak, isBlankAt } from './edit-lines';
-import { isDoneStatus, isRepeating, parseItemLine, setTitle, tickLine, untickLine } from './item-line';
+import { isDoneStatus, isRepeating, parseItemLine, tickLine, untickLine } from './item-line';
 import { dominantEol, spliceLines, type Line } from './lines';
 import { columnOf, isBlank, type ItemBlock, type ListModel, type Section } from './parse';
 import { range, reorderChecked } from './reorder';
+import { setTitleKeepingStar } from './star';
 
 // Callers of the item edits import it from here.
 export { UnsafeEditError };
@@ -26,8 +27,9 @@ export function toggleItem(lines: readonly Line[], item: ItemBlock, now: Date): 
 	return replaceLine(lines, item.titleLine, tickLine(text, now));
 }
 
+/** The lines with the item's title set to `title`, keeping the item's star; throws on a line break. */
 export function setItemTitle(lines: readonly Line[], item: ItemBlock, title: string): Line[] {
-	return replaceLine(lines, item.titleLine, setTitle((lines[item.titleLine] as Line).text, oneLine(title)));
+	return replaceLine(lines, item.titleLine, setTitleKeepingStar((lines[item.titleLine] as Line).text, oneLine(title)));
 }
 
 export function insertItem(
