@@ -292,7 +292,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		if (!(target && this.rootEl.contains(target))) closeBlockField(this, true);
 	}
 
-	// A drag sends no mouseup, and one that ended before its lift left the field open without its focus.
+	// A drag sends no mouseup, so one that ends before its lift would leave the field open without its focus.
 	private onDragEnd(): void {
 		if (!this.field?.pressed) return;
 		this.field.pressed = false;
