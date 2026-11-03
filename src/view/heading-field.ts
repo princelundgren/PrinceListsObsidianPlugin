@@ -7,6 +7,7 @@ import { addCollapseArrow } from './collapse';
 import { fitHeight } from './dom';
 import { FIELD_CLASS } from './fields';
 import type { PrinceListView } from './list-view';
+import { ownElement } from './own-rows';
 import { buildHeading, HEADING_CLASS, LINE_ATTR } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, enqueueAt, writePlanned } from './write';
 
@@ -50,7 +51,7 @@ export function openHeadingField(view: PrinceListView, line: number, isNew = fal
 	const field: HeadingField = { el, heading: view.editing.track(line), openedAt: line, before, isNew };
 	el.value = field.before;
 	view.headingField = field;
-	const heading = view.contentEl.querySelector<HTMLElement>(`.${HEADING_CLASS}[${LINE_ATTR}="${line}"]`);
+	const heading = ownElement(view.contentEl, `.${HEADING_CLASS}[${LINE_ATTR}="${line}"]`);
 	if (heading) {
 		view.dropBlock(heading);
 		heading.replaceWith(el);

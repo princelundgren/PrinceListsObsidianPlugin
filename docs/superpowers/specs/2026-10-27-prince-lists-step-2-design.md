@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-10-30
+verified: 2026-11-02
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -175,9 +175,18 @@ this met on 2026-10-30 **(owner)**.
   hold-and-move on mobile, with the list view's drop rules. Lifting an item closes an open
   title field and saves it. A hold on an item opens no menu, and a swipe that starts no lift
   scrolls the note.
+  - **The item lands where the drop line showed (owner, 2026-11-02),** even when that save
+    removes an empty new item and so moves the lines below it: the drag aims with the rows as
+    drawn, and the move follows each drawn row's line to where it is now. A drop under the row
+    that save removed goes under the row above it, as if that row had never shown **(call)**. A
+    change from elsewhere between the drop and the move writes nothing and shows "This list
+    changed elsewhere. Try again.", as a tick does **(call)**. A draw during the drag, such as for
+    a change from elsewhere, ends it with nothing written, with the mouse as with a finger
+    **(call)**.
 - **No edge scrolling in a block (call):** the block sits in the note's scroller, which is
   Obsidian's, and the plugin doesn't reach into Obsidian's own elements. A drop beyond what shows
-  needs the list view.
+  needs the list view. For the same reason, a lifted row can shift once, as an open title field
+  above it closes, instead of being scrolled back under the pointer.
 - **Writes go to the list's file** through the same guarded edits. An open list view of that file
   follows them as a change from outside **(call)**. Cmd+Z doesn't step through edits made in a
   block **(call)**.
@@ -185,6 +194,11 @@ this met on 2026-10-30 **(owner)**.
   listeners belong to a `MarkdownRenderChild`, so they go when the block does. The metadata cache
   reports each of the block's own writes, sometimes only after a later one has landed; a late report
   is the block's own write, not a change from outside.
+- **In a list's own notes (owner, 2026-11-02):** a block in the list note or an item's notes draws
+  its rows with the list view's classes and line attribute, for its own list's lines. The list
+  view finds, renumbers and aims drops at only its own rows, and never acts on the block's rows:
+  a click, right-click or drag on them is the block's. A click in a block in the list note still
+  closes an open card, as any click on the list note does.
 - **A link to no file, or to a note without the marker,** shows a gray line saying so, naming the
   link. So does a block that names the note it's in **(call)**: that note may be open in an editor
   with typing not yet saved. A note from outside the vault can't be linked, so it can't be shown

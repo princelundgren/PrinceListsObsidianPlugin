@@ -758,7 +758,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   "Dragging a heading").
   - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
     item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
-    drag, a click reopens the card.
+    drag, a click reopens the card. The card closes just after `dragstart`, not during it:
+    Chromium cancels a drag whose row has moved from under the press by the time `dragstart`
+    returns (`DragController::StartDrag`), as a row below a closing card does.
+  - **The lifted row stays under the pointer (owner, 2026-11-02),** as with a touch lift: when a
+    taller card above it closes, the list scrolls back by the card's shift, as far as it can.
   - **The drop line (call)** shows under the visible item the dragged item will follow, or under a
     heading for the first place in its section, or above the first row for the top of the list.
     It passes over content the plugin leaves alone, since a drag changes only the order of items.

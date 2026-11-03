@@ -17,6 +17,7 @@ import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, 
 import { targetOf } from './dom';
 import type { RowDragHost } from './drag-host';
 import { handleLinkClick, handleLinkMenu } from './notes';
+import { LIST_BLOCK_CLASS } from './own-rows';
 import { buildHeading, buildRow, CHECKBOX_CLASS, ITEM_CLASS, ITEMS_CLASS, lineOf, type RowHost } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE, tryEdit } from './write';
 
@@ -53,7 +54,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	) {
 		super(containerEl);
 		this.link = blockLink(source);
-		this.rootEl = containerEl.createDiv({ cls: 'princelists-block' });
+		this.rootEl = containerEl.createDiv({ cls: LIST_BLOCK_CLASS });
 		this.rootEl.toggleClass('princelists-is-mobile', Platform.isMobile);
 		this.rowsEl = createDiv();
 	}
