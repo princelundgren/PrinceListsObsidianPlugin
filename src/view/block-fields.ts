@@ -29,6 +29,8 @@ export interface BlockField {
 	titleEl: Element;
 	/** Set when the block's own insert added the item, so closing an empty field removes it again. */
 	inserted: InsertedItem | null;
+	/** Set while a press that can lift another item holds the field open without its focus. */
+	pressed: boolean;
 }
 
 // Puts a field in place of the row's title, holding the title without its star (spec, "A list inside
@@ -48,7 +50,7 @@ export function openBlockField(block: ListBlock, titleLine: number, inserted: In
 	// makes the row draggable again.
 	const rowEl = wrapper.closest<HTMLElement>(`.${ITEM_CLASS}`);
 	if (rowEl) rowEl.draggable = false;
-	block.field = { line: block.editing.track(titleLine), el, opened: el.value, titleEl, inserted };
+	block.field = { line: block.editing.track(titleLine), el, opened: el.value, titleEl, inserted, pressed: false };
 	fitHeight(el);
 	el.focus();
 }

@@ -10,6 +10,7 @@ import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import type { ListBlock } from './list-block';
 import { shownRows } from './move';
+import { pathUnder } from './own-rows';
 import { ITEM_CLASS } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
@@ -63,6 +64,16 @@ interface DrawnRows {
 function trackDrawn(block: ListBlock): DrawnRows {
 	const drawn = shownRows(block.rowsEl);
 	return { drawn, now: drawn.map((row) => block.editing.track(row.line)) };
+}
+
+/**
+ * Whether a mouse press under `rootEl` can lift the item it is on: a plain main-button press, as a
+ * modified one selects, on an element whose nearest `draggable` ancestor is an item row. A link or
+ * picture in a title drags as itself, and the open field's row doesn't drag.
+ */
+export function pressCanLift(rootEl: HTMLElement, evt: MouseEvent): boolean {
+	if (evt.button !== 0 || evt.shiftKey || evt.ctrlKey || evt.metaKey || evt.altKey) return false;
+	return pathUnder(rootEl, evt).find((el) => el.draggable)?.hasClass(ITEM_CLASS) ?? false;
 }
 
 export function enableBlockDrag(block: ListBlock): void {

@@ -12,7 +12,7 @@ import { serialQueue } from '../core/queue';
 import { dayOf } from '../core/when';
 import { WriteEchoes } from '../core/write-echoes';
 import { contentStartLine, isListText } from '../obsidian/marker';
-import { blockDragHost, enableBlockDrag } from './block-drag';
+import { blockDragHost, enableBlockDrag, pressCanLift } from './block-drag';
 import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, noticeLostField, openBlockField, showBlockItemMenu, type BlockField } from './block-fields';
 import { targetOf } from './dom';
 import type { RowDragHost } from './drag-host';
@@ -68,11 +68,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerDomEvent(this.rootEl, 'click', (evt) => this.onClick(evt));
 		this.registerDomEvent(this.rootEl, 'keydown', (evt) => this.onKeyDown(evt));
 		this.registerDomEvent(this.rootEl, 'focusout', (evt) => this.onFocusOut(evt));
-		// A press elsewhere in the block keeps the field's focus, and the click closes the field instead:
-		// closing it on the blur redraws the rows before the click reaches the one pressed.
-		this.registerDomEvent(this.rootEl, 'mousedown', (evt) => {
-			if (this.field && targetOf(evt) !== this.field.el) evt.preventDefault();
-		});
+		this.registerDomEvent(this.rootEl, 'mousedown', (evt) => this.onMouseDown(evt));
+		this.registerDomEvent(this.rootEl.doc, 'mouseup', (evt) => this.onMouseUp(evt));
+		this.registerDomEvent(this.rootEl, 'dragend', () => this.onDragEnd());
 		// The trash button doesn't take focus, so the field stays open until the click deletes.
 		this.registerDomEvent(this.rootEl, 'pointerdown', (evt) => {
 			if (targetOf(evt)?.closest(`.${BLOCK_TRASH_CLASS}`)) evt.preventDefault();
@@ -275,8 +273,34 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		}
 	}
 
+	// A press elsewhere keeps the field's focus, so the click closes it before a blur's redraw; one that
+	// can lift an item isn't canceled, which would stop the drag, and the lift or the click closes it.
+	private onMouseDown(evt: MouseEvent): void {
+		const field = this.field;
+		if (!field) return;
+		const inField = targetOf(evt) === field.el;
+		field.pressed = !inField && pressCanLift(this.rootEl, evt);
+		if (!inField && !field.pressed) evt.preventDefault();
+	}
+
+	// A press released outside the block sends it no click.
+	private onMouseUp(evt: MouseEvent): void {
+		const field = this.field;
+		if (!field?.pressed) return;
+		field.pressed = false;
+		const target = evt.targetNode;
+		if (!(target && this.rootEl.contains(target))) closeBlockField(this, true);
+	}
+
+	// A drag sends no mouseup, so one that ends before its lift would leave the field open without its focus.
+	private onDragEnd(): void {
+		if (!this.field?.pressed) return;
+		this.field.pressed = false;
+		closeBlockField(this, true);
+	}
+
 	private onFocusOut(evt: FocusEvent): void {
-		if (this.field && evt.target === this.field.el) closeBlockField(this, true);
+		if (this.field && evt.target === this.field.el && !this.field.pressed) closeBlockField(this, true);
 	}
 
 	// On desktop only: mobile has the field's trash button.
