@@ -2,26 +2,21 @@ import { getLinkpath, MarkdownRenderChild, Notice, Platform, setIcon, type App, 
 import { guardedWrite, type WriteResult } from '../core/action-write';
 import { blockLink } from '../core/block-source';
 import { visibleSections, type SectionRows } from '../core/display';
-import { toggleItem } from '../core/edit-items';
 import { ListEditing } from '../core/editing';
 import type { OwnEdit } from '../core/follow';
-import { toggleLine } from '../core/item-line';
-import { joinLines, splitLines } from '../core/lines';
-import { itemAt, parseList } from '../core/parse';
+import { splitLines } from '../core/lines';
+import { parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { dayOf } from '../core/when';
 import { WriteEchoes } from '../core/write-echoes';
 import { contentStartLine, isListText } from '../obsidian/marker';
-import { blockDragHost, enableBlockDrag, pressCanLift } from './block-drag';
-import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, noticeLostField, openBlockField, showBlockItemMenu, type BlockField } from './block-fields';
-import { targetOf } from './dom';
+import { blockDragHost, enableBlockDrag } from './block-drag';
+import { NEW_ITEM_CLASS, registerBlockEvents } from './block-events';
+import { noticeLostField, type BlockField } from './block-fields';
 import type { RowDragHost } from './drag-host';
-import { handleLinkClick, handleLinkMenu } from './notes';
 import { LIST_BLOCK_CLASS } from './own-rows';
-import { buildHeading, buildRow, CHECKBOX_CLASS, ITEM_CLASS, ITEMS_CLASS, lineOf, type RowHost } from './render-list';
-import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE, tryEdit } from './write';
-
-const NEW_ITEM_CLASS = 'princelists-block-new-item';
+import { buildHeading, buildRow, ITEMS_CLASS, type RowHost } from './render-list';
+import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE } from './write';
 
 // A list drawn inside another note by a `princelists` code block (spec, "A list inside another note").
 // It shows the list's headings and items, not its list note, notes or content the plugin leaves alone.
@@ -65,17 +60,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerEvent(vault.on('create', () => void this.resolve()));
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
-		this.registerDomEvent(this.rootEl, 'click', (evt) => this.onClick(evt));
-		this.registerDomEvent(this.rootEl, 'keydown', (evt) => this.onKeyDown(evt));
-		this.registerDomEvent(this.rootEl, 'focusout', (evt) => this.onFocusOut(evt));
-		this.registerDomEvent(this.rootEl, 'mousedown', (evt) => this.onMouseDown(evt));
-		this.registerDomEvent(this.rootEl.doc, 'mouseup', (evt) => this.onMouseUp(evt));
-		this.registerDomEvent(this.rootEl, 'dragend', () => this.onDragEnd());
-		// The trash button doesn't take focus, so the field stays open until the click deletes.
-		this.registerDomEvent(this.rootEl, 'pointerdown', (evt) => {
-			if (targetOf(evt)?.closest(`.${BLOCK_TRASH_CLASS}`)) evt.preventDefault();
-		});
-		if (Platform.isDesktop) this.registerDomEvent(this.rootEl, 'contextmenu', (evt) => this.onContextMenu(evt));
+		registerBlockEvents(this, this.rootEl, this.notePath);
 		enableBlockDrag(this);
 		void this.resolve();
 	}
@@ -126,12 +111,6 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	// them their line attributes are out of date.
 	rowsMatchText(): boolean {
 		return this.editing.text === this.drawnText;
-	}
-
-	// The line of the row holding `target`, or null while the rows are out of date.
-	private rowLine(target: Element): number | null {
-		const rowEl = target.closest(`.${ITEM_CLASS}`);
-		return rowEl && this.rowsMatchText() ? lineOf(rowEl) : null;
 	}
 
 	// After a field closes, whose title went back in its place, or a drag ends: the rows are drawn
@@ -233,113 +212,6 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.outsideChanges++;
 		this.editing.outsideChange(text);
 		if (!this.field) this.drawIfRowsChanged();
-	}
-
-	private onClick(evt: MouseEvent): void {
-		const target = targetOf(evt);
-		if (!target) return;
-		if (this.field && !target.closest(`.${BLOCK_FIELD_CLASS}`)) closeBlockField(this, true);
-		if (handleLinkClick(this.app, this.file?.path ?? this.notePath, evt, target)) return;
-		if (target.closest(`.${NEW_ITEM_CLASS}`)) {
-			addBlockItem(this, 'first');
-			return;
-		}
-		// The field's own line: rows aren't drawn again while it's open, so theirs may be out of date.
-		const fieldLine = this.field?.line.line;
-		if (target.closest(`.${BLOCK_TRASH_CLASS}`)) {
-			if (fieldLine !== null && fieldLine !== undefined) deleteBlockItem(this, fieldLine);
-			return;
-		}
-		const line = this.rowLine(target);
-		if (line === null) return;
-		if (target.closest(`.${CHECKBOX_CLASS}`)) {
-			// The box shows the file: the redraw after the write ticks it.
-			evt.preventDefault();
-			this.queueTick(line);
-		} else if (target.closest('.princelists-item-title')) {
-			openBlockField(this, line, null);
-		}
-	}
-
-	private onKeyDown(evt: KeyboardEvent): void {
-		if (!this.field || evt.target !== this.field.el || evt.isComposing) return;
-		if (evt.key === 'Escape') {
-			evt.preventDefault();
-			closeBlockField(this, false);
-		} else if (evt.key === 'Enter') {
-			evt.preventDefault();
-			if (evt.shiftKey) addBlockItemBelow(this);
-			else closeBlockField(this, true);
-		}
-	}
-
-	// A press elsewhere keeps the field's focus, so the click closes it before a blur's redraw; one that
-	// can lift an item isn't canceled, which would stop the drag, and the lift or the click closes it.
-	private onMouseDown(evt: MouseEvent): void {
-		const field = this.field;
-		if (!field) return;
-		const inField = targetOf(evt) === field.el;
-		field.pressed = !inField && pressCanLift(this.rootEl, evt);
-		if (!inField && !field.pressed) evt.preventDefault();
-	}
-
-	// A press released outside the block sends it no click.
-	private onMouseUp(evt: MouseEvent): void {
-		const field = this.field;
-		if (!field?.pressed) return;
-		field.pressed = false;
-		const target = evt.targetNode;
-		if (!(target && this.rootEl.contains(target))) closeBlockField(this, true);
-	}
-
-	// A drag sends no mouseup, so one that ends before its lift would leave the field open without its focus.
-	private onDragEnd(): void {
-		if (!this.field?.pressed) return;
-		this.field.pressed = false;
-		closeBlockField(this, true);
-	}
-
-	private onFocusOut(evt: FocusEvent): void {
-		if (this.field && evt.target === this.field.el && !this.field.pressed) closeBlockField(this, true);
-	}
-
-	// On desktop only: mobile has the field's trash button.
-	private onContextMenu(evt: MouseEvent): void {
-		const target = targetOf(evt);
-		if (!target || handleLinkMenu(this.app, this.file?.path ?? this.notePath, evt, target)) return;
-		const line = this.rowLine(target);
-		if (line === null) return;
-		evt.preventDefault();
-		showBlockItemMenu(this, evt, line);
-	}
-
-	// As a tick in the list view: it waits on the block's queue, and its line follows the block's own
-	// writes meanwhile.
-	private queueTick(line: number): void {
-		const file = this.file;
-		const pending = this.editing.track(line);
-		const seen = this.outsideChanges;
-		void this.enqueue(async () => {
-			try {
-				if (this.file !== file) return;
-				if (this.outsideChanges !== seen) {
-					new Notice(CHANGED_ELSEWHERE_NOTICE);
-					return;
-				}
-				const titleLine = pending.line;
-				const text = this.editing.text;
-				const lines = splitLines(text);
-				const item = titleLine === null ? null : itemAt(parseList(lines, contentStartLine(text)), titleLine);
-				if (titleLine === null || !item) return;
-				const now = new Date();
-				const edited = tryEdit(() => toggleItem(lines, item, now));
-				if (!edited) return;
-				await this.write(joinLines(edited), text, { start: titleLine, delta: 0, kind: 'change', retitle: (title) => toggleLine(title, now) });
-				if (!this.field) this.draw();
-			} finally {
-				this.editing.untrack(pending);
-			}
-		});
 	}
 
 	private removeBlocks(): void {
