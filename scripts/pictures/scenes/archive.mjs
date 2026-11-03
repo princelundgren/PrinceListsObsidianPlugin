@@ -20,7 +20,7 @@ const scene = {
 	async shoot(session, out) {
 		const mouse = drawnMouse(session, REST.x, REST.y);
 		const box = middleOf(await boundsOf(session, '.princelists-item:nth-child(4) .princelists-checkbox'));
-		const toggle = middleOf(await boundsOf(session, '.view-action[aria-label="Show archived"]'));
+		const toggle = middleOf(await boundsOf(session, '.view-action[aria-label^="Show archived"]'));
 		await undoingChanges(session, 'To do.md', 'Attachments', () => recordGif(session, scene, out, async () => {
 			await pointer(session, REST.x, REST.y, 'move');
 			await sleep(900);

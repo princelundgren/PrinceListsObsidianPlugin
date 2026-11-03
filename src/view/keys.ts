@@ -15,6 +15,11 @@ const ADD_KEY = 'Enter';
 /** The add key's name on this platform, as "Cmd+Enter", or null on mobile. */
 export const ADD_KEY_NAME = modKeyName(Platform, ADD_KEY);
 
+const ARCHIVED_KEY = 'A';
+
+/** The show-archived key's name on this platform, as "Cmd+Shift+A", or null on mobile. */
+export const ARCHIVED_KEY_NAME = modKeyName(Platform, `Shift+${ARCHIVED_KEY}`);
+
 // The view's own keys, which apply only while the list has focus, so none is a default hotkey.
 export function registerListKeys(view: PrinceListView): void {
 	const scope = new Scope(view.app.scope);
@@ -36,6 +41,12 @@ export function registerListKeys(view: PrinceListView): void {
 	register(['Mod'], 'f', () => {
 		if (!isListText(view.text)) return true;
 		openFilter(view);
+		return false;
+	});
+	// As the header's checkbox does, in every field too. In a note that isn't a list, the key is Obsidian's.
+	register(['Mod', 'Shift'], ARCHIVED_KEY, () => {
+		if (!isListText(view.text)) return true;
+		view.toggleArchived();
 		return false;
 	});
 	// In the card's title, as in a note; the notes editor has its own. Anywhere else the key is Obsidian's.

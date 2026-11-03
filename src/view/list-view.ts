@@ -18,7 +18,7 @@ import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
-import { ADD_KEY_NAME, registerListKeys } from './keys';
+import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
@@ -286,7 +286,7 @@ export class PrinceListView extends TextFileView {
 		button.toggle(isListText(this.text));
 		button.toggleClass('princelists-archived-shown', this.showArchived);
 		button.setAttribute('aria-pressed', String(this.showArchived));
-		setTooltip(button, this.showArchived ? 'Hide archived' : 'Show archived');
+		setTooltip(button, labelWithKey(this.showArchived ? 'Hide archived' : 'Show archived', ARCHIVED_KEY_NAME));
 	}
 
 	private outsideChange(data: string): void {
