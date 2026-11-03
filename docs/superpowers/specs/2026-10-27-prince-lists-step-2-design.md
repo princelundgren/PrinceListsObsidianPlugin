@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-02
+verified: 2026-11-03
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -199,6 +199,12 @@ this met on 2026-10-30 **(owner)**.
   view finds, renumbers and aims drops at only its own rows, and never acts on the block's rows:
   a click, right-click or drag on them is the block's. A click in a block in the list note still
   closes an open card, as any click on the list note does.
+  - **The block works there as in a note (owner, 2026-11-03):** a click on a row's box ticks it, a
+    click on its title opens its title field, and items drag, with the mouse and with
+    hold-and-move. Keys and typing in the block, its title field included, are the block's alone,
+    and so are keys after a press on one of its rows: the view's keys, such as Cmd+Enter, Cmd+Z and
+    Escape, and its own field undo leave them be. A press elsewhere on the block shows its
+    Markdown, as on any drawn block in the notes (the notes design, "What shows drawn").
 - **A link to no file, or to a note without the marker,** shows a gray line saying so, naming the
   link. So does a block that names the note it's in **(call)**: that note may be open in an editor
   with typing not yet saved. A note from outside the vault can't be linked, so it can't be shown

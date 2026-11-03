@@ -4,10 +4,19 @@ import { drawnBlocks, spanCrossed, type DrawnBlock } from '../core/drawn-blocks'
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { renderIntoWidget, unloadWidget } from './notes-widgets';
-import { LIST_BLOCK_CLASS } from './own-rows';
+import { LIST_BLOCK_CLASS, pathUnder } from './own-rows';
 import { ITEM_CLASS } from './render-list';
 
 export const NOTES_BLOCK_CLASS = 'princelists-notes-block';
+
+/**
+ * Whether `evt` reached `root` through a block the notes editor draws that holds a list block: from the
+ * list block's title field, say, or from the drawn block itself, which a press on one of its rows
+ * focuses. From the event's path, since the list block's own listener may have removed the target.
+ */
+export function eventInDrawnListBlock(root: Element, evt: Event): boolean {
+	return pathUnder(root, evt).some((el) => el.hasClass(NOTES_BLOCK_CLASS) && el.querySelector(`.${LIST_BLOCK_CLASS}`) !== null);
+}
 
 /** The notes' drawn blocks: their widgets, and the editor's span of each block a widget takes. */
 export interface DrawnBlocks {

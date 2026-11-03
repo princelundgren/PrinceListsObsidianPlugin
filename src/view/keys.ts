@@ -1,4 +1,4 @@
-import { Scope } from 'obsidian';
+import { Scope, type Modifier } from 'obsidian';
 import type { Format } from '../core/format';
 import { isListText } from '../obsidian/marker';
 import { newItem } from './add-button';
@@ -6,29 +6,36 @@ import { targetOf } from './dom';
 import { openFilter } from './filter';
 import { applyFormat } from './format';
 import type { PrinceListView } from './list-view';
+import { eventInDrawnListBlock } from './notes-blocks';
 import { redoKey, undoKey } from './undo';
 
 // The view's own keys, which apply only while the list has focus, so none is a default hotkey.
 export function registerListKeys(view: PrinceListView): void {
-	view.scope = new Scope(view.app.scope);
-	view.scope.register(['Mod'], 'z', (evt) => undoKey(view, evt));
-	view.scope.register(['Mod', 'Shift'], 'z', (evt) => redoKey(view, evt));
+	const scope = new Scope(view.app.scope);
+	view.scope = scope;
+	// A key in a list block drawn in the notes, on the drawn block itself too, is the block's, as in a
+	// note: returning true leaves the key's default in place, where false would prevent it.
+	const register = (modifiers: Modifier[], key: string, func: (evt: KeyboardEvent) => boolean): void => {
+		scope.register(modifiers, key, (evt) => eventInDrawnListBlock(view.contentEl, evt) || func(evt));
+	};
+	register(['Mod'], 'z', (evt) => undoKey(view, evt));
+	register(['Mod', 'Shift'], 'z', (evt) => redoKey(view, evt));
 	// In every field too, a card's included, as "+" would. In a note that isn't a list, the key is Obsidian's.
-	view.scope.register(['Mod'], 'Enter', () => {
+	register(['Mod'], 'Enter', () => {
 		if (!isListText(view.text)) return true;
 		newItem(view);
 		return false;
 	});
 	// Only while the list has focus: elsewhere Cmd+F stays Obsidian's search.
-	view.scope.register(['Mod'], 'f', () => {
+	register(['Mod'], 'f', () => {
 		if (!isListText(view.text)) return true;
 		openFilter(view);
 		return false;
 	});
 	// In the card's title, as in a note; the notes editor has its own. Anywhere else the key is Obsidian's.
-	view.scope.register(['Mod'], 'b', (evt) => formatKey(view, evt, 'bold'));
-	view.scope.register(['Mod'], 'i', (evt) => formatKey(view, evt, 'italic'));
-	view.scope.register(['Mod'], 'k', (evt) => formatKey(view, evt, 'link'));
+	register(['Mod'], 'b', (evt) => formatKey(view, evt, 'bold'));
+	register(['Mod'], 'i', (evt) => formatKey(view, evt, 'italic'));
+	register(['Mod'], 'k', (evt) => formatKey(view, evt, 'link'));
 }
 
 function formatKey(view: PrinceListView, evt: KeyboardEvent, format: Format): boolean {

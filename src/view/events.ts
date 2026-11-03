@@ -24,6 +24,7 @@ import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './headin
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR, NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
+import { eventInDrawnListBlock } from './notes-blocks';
 import { runNotesBarAction } from './notes-keys';
 import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
@@ -196,8 +197,9 @@ function onInput(view: PrinceListView, evt: Event): void {
 
 function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	const target = evt.targetNode;
-	// A key that confirms an input method's composition isn't the user's Enter or Escape.
-	if (evt.isComposing || !target?.instanceOf(HTMLElement)) return;
+	// A key that confirms an input method's composition isn't the user's Enter or Escape. One in a list
+	// block in the notes, such as Escape in its title field, is the block's.
+	if (evt.isComposing || !target?.instanceOf(HTMLElement) || eventInDrawnListBlock(view.contentEl, evt)) return;
 	if (evt.key === 'Escape') {
 		if (target === view.filterEl) {
 			filterKeyDown(view, evt);
@@ -233,9 +235,11 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	}
 }
 
+// A list block's title field in the notes keeps the browser's undo, as in a note: with no history of
+// its own, the view's beforeinput, input and focusout listeners leave it be.
 function onFocusIn(view: PrinceListView, evt: FocusEvent): void {
 	const target = evt.targetNode;
-	if (!target?.instanceOf(HTMLTextAreaElement)) return;
+	if (!target?.instanceOf(HTMLTextAreaElement) || eventInDrawnListBlock(view.contentEl, evt)) return;
 	if (view.card?.el.contains(target)) startFieldHistory(target);
 	if (target.hasClass(CARD_TITLE_CLASS) && view.card?.el.contains(target)) view.editing.focusTitle();
 	else if (target.hasClass(TITLE_CLASS)) beginListTitle(view, target);
@@ -254,7 +258,8 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 		return;
 	}
 	const card = view.card;
-	const inCard = card?.el.contains(target) ?? false;
+	// From the path: closing a list block's title field in the card's notes removes the field first.
+	const inCard = card !== null && pathUnder(view.contentEl, evt).includes(card.el);
 	if (target.instanceOf(HTMLTextAreaElement)) {
 		endFieldHistory(target);
 		// Moving to another window or app doesn't leave the list title or the heading field: they keep
