@@ -175,7 +175,8 @@ this met on 2026-10-30 **(owner)**.
   hold-and-move on mobile, with the list view's drop rules. Lifting an item closes an open
   title field and saves it. Until then, a mouse press that can lift another item leaves the
   field open, without its focus, so the rows don't move under the press; the press's click
-  closes it as any click does, and a release outside the block closes and saves it **(call)**.
+  closes it as any click does, and a release outside the block, or a drag that ends before
+  its lift, closes and saves it **(call)**.
   A hold on an item opens no menu, and a swipe that starts no lift scrolls the note.
   - **The item lands where the drop line showed (owner, 2026-11-02),** even when that save
     removes an empty new item and so moves the lines below it: the drag aims with the rows as

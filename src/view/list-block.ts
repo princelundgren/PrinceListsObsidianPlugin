@@ -70,6 +70,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerDomEvent(this.rootEl, 'focusout', (evt) => this.onFocusOut(evt));
 		this.registerDomEvent(this.rootEl, 'mousedown', (evt) => this.onMouseDown(evt));
 		this.registerDomEvent(this.rootEl.doc, 'mouseup', (evt) => this.onMouseUp(evt));
+		this.registerDomEvent(this.rootEl, 'dragend', () => this.onDragEnd());
 		// The trash button doesn't take focus, so the field stays open until the click deletes.
 		this.registerDomEvent(this.rootEl, 'pointerdown', (evt) => {
 			if (targetOf(evt)?.closest(`.${BLOCK_TRASH_CLASS}`)) evt.preventDefault();
@@ -289,6 +290,13 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		field.pressed = false;
 		const target = evt.targetNode;
 		if (!(target && this.rootEl.contains(target))) closeBlockField(this, true);
+	}
+
+	// A drag sends no mouseup, and one that ended before its lift left the field open without its focus.
+	private onDragEnd(): void {
+		if (!this.field?.pressed) return;
+		this.field.pressed = false;
+		closeBlockField(this, true);
 	}
 
 	private onFocusOut(evt: FocusEvent): void {
