@@ -30,7 +30,7 @@ const scene = {
 		await undoingChanges(session, 'To do.md', 'Attachments', () => recordGif(session, scene, out, async () => {
 			await pointer(session, REST.x, REST.y, 'move');
 			await sleep(700);
-			await glideTo('.view-action[aria-label="New item"]');
+			await glideTo('.view-action[aria-label^="New item"]');
 			await mouse.click();
 			await sleep(500);
 			await type(session, ITEM);

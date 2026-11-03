@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-02
+verified: 2026-11-03
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -658,7 +658,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks.
 - **A "+" in the pane's header (owner, 2026-10-27)** adds an item, on desktop and mobile, beside the
-  show-archived icon. It's a view action (`addAction`) named "New item" **(call)**.
+  show-archived icon. It's a view action (`addAction`) named "New item" **(call)**, with its key:
+  "New item (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which
+  usually has no keyboard, shows "New item" alone **(owner, 2026-11-03)**.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane, on mobile only
   **(owner, 2026-10-27)**, under the thumb. It stays put while the list scrolls. Its accessible name
   is "New item" **(call)**. Desktop has only the header's "+": the floating one, filled with the
