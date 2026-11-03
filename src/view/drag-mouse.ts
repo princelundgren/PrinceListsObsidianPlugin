@@ -12,7 +12,7 @@ const DRAG_TYPE = 'application/x-princelists-item';
 interface MouseDrag {
 	host: RowDragHost;
 	type: string;
-	/** The dragged item's title line, or heading's line. It follows edits that land during the drag. */
+	/** The dragged item's title line, or heading's line, as the drawn rows number it; null once it can't drop. */
 	row: TrackedLine;
 	kind: ShownRow['kind'];
 	drop: RowDrop | null;

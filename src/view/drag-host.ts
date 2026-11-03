@@ -18,8 +18,10 @@ export interface RowDragHost {
 	/** Set when a row lifts, so the click that ends the press isn't a tap. */
 	swallowNextClick: boolean;
 	beforeLift(): void;
+	/** The dragged row's line as the drawn rows number it, which the drop is aimed with; null once it can't drop, such as when the row is gone or, in a block, after any draw. */
 	track(line: number): TrackedLine;
 	untrack(tracked: TrackedLine): void;
+	/** Moves the dragged row on `line`, both it and `drop` as the drawn rows number them. */
 	drop(line: number, drop: RowDrop): void;
 }
 
