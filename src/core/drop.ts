@@ -26,6 +26,37 @@ export function dropAt(shown: readonly ShownRow[], dragged: number, over: { line
 	return stays ? null : drop;
 }
 
+/** A dragged item's move: the title line it's on, and where it goes. */
+export interface ItemMove {
+	from: number;
+	to: ItemPlace;
+}
+
+/**
+ * The move for a drop aimed with the rows as drawn, `dragged` and `place` both on drawn lines, in the
+ * lines as they are now: `now[i]` is `drawn[i]`'s line now, or null once it's gone. A row that's gone
+ * counts as never drawn, so a place after it goes where dropAt would have put it without that row.
+ * null when the dragged row went, or the dragged row or the place's row isn't drawn.
+ */
+export function moveFromDrawn(
+	drawn: readonly ShownRow[],
+	now: readonly (number | null)[],
+	dragged: number,
+	place: ItemPlace,
+): ItemMove | null {
+	const drawnAt = (line: number) => drawn.findIndex((row) => row.line === line);
+	const from = now[drawnAt(dragged)];
+	if (from === null || from === undefined) return null;
+	if (place === 'first') return { from, to: place };
+	const at = drawnAt('after' in place ? place.after : place.firstUnder);
+	if (at === -1) return null;
+	const kept = drawn.slice(0, at + 1).flatMap((row, i) => {
+		const line = now[i];
+		return line === null || line === undefined ? [] : [{ ...row, line }];
+	});
+	return { from, to: kept.length === 0 ? 'first' : dropAbove(kept, kept.length).place };
+}
+
 /** Where a dragged section goes: before the heading on `before`, or to the end when null. */
 export interface SectionDrop {
 	before: number | null;

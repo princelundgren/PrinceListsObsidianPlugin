@@ -4,7 +4,7 @@ import { edgeStep, HOLD_MS, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../c
 import { CARD_CLASS } from './card';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import type { RowDragHost } from './drag-host';
+import { liftInPlace, type RowDragHost } from './drag-host';
 import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
 import { ownClosest, ownElements } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
@@ -13,7 +13,7 @@ const LIFTED_CLASS = 'princelists-lifted';
 const LIFT_OFFSET = '--princelists-lift';
 
 interface Lift {
-	/** The dragged item's title line, or heading's line. It follows edits that land during the drag. */
+	/** The dragged item's title line, or heading's line, as the drawn rows number it; null once it can't drop. */
 	item: TrackedLine;
 	kind: ShownRow['kind'];
 	/** Every row and heading with its extent at the lift, in the scroller's content coordinates, or from rowsEl's top without one. */
@@ -114,11 +114,9 @@ export function enableTouchDrag(host: RowDragHost): void {
 	const lift = (current: Press): void => {
 		current.timer = null;
 		const rowTop = current.row.getBoundingClientRect().top;
-		host.beforeLift();
+		liftInPlace(host, current.row);
 		const line = lineOf(current.row);
 		if (!current.row.isConnected || line === null) return;
-		// A card above the row closing moves the row up under the finger's hold; scroll it back.
-		if (scrollEl) scrollEl.scrollTop += current.row.getBoundingClientRect().top - rowTop;
 		const shift = rowTop - current.row.getBoundingClientRect().top;
 		const top = originTop();
 		const boxes = ownElements(rowsEl, `[${LINE_ATTR}]`).map((el) => {

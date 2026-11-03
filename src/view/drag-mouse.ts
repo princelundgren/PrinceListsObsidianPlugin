@@ -1,7 +1,7 @@
 import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { targetOf } from './dom';
-import type { RowDragHost } from './drag-host';
+import { liftInPlace, type RowDragHost } from './drag-host';
 import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
 import { isInNestedBlock, ownClosest } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
@@ -13,12 +13,14 @@ const DRAG_TYPE = 'application/x-princelists-item';
 interface MouseDrag {
 	host: RowDragHost;
 	type: string;
-	/** The dragged item's title line, or heading's line. It follows edits that land during the drag. */
+	/** The dragged item's title line, or heading's line, as the drawn rows number it; null once it can't drop. */
 	row: TrackedLine;
 	kind: ShownRow['kind'];
 	drop: RowDrop | null;
 	/** The row or heading that shows the drop line. */
 	marked: HTMLElement | null;
+	/** The lift's timer, until it fires. */
+	liftTimer: number | null;
 }
 
 // The row's drag in progress, in whichever list pane of this window it started. A redraw during a
@@ -68,6 +70,7 @@ export function enableMouseDrag(host: RowDragHost): void {
 
 function endDrag(): void {
 	if (!current) return;
+	if (current.liftTimer !== null) window.clearTimeout(current.liftTimer);
 	current.host.untrack(current.row);
 	showDrop(current, null);
 	current = null;
@@ -80,13 +83,18 @@ function startDrag(host: RowDragHost, evt: DragEvent): MouseDrag | null {
 	const kind = row?.hasClass(ITEM_CLASS) ? 'item' : host.dragsHeadings && row?.hasClass(HEADING_CLASS) ? 'heading' : null;
 	const line = row && kind ? lineOf(row) : null;
 	if (!row || !kind || line === null || !evt.dataTransfer) return null;
-	host.beforeLift();
-	// So a redraw detaches it, as it does a touch drag's row.
-	forgetDrawn(row);
 	const type = `${DRAG_TYPE}-${Math.random().toString(36).slice(2)}`;
 	evt.dataTransfer.setData(type, '');
 	evt.dataTransfer.effectAllowed = 'move';
-	return { host, type, row: host.track(line), kind, drop: null, marked: null };
+	const drag: MouseDrag = { host, type, row: host.track(line), kind, drop: null, marked: null, liftTimer: null };
+	// After dragstart returns: Chromium cancels the drag if the row has moved from under the press (spec, "Dragging").
+	drag.liftTimer = window.setTimeout(() => {
+		drag.liftTimer = null;
+		liftInPlace(host, row);
+		// Not before the lift, whose own redraw keeps the row; a later redraw detaches it, as touch's does.
+		forgetDrawn(row);
+	});
+	return drag;
 }
 
 function dragOver(drag: MouseDrag, evt: DragEvent): void {

@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { dropAt, sectionDropAt, type ShownRow } from '../../src/core/drop';
+import { dropAt, moveFromDrawn, sectionDropAt, type ShownRow } from '../../src/core/drop';
+import { ListEditing } from '../../src/core/editing';
+import { planRemoval } from '../../src/core/empty-item';
+import { splitLines } from '../../src/core/lines';
+import { planItemInsert, planItemMove, type ItemPlace } from '../../src/core/list-actions';
+import { contentStartOf } from './edit-helpers';
 
 const heading = (line: number): ShownRow => ({ kind: 'heading', line });
 const item = (line: number): ShownRow => ({ kind: 'item', line });
@@ -80,5 +85,72 @@ describe('sectionDropAt', () => {
 		expect(sectionDropAt(shown, 2, upper(2))).toBeNull();
 		expect(sectionDropAt(shown, 4, upper(3))).toBeNull();
 		expect(sectionDropAt(shown, 4, lower(5))).toBeNull();
+	});
+});
+
+describe('moveFromDrawn', () => {
+	// a and b first in the list, then c and d under H.
+	const drawn = [item(2), item(3), heading(4), item(5), item(6)];
+
+	test('with every row on the line it was drawn on, the move is the drop as aimed', () => {
+		expect(moveFromDrawn(drawn, [2, 3, 4, 5, 6], 5, { after: 2 })).toEqual({ from: 5, to: { after: 2 } });
+		expect(moveFromDrawn(drawn, [2, 3, 4, 5, 6], 2, { firstUnder: 4 })).toEqual({ from: 2, to: { firstUnder: 4 } });
+		expect(moveFromDrawn(drawn, [2, 3, 4, 5, 6], 5, 'first')).toEqual({ from: 5, to: 'first' });
+	});
+	test('the dragged row and the place follow their lines to where they are now', () => {
+		expect(moveFromDrawn(drawn, [1, 2, 3, 4, 5], 5, { after: 2 })).toEqual({ from: 4, to: { after: 1 } });
+		expect(moveFromDrawn(drawn, [1, 2, 3, 4, 5], 2, { firstUnder: 4 })).toEqual({ from: 1, to: { firstUnder: 3 } });
+	});
+	test('a place after a row that went goes after the nearest row above it that is still there', () => {
+		expect(moveFromDrawn(drawn, [2, null, 3, 4, 5], 6, { after: 3 })).toEqual({ from: 5, to: { after: 2 } });
+		expect(moveFromDrawn(drawn, [2, 3, 4, null, 5], 6, { after: 5 })).toEqual({ from: 5, to: { firstUnder: 4 } });
+		expect(moveFromDrawn(drawn, [null, 2, 3, 4, 5], 5, { after: 2 })).toEqual({ from: 4, to: 'first' });
+	});
+	test('null when the dragged row went, or the dragged row or the place is on a line not drawn', () => {
+		expect(moveFromDrawn(drawn, [2, 3, 4, null, 6], 5, { after: 2 })).toBeNull();
+		expect(moveFromDrawn(drawn, [2, 3, 4, 5, 6], 9, { after: 2 })).toBeNull();
+		expect(moveFromDrawn(drawn, [2, 3, 4, 5, 6], 5, { after: 9 })).toBeNull();
+	});
+});
+
+// A list block's drag, in its order: the lift tracks every drawn row's line, then the save of the
+// closed field runs, removing the empty new item it added, while the block keeps the rows as drawn.
+describe('a drag in a list block', () => {
+	const start = (text: string) => contentStartOf(splitLines(text));
+	const titles = (text: string) => splitLines(text).slice(3).map((line) => line.text.slice(6));
+	const groceries = '---\nprincelists: true\n---\n- [ ] Milk\n- [ ] Eggs\n- [ ] Bread\n';
+
+	// Draws the items after an insert of an empty item at `newAt`, when given, then lifts the item drawn
+	// on `lifted` and removes the empty item. Returns the titles after the drop's move, or null for none.
+	function dragAfterNewItem(newAt: ItemPlace | null, lifted: number, over: { line: number; below: boolean }): string[] | null {
+		const editing = new ListEditing(start);
+		editing.text = groceries;
+		const insert = newAt === null ? null : planItemInsert(groceries, start(groceries), newAt);
+		if (insert) editing.applyOwn(insert.next, insert.edit);
+		const drawn: ShownRow[] = titles(editing.text).map((_, i) => item(i + 3));
+		const tracked = drawn.map((row) => editing.track(row.line));
+		if (insert) {
+			const removal = planRemoval(editing.text, start(editing.text), insert.line, insert.inserted);
+			if (removal) editing.applyOwn(removal.next, removal.edit);
+		}
+		const drop = dropAt(drawn, lifted, over);
+		const move = drop && moveFromDrawn(drawn, tracked.map((row) => row.line), lifted, drop.place);
+		const moved = move && planItemMove(editing.text, start(editing.text), move.from, move.to);
+		return moved ? titles(moved.next) : null;
+	}
+
+	test('a new item first, then Bread dropped on the upper half of Milk: Bread goes before Milk', () => {
+		expect(dragAfterNewItem('first', 6, upper(4))).toEqual(['Bread', 'Milk', 'Eggs']);
+	});
+	test('a new item first, then Bread dropped on the lower half of Milk: Bread goes between Milk and Eggs', () => {
+		expect(dragAfterNewItem('first', 6, lower(4))).toEqual(['Milk', 'Bread', 'Eggs']);
+	});
+	test('a new item after Eggs, then Milk dropped below it, on the lower half of Bread: Milk goes last', () => {
+		expect(dragAfterNewItem({ after: 4 }, 3, lower(6))).toEqual(['Eggs', 'Bread', 'Milk']);
+	});
+	test('with no field open, the drop lands where it always did', () => {
+		expect(dragAfterNewItem(null, 5, upper(3))).toEqual(['Bread', 'Milk', 'Eggs']);
+		expect(dragAfterNewItem(null, 5, lower(3))).toEqual(['Milk', 'Bread', 'Eggs']);
+		expect(dragAfterNewItem(null, 3, lower(5))).toEqual(['Eggs', 'Bread', 'Milk']);
 	});
 });
