@@ -25,6 +25,7 @@ import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR, NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
 import { runNotesBarAction } from './notes-keys';
+import { isInNestedBlock } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
@@ -61,6 +62,11 @@ function onChange(view: PrinceListView, evt: Event): void {
 function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
 	if (!target) return;
+	// A list block in the notes acts on its own rows; to the view, a click there is one on the notes.
+	if (isInNestedBlock(view.contentEl, target)) {
+		if (view.card && !view.card.el.contains(target)) closeCard(view);
+		return;
+	}
 	const arrow = target.closest<HTMLElement>(`.${COLLAPSE_CLASS}`);
 	if (arrow) {
 		const heading = arrow.closest(`.${HEADING_CLASS}`);
@@ -139,7 +145,8 @@ function keepNotesFocused(evt: MouseEvent): void {
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
-	if (!target || showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target)) return;
+	if (!target || isInNestedBlock(view.contentEl, target)) return;
+	if (showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target)) return;
 	showContextMenu(view, evt, target);
 }
 

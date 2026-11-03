@@ -14,6 +14,7 @@ import { FIELD_CLASS, keepOneLine } from './fields';
 import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
 import { cardNotesSource } from './notes-source';
+import { ownElement } from './own-rows';
 import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
@@ -46,7 +47,7 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 	const card: Card = { el: createCardElement(), editor: null, inserted: inserted ?? null, lostAt: null };
 	view.card = card;
 	// A new item has no row yet, nor does one that is hidden, so the view draws the card in its place.
-	const row = view.contentEl.querySelector<HTMLElement>(`.${ITEM_CLASS}:not(.${CARD_CLASS})[${LINE_ATTR}="${titleLine}"]`);
+	const row = ownElement(view.contentEl, `.${ITEM_CLASS}:not(.${CARD_CLASS})[${LINE_ATTR}="${titleLine}"]`);
 	if (row) {
 		refreshCard(view, card);
 		view.dropBlock(row);
