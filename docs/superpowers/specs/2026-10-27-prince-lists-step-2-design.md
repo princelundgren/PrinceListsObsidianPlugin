@@ -173,8 +173,10 @@ this met on 2026-10-30 **(owner)**.
   the item as the file had it.
 - **Dragging** works within the block, within and between sections: with the mouse on desktop and
   hold-and-move on mobile, with the list view's drop rules. Lifting an item closes an open
-  title field and saves it. A hold on an item opens no menu, and a swipe that starts no lift
-  scrolls the note.
+  title field and saves it. Until then, a mouse press that can lift another item leaves the
+  field open, without its focus, so the rows don't move under the press; the press's click
+  closes it as any click does, and a release outside the block closes and saves it **(call)**.
+  A hold on an item opens no menu, and a swipe that starts no lift scrolls the note.
   - **The item lands where the drop line showed (owner, 2026-11-02),** even when that save
     removes an empty new item and so moves the lines below it: the drag aims with the rows as
     drawn, and the move follows each drawn row's line to where it is now. A drop under the row
