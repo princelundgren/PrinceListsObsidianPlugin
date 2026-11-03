@@ -798,7 +798,12 @@ back only what was typed and leaves the empty line, which can be deleted like an
     menu alone was hard to find on mobile. The icon is the same shape as the list's own
     checkboxes, so it reads as done items; an eye was tried first and read as unrelated to them.
     It toggles the same setting as the menu item, is blue while archived items show, as their
-    checkboxes are, and its tooltip then says "Hide archived". It shows only on a list.
+    checkboxes are. It shows only on a list.
+  - **Cmd+Shift+A toggles it too (owner, 2026-11-03),** Ctrl+Shift+A on Windows and Linux, while a
+    list has focus, its fields included. It's registered on the view's own `scope`, as
+    Cmd+Enter is, so it isn't a default hotkey, and there's no command for it. The icon's tooltip
+    names the key: "Show archived (Cmd+Shift+A)" or "Hide archived (Cmd+Shift+A)", with Ctrl on
+    Windows and Linux. Mobile, which usually has no keyboard, shows no key **(owner, 2026-11-03)**.
   - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
     it stands apart from an item ticked in the last day, whose checkbox keeps the accent color.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
