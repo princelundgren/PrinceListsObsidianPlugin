@@ -185,7 +185,8 @@ this met on 2026-10-30 **(owner)**.
     **(call)**.
 - **No edge scrolling in a block (call):** the block sits in the note's scroller, which is
   Obsidian's, and the plugin doesn't reach into Obsidian's own elements. A drop beyond what shows
-  needs the list view.
+  needs the list view. For the same reason, a lifted row can shift once, as an open title field
+  above it closes, instead of being scrolled back under the pointer.
 - **Writes go to the list's file** through the same guarded edits. An open list view of that file
   follows them as a change from outside **(call)**. Cmd+Z doesn't step through edits made in a
   block **(call)**.
