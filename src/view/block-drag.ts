@@ -18,6 +18,7 @@ export function blockDragHost(block: ListBlock): RowDragHost {
 		component: block,
 		rowsEl: block.rowsEl,
 		edgeScroll: null,
+		liftScrollEl: null,
 		dragsHeadings: false,
 		get swallowNextClick() {
 			return block.swallowNextClick;

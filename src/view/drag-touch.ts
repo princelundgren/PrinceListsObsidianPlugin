@@ -4,7 +4,7 @@ import { edgeStep, HOLD_MS, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../c
 import { CARD_CLASS } from './card';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import type { RowDragHost } from './drag-host';
+import { liftInPlace, type RowDragHost } from './drag-host';
 import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 
@@ -113,11 +113,9 @@ export function enableTouchDrag(host: RowDragHost): void {
 	const lift = (current: Press): void => {
 		current.timer = null;
 		const rowTop = current.row.getBoundingClientRect().top;
-		host.beforeLift();
+		liftInPlace(host, current.row);
 		const line = lineOf(current.row);
 		if (!current.row.isConnected || line === null) return;
-		// A card above the row closing moves the row up under the finger's hold; scroll it back.
-		if (scrollEl) scrollEl.scrollTop += current.row.getBoundingClientRect().top - rowTop;
 		const shift = rowTop - current.row.getBoundingClientRect().top;
 		const top = originTop();
 		const boxes = Array.from(rowsEl.querySelectorAll<HTMLElement>(`[${LINE_ATTR}]`), (el) => {
