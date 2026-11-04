@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { checkDemoVault, pickPage, vaultProblem } from './cdp.mjs';
 
-const target = (type, url) => ({ type, url, webSocketDebuggerUrl: `ws://x/${url}` });
+const target = (type, url, title = '') => ({ type, url, title, webSocketDebuggerUrl: `ws://x/${url}` });
 const desktop = target('page', 'app://obsidian.md/index.html');
 // Stands in for a session: answers checkDemoVault's one question with what the page would say.
 const fakeSession = (answer) => ({ evaluate: async () => answer });
@@ -25,6 +25,17 @@ test('pickPage throws listing the targets when there is no app page', () => {
 
 test('pickPage throws listing the targets when there are two app pages', () => {
 	assert.throws(() => pickPage([desktop, desktop]), /page app:\/\/obsidian\.md\/index\.html/);
+});
+
+test('pickPage names each app page by its title when there are two', () => {
+	const titled = (title) => target('page', 'app://obsidian.md/index.html', title);
+	assert.throws(() => pickPage([titled('Groceries - Demo - Obsidian 1.15.0'), titled('Settings - Demo - Obsidian 1.15.0')]),
+		/"Groceries - Demo - Obsidian 1\.15\.0"\n.*"Settings - Demo - Obsidian 1\.15\.0"/);
+});
+
+test('pickPage keeps a title with a line break on its target\'s line', () => {
+	assert.throws(() => pickPage([target('page', 'devtools://devtools/inspector.html', 'One\nTwo')]),
+		/inspector\.html "One\\nTwo"$/);
 });
 
 const dark = { nativeMenus: false, theme: 'obsidian' };
