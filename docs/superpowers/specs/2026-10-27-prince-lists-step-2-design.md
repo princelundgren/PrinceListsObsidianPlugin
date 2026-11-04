@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-03
+verified: 2026-11-04
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -74,7 +74,13 @@ this met on 2026-10-30 **(owner)**.
   splits the line. The row hides the emoji and shows Lucide's `star` icon instead.
 - **The title field shows the title without its star,** and saving puts ` ⭐` back, so typing can't
   drop the star or add a second one **(call)**.
-- **Removing the star** removes the space, the `⭐` and any U+FE0F after it, and nothing else.
+- **Removing the star** removes the space, the `⭐` and any U+FE0F after it, and nothing else,
+  except on an item with no title whose first field is a tag **(owner, 2026-11-03)**. Starring
+  `- [ ] #errand` adds a space before the tag as well, which a tag needs, giving
+  `- [ ]  ⭐ #errand`, and removing the star takes that space back. So star then unstar gives back
+  the line it started from, as tick then untick does. Starring adds that space even when white
+  space is already there, so `- [ ]  #errand` stars to `- [ ]  ⭐  #errand` and comes back too
+  **(owner, 2026-11-04)**.
 
 ### Checklist lines
 
