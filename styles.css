@@ -104,9 +104,9 @@ textarea.princelists-title {
 }
 
 /* A hold on a row or heading selects nothing and shows no callout, as in spike 2 (spec, "Touch on
-   mobile"). The open card is a row too, and its text stays selectable. In a list block the gaps
-   between rows don't either: a lift that closes a title field moves the rows, so the phone's own
-   long press can land in a gap, and a selection there cancels the drag. */
+   mobile"). The open card is a row too, and its text stays selectable. A hold in the gaps between a
+   list block's rows selects nothing either: a lift that closes a title field moves the rows, so the
+   phone's own long press can land in a gap, and a selection there cancels the drag. */
 .princelists-item:not(.princelists-card),
 .princelists-heading,
 .princelists-block-rows {
