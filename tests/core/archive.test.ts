@@ -32,7 +32,7 @@ describe('archiveDelayHoursOf', () => {
 		expect(archiveDelayHoursOf('168')).toBe('168');
 	});
 
-	test.each([['5'], [''], ['-24'], ['24.5'], [24], [null], [undefined]])('reads a stored value that is no choice as a day: %s', (stored) => {
+	test.each([['5'], [''], ['-24'], ['24.5'], [168], [null], [undefined]])('reads a stored value that is no choice as a day: %s', (stored) => {
 		expect(archiveDelayHoursOf(stored)).toBe('24');
 	});
 });

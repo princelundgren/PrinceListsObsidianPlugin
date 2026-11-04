@@ -798,7 +798,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   of graying the row in place, so the item goes then, not at the next redraw. Rows below move up,
   and the next tap lands where the ticked item was. A mistaken tick comes back with Show archived,
   or Cmd+Z on desktop. A list block and the Schedule redraw after every tick already. With Show
-  archived on, it stays in place, blue, as it does with any delay.
+  archived on, it stays in place, blue, as it does with any delay. An item ticked in its open card
+  stays there, blue, and goes when the card closes.
 - **"Archived" is worked out, never written down.** It is computed from `✔` plus the delay.
   Nothing in the file changes when an item becomes archived.
 - **"Show archived" in the pane's ⋯ menu (call; archived is the owner's word)** shows archived
