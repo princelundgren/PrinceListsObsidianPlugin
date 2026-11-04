@@ -30,6 +30,7 @@ import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
+import { showTextMenu } from './text-menu';
 import { queueTick } from './tick';
 
 // Delegated listeners on the view's own element, and the picture events' capture listeners on the
@@ -148,7 +149,7 @@ function keepNotesFocused(evt: MouseEvent): void {
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
 	if (!target || isInNestedBlock(view.contentEl, target)) return;
-	if (showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target)) return;
+	if (showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target) || showTextMenu(view, evt, target)) return;
 	showContextMenu(view, evt, target);
 }
 

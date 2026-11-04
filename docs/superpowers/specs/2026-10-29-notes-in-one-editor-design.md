@@ -138,11 +138,26 @@ Compared with Obsidian's own editor side by side on desktop:
   and Obsidian's reading view didn't open an `obsidian://` link on a real click either. The caret
   reaches a link with the arrow keys or a click beside it.
 - **Right-click on desktop:** on a link, Obsidian's link menu (step one); on a picture, the picture
-  menu (step two, "Right-click menus"). Elsewhere in the notes the plugin opens no menu of its own,
-  and the list's background menu no longer covers the list note **(call)**. A press of a button
+  menu (step two, "Right-click menus"). Elsewhere in the notes, and in the card's title, a text
+  menu with the names and icons of Obsidian's editor menu **(owner, 2026-11-04)**: Add link and Add
+  external link; Bold, Italic, Strikethrough and Underline; in the notes, Bullet list, Numbered list
+  and Task list; then Cut, Copy, Paste, Paste as plain text and Select all. The list's background
+  menu doesn't cover the list note **(call)**. A press of a button
   other than the main one on a picture the editor draws, or on a drawn block, leaves it drawn and
   the editor's focus as it was: Windows opens the menu on release, after a focus would have shown
   the Markdown.
+  - Obsidian documents no way to open its own editor menu outside a note's editor, and plugins
+    can't make its submenus, so the text menu is the plugin's own and flat.
+  - In the card's title and in the notes, the card's and the list's, the text menu takes the place
+    of Obsidian's own menu for a text field, and with it the spelling suggestions, Add to dictionary
+    and Look up, which plugins have no documented way to offer **(owner, 2026-11-04)**. A heading's
+    or the list title's field, which takes no formatting, keeps Obsidian's menu.
+  - Add link asks for a note or list in Obsidian's search box, as the format bar's button does
+    (step two, "Formatting in a card"). Neither link item takes a selection over lines, as in
+    Obsidian's menu.
+  - Paste turns copied web or rich text into Markdown with Obsidian's `htmlToMarkdown`; Paste as
+    plain text pastes the text as it is. Text wins over pictures, as in step one's "Text wins", so a
+    clipboard with no text pastes its pictures into the card's notes.
 
 ## Undo (call)
 
@@ -282,8 +297,7 @@ Compared with Obsidian's own editor side by side on desktop:
 6. **Android:** the on-screen keyboard's Backspace and Enter, and the format bar above it.
 7. **A drawn block:** a click inside a drawn table or callout enters it without jumping the card's
    scroll, and a widget with an embedded note unloads when it's taken away.
-8. **Right-click elsewhere in the notes** on desktop shows what a text field shows in Obsidian, or
-   nothing, and never the item menu.
+8. **Right-click elsewhere in the notes** on desktop shows the text menu, and never the item menu.
 
 ## Order (call)
 
