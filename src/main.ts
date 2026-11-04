@@ -1,8 +1,9 @@
 import { FileView, MarkdownView, normalizePath, Notice, Plugin, TFile, TFolder } from 'obsidian';
 import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { archiveDelayHoursOf, archiveDelayMs } from './core/archive';
+import { serialQueue } from './core/queue';
 import { ArchiveDelay } from './obsidian/archive-delay';
-import { createList } from './obsidian/create-list';
+import { createList, openNewList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { addScheduleTab, openSchedule } from './obsidian/open-schedule';
 import { DEFAULT_SETTINGS, type PrinceListsSettings, PrinceListsSettingTab } from './obsidian/settings';
@@ -17,6 +18,11 @@ import { ScheduleView } from './view/schedule-view';
 export default class PrinceListsPlugin extends Plugin {
 	settings: PrinceListsSettings = { ...DEFAULT_SETTINGS };
 	private readonly archiveDelay = new ArchiveDelay(() => archiveDelayMs(this.settings.archiveDelayHours));
+	private newListRequests = 0;
+	private readonly enqueueNewList = serialQueue((error) => {
+		console.error('PrinceLists: could not create the list', error);
+		new Notice("Couldn't create the list.");
+	});
 
 	override async onload() {
 		await this.loadSettings();
@@ -174,12 +180,12 @@ export default class PrinceListsPlugin extends Plugin {
 		return this.app.vault.getFolderByPath(path) ?? (await this.app.vault.createFolder(path));
 	}
 
-	private async newList(folder: () => TFolder | Promise<TFolder>): Promise<void> {
-		try {
-			await createList(this.app, await folder());
-		} catch (error) {
-			console.error('PrinceLists: could not create the list', error);
-			new Notice("Couldn't create the list.");
-		}
+	// One at a time: overlapping runs pick the same name, and vault.create then returns the first run's file.
+	private newList(folder: () => TFolder | Promise<TFolder>): Promise<void> {
+		const request = ++this.newListRequests;
+		return this.enqueueNewList(async () => {
+			const file = await createList(this.app, await folder());
+			if (request === this.newListRequests) await openNewList(this.app, file);
+		});
 	}
 }
