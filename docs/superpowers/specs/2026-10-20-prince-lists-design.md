@@ -1002,8 +1002,8 @@ From here on the document is for the builder.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
   `@since` tag in `obsidian.d.ts`, and from the CodeMirror and Lezer packages the bundled code
   takes from Obsidian at runtime. Every device must run at least that version, mobile included.
-  For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts"). The notes editor
-  raises it to 1.13.4 **(owner, 2026-10-29)**: see its design's risk 1.
+  Step one needed 1.5.7, for `getFrontMatterInfo`; the notes editor raised it to 1.13.4
+  **(owner, 2026-10-29)**, as its design's risk 1 says. `manifest.json` holds the current value.
 - **Installing:** copy `main.js`, `manifest.json` and `styles.css` into
   `<vault>/.obsidian/plugins/princelists/`. The folder name must match the ID, or
   `onExternalSettingsChange` and similar methods aren't called (Manifest docs). Obsidian Sync takes
@@ -1266,7 +1266,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     0.4.2 on 2026-10-20).
   - The picture refusal tells them apart by `file.parent === null` instead, observed in 1.14.4 as
     the rename check does **(call)**: `TExternalFile` is newer than `minAppVersion`.
-- **Outside notes don't raise `minAppVersion`:** nothing here uses an API newer than 1.5.7.
+- **Outside notes don't raise `minAppVersion`:** nothing here uses an API newer than it.
 
 ## Testing and owner checkpoints
 
@@ -1358,14 +1358,11 @@ Checked 2026-10-20.
       though it returns a note from outside the vault too (observed in 1.14.4)
   - settings: `getSettingDefinitions` and `PluginSettingTab.setControlValue` (1.13.0),
     `onExternalSettingsChange` (1.5.7), `Events` (0.9.7)
-  - the minimum version: the `@since` tags decide it. The newest among the APIs step one uses is
-    1.5.7, for `getFrontMatterInfo` (and `FileManager.getAvailablePathForAttachment` and
-    `View.scope` in 1b). The others are older or untagged, and every untagged one is already in
-    the 1.5.7 `obsidian` package. With `minAppVersion` 1.5.7, the `obsidianmd/no-unsupported-api`
-    rule passes a file that calls each of these APIs, and at 1.5.6 it flags the three 1.5.7 ones
-    (checked again 2026-10-27). `MenuItem.setWarning` and `Workspace.handleLinkContextMenu` carry
-    older tags but first appear in the package at 1.10.0. Nothing has been tried on an Obsidian
-    older than 1.14.4.
+  - the minimum version: `minAppVersion` in `manifest.json`, set as "Minimum Obsidian version"
+    says. `npm run lint`'s `obsidianmd/no-unsupported-api` rule flags a call to an API newer than
+    it, but not an overridden method or an `instanceof` check (a copy at 1.12.0 flagged the
+    `super.setControlValue` call and neither override, 2026-11-04). Nothing has been tried on an
+    Obsidian older than 1.14.4.
   - extensions: `registerBasesView` (1.10.0), `registerEditorExtension` (0.12.8),
     `registerMarkdownCodeBlockProcessor`, `registerMarkdownPostProcessor`,
     `registerObsidianProtocolHandler`, `Plugin.registerCliHandler` (1.12.2)

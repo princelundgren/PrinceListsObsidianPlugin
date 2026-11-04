@@ -255,7 +255,7 @@ Compared with Obsidian's own editor side by side on desktop:
   note in small ways, and a theme that styles Obsidian's editor doesn't style this one.
 - **A CodeMirror update in Obsidian** could stop matching the bundled Markdown package. Risk 1
   checks it at the build, and again whenever `minAppVersion` moves.
-- **Obsidian 1.13.4 or later** (risk 1), where step two ran on 1.5.7.
+- **A higher minimum Obsidian version** (risk 1), where step two ran on 1.5.7.
 - **A drawn block shows its whole Markdown** once the cursor enters it: a table shows its pipes.
 - **A numbered checklist item,** `1. [ ]`, continues as a numbered item without a box: the command
   carries a box only for bullets.
