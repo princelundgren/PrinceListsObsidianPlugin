@@ -5,7 +5,7 @@ import { Annotation, Compartment, EditorState, Transaction, type ChangeSpec, typ
 import { EditorView, placeholder } from '@codemirror/view';
 import { htmlToMarkdown, Notice } from 'obsidian';
 import { checklistStatusAt } from '../core/checklist';
-import { pasteSource } from '../core/clipboard';
+import { pastedData, pasteSource } from '../core/clipboard';
 import { blockBelow } from '../core/note-pieces';
 import { changedLines, type NotesChange } from '../core/notes-lines';
 import { isBlank } from '../core/parse';
@@ -151,7 +151,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 						return true;
 					},
 					// A file is never text in the notes: pictures go through the view's own listeners.
-					paste: (evt, editor) => pasteAsMarkdown(evt, editor) || (!evt.clipboardData?.getData('text/plain') && (evt.clipboardData?.files.length ?? 0) > 0),
+					paste: (evt, editor) => pasteAsMarkdown(evt, editor) || leavesPasteToPictures(evt),
 					drop: (evt) => (evt.dataTransfer?.files.length ?? 0) > 0,
 				}),
 			],
@@ -260,10 +260,15 @@ function lineChange(doc: Text, { from, to, lines }: NotesChange): ChangeSpec {
 
 // Web or rich text pastes as Markdown, as in a note; CodeMirror's own paste takes only the plain text.
 function pasteAsMarkdown(evt: ClipboardEvent, editor: EditorView): boolean {
-	const data = evt.clipboardData;
-	const html = data?.getData('text/html') ?? '';
-	if (!data || editor.state.readOnly || pasteSource(data.types, 'markdown', html) !== 'html') return false;
+	if (!evt.clipboardData || editor.state.readOnly) return false;
+	const data = pastedData(evt.clipboardData);
+	if (pasteSource(data, 'markdown') !== 'html') return false;
 	evt.preventDefault();
-	editor.dispatch(editor.state.replaceSelection(htmlToMarkdown(html)), { userEvent: 'input.paste', scrollIntoView: true });
+	editor.dispatch(editor.state.replaceSelection(htmlToMarkdown(data.html)), { userEvent: 'input.paste', scrollIntoView: true });
 	return true;
+}
+
+function leavesPasteToPictures(evt: ClipboardEvent): boolean {
+	const data = evt.clipboardData;
+	return !!data && data.files.length > 0 && pasteSource(pastedData(data), 'markdown') === 'pictures';
 }
