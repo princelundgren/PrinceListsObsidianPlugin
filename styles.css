@@ -794,8 +794,9 @@ button.princelists-collapse {
 	padding-bottom: calc(var(--size-4-8) + var(--view-bottom-spacing, 0px));
 }
 
-/* The list's title style, so the Schedule reads as a page beside the lists. */
-.princelists-schedule-title {
+/* The list's title style, so the Schedule and Getting started read as pages beside the lists. */
+.princelists-schedule-title,
+.princelists-start-title {
 	margin: 0 0 var(--size-4-2);
 	font-family: var(--inline-title-font);
 	font-size: var(--inline-title-size);
@@ -804,7 +805,8 @@ button.princelists-collapse {
 	color: var(--inline-title-color);
 }
 
-.princelists-schedule-about {
+.princelists-schedule-about,
+.princelists-start-about {
 	margin-bottom: var(--size-4-4);
 	color: var(--text-muted);
 }
@@ -848,6 +850,20 @@ button.princelists-collapse {
 
 .princelists-schedule-empty {
 	color: var(--text-faint);
+}
+
+.princelists-start-text {
+	flex: 1;
+	min-width: 0;
+}
+
+.princelists-start-how {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.princelists-start-button {
+	flex: none;
 }
 
 /* In Live Preview the block sits in the editor's editable text, where the pointer would otherwise be

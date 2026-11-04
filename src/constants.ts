@@ -7,3 +7,5 @@ export const VIEW_TYPE_MARKDOWN = 'markdown';
 
 export const VIEW_TYPE_SCHEDULE = 'princelists-schedule';
 export const SCHEDULE_ICON = 'calendar-clock';
+
+export const VIEW_TYPE_GETTING_STARTED = 'princelists-getting-started';
