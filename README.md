@@ -12,7 +12,7 @@ Make a list from the ribbon, a folder, or a note you already have.
 | --- | --- | --- |
 | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.webp" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.webp" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.webp" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
-Ticked items hide after a day. Show archived brings them back, with blue checkboxes.
+Ticked items hide after a day, or the time you choose in the settings. Show archived brings them back, with blue checkboxes.
 
 ![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
 
@@ -36,7 +36,7 @@ You can embed lists in normal notes.
 ```
 ````
 
-<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.webp" alt="An ordinary note with a paragraph above and below the Hardware store list, shown with its checkboxes, a star and a New item button" width="540">
+![In an ordinary note, a princelists block naming Hardware store is typed between two paragraphs, with the link picked from Obsidian's suggestions, and once the cursor leaves the block the list shows in its place, with its checkboxes, a star and a New item button](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.gif)
 
 ## Full feature list
 
@@ -51,7 +51,7 @@ You can embed lists in normal notes.
 
 - **Add** with the **+**, and **drag** to reorder.
 - **Star** an item and give it a date.
-- **Tick and forget:** ticked items hide after a day.
+- **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
 - **Delete** with Undo.
 
 **Notes on an item**
@@ -63,7 +63,7 @@ You can embed lists in normal notes.
 
 **Across lists**
 
-- **The Schedule,** in the right sidebar, sorts dated items into Today (with anything overdue), Tomorrow, Next 7 days and Later. Closed its tab? The ribbon icon or PrinceLists' settings bring it back.
+- **The Schedule,** in the right sidebar, sorts dated items into Today (with anything overdue), Tomorrow, Next 7 days and Later. A button in each list's header opens it, and the settings can hide that button. Closed its tab? That button, the ribbon icon or PrinceLists' settings bring it back.
 - **A list inside another note** can be ticked and edited there. If you rename the list, update the block.
 - **Works with Tasks:** dates use the Tasks plugin's format.
 

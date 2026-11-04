@@ -61,6 +61,9 @@ this project.
     `registerEvent` or `registerDomEvent`, so the plugin unloads cleanly.
   - The view's own elements use one delegated listener per container.
 - **Interface text** is in sentence case.
+- **README.md keeps each paragraph and list item on one line.** Obsidian's plugin browser shows
+  every line break in it, so a wrapped paragraph breaks mid-sentence there. The docs check flags
+  one.
 - **Stable IDs:** never change the plugin `id` (`princelists`), command IDs or the view type once
   they're released.
 - **No default hotkeys** on commands (Obsidian's plugin guidelines).
@@ -80,7 +83,7 @@ The docs check needs only Node.js 22 or later, and CI runs it:
 
 | Command | What it does |
 |---|---|
-| `node scripts/check-docs.mjs` | Check the docs for British spellings, the letters a-ring, a-umlaut and o-umlaut, home-directory paths and broken links |
+| `node scripts/check-docs.mjs` | Check the docs for British spellings, the letters a-ring, a-umlaut and o-umlaut, home-directory paths, broken links, and README paragraphs split over lines |
 | `node scripts/check-docs.mjs --pr-title="<title>" --pr-body-file <file>` | Also check a pull request's title, and its description saved in `<file>`: the template's five parts, 400 words at most |
 | `node --test scripts/check-docs.test.mjs` | Run the docs check's tests |
 
@@ -104,6 +107,7 @@ workspace files when it opens it. These need Node.js 22 or later too:
 | `node scripts/pictures/demo-vault.mjs <folder> [--theme dark\|light] [--today YYYY-MM-DD]` | Copy the demo vault into `<folder>`, its dates moved from the day they were written for to today. It writes only into a folder with no notes or an earlier copy, never through a linked `.obsidian/`, and keeps `.obsidian/plugins/` |
 | `node --test "scripts/pictures/*.test.mjs"` | Run the picture scripts' tests. Quote the glob so Node expands it in every shell; a folder argument fails on Node 22 and 24 |
 | `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...` | Take the named scenes in `scripts/pictures/scenes/` from a demo vault that Obsidian has open with a DevTools port, writing each as `<scene>.webp` or `<scene>.gif` in `<folder>`. It needs `cwebp` and `ffmpeg`, and stops unless the vault is a copy in the scene's theme with "Native menus" off |
+| `node scripts/pictures/shoot.mjs --port <port> --out <folder> --desktop` | Take every scene that isn't a phone's, in name order, the same way |
 | `node scripts/pictures/push-vault.mjs --port <port> <folder>` | Write the copy in `<folder>` and the build into the vault Obsidian has open on an emulator, after removing everything in it but its plugins. It stops if the open vault has notes and isn't a copy |
 
 To make a demo vault: close an earlier copy in Obsidian if it's open, run the copy script, then

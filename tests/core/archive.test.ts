@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ARCHIVE_DELAY_MS, doneAt, isArchived } from '../../src/core/archive';
+import { archiveDelayHoursOf, archiveDelayMs, doneAt, isArchived, type ArchiveDelayHours } from '../../src/core/archive';
 
 const now = new Date(2026, 9, 20, 12, 0);
 const VS16 = '️';
@@ -11,9 +11,29 @@ function at(...args: [number, number, number, number?, number?, number?, number?
 	return { kind: 'at', time: new Date(...args) };
 }
 
-describe('ARCHIVE_DELAY_MS', () => {
-	test('is 24 hours', () => {
-		expect(ARCHIVE_DELAY_MS).toBe(24 * 60 * 60 * 1000);
+const HOUR = 3_600_000;
+const DAY = 24 * HOUR;
+
+describe('archiveDelayMs', () => {
+	test.each([
+		['0', 0],
+		['1', HOUR],
+		['12', 12 * HOUR],
+		['24', DAY],
+		['48', 2 * DAY],
+		['168', 7 * DAY],
+	])('reads the hours choice %s', (hours, expected) => {
+		expect(archiveDelayMs(hours as ArchiveDelayHours)).toBe(expected);
+	});
+});
+
+describe('archiveDelayHoursOf', () => {
+	test('keeps a stored choice', () => {
+		expect(archiveDelayHoursOf('168')).toBe('168');
+	});
+
+	test.each([['5'], [''], ['-24'], ['24.5'], [168], [null], [undefined]])('reads a stored value that is no choice as a day: %s', (stored) => {
+		expect(archiveDelayHoursOf(stored)).toBe('24');
 	});
 });
 
@@ -80,6 +100,28 @@ describe('isArchived', () => {
 		['an open item', '- [ ] a ✔ 2026-10-19 10:00', now, false],
 		['a line that is not a task', 'a paragraph', now, false],
 	])('%s', (_name, line, when, expected) => {
-		expect(isArchived(line, when)).toBe(expected);
+		expect(isArchived(line, when, DAY)).toBe(expected);
+	});
+
+	test.each([
+		['at once, a tick from a moment ago', 0, new Date(2026, 9, 20, 12, 0), true],
+		['after an hour, a tick 59 minutes old', HOUR, new Date(2026, 9, 20, 11, 59), false],
+		['after an hour, a tick an hour old', HOUR, new Date(2026, 9, 20, 13, 0), true],
+		['after a week, a tick 6 days old', 7 * DAY, new Date(2026, 9, 26, 12, 0), false],
+		['after a week, a tick 7 days old', 7 * DAY, new Date(2026, 9, 27, 12, 0), true],
+	])('%s', (_name, delay, when, expected) => {
+		expect(isArchived('- [x] a ✔ 2026-10-20 12:00', when, delay)).toBe(expected);
+	});
+
+	test('hides a date-only tick the delay after the end of its day', () => {
+		expect(isArchived('- [x] a ✔ 2026-10-19', new Date(2026, 9, 19, 23, 59), 0)).toBe(false);
+		expect(isArchived('- [x] a ✔ 2026-10-19', new Date(2026, 9, 20, 0, 0), 0)).toBe(true);
+		expect(isArchived('- [x] a ✔ 2026-10-19', new Date(2026, 9, 20, 0, 59), HOUR)).toBe(false);
+		expect(isArchived('- [x] a ✔ 2026-10-19', new Date(2026, 9, 20, 1, 0), HOUR)).toBe(true);
+	});
+
+	test('counts a tick more than 24 h ahead as long ago, whatever the delay', () => {
+		expect(isArchived('- [x] a ✔ 2026-10-22 12:00', now, 7 * DAY)).toBe(true);
+		expect(isArchived('- [x] a ✔ 2026-10-21 11:00', now, 7 * DAY)).toBe(false);
 	});
 });

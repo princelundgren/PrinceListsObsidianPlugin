@@ -45,7 +45,7 @@ describe('setWhen', () => {
 		const changed = setWhen(line, '2026-11-02');
 		expect(changed).toBe(line.replace('⏳ 2026-10-30', '⏳ 2026-11-02'));
 		expect(parseItemLine(changed)?.title).toBe(parseItemLine(line)?.title);
-		expect(itemRow(line, 0, new Date(2026, 9, 27)).when).toBe('2026-10-30');
+		expect(itemRow(line, 0, new Date(2026, 9, 27), 86_400_000).when).toBe('2026-10-30');
 	});
 });
 

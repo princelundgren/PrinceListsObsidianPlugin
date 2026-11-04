@@ -198,7 +198,7 @@ function showStar(cardEl: HTMLElement, starred: boolean): void {
 
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {
 	const text = line === null ? undefined : view.lines()[line]?.text;
-	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line, new Date()) : null;
+	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line, new Date(), view.archiveDelay.ms) : null;
 }
 
 function isRowVisible(view: PrinceListView, row: ItemRow): boolean {

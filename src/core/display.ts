@@ -14,7 +14,7 @@ export interface ItemRow {
 	/** The checkbox's accessible name: the title, or the rest of the line when the title is empty. */
 	label: string;
 	done: boolean;
-	/** Done more than 24 hours ago, so hidden unless "Show archived" is on. */
+	/** Done the archive delay or longer ago, so hidden unless "Show archived" is on. */
 	archived: boolean;
 	starred: boolean;
 	/** The item's When, `YYYY-MM-DD`, or null. */
@@ -41,6 +41,8 @@ export interface SectionRows {
 
 export interface RowFilter {
 	showArchived: boolean;
+	/** How long after its tick a done item is archived. */
+	archiveDelayMs: number;
 	/** What Cmd+F's field holds; '' filters nothing. */
 	query: string;
 	/** The open card's item, which shows whether or not it matches or its section is collapsed. */
@@ -63,7 +65,7 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 		const end = model.sections[i + 1]?.headingLine ?? lines.length;
 		const collapsed = headingLine !== null && filter.collapsed.has(headingLine);
 		const shown: ListRow[] = items.flatMap((item) => {
-			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now);
+			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, filter.archiveDelayMs);
 			if (!isShown(row, filter.showArchived)) return [];
 			if (item.titleLine === filter.keepLine) return [row];
 			if (filtering) return itemMatches(lines, item, row, filter.query) ? [row] : [];
@@ -114,9 +116,9 @@ export function withoutRange(sections: SectionRows[], range: { start: number; en
 	}));
 }
 
-export function itemRow(text: string, titleLine: number, now: Date): ItemRow {
+export function itemRow(text: string, titleLine: number, now: Date, archiveDelayMs: number): ItemRow {
 	const row = timelessItemRow(text, titleLine);
-	return { ...row, archived: row.done && isArchived(text, now) };
+	return { ...row, archived: row.done && isArchived(text, now, archiveDelayMs) };
 }
 
 /** The fields of an item's row that don't depend on the time: all but `archived`. */

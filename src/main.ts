@@ -1,6 +1,9 @@
 import { FileView, MarkdownView, normalizePath, Notice, Plugin, TFile, TFolder } from 'obsidian';
 import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
-import { createList } from './obsidian/create-list';
+import { archiveDelayHoursOf, archiveDelayMs } from './core/archive';
+import { serialQueue } from './core/queue';
+import { ArchiveDelay } from './obsidian/archive-delay';
+import { createList, openNewList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { addScheduleTab, openSchedule } from './obsidian/open-schedule';
 import { DEFAULT_SETTINGS, type PrinceListsSettings, PrinceListsSettingTab } from './obsidian/settings';
@@ -14,13 +17,21 @@ import { ScheduleView } from './view/schedule-view';
 
 export default class PrinceListsPlugin extends Plugin {
 	settings: PrinceListsSettings = { ...DEFAULT_SETTINGS };
+	private readonly archiveDelay = new ArchiveDelay(() => archiveDelayMs(this.settings.archiveDelayHours));
+	private newListRequests = 0;
+	private readonly enqueueNewList = serialQueue((error) => {
+		console.error('PrinceLists: could not create the list', error);
+		new Notice("Couldn't create the list.");
+	});
 
 	override async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
-		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf));
-		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf));
-		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) => ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath)));
+		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, this.archiveDelay, () => this.settings.showScheduleButton));
+		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf, this.archiveDelay));
+		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) =>
+			ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath, this.archiveDelay)),
+		);
 		registerAutoSwitch(this);
 
 		this.addCommand({
@@ -140,11 +151,27 @@ export default class PrinceListsPlugin extends Plugin {
 	}
 
 	override async onExternalSettingsChange() {
+		const before = this.archiveDelay.ms;
 		await this.loadSettings();
+		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
+		this.syncListHeaders();
+	}
+
+	/** Called by the settings tab after it saves `key`. */
+	settingChanged(key: keyof PrinceListsSettings): void {
+		if (key === 'archiveDelayHours') this.archiveDelay.changed();
+		if (key === 'showScheduleButton') this.syncListHeaders();
+	}
+
+	private syncListHeaders(): void {
+		for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_LIST)) {
+			if (leaf.view instanceof PrinceListView) leaf.view.syncHeaderButtons();
+		}
 	}
 
 	private async loadSettings(): Promise<void> {
-		this.settings = { ...DEFAULT_SETTINGS, ...((await this.loadData()) as Partial<PrinceListsSettings> | null) };
+		const stored = (await this.loadData()) as Partial<PrinceListsSettings> | null;
+		this.settings = { ...DEFAULT_SETTINGS, ...stored, archiveDelayHours: archiveDelayHoursOf(stored?.archiveDelayHours) };
 	}
 
 	private async folderForNewLists(): Promise<TFolder> {
@@ -153,12 +180,12 @@ export default class PrinceListsPlugin extends Plugin {
 		return this.app.vault.getFolderByPath(path) ?? (await this.app.vault.createFolder(path));
 	}
 
-	private async newList(folder: () => TFolder | Promise<TFolder>): Promise<void> {
-		try {
-			await createList(this.app, await folder());
-		} catch (error) {
-			console.error('PrinceLists: could not create the list', error);
-			new Notice("Couldn't create the list.");
-		}
+	// One at a time: overlapping runs pick the same name, and vault.create then returns the first run's file.
+	private newList(folder: () => TFolder | Promise<TFolder>): Promise<void> {
+		const request = ++this.newListRequests;
+		return this.enqueueNewList(async () => {
+			const file = await createList(this.app, await folder());
+			if (request === this.newListRequests) await openNewList(this.app, file);
+		});
 	}
 }

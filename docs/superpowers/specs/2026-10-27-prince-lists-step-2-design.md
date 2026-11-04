@@ -37,7 +37,9 @@ only documented Obsidian APIs are used.
   editor](2026-10-29-notes-in-one-editor-design.md) replaced this.
 - **Right-click menus:** a heading's menu gains "Edit in Markdown" and collapsing or expanding
   every heading, and the list's background has a menu of its own on desktop.
-- **A settings page:** a folder for new lists, and a button that brings back the Schedule's tab.
+- **A settings page:** a folder for new lists, how long ticked items stay before they're archived,
+  whether a list's header shows the Schedule button, and a button that brings back the Schedule's
+  tab.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -271,6 +273,9 @@ this met on 2026-10-30 **(owner)**.
   that are open or done but not yet archived.
 - **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
   ribbon hidden or doesn't know the command.
+- **So does a list's header (owner, 2026-11-04):** a `calendar-clock` view action named "Open
+  schedule", left of Show archived, since the ⋯ menu alone is hard to find on mobile. Like Show
+  archived, it shows only on a list. The settings can hide it; the ⋯ menu's item stays either way.
 - **Its groups (owner, 2026-10-27):** Today, which includes everything overdue, then Tomorrow,
   Next 7 days and Later. An earlier "Next month", 8 to 31 days ahead, read as the calendar month
   and seemed to leave a gap after the week.
@@ -301,10 +306,10 @@ this met on 2026-10-30 **(owner)**.
   item's line still reads as the view showed it, so an edit since then opens the list with no card.
 - **It's a view in the right sidebar (owner, 2026-11-02),** a tab with its `calendar-clock` icon
   beside core views such as Backlinks and Outline, so it stays beside the list in use. The ribbon
-  icon, the command and a list's menu item open it there with `ensureSideLeaf`, or show it where it
-  already is, such as in a main-area tab kept from an earlier version. It's a static view
-  (`navigation` false), so a link in a row opens in the main area rather than in its place, and
-  the file that was active stays active while it has focus (observed in 1.14.5).
+  icon, the command, and a list's menu item and header button open it there with `ensureSideLeaf`,
+  or show it where it already is, such as in a main-area tab kept from an earlier version. It's a
+  static view (`navigation` false), so a link in a row opens in the main area rather than in its
+  place, and the file that was active stays active while it has focus (observed in 1.14.5).
   - **Its tab is added when the user turns the plugin on (owner, 2026-11-04),** in
     `onUserEnable` (`@since` 1.7.2), which Obsidian's docs name as the place to open a plugin's
     view. It's added without being shown, unless a Schedule is open already. It isn't added when
@@ -499,7 +504,7 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed.
+the plugin as it was before the page existed, except the Schedule button's, below.
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
@@ -507,9 +512,22 @@ the plugin as it was before the page existed.
   field then agrees with what a new list does when a chosen folder has gone. Obsidian saves the
   value to the plugin's `data.json` when the user changes it, so it's never written in the
   background, and `onExternalSettingsChange` reads it again when Sync brings a change.
+- **Hide ticked items after (owner, 2026-11-04):** a `dropdown` control with at once, 1 hour,
+  12 hours, 1 day (the default), 2 days and 1 week, saved as the hours in a string, such as
+  `"24"`. A value in `data.json` that is none of them is read as 1 day when the settings load, as
+  Obsidian's docs ask a plugin to check stored values when it reads them; nothing is written back.
+  - **A change redraws** the list views, the list blocks and the Schedule. The settings tab's
+    `setControlValue`, and `onExternalSettingsChange` when Sync changes the delay, tell them
+    through an `Events` object the plugin hands each view, which each one listens to with
+    `registerEvent`. A list block with an open field or a drag draws it when the field closes or
+    the drag ends.
+  - **It writes nothing to any list,** since archived is worked out, never written down.
+- **Schedule button (owner, 2026-11-04):** a toggle that shows or hides the header's "Open
+  schedule" button. It's on by default, so the button shows after the update: the owner chose that
+  over the rule that opens this section. Open lists show or hide the button at once, and again when
+  Sync brings a change.
 - **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
   closed tab is easy to get back. A button saves nothing.
-- **The archive delay stays fixed** at 24 hours, as step one's design decides; it isn't a setting.
 
 ### No onboarding (owner, 2026-11-04)
 
@@ -576,4 +594,4 @@ Smallest first, each feature its own group of plan tasks that can be released al
 list, star, the empty-list hint and Cmd+Enter, ticking checklists, Cmd+F, dragging and collapsing
 headings, When on rows and in the card, the Schedule view, then lists inside other notes. Then,
 before 0.4.0 **(owner, 2026-10-28)**: the two new format buttons, the right-click menus, and
-editing notes a block at a time. No API here is newer than 1.5.7, step two's `minAppVersion`.
+editing notes a block at a time.

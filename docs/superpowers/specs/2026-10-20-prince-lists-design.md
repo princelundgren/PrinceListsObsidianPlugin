@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-03
+verified: 2026-11-04
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -34,8 +34,9 @@ and data safety, and owner's advocate. Their findings are folded in.
   clean todo list. Turn the plugin off and it is still a readable note.
 - **What's inside:** headings make sections and checkboxes are items. Anything indented under an
   item is that item's notes, and notes can hold any Markdown, pictures included.
-- **Ticking an item** grays it out where it is. Twenty-four hours later it is **archived** and
-  hidden, and "Show archived" brings archived items back.
+- **Ticking an item** grays it out where it is, or hides it at once with the At once delay. A
+  day later, or after the delay chosen in the settings, it is **archived** and hidden, and "Show
+  archived" brings archived items back.
 - **Lists open in the list view.** The plain note shows for about 10 ms first, which the owner
   couldn't see on macOS or an iPhone.
 - **A note from outside the vault** with the marker, opened in Obsidian on desktop, is a list too.
@@ -466,8 +467,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 | What's on the line | Counts as done at | So it's hidden |
 |---|---|---|
-| `✔ date time` | that date and time | 24 hours later |
-| `✔ date` only, or `✅ date` | the end of that day | from the end of the next day |
+| `✔ date time` | that date and time | the delay later |
+| `✔ date` only, or `✅ date` | the end of that day | the delay after the end of that day |
 | `[x]` with no time | long ago | at once |
 | a time that can't be read | long ago | at once |
 | a time more than 24 hours in the future | long ago | at once |
@@ -790,8 +791,17 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 ### Done and archived (owner)
 
-- **The delay is 24 hours (owner).** The owner said exactly 24 hours. It is fixed, with no setting
-  and no settings screen in step one **(call)**.
+- **The delay is a setting, 1 day by default (owner, 2026-11-04):** "Hide ticked items after" in
+  the settings offers at once, 1 hour, 12 hours, 1 day, 2 days and 1 week, with no "never", so
+  ticked items always archive in the end. Step two's "Settings" has how it's built. A mark more
+  than 24 hours ahead still counts as done long ago, whatever the delay: that limit guards
+  against a wrong clock, not how long items stay.
+- **At once hides an item as it's ticked (owner, 2026-11-04).** The tick redraws the list instead
+  of graying the row in place, so the item goes then, not at the next redraw. Rows below move up,
+  and the next tap lands where the ticked item was. A mistaken tick comes back with Show archived,
+  or Cmd+Z on desktop. A list block and the Schedule redraw after every tick already. With Show
+  archived on, it stays in place, blue, as it does with any delay. An item ticked in its open card
+  stays there, blue, and goes when the card closes.
 - **"Archived" is worked out, never written down.** It is computed from `✔` plus the delay.
   Nothing in the file changes when an item becomes archived.
 - **"Show archived" in the pane's ⋯ menu (call; archived is the owner's word)** shows archived
@@ -807,7 +817,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     names the key: "Show archived (Cmd+Shift+A)" or "Hide archived (Cmd+Shift+A)", with Ctrl on
     Windows and Linux. Mobile, which usually has no keyboard, shows no key **(owner, 2026-11-03)**.
   - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
-    it stands apart from an item ticked in the last day, whose checkbox keeps the accent color.
+    it stands apart from a ticked item not yet archived, whose checkbox keeps the accent color.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.
@@ -841,6 +851,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   without regard to case as macOS and iOS disks compare names. It holds only the marker.
 - It opens in a new tab, as Obsidian's own New note does (observed in 1.14.4), straight into the
   list view with its title selected, so typing replaces it.
+- Asked for again while a list is still being made, each request makes its own list, in turn,
+  and only the newest opens **(owner, 2026-11-04)**. They run one at a time: two at once pick the
+  same name, and `vault.create`, documented to throw on an existing file, returned the first file
+  to the second call instead (observed in 1.15.0), giving one list in two tabs. Obsidian's own New
+  note does the same.
 
 **An existing note becomes a list** with "Turn into list" (step two), which adds the marker to it.
 
@@ -989,8 +1004,8 @@ From here on the document is for the builder.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
   `@since` tag in `obsidian.d.ts`, and from the CodeMirror and Lezer packages the bundled code
   takes from Obsidian at runtime. Every device must run at least that version, mobile included.
-  For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts"). The notes editor
-  raises it to 1.13.4 **(owner, 2026-10-29)**: see its design's risk 1.
+  Step one needed 1.5.7, for `getFrontMatterInfo`; the notes editor raised it to 1.13.4
+  **(owner, 2026-10-29)**, as its design's risk 1 says. `manifest.json` holds the current value.
 - **Installing:** copy `main.js`, `manifest.json` and `styles.css` into
   `<vault>/.obsidian/plugins/princelists/`. The folder name must match the ID, or
   `onExternalSettingsChange` and similar methods aren't called (Manifest docs). Obsidian Sync takes
@@ -1194,12 +1209,12 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ### Hide-time edge cases
 
-- **The delay is 24 hours of elapsed time.** Across a daylight-saving change, the hide time moves
+- **The delay is elapsed time.** Across a daylight-saving change, the hide time moves
   by an hour on the clock. Accepted.
 - **`✔` carries no time zone.** After traveling, two devices may disagree by a few hours. Accepted.
 - **A time the clock skipped can be read (call).** When summer time starts, `✔ 2026-03-29 02:30`
   names a time that never showed on a clock in Stockholm. It counts as the moment the clock showed
-  then, 03:30, so the item hides a day later, not at once as "a time that can't be read" would.
+  then, 03:30, so the item hides the delay later, not at once as "a time that can't be read" would.
 
 ### Frontmatter
 
@@ -1253,7 +1268,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     0.4.2 on 2026-10-20).
   - The picture refusal tells them apart by `file.parent === null` instead, observed in 1.14.4 as
     the rename check does **(call)**: `TExternalFile` is newer than `minAppVersion`.
-- **Outside notes don't raise `minAppVersion`:** nothing here uses an API newer than 1.5.7.
+- **Outside notes don't raise `minAppVersion`:** nothing here uses an API newer than it.
 
 ## Testing and owner checkpoints
 
@@ -1343,15 +1358,13 @@ Checked 2026-10-20.
       vault API just like any other file."
     - `Vault.getAbstractFileByPath` (0.11.11), which gets "a file or folder inside the vault",
       though it returns a note from outside the vault too (observed in 1.14.4)
-  - settings: `getSettingDefinitions` (1.13.0), `onExternalSettingsChange` (1.5.7)
-  - the minimum version: the `@since` tags decide it. The newest among the APIs step one uses is
-    1.5.7, for `getFrontMatterInfo` (and `FileManager.getAvailablePathForAttachment` and
-    `View.scope` in 1b). The others are older or untagged, and every untagged one is already in
-    the 1.5.7 `obsidian` package. With `minAppVersion` 1.5.7, the `obsidianmd/no-unsupported-api`
-    rule passes a file that calls each of these APIs, and at 1.5.6 it flags the three 1.5.7 ones
-    (checked again 2026-10-27). `MenuItem.setWarning` and `Workspace.handleLinkContextMenu` carry
-    older tags but first appear in the package at 1.10.0. Nothing has been tried on an Obsidian
-    older than 1.14.4.
+  - settings: `getSettingDefinitions` and `PluginSettingTab.setControlValue` (1.13.0),
+    `onExternalSettingsChange` (1.5.7), `Events` (0.9.7)
+  - the minimum version: `minAppVersion` in `manifest.json`, set as "Minimum Obsidian version"
+    says. `npm run lint`'s `obsidianmd/no-unsupported-api` rule flags a call to an API newer than
+    it, but not an overridden method or an `instanceof` check (a copy at 1.12.0 flagged the
+    `super.setControlValue` call and neither override, 2026-11-04). Nothing has been tried on an
+    Obsidian older than 1.14.4.
   - extensions: `registerBasesView` (1.10.0), `registerEditorExtension` (0.12.8),
     `registerMarkdownCodeBlockProcessor`, `registerMarkdownPostProcessor`,
     `registerObsidianProtocolHandler`, `Plugin.registerCliHandler` (1.12.2)
