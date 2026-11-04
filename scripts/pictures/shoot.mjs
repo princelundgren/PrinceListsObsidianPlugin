@@ -1,7 +1,7 @@
 // Takes the README's and the listing's pictures in a demo vault that Obsidian has open with a
 // DevTools port. Usage is in AGENTS.md, under Commands.
 import { existsSync, realpathSync } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { checkDemoVault, connect } from './cdp.mjs';
@@ -38,14 +38,26 @@ async function shootScene(port, module, out) {
 	}
 }
 
+/** Returns the names of the scenes in `scenes/` that aren't a phone's, in name order. */
+export async function desktopSceneNames() {
+	const names = (await readdir(SCENES)).filter((file) => file.endsWith('.mjs')).map((file) => file.slice(0, -'.mjs'.length)).sort();
+	const scenes = await Promise.all(names.map(async (name) => ({ name, scene: (await import(sceneModule(name))).default })));
+	return scenes.filter(({ scene }) => !scene.phone).map(({ name }) => name);
+}
+
 async function main() {
-	const { values, positionals } = parseArgs({ allowPositionals: true, options: { port: { type: 'string' }, out: { type: 'string' } } });
-	if (!values.port || !values.out || positionals.length === 0) {
-		throw new Error('Usage: node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...');
+	const { values, positionals } = parseArgs({
+		allowPositionals: true,
+		options: { port: { type: 'string' }, out: { type: 'string' }, desktop: { type: 'boolean' } },
+	});
+	const namesScenes = positionals.length > 0;
+	if (!values.port || !values.out || namesScenes === Boolean(values.desktop)) {
+		throw new Error('Usage: node scripts/pictures/shoot.mjs --port <port> --out <folder> (<scene>... | --desktop)');
 	}
 	const port = Number(values.port);
 	if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error(`The port is a number from 1 to 65535, not ${values.port}.`);
-	const scenes = positionals.map((name) => ({ name, module: sceneModule(name) }));
+	const names = values.desktop ? await desktopSceneNames() : positionals;
+	const scenes = names.map((name) => ({ name, module: sceneModule(name) }));
 	await mkdir(values.out, { recursive: true });
 	for (const { name, module } of scenes) {
 		await shootScene(port, module, values.out);
