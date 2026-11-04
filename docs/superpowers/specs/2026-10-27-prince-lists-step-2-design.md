@@ -199,7 +199,8 @@ this met on 2026-10-30 **(owner)**.
   above it closes, instead of being scrolled back under the pointer.
 - **Writes go to the list's file** through the same guarded edits. An open list view of that file
   follows them as a change from outside **(call)**. Cmd+Z doesn't step through edits made in a
-  block **(call)**.
+  block, not even in a list view whose notes hold the block: each keeps its own history, and a
+  block's delete shows an Undo message **(owner, 2026-11-04)**.
 - **It follows changes to the list file,** and draws again only when they change its rows. Its
   listeners belong to a `MarkdownRenderChild`, so they go when the block does. The metadata cache
   reports each of the block's own writes, sometimes only after a later one has landed; a late report
