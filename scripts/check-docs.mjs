@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path/posix';
 import { parseArgs } from 'node:util';
-import { checkLinks, checkPullRequestBody, checkPullRequestTitle, checkRawLinks, checkText } from './docs-checks.mjs';
+import { checkLinks, checkPullRequestBody, checkPullRequestTitle, checkRawLinks, checkReadmeParagraphs, checkText } from './docs-checks.mjs';
 
 const { values } = parseArgs({
 	options: { 'pr-title': { type: 'string' }, 'pr-body-file': { type: 'string' } },
@@ -25,6 +25,7 @@ const docs = new Map([...texts].filter(([path]) => path.endsWith('.md')));
 const findings = [...texts].flatMap(([path, text]) => checkText(text, path));
 const fileSet = new Set(files);
 findings.push(...checkLinks(docs, fileSet), ...checkRawLinks(docs, fileSet));
+if (texts.has('README.md')) findings.push(...checkReadmeParagraphs(texts.get('README.md'), 'README.md'));
 findings.sort((a, b) => a.path.localeCompare(b.path) || a.line - b.line);
 const prText = [];
 if (values['pr-title'] !== undefined) {
