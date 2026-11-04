@@ -497,13 +497,14 @@ the plugin as it was before the page existed.
 
 ### No onboarding (owner, 2026-11-04)
 
-- **Turning PrinceLists on opens nothing by itself:** no tab, window or example note. The README's
-  Quick start shows how to begin.
-- **Why:** a page of steps drawn like list rows reads as half a PrinceLists list and half another
-  app's checklist. Onboarding worth having needs pictures, and a release ships only `main.js`,
+- **Turning PrinceLists on shows nothing of its own** beyond the Schedule's sidebar tab, which is
+  added without being shown (see "When and the Schedule view"): no window, onboarding tab or
+  example note. The README's Quick start shows how to begin.
+- **Why:** steps drawn as list rows read as half a PrinceLists list and half another app's
+  checklist. Onboarding worth having needs pictures, and a release ships only `main.js`,
   `manifest.json` and `styles.css`: bundled, they would make `main.js` several times bigger, and
-  loading them would be a network request, which the privacy rule keeps out. An example note
-  leaves a file the user has to delete.
+  loading them would be a network request, which the privacy rule allows only after an issue
+  agrees to it. An example note leaves a file the user has to delete.
 
 ## Still later
 
