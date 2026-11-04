@@ -53,13 +53,14 @@ function onClick(block: ListBlock, notePath: string, evt: MouseEvent): void {
 		if (fieldLine !== null && fieldLine !== undefined) deleteBlockItem(block, fieldLine);
 		return;
 	}
+	if (target.closest(`.${BLOCK_FIELD_CLASS}`)) return;
 	const line = rowLine(block, target);
 	if (line === null) return;
 	if (target.closest(`.${CHECKBOX_CLASS}`)) {
 		// The box shows the file: the redraw after the write ticks it.
 		evt.preventDefault();
 		queueTick(block, line);
-	} else if (target.closest('.princelists-item-title')) {
+	} else {
 		openBlockField(block, line, null);
 	}
 }

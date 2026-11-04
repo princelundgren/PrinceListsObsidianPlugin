@@ -159,8 +159,9 @@ this met on 2026-10-30 **(owner)**.
   - Done items stay gray until archived. Archived items are hidden, with no "Show archived"
     **(call)**.
 - **Ticking** works as in the list view.
-- **Titles are edited in place (call).** A click on a title, not on a link in it, turns it into a
-  field: Enter or leaving saves, Escape cancels. A change to the file from elsewhere while the field
+- **Titles are edited in place (call).** A click on a row, not on its checkbox or a link, turns its
+  title into a field, so a row with no title can be edited too: Enter or leaving saves, Escape
+  cancels. A change to the file from elsewhere while the field
   is open waits for it to close before the block draws it **(call)**; the field saves to its line as
   that change moved it. A line that went writes nothing and shows the list view's message with "Copy
   text" for what was typed, or "This list changed elsewhere. Try again." for a field emptied by
@@ -209,7 +210,7 @@ this met on 2026-10-30 **(owner)**.
   a click, right-click or drag on them is the block's. A click in a block in the list note still
   closes an open card, as any click on the list note does.
   - **The block works there as in a note (owner, 2026-11-03):** a click on a row's box ticks it, a
-    click on its title opens its title field, and items drag, with the mouse and with
+    click elsewhere on the row opens its title field, and items drag, with the mouse and with
     hold-and-move. Keys and typing in the block, its title field included, are the block's alone,
     and so are keys after a press on one of its rows: the view's keys, such as Cmd+Enter, Cmd+Z and
     Escape, and its own field undo leave them be. A press elsewhere on the block shows its
