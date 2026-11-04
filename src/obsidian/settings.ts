@@ -7,11 +7,14 @@ export interface PrinceListsSettings {
 	newListFolder: string;
 	/** How long after its tick a done item is archived, in hours, as the dropdown stores it. */
 	archiveDelayHours: ArchiveDelayHours;
+	/** Whether a list's header shows the "Open schedule" button. */
+	showScheduleButton: boolean;
 }
 
 export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	newListFolder: '',
 	archiveDelayHours: DEFAULT_ARCHIVE_DELAY_HOURS,
+	showScheduleButton: true,
 };
 
 const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {
@@ -58,6 +61,15 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 					key: 'archiveDelayHours',
 					defaultValue: DEFAULT_SETTINGS.archiveDelayHours,
 					options: ARCHIVE_DELAY_NAMES,
+				},
+			},
+			{
+				name: 'Schedule button',
+				desc: "Shows a button in a list's header that opens the Schedule.",
+				control: {
+					type: 'toggle',
+					key: 'showScheduleButton',
+					defaultValue: DEFAULT_SETTINGS.showScheduleButton,
 				},
 			},
 			{

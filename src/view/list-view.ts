@@ -56,6 +56,7 @@ export class PrinceListView extends TextFileView {
 	newItemButton: HTMLButtonElement | null = null;
 	newItemAction: HTMLElement | null = null;
 	private archivedButton: HTMLElement | null = null;
+	private scheduleAction: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
 	readonly blocks = new Map<HTMLElement, Component>();
 	// One-off writes wait for the one before to land, then edit the text as it left it, so two quick
@@ -81,6 +82,7 @@ export class PrinceListView extends TextFileView {
 	constructor(
 		leaf: WorkspaceLeaf,
 		readonly archiveDelay: ArchiveDelay,
+		private readonly showsScheduleButton: () => boolean,
 	) {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
@@ -168,7 +170,9 @@ export class PrinceListView extends TextFileView {
 		if (Platform.isMobile) this.newItemButton = buildNewItemButton(this);
 		this.newItemAction = this.addAction('plus', labelWithKey('New item', ADD_KEY_NAME), () => newItem(this));
 		this.archivedButton = this.addAction('square-check-big', 'Show archived', () => this.toggleArchived());
-		this.syncArchivedButton();
+		// Each action goes left of the ones before, so this one sits leftmost.
+		this.scheduleAction = this.addAction(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
+		this.syncHeaderButtons();
 	}
 
 	protected async onClose(): Promise<void> {
@@ -266,7 +270,7 @@ export class PrinceListView extends TextFileView {
 	// focus, or about to (`focusing`), stays in place and updates after blur.
 	render(focusing: Element | null = null): void {
 		redraw(this, focusing);
-		this.syncArchivedButton();
+		this.syncHeaderButtons();
 	}
 
 	toggleArchived(): void {
@@ -282,6 +286,12 @@ export class PrinceListView extends TextFileView {
 	dropListNoteEditor(): void {
 		this.listNoteEditor?.destroy();
 		this.listNoteEditor = null;
+	}
+
+	/** Shows or hides the header's buttons to match the text and the settings. */
+	syncHeaderButtons(): void {
+		this.scheduleAction?.toggle(isListText(this.text) && this.showsScheduleButton());
+		this.syncArchivedButton();
 	}
 
 	// The header's checkbox shows only on a list, and is lit while archived items show.
