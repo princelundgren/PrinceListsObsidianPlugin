@@ -1,7 +1,22 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { runInNewContext } from 'node:vm';
-import { drawnMouse, undoingChanges } from './page.mjs';
+import { drawnMouse, glideOver, sleep, undoingChanges } from './page.mjs';
+
+test('a glide whose steps are slow still ends on time, at its end', async () => {
+	// Real timers: each step takes 40 ms, as input sent to an emulator can. The bound leaves slack.
+	const fractions = [];
+	const start = Date.now();
+	await glideOver(200, async (done) => {
+		fractions.push(done);
+		await sleep(40);
+	});
+	const elapsed = Date.now() - start;
+	assert.ok(elapsed >= 200 && elapsed < 400, `took ${elapsed} ms`);
+	assert.ok(fractions.length >= 3);
+	assert.equal(fractions.at(-1), 1);
+	assert.ok(fractions.every((done, i) => i === 0 || done >= fractions[i - 1]));
+});
 
 test('drag lets go of the button and ends interception when no drag starts', async () => {
 	// The fake never reports a drag, so this waits out the real two-second timeout.
