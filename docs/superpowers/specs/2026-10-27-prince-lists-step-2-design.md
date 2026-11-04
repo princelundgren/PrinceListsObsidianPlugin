@@ -283,8 +283,9 @@ this met on 2026-10-30 **(owner)**.
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
     Today with no day read as an item with no date beside the overdue ones that show theirs.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
-  its title in a list's title style. A muted line under it says what the page shows and how an item
-  gets a When, for anyone who opens it without knowing.
+  its title in a list's title style. A muted line under it says in a few words what the page shows,
+  so it takes one line on a phone, and the empty page says how an item gets a When **(owner,
+  2026-11-04)**.
   - **In a pane about as narrow as a sidebar (owner, 2026-11-04),** it has a sidebar's margins and
     the title at heading size, through a container query; the width where that starts, 480 px, is
     a **(call)**.
