@@ -26,7 +26,7 @@ The Schedule shows the dated items from all your lists.
 
 It works great on your phone too.
 
-<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, stars and a floating add button, an item is ticked, then another is held and dragged into a different section" width="300">
+<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, an item is ticked, then the floating add button adds an item with a short note, which is held and dragged into the Bakery section" width="300">
 
 You can embed lists in normal notes.
 
