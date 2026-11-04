@@ -91,9 +91,6 @@ You can embed lists in normal notes.
 
 1. **Install** PrinceLists from Settings → Community plugins → Browse, and enable it. It's
    [listed in Obsidian's community directory](https://community.obsidian.md/plugins/princelists).
-   In a vault with no lists yet, a **Getting started** tab opens that shows how to make a list,
-   turn a note into one and open the Schedule. The **Show getting started** command, or the button
-   in PrinceLists' settings, brings it back.
 2. **Make a list** with the list icon in the ribbon, or right-click a folder and choose
    **New list**.
 3. **Add items** with the **+**. Click one to add notes, a star or a date.

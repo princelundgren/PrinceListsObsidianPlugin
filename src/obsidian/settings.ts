@@ -1,5 +1,4 @@
 import { type App, PluginSettingTab, type Plugin, type SettingDefinitionItem } from 'obsidian';
-import { openGettingStarted } from './open-getting-started';
 import { openSchedule } from './open-schedule';
 
 export interface PrinceListsSettings {
@@ -33,13 +32,6 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 				desc: "Puts the Schedule back in the right sidebar if you've closed its tab.",
 				render: (setting) => {
 					setting.addButton((button) => button.setButtonText('Add to sidebar').onClick(() => void openSchedule(this.app.workspace)));
-				},
-			},
-			{
-				name: 'Getting started',
-				desc: 'Shows how to make a list, turn a note into one and open the Schedule.',
-				render: (setting) => {
-					setting.addButton((button) => button.setButtonText('Show getting started').onClick(() => void openGettingStarted(this.app.workspace)));
 				},
 			},
 		];
