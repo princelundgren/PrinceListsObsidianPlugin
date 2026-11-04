@@ -4,16 +4,29 @@ import { openSchedule } from './open-schedule';
 export interface PrinceListsSettings {
 	/** The folder "Create new list" puts a list in; empty means where Obsidian puts new notes. */
 	newListFolder: string;
+	/** Whether a list's header shows the "Open schedule" button. */
+	showScheduleButton: boolean;
 }
 
 export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	newListFolder: '',
+	showScheduleButton: true,
 };
+
+type SettingsHost = Plugin & { settings: PrinceListsSettings; settingChanged(key: string): void };
 
 /** PrinceLists' page in Obsidian's settings. Obsidian saves a control's value to `data.json` itself. */
 export class PrinceListsSettingTab extends PluginSettingTab {
-	constructor(app: App, plugin: Plugin & { settings: PrinceListsSettings }) {
-		super(app, plugin);
+	constructor(
+		app: App,
+		private readonly host: SettingsHost,
+	) {
+		super(app, host);
+	}
+
+	override async setControlValue(key: string, value: unknown): Promise<void> {
+		await super.setControlValue(key, value);
+		this.host.settingChanged(key);
 	}
 
 	override getSettingDefinitions(): SettingDefinitionItem[] {
@@ -25,6 +38,15 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 					type: 'folder',
 					key: 'newListFolder',
 					defaultValue: DEFAULT_SETTINGS.newListFolder,
+				},
+			},
+			{
+				name: 'Schedule button',
+				desc: "Shows a button in a list's header that opens the Schedule.",
+				control: {
+					type: 'toggle',
+					key: 'showScheduleButton',
+					defaultValue: DEFAULT_SETTINGS.showScheduleButton,
 				},
 			},
 			{

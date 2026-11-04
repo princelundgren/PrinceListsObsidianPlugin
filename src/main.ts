@@ -18,7 +18,7 @@ export default class PrinceListsPlugin extends Plugin {
 	override async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
-		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf));
+		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, () => this.settings.showScheduleButton));
 		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf));
 		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) => ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath)));
 		registerAutoSwitch(this);
@@ -141,6 +141,18 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onExternalSettingsChange() {
 		await this.loadSettings();
+		this.syncListHeaders();
+	}
+
+	/** Called by the settings tab after it saves `key`. */
+	settingChanged(key: string): void {
+		if (key === 'showScheduleButton') this.syncListHeaders();
+	}
+
+	private syncListHeaders(): void {
+		for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_LIST)) {
+			if (leaf.view instanceof PrinceListView) leaf.view.syncHeaderButtons();
+		}
 	}
 
 	private async loadSettings(): Promise<void> {
