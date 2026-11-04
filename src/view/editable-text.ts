@@ -31,7 +31,7 @@ export function notesText(view: PrinceListView, editor: EditorView): EditableTex
 		selectedText: () => editor.state.sliceDoc(editor.state.selection.main.from, editor.state.selection.main.to),
 		// The editor keeps its selection while it has no focus, mapped through any change.
 		holdSelection: () => () => undefined,
-		replaceSelection: (insert) => editor.dispatch(editor.state.replaceSelection(insert), { userEvent: insert ? 'input.paste' : 'delete.cut' }),
+		replaceSelection: (insert) => editor.dispatch(editor.state.replaceSelection(insert), { userEvent: insert ? 'input.paste' : 'delete.cut', scrollIntoView: true }),
 		pastePictures: (pictures) => {
 			pastePictures(view, pictures);
 		},
@@ -50,11 +50,7 @@ export function fieldText(field: HTMLTextAreaElement): EditableText {
 			const { selectionStart, selectionEnd } = field;
 			return () => field.setSelectionRange(selectionStart, selectionEnd);
 		},
-		replaceSelection: (insert) => {
-			changeField(field, () => field.setRangeText(insert, field.selectionStart, field.selectionEnd, 'end'));
-			// setRangeText sends no input event, and the view saves a field's text from that event.
-			field.dispatchEvent(new Event('input', { bubbles: true }));
-		},
+		replaceSelection: (insert) => changeField(field, () => field.setRangeText(insert, field.selectionStart, field.selectionEnd, 'end')),
 		pastePictures: () => undefined,
 		selectAll: () => field.select(),
 		format: (format) => applyFormat(field, format),
