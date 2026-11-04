@@ -616,7 +616,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
     settings; with Obsidian's defaults that's `![[name]]` **(owner, 2026-10-22)**. A plain
     `![[name]]` could show the wrong picture when two files share a name.
   - **Pasting (call):** a picture pasted into an open notes editor is saved and linked; text
-    pastes as text. A pasted picture in a card's title does nothing.
+    pastes as text, and web or rich text as Markdown ([notes in one
+    editor](2026-10-29-notes-in-one-editor-design.md), "Right-click on desktop"). A pasted picture in
+    a card's title does nothing.
   - **Text wins (owner, 2026-10-27):** a paste that holds plain text pastes as text, even when it
     holds a picture too. Numbers, Excel, Pages and Word copy a picture of the text along with it.
     A card's notes are plain text, and the text is what was copied; Obsidian's own editor pastes a
