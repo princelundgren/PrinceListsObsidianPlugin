@@ -2,7 +2,7 @@ import { FileView, MarkdownView, Notice, Plugin, TFile, TFolder } from 'obsidian
 import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
-import { openSchedule } from './obsidian/open-schedule';
+import { addScheduleTab, openSchedule } from './obsidian/open-schedule';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
 import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
 import { canTurnIntoNote, turnIntoNote } from './obsidian/turn-into-note';
@@ -30,6 +30,7 @@ export default class PrinceListsPlugin extends Plugin {
 			callback: () => void openSchedule(this.app.workspace),
 		});
 		this.addRibbonIcon(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
+		this.app.workspace.onLayoutReady(() => void addScheduleTab(this.app.workspace));
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu, file) => {
 				if (file instanceof TFolder) {

@@ -301,6 +301,10 @@ this met on 2026-10-30 **(owner)**.
   already is, such as in a main-area tab kept from an earlier version. It's a static view
   (`navigation` false), so a link in a row opens in the main area rather than in its place, and
   the file that was active stays active while it has focus (observed in 1.14.5).
+  - **Its tab is there from the start (owner, 2026-11-04):** once Obsidian's layout is ready, the
+    plugin adds it to the right sidebar without showing it, unless a Schedule is open already. A
+    closed tab comes back at the next start: remembering the close would take a settings file
+    written with no user action, a background write.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
   metadata cache's `changed` event and the vault's `rename` and `delete`. Those keep the lists it
   has read current, so focus reads only lists it doesn't hold yet, and it draws again only when

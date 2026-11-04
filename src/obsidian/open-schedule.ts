@@ -11,3 +11,9 @@ export async function openSchedule(workspace: Workspace): Promise<void> {
 	await workspace.revealLeaf(open);
 	workspace.setActiveLeaf(open, { focus: true });
 }
+
+/** Adds the Schedule as a right-sidebar tab without showing it, unless it is open somewhere already. */
+export async function addScheduleTab(workspace: Workspace): Promise<void> {
+	if (workspace.getLeavesOfType(VIEW_TYPE_SCHEDULE).length > 0) return;
+	await workspace.ensureSideLeaf(VIEW_TYPE_SCHEDULE, 'right', { active: false, reveal: false });
+}
