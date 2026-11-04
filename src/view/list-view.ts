@@ -5,6 +5,7 @@ import { CollapsedHeadings } from '../core/collapsed';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
 import { labelWithKey } from '../core/key-name';
+import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
@@ -62,6 +63,10 @@ export class PrinceListView extends TextFileView {
 	// One-off writes wait for the one before to land, then edit the text as it left it, so two quick
 	// taps on one box tick and untick it, and taps on two rows both land.
 	readonly enqueue = serialQueue((error) => console.error(error));
+	private readonly parsedText = rememberLast((text) => {
+		const lines = splitLines(text);
+		return { lines, model: parseList(lines, contentStartLine(text)) };
+	});
 	/** How many outside changes the view has taken, so a queued tap can tell one landed. */
 	outsideChanges = 0;
 	/** Whether the last redraw left out rows inside the list note being typed. */
@@ -236,9 +241,9 @@ export class PrinceListView extends TextFileView {
 		return splitLines(this.text);
 	}
 
-	parse(): { lines: Line[]; model: ListModel } {
-		const lines = this.lines();
-		return { lines, model: parseList(lines, contentStartLine(this.text)) };
+	/** The text's lines and model, parsed once per text. Shared by every caller: never change them. */
+	parse(): { lines: readonly Line[]; model: Readonly<ListModel> } {
+		return this.parsedText(this.text);
 	}
 
 	// One of the view's own writes landed (writeAction). The line-based state and every row's line
