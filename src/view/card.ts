@@ -1,5 +1,6 @@
 import type { EditorView } from '@codemirror/view';
 import { Notice, setIcon, type TFile } from 'obsidian';
+import { archiveDelayMs, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import { isItemVisible, itemRow, type ItemRow } from '../core/display';
 import { UnsafeEditError } from '../core/edit-check';
 import { isEmptyItem, planRemoval, type InsertedItem, type Removal } from '../core/empty-item';
@@ -198,7 +199,7 @@ function showStar(cardEl: HTMLElement, starred: boolean): void {
 
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {
 	const text = line === null ? undefined : view.lines()[line]?.text;
-	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line, new Date()) : null;
+	return line !== null && text !== undefined && parseItemLine(text) ? itemRow(text, line, new Date(), archiveDelayMs(DEFAULT_ARCHIVE_DELAY_HOURS)) : null;
 }
 
 function isRowVisible(view: PrinceListView, row: ItemRow): boolean {

@@ -1,5 +1,6 @@
 import { ItemView, Notice, Platform, TFile, type CachedMetadata, type Component, type TAbstractFile } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
+import { archiveDelayMs, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
 import { joinLines, splitLines } from '../core/lines';
@@ -187,7 +188,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	private draw(): void {
 		const now = new Date();
 		const today = dayOf(now);
-		const groups = groupSchedule([...this.lists.values()].flatMap((list) => unarchived(list.items, now)), today);
+		const groups = groupSchedule([...this.lists.values()].flatMap((list) => unarchived(list.items, now, archiveDelayMs(DEFAULT_ARCHIVE_DELAY_HOURS))), today);
 		const drawn = JSON.stringify([today, groups]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;

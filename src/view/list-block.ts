@@ -1,5 +1,6 @@
 import { getLinkpath, MarkdownRenderChild, Notice, Platform, setIcon, type App, type Component, type TFile } from 'obsidian';
 import { guardedWrite, type WriteResult } from '../core/action-write';
+import { archiveDelayMs, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import { blockLink } from '../core/block-source';
 import { visibleSections, type SectionRows } from '../core/display';
 import { ListEditing } from '../core/editing';
@@ -160,7 +161,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private shownSections(): SectionRows[] {
 		const lines = splitLines(this.editing.text);
 		const model = parseList(lines, contentStartLine(this.editing.text));
-		return visibleSections(lines, model, new Date(), { showArchived: false, query: '', keepLine: null, collapsed: new Set() });
+		return visibleSections(lines, model, new Date(), { showArchived: false, archiveDelayMs: archiveDelayMs(DEFAULT_ARCHIVE_DELAY_HOURS), query: '', keepLine: null, collapsed: new Set() });
 	}
 
 	// A change from outside often leaves every row as drawn, such as a list view's save of an item's notes.

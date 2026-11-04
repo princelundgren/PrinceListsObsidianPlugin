@@ -37,9 +37,9 @@ export function datedItems(text: string, contentStart: number, list: { path: str
 	return scheduled;
 }
 
-/** The items that are open, or done and not yet archived at `now`. */
-export function unarchived(items: readonly ScheduledItem[], now: Date): ScheduledItem[] {
-	return items.filter((item) => !(item.done && isArchived(item.line, now)));
+/** The items that are open, or done and not yet archived at `now` with `archiveDelayMs`. */
+export function unarchived(items: readonly ScheduledItem[], now: Date, archiveDelayMs: number): ScheduledItem[] {
+	return items.filter((item) => !(item.done && isArchived(item.line, now, archiveDelayMs)));
 }
 
 // Today takes everything overdue too.
