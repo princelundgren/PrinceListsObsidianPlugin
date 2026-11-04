@@ -148,7 +148,7 @@ export default class PrinceListsPlugin extends Plugin {
 	}
 
 	private async folderForNewLists(): Promise<TFolder> {
-		if (!this.settings.newListFolder) return this.app.fileManager.getNewFileParent(this.app.workspace.getActiveFile()?.path ?? '');
+		if (!this.settings.newListFolder.trim()) return this.app.fileManager.getNewFileParent(this.app.workspace.getActiveFile()?.path ?? '');
 		const path = normalizePath(this.settings.newListFolder);
 		return this.app.vault.getFolderByPath(path) ?? (await this.app.vault.createFolder(path));
 	}
