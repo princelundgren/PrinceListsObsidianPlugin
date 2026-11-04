@@ -997,8 +997,8 @@ From here on the document is for the builder.
 - **Minimum Obsidian version:** set `minAppVersion` from the newest API used, going by each API's
   `@since` tag in `obsidian.d.ts`, and from the CodeMirror and Lezer packages the bundled code
   takes from Obsidian at runtime. Every device must run at least that version, mobile included.
-  For step one that's 1.5.7, from `getFrontMatterInfo` (see "Verified facts"). The notes editor
-  raises it to 1.13.4 **(owner, 2026-10-29)**: see its design's risk 1.
+  Step one needed 1.5.7, for `getFrontMatterInfo`; the notes editor raised it to 1.13.4
+  **(owner, 2026-10-29)**, as its design's risk 1 says. `manifest.json` holds the current value.
 - **Installing:** copy `main.js`, `manifest.json` and `styles.css` into
   `<vault>/.obsidian/plugins/princelists/`. The folder name must match the ID, or
   `onExternalSettingsChange` and similar methods aren't called (Manifest docs). Obsidian Sync takes
@@ -1261,7 +1261,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     0.4.2 on 2026-10-20).
   - The picture refusal tells them apart by `file.parent === null` instead, observed in 1.14.4 as
     the rename check does **(call)**: `TExternalFile` is newer than `minAppVersion`.
-- **Outside notes don't raise `minAppVersion`:** nothing here uses an API newer than 1.5.7.
+- **Outside notes don't raise `minAppVersion`:** nothing here uses an API newer than it.
 
 ## Testing and owner checkpoints
 
