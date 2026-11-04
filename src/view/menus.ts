@@ -167,8 +167,8 @@ function headingLinesOf(model: ListModel): number[] {
 	return model.sections.flatMap(({ headingLine }) => (headingLine === null ? [] : [headingLine]));
 }
 
-// A right-click on desktop: a row's or a heading's menu, else the list's. A field keeps the menu it
-// has of its own, and the list note gets none of the list's.
+// A right-click on desktop: a row's or a heading's menu, else the list's. A field and the notes have
+// a menu of their own, and the list note gets none of the list's.
 export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
 	if (target.closest(`textarea, input:not([type="checkbox"]), .${NOTES_CODEMIRROR_CLASS}, .${NOTE_CLASS}`)) return;
 	const menu = menuAt(view, target) ?? backgroundMenu(view, evt);

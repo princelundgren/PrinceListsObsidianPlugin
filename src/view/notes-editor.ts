@@ -3,8 +3,9 @@ import { markdownLanguage } from '@codemirror/lang-markdown';
 import { indentUnit } from '@codemirror/language';
 import { Annotation, Compartment, EditorState, Transaction, type ChangeSpec, type Text } from '@codemirror/state';
 import { EditorView, placeholder } from '@codemirror/view';
-import { Notice } from 'obsidian';
+import { htmlToMarkdown, Notice } from 'obsidian';
 import { checklistStatusAt } from '../core/checklist';
+import { pasteSource } from '../core/clipboard';
 import { blockBelow } from '../core/note-pieces';
 import { changedLines, type NotesChange } from '../core/notes-lines';
 import { isBlank } from '../core/parse';
@@ -150,7 +151,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 						return true;
 					},
 					// A file is never text in the notes: pictures go through the view's own listeners.
-					paste: (evt) => !evt.clipboardData?.getData('text/plain') && (evt.clipboardData?.files.length ?? 0) > 0,
+					paste: (evt, editor) => pasteAsMarkdown(evt, editor) || (!evt.clipboardData?.getData('text/plain') && (evt.clipboardData?.files.length ?? 0) > 0),
 					drop: (evt) => (evt.dataTransfer?.files.length ?? 0) > 0,
 				}),
 			],
@@ -255,4 +256,14 @@ function lineChange(doc: Text, { from, to, lines }: NotesChange): ChangeSpec {
 	if (to > from && lines.length > 0) return { from: doc.line(from + 1).from, to: doc.line(to).to, insert };
 	if (to > from) return to < doc.lines ? { from: doc.line(from + 1).from, to: doc.line(to + 1).from } : { from: doc.line(from).to, to: doc.length };
 	return from < doc.lines ? { from: doc.line(from + 1).from, insert: insert + '\n' } : { from: doc.length, insert: '\n' + insert };
+}
+
+// Web or rich text pastes as Markdown, as in a note; CodeMirror's own paste takes only the plain text.
+function pasteAsMarkdown(evt: ClipboardEvent, editor: EditorView): boolean {
+	const data = evt.clipboardData;
+	const html = data?.getData('text/html') ?? '';
+	if (!data || editor.state.readOnly || pasteSource(data.types, 'markdown', html) !== 'html') return false;
+	evt.preventDefault();
+	editor.dispatch(editor.state.replaceSelection(htmlToMarkdown(html)), { userEvent: 'input.paste', scrollIntoView: true });
+	return true;
 }

@@ -17,12 +17,14 @@ import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, keepOneLine, TITLE_CLASS } from './fields';
+import { notesText } from './editable-text';
 import { filterBlur, filterInput, filterKeyDown } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { barActionAt, FORMAT_BAR_CLASS } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
+import { insertNoteLink } from './note-link-modal';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR, NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
 import { eventInDrawnListBlock } from './notes-blocks';
 import { runNotesBarAction } from './notes-keys';
@@ -30,6 +32,7 @@ import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
+import { showTextMenu } from './text-menu';
 import { queueTick } from './tick';
 
 // Delegated listeners on the view's own element, and the picture events' capture listeners on the
@@ -85,7 +88,9 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const action = barActionAt(target);
 	if (action) {
 		const editor = barEditor(view, target);
-		if (editor) runNotesBarAction(editor, action);
+		if (!editor) return;
+		if (action === 'noteLink') insertNoteLink(view, notesText(view, editor));
+		else runNotesBarAction(editor, action);
 		return;
 	}
 	if (target.closest(`.${OPEN_AS_MARKDOWN_CLASS}`)) {
@@ -148,7 +153,7 @@ function keepNotesFocused(evt: MouseEvent): void {
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
 	if (!target || isInNestedBlock(view.contentEl, target)) return;
-	if (showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target)) return;
+	if (showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target) || showTextMenu(view, evt, target)) return;
 	showContextMenu(view, evt, target);
 }
 
