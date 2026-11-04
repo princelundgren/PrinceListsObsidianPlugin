@@ -116,7 +116,7 @@ textarea.princelists-title {
 	font-family: inherit;
 }
 
-/* An archived item's checkbox is blue, to tell it from one ticked in the last day. */
+/* An archived item's checkbox is blue, to tell it from a ticked item not yet archived. */
 .princelists-item.is-archived .princelists-checkbox {
 	--checkbox-color: var(--color-blue);
 	--checkbox-color-hover: var(--color-blue);

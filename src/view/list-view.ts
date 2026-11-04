@@ -8,6 +8,7 @@ import { labelWithKey } from '../core/key-name';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import { openAsMarkdown } from '../obsidian/switch';
@@ -77,7 +78,10 @@ export class PrinceListView extends TextFileView {
 	/** What the view draws, at Obsidian's readable line width, as a Markdown view's sizer. */
 	readonly listSizerEl: HTMLElement;
 
-	constructor(leaf: WorkspaceLeaf) {
+	constructor(
+		leaf: WorkspaceLeaf,
+		readonly archiveDelay: ArchiveDelay,
+	) {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
 		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
@@ -153,6 +157,7 @@ export class PrinceListView extends TextFileView {
 
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
+		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
 		registerFieldEvents(this);
 		registerFileRedraws(this);
 		// The collapse arrows always show where there's no hover.

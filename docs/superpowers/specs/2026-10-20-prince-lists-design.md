@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-03
+verified: 2026-11-04
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -34,8 +34,9 @@ and data safety, and owner's advocate. Their findings are folded in.
   clean todo list. Turn the plugin off and it is still a readable note.
 - **What's inside:** headings make sections and checkboxes are items. Anything indented under an
   item is that item's notes, and notes can hold any Markdown, pictures included.
-- **Ticking an item** grays it out where it is. Twenty-four hours later it is **archived** and
-  hidden, and "Show archived" brings archived items back.
+- **Ticking an item** grays it out where it is, or hides it at once with the At once delay. A
+  day later, or after the delay chosen in the settings, it is **archived** and hidden, and "Show
+  archived" brings archived items back.
 - **Lists open in the list view.** The plain note shows for about 10 ms first, which the owner
   couldn't see on macOS or an iPhone.
 - **A note from outside the vault** with the marker, opened in Obsidian on desktop, is a list too.
@@ -466,8 +467,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 | What's on the line | Counts as done at | So it's hidden |
 |---|---|---|
-| `✔ date time` | that date and time | 24 hours later |
-| `✔ date` only, or `✅ date` | the end of that day | from the end of the next day |
+| `✔ date time` | that date and time | the delay later |
+| `✔ date` only, or `✅ date` | the end of that day | the delay after the end of that day |
 | `[x]` with no time | long ago | at once |
 | a time that can't be read | long ago | at once |
 | a time more than 24 hours in the future | long ago | at once |
@@ -788,8 +789,16 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 ### Done and archived (owner)
 
-- **The delay is 24 hours (owner).** The owner said exactly 24 hours. It is fixed, with no setting
-  and no settings screen in step one **(call)**.
+- **The delay is a setting, 1 day by default (owner, 2026-11-04):** "Hide ticked items after" in
+  the settings offers at once, 1 hour, 12 hours, 1 day, 2 days and 1 week, with no "never", so
+  ticked items always archive in the end. Step two's "Settings" has how it's built. A mark more
+  than 24 hours ahead still counts as done long ago, whatever the delay: that limit guards
+  against a wrong clock, not how long items stay.
+- **At once hides an item as it's ticked (owner, 2026-11-04).** The tick redraws the list instead
+  of graying the row in place, so the item goes then, not at the next redraw. Rows below move up,
+  and the next tap lands where the ticked item was. A mistaken tick comes back with Show archived,
+  or Cmd+Z on desktop. A list block and the Schedule redraw after every tick already. With Show
+  archived on, it stays in place, blue, as it does with any delay.
 - **"Archived" is worked out, never written down.** It is computed from `✔` plus the delay.
   Nothing in the file changes when an item becomes archived.
 - **"Show archived" in the pane's ⋯ menu (call; archived is the owner's word)** shows archived
@@ -805,7 +814,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     names the key: "Show archived (Cmd+Shift+A)" or "Hide archived (Cmd+Shift+A)", with Ctrl on
     Windows and Linux. Mobile, which usually has no keyboard, shows no key **(owner, 2026-11-03)**.
   - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
-    it stands apart from an item ticked in the last day, whose checkbox keeps the accent color.
+    it stands apart from a ticked item not yet archived, whose checkbox keeps the accent color.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.
@@ -1192,12 +1201,12 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 
 ### Hide-time edge cases
 
-- **The delay is 24 hours of elapsed time.** Across a daylight-saving change, the hide time moves
+- **The delay is elapsed time.** Across a daylight-saving change, the hide time moves
   by an hour on the clock. Accepted.
 - **`✔` carries no time zone.** After traveling, two devices may disagree by a few hours. Accepted.
 - **A time the clock skipped can be read (call).** When summer time starts, `✔ 2026-03-29 02:30`
   names a time that never showed on a clock in Stockholm. It counts as the moment the clock showed
-  then, 03:30, so the item hides a day later, not at once as "a time that can't be read" would.
+  then, 03:30, so the item hides the delay later, not at once as "a time that can't be read" would.
 
 ### Frontmatter
 
@@ -1341,7 +1350,8 @@ Checked 2026-10-20.
       vault API just like any other file."
     - `Vault.getAbstractFileByPath` (0.11.11), which gets "a file or folder inside the vault",
       though it returns a note from outside the vault too (observed in 1.14.4)
-  - settings: `getSettingDefinitions` (1.13.0), `onExternalSettingsChange` (1.5.7)
+  - settings: `getSettingDefinitions` and `PluginSettingTab.setControlValue` (1.13.0),
+    `onExternalSettingsChange` (1.5.7), `Events` (0.9.7)
   - the minimum version: the `@since` tags decide it. The newest among the APIs step one uses is
     1.5.7, for `getFrontMatterInfo` (and `FileManager.getAvailablePathForAttachment` and
     `View.scope` in 1b). The others are older or untagged, and every untagged one is already in

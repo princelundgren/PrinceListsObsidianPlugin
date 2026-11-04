@@ -1,5 +1,4 @@
 import { Platform, type Component } from 'obsidian';
-import { archiveDelayMs, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import { visibleSections, withoutRange, type ItemRow, type RowFilter, type SectionRows } from '../core/display';
 import type { LineRange } from '../core/follow';
 import type { Line } from '../core/lines';
@@ -159,7 +158,7 @@ export function renderList(
 // What hides rows in the view: archived items, Cmd+F's query and collapsed headings, with the item on
 // `keepLine` shown regardless of the last two.
 export function rowFilter(view: PrinceListView, keepLine: number | null): RowFilter {
-	return { showArchived: view.showArchived, archiveDelayMs: archiveDelayMs(DEFAULT_ARCHIVE_DELAY_HOURS), query: view.filter ?? '', keepLine, collapsed: view.collapsed.lines() };
+	return { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms, query: view.filter ?? '', keepLine, collapsed: view.collapsed.lines() };
 }
 
 export function buildHeading(

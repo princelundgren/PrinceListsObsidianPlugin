@@ -1,6 +1,5 @@
 import { Notice } from 'obsidian';
-import { archiveDelayMs, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
-import { itemRow } from '../core/display';
+import { itemRow, timelessItemRow } from '../core/display';
 import { toggleItem } from '../core/edit-items';
 import type { OwnEdit } from '../core/follow';
 import { toggleLine } from '../core/item-line';
@@ -50,7 +49,7 @@ async function tick(view: PrinceListView, row: HTMLElement | null, pending: { li
 		const { lines, model } = view.parse();
 		const item = itemAt(model, titleLine);
 		const now = new Date();
-		if (!item || done === itemRow((lines[titleLine] as Line).text, titleLine, now, archiveDelayMs(DEFAULT_ARCHIVE_DELAY_HOURS)).done) return;
+		if (!item || done === timelessItemRow((lines[titleLine] as Line).text, titleLine).done) return;
 		const edited = tryEdit(() => toggleItem(lines, item, now));
 		if (!edited) return;
 		// A title field with focus makes the same tick to the line it saved (syncTitleField).
@@ -60,7 +59,10 @@ async function tick(view: PrinceListView, row: HTMLElement | null, pending: { li
 			// Obsidian's echo of this write returns early in setViewData, so the row is updated here. A
 			// tick moves no line, so the row still stands for this item. A redraw during the write,
 			// such as "Show archived", drew from the text before the tick, so the view redraws again.
-			if (row?.isConnected && lineOf(row) === titleLine) showDone(row, itemRow((edited[titleLine] as Line).text, titleLine, now, archiveDelayMs(DEFAULT_ARCHIVE_DELAY_HOURS)));
+			const ticked = itemRow((edited[titleLine] as Line).text, titleLine, now, view.archiveDelay.ms);
+			// With the "At once" delay a tick archives the item, which hides it now, not at the next redraw.
+			const hides = ticked.archived && !view.showArchived;
+			if (!hides && row?.isConnected && lineOf(row) === titleLine) showDone(row, ticked);
 			else view.render();
 			return;
 		}

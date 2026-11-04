@@ -1,6 +1,5 @@
-import { ItemView, Notice, Platform, TFile, type CachedMetadata, type Component, type TAbstractFile } from 'obsidian';
+import { ItemView, Notice, Platform, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
-import { archiveDelayMs, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
 import { joinLines, splitLines } from '../core/lines';
@@ -8,6 +7,7 @@ import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { datedItems, groupSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import { dayOf } from '../core/when';
+import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
@@ -52,6 +52,13 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
 
+	constructor(
+		leaf: WorkspaceLeaf,
+		private readonly archiveDelay: ArchiveDelay,
+	) {
+		super(leaf);
+	}
+
 	getViewType(): string {
 		return VIEW_TYPE_SCHEDULE;
 	}
@@ -74,6 +81,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		this.registerEvent(metadataCache.on('changed', (file, data, cache) => this.listChanged(file, data, cache)));
 		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
+		this.registerEvent(this.archiveDelay.onChange(() => this.draw()));
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
 		await this.refresh();
 	}
@@ -188,7 +196,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	private draw(): void {
 		const now = new Date();
 		const today = dayOf(now);
-		const groups = groupSchedule([...this.lists.values()].flatMap((list) => unarchived(list.items, now, archiveDelayMs(DEFAULT_ARCHIVE_DELAY_HOURS))), today);
+		const groups = groupSchedule([...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms)), today);
 		const drawn = JSON.stringify([today, groups]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;
