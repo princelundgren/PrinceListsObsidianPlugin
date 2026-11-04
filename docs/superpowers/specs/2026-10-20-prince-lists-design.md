@@ -1353,14 +1353,11 @@ Checked 2026-10-20.
       though it returns a note from outside the vault too (observed in 1.14.4)
   - settings: `getSettingDefinitions` and `PluginSettingTab.setControlValue` (1.13.0),
     `onExternalSettingsChange` (1.5.7), `Events` (0.9.7)
-  - the minimum version: the `@since` tags decide it. The newest among the APIs step one uses is
-    1.5.7, for `getFrontMatterInfo` (and `FileManager.getAvailablePathForAttachment` and
-    `View.scope` in 1b). The others are older or untagged, and every untagged one is already in
-    the 1.5.7 `obsidian` package. With `minAppVersion` 1.5.7, the `obsidianmd/no-unsupported-api`
-    rule passes a file that calls each of these APIs, and at 1.5.6 it flags the three 1.5.7 ones
-    (checked again 2026-10-27). `MenuItem.setWarning` and `Workspace.handleLinkContextMenu` carry
-    older tags but first appear in the package at 1.10.0. Nothing has been tried on an Obsidian
-    older than 1.14.4.
+  - the minimum version: `minAppVersion` in `manifest.json`, set as "Minimum Obsidian version"
+    says. `npm run lint`'s `obsidianmd/no-unsupported-api` rule flags a call to an API newer than
+    it, but not an overridden method or an `instanceof` check (a copy at 1.12.0 flagged the
+    `super.setControlValue` call and neither override, 2026-11-04). Nothing has been tried on an
+    Obsidian older than 1.14.4.
   - extensions: `registerBasesView` (1.10.0), `registerEditorExtension` (0.12.8),
     `registerMarkdownCodeBlockProcessor`, `registerMarkdownPostProcessor`,
     `registerObsidianProtocolHandler`, `Plugin.registerCliHandler` (1.12.2)
