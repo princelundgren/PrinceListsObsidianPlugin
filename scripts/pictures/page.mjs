@@ -31,6 +31,34 @@ export async function boundsOf(session, selector, text) {
 	return bounds;
 }
 
+/**
+ * Calls `step` with how far through `ms` the glide is, from 0 to exactly 1, by the time that has
+ * passed: a step slower than a frame makes fewer steps, not a slower glide.
+ */
+export async function glideOver(ms, step) {
+	const start = performance.now();
+	for (;;) {
+		const done = ms > 0 ? Math.min(1, (performance.now() - start) / ms) : 1;
+		await step(done);
+		if (done === 1) return;
+		await sleep(GLIDE_STEP_MS);
+	}
+}
+
+/**
+ * Returns the bounds of the list heading named `name`, or of the element matching the CSS `selector`
+ * inside it when one is given. Throws naming the heading when the list has none by that name.
+ */
+export async function headingBounds(session, name, selector) {
+	return session.evaluate(`(() => {
+		const heading = [...document.querySelectorAll('.princelists-heading')].find((el) => el.firstChild?.textContent.trim() === ${JSON.stringify(name)});
+		if (!heading) throw new Error(${JSON.stringify(`No heading in the list is named "${name}".`)});
+		const selector = ${JSON.stringify(selector ?? null)};
+		const { x, y, width, height } = (selector ? heading.querySelector(selector) : heading).getBoundingClientRect();
+		return { x, y, width, height };
+	})()`);
+}
+
 /** Returns the middle of `bounds`. */
 export const middleOf = ({ x, y, width, height }) => ({ x: x + width / 2, y: y + height / 2 });
 
@@ -50,8 +78,8 @@ export async function click(session, x, y, button = 'left') {
 
 /**
  * A mouse for recordings, starting at `x, y`: each input moves the drawn pointer too. `glide` moves
- * in steps over `ms`, so the pointer travels on screen; `press`, `release` and `click` act where it
- * is; `drag` drags what's under it to `x, y` with HTML drag and drop, rejecting if no drag starts.
+ * in steps over about `ms`, so the pointer travels on screen; `press`, `release` and `click` act where
+ * it is; `drag` drags what's under it to `x, y` with HTML drag and drop, rejecting if no drag starts.
  */
 export function drawnMouse(session, x, y) {
 	const at = { x, y };
@@ -61,16 +89,14 @@ export function drawnMouse(session, x, y) {
 	let held = {};
 	const glide = async (toX, toY, ms, sendStep) => {
 		const start = { ...at };
-		const steps = Math.max(1, Math.round(ms / GLIDE_STEP_MS));
-		for (let step = 1; step <= steps; step++) {
+		await glideOver(ms, async (progress) => {
 			// Eases out, as a hand slows onto its target.
-			const done = 1 - (1 - step / steps) ** 3;
+			const done = 1 - (1 - progress) ** 3;
 			at.x = Math.round(start.x + (toX - start.x) * done);
 			at.y = Math.round(start.y + (toY - start.y) * done);
 			await sendStep();
 			await pointer(session, at.x, at.y, 'move');
-			await sleep(GLIDE_STEP_MS);
-		}
+		});
 	};
 	const mouse = {
 		at,
@@ -131,14 +157,12 @@ export async function fingerDown(session, x, y) {
 
 /** Slides the finger from `from` to `to` in small steps, over about `ms`. */
 export async function fingerSlide(session, from, to, ms) {
-	const steps = Math.max(1, Math.round(ms / GLIDE_STEP_MS));
-	for (let step = 1; step <= steps; step++) {
-		const x = Math.round(from.x + ((to.x - from.x) * step) / steps);
-		const y = Math.round(from.y + ((to.y - from.y) * step) / steps);
+	await glideOver(ms, async (done) => {
+		const x = Math.round(from.x + (to.x - from.x) * done);
+		const y = Math.round(from.y + (to.y - from.y) * done);
 		await pointer(session, x, y, 'down');
 		await sendTouch(session, 'touchMove', { x, y });
-		await sleep(GLIDE_STEP_MS);
-	}
+	});
 }
 
 /** Lifts the finger from `x, y`, and the finger mark fades a moment later. */

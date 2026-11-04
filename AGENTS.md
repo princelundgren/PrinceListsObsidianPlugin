@@ -123,11 +123,14 @@ each time, with `adb`:
 
 1. Forward the port: `adb shell pidof md.obsidian`, then
    `adb forward tcp:<port> localabstract:webview_devtools_remote_<pid>`.
-2. Make a copy in the scene's theme (`tick-and-drag` is light, the `phone-` scenes dark) and run
-   `push-vault.mjs` on it.
+2. Make a dark copy, the theme of every phone scene, and run `push-vault.mjs` on it.
 3. Restart Obsidian, so it reads the files: `adb shell am force-stop md.obsidian`, then
    `adb shell am start -n md.obsidian/.MainActivity`. After the first push, trust the vault there.
-4. Forward the port again, since the pid changed, and run `shoot.mjs` on it.
+4. For `tick-and-drag`, which types, turn off the on-screen keyboard, which would shrink the page:
+   `adb shell ime disable <id>` for each keyboard `adb shell ime list -s` names.
+5. Forward the port again, since the pid changed, and run `shoot.mjs` on it.
+6. Turn the keyboards back on: `adb shell ime enable <id>` for each, then `adb shell ime set <id>`
+   for the one that was in use.
 
 The forward gives any program on the machine the same control as a DevTools port, so keep only the
 demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
