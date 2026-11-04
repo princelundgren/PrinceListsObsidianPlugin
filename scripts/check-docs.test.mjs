@@ -11,6 +11,7 @@ import {
 	checkPullRequestBody,
 	checkPullRequestTitle,
 	checkRawLinks,
+	checkReadmeParagraphs,
 	checkText,
 	headingAnchors,
 	PR_PARTS,
@@ -78,6 +79,39 @@ test('flags local paths but not URL paths or the CI runner\'s home', () => {
 		'a.md:3: local path "c:\\users\\"',
 		'a.md:3: local path "D:/Users/"',
 		'a.md:5: local path "/home/runners"',
+	]);
+});
+
+const RUNS_ON = 'paragraph runs on from the line above: Obsidian\'s plugin browser shows the break, so join the lines';
+
+test('flags a README paragraph or list item that runs on to a second line', () => {
+	const readme = [
+		'A paragraph that goes on',
+		'to a second line.',
+		'',
+		'- An item that goes on',
+		'  to a second line.',
+		'- **An item** with a nested list',
+		'  - a nested item',
+		'1. A step',
+		'2. Another step',
+		'## A heading',
+		'Text right under the heading.',
+		'> A quote',
+		'',
+		'| a | b |',
+		'| --- | --- |',
+		'<details>',
+		'<summary>Install</summary>',
+		'',
+		'```markdown',
+		'Code that goes on',
+		'to a second line.',
+		'```',
+	].join('\n');
+	assert.deepEqual(lines(checkReadmeParagraphs(readme, 'README.md')), [
+		`README.md:2: ${RUNS_ON}`,
+		`README.md:5: ${RUNS_ON}`,
 	]);
 });
 
@@ -189,8 +223,8 @@ test('the command checks the files of the repo it runs in, and exits 1 on a prob
 		mkdirSync(dirname(join(repo, path)), { recursive: true });
 		writeFileSync(join(repo, path), text);
 	};
-	write('README.md', 'Grey [rules](AGENTS.md)\n');
-	write('AGENTS.md', '# Rules\n');
+	write('README.md', 'Grey [rules](AGENTS.md)\nruns on.\n');
+	write('AGENTS.md', '# Rules\n\nOnly the README keeps\nits paragraphs on one line.\n');
 	write('.github/workflows/ci.yml', 'name: grey\n');
 	write('tests/fixtures/list.md', '- [ ] grey [x](nope.md)\n');
 	write('notes.txt', 'grey\n');
@@ -206,7 +240,8 @@ test('the command checks the files of the repo it runs in, and exits 1 on a prob
 	assert.deepEqual(failing.stdout.trim().split('\n'), [
 		'.github/workflows/ci.yml:1: British spelling "grey": use "gray"',
 		'README.md:1: British spelling "Grey": use "gray"',
-		'2 problems found.',
+		`README.md:2: ${RUNS_ON}`,
+		'3 problems found.',
 	]);
 
 	write('README.md', 'Gray [rules](AGENTS.md)\n');
