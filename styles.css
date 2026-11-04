@@ -84,12 +84,36 @@ textarea.princelists-title {
 	line-height: var(--line-height-normal);
 }
 
-/* Centered on the title's first line, so it stays there when the title wraps. The font size is the
-   row's, so 1em matches the title's. Two classes outrank Obsidian's own input[type=checkbox] rule. */
+/* The row's parts sit on the title's first baseline, so they stay on its first line when it wraps and
+   a smaller day still lines up with it. An open card or title field lines its checkbox up the same
+   way. */
+.princelists-item > .princelists-item-title,
+.princelists-item > .princelists-schedule-text,
+.princelists-item > .princelists-card-body,
+.princelists-item > .princelists-block-field,
+.princelists-schedule-title-line > .princelists-item-title {
+	align-self: baseline;
+}
+
+/* An empty title still has a line, so its row keeps its height and a baseline. */
+.princelists-item-title:empty::before {
+	content: '';
+	display: inline-block;
+}
+
+/* Lowered from the baseline until its middle meets the middle of the title's lowercase letters, as
+   Obsidian lowers its own task checkbox, and as much taken off its top margin, so it takes no more
+   room above the baseline than it shows. The font is the row's, so 1ex is the title's. Two classes
+   outrank Obsidian's own input[type=checkbox] rule. */
 .princelists-item .princelists-checkbox {
+	--princelists-lowered-by: calc(var(--checkbox-size) / 2 - 0.5ex);
 	flex: none;
-	margin: calc((var(--line-height-normal) * 1em - var(--checkbox-size)) / 2) 0 0;
+	align-self: baseline;
+	position: relative;
+	top: var(--princelists-lowered-by);
+	margin: calc(-1 * var(--princelists-lowered-by)) 0 0;
 	font-size: inherit;
+	font-family: inherit;
 }
 
 /* An archived item's checkbox is blue, to tell it from one ticked in the last day. */
@@ -642,12 +666,11 @@ textarea.princelists-heading-field {
 	margin-inline-start: var(--size-4-2);
 }
 
-/* On the title's first line, as the checkbox is. Filled, so it reads as set, not as a button. */
+/* On the title's baseline. Filled, so it reads as set, not as a button. */
 .princelists-star {
 	flex: none;
 	display: flex;
-	align-items: center;
-	height: calc(var(--line-height-normal) * 1em);
+	align-self: baseline;
 	color: var(--color-yellow);
 }
 
@@ -658,11 +681,21 @@ textarea.princelists-heading-field {
 .princelists-when {
 	flex: none;
 	display: flex;
-	align-items: center;
+	align-self: baseline;
+	align-items: baseline;
 	gap: var(--size-2-1);
-	height: calc(var(--line-height-normal) * 1em);
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
+}
+
+/* Lowered as the checkbox is: the star to the middle of the title's lowercase letters, and the day's
+   icon to the middle of the day's. */
+.princelists-star svg,
+.princelists-when > .princelists-when-icon svg {
+	--princelists-lowered-by: calc(var(--icon-size) / 2 - 0.5ex);
+	position: relative;
+	top: var(--princelists-lowered-by);
+	margin-top: calc(-1 * var(--princelists-lowered-by));
 }
 
 .princelists-when-icon {
@@ -809,11 +842,24 @@ button.princelists-collapse {
 	color: var(--text-muted);
 }
 
-/* In a pane about as narrow as a sidebar, a sidebar's margins and a heading-sized title. */
-.princelists-schedule {
+/* The views and list blocks lay their rows out by their own width, not the window's. */
+.princelists-content,
+.princelists-block {
 	container-type: inline-size;
 }
 
+/* In a view or list block about as narrow as a sidebar, the star and the day move to the row's right
+   edge, so a title that wraps leaves no gap before them, and the days line up. */
+@container (max-width: 480px) {
+	.princelists-item > .princelists-item-title,
+	.princelists-item > .princelists-schedule-text,
+	.princelists-schedule-title-line > .princelists-item-title {
+		flex: 1 1 auto;
+	}
+}
+
+/* In a pane about as narrow as a sidebar, the Schedule has a sidebar's margins and a heading-sized
+   title. */
 @container (max-width: 480px) {
 	.princelists-schedule .princelists-scroll {
 		padding: var(--size-4-3);
