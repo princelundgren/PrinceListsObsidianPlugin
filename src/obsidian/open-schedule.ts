@@ -1,8 +1,13 @@
 import type { Workspace } from 'obsidian';
 import { VIEW_TYPE_SCHEDULE } from '../constants';
 
+/** Shows the Schedule where it is open, else opens it in the right sidebar, and makes it active. */
 export async function openSchedule(workspace: Workspace): Promise<void> {
 	const open = workspace.getLeavesOfType(VIEW_TYPE_SCHEDULE)[0];
-	if (open) workspace.setActiveLeaf(open, { focus: true });
-	else await workspace.getLeaf('tab').setViewState({ type: VIEW_TYPE_SCHEDULE, active: true });
+	if (!open) {
+		await workspace.ensureSideLeaf(VIEW_TYPE_SCHEDULE, 'right', { active: true });
+		return;
+	}
+	await workspace.revealLeaf(open);
+	workspace.setActiveLeaf(open, { focus: true });
 }
