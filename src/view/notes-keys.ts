@@ -4,7 +4,7 @@ import { syntaxTree } from '@codemirror/language';
 import type { EditorState, Extension, SelectionRange } from '@codemirror/state';
 import { keymap, type Command, type EditorView } from '@codemirror/view';
 import { formatSelection, type Format } from '../core/format';
-import type { BarAction } from './format';
+import type { EditorAction } from './format';
 
 // Cmd+Enter stays the list's add, and Escape the view's, which closes the card; only Tab indents.
 const LIST_KEYS = new Set(['Mod-Enter', 'Escape', 'Mod-[', 'Mod-]']);
@@ -27,7 +27,7 @@ export function notesKeymap(): Extension {
 }
 
 /** Runs a format bar button in the editor: Undo and Redo through its history, the rest as the keys do. */
-export function runNotesBarAction(editor: EditorView, action: BarAction): void {
+export function runNotesBarAction(editor: EditorView, action: EditorAction): void {
 	if (action === 'undo') undo(editor);
 	else if (action === 'redo') redo(editor);
 	else applyNotesFormat(editor, action);

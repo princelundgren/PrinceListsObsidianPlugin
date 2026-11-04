@@ -5,7 +5,9 @@ import { changeField } from './field-undo';
 export const FORMAT_BAR_CLASS = 'princelists-format-bar';
 const ACTION_ATTR = 'data-format';
 
-export type BarAction = Format | 'undo' | 'redo';
+/** What a bar button does in the notes editor itself; Add link asks for a note first. */
+export type EditorAction = Format | 'undo' | 'redo';
+export type BarAction = EditorAction | 'noteLink';
 
 const GROUPS: readonly (readonly { action: BarAction; icon: string; label: string }[])[] = [
 	[
@@ -23,6 +25,7 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 		{ action: 'codeBlock', icon: 'code', label: 'Code block' },
 	],
 	[
+		{ action: 'noteLink', icon: 'link', label: 'Add link' },
 		{ action: 'link', icon: 'external-link', label: 'Add external link' },
 	],
 	[
