@@ -849,6 +849,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   without regard to case as macOS and iOS disks compare names. It holds only the marker.
 - It opens in a new tab, as Obsidian's own New note does (observed in 1.14.4), straight into the
   list view with its title selected, so typing replaces it.
+- Asked for again while a list is still being made, each request makes its own list, in turn,
+  and only the newest opens **(owner, 2026-11-04)**. They run one at a time: two at once pick the
+  same name, and `vault.create`, documented to throw on an existing file, returned the first file
+  to the second call instead (observed in 1.15.0), giving one list in two tabs. Obsidian's own New
+  note does the same.
 
 **An existing note becomes a list** with "Turn into list" (step two), which adds the marker to it.
 
