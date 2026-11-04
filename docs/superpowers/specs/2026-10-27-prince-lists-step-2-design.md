@@ -423,9 +423,12 @@ Obsidian documents no way to put its editor in a plugin's view.
   on the view's own `scope`, as Cmd+Z is, and the notes' are in their editor's keymap; anywhere
   else the key stays Obsidian's.
 - **A format bar under the notes** while their editor has focus: Undo and Redo; Bold, Italic,
-  Strikethrough and Underline; Inline code and Link; Bulleted list, Numbered list and Checklist;
-  Code block. A press keeps focus in the notes, so the phone's keyboard stays up. The list note
+  Strikethrough and Underline; Code and Code block; Add external link; Bullet list, Numbered list
+  and Task list. A press keeps focus in the notes, so the phone's keyboard stays up. The list note
   has it too. It has no Table button until a table can be edited well, #213 **(owner, 2026-10-30)**.
+  - The buttons take the names and icons of Obsidian's own editor menu, where it has them
+    **(owner, 2026-11-04)**.
+  - Add external link wraps the selection in `[` and `]()`, as Cmd+K does.
   - On a narrow desktop card, whole groups wrap to a second row, so every button stays in sight,
     with no menu to open **(call)**. On mobile it's one row that scrolls sideways ([notes in one
     editor](2026-10-29-notes-in-one-editor-design.md), "The format bar").
@@ -433,7 +436,7 @@ Obsidian documents no way to put its editor in a plugin's view.
     into a plain line when every one already is one **(call)**. A caret on a blank line gets the
     marker, to type after.
   - A selection that takes in its markers, as a drag does, counts as the text inside them, so
-    Bold, Italic or Inline code again takes them off.
+    Bold, Italic or Code again takes them off.
   - Strikethrough wraps the selection in `~~`, as Obsidian writes it. Markdown has no underline,
     so Underline wraps it in HTML's `<u>` and `</u>` **(owner, 2026-10-28)**. Both take their
     marks off again, as Bold does. No key is added for them **(call)**.

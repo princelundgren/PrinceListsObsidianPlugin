@@ -19,16 +19,16 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 		{ action: 'underline', icon: 'underline', label: 'Underline' },
 	],
 	[
-		{ action: 'code', icon: 'code', label: 'Inline code' },
-		{ action: 'link', icon: 'link', label: 'Link' },
+		{ action: 'code', icon: 'code-2', label: 'Code' },
+		{ action: 'codeBlock', icon: 'code', label: 'Code block' },
 	],
 	[
-		{ action: 'bulleted', icon: 'list', label: 'Bulleted list' },
+		{ action: 'link', icon: 'external-link', label: 'Add external link' },
+	],
+	[
+		{ action: 'bulleted', icon: 'list', label: 'Bullet list' },
 		{ action: 'numbered', icon: 'list-ordered', label: 'Numbered list' },
-		{ action: 'checklist', icon: 'list-checks', label: 'Checklist' },
-	],
-	[
-		{ action: 'codeBlock', icon: 'square-code', label: 'Code block' },
+		{ action: 'checklist', icon: 'check-square', label: 'Task list' },
 	],
 ];
 const ACTIONS = GROUPS.flat().map((button) => button.action);
