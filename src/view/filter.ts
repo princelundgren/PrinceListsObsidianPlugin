@@ -24,7 +24,9 @@ export function buildFilterField(view: PrinceListView, parent: HTMLElement): HTM
 
 export function filterInput(view: PrinceListView): void {
 	view.filter = view.filterEl?.value ?? '';
-	view.render();
+	// At once when emptied, so the rows are all back before a click can move focus away (filterBlur).
+	if (view.filter === '') view.render();
+	else view.redrawFiltered();
 }
 
 export function filterKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
