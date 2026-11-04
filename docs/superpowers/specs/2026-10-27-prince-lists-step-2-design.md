@@ -284,6 +284,9 @@ this met on 2026-10-30 **(owner)**.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
   its title in a list's title style. A muted line under it says what the page shows and how an item
   gets a When, for anyone who opens it without knowing.
+  - **In a pane about as narrow as a sidebar (owner, 2026-11-04),** it has a sidebar's margins and
+    the title at heading size, through a container query; the width where that starts, 480 px, is
+    a **(call)**.
 - **Ticking works in place.** A repeating item (🔁) shows the same message as in its list instead
   of ticking. A tick is worked out on the text the view last read, so a list changed, renamed or
   deleted since then shows "This list changed elsewhere. Try again." and writes nothing, and so
@@ -292,10 +295,16 @@ this met on 2026-10-30 **(owner)**.
 - **A click on a row,** away from a link, opens its list with that item's card open **(call)**: in
   a tab whose list view already shows that list, else in a new tab. The card opens only while the
   item's line still reads as the view showed it, so an edit since then opens the list with no card.
-- **It's a view in a tab, like a note (call):** while it's active, no file is, so the file explorer
-  highlights none, as with Graph view (observed in 1.14.4). A link in a row opens where a link in a
-  note would, and a note opened from the file explorer takes the Schedule's tab, as it would a
-  note's; Back brings the Schedule back.
+- **It's a view in the right sidebar (owner, 2026-11-02),** a tab with its `calendar-clock` icon
+  beside core views such as Backlinks and Outline, so it stays beside the list in use. The ribbon
+  icon, the command and a list's menu item open it there with `ensureSideLeaf`, or show it where it
+  already is, such as in a main-area tab kept from an earlier version. It's a static view
+  (`navigation` false), so a link in a row opens in the main area rather than in its place, and
+  the file that was active stays active while it has focus (observed in 1.14.5).
+  - **Its tab is there from the start (owner, 2026-11-04):** once Obsidian's layout is ready, the
+    plugin adds it to the right sidebar without showing it, unless a Schedule is open already. A
+    closed tab comes back at the next start: remembering the close would take a settings file
+    written with no user action, a background write.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
   metadata cache's `changed` event and the vault's `rename` and `delete`. Those keep the lists it
   has read current, so focus reads only lists it doesn't hold yet, and it draws again only when

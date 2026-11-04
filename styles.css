@@ -809,6 +809,23 @@ button.princelists-collapse {
 	color: var(--text-muted);
 }
 
+/* In a pane about as narrow as a sidebar, a sidebar's margins and a heading-sized title. */
+.princelists-schedule {
+	container-type: inline-size;
+}
+
+@container (max-width: 480px) {
+	.princelists-schedule .princelists-scroll {
+		padding: var(--size-4-3);
+	}
+
+	.princelists-schedule-title {
+		font-size: var(--h3-size);
+		font-weight: var(--h3-weight);
+		line-height: var(--h3-line-height);
+	}
+}
+
 /* The list's name goes under the title, so it doesn't read as part of it. */
 .princelists-schedule-text {
 	display: flex;

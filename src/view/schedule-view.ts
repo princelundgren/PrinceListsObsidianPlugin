@@ -35,9 +35,8 @@ interface ReadList {
 
 // Every list's items with a When, by day (spec, "When and the Schedule view").
 export class ScheduleView extends ItemView implements MarkdownHost {
-	// A view in a tab, not a sidebar: Obsidian keeps the last file active and highlighted for a view
-	// that sets this false, as ItemView does (observed in 1.14.4).
-	override navigation = true;
+	// A static view, as Obsidian's docs class a calendar: a link opens in the main area, not in its place.
+	override navigation = false;
 	private lists = new Map<string, ReadList>();
 	private readonly rows = new WeakMap<Element, ScheduledItem>();
 	// Ticks run in turn, so each is worked out on the text the one before it wrote.

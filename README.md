@@ -71,8 +71,8 @@ You can embed lists in normal notes.
 
 **Across lists**
 
-- **The Schedule** sorts dated items into Today (with anything overdue), Tomorrow, Next 7 days and
-  Later.
+- **The Schedule,** in the right sidebar, sorts dated items into Today (with anything overdue),
+  Tomorrow, Next 7 days and Later.
 - **A list inside another note** can be ticked and edited there. If you rename the list, update
   the block.
 - **Works with Tasks:** dates use the Tasks plugin's format.
