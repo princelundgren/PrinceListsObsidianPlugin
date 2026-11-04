@@ -159,7 +159,9 @@ Compared with Obsidian's own editor side by side on desktop:
     Cmd+V in the notes **(owner, 2026-11-04)**. A phone's own Paste there goes through the same
     paste handler **(call)**. Paste as plain text pastes the text as it is. Text wins over pictures,
     as in step one's "Text wins", so a clipboard with no text pastes its pictures into the card's
-    notes.
+    notes. Markdown copied from Obsidian, whose clipboard holds `text/markdown` or HTML marked
+    `<!-- obsidian -->`, pastes as its text **(call)**: the text is already the Markdown that was
+    copied.
   - Every paste in the notes, and the menu's Paste, convert whatever Obsidian's "Convert pasted
     HTML to Markdown" setting says **(call)**: `obsidian.d.ts` documents no key for it, and names
     `vault.getConfig` only in `SettingTab.getControlValue`'s comment, as what Obsidian's own setting

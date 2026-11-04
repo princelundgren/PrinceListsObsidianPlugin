@@ -59,6 +59,7 @@ You can embed lists in normal notes.
 - **Edited like a note:** Markdown shows only where the cursor is, as in Obsidian's Live Preview. The list's own note edits the same way.
 - **Any Markdown:** links, checklists, tables and code.
 - **A toolbar** for bold, italic, links, lists, code blocks and more.
+- **Paste from the web:** copied web pages and rich text paste as Markdown. Markdown copied from Obsidian pastes as it is.
 - **Pictures:** paste or drop them in. On iOS, a picture dropped from Photos may not reach Obsidian; paste it instead.
 
 **Across lists**
@@ -70,7 +71,7 @@ You can embed lists in normal notes.
 **Keys and devices**
 
 - **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters, Cmd+Shift+A shows or hides archived items, Cmd+Z undoes, and Cmd+B, Cmd+I and Cmd+K format. Use Ctrl on Windows and Linux.
-- **Right-click menus** on items, headings, pictures and the list.
+- **Right-click menus** on items, headings, pictures and the list. On desktop, text in a card or the list's note gets a menu too: add a link, format, and paste with or without formatting.
 - **Made for touch:** a floating **+**, finger-sized buttons, and hold to drag.
 - **Fits your theme,** light or dark.
 
