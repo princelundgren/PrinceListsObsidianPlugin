@@ -830,7 +830,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 **Where a new list goes (call):**
 
-- From the command or the ribbon, a list goes where Obsidian puts new notes:
+- From the command or the ribbon, a list goes in the "Folder for new lists" from PrinceLists'
+  settings (owner, 2026-11-04), made if it isn't there (call), since the setting says where the
+  user wants lists. Left empty, as it is at first, a list goes where Obsidian puts new notes:
   `fileManager.getNewFileParent(<active file path>)`, which follows the "Default location for new
   notes" setting.
 - The new file is called `Untitled list.md`, with a number added if that name is taken, compared

@@ -37,6 +37,7 @@ only documented Obsidian APIs are used.
   editor](2026-10-29-notes-in-one-editor-design.md) replaced this.
 - **Right-click menus:** a heading's menu gains "Edit in Markdown" and collapsing or expanding
   every heading, and the list's background has a menu of its own on desktop.
+- **A settings page:** a folder for new lists, and a button that brings back the Schedule's tab.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -301,10 +302,13 @@ this met on 2026-10-30 **(owner)**.
   already is, such as in a main-area tab kept from an earlier version. It's a static view
   (`navigation` false), so a link in a row opens in the main area rather than in its place, and
   the file that was active stays active while it has focus (observed in 1.14.5).
-  - **Its tab is there from the start (owner, 2026-11-04):** once Obsidian's layout is ready, the
-    plugin adds it to the right sidebar without showing it, unless a Schedule is open already. A
-    closed tab comes back at the next start: remembering the close would take a settings file
-    written with no user action, a background write.
+  - **Its tab is added when the user turns the plugin on (owner, 2026-11-04),** in
+    `onUserEnable` (`@since` 1.7.2), which Obsidian's docs name as the place to open a plugin's
+    view. It's added without being shown, unless a Schedule is open already. It isn't added when
+    Obsidian starts: Obsidian keeps the tab in its workspace from one start to the next, and adding
+    it at every start brought back a tab the user had closed.
+  - **A closed tab comes back from the settings (owner, 2026-11-04):** the Schedule tab's "Add to
+    sidebar" button in PrinceLists' settings does what the ribbon icon does.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
   metadata cache's `changed` event and the vault's `rename` and `delete`. Those keep the lists it
   has read current, so focus reads only lists it doesn't hold yet, and it draws again only when
@@ -474,6 +478,22 @@ The block fields this section described are gone.
     while the prompt is open can still leave the link **(call)**.
   - Copy image copies PNG, the one picture format the clipboard takes, so any other is drawn into a
     PNG first **(call)**.
+
+### Settings (owner, 2026-11-04)
+
+PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
+docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
+the plugin as it was before the page existed.
+
+- **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
+  where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
+  says. Any path is kept, and a folder that isn't there is made with the next list (call): the
+  field then agrees with what a new list does when a chosen folder has gone. Obsidian saves the
+  value to the plugin's `data.json` when the user changes it, so it's never written in the
+  background, and `onExternalSettingsChange` reads it again when Sync brings a change.
+- **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
+  closed tab is easy to get back. A button saves nothing.
+- **The archive delay stays fixed** at 24 hours, as step one's design decides; it isn't a setting.
 
 ## Still later
 

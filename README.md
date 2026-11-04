@@ -48,7 +48,8 @@ You can embed lists in normal notes.
 
 **Lists**
 
-- **Any note can be a list:** make a new one, or turn a note with checkboxes into one.
+- **Any note can be a list:** make a new one, in a folder you choose in the settings if you like,
+  or turn a note with checkboxes into one.
 - **Back to Markdown** any time with **Open as Markdown**, or for good with **Turn into note**.
 - **Sections** come from headings. Drag them, collapse one, or collapse them all.
 - **A note for the list** sits under its title.
@@ -72,7 +73,8 @@ You can embed lists in normal notes.
 **Across lists**
 
 - **The Schedule,** in the right sidebar, sorts dated items into Today (with anything overdue),
-  Tomorrow, Next 7 days and Later.
+  Tomorrow, Next 7 days and Later. Closed its tab? The ribbon icon or PrinceLists' settings bring
+  it back.
 - **A list inside another note** can be ticked and edited there. If you rename the list, update
   the block.
 - **Works with Tasks:** dates use the Tasks plugin's format.
