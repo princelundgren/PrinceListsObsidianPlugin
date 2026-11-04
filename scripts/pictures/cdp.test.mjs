@@ -33,6 +33,11 @@ test('pickPage names each app page by its title when there are two', () => {
 		/"Groceries - Demo - Obsidian 1\.15\.0"\n.*"Settings - Demo - Obsidian 1\.15\.0"/);
 });
 
+test('pickPage keeps a title with a line break on its target\'s line', () => {
+	assert.throws(() => pickPage([target('page', 'devtools://devtools/inspector.html', 'One\nTwo')]),
+		/inspector\.html "One\\nTwo"$/);
+});
+
 const dark = { nativeMenus: false, theme: 'obsidian' };
 
 test('vaultProblem names a vault without the marker', () => {

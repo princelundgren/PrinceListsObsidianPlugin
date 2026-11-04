@@ -13,7 +13,7 @@ const ANSWER_MS = 15000;
 export function pickPage(targets) {
 	const pages = targets.filter((t) => t.type === 'page' && APP_PAGES.some((start) => t.url.startsWith(start)));
 	if (pages.length === 1) return pages[0].webSocketDebuggerUrl;
-	const listed = targets.map((t) => `${t.type} ${t.url} "${t.title}"`).join('\n') || '(none)';
+	const listed = targets.map((t) => `${t.type} ${t.url} ${JSON.stringify(t.title)}`).join('\n') || '(none)';
 	throw new Error(`Expected one Obsidian page among the DevTools targets, found ${pages.length}:\n${listed}`);
 }
 
