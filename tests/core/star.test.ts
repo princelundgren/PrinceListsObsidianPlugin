@@ -30,6 +30,44 @@ test('setStar keeps a tag after an empty title a tag', () => {
 	expect(parseItemLine(starred)?.tail).toBe(' #errand');
 });
 
+test('star then unstar gives back the line it started from', () => {
+	const lines = [
+		'- [ ] #errand',
+		'- [ ]  #errand',
+		'- [ ] \t#errand',
+		'- [ ] #errand 📅 2026-11-30',
+		'- [ ] #errand ^id  ',
+		'- [ ] a #shop',
+		'- [ ] a  #shop',
+		'- [ ] a📅 2026-10-30',
+		'- [ ] 📅 2026-11-30',
+		'- [ ]  📅 2026-11-30',
+		'- [ ] ',
+		'- [x] ✔ 2026-10-27 18:05 #errand',
+		'- [x]  ✔ 2026-10-27 18:05 #errand',
+	];
+	for (const line of lines) expect(setStar(setStar(line, true), false), JSON.stringify(line)).toBe(line);
+});
+
+test('setStar adds a space before a tag after an empty title even when one is there', () => {
+	const starred = setStar('- [ ]  #errand', true);
+	expect(starred).toBe('- [ ]  ⭐  #errand');
+	expect(isStarred(starred)).toBe(true);
+});
+
+test('setStar adds no space before a tag after a done item mark', () => {
+	expect(setStar('- [x]  ✔ 2026-10-27 18:05 #errand', true)).toBe('- [x]  ⭐ ✔ 2026-10-27 18:05 #errand');
+});
+
+test('unstarring an item with no title removes the space before its tag that starring adds', () => {
+	expect(setStar('- [ ]  ⭐ #errand', false)).toBe('- [ ] #errand');
+	expect(setStar('- [ ]  ⭐' + F + ' #errand 📅 2026-11-30', false)).toBe('- [ ] #errand 📅 2026-11-30');
+});
+
+test('unstarring an item with no title keeps a tab before its tag', () => {
+	expect(setStar('- [ ]  ⭐\t#errand', false)).toBe('- [ ] \t#errand');
+});
+
 test('setStar removes the space, the star and its U+FE0F, keeping the tail as it is', () => {
 	expect(setStar('- [ ] a ⭐' + F + ' #shop  ', false)).toBe('- [ ] a #shop  ');
 });

@@ -3,6 +3,7 @@ import { joinItemLine, parseItemLine, setTitle, type ItemLineParts } from './ite
 const STAR = ' ⭐';
 // A star counts only after a space, so `5⭐` is a title, not a starred `5`.
 const TRAILING_STAR = / ⭐️?$/;
+const TAG_FIRST = /^\s*#/;
 
 export function splitStar(title: string): { plain: string; star: string } {
 	const star = TRAILING_STAR.exec(title)?.[0] ?? '';
@@ -14,14 +15,17 @@ export function isStarred(line: string): boolean {
 	return title !== undefined && splitStar(title).star !== '';
 }
 
-// Only the title changes: the ✔ marks and the tail after it stay as written, spacing included,
-// except that a tag the star would touch gets the space a tag needs.
+// Only the title changes, except with no title or ✔ mark and a tag first in the tail: starring always
+// adds a space before the tail and unstarring takes one back, so the line comes back as it was.
 export function setStar(line: string, starred: boolean): string {
 	const parts = parseItemLine(line);
 	if (!parts) return line;
 	const { plain, star } = splitStar(parts.title);
 	if (starred === (star !== '')) return line;
-	return starred ? withStar(parts, STAR) : joinItemLine({ ...parts, title: plain });
+	const tagFirst = plain === '' && parts.marks === '' && TAG_FIRST.test(parts.tail);
+	if (starred) return joinItemLine({ ...parts, title: parts.title + STAR, tail: tagFirst ? ` ${parts.tail}` : parts.tail });
+	const tail = tagFirst && parts.tail.startsWith(' ') ? parts.tail.slice(1) : parts.tail;
+	return joinItemLine({ ...parts, title: plain, tail });
 }
 
 /**
@@ -37,6 +41,7 @@ export function setTitleKeepingStar(line: string, typed: string): string {
 	return parts ? withStar({ ...parts, title: splitStar(parts.title).plain }, star) : titled;
 }
 
+// Puts back a star the line had, so it adds a space only where a tag would touch the star.
 function withStar(parts: ItemLineParts, star: string): string {
 	const tail = parts.tail.startsWith('#') ? ` ${parts.tail}` : parts.tail;
 	return joinItemLine({ ...parts, title: parts.title + star, tail });

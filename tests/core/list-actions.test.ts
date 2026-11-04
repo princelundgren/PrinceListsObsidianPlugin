@@ -16,6 +16,7 @@ import {
 	type PlannedDelete,
 } from '../../src/core/list-actions';
 import { splitLines } from '../../src/core/lines';
+import { isStarred, setStar } from '../../src/core/star';
 import { contentStartOf, crlf, FIXTURES, JOINING_CASES, list, readFixture, REFUSED_CASES } from './edit-helpers';
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
@@ -298,6 +299,15 @@ describe('planItemLineEdit', () => {
 		const planned = planItemLineEdit(text, start(text), 4, star);
 		expect(planned?.next).toBe(`${FRONTMATTER}## H\n- [ ] a ⭐\n`);
 		expect(planned?.edit).toEqual({ start: 4, delta: 0, kind: 'change', retitle: star });
+	});
+
+	test('star then unstar of an item with no title gives back the file, with CRLF or no final newline', () => {
+		const toggle = (text: string) => planItemLineEdit(text, start(text), 4, (line) => setStar(line, !isStarred(line)))?.next;
+		for (const file of [crlf(`${FRONTMATTER}## H\n- [ ] #errand\n- [ ] b\n`), `${FRONTMATTER}## H\n- [ ] #errand`]) {
+			const starred = toggle(file);
+			expect(starred).toBe(file.replace('- [ ] #errand', '- [ ]  ⭐ #errand'));
+			expect(toggle(starred as string)).toBe(file);
+		}
 	});
 
 	test('is null on a heading and for a change that changes nothing', () => {
