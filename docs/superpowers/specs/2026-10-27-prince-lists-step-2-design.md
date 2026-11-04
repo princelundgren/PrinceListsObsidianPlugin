@@ -133,7 +133,9 @@ this met on 2026-10-30 **(owner)**.
 - **A "Find in list" command** opens the same field, for mobile and for anyone who wants
   another hotkey. It has no default hotkey **(call)**.
 - **As you type, items whose title or notes don't contain the text hide (call).** The match ignores
-  case and compares the text as written, Markdown included, with no Unicode normalization.
+  case and compares the text as written, Markdown included, with no Unicode normalization. The
+  list redraws once typing pauses for 100 ms, not at every letter, and at once when the field is
+  emptied **(call)**.
 - **A heading shows while one of its items shows (call).** Headings themselves aren't searched.
 - **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and
   can't match.

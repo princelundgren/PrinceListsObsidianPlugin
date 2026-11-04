@@ -1,10 +1,11 @@
 import type { EditorView } from '@codemirror/view';
-import { type Component, type Menu, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
+import { type Component, debounce, type Menu, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { CollapsedHeadings } from '../core/collapsed';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
 import { labelWithKey } from '../core/key-name';
+import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
@@ -27,6 +28,8 @@ import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
 import { UNSAFE_EDIT_NOTICE } from './write';
+
+const FILTER_PAUSE_MS = 100;
 
 // canAcceptExtension stays at its default of false: true would open every note clicked from a
 // list pane in the list view.
@@ -62,6 +65,12 @@ export class PrinceListView extends TextFileView {
 	// One-off writes wait for the one before to land, then edit the text as it left it, so two quick
 	// taps on one box tick and untick it, and taps on two rows both land.
 	readonly enqueue = serialQueue((error) => console.error(error));
+	/** Draws the rows Cmd+F's query matches once typing pauses, rather than at every letter. */
+	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
+	private readonly parsedText = rememberLast((text) => {
+		const lines = splitLines(text);
+		return { lines, model: parseList(lines, contentStartLine(text)) };
+	});
 	/** How many outside changes the view has taken, so a queued tap can tell one landed. */
 	outsideChanges = 0;
 	/** Whether the last redraw left out rows inside the list note being typed. */
@@ -177,6 +186,7 @@ export class PrinceListView extends TextFileView {
 
 	protected async onClose(): Promise<void> {
 		this.viewClosed = true;
+		this.redrawFiltered.cancel();
 		this.endListNote();
 		this.dropListNoteEditor();
 		await super.onClose();
@@ -236,9 +246,9 @@ export class PrinceListView extends TextFileView {
 		return splitLines(this.text);
 	}
 
-	parse(): { lines: Line[]; model: ListModel } {
-		const lines = this.lines();
-		return { lines, model: parseList(lines, contentStartLine(this.text)) };
+	/** The text's lines and model, parsed once per text. Shared by every caller: never change them. */
+	parse(): { lines: readonly Line[]; model: Readonly<ListModel> } {
+		return this.parsedText(this.text);
 	}
 
 	// One of the view's own writes landed (writeAction). The line-based state and every row's line
@@ -269,6 +279,7 @@ export class PrinceListView extends TextFileView {
 	// Draws everything from the text, moving what didn't change into place (redraw.ts); a field holding
 	// focus, or about to (`focusing`), stays in place and updates after blur.
 	render(focusing: Element | null = null): void {
+		this.redrawFiltered.cancel();
 		redraw(this, focusing);
 		this.syncHeaderButtons();
 	}
