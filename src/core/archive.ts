@@ -1,6 +1,24 @@
 import { DONE_DATE_PATTERN, MARK_PATTERN, isDoneStatus, markTime, parseItemLine } from './item-line';
 
-export const ARCHIVE_DELAY_MS = 86_400_000;
+const HOUR_MS = 3_600_000;
+
+/** The archive delays the settings offer, in hours, as the dropdown stores them. */
+export const ARCHIVE_DELAY_HOURS = ['0', '1', '12', '24', '48', '168'] as const;
+export type ArchiveDelayHours = (typeof ARCHIVE_DELAY_HOURS)[number];
+export const DEFAULT_ARCHIVE_DELAY_HOURS: ArchiveDelayHours = '24';
+
+// A mark further ahead of `now` than this can't be a real tick, so its line counts as done long ago.
+const LATEST_MARK_AHEAD_MS = 24 * HOUR_MS;
+
+/** A stored setting as one of the choices: the default when it is none of them. */
+export function archiveDelayHoursOf(stored: unknown): ArchiveDelayHours {
+	return ARCHIVE_DELAY_HOURS.find((hours) => hours === stored) ?? DEFAULT_ARCHIVE_DELAY_HOURS;
+}
+
+/** The delay a choice stands for, in milliseconds. */
+export function archiveDelayMs(hours: ArchiveDelayHours): number {
+	return Number(hours) * HOUR_MS;
+}
 
 export type DoneAt = { kind: 'at'; time: Date } | { kind: 'longAgo' };
 
@@ -14,7 +32,7 @@ export function doneAt(text: string, now: Date): DoneAt | null {
 	if (!parts || !isDoneStatus(parts.status)) return null;
 
 	const marks = [...parts.marks.matchAll(EVERY_MARK), ...parts.tail.matchAll(EVERY_DONE_DATE)].map((m) => m[0]);
-	const latestReadable = now.getTime() + ARCHIVE_DELAY_MS;
+	const latestReadable = now.getTime() + LATEST_MARK_AHEAD_MS;
 	let earliest: Date | null = null;
 	for (const mark of marks) {
 		const time = markTime(mark);
@@ -24,8 +42,9 @@ export function doneAt(text: string, now: Date): DoneAt | null {
 	return earliest ? { kind: 'at', time: earliest } : { kind: 'longAgo' };
 }
 
-export function isArchived(text: string, now: Date): boolean {
+/** Whether a done line is hidden at `now`: `delayMs` or more after its tick, or done long ago. */
+export function isArchived(text: string, now: Date, delayMs: number): boolean {
 	const done = doneAt(text, now);
 	if (!done) return false;
-	return done.kind === 'longAgo' || now.getTime() - done.time.getTime() >= ARCHIVE_DELAY_MS;
+	return done.kind === 'longAgo' || now.getTime() - done.time.getTime() >= delayMs;
 }

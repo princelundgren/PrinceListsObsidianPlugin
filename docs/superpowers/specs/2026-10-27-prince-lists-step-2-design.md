@@ -37,7 +37,9 @@ only documented Obsidian APIs are used.
   editor](2026-10-29-notes-in-one-editor-design.md) replaced this.
 - **Right-click menus:** a heading's menu gains "Edit in Markdown" and collapsing or expanding
   every heading, and the list's background has a menu of its own on desktop.
-- **A settings page:** a folder for new lists, and a button that brings back the Schedule's tab.
+- **A settings page:** a folder for new lists, how long ticked items stay before they're archived,
+  whether a list's header shows the Schedule button, and a button that brings back the Schedule's
+  tab.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -504,13 +506,22 @@ the plugin as it was before the page existed, except the Schedule button's, belo
   field then agrees with what a new list does when a chosen folder has gone. Obsidian saves the
   value to the plugin's `data.json` when the user changes it, so it's never written in the
   background, and `onExternalSettingsChange` reads it again when Sync brings a change.
+- **Hide ticked items after (owner, 2026-11-04):** a `dropdown` control with at once, 1 hour,
+  12 hours, 1 day (the default), 2 days and 1 week, saved as the hours in a string, such as
+  `"24"`. A value in `data.json` that is none of them is read as 1 day when the settings load, as
+  Obsidian's docs ask a plugin to check stored values when it reads them; nothing is written back.
+  - **A change redraws** the list views, the list blocks and the Schedule. The settings tab's
+    `setControlValue`, and `onExternalSettingsChange` when Sync changes the delay, tell them
+    through an `Events` object the plugin hands each view, which each one listens to with
+    `registerEvent`. A list block with an open field or a drag draws it when the field closes or
+    the drag ends.
+  - **It writes nothing to any list,** since archived is worked out, never written down.
 - **Schedule button (owner, 2026-11-04):** a toggle that shows or hides the header's "Open
   schedule" button. It's on by default, so the button shows after the update: the owner chose that
-  over the rule above. Open lists show or hide the button at once, and again when Sync brings a
-  change.
+  over the rule that opens this section. Open lists show or hide the button at once, and again when
+  Sync brings a change.
 - **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
   closed tab is easy to get back. A button saves nothing.
-- **The archive delay stays fixed** at 24 hours, as step one's design decides; it isn't a setting.
 
 ### No onboarding (owner, 2026-11-04)
 

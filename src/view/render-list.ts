@@ -158,7 +158,7 @@ export function renderList(
 // What hides rows in the view: archived items, Cmd+F's query and collapsed headings, with the item on
 // `keepLine` shown regardless of the last two.
 export function rowFilter(view: PrinceListView, keepLine: number | null): RowFilter {
-	return { showArchived: view.showArchived, query: view.filter ?? '', keepLine, collapsed: view.collapsed.lines() };
+	return { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms, query: view.filter ?? '', keepLine, collapsed: view.collapsed.lines() };
 }
 
 export function buildHeading(

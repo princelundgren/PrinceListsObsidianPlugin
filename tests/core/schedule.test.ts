@@ -3,6 +3,7 @@ import { datedItems, groupSchedule, scheduleGroup, unarchived, type ScheduledIte
 
 const now = new Date(2026, 9, 27, 12, 0);
 const list = { path: 'Lists/Home.md', name: 'Home' };
+const DAY = 86_400_000;
 
 describe('datedItems and unarchived', () => {
 	test('keep open items with a When and done ones not yet archived, across sections', () => {
@@ -21,7 +22,7 @@ describe('datedItems and unarchived', () => {
 			'- [ ] under a heading ⭐ ⏳ 2026-11-02',
 			'',
 		].join('\n');
-		const items = unarchived(datedItems(text, 3, list), now);
+		const items = unarchived(datedItems(text, 3, list), now, DAY);
 		expect(items.map(({ title, titleLine, day, done, starred, order }) => ({ title, titleLine, day, done, starred, order }))).toEqual([
 			{ title: 'open', titleLine: 3, day: '2026-10-28', done: false, starred: false, order: 0 },
 			{ title: 'ticked today', titleLine: 5, day: '2026-10-27', done: true, starred: false, order: 2 },
@@ -43,7 +44,7 @@ describe('unarchived', () => {
 		'',
 	].join('\n');
 	const items = datedItems(text, 3, list);
-	const titles = (at: Date) => unarchived(items, at).map((item) => item.title);
+	const titles = (at: Date, delay = DAY) => unarchived(items, at, delay).map((item) => item.title);
 
 	test.each([
 		[new Date(2026, 9, 27, 12, 0), ['ticked', 'open']],
@@ -52,6 +53,11 @@ describe('unarchived', () => {
 		[new Date(2026, 9, 29, 13, 0), ['ahead', 'open']],
 	])('at %s, keeps what a list read then shows', (at, shown) => {
 		expect(titles(at)).toEqual(shown);
+	});
+
+	test('hides a done item after the delay it is given', () => {
+		expect(titles(new Date(2026, 9, 27, 11, 59), DAY / 24)).toEqual(['ticked', 'open']);
+		expect(titles(new Date(2026, 9, 27, 12, 0), DAY / 24)).toEqual(['open']);
 	});
 
 	test('brings an item back when the clock moves back', () => {

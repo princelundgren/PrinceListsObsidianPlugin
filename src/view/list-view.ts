@@ -8,6 +8,7 @@ import { labelWithKey } from '../core/key-name';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import { openAsMarkdown } from '../obsidian/switch';
@@ -80,6 +81,7 @@ export class PrinceListView extends TextFileView {
 
 	constructor(
 		leaf: WorkspaceLeaf,
+		readonly archiveDelay: ArchiveDelay,
 		private readonly showsScheduleButton: () => boolean,
 	) {
 		super(leaf);
@@ -157,6 +159,7 @@ export class PrinceListView extends TextFileView {
 
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
+		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
 		registerFieldEvents(this);
 		registerFileRedraws(this);
 		// The collapse arrows always show where there's no hover.

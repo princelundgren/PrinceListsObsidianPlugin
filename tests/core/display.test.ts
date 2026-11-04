@@ -3,6 +3,8 @@ import { headingText, isItemVisible, itemRow, matchesQuery, visibleSections } fr
 import { tickLine } from '../../src/core/item-line';
 import { list, readFixture } from './edit-helpers';
 
+const DAY = 86_400_000;
+
 const sectionsOf = (
 	text: string,
 	now: Date,
@@ -10,9 +12,10 @@ const sectionsOf = (
 	query = '',
 	keepLine: number | null = null,
 	collapsed: ReadonlySet<number> = new Set(),
+	archiveDelayMs = DAY,
 ) => {
 	const { lines, model } = list(text);
-	return visibleSections(lines, model, now, { showArchived, query, keepLine, collapsed });
+	return visibleSections(lines, model, now, { showArchived, archiveDelayMs, query, keepLine, collapsed });
 };
 
 const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false, when: string | null = null) => ({
@@ -49,6 +52,12 @@ describe('visibleSections', () => {
 			{ heading: { line: 0, text: 'H' }, rows: [row(1, 'a'), row(3, 'c', true)], collapsed: false },
 		]);
 		expect(sectionsOf(text, now, true)[1]?.rows).toEqual([row(1, 'a'), row(2, 'b', true, 'b', true), row(3, 'c', true)]);
+	});
+
+	test('hides an item the archive delay it is given after its tick', () => {
+		const text = '- [x] a ✔ 2026-10-21 09:00\n- [x] b ✔ 2026-10-21 09:01\n';
+		const rows = sectionsOf(text, new Date(2026, 9, 21, 10, 0), false, '', null, new Set(), DAY / 24)[0]?.rows;
+		expect(rows).toEqual([row(1, 'b', true)]);
 	});
 
 	test.each([
@@ -111,19 +120,26 @@ describe('visibleSections, content the plugin leaves alone', () => {
 
 describe('itemRow', () => {
 	test('shows a starred title without its star', () => {
-		expect(itemRow('- [ ] milk ⭐', 0, new Date())).toEqual(row(0, 'milk', false, 'milk', false, true));
+		expect(itemRow('- [ ] milk ⭐', 0, new Date(), DAY)).toEqual(row(0, 'milk', false, 'milk', false, true));
 	});
 
 	test('reads the row an item line shows, as the view does after its own tick', () => {
 		const now = new Date(2026, 9, 21, 10, 0);
 		const ticked = tickLine('- [ ] a 📅 2026-10-30', now);
-		expect(itemRow(ticked, 4, now)).toEqual(row(4, 'a', true));
+		expect(itemRow(ticked, 4, now, DAY)).toEqual(row(4, 'a', true));
 	});
 
 	test('marks a done item archived 24 hours after its tick', () => {
 		const ticked = tickLine('- [ ] a', new Date(2026, 9, 21, 10, 0));
-		expect(itemRow(ticked, 0, new Date(2026, 9, 22, 9, 59)).archived).toBe(false);
-		expect(itemRow(ticked, 0, new Date(2026, 9, 22, 10, 0)).archived).toBe(true);
+		expect(itemRow(ticked, 0, new Date(2026, 9, 22, 9, 59), DAY).archived).toBe(false);
+		expect(itemRow(ticked, 0, new Date(2026, 9, 22, 10, 0), DAY).archived).toBe(true);
+	});
+
+	test('marks a done item archived after the delay it is given', () => {
+		const ticked = tickLine('- [ ] a', new Date(2026, 9, 21, 10, 0));
+		expect(itemRow(ticked, 0, new Date(2026, 9, 21, 10, 59), DAY / 24).archived).toBe(false);
+		expect(itemRow(ticked, 0, new Date(2026, 9, 21, 11, 0), DAY / 24).archived).toBe(true);
+		expect(itemRow(ticked, 0, new Date(2026, 9, 21, 10, 0), 0).archived).toBe(true);
 	});
 
 	test.each([
@@ -132,7 +148,7 @@ describe('itemRow', () => {
 		['nothing at all', '- [ ] ', ''],
 	])('labels an item with an empty title by the rest of its line: %s', (_, text, label) => {
 		const done = text.startsWith('- [x]');
-		expect(itemRow(text, 0, new Date(2026, 9, 21))).toEqual(row(0, '', done, label, done));
+		expect(itemRow(text, 0, new Date(2026, 9, 21), DAY)).toEqual(row(0, '', done, label, done));
 	});
 });
 
@@ -226,7 +242,7 @@ describe('isItemVisible', () => {
 	const text = '---\nprincelists: true\n---\n- [ ] a\n## B\n- [ ] b\n## C\n- [ ] c\n- [x] old ✔ 2026-10-01 10:00\n';
 	const visible = (titleLine: number, query = '', collapsed: ReadonlySet<number> = new Set()) => {
 		const { lines, model } = list(text);
-		return isItemVisible(lines, model, now, { showArchived: false, query, keepLine: null, collapsed }, titleLine);
+		return isItemVisible(lines, model, now, { showArchived: false, archiveDelayMs: DAY, query, keepLine: null, collapsed }, titleLine);
 	};
 
 	test('an item in an open section, with no filter, is visible', () => {
