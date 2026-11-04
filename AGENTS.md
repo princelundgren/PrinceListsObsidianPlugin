@@ -107,6 +107,7 @@ workspace files when it opens it. These need Node.js 22 or later too:
 | `node scripts/pictures/demo-vault.mjs <folder> [--theme dark\|light] [--today YYYY-MM-DD]` | Copy the demo vault into `<folder>`, its dates moved from the day they were written for to today. It writes only into a folder with no notes or an earlier copy, never through a linked `.obsidian/`, and keeps `.obsidian/plugins/` |
 | `node --test "scripts/pictures/*.test.mjs"` | Run the picture scripts' tests. Quote the glob so Node expands it in every shell; a folder argument fails on Node 22 and 24 |
 | `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...` | Take the named scenes in `scripts/pictures/scenes/` from a demo vault that Obsidian has open with a DevTools port, writing each as `<scene>.webp` or `<scene>.gif` in `<folder>`. It needs `cwebp` and `ffmpeg`, and stops unless the vault is a copy in the scene's theme with "Native menus" off |
+| `node scripts/pictures/shoot.mjs --port <port> --out <folder> --desktop` | Take every scene that isn't a phone's, in name order, the same way |
 | `node scripts/pictures/push-vault.mjs --port <port> <folder>` | Write the copy in `<folder>` and the build into the vault Obsidian has open on an emulator, after removing everything in it but its plugins. It stops if the open vault has notes and isn't a copy |
 
 To make a demo vault: close an earlier copy in Obsidian if it's open, run the copy script, then
