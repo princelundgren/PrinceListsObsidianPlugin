@@ -1,5 +1,6 @@
 import { EditorView } from '@codemirror/view';
 import { Notice } from 'obsidian';
+import { pastedData, pasteSource } from '../core/clipboard';
 import { pictureName } from '../core/picture';
 import type { Card } from './card';
 import { targetOf } from './dom';
@@ -37,9 +38,9 @@ function measureNotesEditors(contentEl: HTMLElement): void {
 }
 
 function onPaste(view: PrinceListView, evt: ClipboardEvent): void {
-	// Spreadsheets and word processors copy a picture of their text along with it; the text wins.
-	if (evt.clipboardData?.getData('text/plain')) return;
-	if (pastePictures(view, Array.from(evt.clipboardData?.files ?? []))) evt.preventDefault();
+	const data = evt.clipboardData;
+	if (!data || pasteSource(pastedData(data), 'markdown') !== 'pictures') return;
+	if (pastePictures(view, Array.from(data.files))) evt.preventDefault();
 }
 
 /** Starts adding the pictures among `files` to the notes at the caret, as a paste. False when the notes don't take them: none is a picture, or no card's notes have focus. */
