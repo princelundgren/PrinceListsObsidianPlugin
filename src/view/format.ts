@@ -66,6 +66,4 @@ function applyEdit(field: HTMLTextAreaElement, edit: FormatEdit): void {
 		field.setRangeText(edit.insert, edit.from, edit.to);
 		field.setSelectionRange(edit.selectionStart, edit.selectionEnd);
 	});
-	// setRangeText sends no input event, and the view saves a field's text from that event.
-	field.dispatchEvent(new Event('input', { bubbles: true }));
 }

@@ -50,11 +50,7 @@ export function fieldText(field: HTMLTextAreaElement): EditableText {
 			const { selectionStart, selectionEnd } = field;
 			return () => field.setSelectionRange(selectionStart, selectionEnd);
 		},
-		replaceSelection: (insert) => {
-			changeField(field, () => field.setRangeText(insert, field.selectionStart, field.selectionEnd, 'end'));
-			// setRangeText sends no input event, and the view saves a field's text from that event.
-			field.dispatchEvent(new Event('input', { bubbles: true }));
-		},
+		replaceSelection: (insert) => changeField(field, () => field.setRangeText(insert, field.selectionStart, field.selectionEnd, 'end')),
 		pastePictures: () => undefined,
 		selectAll: () => field.select(),
 		format: (format) => applyFormat(field, format),
