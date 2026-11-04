@@ -279,12 +279,15 @@ this met on 2026-10-30 **(owner)**.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day. The
   list's name is smaller, on a line under the title, so it doesn't read as part of it **(owner,
-  2026-10-28)**. The star and the day stay right after the title, however long the list's name.
+  2026-10-28)**. The star and the day stay right after the title, however long the list's name,
+  and go to the row's right edge in a narrow pane, as in every row ("Where the star and the day
+  sit").
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
     Today with no day read as an item with no date beside the overdue ones that show theirs.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
-  its title in a list's title style. A muted line under it says what the page shows and how an item
-  gets a When, for anyone who opens it without knowing.
+  its title in a list's title style. A muted line under it says in a few words what the page shows,
+  so it takes one line on a phone, and the empty page says how an item gets a When **(owner,
+  2026-11-04)**.
   - **In a pane about as narrow as a sidebar (owner, 2026-11-04),** it has a sidebar's margins and
     the title at heading size, through a container query; the width where that starts, 480 px, is
     a **(call)**.
@@ -393,6 +396,13 @@ this met on 2026-10-30 **(owner)**.
   item menu at first had no star entry **(owner)**: the step one design's "Item actions".
 - **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
   show: a list, the Schedule view and a list inside another note.
+- **Where the star and the day sit (owner, 2026-11-04):**
+  - On the title's first line: the day on its baseline, and the checkbox and the star on the
+    middle of its lowercase letters, a little lower than Obsidian puts a task's checkbox. The day's
+    icon is on the middle of the day's own lowercase letters.
+  - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
+    the day go to the row's right edge, so a title that wraps leaves no gap before them and the days line up. In a wider
+    pane they stay after the title, where the right edge can be far away.
 
 ### Formatting in a card (owner, 2026-10-27)
 
