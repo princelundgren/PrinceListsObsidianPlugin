@@ -45,6 +45,20 @@ export async function glideOver(ms, step) {
 	}
 }
 
+/**
+ * Returns the bounds of the list heading named `name`, or of the element matching the CSS `selector`
+ * inside it when one is given. Throws naming the heading when the list has none by that name.
+ */
+export async function headingBounds(session, name, selector) {
+	return session.evaluate(`(() => {
+		const heading = [...document.querySelectorAll('.princelists-heading')].find((el) => el.firstChild?.textContent.trim() === ${JSON.stringify(name)});
+		if (!heading) throw new Error(${JSON.stringify(`No heading in the list is named "${name}".`)});
+		const selector = ${JSON.stringify(selector ?? null)};
+		const { x, y, width, height } = (selector ? heading.querySelector(selector) : heading).getBoundingClientRect();
+		return { x, y, width, height };
+	})()`);
+}
+
 /** Returns the middle of `bounds`. */
 export const middleOf = ({ x, y, width, height }) => ({ x: x + width / 2, y: y + height / 2 });
 
