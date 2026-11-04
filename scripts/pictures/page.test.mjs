@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { runInNewContext } from 'node:vm';
-import { drawnMouse, glideOver, sleep, undoingChanges } from './page.mjs';
+import { drawnMouse, glideOver, showAlone, sleep, undoingChanges } from './page.mjs';
 
 test('a glide whose steps are slow still ends on time, at its end', async () => {
 	// Real timers: each step takes 40 ms, as input sent to an emulator can. The bound leaves slack.
@@ -57,4 +57,11 @@ test('undoingChanges puts the note back and removes only added files when the sc
 	};
 	await assert.rejects(undoingChanges(vaultSession(files), 'To do.md', 'Attachments', failing), /the scene failed/);
 	assert.deepEqual([...files], [['To do.md', 'before'], ['Attachments/kept.jpg', 'kept'], ['Other/left.jpg', 'left']]);
+});
+
+test('showAlone refuses a view it has no state for, before touching the page', async () => {
+	const evaluated = [];
+	const session = { evaluate: async (expression) => evaluated.push(expression) };
+	await assert.rejects(showAlone(session, 'To do.md', 'preview'), /not "preview"/);
+	assert.deepEqual(evaluated, []);
 });

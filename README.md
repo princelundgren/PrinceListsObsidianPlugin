@@ -36,7 +36,7 @@ You can embed lists in normal notes.
 ```
 ````
 
-<img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.webp" alt="An ordinary note with a paragraph above and below the Hardware store list, shown with its checkboxes, a star and a New item button" width="540">
+![In an ordinary note, a princelists block naming Hardware store is typed between two paragraphs, with the link picked from Obsidian's suggestions, and once the cursor leaves the block the list shows in its place, with its checkboxes, a star and a New item button](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.gif)
 
 ## Full feature list
 
