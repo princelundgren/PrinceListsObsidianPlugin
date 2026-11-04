@@ -1,13 +1,15 @@
 import { FileView, MarkdownView, normalizePath, Notice, Plugin, TFile, TFolder } from 'obsidian';
-import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
+import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_GETTING_STARTED, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
+import { openGettingStarted, vaultHasLists } from './obsidian/open-getting-started';
 import { addScheduleTab, openSchedule } from './obsidian/open-schedule';
 import { DEFAULT_SETTINGS, type PrinceListsSettings, PrinceListsSettingTab } from './obsidian/settings';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
 import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
 import { canTurnIntoNote, turnIntoNote } from './obsidian/turn-into-note';
 import { openFilter } from './view/filter';
+import { GettingStartedView } from './view/getting-started-view';
 import { ListBlock } from './view/list-block';
 import { PrinceListView } from './view/list-view';
 import { ScheduleView } from './view/schedule-view';
@@ -20,21 +22,30 @@ export default class PrinceListsPlugin extends Plugin {
 		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf));
 		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf));
+		this.registerView(
+			VIEW_TYPE_GETTING_STARTED,
+			(leaf) => new GettingStartedView(leaf, { createList: () => void this.newListInChosenFolder() }),
+		);
 		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) => ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath)));
 		registerAutoSwitch(this);
 
 		this.addCommand({
 			id: 'new-list',
 			name: 'Create new list',
-			callback: () => void this.newList(() => this.folderForNewLists()),
+			callback: () => void this.newListInChosenFolder(),
 		});
-		this.addRibbonIcon(RIBBON_ICON, 'Create new list', () => void this.newList(() => this.folderForNewLists()));
+		this.addRibbonIcon(RIBBON_ICON, 'Create new list', () => void this.newListInChosenFolder());
 		this.addCommand({
 			id: 'open-schedule',
 			name: 'Open schedule',
 			callback: () => void openSchedule(this.app.workspace),
 		});
 		this.addRibbonIcon(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
+		this.addCommand({
+			id: 'show-getting-started',
+			name: 'Show getting started',
+			callback: () => void openGettingStarted(this.app.workspace),
+		});
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu, file) => {
 				if (file instanceof TFolder) {
@@ -137,6 +148,7 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override onUserEnable() {
 		void addScheduleTab(this.app.workspace);
+		if (!vaultHasLists(this.app)) void openGettingStarted(this.app.workspace);
 	}
 
 	override async onExternalSettingsChange() {
@@ -151,6 +163,10 @@ export default class PrinceListsPlugin extends Plugin {
 		if (!this.settings.newListFolder.trim()) return this.app.fileManager.getNewFileParent(this.app.workspace.getActiveFile()?.path ?? '');
 		const path = normalizePath(this.settings.newListFolder);
 		return this.app.vault.getFolderByPath(path) ?? (await this.app.vault.createFolder(path));
+	}
+
+	private newListInChosenFolder(): Promise<void> {
+		return this.newList(() => this.folderForNewLists());
 	}
 
 	private async newList(folder: () => TFolder | Promise<TFolder>): Promise<void> {

@@ -38,6 +38,8 @@ only documented Obsidian APIs are used.
 - **Right-click menus:** a heading's menu gains "Edit in Markdown" and collapsing or expanding
   every heading, and the list's background has a menu of its own on desktop.
 - **A settings page:** a folder for new lists, and a button that brings back the Schedule's tab.
+- **A Getting started tab** opens when PrinceLists is turned on in a vault with no lists, and shows
+  how to make a list, turn a note into one and open the Schedule.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -493,7 +495,36 @@ the plugin as it was before the page existed.
   background, and `onExternalSettingsChange` reads it again when Sync brings a change.
 - **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
   closed tab is easy to get back. A button saves nothing.
+- **Getting started:** a "Show getting started" button that opens that tab (see "Getting started").
 - **The archive delay stays fixed** at 24 hours, as step one's design decides; it isn't a setting.
+
+### Getting started (owner, 2026-11-04)
+
+Using a list is easy to pick up; the ways into one are not. A tab of its own, an `ItemView` like the
+Schedule, shows the three that are easy to miss.
+
+- **It opens by itself** when the user turns PrinceLists on (`onUserEnable`) in a vault where no
+  note is a list yet, and is the active tab. It doesn't open at startup, and a vault that has a list
+  already, as after turning the plugin off and on, doesn't get it.
+- **It writes nothing to the vault,** so closing the tab is the whole cleanup. An example list
+  note, which would teach by doing, was turned down because it leaves a file to delete, and a modal
+  because it's easy to click past and blocks the vault while you try things.
+- **The page:** "Getting started with PrinceLists" in a list's title style, a muted line under it,
+  then three rows drawn as list items:
+  - **Make a list,** by the ribbon icon or a folder's New list, with a "Create a list" button that
+    does what the ribbon icon does.
+  - **Turn a note into a list,** by a note's Turn into list, and Turn into note to go back.
+  - **See what's coming up,** with an "Open schedule" button.
+- **A row ticks itself (call)** when the user does its step while the tab is open: a note made as a
+  list, one created and read as a list before anything else writes to it, as "Create new list"
+  does; any other note becoming a list, since "Turn into list" writes to it; or the Schedule
+  becoming the active tab. Its checkbox can be ticked by hand too. Nothing is stored, so the rows
+  start unticked each time.
+- **On mobile the rows say "long-press"** where a computer's say "right-click" **(call)**, since a
+  long-press on a folder or note opens the same menu there.
+- **It comes back** from the "Show getting started" command, with no default hotkey, and the button
+  on the settings page. No documented API adds to the plugin's row in Settings → Community plugins,
+  whose gear opens the settings page.
 
 ## Still later
 
