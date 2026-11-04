@@ -31,7 +31,7 @@ export function notesText(view: PrinceListView, editor: EditorView): EditableTex
 		selectedText: () => editor.state.sliceDoc(editor.state.selection.main.from, editor.state.selection.main.to),
 		// The editor keeps its selection while it has no focus, mapped through any change.
 		holdSelection: () => () => undefined,
-		replaceSelection: (insert) => editor.dispatch(editor.state.replaceSelection(insert), { userEvent: insert ? 'input.paste' : 'delete.cut' }),
+		replaceSelection: (insert) => editor.dispatch(editor.state.replaceSelection(insert), { userEvent: insert ? 'input.paste' : 'delete.cut', scrollIntoView: true }),
 		pastePictures: (pictures) => {
 			pastePictures(view, pictures);
 		},
