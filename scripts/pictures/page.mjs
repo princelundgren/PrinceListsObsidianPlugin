@@ -207,11 +207,12 @@ export async function type(session, text) {
 	}
 }
 
-/** Shows `file` alone in the main area, as a list (`princelists-view`) or as a note in reading view. */
-export const showAlone = (session, file, view) => showStateAlone(
-	session,
-	view === 'list' ? { type: 'princelists-view', state: { file } } : { type: 'markdown', state: { file, mode: 'preview' } },
-);
+/** Shows `file` alone in the main area: as a `list`, as a `note` in reading view, or in the `editor`. */
+export const showAlone = (session, file, view) => showStateAlone(session, {
+	list: { type: 'princelists-view', state: { file } },
+	note: { type: 'markdown', state: { file, mode: 'preview' } },
+	editor: { type: 'markdown', state: { file, mode: 'source' } },
+}[view]);
 
 /** Shows the Schedule alone in the main area. */
 export const showScheduleAlone = (session) => showStateAlone(session, { type: 'princelists-schedule' });
