@@ -61,6 +61,9 @@ this project.
     `registerEvent` or `registerDomEvent`, so the plugin unloads cleanly.
   - The view's own elements use one delegated listener per container.
 - **Interface text** is in sentence case.
+- **README.md keeps each paragraph and list item on one line.** Obsidian's plugin browser shows
+  every line break in it, so a wrapped paragraph breaks mid-sentence there. The docs check flags
+  one.
 - **Stable IDs:** never change the plugin `id` (`princelists`), command IDs or the view type once
   they're released.
 - **No default hotkeys** on commands (Obsidian's plugin guidelines).
@@ -80,7 +83,7 @@ The docs check needs only Node.js 22 or later, and CI runs it:
 
 | Command | What it does |
 |---|---|
-| `node scripts/check-docs.mjs` | Check the docs for British spellings, the letters a-ring, a-umlaut and o-umlaut, home-directory paths and broken links |
+| `node scripts/check-docs.mjs` | Check the docs for British spellings, the letters a-ring, a-umlaut and o-umlaut, home-directory paths, broken links, and README paragraphs split over lines |
 | `node scripts/check-docs.mjs --pr-title="<title>" --pr-body-file <file>` | Also check a pull request's title, and its description saved in `<file>`: the template's five parts, 400 words at most |
 | `node --test scripts/check-docs.test.mjs` | Run the docs check's tests |
 

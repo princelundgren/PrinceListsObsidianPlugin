@@ -89,6 +89,28 @@ export function checkText(text, path) {
 	return findings;
 }
 
+// A thematic break, or the underline that makes the line above a heading.
+const RULE_LINE = String.raw`(?:[-*_][ \t]*){3,}$|=+[ \t]*$`;
+// A line that starts a block of its own, rather than carrying on the one above it.
+const STARTS_BLOCK = new RegExp(String.raw`^[ \t]*(?:[-*+][ \t]|\d+[.)][ \t]|[#|<>]|${RULE_LINE})`);
+// A line that no paragraph text can carry on from: a heading, table row, HTML or thematic break.
+const ENDS_BLOCK = new RegExp(String.raw`^[ \t]*(?:[#|<]|${RULE_LINE})`);
+
+// Obsidian's plugin browser keeps each line break in a README, so a wrapped paragraph breaks
+// mid-sentence there.
+export function checkReadmeParagraphs(text, path) {
+	const findings = [];
+	let above = null;
+	for (const [index, line] of proseLines(text)) {
+		const runsOn = above?.index === index - 1 && above.line.trim() !== '' && !ENDS_BLOCK.test(above.line);
+		if (runsOn && line.trim() !== '' && !STARTS_BLOCK.test(line)) {
+			findings.push(finding(path, index + 1, "paragraph runs on from the line above: Obsidian's plugin browser shows the break, so join the lines"));
+		}
+		above = { index, line };
+	}
+	return findings;
+}
+
 // Yields [lineIndex, line] for each line outside front matter and fenced code blocks. Fences
 // follow CommonMark, except that an opener may be indented any amount, as in a list item.
 function* proseLines(markdown) {
