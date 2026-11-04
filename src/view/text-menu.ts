@@ -153,10 +153,10 @@ async function writeClipboard(selected: string): Promise<boolean> {
 async function paste(text: EditableText, as: 'markdown' | 'plain'): Promise<void> {
 	try {
 		const items = await navigator.clipboard.read();
-		const html = await textOf(items, 'text/html');
-		const source = pasteSource(items.flatMap((item) => item.types), as, html);
+		const data = { types: items.flatMap((item) => item.types), text: await textOf(items, 'text/plain'), html: await textOf(items, 'text/html') };
+		const source = pasteSource(data, as);
 		if (source === 'pictures') text.pastePictures(await picturesIn(items));
-		else text.replaceSelection(source === 'html' ? htmlToMarkdown(html) : await textOf(items, 'text/plain'));
+		else text.replaceSelection(source === 'html' ? htmlToMarkdown(data.html) : data.text);
 	} catch (error) {
 		console.error(error);
 		new Notice("Couldn't paste from the clipboard.");
