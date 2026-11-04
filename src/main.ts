@@ -1,8 +1,9 @@
-import { FileView, MarkdownView, Notice, Plugin, TFile, TFolder } from 'obsidian';
+import { FileView, MarkdownView, normalizePath, Notice, Plugin, TFile, TFolder } from 'obsidian';
 import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { createList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
 import { addScheduleTab, openSchedule } from './obsidian/open-schedule';
+import { DEFAULT_SETTINGS, type PrinceListsSettings, PrinceListsSettingTab } from './obsidian/settings';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
 import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
 import { canTurnIntoNote, turnIntoNote } from './obsidian/turn-into-note';
@@ -12,7 +13,11 @@ import { PrinceListView } from './view/list-view';
 import { ScheduleView } from './view/schedule-view';
 
 export default class PrinceListsPlugin extends Plugin {
-	onload() {
+	settings: PrinceListsSettings = { ...DEFAULT_SETTINGS };
+
+	override async onload() {
+		await this.loadSettings();
+		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf));
 		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf));
 		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) => ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath)));
@@ -21,16 +26,15 @@ export default class PrinceListsPlugin extends Plugin {
 		this.addCommand({
 			id: 'new-list',
 			name: 'Create new list',
-			callback: () => void this.newListWhereNotesGo(),
+			callback: () => void this.newList(() => this.folderForNewLists()),
 		});
-		this.addRibbonIcon(RIBBON_ICON, 'Create new list', () => void this.newListWhereNotesGo());
+		this.addRibbonIcon(RIBBON_ICON, 'Create new list', () => void this.newList(() => this.folderForNewLists()));
 		this.addCommand({
 			id: 'open-schedule',
 			name: 'Open schedule',
 			callback: () => void openSchedule(this.app.workspace),
 		});
 		this.addRibbonIcon(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
-		this.app.workspace.onLayoutReady(() => void addScheduleTab(this.app.workspace));
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu, file) => {
 				if (file instanceof TFolder) {
@@ -39,7 +43,7 @@ export default class PrinceListsPlugin extends Plugin {
 							.setTitle('New list')
 							.setIcon(RIBBON_ICON)
 							.setSection('action-primary')
-							.onClick(() => void this.newList(file)),
+							.onClick(() => void this.newList(() => file)),
 					);
 				} else if (file instanceof TFile && canTurnIntoList(this.app, file)) {
 					menu.addItem((item) =>
@@ -131,14 +135,27 @@ export default class PrinceListsPlugin extends Plugin {
 		);
 	}
 
-	private newListWhereNotesGo(): Promise<void> {
-		const active = this.app.workspace.getActiveFile();
-		return this.newList(this.app.fileManager.getNewFileParent(active?.path ?? ''));
+	override onUserEnable() {
+		void addScheduleTab(this.app.workspace);
 	}
 
-	private async newList(folder: TFolder): Promise<void> {
+	override async onExternalSettingsChange() {
+		await this.loadSettings();
+	}
+
+	private async loadSettings(): Promise<void> {
+		this.settings = { ...DEFAULT_SETTINGS, ...((await this.loadData()) as Partial<PrinceListsSettings> | null) };
+	}
+
+	private async folderForNewLists(): Promise<TFolder> {
+		if (!this.settings.newListFolder.trim()) return this.app.fileManager.getNewFileParent(this.app.workspace.getActiveFile()?.path ?? '');
+		const path = normalizePath(this.settings.newListFolder);
+		return this.app.vault.getFolderByPath(path) ?? (await this.app.vault.createFolder(path));
+	}
+
+	private async newList(folder: () => TFolder | Promise<TFolder>): Promise<void> {
 		try {
-			await createList(this.app, folder);
+			await createList(this.app, await folder());
 		} catch (error) {
 			console.error('PrinceLists: could not create the list', error);
 			new Notice("Couldn't create the list.");
