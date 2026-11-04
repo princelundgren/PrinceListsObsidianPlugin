@@ -8,12 +8,12 @@ const ANSWER_MS = 15000;
 
 /**
  * Returns the WebSocket URL of the one `page` target that is Obsidian's app page. Throws, listing
- * every target's type and URL, when there is none or more than one.
+ * every target's type, URL and title, when there is none or more than one.
  */
 export function pickPage(targets) {
 	const pages = targets.filter((t) => t.type === 'page' && APP_PAGES.some((start) => t.url.startsWith(start)));
 	if (pages.length === 1) return pages[0].webSocketDebuggerUrl;
-	const listed = targets.map((t) => `${t.type} ${t.url}`).join('\n') || '(none)';
+	const listed = targets.map((t) => `${t.type} ${t.url} "${t.title}"`).join('\n') || '(none)';
 	throw new Error(`Expected one Obsidian page among the DevTools targets, found ${pages.length}:\n${listed}`);
 }
 
