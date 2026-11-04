@@ -11,7 +11,15 @@ export async function openGettingStarted(workspace: Workspace): Promise<void> {
 	workspace.setActiveLeaf(leaf, { focus: true });
 }
 
+/** The paths of the notes that are lists, as the metadata cache has read them. */
+export function listPaths(app: App): string[] {
+	return app.vault
+		.getMarkdownFiles()
+		.filter((file) => isMarkerValue(app.metadataCache.getFileCache(file)?.frontmatter))
+		.map((file) => file.path);
+}
+
 /** Whether any note in the vault is a list, as the metadata cache has read it. */
 export function vaultHasLists(app: App): boolean {
-	return app.vault.getMarkdownFiles().some((file) => isMarkerValue(app.metadataCache.getFileCache(file)?.frontmatter));
+	return listPaths(app).length > 0;
 }

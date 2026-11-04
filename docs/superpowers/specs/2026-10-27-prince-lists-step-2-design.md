@@ -37,7 +37,8 @@ only documented Obsidian APIs are used.
   editor](2026-10-29-notes-in-one-editor-design.md) replaced this.
 - **Right-click menus:** a heading's menu gains "Edit in Markdown" and collapsing or expanding
   every heading, and the list's background has a menu of its own on desktop.
-- **A settings page:** a folder for new lists, and a button that brings back the Schedule's tab.
+- **A settings page:** a folder for new lists, and buttons that bring back the Schedule's tab and
+  the Getting started tab.
 - **A Getting started tab** opens when PrinceLists is turned on in a vault with no lists, and shows
   how to make a list, turn a note into one and open the Schedule.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see

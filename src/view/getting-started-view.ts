@@ -2,6 +2,7 @@ import { ItemView, Platform, type WorkspaceLeaf } from 'obsidian';
 import { RIBBON_ICON, VIEW_TYPE_GETTING_STARTED, VIEW_TYPE_SCHEDULE } from '../constants';
 import { isMarkerValue } from '../core/frontmatter';
 import { NewListTracker, START_STEPS, type StartStep, stepTexts } from '../core/getting-started';
+import { listPaths } from '../obsidian/open-getting-started';
 import { openSchedule } from '../obsidian/open-schedule';
 import { addHiddenLabel, targetOf } from './dom';
 import { CHECKBOX_CLASS, ITEM_CLASS, ITEMS_CLASS } from './render-list';
@@ -78,8 +79,7 @@ export class GettingStartedView extends ItemView {
 
 	private watch(): void {
 		const { vault, metadataCache, workspace } = this.app;
-		const lists = vault.getMarkdownFiles().filter((file) => isMarkerValue(metadataCache.getFileCache(file)?.frontmatter));
-		const tracker = new NewListTracker(lists.map((file) => file.path));
+		const tracker = new NewListTracker(listPaths(this.app));
 		this.registerEvent(vault.on('create', (file) => tracker.created(file.path)));
 		this.registerEvent(vault.on('modify', (file) => tracker.modified(file.path)));
 		this.registerEvent(vault.on('rename', (file, oldPath) => tracker.renamed(oldPath, file.path)));
