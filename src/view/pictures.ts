@@ -36,16 +36,21 @@ function measureNotesEditors(contentEl: HTMLElement): void {
 	for (const editorEl of contentEl.findAll(`.${NOTES_CODEMIRROR_CLASS}`)) EditorView.findFromDOM(editorEl)?.requestMeasure();
 }
 
-// A paste goes where focus is, so it is in the notes while their editor has it.
 function onPaste(view: PrinceListView, evt: ClipboardEvent): void {
-	const card = view.card;
-	if (!card || card.lostAt !== null || !card.editor?.hasFocus) return;
 	// Spreadsheets and word processors copy a picture of their text along with it; the text wins.
 	if (evt.clipboardData?.getData('text/plain')) return;
-	const pictures = Array.from(evt.clipboardData?.files ?? []).filter((file) => file.type.startsWith('image/'));
-	if (pictures.length === 0) return;
-	evt.preventDefault();
+	if (pastePictures(view, Array.from(evt.clipboardData?.files ?? []))) evt.preventDefault();
+}
+
+/** Starts adding the pictures among `files` to the notes at the caret, as a paste. False when the notes don't take them: none is a picture, or no card's notes have focus. */
+export function pastePictures(view: PrinceListView, files: File[]): boolean {
+	const card = view.card;
+	// A paste goes where focus is, so it is in the notes while their editor has it.
+	if (!card || card.lostAt !== null || !card.editor?.hasFocus) return false;
+	const pictures = files.filter((file) => file.type.startsWith('image/'));
+	if (pictures.length === 0) return false;
 	void addPictures(view, card, pictures, true, ({ state }) => state.doc.lineAt(state.selection.main.head).number - 1);
+	return true;
 }
 
 function onDragOver(view: PrinceListView, evt: DragEvent): void {
