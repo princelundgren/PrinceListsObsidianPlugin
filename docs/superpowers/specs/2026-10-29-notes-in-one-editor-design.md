@@ -156,11 +156,13 @@ Compared with Obsidian's own editor side by side on desktop:
     (step two, "Formatting in a card"). Neither link item takes a selection over lines, as in
     Obsidian's menu.
   - Paste turns copied web or rich text into Markdown with Obsidian's `htmlToMarkdown`, and so does
-    Cmd+V in the notes **(owner, 2026-11-04)**, and a phone's own Paste there **(call)**: they are
-    the same paste. Paste as plain text pastes the text as it is. Text wins over pictures, as in
-    step one's "Text wins", so a clipboard with no text pastes its pictures into the card's notes.
+    Cmd+V in the notes **(owner, 2026-11-04)**. A phone's own Paste there converts too, since it is
+    the same paste **(call)**. Paste as plain text pastes the text as it is. Text wins over
+    pictures, as in step one's "Text wins", so a clipboard with no text pastes its pictures into the
+    card's notes.
   - Cmd+V and a phone's Paste convert whatever Obsidian's "Convert pasted HTML to Markdown"
-    setting says, since no documented API reads it; that setting is on by default.
+    setting says: `obsidian.d.ts` declares no way to read it, and names `vault.getConfig`, which
+    reads Obsidian's own settings, only in a comment. That setting is on by default.
 
 ## Undo (call)
 
