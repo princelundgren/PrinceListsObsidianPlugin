@@ -20,8 +20,7 @@ export function afterFieldInput(field: HTMLTextAreaElement): void {
 	histories.get(field)?.didChange(stateOf(field));
 }
 
-// A change the view makes, which the browser sends no beforeinput or input event for: one undo step,
-// then the input event the view saves a field's text from.
+// Records a change the view makes as one undo step, then sends the input event the browser doesn't.
 export function changeField(field: HTMLTextAreaElement, change: () => void): void {
 	const before = stateOf(field);
 	change();
