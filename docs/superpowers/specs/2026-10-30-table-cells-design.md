@@ -52,8 +52,8 @@ what has none is a **(call)**.
 - **Undo** in a cell is the notes editor's, and a cell it changes is drawn again. **If undo or an
   outside change takes the open cell's row,** the cell closes without writing, and focus goes to the
   notes editor.
-- **The format bar** stays under the notes while a cell is open. Its Undo and Redo go to the notes
-  editor, its formats and their keys act on the cell's selection, and a press keeps focus in the cell.
+- **The format bar** stays under the notes while a cell is open. Its formats and their keys act on
+  the cell's selection, and a press keeps focus in the cell.
 
 ## Rows, columns and the Markdown (owner, 2026-10-30)
 
