@@ -829,6 +829,18 @@ button.princelists-card-star.is-starred svg {
 		top: var(--princelists-mark-drop);
 	}
 
+	/* The card's star, and its calendar when it has no day, keep the box their full-size icon takes,
+	   as the ⋯ beside them does. */
+	button.princelists-card-star,
+	.princelists-when-button {
+		--princelists-icon-slot: var(--icon-size);
+	}
+
+	button.princelists-card-star > svg,
+	.princelists-when-button > svg {
+		margin: calc((var(--princelists-icon-slot) - var(--icon-size)) / 2);
+	}
+
 	/* The open card's day and star stand on the day's baseline, as on its row; the ⋯ stays centered. */
 	.princelists-card-tools,
 	.princelists-when-button {
