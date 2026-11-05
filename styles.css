@@ -84,6 +84,12 @@ textarea.princelists-title {
 	line-height: var(--line-height-normal);
 }
 
+/* On mobile a one-line row is 40px tall, Obsidian's own --touch-size-s, so a finger doesn't land on
+   the next row. */
+.princelists-is-mobile .princelists-item {
+	padding: calc((40px - var(--line-height-normal) * 1em) / 2) 0;
+}
+
 /* The row's parts sit on the title's first baseline, so they stay on its first line when it wraps and
    a smaller day still lines up with it. An open card or title field lines its checkbox up the same
    way. */

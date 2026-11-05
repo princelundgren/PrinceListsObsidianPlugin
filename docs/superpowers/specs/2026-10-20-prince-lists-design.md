@@ -581,6 +581,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 - **The checkbox only ticks and unticks (call).** It never opens the card. The open card shows the
   same checkbox.
+- **On mobile a one-line row is 40px tall (owner, 2026-11-05),** Obsidian's own
+  `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows denser.
 - **A done item stays where it is,** with the box ticked and the text gray **(owner)**. There's no
   strikethrough **(call)**.
 
