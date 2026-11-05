@@ -261,9 +261,12 @@ this met on 2026-10-30 **(owner)**.
   star and the ⋯. Once the item has a When, the day takes the icon's place, after its own calendar
   icon. Clicking either opens the platform's date picker through an `<input type="date">`.
   Obsidian has no date picker API, and the HTML input gives each platform's own picker.
-  - **In a pane too narrow for the title beside them (call),** such as a sidebar, the When, star
-    and ⋯ move to a line of their own under the title, still on the right, so the title keeps
-    about 8em to show and edit.
+  - **In a view or list block 480 px wide or narrower (owner, 2026-11-05),** such as a phone or a
+    sidebar, the When, star and ⋯ always have a line of their own under the title: the day under
+    the title's start, the star and ⋯ at the right. Beside the title they took about half a phone's
+    line, and moved down only on some titles.
+  - **In a wider pane too narrow for the title beside them (call),** they move to a line of their
+    own under the title, still on the right, so the title keeps about 8em to show and edit.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's top right, and every platform's picker can
     already clear the day.

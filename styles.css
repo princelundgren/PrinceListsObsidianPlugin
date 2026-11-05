@@ -608,8 +608,8 @@ button.princelists-new-item {
 }
 
 /* The title, with the card's When, star and ⋯ on its first line. They sit in the title's row only,
-   so the notes and the format bar under it span the card. In a pane too narrow for both, such as a
-   sidebar, they move to a line of their own under the title, still on the right. */
+   so the notes and the format bar under it span the card. In a pane too narrow for both they move to
+   a line of their own under the title, still on the right. */
 .princelists-card-head {
 	display: flex;
 	flex-wrap: wrap;
@@ -628,6 +628,26 @@ button.princelists-new-item {
 	display: flex;
 	align-items: center;
 	gap: var(--size-2-1);
+}
+
+/* In a view or list block about as narrow as a sidebar or a phone, they always have a line of their
+   own, so the title keeps the width: the day under the title's start, the star and ⋯ at the right. */
+@container (max-width: 480px) {
+	.princelists-card-head > .princelists-card-title {
+		flex-basis: 100%;
+	}
+
+	.princelists-card-tools {
+		flex: 1 1 100%;
+	}
+
+	.princelists-card-tools > .princelists-card-when {
+		margin-inline: calc(-1 * var(--size-2-2)) auto;
+	}
+
+	.princelists-card-tools > .princelists-card-when .princelists-when-button {
+		justify-content: start;
+	}
 }
 
 /* Under the notes editor while it has focus. On a narrow card, whole groups move to a second row, so
