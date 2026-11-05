@@ -64,6 +64,40 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸[[__init__]] ![[pic _1_.png]] [[note#_Heading_]] [[note|**x**]] **y**‸')).toBe('‸[[__init__]] ![[pic _1_.png]] [[note#_Heading_]] [[note|**x**]] y‸');
 	});
 
+	test('leaves inline code whose text would read as Markdown without its backticks', () => {
+		expect(clear('‸`npm test` and `a**b**c` and `d`‸')).toBe('‸npm test and `a**b**c` and d‸');
+		expect(clear('‸``d`e`` and f`‸')).toBe('‸``d`e`` and f`‸');
+		expect(clear('‸`$5` `#tag` `&amp;` `<b>` `[x]`‸')).toBe('‸`$5` `#tag` `&amp;` `<b>` `[x]`‸');
+		expect(clear('‸`snake_case` `C#`‸')).toBe('‸`snake_case` `C#`‸');
+		expect(clear('‸`https://a.b` `- item` `1. item` `> quote` `---`‸')).toBe('‸`https://a.b` `- item` `1. item` `> quote` `---`‸');
+	});
+
+	test('leaves inline code whose text would pair with the text around it without its backticks', () => {
+		for (const kept of ['`*a` b*', '`_a` b_', '`~~a` b~~', '`==a` b==', '`$a` b$', '`a%%` b%%', '`<a` b>', '`&amp`;', '`[a` b](x)', '`a #`tag']) {
+			expect(clear(`‸${kept}‸`)).toBe(`‸${kept}‸`);
+		}
+		expect(clear('‸`a\\`‸*b*')).toBe('‸`a\\`‸*b*');
+	});
+
+	test('leaves inline code that would read as Markdown with the rest of its word', () => {
+		for (const kept of ['<`b`> x', '#`tag` x', '&`amp`; x', '`1`. x', '`http`://a.b', '`-` x']) {
+			expect(clear(`‸${kept}‸`)).toBe(`‸${kept}‸`);
+		}
+		expect(clear('‸`a` b\n`c`‸')).toBe('‸a b\nc‸');
+	});
+
+	test('keeps tags whole, as Obsidian reads them', () => {
+		expect(clear('‸#_tag_ #a_b_c #__b__ #a/_b_ #_é_ #1_2_ *x*‸')).toBe('‸#_tag_ #a_b_c #__b__ #a/_b_ #_é_ #1_2_ x‸');
+		expect(clear('‸**#_t_** ~~#_u_~~ ==#_v_==‸')).toBe('‸#_t_ #_u_ #_v_‸');
+		expect(clear('‸#_t_*a* #_u_.‸')).toBe('‸#_t_a #_u_.‸');
+		const decomposed = '#é/_b_'.normalize('NFD');
+		expect(clear(`‸#a-_b_ ${decomposed} *x*‸`)).toBe(`‸#a-_b_ ${decomposed} x‸`);
+	});
+
+	test('reads a # after a letter, a bracket or a backslash as no tag', () => {
+		expect(clear('‸x#_v_ (#_w_) \\#_z_‸')).toBe('‸x#v (#w) \\#z‸');
+	});
+
 	test('keeps math and comments whole, inline and as blocks', () => {
 		expect(clear('‸$a*b*c$ and $$x_1_$$ and %%a *b*%% **d**‸')).toBe('‸$a*b*c$ and $$x_1_$$ and %%a *b*%% d‸');
 		expect(clear('‸$$\na*b*c\n$$\n%%\n*d*\n%%\n**e**‸')).toBe('‸$$\na*b*c\n$$\n%%\n*d*\n%%\ne‸');
@@ -74,9 +108,26 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸$$\na*b*\n\nc*d*\n$$\n\n%%\n*e*\n\n*f*\n%%‸')).toBe('‸$$\na*b*\n\nc*d*\n$$\n\n%%\n*e*\n\n*f*\n%%‸');
 	});
 
-	test('opens a math or comment block only at the top level', () => {
+	test('keeps a math or comment block whole inside a list item or quote, blank lines and all', () => {
+		expect(clear('‸- x\n  $$\n  a*b*c\n\n  d*e*f\n  $$\n- **y**‸')).toBe('‸- x\n  $$\n  a*b*c\n\n  d*e*f\n  $$\n- y‸');
+		expect(clear('‸- x\n  %%\n  a*b*c\n\n  d*e*f\n  %%\n- **y**‸')).toBe('‸- x\n  %%\n  a*b*c\n\n  d*e*f\n  %%\n- y‸');
+		expect(clear('‸> $$\n> a*b*\n>\n> c*d*\n> $$\n\n**e**‸')).toBe('‸> $$\n> a*b*\n>\n> c*d*\n> $$\n\ne‸');
+		expect(clear('‸>$$\n> a*b*\n>c*d*\n>$$‸')).toBe('‸>$$\n> a*b*\n>c*d*\n>$$‸');
+		expect(clear('‸> - x\n>   $$\n>   a*b*\n>\n>   c*d*\n>   $$‸')).toBe('‸> - x\n>   $$\n>   a*b*\n>\n>   c*d*\n>   $$‸');
+	});
+
+	test('ends an unclosed math block where its list item or quote ends', () => {
 		expect(clear('‸> $$\n> a\n\n**c**‸')).toBe('‸> $$\n> a\n\nc‸');
-		expect(clear('‸- $$\n  x\n- **y**‸')).toBe('‸- $$\n  x\n- y‸');
+		expect(clear('‸- $$\n  x\n\n**y**‸')).toBe('‸- $$\n  x\n\ny‸');
+		expect(clear('‸> - $$\n>   x\n>\n> **y**‸')).toBe('‸> - $$\n>   x\n>\n> y‸');
+		expect(clear('‸>$$\n>a\n\n**b**‸')).toBe('‸>$$\n>a\n\nb‸');
+		expect(clear('‸> $$\n> a\n\n> **c**‸')).toBe('‸> $$\n> a\n\n> c‸');
+	});
+
+	test('takes a lazy line right after an unclosed math block into it, as Obsidian draws it', () => {
+		expect(clear('‸> $$\n> x\n**y**‸')).toBe('‸> $$\n> x\n**y**‸');
+		expect(clear('‸- $$\n  x\n**y**‸')).toBe('‸- $$\n  x\n**y**‸');
+		expect(clear('‸> - $$\n>   x\n> **y**‸')).toBe('‸> - $$\n>   x\n> **y**‸');
 	});
 
 	test('changes nothing when there is nothing to clear, so it leaves no empty undo step', () => {

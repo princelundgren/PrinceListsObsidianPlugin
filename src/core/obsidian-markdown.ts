@@ -1,10 +1,11 @@
-import { GFM, parser, type BlockParser, type DelimiterType, type InlineContext, type InlineParser, type Line, type MarkdownConfig } from '@lezer/markdown';
+import { GFM, parser, type BlockContext, type BlockParser, type DelimiterType, type InlineContext, type InlineParser, type Line, type MarkdownConfig } from '@lezer/markdown';
 
 const EQUALS = 61;
 const DOLLAR = 36;
 const BANG = 33;
 const BRACKET = 91;
 const PERCENT = 37;
+const HASH = 35;
 const HIGHLIGHT_DELIMITER: DelimiterType = { resolve: 'Highlight', mark: 'HighlightMark' };
 
 const isSpace = (char: string) => /\s|^$/.test(char);
@@ -27,6 +28,21 @@ const wikiLink: InlineParser = {
 		return addOpaque(cx, 'WikiLink', pos, cx.slice(open, cx.end).indexOf(']]', 2), open, 2);
 	},
 	before: 'Link',
+};
+
+const TAG_BODY = /^[\p{L}\p{N}\p{M}_\-/]+/u;
+
+// A #tag's letters, digits, `_`, `-` and `/`, taken whole so its underscores don't read as italic. As
+// in Obsidian, a tag follows a space, the start of the text or a mark that may open a span.
+const tag: InlineParser = {
+	name: 'Tag',
+	parse(cx, next, pos) {
+		if (next !== HASH || !(pos === cx.offset || /[\s*_~=]/.test(cx.slice(pos - 1, pos)))) return -1;
+		const body = TAG_BODY.exec(cx.slice(pos + 1, cx.end))?.[0];
+		if (!body) return -1;
+		return cx.addElement(cx.elt('Tag', pos, pos + 1 + body.length));
+	},
+	before: 'Emphasis',
 };
 
 // $math$ as Obsidian reads it: no space just inside either `$`, and an escaped `\$` inside doesn't close it.
@@ -59,25 +75,31 @@ function addOpaque(cx: InlineContext, name: string, from: number, close: number,
 }
 
 /**
- * A $$ math block or %% comment block, taken whole: a line that starts with the delimiter at its first
- * column opens one, unless it closes it too, and the next line holding it closes it. Inside a list item
- * or quote, only the inline parsers keep them whole, and only within one paragraph.
+ * A $$ math block or %% comment block, taken whole, as Obsidian reads them: a line whose text starts
+ * with the delimiter opens one, unless it closes it too, and the next line holding it closes it. Blank
+ * lines don't end it, but the end of the list item or quote it opened in does, except for a line right
+ * after one of its own, which it takes in as a paragraph takes a lazy line. Unlike Obsidian, it takes in
+ * a new list item that way too, so that line keeps its marks.
  */
 function delimitedBlock(name: string, delimiter: string): BlockParser {
-	const opens = (line: Line) => line.text.startsWith(delimiter);
+	const opens = (line: Line) => line.text.startsWith(delimiter, line.pos);
 	return {
 		name,
 		parse(cx, line) {
 			if (!opens(line)) return false;
-			const from = cx.lineStart;
+			const from = cx.lineStart + line.pos;
+			const inContainers = staysInContainers(cx, line);
 			let to = cx.lineStart + line.text.length;
-			if (!line.text.includes(delimiter, delimiter.length)) {
-				while (cx.nextLine()) {
-					to = cx.lineStart + line.text.length;
-					if (line.text.includes(delimiter)) break;
-				}
+			let closed = line.text.includes(delimiter, line.pos + delimiter.length);
+			let afterText = true;
+			while (!closed && cx.nextLine()) {
+				const isBlank = line.pos === line.text.length;
+				if (!inContainers(line) && (isBlank || !afterText)) break;
+				afterText = !isBlank;
+				to = cx.lineStart + line.text.length;
+				closed = line.text.includes(delimiter, line.pos);
 			}
-			cx.nextLine();
+			if (closed) cx.nextLine();
 			cx.addElement(cx.elt(name, from, to));
 			return true;
 		},
@@ -86,9 +108,21 @@ function delimitedBlock(name: string, delimiter: string): BlockParser {
 	};
 }
 
+/**
+ * Whether a later line is still inside every list item and quote around `opening`. Each matched quote
+ * leaves a marker, and each list item or quote adds to the base indent: a quote one column or two, as
+ * a space follows its `>` or not, so the indent is allowed one column less per quote.
+ */
+function staysInContainers(cx: BlockContext, opening: Line): (line: Line) => boolean {
+	let quotes = 0;
+	for (let depth = 0; depth < cx.depth; depth++) if (cx.parentType(depth).name === 'Blockquote') quotes++;
+	const indent = opening.baseIndent - quotes;
+	return (line) => line.markers.length >= quotes && line.baseIndent >= indent;
+}
+
 const OBSIDIAN: MarkdownConfig = {
-	defineNodes: ['Highlight', 'HighlightMark', 'WikiLink', 'InlineMath', 'InlineComment', 'MathBlock', 'CommentBlock'],
-	parseInline: [highlight, wikiLink, inlineMath, inlineComment],
+	defineNodes: ['Highlight', 'HighlightMark', 'WikiLink', 'Tag', 'InlineMath', 'InlineComment', 'MathBlock', 'CommentBlock'],
+	parseInline: [highlight, wikiLink, tag, inlineMath, inlineComment],
 	parseBlock: [delimitedBlock('MathBlock', '$$'), delimitedBlock('CommentBlock', '%%')],
 };
 

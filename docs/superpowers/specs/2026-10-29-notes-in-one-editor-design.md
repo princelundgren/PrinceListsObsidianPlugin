@@ -145,11 +145,17 @@ Compared with Obsidian's own editor side by side on desktop:
   all, which Cmd+A does **(owner, 2026-11-05)**. Clear formatting removes the bold, italic,
   strikethrough, underline, highlight and inline code marks of every span the selection touches, or
   the caret is in, and leaves links and list markers **(owner, 2026-11-05)**. Wikilinks, embeds,
-  math and `%%` comments stay whole, marks and all **(call)**. The list's background
-  menu doesn't cover the list note **(call)**. A press of a button
-  other than the main one on a picture the editor draws, or on a drawn block, leaves it drawn and
-  the editor's focus as it was: Windows opens the menu on release, after a focus would have shown
-  the Markdown.
+  math and `%%` comments stay whole, marks and all **(call)**. So do math and comment blocks inside
+  a list item or quote, as Obsidian draws them, except that one left open also takes in a new list
+  item right after it, where Obsidian ends it, so that line keeps its marks **(owner, 2026-11-05)**.
+  Tags stay whole too, so `#_tag_` keeps its name **(owner, 2026-11-05)**. Inline code keeps its
+  backticks when its text or the rest of its word holds a character Markdown or Obsidian could read,
+  such as `*`, `_` or `#`, which could pair with text further on, or when the two together would
+  read as Markdown without them. So `` `a**b**c` `` doesn't turn bold, and `` `snake_case` `` stays
+  code too, unlike in Obsidian's own Clear formatting **(owner, 2026-11-05)**. The list's background
+  menu doesn't cover the list note **(call)**. A press of a button other than the main one on a
+  picture the editor draws, or on a drawn block, leaves it drawn and the editor's focus as it was:
+  Windows opens the menu on release, after a focus would have shown the Markdown.
   - Obsidian documents no way to open its own editor menu outside a note's editor, and plugins
     can't make its submenus, so the text menu is the plugin's own and flat.
   - In the card's title and in the notes, the card's and the list's, the text menu takes the place
