@@ -416,10 +416,11 @@ this met on 2026-10-30 **(owner)**.
 - **Where the star and the day sit (owner, 2026-11-05):**
   - On the title's first line: the day and the star on its baseline, and the checkbox centered on
     its capital letters. The day's icon sits on the day's own baseline.
-  - The star and the day's icon are drawn as tall as their text's capital letters, and the checkbox
+  - The star and the day's icon are drawn as tall as the title's capital letters, and the checkbox
     a fifth taller, so it reaches a little above and below them. Each keeps the room its full size
-    takes, so the text doesn't move and a tap anywhere the full-size box was still ticks. Where the app's web view lacks CSS's `cap` unit (before Chrome 118 and Safari
-    17.2) they keep their full size.
+    takes, so the text doesn't move and a tap anywhere the full-size box was still ticks. Where the
+    app's web view lacks CSS's `cap` unit (before Chrome 118 and Safari 17.2) they keep their full
+    size.
   - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
     the day go to the row's right edge, so a title that wraps leaves no gap before them and the days line up. In a wider
     pane they stay after the title, where the right edge can be far away.

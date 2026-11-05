@@ -730,13 +730,21 @@ textarea.princelists-heading-field {
 	fill: currentColor;
 }
 
-/* The star and the day's icon are drawn as tall as their text's capitals, bottoms on its baseline, and
-   the checkbox a little taller, centered on the capitals. Each keeps the slot its full size takes, so
-   the text and the tick zone stay where they were. The box's border and tick follow its size.
-   Without the cap unit they keep their full size. */
+/* Registered, so the row's 1cap is computed there and the smaller day text inherits the title's. */
+@property --princelists-title-cap {
+	syntax: '<length>';
+	inherits: true;
+	initial-value: 0px;
+}
+
+/* The star and the day's icon are drawn as tall as the title's capitals, bottoms on their text's
+   baseline, and the checkbox a little taller, centered on the capitals. Each keeps the slot its full
+   size takes, so the text and the tick zone stay where they were. The box's border and tick follow
+   its size. Without the cap unit they keep their full size. */
 @supports (height: 1cap) {
 	.princelists-item {
 		--princelists-checkbox-slot: var(--checkbox-size);
+		--princelists-title-cap: 1cap;
 	}
 
 	.princelists-item .princelists-checkbox {
@@ -760,7 +768,7 @@ textarea.princelists-heading-field {
 	}
 
 	.princelists-when-icon svg {
-		--icon-size: 1cap;
+		--icon-size: var(--princelists-title-cap);
 	}
 }
 
