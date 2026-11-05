@@ -422,8 +422,9 @@ this met on 2026-10-30 **(owner)**.
     capital letters. The checkbox reaches a little above and below them; the star and the calendar,
     which Lucide draws inside a margin, run from the baseline to the capitals' top. Each keeps the
     room its full size takes, so the text doesn't move and a tap anywhere the full-size box was
-    still ticks. An open card draws its day and star the same way, on the day's baseline, with
-    the ⋯ centered beside them. Where the app's web view lacks CSS's `cap` unit (before Chrome 118
+    still ticks. An open card's day, star and ⋯ are buttons the ⋯'s size, centered on one line;
+    its star and calendar are drawn as small as the row's, and a day's calendar stands on the day's
+    baseline. Where the app's web view lacks CSS's `cap` unit (before Chrome 118
     and Safari 17.2) they keep their full size.
   - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
     the day go to the row's right edge, so a title that wraps leaves no gap before them and the days line up. In a wider

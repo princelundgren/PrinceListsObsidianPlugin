@@ -821,16 +821,14 @@ button.princelists-card-star.is-starred svg {
 	}
 
 	.princelists-star svg,
-	.princelists-when > .princelists-when-icon svg,
-	.princelists-when-button svg,
-	button.princelists-card-star svg {
+	.princelists-when-icon svg {
 		--icon-size: var(--princelists-mark-size);
 		position: relative;
 		top: var(--princelists-mark-drop);
 	}
 
-	/* The card's star, and its calendar when it has no day, keep the box their full-size icon takes,
-	   as the ⋯ beside them does. */
+	/* The open card's star, day and ⋯ are buttons of one size, centered on one line. The star, and
+	   the calendar when there is no day, are as small as the row's, centered in that box. */
 	button.princelists-card-star,
 	.princelists-when-button {
 		--princelists-icon-slot: var(--icon-size);
@@ -838,17 +836,17 @@ button.princelists-card-star.is-starred svg {
 
 	button.princelists-card-star > svg,
 	.princelists-when-button > svg {
+		--icon-size: var(--princelists-mark-size);
 		margin: calc((var(--princelists-icon-slot) - var(--icon-size)) / 2);
 	}
 
-	/* The open card's day and star stand on the day's baseline, as on its row; the ⋯ stays centered. */
-	.princelists-card-tools,
-	.princelists-when-button {
+	/* A day's calendar stands on the day's baseline, as on its row, and the button is as tall as the ⋯.
+	   Wrapping lets align-content center the line when mobile makes the button taller. */
+	.princelists-when-button:has(> .princelists-when-icon) {
+		flex-wrap: wrap;
+		align-content: center;
 		align-items: baseline;
-	}
-
-	.princelists-card-tools > button.princelists-card-actions {
-		align-self: center;
+		padding-block: calc((var(--princelists-icon-slot) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
 	}
 }
 
