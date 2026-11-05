@@ -34,8 +34,10 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸**a**\n*b*\n- ~~c~~‸')).toBe('‸a\nb\n- c‸');
 	});
 
-	test('pairs an underline only within its paragraph', () => {
+	test('pairs an underline only within its paragraph, heading or table cell', () => {
 		expect(clear('<u>a\n\nb‸c</u> d')).toBe('<u>a\n\nb‸c</u> d');
+		expect(clear('# <u>a\n\n## b‸c</u>')).toBe('# <u>a\n\n## b‸c</u>');
+		expect(clear('| <u>a | b‸c</u> |\n| - | - |')).toBe('| <u>a | b‸c</u> |\n| - | - |');
 	});
 
 	test('clears a whole span when the selection takes in only part of it', () => {

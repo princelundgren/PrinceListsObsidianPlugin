@@ -7,6 +7,9 @@ interface Span {
 	to: number;
 }
 
+// The blocks whose text is read as inline Markdown, so an underline's tags pair only within one.
+const INLINE_BLOCK = /^(?:Paragraph|ATXHeading\d|SetextHeading\d|TableCell)$/;
+
 // Each span Clear formatting removes, and the name of its marks.
 const SPAN_MARKS: Record<string, string> = {
 	Emphasis: 'EmphasisMark',
@@ -43,7 +46,7 @@ function marksToClear(text: string, start: number, end: number): Span[] {
 	const underlineOpens: SyntaxNode[] = [];
 	obsidianMarkdown.parse(text).iterate({
 		enter: (ref) => {
-			if (ref.name === 'Paragraph') underlineOpens.length = 0;
+			if (INLINE_BLOCK.test(ref.name)) underlineOpens.length = 0;
 			const markName = SPAN_MARKS[ref.name];
 			if (markName && touches(ref)) marks.push(...ref.node.getChildren(markName));
 			if (ref.name !== 'HTMLTag') return;
