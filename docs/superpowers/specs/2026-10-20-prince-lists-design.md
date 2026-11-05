@@ -586,8 +586,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   a note stops at the note's text, since its margin is the editor's. The open card's box has none,
   as the card's notes would make it tall. While a card is open the zone only closes it
   ("Selecting").
-- **On mobile a one-line row is 40px tall (owner, 2026-11-05),** Obsidian's own
-  `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows denser.
+- **On mobile a one-line row is 40px tall (owner, 2026-11-05),** the size Obsidian 1.15 gives its
+  undocumented `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows
+  denser.
 - **A done item stays where it is,** with the box ticked and the text gray **(owner)**. There's no
   strikethrough **(call)**.
 

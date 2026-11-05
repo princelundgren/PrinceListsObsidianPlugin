@@ -85,8 +85,8 @@ textarea.princelists-title {
 	line-height: var(--line-height-normal);
 }
 
-/* On mobile a one-line row is 40px tall, Obsidian's own --touch-size-s, so a finger doesn't land on
-   the next row. */
+/* On mobile a one-line row is 40px tall, the size Obsidian 1.15 gives its undocumented
+   --touch-size-s, so a finger doesn't land on the next row. */
 .princelists-is-mobile .princelists-item {
 	padding: calc((40px - var(--line-height-normal) * 1em) / 2) 0;
 }
