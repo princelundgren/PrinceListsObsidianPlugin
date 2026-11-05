@@ -14,7 +14,7 @@ export interface ItemRow {
 	/** The checkbox's accessible name: the title, or the rest of the line when the title is empty. */
 	label: string;
 	done: boolean;
-	/** Done the archive delay or longer ago, so hidden unless "Show archived" is on. */
+	/** Done the archive delay or longer ago, so hidden unless "Show archived items" is on. */
 	archived: boolean;
 	starred: boolean;
 	/** The item's When, `YYYY-MM-DD`, or null. */
@@ -98,7 +98,7 @@ function itemMatches(lines: readonly Line[], item: ItemBlock, row: ItemRow, quer
 	return matchesQuery(row.title, getItemNotes(lines, item), query);
 }
 
-// A done item is hidden once it is archived, unless "Show archived" is on.
+// A done item is hidden once it is archived, unless "Show archived items" is on.
 function isShown(row: ItemRow, showArchived: boolean): boolean {
 	return showArchived || !row.archived;
 }
