@@ -112,6 +112,15 @@ textarea.princelists-title {
 	width: calc(var(--checkbox-size) + var(--size-4-2));
 }
 
+/* The open card's starts at its edge and is as tall as the title's first line with the padding
+   around it, since the notes make the card tall. */
+.princelists-content .princelists-card > .princelists-tick-zone {
+	inset-inline-start: 0;
+	inset-block-end: auto;
+	width: calc(var(--size-4-2) + var(--checkbox-size) + var(--size-4-2));
+	height: calc(var(--line-height-normal) * 1em + 2 * var(--size-4-2));
+}
+
 /* The row's parts sit on the title's first baseline, so they stay on its first line when it wraps and
    a smaller day still lines up with it. An open card or title field lines its checkbox up the same
    way. */
