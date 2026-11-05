@@ -29,7 +29,7 @@ only documented Obsidian APIs are used.
   7 days and Later.
 - **An item can be starred.**
 - **An empty list says how to add an item,** and Cmd+Enter adds one.
-- **Dragging a heading moves its whole section,** and an arrow left of a heading collapses it.
+- **Dragging a heading moves its whole section,** and an arrow beside a heading collapses it.
 - **Formatting in a card:** Cmd+B, Cmd+I and Cmd+K, a format bar under the notes, and "Edit in
   Markdown", which opens the list as Markdown at the item.
 - **Notes edited one block at a time:** a card's notes and the list note stayed drawn as in a note,
@@ -374,14 +374,14 @@ this met on 2026-10-30 **(owner)**.
 
 ### Collapsing a heading (owner)
 
-- **An arrow left of a heading collapses and expands its section,** in the margin as Obsidian's
-  own fold arrows are, and drawn as they are (owner, 2026-10-27): Obsidian's `right-triangle`
+- **An arrow in the checkboxes' column collapses and expands a heading's section (owner,
+  2026-11-05),** with the heading's text lined up with the item titles; in the margin it was too
+  hard to hit. It is drawn as Obsidian's own fold arrows are (owner, 2026-10-27): its `right-triangle`
   icon in `--collapse-icon-color`, turned to point right and in `--collapse-icon-color-collapsed`
   while collapsed. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
   on mobile.
-- **On a phone the arrow has only the list's narrower margin (owner, 2026-11-05):** its touch
-  target is as wide as that margin, with the icon near the screen's edge, as the cost of the wider
-  list.
+- **Its target is as wide as a row's tick zone (call):** the column and the gap after it, reaching
+  into the view's margin. It runs from the space above the heading to the heading's bottom.
 - **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. Mobile
   has no hover, so there it always shows, as on a desktop system's touchscreen without a mouse. It
   shows no tooltip: its accessible name is

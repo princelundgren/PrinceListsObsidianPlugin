@@ -702,6 +702,7 @@ button.princelists-collapse:not(:focus-visible) {
 textarea.princelists-heading-field {
 	margin: var(--size-4-4) 0 var(--size-4-1);
 	padding-bottom: var(--size-4-1);
+	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-weight: var(--font-bold);
 }
@@ -810,20 +811,27 @@ button.princelists-card-star.is-starred svg {
 	margin-block: var(--size-4-2);
 }
 
-/* The collapse arrow sits in the margin left of its heading, drawn as Obsidian's own fold icon. */
+/* A heading's text lines up with the item titles, and its collapse arrow, drawn as Obsidian's own
+   fold icon, sits in the checkboxes' column. */
 .princelists-heading {
 	position: relative;
+	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
 }
 
+/* The arrow's target is as wide as a row's tick zone, the column and the gap after it, and runs from
+   the space above the heading to its bottom. Its content box is the column beside the heading's line. */
 button.princelists-collapse {
 	position: absolute;
-	inset-inline-end: 100%;
-	top: 0;
+	inset-block: calc(-1 * var(--size-4-4)) 0;
+	inset-inline-start: 0;
+	box-sizing: content-box;
+	width: var(--checkbox-size);
+	height: auto;
 	display: flex;
 	align-items: center;
-	padding: 0 var(--size-2-1);
+	justify-content: center;
+	padding: var(--size-4-4) var(--size-4-2) var(--size-4-1) 0;
 	font-size: inherit;
-	height: calc(var(--line-height-normal) * 1em);
 	background: none;
 	border: none;
 	color: var(--collapse-icon-color);
@@ -832,10 +840,15 @@ button.princelists-collapse {
 	--icon-stroke: 4px;
 }
 
-/* On mobile, wider into the margin for a finger, with the icon still beside its heading. */
-.princelists-is-mobile button.princelists-collapse {
-	justify-content: flex-end;
-	min-width: var(--size-4-5);
+/* In a view it also takes in part of the margin, as the tick zone does. */
+.princelists-content button.princelists-collapse {
+	inset-inline-start: calc(-1 * var(--size-4-3));
+	padding-inline-start: var(--size-4-3);
+}
+
+.princelists-content .princelists-block button.princelists-collapse {
+	inset-inline-start: 0;
+	padding-inline-start: 0;
 }
 
 .princelists-is-collapsed .princelists-collapse {
