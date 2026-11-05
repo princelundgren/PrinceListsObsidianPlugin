@@ -19,6 +19,7 @@ const FORMATS: readonly FormatItem[] = [
 	{ format: 'italic', icon: 'italic', label: 'Italic' },
 	{ format: 'strikethrough', icon: 'strikethrough', label: 'Strikethrough' },
 	{ format: 'underline', icon: 'underline', label: 'Underline' },
+	{ format: 'clearFormatting', icon: 'eraser', label: 'Clear formatting' },
 ];
 
 const PARAGRAPHS: readonly FormatItem[] = [
