@@ -64,6 +64,27 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸[[__init__]] ![[pic _1_.png]] [[note#_Heading_]] [[note|**x**]] **y**‸')).toBe('‸[[__init__]] ![[pic _1_.png]] [[note#_Heading_]] [[note|**x**]] y‸');
 	});
 
+	test('leaves inline code whose text would read as Markdown without its backticks', () => {
+		expect(clear('‸`npm test` and `a**b**c` and `d`‸')).toBe('‸npm test and `a**b**c` and d‸');
+		expect(clear('‸``d`e`` and f`‸')).toBe('‸``d`e`` and f`‸');
+		expect(clear('‸`$5` `#tag` `&amp;` `<b>` `[x]`‸')).toBe('‸`$5` `#tag` `&amp;` `<b>` `[x]`‸');
+		expect(clear('‸`https://a.b` `- item` `1. item` `> quote` `---`‸')).toBe('‸`https://a.b` `- item` `1. item` `> quote` `---`‸');
+	});
+
+	test('leaves inline code whose text would pair with the text around it without its backticks', () => {
+		for (const kept of ['`*a` b*', '`_a` b_', '`~~a` b~~', '`==a` b==', '`$a` b$', '`a%%` b%%', '`<a` b>', '`&amp`;', '`[a` b](x)', '`a #`tag']) {
+			expect(clear(`‸${kept}‸`)).toBe(`‸${kept}‸`);
+		}
+		expect(clear('‸`a\\`‸*b*')).toBe('‸`a\\`‸*b*');
+	});
+
+	test('leaves inline code that would read as Markdown with the rest of its word', () => {
+		for (const kept of ['<`b`> x', '#`tag` x', '&`amp`; x', '`1`. x', '`http`://a.b', '`-` x']) {
+			expect(clear(`‸${kept}‸`)).toBe(`‸${kept}‸`);
+		}
+		expect(clear('‸`a` b\n`c`‸')).toBe('‸a b\nc‸');
+	});
+
 	test('keeps tags whole, as Obsidian reads them', () => {
 		expect(clear('‸#_tag_ #a_b_c #__b__ #a/_b_ #_é_ #1_2_ *x*‸')).toBe('‸#_tag_ #a_b_c #__b__ #a/_b_ #_é_ #1_2_ x‸');
 		expect(clear('‸**#_t_** ~~#_u_~~ ==#_v_==‸')).toBe('‸#_t_ #_u_ #_v_‸');
