@@ -3,7 +3,7 @@ import type { Format } from '../core/format';
 import { changeField } from './field-undo';
 import { applyFormat } from './format';
 import type { PrinceListView } from './list-view';
-import { runNotesBarAction } from './notes-keys';
+import { applyNotesFormat } from './notes-keys';
 import { pastePictures } from './pictures';
 
 /** The card's title, or notes, a card's or the list's, as the right-click menu and the format bar's links edit them. */
@@ -33,7 +33,7 @@ export function notesText(view: PrinceListView, editor: EditorView): EditableTex
 		pastePictures: (pictures) => {
 			pastePictures(view, pictures);
 		},
-		format: (format) => runNotesBarAction(editor, format),
+		format: (format) => applyNotesFormat(editor, format),
 		focus: () => editor.focus(),
 	};
 }

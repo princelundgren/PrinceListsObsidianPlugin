@@ -179,8 +179,8 @@ Compared with Obsidian's own editor side by side on desktop:
 
 ## Undo (call)
 
-- **While the editor has focus,** Cmd+Z and Cmd+Shift+Z, and the format bar's Undo and Redo, step
-  through the editor's own history, across the whole notes.
+- **While the editor has focus,** Cmd+Z and Cmd+Shift+Z step through the editor's own history,
+  across the whole notes.
 - **Outside the editor,** they stay the list's (step one, "Undo (1b, call)"), where a visit to the
   notes is one step, as typing in a field was.
 - **Any change the editor didn't make** clears its history, as an outside change clears the list's:
