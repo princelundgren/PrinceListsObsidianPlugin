@@ -630,23 +630,11 @@ button.princelists-new-item {
 	gap: var(--size-2-1);
 }
 
-/* In a view or list block about as narrow as a sidebar or a phone, they always have a line of their
-   own, so the title keeps the width: the day under the title's start, the star and ⋯ at the right. */
+/* In a view or list block about as narrow as a sidebar or a phone, they always have that line, so the
+   title keeps the width. */
 @container (max-width: 480px) {
 	.princelists-card-head > .princelists-card-title {
 		flex-basis: 100%;
-	}
-
-	.princelists-card-tools {
-		flex: 1 1 100%;
-	}
-
-	.princelists-card-tools > .princelists-card-when {
-		margin-inline: calc(-1 * var(--size-2-2)) auto;
-	}
-
-	.princelists-card-tools > .princelists-card-when .princelists-when-button {
-		justify-content: start;
 	}
 }
 
