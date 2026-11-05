@@ -336,7 +336,8 @@ this met on 2026-10-30 **(owner)**.
   Linux, and "Tap + to add an item" on mobile, which usually has no keyboard. Where the settings
   show no "+" on that device, it leaves the "+" out: "Press Cmd+Enter to add an item", and "Press
   Enter in the title to add an item" on mobile **(owner, 2026-11-05)**. Changing either "+"
-  setting draws open lists again, so the hint follows at once.
+  setting draws open empty lists again, so the hint follows at once; a list with items only shows
+  or hides its buttons.
 - **Cmd+Enter adds an item (owner),** the same as "+": below the selected item, or as the list's
   first item when nothing is selected. It's registered on the view's own `scope` as `Mod+Enter`,
   like Cmd+Z, so it works anywhere in a list that has focus, a card's fields included, and isn't

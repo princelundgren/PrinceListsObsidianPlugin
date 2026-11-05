@@ -15,7 +15,7 @@ import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import type { PrinceListsSettings } from '../obsidian/settings';
 import { openAsMarkdown } from '../obsidian/switch';
-import { buildNewItemButton, newItem } from './add-button';
+import { buildNewItemButton, hasNoItems, newItem } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
 import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
@@ -311,6 +311,12 @@ export class PrinceListView extends TextFileView {
 		this.newItemAction?.toggle(isList && this.showsHeaderAdd());
 		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
 		this.syncArchivedButton();
+	}
+
+	/** Follows a change to where the "+" buttons show: an empty list is drawn again, since its hint names them. */
+	syncAddButtons(): void {
+		if (hasNoItems(this)) this.render();
+		else this.syncButtons();
 	}
 
 	/** Whether the settings show a "+" that adds an item on this device. */

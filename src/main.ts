@@ -156,7 +156,7 @@ export default class PrinceListsPlugin extends Plugin {
 		const { floatingAddButton, headerAddButton } = this.settings;
 		await this.loadSettings();
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
-		if (this.settings.floatingAddButton !== floatingAddButton || this.settings.headerAddButton !== headerAddButton) this.redrawLists();
+		if (this.settings.floatingAddButton !== floatingAddButton || this.settings.headerAddButton !== headerAddButton) this.syncAddButtons();
 		else this.syncListButtons();
 	}
 
@@ -164,8 +164,7 @@ export default class PrinceListsPlugin extends Plugin {
 	settingChanged(key: keyof PrinceListsSettings): void {
 		if (key === 'archiveDelayHours') this.archiveDelay.changed();
 		if (key === 'showScheduleButton') this.syncListButtons();
-		// An empty list's hint names the "+" buttons, so it's drawn again with them.
-		if (key === 'floatingAddButton' || key === 'headerAddButton') this.redrawLists();
+		if (key === 'floatingAddButton' || key === 'headerAddButton') this.syncAddButtons();
 	}
 
 	private listViews(): PrinceListView[] {
@@ -176,9 +175,8 @@ export default class PrinceListsPlugin extends Plugin {
 		for (const view of this.listViews()) view.syncButtons();
 	}
 
-	/** Draws every open list again, which also shows or hides its buttons. */
-	private redrawLists(): void {
-		for (const view of this.listViews()) view.render();
+	private syncAddButtons(): void {
+		for (const view of this.listViews()) view.syncAddButtons();
 	}
 
 	private async loadSettings(): Promise<void> {
