@@ -74,9 +74,26 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸$$\na*b*\n\nc*d*\n$$\n\n%%\n*e*\n\n*f*\n%%‸')).toBe('‸$$\na*b*\n\nc*d*\n$$\n\n%%\n*e*\n\n*f*\n%%‸');
 	});
 
-	test('opens a math or comment block only at the top level', () => {
+	test('keeps a math or comment block whole inside a list item or quote, blank lines and all', () => {
+		expect(clear('‸- x\n  $$\n  a*b*c\n\n  d*e*f\n  $$\n- **y**‸')).toBe('‸- x\n  $$\n  a*b*c\n\n  d*e*f\n  $$\n- y‸');
+		expect(clear('‸- x\n  %%\n  a*b*c\n\n  d*e*f\n  %%\n- **y**‸')).toBe('‸- x\n  %%\n  a*b*c\n\n  d*e*f\n  %%\n- y‸');
+		expect(clear('‸> $$\n> a*b*\n>\n> c*d*\n> $$\n\n**e**‸')).toBe('‸> $$\n> a*b*\n>\n> c*d*\n> $$\n\ne‸');
+		expect(clear('‸>$$\n> a*b*\n>c*d*\n>$$‸')).toBe('‸>$$\n> a*b*\n>c*d*\n>$$‸');
+		expect(clear('‸> - x\n>   $$\n>   a*b*\n>\n>   c*d*\n>   $$‸')).toBe('‸> - x\n>   $$\n>   a*b*\n>\n>   c*d*\n>   $$‸');
+	});
+
+	test('ends an unclosed math block where its list item or quote ends', () => {
 		expect(clear('‸> $$\n> a\n\n**c**‸')).toBe('‸> $$\n> a\n\nc‸');
-		expect(clear('‸- $$\n  x\n- **y**‸')).toBe('‸- $$\n  x\n- y‸');
+		expect(clear('‸- $$\n  x\n\n**y**‸')).toBe('‸- $$\n  x\n\ny‸');
+		expect(clear('‸> - $$\n>   x\n>\n> **y**‸')).toBe('‸> - $$\n>   x\n>\n> y‸');
+		expect(clear('‸>$$\n>a\n\n**b**‸')).toBe('‸>$$\n>a\n\nb‸');
+		expect(clear('‸> $$\n> a\n\n> **c**‸')).toBe('‸> $$\n> a\n\n> c‸');
+	});
+
+	test('takes a lazy line right after an unclosed math block into it, as Obsidian draws it', () => {
+		expect(clear('‸> $$\n> x\n**y**‸')).toBe('‸> $$\n> x\n**y**‸');
+		expect(clear('‸- $$\n  x\n**y**‸')).toBe('‸- $$\n  x\n**y**‸');
+		expect(clear('‸> - $$\n>   x\n> **y**‸')).toBe('‸> - $$\n>   x\n> **y**‸');
 	});
 
 	test('changes nothing when there is nothing to clear, so it leaves no empty undo step', () => {

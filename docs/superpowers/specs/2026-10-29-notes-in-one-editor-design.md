@@ -145,8 +145,10 @@ Compared with Obsidian's own editor side by side on desktop:
   all, which Cmd+A does **(owner, 2026-11-05)**. Clear formatting removes the bold, italic,
   strikethrough, underline, highlight and inline code marks of every span the selection touches, or
   the caret is in, and leaves links and list markers **(owner, 2026-11-05)**. Wikilinks, embeds,
-  math and `%%` comments stay whole, marks and all **(call)**. The list's background
-  menu doesn't cover the list note **(call)**. A press of a button
+  math and `%%` comments stay whole, marks and all **(call)**. So do math and comment blocks inside
+  a list item or quote, as Obsidian draws them, except that one left open also takes in a new list
+  item right after it, where Obsidian ends it, so that line keeps its marks **(owner, 2026-11-05)**.
+  The list's background menu doesn't cover the list note **(call)**. A press of a button
   other than the main one on a picture the editor draws, or on a drawn block, leaves it drawn and
   the editor's focus as it was: Windows opens the menu on release, after a focus would have shown
   the Markdown.
