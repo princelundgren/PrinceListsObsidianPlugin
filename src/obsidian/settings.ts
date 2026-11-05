@@ -55,7 +55,7 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 			},
 			{
 				name: 'Hide ticked items after',
-				desc: 'How long a ticked item stays in its list before Show archived is needed to see it. An item ticked on a date with no time counts from the end of that day.',
+				desc: 'How long a ticked item stays in its list before Show archived items is needed to see it. An item ticked on a date with no time counts from the end of that day.',
 				control: {
 					type: 'dropdown',
 					key: 'archiveDelayHours',

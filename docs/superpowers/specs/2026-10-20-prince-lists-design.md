@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-04
+verified: 2026-11-05
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -36,7 +36,7 @@ and data safety, and owner's advocate. Their findings are folded in.
   item is that item's notes, and notes can hold any Markdown, pictures included.
 - **Ticking an item** grays it out where it is, or hides it at once with the At once delay. A
   day later, or after the delay chosen in the settings, it is **archived** and hidden, and "Show
-  archived" brings archived items back.
+  archived items" brings them back.
 - **Lists open in the list view.** The plain note shows for about 10 ms first, which the owner
   couldn't see on macOS or an iPhone.
 - **A note from outside the vault** with the marker, opened in Obsidian on desktop, is a list too.
@@ -223,7 +223,7 @@ These are wanted later, roughly in this order. The file format already leaves ro
   **(owner, 2026-10-20)**.
 - **Done:** ticked.
 - **Archived:** done and hidden by the archived rule (see the table under Completion). "Show
-  archived" shows it again.
+  archived items" shows it again.
 
 ## What a list is
 
@@ -798,14 +798,15 @@ back only what was typed and leaves the empty line, which can be deleted like an
   against a wrong clock, not how long items stay.
 - **At once hides an item as it's ticked (owner, 2026-11-04).** The tick redraws the list instead
   of graying the row in place, so the item goes then, not at the next redraw. Rows below move up,
-  and the next tap lands where the ticked item was. A mistaken tick comes back with Show archived,
-  or Cmd+Z on desktop. A list block and the Schedule redraw after every tick already. With Show
-  archived on, it stays in place, blue, as it does with any delay. An item ticked in its open card
-  stays there, blue, and goes when the card closes.
+  and the next tap lands where the ticked item was. A mistaken tick comes back with Show archived
+  items, or Cmd+Z on desktop. A list block and the Schedule redraw after every tick already. With
+  Show archived items on, it stays in place, blue, as it does with any delay. An item ticked in its
+  open card stays there, blue, and goes when the card closes.
 - **"Archived" is worked out, never written down.** It is computed from `✔` plus the delay.
   Nothing in the file changes when an item becomes archived.
-- **"Show archived" in the pane's ⋯ menu (call; archived is the owner's word)** shows archived
-  items again, gray, in place.
+- **"Show archived items" in the pane's ⋯ menu (owner, 2026-11-05; archived is the owner's word)**
+  shows archived items again, gray, in place. The name says what it shows, since the ⋯ menu also
+  holds Obsidian's and other plugins' items, where "Show archived" alone was unclear.
   - **It's also a ticked-checkbox icon in the pane's header (owner, 2026-10-27),** because the ⋯
     menu alone was hard to find on mobile. The icon is the same shape as the list's own
     checkboxes, so it reads as done items; an eye was tried first and read as unrelated to them.
@@ -814,8 +815,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - **Cmd+Shift+A toggles it too (owner, 2026-11-03),** Ctrl+Shift+A on Windows and Linux, while a
     list has focus, its fields included. It's registered on the view's own `scope`, as
     Cmd+Enter is, so it isn't a default hotkey, and there's no command for it. The icon's tooltip
-    names the key: "Show archived (Cmd+Shift+A)" or "Hide archived (Cmd+Shift+A)", with Ctrl on
-    Windows and Linux. Mobile, which usually has no keyboard, shows no key **(owner, 2026-11-03)**.
+    names the key: "Show archived items (Cmd+Shift+A)" or "Hide archived items (Cmd+Shift+A)",
+    with Ctrl on Windows and Linux. Mobile, which usually has no keyboard, shows no key **(owner,
+    2026-11-03)**.
   - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
     it stands apart from a ticked item not yet archived, whose checkbox keeps the accent color.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only

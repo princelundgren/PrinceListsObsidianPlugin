@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-04
+verified: 2026-11-05
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -139,9 +139,9 @@ this met on 2026-10-30 **(owner)**.
 - **A heading shows while one of its items shows (call).** Headings themselves aren't searched.
 - **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and
   can't match.
-- **Archived items are searched only while "Show archived" is on.**
+- **Archived items are searched only while "Show archived items" is on.**
 - **Escape in the field ends the filter** and shows every row again, and so does leaving the field
-  while it's empty. Like "Show archived", it isn't remembered **(call)**.
+  while it's empty. Like "Show archived items", it isn't remembered **(call)**.
 - **Everything else works while filtering (call):** ticking, cards, dragging and adding. A drop
   goes after the visible row above it, as it does past hidden archived rows. A new item, or an item
   whose card is open, stays shown while its card is open even if it doesn't match.
@@ -161,7 +161,7 @@ this met on 2026-10-30 **(owner)**.
 - **It shows (owner):** the list's name as a link to it, its headings, and its items as rows with
   a checkbox, the rendered title, the star and the When. The list note, the items' notes and
   content the plugin leaves alone don't show **(call)**, and there are no cards.
-  - Done items stay gray until archived. Archived items are hidden, with no "Show archived"
+  - Done items stay gray until archived. Archived items are hidden, with no "Show archived items"
     **(call)**.
 - **Ticking** works as in the list view.
 - **Titles are edited in place (call).** A click on a row, not on its checkbox or a link, turns its
@@ -276,8 +276,9 @@ this met on 2026-10-30 **(owner)**.
 - **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
   ribbon hidden or doesn't know the command.
 - **So does a list's header (owner, 2026-11-04):** a `calendar-clock` view action named "Open
-  schedule", left of Show archived, since the ⋯ menu alone is hard to find on mobile. Like Show
-  archived, it shows only on a list. The settings can hide it; the ⋯ menu's item stays either way.
+  schedule", left of Show archived items, since the ⋯ menu alone is hard to find on mobile. Like
+  Show archived items, it shows only on a list. The settings can hide it; the ⋯ menu's item stays
+  either way.
 - **Its groups (owner, 2026-10-27):** Today, which includes everything overdue, then Tomorrow,
   Next 7 days and Later. An earlier "Next month", 8 to 31 days ahead, read as the calendar month
   and seemed to leave a gap after the week.
@@ -381,8 +382,9 @@ this met on 2026-10-30 **(owner)**.
   have no heading, so they can't collapse. The open card's item still shows in a collapsed
   section, so a card never vanishes under its heading **(call)**.
 - **It isn't remembered (owner).** Every heading is open each time a list opens, as "Show
-  archived" is off. While the view is open, a collapsed heading stays collapsed through redraws
-  and edits, following its line as a selection does **(call)**. Nothing is written to the file.
+  archived items" is off. While the view is open, a collapsed heading stays collapsed through
+  redraws and edits, following its line as a selection does **(call)**. Nothing is written to the
+  file.
 - **Adding into a collapsed section expands it (call):** New item from its heading menu, an item
   dropped under the heading, or Cmd+Enter with an item in it selected.
 - **A collapsed section drags as any section does.** While Cmd+F filters the list, matches in a
@@ -467,7 +469,7 @@ The block fields this section described are gone.
 - **The heading menu gains "Edit in Markdown",** with the caret at the end of the heading's line,
   on desktop and on mobile, and Collapse or Expand all headings ("Collapsing a heading").
 - **Right-clicking the list's background on desktop** opens the list menu: New item, New heading,
-  Edit in Markdown, Show archived, Collapse or Expand all headings, and Open schedule. The
+  Edit in Markdown, Show archived items, Collapse or Expand all headings, and Open schedule. The
   background is anywhere a click lands on no row, heading, field, link or notes editor: the list
   note is its editor, and gets no list menu ([notes in one
   editor](2026-10-29-notes-in-one-editor-design.md), "Keys and touch").
@@ -476,7 +478,7 @@ The block fields this section described are gone.
     section's last item, before any text below it that isn't an item, which an item can't follow
     without joining it **(call)**.
   - Edit in Markdown puts the caret at the end of that section's last line **(call)**.
-  - Show archived and Open schedule do what they do in the pane's ⋯ menu.
+  - Show archived items and Open schedule do what they do in the pane's ⋯ menu.
   - Mobile has no background menu: the plugin opens no menu on a long-press (step one, "Touch on
     mobile").
 - **Right-clicking a picture on desktop** in a card's notes or the list note opens the picture's

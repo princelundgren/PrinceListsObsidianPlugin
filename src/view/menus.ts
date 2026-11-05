@@ -118,7 +118,7 @@ export function listMenu(view: PrinceListView, model: ListModel, section: Sectio
 	);
 	menu.addItem((entry) =>
 		entry
-			.setTitle('Show archived')
+			.setTitle('Show archived items')
 			.setIcon('archive')
 			.setChecked(view.showArchived)
 			.onClick(() => view.toggleArchived()),

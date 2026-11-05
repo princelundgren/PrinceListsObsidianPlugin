@@ -58,7 +58,7 @@ async function tick(view: PrinceListView, row: HTMLElement | null, pending: { li
 		if (result === 'written') {
 			// Obsidian's echo of this write returns early in setViewData, so the row is updated here. A
 			// tick moves no line, so the row still stands for this item. A redraw during the write,
-			// such as "Show archived", drew from the text before the tick, so the view redraws again.
+			// such as "Show archived items", drew from the text before the tick, so the view redraws again.
 			const ticked = itemRow((edited[titleLine] as Line).text, titleLine, now, view.archiveDelay.ms);
 			// With the "At once" delay a tick archives the item, which hides it now, not at the next redraw.
 			const hides = ticked.archived && !view.showArchived;

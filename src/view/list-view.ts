@@ -178,7 +178,7 @@ export class PrinceListView extends TextFileView {
 		if (Platform.isMobile) enableTouchDrag(dragHost);
 		if (Platform.isMobile) this.newItemButton = buildNewItemButton(this);
 		this.newItemAction = this.addAction('plus', labelWithKey('New item', ADD_KEY_NAME), () => newItem(this));
-		this.archivedButton = this.addAction('square-check-big', 'Show archived', () => this.toggleArchived());
+		this.archivedButton = this.addAction('square-check-big', 'Show archived items', () => this.toggleArchived());
 		// Each action goes left of the ones before, so this one sits leftmost.
 		this.scheduleAction = this.addAction(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
 		this.syncHeaderButtons();
@@ -215,7 +215,7 @@ export class PrinceListView extends TextFileView {
 		if (isListText(this.text)) {
 			menu.addItem((item) =>
 				item
-					.setTitle('Show archived')
+					.setTitle('Show archived items')
 					.setIcon('archive')
 					.setChecked(this.showArchived)
 					.onClick(() => this.toggleArchived()),
@@ -312,7 +312,7 @@ export class PrinceListView extends TextFileView {
 		button.toggle(isListText(this.text));
 		button.toggleClass('princelists-archived-shown', this.showArchived);
 		button.setAttribute('aria-pressed', String(this.showArchived));
-		setTooltip(button, labelWithKey(this.showArchived ? 'Hide archived' : 'Show archived', ARCHIVED_KEY_NAME));
+		setTooltip(button, labelWithKey(this.showArchived ? 'Hide archived items' : 'Show archived items', ARCHIVED_KEY_NAME));
 	}
 
 	private outsideChange(data: string): void {

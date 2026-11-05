@@ -12,9 +12,9 @@ Make a list from the ribbon, a folder, or a note you already have.
 | --- | --- | --- |
 | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.webp" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.webp" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.webp" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
-Ticked items hide after a day, or the time you choose in the settings. Show archived brings them back, with blue checkboxes.
+Ticked items hide after a day, or the time you choose in the settings. Show archived items brings them back, with blue checkboxes.
 
-![In a todo list, an item is ticked and grays out, then Show archived in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
+![In a todo list, an item is ticked and grays out, then Show archived items in the pane's header brings back three items ticked days ago, with blue checkboxes, and hides them again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/archive.gif)
 
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 
@@ -81,7 +81,7 @@ You can embed lists in normal notes.
 2. **Make a list** with the list icon in the ribbon, or right-click a folder and choose **New list**.
 3. **Add items** with the **+**. Click one to add notes, a star or a date.
 
-Already have a note with checkboxes? Right-click it and choose **Turn into list**. Items already ticked hide at once, and **Show archived** shows them.
+Already have a note with checkboxes? Right-click it and choose **Turn into list**. Items already ticked hide at once, and **Show archived items** shows them.
 
 <details>
 <summary>Install by hand instead</summary>
