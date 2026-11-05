@@ -581,6 +581,14 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 - **The checkbox only ticks and unticks (call).** It never opens the card. The open card shows the
   same checkbox.
+- **A tap or click beside the checkbox ticks it too (owner, 2026-11-05),** so a finger needn't hit
+  the box: the row's full height, from a little into a view's margin up to the title. A list inside
+  a note stops at the note's text, since its margin is the editor's. The open card's box has none,
+  as the card's notes would make it tall. While a card is open the zone only closes it
+  ("Selecting").
+- **On mobile a one-line row is 40px tall (owner, 2026-11-05),** the size Obsidian 1.15 gives its
+  undocumented `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows
+  denser.
 - **A done item stays where it is,** with the box ticked and the text gray **(owner)**. There's no
   strikethrough **(call)**.
 
@@ -656,10 +664,12 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 ### Selecting and adding
 
-- **Selecting (call):** clicking an item, anywhere except its checkbox or a link in its title, opens
-  its card and selects it. Clicking empty space closes the card and clears the selection.
+- **Selecting (call):** clicking an item, anywhere except its checkbox, the zone beside it
+  ("Ticking") or a link in its title, opens its card and selects it. Clicking empty space closes
+  the card and clears the selection.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
-    another item, a heading or the list note doesn't also open it. A checkbox still only ticks.
+    another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
+    zone beside it only closes the card, as empty space does (owner, 2026-11-05).
 - **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the show-archived icon.
   It's a view action (`addAction`) named "New item" **(call)**, with its key: "New item
   (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which usually

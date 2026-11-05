@@ -15,7 +15,7 @@ import { addHiddenLabel, targetOf } from './dom';
 import { PrinceListView } from './list-view';
 import { handleLinkClick, renderInline, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
-import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS } from './render-list';
+import { addTickZone, CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
 import { addStar, addWhen } from './row-marks';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
@@ -148,7 +148,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		const rowEl = target?.closest(`.${ITEM_CLASS}`);
 		const item = rowEl && this.rows.get(rowEl);
 		if (!target || !item || handleLinkClick(this.app, item.listPath, evt, target)) return;
-		if (target.closest(`.${CHECKBOX_CLASS}`)) {
+		if (target.closest(TICK_SELECTOR)) {
 			// The box shows the file: the redraw after the write ticks it.
 			evt.preventDefault();
 			void this.enqueue(() => this.tick(item));
@@ -219,6 +219,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	private buildRow(item: ScheduledItem, today: string): HTMLLIElement {
 		const rowEl = createEl('li', { cls: ITEM_CLASS });
 		rowEl.toggleClass('is-done', item.done);
+		addTickZone(rowEl);
 		const box = rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' });
 		box.checked = item.done;
 		addHiddenLabel(box, item.title);

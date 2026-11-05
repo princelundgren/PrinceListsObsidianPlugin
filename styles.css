@@ -77,11 +77,39 @@ textarea.princelists-title {
 }
 
 .princelists-item {
+	position: relative;
 	display: flex;
 	align-items: flex-start;
 	gap: var(--size-4-2);
 	padding: var(--size-4-1) 0;
 	line-height: var(--line-height-normal);
+}
+
+/* On mobile a one-line row is 40px tall, the size Obsidian 1.15 gives its undocumented
+   --touch-size-s, so a finger doesn't land on the next row. */
+.princelists-is-mobile .princelists-item {
+	padding: calc((40px - var(--line-height-normal) * 1em) / 2) 0;
+}
+
+/* The row's full height beside the checkbox ticks it too, up to the title. It sits behind the box,
+   which keeps its own hover. */
+.princelists-tick-zone {
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 0;
+	width: calc(var(--checkbox-size) + var(--size-4-2));
+}
+
+/* In a view it also takes in part of the margin, which in a note is the editor's. */
+.princelists-content .princelists-tick-zone {
+	inset-inline-start: calc(-1 * var(--size-4-3));
+	width: calc(var(--size-4-3) + var(--checkbox-size) + var(--size-4-2));
+}
+
+/* A list drawn in a view's notes keeps a note's zone. */
+.princelists-content .princelists-block .princelists-tick-zone {
+	inset-inline-start: 0;
+	width: calc(var(--checkbox-size) + var(--size-4-2));
 }
 
 /* The row's parts sit on the title's first baseline, so they stay on its first line when it wraps and

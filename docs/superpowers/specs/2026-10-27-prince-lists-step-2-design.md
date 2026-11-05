@@ -164,17 +164,17 @@ this met on 2026-10-30 **(owner)**.
   - Done items stay gray until archived. Archived items are hidden, with no "Show archived items"
     **(call)**.
 - **Ticking** works as in the list view.
-- **Titles are edited in place (call).** A click on a row, not on its checkbox or a link, turns its
-  title into a field, so a row with no title can be edited too: Enter or leaving saves, Escape
-  cancels. A change to the file from elsewhere while the field
-  is open waits for it to close before the block draws it **(call)**; the field saves to its line as
-  that change moved it. A line that went writes nothing and shows the list view's message with "Copy
-  text" for what was typed, or "This list changed elsewhere. Try again." for a field emptied by
-  hand; a field left as it opened shows nothing, since nothing is lost **(call)**. The same message
-  shows when the block's link comes to lead to another note, or the list is renamed, while a field
-  is open. Until the block draws again, its other rows may stand on lines the change moved, so a
-  tick, a click, a right-click or a drag on one only closes the field and redraws: it never acts on
-  the item that is now on that line **(call)**.
+- **Titles are edited in place (call).** A click on a row, not on its checkbox, the zone beside it
+  or a link, turns its title into a field, so a row with no title can be edited too: Enter or
+  leaving saves, Escape cancels. A change to the file from elsewhere while the field is open waits
+  for it to close before the block draws it **(call)**; the field saves to its line as that change
+  moved it. A line that went writes nothing and shows the list view's message with "Copy text" for
+  what was typed, or "This list changed elsewhere. Try again." for a field emptied by hand; a field
+  left as it opened shows nothing, since nothing is lost **(call)**. The same message shows when the
+  block's link comes to lead to another note, or the list is renamed, while a field is open. Until
+  the block draws again, its other rows may stand on lines the change moved, so a tick, a click, a
+  right-click or a drag on one only closes the field and redraws: it never acts on the item that is
+  now on that line **(call)**.
 - **Adding:** a "New item" button below the rows adds an item where "+" puts one with nothing
   selected, as the list's first item, and opens its title field **(call)**. Shift+Enter adds the
   next one. Leaving a new item with an empty title removes it, as in the list view.
@@ -215,12 +215,13 @@ this met on 2026-10-30 **(owner)**.
   view finds, renumbers and aims drops at only its own rows, and never acts on the block's rows:
   a click, right-click or drag on them is the block's. A click in a block in the list note still
   closes an open card, as any click on the list note does.
-  - **The block works there as in a note (owner, 2026-11-03):** a click on a row's box ticks it, a
-    click elsewhere on the row opens its title field, and items drag, with the mouse and with
-    hold-and-move. Keys and typing in the block, its title field included, are the block's alone,
-    and so are keys after a press on one of its rows: the view's keys, such as Cmd+Enter, Cmd+Z and
-    Escape, and its own field undo leave them be. A press elsewhere on the block shows its
-    Markdown, as on any drawn block in the notes (the notes design, "What shows drawn").
+  - **The block works there as in a note (owner, 2026-11-03):** a click on a row's box or the zone
+    beside it ticks it, a click elsewhere on the row opens its title field, and items drag, with the
+    mouse and with hold-and-move. Keys and typing in the block, its title field included, are the
+    block's alone, and so are keys after a press on one of its rows: the view's keys, such as
+    Cmd+Enter, Cmd+Z and Escape, and its own field undo leave them be. A press elsewhere on the
+    block shows its Markdown, as on any drawn block in the notes (the notes design, "What shows
+    drawn").
 - **A link to no file, or to a note without the marker,** shows a gray line saying so, naming the
   link. So does a block that names the note it's in **(call)**: that note may be open in an editor
   with typing not yet saved. A note from outside the vault can't be linked, so it can't be shown
@@ -303,9 +304,10 @@ this met on 2026-10-30 **(owner)**.
   deleted since then shows "This list changed elsewhere. Try again." and writes nothing, and so
   does a click that opens a list that's gone. Rows can't be dragged: their
   order comes from the days.
-- **A click on a row,** away from a link, opens its list with that item's card open **(call)**: in
-  a tab whose list view already shows that list, else in a new tab. The card opens only while the
-  item's line still reads as the view showed it, so an edit since then opens the list with no card.
+- **A click on a row,** away from a link, its checkbox and the zone beside it, opens its list with
+  that item's card open **(call)**: in a tab whose list view already shows that list, else in a new
+  tab. The card opens only while the item's line still reads as the view showed it, so an edit since
+  then opens the list with no card.
 - **It's a view in the right sidebar (owner, 2026-11-02),** a tab with its `calendar-clock` icon
   beside core views such as Backlinks and Outline, so it stays beside the list in use. The ribbon
   icon, the command, and a list's menu item and header button open it there with `ensureSideLeaf`,

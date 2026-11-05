@@ -9,7 +9,7 @@ import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, 
 import { targetOf } from './dom';
 import type { ListBlock } from './list-block';
 import { handleLinkClick, handleLinkMenu } from './notes';
-import { CHECKBOX_CLASS, ITEM_CLASS, lineOf } from './render-list';
+import { ITEM_CLASS, lineOf, TICK_SELECTOR } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 export const NEW_ITEM_CLASS = 'princelists-block-new-item';
@@ -56,7 +56,7 @@ function onClick(block: ListBlock, notePath: string, evt: MouseEvent): void {
 	if (target.closest(`.${BLOCK_FIELD_CLASS}`)) return;
 	const line = rowLine(block, target);
 	if (line === null) return;
-	if (target.closest(`.${CHECKBOX_CLASS}`)) {
+	if (target.closest(TICK_SELECTOR)) {
 		// The box shows the file: the redraw after the write ticks it.
 		evt.preventDefault();
 		queueTick(block, line);

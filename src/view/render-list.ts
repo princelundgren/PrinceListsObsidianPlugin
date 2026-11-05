@@ -12,6 +12,9 @@ import { addStar, addWhen } from './row-marks';
 
 export const ITEM_CLASS = 'princelists-item';
 export const CHECKBOX_CLASS = 'princelists-checkbox';
+const TICK_ZONE_CLASS = 'princelists-tick-zone';
+/** What a click lands on to tick a row: its checkbox, or the wider zone behind it. */
+export const TICK_SELECTOR = `.${CHECKBOX_CLASS}, .${TICK_ZONE_CLASS}`;
 export const ITEMS_CLASS = 'princelists-items';
 export const HEADING_CLASS = 'princelists-heading';
 export const OPEN_AS_MARKDOWN_CLASS = 'princelists-open-as-markdown';
@@ -173,6 +176,11 @@ export function buildHeading(
 	return el;
 }
 
+/** Adds the zone around a row's checkbox that ticks it too, so a finger needn't hit the box itself. */
+export function addTickZone(rowEl: HTMLElement): void {
+	rowEl.createSpan({ cls: TICK_ZONE_CLASS, attr: { 'aria-hidden': 'true' } });
+}
+
 function drawnCount(sections: SectionRows[]): number {
 	return sections.reduce((count, { heading, rows }) => count + (heading ? 1 : 0) + rows.length, 0);
 }
@@ -180,6 +188,7 @@ function drawnCount(sections: SectionRows[]): number {
 export function buildRow(host: RowHost, sourcePath: string, row: ItemRow, blocks: Map<HTMLElement, Component>): HTMLLIElement {
 	const rowEl = createEl('li', { cls: ITEM_CLASS, attr: { [LINE_ATTR]: row.titleLine } });
 	if (ROWS_DRAG && host.dragsRows) rowEl.draggable = true;
+	addTickZone(rowEl);
 	addHiddenLabel(rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), row.label);
 	const title = rowEl.createDiv({ cls: 'princelists-item-title' });
 	record(blocks, rowEl, renderInline(host, sourcePath, title, row.title));
