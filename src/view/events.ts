@@ -107,8 +107,8 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	const tickTarget = target.closest(TICK_SELECTOR);
-	// While a card is open, only the checkbox itself ticks: the zone beside it closes the card, as empty space does.
-	if (tickTarget && (!view.card || tickTarget.matches(`.${CHECKBOX_CLASS}`))) {
+	// While a card is open, another row's zone closes the card, as empty space does; checkboxes and the card's own zone tick.
+	if (tickTarget && (!view.card || tickTarget.matches(`.${CHECKBOX_CLASS}`) || view.card.el.contains(tickTarget))) {
 		// The box shows what the file holds: it changes once the write lands, not while a tap waits.
 		// It only ticks: it never opens or closes a card (spec, "Ticking").
 		evt.preventDefault();
