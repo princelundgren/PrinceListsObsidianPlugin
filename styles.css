@@ -718,7 +718,7 @@ textarea.princelists-heading-field {
 	margin-inline-start: var(--size-4-2);
 }
 
-/* Its bottom on the title's baseline. Filled, so it reads as set, not as a button. */
+/* On the title's baseline. Filled, so it reads as set, not as a button. */
 .princelists-star {
 	flex: none;
 	display: flex;
@@ -737,38 +737,36 @@ textarea.princelists-heading-field {
 	initial-value: 0px;
 }
 
-/* The star and the day's icon are drawn as tall as the title's capitals, bottoms on their text's
-   baseline, and the checkbox a little taller, centered on the capitals. Each keeps the slot its full
-   size takes, so the text and the tick zone stay where they were. The box's border and tick follow
-   its size. Without the cap unit they keep their full size. */
+/* The checkbox, the star and the day's icon share one box a fifth taller than the title's capitals,
+   centered on them. Lucide draws inside a twelfth of its box on each side, so the star and the
+   calendar run from the baseline to the capitals' top. Each keeps the slot its full size takes, so
+   the text and the tick zone stay where they were. The box's border and tick follow its size.
+   Without the cap unit they keep their full size. */
 @supports (height: 1cap) {
 	.princelists-item {
 		--princelists-checkbox-slot: var(--checkbox-size);
 		--princelists-title-cap: 1cap;
+		--princelists-mark-size: calc(1.2 * var(--princelists-title-cap));
+		--princelists-mark-drop: calc(0.1 * var(--princelists-title-cap));
 	}
 
 	.princelists-item .princelists-checkbox {
-		--checkbox-size: 1.2cap;
-		top: calc((var(--checkbox-size) - 1cap) / 2);
+		--checkbox-size: var(--princelists-mark-size);
+		top: var(--princelists-mark-drop);
 		margin-inline: calc((var(--princelists-checkbox-slot) - var(--checkbox-size)) / 2);
 	}
 
-	.princelists-star {
-		justify-content: center;
-		width: var(--icon-size);
-	}
-
-	.princelists-star svg {
-		--icon-size: 1cap;
-	}
-
+	.princelists-star,
 	.princelists-when > .princelists-when-icon {
 		justify-content: center;
 		width: var(--icon-size);
 	}
 
+	.princelists-star svg,
 	.princelists-when > .princelists-when-icon svg {
-		--icon-size: var(--princelists-title-cap);
+		--icon-size: var(--princelists-mark-size);
+		position: relative;
+		top: var(--princelists-mark-drop);
 	}
 }
 
