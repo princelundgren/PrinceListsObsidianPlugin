@@ -1,6 +1,6 @@
 import { BLOCK_ID_PATTERN, findRunStart, joinItemLine, parseItemLine, TASKS_SIGNIFIERS } from './item-line';
 
-export type DayLabelKind = 'today' | 'tomorrow' | 'weekday' | 'date';
+export type DayLabelKind = 'today' | 'tomorrow' | 'weekday' | 'date-this-year' | 'date';
 
 const WHEN = '⏳';
 // Tasks reads both ⏳ and ⌛ as the scheduled date. A field ends at whitespace, the end of the
@@ -67,7 +67,8 @@ export function dayLabelKind(day: string, today: string): DayLabelKind {
 	const days = daysFrom(today, day);
 	if (days === 0) return 'today';
 	if (days === 1) return 'tomorrow';
-	return days >= 2 && days <= 6 ? 'weekday' : 'date';
+	if (days >= 2 && days <= 6) return 'weekday';
+	return day.slice(0, 4) === today.slice(0, 4) ? 'date-this-year' : 'date';
 }
 
 // The tail's fields and tags, and the block ID and trailing whitespace after them.

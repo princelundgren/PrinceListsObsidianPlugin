@@ -1,4 +1,4 @@
-import { moment, setIcon } from 'obsidian';
+import { getLanguage, moment, setIcon } from 'obsidian';
 import { dayLabelKind } from '../core/when';
 
 export function addStar(rowEl: HTMLElement): void {
@@ -16,6 +16,10 @@ export function dayLabel(day: string, today: string): string {
 			return 'Tomorrow';
 		case 'weekday':
 			return moment.utc(day, 'YYYY-MM-DD').format('dddd');
+		case 'date-this-year':
+			return new Intl.DateTimeFormat(getLanguage(), { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(
+				moment.utc(day, 'YYYY-MM-DD').toDate(),
+			);
 		case 'date':
 			return moment.utc(day, 'YYYY-MM-DD').format('ll');
 	}

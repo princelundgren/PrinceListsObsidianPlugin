@@ -68,6 +68,10 @@ describe('days', () => {
 	});
 	test('dayLabelKind names today, tomorrow, the next days by weekday, and the rest by date', () => {
 		const kinds = ['2026-10-27', '2026-10-28', '2026-10-29', '2026-11-02', '2026-11-03', '2026-10-26'].map((day) => dayLabelKind(day, '2026-10-27'));
-		expect(kinds).toEqual(['today', 'tomorrow', 'weekday', 'weekday', 'date', 'date']);
+		expect(kinds).toEqual(['today', 'tomorrow', 'weekday', 'weekday', 'date-this-year', 'date-this-year']);
+	});
+	test('dayLabelKind keeps the year only for a date in another year', () => {
+		const kinds = ['2026-12-31', '2027-01-01', '2025-12-31', '2026-01-01'].map((day) => dayLabelKind(day, '2026-12-25'));
+		expect(kinds).toEqual(['weekday', 'date', 'date', 'date-this-year']);
 	});
 });

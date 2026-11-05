@@ -268,8 +268,10 @@ this met on 2026-10-30 **(owner)**.
     button beside the day: it crowded the card's top right, and every platform's picker can
     already clear the day.
 - **On a row (call):** the calendar icon and a short day at the row's end: "Today", "Tomorrow", a
-  weekday for the rest of the next seven days, or else the date in the locale's short form through
-  Obsidian's `moment`, which follows the language set in Obsidian. A past day shows its date.
+  weekday for the rest of the next seven days, or else the date, in the language set in Obsidian.
+  A past day shows its date.
+  - **A date in the current year has no year (owner, 2026-11-05),** such as "Nov 12", since the
+    year took much of the row; one in another year keeps it, such as "Jan 4, 2027".
 - **The Schedule view** is a view of its own, opened with an "Open schedule" command and a ribbon
   icon **(call)**. The icon is Lucide's `calendar-clock`, not `calendar`, which the Daily notes
   core plugin's ribbon button uses **(owner, 2026-10-27)**. It gathers, from every list in the vault, the items with a When
