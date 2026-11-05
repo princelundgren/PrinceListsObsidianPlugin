@@ -259,9 +259,10 @@ this met on 2026-10-30 **(owner)**.
 
 - **Setting a When (owner, 2026-10-27):** the card's top right has a calendar icon, between the
   star and the ⋯, so the star comes before the day as on the row **(owner, 2026-11-05)**. Once the
-  item has a When, its day takes the icon's place, with no icon, as on the row. Clicking either opens the platform's date picker through an `<input type="date">`.
-  Obsidian has no date picker API, and the HTML input gives each platform's own picker.
-  - **In a view or list block 480 px wide or narrower (owner, 2026-11-05),** such as a phone or a
+  item has a When, its day takes the icon's place, with no icon, as on the row. Clicking either
+  opens the platform's date picker through an `<input type="date">`. Obsidian has no date picker
+  API, and the HTML input gives each platform's own picker.
+  - **In a view 480 px wide or narrower (owner, 2026-11-05),** such as a phone or a
     sidebar, the star, When and ⋯ always have a line of their own under the title, together at its
     right, where a row shows its day. Beside the title they took about half a phone's line, and
     moved down only on some titles; split, with the day under the title's start, a lone calendar
@@ -424,14 +425,14 @@ this met on 2026-10-30 **(owner)**.
     its capital letters.
   - The checkbox and the star are drawn in one box a fifth taller than the title's capital
     letters. The checkbox reaches a little above and below them; the star, which Lucide draws
-    inside a margin, runs from the baseline to the capitals' top. Each keeps the
-    room its full size takes, so the text doesn't move and a tap anywhere the full-size box was
-    still ticks. An open card's star, day and ⋯ are buttons the ⋯'s size, centered on one line;
-    its star, and its calendar while it has no day, are drawn as small as the row's star. Where the app's web view lacks CSS's `cap` unit (before Chrome 118
-    and Safari 17.2) they keep their full size.
+    inside a margin, runs from the baseline to the capitals' top. Each keeps the room its full size
+    takes, so the text doesn't move and a tap anywhere the full-size box was still ticks. An open
+    card's star, day and ⋯ are buttons the ⋯'s height, centered on one line; its star, and its
+    calendar while it has no day, are drawn as small as the row's star. Where the app's web view
+    lacks CSS's `cap` unit (before Chrome 118 and Safari 17.2) they keep their full size.
   - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
-    the day go to the row's right edge, so a title that wraps leaves no gap before them and the days line up. In a wider
-    pane they stay after the title, where the right edge can be far away.
+    the day go to the row's right edge, so a title that wraps leaves no gap before them and the
+    days line up. In a wider pane they stay after the title, where the right edge can be far away.
 
 ### Formatting in a card (owner, 2026-10-27)
 
