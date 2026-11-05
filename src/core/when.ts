@@ -1,6 +1,6 @@
 import { BLOCK_ID_PATTERN, findRunStart, joinItemLine, parseItemLine, TASKS_SIGNIFIERS } from './item-line';
 
-export type DayLabelKind = 'today' | 'tomorrow' | 'weekday' | 'date';
+export type DayLabelKind = 'today' | 'tomorrow' | 'weekday' | 'date-this-year' | 'date';
 
 const WHEN = '⏳';
 // Tasks reads both ⏳ and ⌛ as the scheduled date. A field ends at whitespace, the end of the
@@ -67,7 +67,22 @@ export function dayLabelKind(day: string, today: string): DayLabelKind {
 	const days = daysFrom(today, day);
 	if (days === 0) return 'today';
 	if (days === 1) return 'tomorrow';
-	return days >= 2 && days <= 6 ? 'weekday' : 'date';
+	if (days >= 2 && days <= 6) return 'weekday';
+	return day.slice(0, 4) === today.slice(0, 4) ? 'date-this-year' : 'date';
+}
+
+const LABEL_FORMATS: Record<Exclude<DayLabelKind, 'today' | 'tomorrow'>, Intl.DateTimeFormatOptions> = {
+	weekday: { weekday: 'long' },
+	'date-this-year': { month: 'short', day: 'numeric' },
+	date: { year: 'numeric', month: 'short', day: 'numeric' },
+};
+
+/** A row's short day, "Today", "Tomorrow", a weekday or a date, with weekdays and dates in `language`. */
+export function dayLabel(day: string, today: string, language: string): string {
+	const kind = dayLabelKind(day, today);
+	if (kind === 'today') return 'Today';
+	if (kind === 'tomorrow') return 'Tomorrow';
+	return new Intl.DateTimeFormat(language, { ...LABEL_FORMATS[kind], timeZone: 'UTC' }).format(utcOf(day));
 }
 
 // The tail's fields and tags, and the block ID and trailing whitespace after them.

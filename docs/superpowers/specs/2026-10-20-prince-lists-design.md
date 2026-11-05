@@ -558,6 +558,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   that draws it, inside its own views only, as Obsidian's web viewer does.
 - **Clicking an item** (not a link in its title) opens it into a raised card that shows the title
   and the rendered notes.
+  - **The checkbox and title stay where the row had them (owner, 2026-11-05):** the card reaches
+    out into the view's side margin, so its padding and border don't push them right, and keeps
+    the row's padding above the title, so they don't push them down.
   - **In dark mode the card takes Obsidian's secondary background (owner, 2026-10-27),** on
     desktop and mobile. A card in the page's own color, raised only by its shadow, can hardly be
     seen on a dark page, and on mobile's black one not at all. In light mode it keeps the page's
@@ -583,8 +586,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   same checkbox.
 - **A tap or click beside the checkbox ticks it too (owner, 2026-11-05),** so a finger needn't hit
   the box: the row's full height, from a little into a view's margin up to the title. A list inside
-  a note stops at the note's text, since its margin is the editor's. The open card's box has none,
-  as the card's notes would make it tall. While a card is open the zone only closes it
+  a note stops at the note's text, since its margin is the editor's. The open card's runs from its
+  edge and is only as tall as its title's first line and the padding around it, since the notes
+  make the card tall (owner, 2026-11-05). While a card is open another row's zone only closes it
   ("Selecting").
 - **On mobile a one-line row is 40px tall (owner, 2026-11-05),** the size Obsidian 1.15 gives its
   undocumented `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows
@@ -598,8 +602,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was, except that doubled
   `✔` marks collapse to the earliest and a leftover `✔` on an open line is dropped (see
   Completion). Step two hides an item's star too, and saving puts it back once.
-- **An item's When (step two):** the calendar icon at the card's top right sets it, and the
-  picker's own Clear or Reset removes it.
+- **An item's When (step two):** the calendar icon at the card's top right, or the day in its
+  place, sets it, and the picker's own Clear or Reset removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
   not on every keystroke. Switching to another window or app doesn't leave the field. The rename
   uses `fileManager.renameFile`, which updates links according to the user's link settings. Escape
@@ -669,7 +673,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   the card and clears the selection.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
-    zone beside it only closes the card, as empty space does (owner, 2026-11-05).
+    zone beside another row's only closes the card, as empty space does (owner, 2026-11-05).
 - **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the show-archived icon.
   It's a view action (`addAction`) named "New item" **(call)**, with its key: "New item
   (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which usually
