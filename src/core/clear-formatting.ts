@@ -69,9 +69,11 @@ function keepsBackticks(text: string, node: SyntaxNode): boolean {
 	if (node.name !== 'InlineCode') return false;
 	const { firstChild: open, lastChild: close } = node;
 	if (!open || !close) return false;
-	const before = text.slice(0, node.from).replace(/^.*\s/s, '');
-	const after = text.slice(node.to).replace(/\s.*$/s, '');
-	const word = before + text.slice(open.to, close.from) + after;
+	let wordStart = node.from;
+	while (wordStart > 0 && !/\s/.test(text.charAt(wordStart - 1))) wordStart--;
+	let wordEnd = node.to;
+	while (wordEnd < text.length && !/\s/.test(text.charAt(wordEnd))) wordEnd++;
+	const word = text.slice(wordStart, node.from) + text.slice(open.to, close.from) + text.slice(node.to, wordEnd);
 	if (MARKUP_CHARACTER.test(word)) return true;
 	let readsAsMarkdown = false;
 	obsidianMarkdown.parse(word).iterate({
