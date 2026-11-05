@@ -138,7 +138,8 @@ textarea.princelists-title {
 	display: inline-block;
 }
 
-/* Its bottom on the title's baseline: with no text inside, its baseline is its bottom edge. Positioned,
+/* Its bottom on the title's baseline: with no text inside, its baseline is its bottom edge. The cap
+   rules below draw it smaller and lower it to center it on the capitals. Positioned,
    so it paints above the tick zone before it. Two classes outrank Obsidian's own
    input[type=checkbox] rule. */
 .princelists-item .princelists-checkbox {
@@ -717,8 +718,7 @@ textarea.princelists-heading-field {
 	margin-inline-start: var(--size-4-2);
 }
 
-/* Its bottom on the title's baseline, as the checkbox's is. Filled, so it reads as set, not as a
-   button. */
+/* Its bottom on the title's baseline. Filled, so it reads as set, not as a button. */
 .princelists-star {
 	flex: none;
 	display: flex;
@@ -762,12 +762,12 @@ textarea.princelists-heading-field {
 		--icon-size: 1cap;
 	}
 
-	.princelists-when-icon {
+	.princelists-when > .princelists-when-icon {
 		justify-content: center;
 		width: var(--icon-size);
 	}
 
-	.princelists-when-icon svg {
+	.princelists-when > .princelists-when-icon svg {
 		--icon-size: var(--princelists-title-cap);
 	}
 }
@@ -781,7 +781,6 @@ textarea.princelists-heading-field {
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
 }
-
 
 .princelists-when-icon {
 	display: flex;

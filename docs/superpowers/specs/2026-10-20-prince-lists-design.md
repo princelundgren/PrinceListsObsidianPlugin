@@ -586,8 +586,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **A tap or click beside the checkbox ticks it too (owner, 2026-11-05),** so a finger needn't hit
   the box: the row's full height, from a little into a view's margin up to the title. A list inside
   a note stops at the note's text, since its margin is the editor's. The open card's runs from its
-  edge and is only as tall as its title's first line, since the notes make the card tall
-  (owner, 2026-11-05). While a card is open another row's zone only closes it ("Selecting").
+  edge and is only as tall as its title's first line and the padding around it, since the notes
+  make the card tall (owner, 2026-11-05). While a card is open another row's zone only closes it ("Selecting").
 - **On mobile a one-line row is 40px tall (owner, 2026-11-05),** the size Obsidian 1.15 gives its
   undocumented `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows
   denser.
