@@ -64,7 +64,7 @@ You can embed lists in normal notes.
 
 **Across lists**
 
-- **The Schedule,** in the right sidebar, sorts dated items into Today (with anything overdue), Tomorrow, Next 7 days and Later. A button in each list's header opens it, and the settings can hide that button. Closed its tab? That button, the ribbon icon or PrinceLists' settings bring it back.
+- **The Schedule,** in the right sidebar, sorts dated items into Today (with anything overdue), Tomorrow, Next 7 days and Later. The ribbon icon opens it, and a setting adds a button for it to each list's header. Closed its tab? The ribbon icon or PrinceLists' settings bring it back.
 - **A list inside another note** can be ticked and edited there. If you rename the list, update the block.
 - **Works with Tasks:** dates use the Tasks plugin's format.
 

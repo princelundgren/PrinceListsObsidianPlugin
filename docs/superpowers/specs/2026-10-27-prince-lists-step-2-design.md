@@ -275,10 +275,9 @@ this met on 2026-10-30 **(owner)**.
   that are open or done but not yet archived.
 - **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
   ribbon hidden or doesn't know the command.
-- **So does a list's header (owner, 2026-11-04):** a `calendar-clock` view action named "Open
-  schedule", left of Show archived items, since the ⋯ menu alone is hard to find on mobile. Like
-  Show archived items, it shows only on a list. The settings can hide it; the ⋯ menu's item stays
-  either way.
+- **So can a list's header (owner, 2026-11-05):** a `calendar-clock` view action named "Open
+  schedule", left of Show archived items, which shows once the settings turn it on; it's off by
+  default. Like Show archived items, it shows only on a list. The ⋯ menu's item stays either way.
 - **Its groups (owner, 2026-10-27):** Today, which includes everything overdue, then Tomorrow,
   Next 7 days and Later. An earlier "Next month", 8 to 31 days ahead, read as the calendar month
   and seemed to leave a gap after the week.
@@ -509,7 +508,7 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the Schedule button's, below.
+the plugin as it was before the page existed.
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
@@ -527,10 +526,10 @@ the plugin as it was before the page existed, except the Schedule button's, belo
     `registerEvent`. A list block with an open field or a drag draws it when the field closes or
     the drag ends.
   - **It writes nothing to any list,** since archived is worked out, never written down.
-- **Schedule button (owner, 2026-11-04):** a toggle that shows or hides the header's "Open
-  schedule" button. It's on by default, so the button shows after the update: the owner chose that
-  over the rule that opens this section. Open lists show or hide the button at once, and again when
-  Sync brings a change.
+- **Show Schedule button (owner, 2026-11-05):** a toggle that shows or hides the header's "Open
+  schedule" button. It's off by default, so the header stays short and the ribbon icon and the
+  command open the Schedule. Open lists show or hide the button at once, and again when Sync brings
+  a change.
 - **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
   closed tab is easy to get back. A button saves nothing.
 
