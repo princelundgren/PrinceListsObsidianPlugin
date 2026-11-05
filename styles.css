@@ -129,17 +129,14 @@ textarea.princelists-title {
 	display: inline-block;
 }
 
-/* Lowered from the baseline until its middle meets the middle of the title's lowercase letters, as
-   Obsidian lowers its own task checkbox, and as much taken off its top margin, so it takes no more
-   room above the baseline than it shows. The font is the row's, so 1ex is the title's. Two classes
-   outrank Obsidian's own input[type=checkbox] rule. */
+/* Its bottom on the title's baseline: with no text inside, its baseline is its bottom edge. Positioned,
+   so it paints above the tick zone before it. Two classes outrank Obsidian's own
+   input[type=checkbox] rule. */
 .princelists-item .princelists-checkbox {
-	--princelists-lowered-by: calc(var(--checkbox-size) / 2 - 0.5ex);
 	flex: none;
 	align-self: baseline;
 	position: relative;
-	top: var(--princelists-lowered-by);
-	margin: calc(-1 * var(--princelists-lowered-by)) 0 0;
+	margin: 0;
 	font-size: inherit;
 	font-family: inherit;
 }
@@ -710,7 +707,8 @@ textarea.princelists-heading-field {
 	margin-inline-start: var(--size-4-2);
 }
 
-/* On the title's baseline. Filled, so it reads as set, not as a button. */
+/* Its bottom on the title's baseline, as the checkbox's is. Filled, so it reads as set, not as a
+   button. */
 .princelists-star {
 	flex: none;
 	display: flex;
@@ -732,9 +730,8 @@ textarea.princelists-heading-field {
 	font-size: var(--font-ui-small);
 }
 
-/* Lowered as the checkbox is: the star to the middle of the title's lowercase letters, and the day's
-   icon to the middle of the day's. */
-.princelists-star svg,
+/* Lowered from the baseline until its middle meets the middle of the day's lowercase letters, and as
+   much taken off its top margin, so it takes no more room above the baseline than it shows. */
 .princelists-when > .princelists-when-icon svg {
 	--princelists-lowered-by: calc(var(--icon-size) / 2 - 0.5ex);
 	position: relative;

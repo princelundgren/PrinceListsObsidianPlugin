@@ -413,10 +413,10 @@ this met on 2026-10-30 **(owner)**.
   item menu at first had no star entry **(owner)**: the step one design's "Item actions".
 - **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
   show: a list, the Schedule view and a list inside another note.
-- **Where the star and the day sit (owner, 2026-11-04):**
-  - On the title's first line: the day on its baseline, and the checkbox and the star on the
-    middle of its lowercase letters, a little lower than Obsidian puts a task's checkbox. The day's
-    icon is on the middle of the day's own lowercase letters.
+- **Where the star and the day sit (owner, 2026-11-05):**
+  - On the title's first line: the day on its baseline, and the checkbox's and the star's bottoms on
+    it too, so they line up with the bottom of the title's letters. The day's icon is on the middle
+    of the day's own lowercase letters.
   - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
     the day go to the row's right edge, so a title that wraps leaves no gap before them and the days line up. In a wider
     pane they stay after the title, where the right edge can be far away.
