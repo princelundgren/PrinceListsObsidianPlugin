@@ -304,6 +304,9 @@ this met on 2026-10-30 **(owner)**.
   deleted since then shows "This list changed elsewhere. Try again." and writes nothing, and so
   does a click that opens a list that's gone. Rows can't be dragged: their
   order comes from the days.
+- **A day's heading collapses as a list's does (owner, 2026-11-05),** with the same arrow in the
+  checkboxes' column, so it doesn't read as an item without its checkbox. As in a list, it isn't
+  remembered: every day is open each time the view opens.
 - **A click on a row,** away from a link, its checkbox and the zone beside it, opens its list with
   that item's card open **(call)**: in a tab whose list view already shows that list, else in a new
   tab. The card opens only while the item's line still reads as the view showed it, so an edit since
