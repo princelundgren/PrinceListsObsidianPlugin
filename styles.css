@@ -622,13 +622,15 @@ button.princelists-new-item {
 	gap: var(--size-2-1);
 }
 
-/* Under the notes editor while it has focus. On a narrow card, whole groups move to a second row, so
-   every button stays in sight. On mobile it is one row, which scrolls sideways. */
+/* Under the notes editor while it has focus, its first icon lined up with the notes' text. On a
+   narrow card, whole groups move to a second row, so every button stays in sight. On mobile it is
+   one row, which scrolls sideways. */
 .princelists-format-bar {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--size-2-1) var(--size-4-3);
 	margin-top: var(--size-4-1);
+	margin-inline-start: calc(-1 * var(--size-2-2));
 }
 
 .princelists-notes-codemirror:not(.cm-focused) + .princelists-format-bar {
@@ -636,6 +638,7 @@ button.princelists-new-item {
 }
 
 .princelists-is-mobile .princelists-format-bar {
+	margin-inline-start: calc((var(--icon-size) - var(--input-height)) / 2);
 	flex-wrap: nowrap;
 	overflow-x: auto;
 	scrollbar-width: none;
