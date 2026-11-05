@@ -382,9 +382,9 @@ this met on 2026-10-30 **(owner)**.
   on mobile.
 - **Its target is as wide as a row's tick zone (call):** the column and the gap after it, reaching
   into the view's margin. It runs from the space above the heading to the heading's bottom.
-- **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. Mobile
-  has no hover, so there it always shows, as on a desktop system's touchscreen without a mouse. It
-  shows no tooltip: its accessible name is
+- **It always shows (owner, 2026-11-05),** so a heading has something in the column where an item
+  has its checkbox; shown only on hover, the empty column made a heading read as an item without
+  one. It shows no tooltip: its accessible name is
   "Collapse section", with `aria-expanded` saying whether the section is open **(call)**.
 - **Collapsed, the section's rows hide;** the heading stays. The items before the first heading
   have no heading, so they can't collapse. The open card's item still shows in a collapsed
