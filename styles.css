@@ -81,14 +81,15 @@ textarea.princelists-title {
 	display: flex;
 	align-items: flex-start;
 	gap: var(--size-4-2);
-	padding: var(--size-4-1) 0;
+	--princelists-row-padding: var(--size-4-1);
+	padding: var(--princelists-row-padding) 0;
 	line-height: var(--line-height-normal);
 }
 
 /* On mobile a one-line row is 40px tall, the size Obsidian 1.15 gives its undocumented
    --touch-size-s, so a finger doesn't land on the next row. */
 .princelists-is-mobile .princelists-item {
-	padding: calc((40px - var(--line-height-normal) * 1em) / 2) 0;
+	--princelists-row-padding: calc((40px - var(--line-height-normal) * 1em) / 2);
 }
 
 /* The row's full height beside the checkbox ticks it too, up to the title. It sits behind the box,
@@ -210,11 +211,12 @@ textarea.princelists-title {
 }
 
 /* The open card: raised above the list, in place of its row (spec, "Layout"). It reaches into the
-   view's side margin by its padding and border, so the checkbox and title stay where the row had
-   them; the margin is wider than that, so mobile gets no sideways scrolling. */
+   view's side margin by its padding and border, and up by its border with the row's own padding
+   above the title, so the checkbox and title stay where the row had them; the margin is wider than
+   that, so mobile gets no sideways scrolling. */
 .princelists-item.princelists-card {
-	margin: var(--size-4-2) calc(-1 * (var(--size-4-2) + var(--border-width)));
-	padding: var(--size-4-2);
+	margin: calc(-1 * var(--border-width)) calc(-1 * (var(--size-4-2) + var(--border-width))) var(--size-4-2);
+	padding: var(--princelists-row-padding) var(--size-4-2) var(--size-4-2);
 	border: var(--border-width) solid var(--background-modifier-border);
 	border-radius: var(--radius-m);
 	background-color: var(--background-primary);
