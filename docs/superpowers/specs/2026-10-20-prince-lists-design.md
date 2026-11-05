@@ -558,6 +558,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   that draws it, inside its own views only, as Obsidian's web viewer does.
 - **Clicking an item** (not a link in its title) opens it into a raised card that shows the title
   and the rendered notes.
+  - **The checkbox and title stay where the row had them (owner, 2026-11-05):** the card reaches
+    out into the view's side margin, so its padding and border don't push them right.
   - **In dark mode the card takes Obsidian's secondary background (owner, 2026-10-27),** on
     desktop and mobile. A card in the page's own color, raised only by its shadow, can hardly be
     seen on a dark page, and on mobile's black one not at all. In light mode it keeps the page's

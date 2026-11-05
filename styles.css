@@ -199,10 +199,11 @@ textarea.princelists-title {
 	margin-bottom: 0;
 }
 
-/* The open card: raised above the list, in place of its row (spec, "Layout"). Its margins stay inside
-   the pane, so mobile gets no sideways scrolling. */
+/* The open card: raised above the list, in place of its row (spec, "Layout"). It reaches into the
+   view's side margin by its padding and border, so the checkbox and title stay where the row had
+   them; the margin is wider than that, so mobile gets no sideways scrolling. */
 .princelists-item.princelists-card {
-	margin: var(--size-4-2) 0;
+	margin: var(--size-4-2) calc(-1 * (var(--size-4-2) + var(--border-width)));
 	padding: var(--size-4-2);
 	border: var(--border-width) solid var(--background-modifier-border);
 	border-radius: var(--radius-m);
