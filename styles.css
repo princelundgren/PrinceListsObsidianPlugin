@@ -556,7 +556,12 @@ button.princelists-new-item {
 	}
 }
 
-/* Room below the last row, so it can scroll clear of the floating "+". */
+/* Room below the last row, so it can scroll clear of mobile's navigation bar, and of the floating "+"
+   where it shows. */
+.princelists-is-mobile .princelists-end {
+	height: var(--view-bottom-spacing, 0px);
+}
+
 .princelists-has-floating-add .princelists-end {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }

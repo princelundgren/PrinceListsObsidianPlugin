@@ -1191,7 +1191,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   and keyboard, and desktop's status bar.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
   - It keeps above mobile's floating navbar with Obsidian's `--view-bottom-spacing`, as Bases
-    does **(call)**. The variable is undocumented, read from 1.14.4's `app.css`, and unset on
+    does **(call)**. The same room stays below a list's last row on mobile when the settings turn
+    the "+" off. The variable is undocumented, read from 1.14.4's `app.css`, and unset on
     desktop. If Obsidian drops it, the "+" sits lower on mobile, under the floating navbar, and the
     edge scroll, its second user, takes the bottom of the view for the bottom of what is visible,
     so dragging toward the navbar scrolls late.
