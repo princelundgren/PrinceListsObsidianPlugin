@@ -431,11 +431,12 @@ Obsidian documents no way to put its editor in a plugin's view.
   link, as in a note, and Cmd+B or Cmd+I again takes it off **(call)**. The title's are registered
   on the view's own `scope`, as Cmd+Z is, and the notes' are in their editor's keymap; anywhere
   else the key stays Obsidian's.
-- **A format bar under the notes** while their editor has focus: Undo and Redo; Bold, Italic,
-  Strikethrough and Underline; Code and Code block; Add link and Add external link; Bullet list,
-  Numbered list and Task list. A press keeps focus in the notes, so the phone's keyboard stays up,
-  but for Add link, whose search box takes it. The list note has it too. It has no Table button
-  until a table can be edited well, #213 **(owner, 2026-10-30)**.
+- **A format bar under the notes** while their editor has focus, in three groups: Undo and Redo;
+  Bold, Italic, Strikethrough and Underline; then Task list, Bullet list, Numbered list, Add link,
+  Add external link, Code and Code block, in one group so the bar stays short **(owner,
+  2026-11-05)**. A press keeps focus in the notes, so the phone's keyboard stays up, but for Add
+  link, whose search box takes it. The list note has it too. It has no Table button until a table
+  can be edited well, #213 **(owner, 2026-10-30)**.
   - The buttons take the names and icons of Obsidian's own editor menu, where it has them
     **(owner, 2026-11-04)**.
   - Add link asks for a note or list in Obsidian's search box, then links to it as the vault's link
