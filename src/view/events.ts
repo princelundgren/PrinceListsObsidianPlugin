@@ -31,7 +31,7 @@ import { runNotesBarAction } from './notes-keys';
 import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
-import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS } from './render-list';
+import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS, TICK_SELECTOR } from './render-list';
 import { showTextMenu } from './text-menu';
 import { queueTick } from './tick';
 
@@ -106,12 +106,13 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		evt.preventDefault();
 		return;
 	}
-	const box = target.closest(`.${CHECKBOX_CLASS}`);
-	if (box) {
+	const tickTarget = target.closest(TICK_SELECTOR);
+	// While a card is open, only the checkbox itself ticks: the zone beside it closes the card, as empty space does.
+	if (tickTarget && (!view.card || tickTarget.matches(`.${CHECKBOX_CLASS}`))) {
 		// The box shows what the file holds: it changes once the write lands, not while a tap waits.
 		// It only ticks: it never opens or closes a card (spec, "Ticking").
 		evt.preventDefault();
-		const row = box.closest<HTMLElement>(`.${ITEM_CLASS}`);
+		const row = tickTarget.closest<HTMLElement>(`.${ITEM_CLASS}`);
 		if (row) queueTick(view, row);
 		return;
 	}
