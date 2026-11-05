@@ -812,10 +812,15 @@ button.princelists-card-star.is-starred svg {
 }
 
 /* A heading's text lines up with the item titles, and its collapse arrow, drawn as Obsidian's own
-   fold icon, sits in the checkboxes' column. */
+   fold icon, sits in the checkboxes' column. A list inside another note has no arrow, so its headings
+   keep to the edge rather than leave the column empty. */
 .princelists-heading {
 	position: relative;
 	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
+}
+
+.princelists-block .princelists-heading {
+	padding-inline-start: 0;
 }
 
 /* The arrow's target is as wide as a row's tick zone, the column and the gap after it, and runs from
@@ -830,7 +835,8 @@ button.princelists-collapse {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: var(--size-4-4) var(--size-4-2) var(--size-4-1) 0;
+	padding-block: var(--size-4-4) var(--size-4-1);
+	padding-inline: 0 var(--size-4-2);
 	font-size: inherit;
 	background: none;
 	border: none;
@@ -843,11 +849,6 @@ button.princelists-collapse {
 .princelists-content button.princelists-collapse {
 	inset-inline-start: calc(-1 * var(--size-4-3));
 	padding-inline-start: var(--size-4-3);
-}
-
-.princelists-content .princelists-block button.princelists-collapse {
-	inset-inline-start: 0;
-	padding-inline-start: 0;
 }
 
 .princelists-is-collapsed .princelists-collapse {

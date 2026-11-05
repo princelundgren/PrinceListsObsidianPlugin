@@ -214,7 +214,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		const now = new Date();
 		const today = dayOf(now);
 		const groups = groupSchedule([...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms)), today);
-		const drawn = JSON.stringify([today, groups, [...this.collapsed]]);
+		const drawn = JSON.stringify([today, groups, [...this.collapsed].sort()]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;
