@@ -22,7 +22,7 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 		{ action: 'noteLink', icon: 'link', label: 'Add link' },
 		{ action: 'link', icon: 'external-link', label: 'Add external link' },
 		{ action: 'code', icon: 'code-2', label: 'Code' },
-		{ action: 'codeBlock', icon: 'code', label: 'Code block' },
+		{ action: 'codeBlock', icon: 'square-code', label: 'Code block' },
 	],
 ];
 const ACTIONS = GROUPS.flat().map((button) => button.action);
