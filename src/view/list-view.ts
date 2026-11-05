@@ -173,6 +173,7 @@ export class PrinceListView extends TextFileView {
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
 		registerFieldEvents(this);
 		registerFileRedraws(this);
+		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);
 		// The collapse arrows always show where there's no hover.
 		this.contentEl.toggleClass('princelists-is-mobile', Platform.isMobile);
 		const dragHost = listDragHost(this);

@@ -377,6 +377,9 @@ this met on 2026-10-30 **(owner)**.
   icon in `--collapse-icon-color`, turned to point right and in `--collapse-icon-color-collapsed`
   while collapsed. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
   on mobile.
+- **On a phone the arrow has only the list's narrower margin (owner, 2026-11-05):** its touch
+  target is as wide as that margin, with the icon near the screen's edge, as the cost of the wider
+  list.
 - **It shows on hover, and always on a collapsed heading (owner),** as in Obsidian's notes. Mobile
   has no hover, so there it always shows, as on a desktop system's touchscreen without a mouse. It
   shows no tooltip: its accessible name is

@@ -505,6 +505,11 @@ textarea.princelists-title {
 	box-sizing: border-box;
 }
 
+/* On a phone, the sides line up with the view header's buttons, which Obsidian insets by this much. */
+.princelists-is-phone .princelists-scroll {
+	padding-inline: var(--size-4-3);
+}
+
 /* Always at the readable line width: no documented API reads Obsidian's setting for it. */
 .princelists-sizer {
 	max-width: var(--file-line-width);
