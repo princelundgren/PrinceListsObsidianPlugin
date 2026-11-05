@@ -5,6 +5,7 @@ const DOLLAR = 36;
 const BANG = 33;
 const BRACKET = 91;
 const PERCENT = 37;
+const HASH = 35;
 const HIGHLIGHT_DELIMITER: DelimiterType = { resolve: 'Highlight', mark: 'HighlightMark' };
 
 const isSpace = (char: string) => /\s|^$/.test(char);
@@ -27,6 +28,21 @@ const wikiLink: InlineParser = {
 		return addOpaque(cx, 'WikiLink', pos, cx.slice(open, cx.end).indexOf(']]', 2), open, 2);
 	},
 	before: 'Link',
+};
+
+const TAG_BODY = /^[\p{L}\p{N}\p{M}_\-/]+/u;
+
+// A #tag's letters, digits, `_`, `-` and `/`, taken whole so its underscores don't read as italic. As
+// in Obsidian, a tag follows a space, the start of the text or a mark that may open a span.
+const tag: InlineParser = {
+	name: 'Tag',
+	parse(cx, next, pos) {
+		if (next !== HASH || !(pos === cx.offset || /[\s*_~=]/.test(cx.slice(pos - 1, pos)))) return -1;
+		const body = TAG_BODY.exec(cx.slice(pos + 1, cx.end))?.[0];
+		if (!body) return -1;
+		return cx.addElement(cx.elt('Tag', pos, pos + 1 + body.length));
+	},
+	before: 'Emphasis',
 };
 
 // $math$ as Obsidian reads it: no space just inside either `$`, and an escaped `\$` inside doesn't close it.
@@ -105,8 +121,8 @@ function staysInContainers(cx: BlockContext, opening: Line): (line: Line) => boo
 }
 
 const OBSIDIAN: MarkdownConfig = {
-	defineNodes: ['Highlight', 'HighlightMark', 'WikiLink', 'InlineMath', 'InlineComment', 'MathBlock', 'CommentBlock'],
-	parseInline: [highlight, wikiLink, inlineMath, inlineComment],
+	defineNodes: ['Highlight', 'HighlightMark', 'WikiLink', 'Tag', 'InlineMath', 'InlineComment', 'MathBlock', 'CommentBlock'],
+	parseInline: [highlight, wikiLink, tag, inlineMath, inlineComment],
 	parseBlock: [delimitedBlock('MathBlock', '$$'), delimitedBlock('CommentBlock', '%%')],
 };
 

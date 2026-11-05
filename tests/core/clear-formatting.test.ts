@@ -64,6 +64,18 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸[[__init__]] ![[pic _1_.png]] [[note#_Heading_]] [[note|**x**]] **y**‸')).toBe('‸[[__init__]] ![[pic _1_.png]] [[note#_Heading_]] [[note|**x**]] y‸');
 	});
 
+	test('keeps tags whole, as Obsidian reads them', () => {
+		expect(clear('‸#_tag_ #a_b_c #__b__ #a/_b_ #_é_ #1_2_ *x*‸')).toBe('‸#_tag_ #a_b_c #__b__ #a/_b_ #_é_ #1_2_ x‸');
+		expect(clear('‸**#_t_** ~~#_u_~~ ==#_v_==‸')).toBe('‸#_t_ #_u_ #_v_‸');
+		expect(clear('‸#_t_*a* #_u_.‸')).toBe('‸#_t_a #_u_.‸');
+		const decomposed = '#é/_b_'.normalize('NFD');
+		expect(clear(`‸#a-_b_ ${decomposed} *x*‸`)).toBe(`‸#a-_b_ ${decomposed} x‸`);
+	});
+
+	test('reads a # after a letter, a bracket or a backslash as no tag', () => {
+		expect(clear('‸x#_v_ (#_w_) \\#_z_‸')).toBe('‸x#v (#w) \\#z‸');
+	});
+
 	test('keeps math and comments whole, inline and as blocks', () => {
 		expect(clear('‸$a*b*c$ and $$x_1_$$ and %%a *b*%% **d**‸')).toBe('‸$a*b*c$ and $$x_1_$$ and %%a *b*%% d‸');
 		expect(clear('‸$$\na*b*c\n$$\n%%\n*d*\n%%\n**e**‸')).toBe('‸$$\na*b*c\n$$\n%%\n*d*\n%%\ne‸');

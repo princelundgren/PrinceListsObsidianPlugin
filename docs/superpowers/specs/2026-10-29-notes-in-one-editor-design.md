@@ -148,7 +148,8 @@ Compared with Obsidian's own editor side by side on desktop:
   math and `%%` comments stay whole, marks and all **(call)**. So do math and comment blocks inside
   a list item or quote, as Obsidian draws them, except that one left open also takes in a new list
   item right after it, where Obsidian ends it, so that line keeps its marks **(owner, 2026-11-05)**.
-  The list's background menu doesn't cover the list note **(call)**. A press of a button
+  Tags stay whole too, so `#_tag_` keeps its name **(owner, 2026-11-05)**. The list's background
+  menu doesn't cover the list note **(call)**. A press of a button
   other than the main one on a picture the editor draws, or on a drawn block, leaves it drawn and
   the editor's focus as it was: Windows opens the menu on release, after a focus would have shown
   the Markdown.
