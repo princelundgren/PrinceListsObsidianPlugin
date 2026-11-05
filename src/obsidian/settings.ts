@@ -1,5 +1,6 @@
 import { type App, PluginSettingTab, type Plugin, type SettingDefinitionItem } from 'obsidian';
 import { type ArchiveDelayHours, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
+import type { ButtonPlatforms } from '../core/button-platforms';
 import { openSchedule } from './open-schedule';
 
 export interface PrinceListsSettings {
@@ -9,12 +10,18 @@ export interface PrinceListsSettings {
 	archiveDelayHours: ArchiveDelayHours;
 	/** Whether a list's header shows the "Open schedule" button. */
 	showScheduleButton: boolean;
+	/** Where a list shows the round "+" at its bottom right. */
+	floatingAddButton: ButtonPlatforms;
+	/** Where a list's header shows its "+". */
+	headerAddButton: ButtonPlatforms;
 }
 
 export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	newListFolder: '',
 	archiveDelayHours: DEFAULT_ARCHIVE_DELAY_HOURS,
 	showScheduleButton: false,
+	floatingAddButton: 'both',
+	headerAddButton: 'off',
 };
 
 const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {
@@ -24,6 +31,13 @@ const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {
 	'24': '1 day',
 	'48': '2 days',
 	'168': '1 week',
+};
+
+const BUTTON_PLATFORM_NAMES: Record<ButtonPlatforms, string> = {
+	both: 'Desktop and mobile',
+	desktop: 'Desktop only',
+	mobile: 'Mobile only',
+	off: 'Off',
 };
 
 type SettingsHost = Plugin & { settings: PrinceListsSettings; settingChanged(key: keyof PrinceListsSettings): void };
@@ -61,6 +75,26 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 					key: 'archiveDelayHours',
 					defaultValue: DEFAULT_SETTINGS.archiveDelayHours,
 					options: ARCHIVE_DELAY_NAMES,
+				},
+			},
+			{
+				name: 'Floating add button',
+				desc: 'Where a list shows the round "+" at its bottom right, which adds an item.',
+				control: {
+					type: 'dropdown',
+					key: 'floatingAddButton',
+					defaultValue: DEFAULT_SETTINGS.floatingAddButton,
+					options: BUTTON_PLATFORM_NAMES,
+				},
+			},
+			{
+				name: 'Header add button',
+				desc: 'Where a list\'s header shows a "+" that adds an item.',
+				control: {
+					type: 'dropdown',
+					key: 'headerAddButton',
+					defaultValue: DEFAULT_SETTINGS.headerAddButton,
+					options: BUTTON_PLATFORM_NAMES,
 				},
 			},
 			{

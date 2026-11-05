@@ -1,6 +1,7 @@
 import { FileView, MarkdownView, normalizePath, Notice, Plugin, TFile, TFolder } from 'obsidian';
 import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { archiveDelayHoursOf, archiveDelayMs } from './core/archive';
+import { buttonPlatformsOf } from './core/button-platforms';
 import { serialQueue } from './core/queue';
 import { ArchiveDelay } from './obsidian/archive-delay';
 import { createList, openNewList } from './obsidian/create-list';
@@ -27,7 +28,7 @@ export default class PrinceListsPlugin extends Plugin {
 	override async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
-		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, this.archiveDelay, () => this.settings.showScheduleButton));
+		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, this.archiveDelay, () => this.settings));
 		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf, this.archiveDelay));
 		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) =>
 			ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath, this.archiveDelay)),
@@ -152,26 +153,41 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onExternalSettingsChange() {
 		const before = this.archiveDelay.ms;
+		const { floatingAddButton, headerAddButton } = this.settings;
 		await this.loadSettings();
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
-		this.syncListHeaders();
+		if (this.settings.floatingAddButton !== floatingAddButton || this.settings.headerAddButton !== headerAddButton) this.syncAddButtons();
+		else this.syncListButtons();
 	}
 
 	/** Called by the settings tab after it saves `key`. */
 	settingChanged(key: keyof PrinceListsSettings): void {
 		if (key === 'archiveDelayHours') this.archiveDelay.changed();
-		if (key === 'showScheduleButton') this.syncListHeaders();
+		if (key === 'showScheduleButton') this.syncListButtons();
+		if (key === 'floatingAddButton' || key === 'headerAddButton') this.syncAddButtons();
 	}
 
-	private syncListHeaders(): void {
-		for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_LIST)) {
-			if (leaf.view instanceof PrinceListView) leaf.view.syncHeaderButtons();
-		}
+	private listViews(): PrinceListView[] {
+		return this.app.workspace.getLeavesOfType(VIEW_TYPE_LIST).flatMap((leaf) => (leaf.view instanceof PrinceListView ? [leaf.view] : []));
+	}
+
+	private syncListButtons(): void {
+		for (const view of this.listViews()) view.syncButtons();
+	}
+
+	private syncAddButtons(): void {
+		for (const view of this.listViews()) view.syncAddButtons();
 	}
 
 	private async loadSettings(): Promise<void> {
 		const stored = (await this.loadData()) as Partial<PrinceListsSettings> | null;
-		this.settings = { ...DEFAULT_SETTINGS, ...stored, archiveDelayHours: archiveDelayHoursOf(stored?.archiveDelayHours) };
+		this.settings = {
+			...DEFAULT_SETTINGS,
+			...stored,
+			archiveDelayHours: archiveDelayHoursOf(stored?.archiveDelayHours),
+			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
+			headerAddButton: buttonPlatformsOf(stored?.headerAddButton, DEFAULT_SETTINGS.headerAddButton),
+		};
 	}
 
 	private async folderForNewLists(): Promise<TFolder> {

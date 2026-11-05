@@ -525,11 +525,17 @@ textarea.princelists-title {
 	height: 0;
 }
 
+/* Desktop's status bar sits over the window's bottom right. Obsidian documents no height for it, and
+   1.15 leaves --status-bar-scroll-padding unset, so this is the default theme's 31px, rounded up. */
+.princelists-clears-status-bar {
+	--princelists-status-bar-room: var(--size-4-8);
+}
+
 button.princelists-new-item {
 	--icon-size: var(--icon-l);
 	position: absolute;
 	right: var(--size-4-4);
-	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px));
+	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 	width: var(--size-4-12);
 	height: var(--size-4-12);
 	padding: 0;
@@ -550,9 +556,14 @@ button.princelists-new-item {
 	}
 }
 
-/* Room below the last row, so it can scroll clear of mobile's "+". */
+/* Room below the last row, so it can scroll clear of mobile's navigation bar, and of the floating "+"
+   where it shows. */
 .princelists-is-mobile .princelists-end {
-	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px));
+	height: var(--view-bottom-spacing, 0px);
+}
+
+.princelists-has-floating-add .princelists-end {
+	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
 /* The title, with the card's When, star and ⋯ on its first line. They sit in the title's row only,
