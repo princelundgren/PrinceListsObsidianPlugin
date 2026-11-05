@@ -11,6 +11,7 @@ import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
+import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
 import { addHiddenLabel, targetOf } from './dom';
 import { PrinceListView } from './list-view';
 import { handleLinkClick, renderInline, type MarkdownHost } from './notes';
@@ -40,6 +41,9 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	override navigation = false;
 	private lists = new Map<string, ReadList>();
 	private readonly rows = new WeakMap<Element, ScheduledItem>();
+	private readonly headings = new WeakMap<Element, ScheduleGroup>();
+	// Only while the view is open, as a list's collapsed headings.
+	private readonly collapsed = new Set<ScheduleGroup>();
 	// Ticks run in turn, so each is worked out on the text the one before it wrote.
 	private readonly enqueue = serialQueue((error) => console.error(error));
 	// Paths an event updated while a refresh was reading, which its older reads must not overwrite.
@@ -47,7 +51,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	private updatedPaths: Set<string> | null = null;
 	private refreshes = 0;
 	private blocks: Component[] = [];
-	// Today and the groups as drawn last. Every field counts: the rows keep these items, and ticks use their lines.
+	// Today, the groups and the collapsed ones as drawn last. Every field counts: the rows keep these items, and ticks use their lines.
 	private drawn: string | null = null;
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
@@ -92,6 +96,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		this.refreshes++;
 		this.drawn = null;
 		this.lists.clear();
+		this.collapsed.clear();
 		this.removeBlocks();
 	}
 
@@ -145,6 +150,12 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 
 	private onClick(evt: MouseEvent): void {
 		const target = targetOf(evt);
+		const heading = target?.closest(`.${COLLAPSE_CLASS}`)?.closest(`.${HEADING_CLASS}`);
+		const group = heading && this.headings.get(heading);
+		if (group) {
+			this.toggleGroup(group);
+			return;
+		}
 		const rowEl = target?.closest(`.${ITEM_CLASS}`);
 		const item = rowEl && this.rows.get(rowEl);
 		if (!target || !item || handleLinkClick(this.app, item.listPath, evt, target)) return;
@@ -155,6 +166,11 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		} else {
 			void this.openItem(item);
 		}
+	}
+
+	private toggleGroup(group: ScheduleGroup): void {
+		if (!this.collapsed.delete(group)) this.collapsed.add(group);
+		this.draw();
 	}
 
 	private async tick(item: ScheduledItem): Promise<void> {
@@ -198,7 +214,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		const now = new Date();
 		const today = dayOf(now);
 		const groups = groupSchedule([...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms)), today);
-		const drawn = JSON.stringify([today, groups]);
+		const drawn = JSON.stringify([today, groups, [...this.collapsed].sort()]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;
@@ -209,7 +225,11 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		sizer.createDiv({ cls: 'princelists-schedule-about', text: SCHEDULE_ABOUT });
 		if (groups.length === 0) sizer.createDiv({ cls: 'princelists-schedule-empty', text: "No items have a date. Pick a day with the calendar icon on an item's card." });
 		for (const { group, items } of groups) {
-			sizer.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
+			const heading = sizer.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
+			this.headings.set(heading, group);
+			const collapsed = this.collapsed.has(group);
+			addCollapseArrow(heading, collapsed);
+			if (collapsed) continue;
 			const list = sizer.createEl('ul', { cls: ITEMS_CLASS });
 			for (const item of items) list.append(this.buildRow(item, today));
 		}
