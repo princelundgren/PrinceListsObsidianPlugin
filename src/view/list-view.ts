@@ -313,7 +313,7 @@ export class PrinceListView extends TextFileView {
 		this.syncArchivedButton();
 	}
 
-	/** Whether the settings show a "+" that adds an item on this device, in a note that is a list. */
+	/** Whether the settings show a "+" that adds an item on this device. */
 	showsAddButton(): boolean {
 		return this.showsFloatingAdd() || this.showsHeaderAdd();
 	}

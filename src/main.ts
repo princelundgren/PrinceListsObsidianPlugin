@@ -153,9 +153,11 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onExternalSettingsChange() {
 		const before = this.archiveDelay.ms;
+		const { floatingAddButton, headerAddButton } = this.settings;
 		await this.loadSettings();
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
-		this.redrawLists();
+		if (this.settings.floatingAddButton !== floatingAddButton || this.settings.headerAddButton !== headerAddButton) this.redrawLists();
+		else this.syncListButtons();
 	}
 
 	/** Called by the settings tab after it saves `key`. */

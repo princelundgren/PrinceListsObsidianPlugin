@@ -12,7 +12,7 @@ import { enqueueAt, writePlanned } from './write';
 export function buildNewItemButton(view: PrinceListView, label: string): HTMLButtonElement {
 	view.containerEl.addClass('princelists-view');
 	view.containerEl.toggleClass('princelists-clears-status-bar', !Platform.isMobile);
-	const button = view.containerEl.createEl('button', { cls: 'princelists-new-item' });
+	const button = view.containerEl.createEl('button', { cls: 'princelists-new-item', attr: { 'aria-label': label } });
 	setTooltip(button, label);
 	setIcon(button, 'plus');
 	view.registerDomEvent(button, 'click', () => newItem(view));
