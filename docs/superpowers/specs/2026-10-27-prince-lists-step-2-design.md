@@ -257,12 +257,13 @@ this met on 2026-10-30 **(owner)**.
 
 ### When and the Schedule view (owner)
 
-- **Setting a When (owner, 2026-10-27):** the card's top right has a calendar icon, before the
-  star and the ⋯. Once the item has a When, the day takes the icon's place, after its own calendar
+- **Setting a When (owner, 2026-10-27):** the card's top right has a calendar icon, between the
+  star and the ⋯, so the star comes before the day as on the row **(owner, 2026-11-05)**. Once the
+  item has a When, the day takes the icon's place, after its own calendar
   icon. Clicking either opens the platform's date picker through an `<input type="date">`.
   Obsidian has no date picker API, and the HTML input gives each platform's own picker.
   - **In a view or list block 480 px wide or narrower (owner, 2026-11-05),** such as a phone or a
-    sidebar, the When, star and ⋯ always have a line of their own under the title, together at its
+    sidebar, the star, When and ⋯ always have a line of their own under the title, together at its
     right, where a row shows its day. Beside the title they took about half a phone's line, and
     moved down only on some titles; split, with the day under the title's start, a lone calendar
     looked out of place.
@@ -426,7 +427,7 @@ this met on 2026-10-30 **(owner)**.
     capital letters. The checkbox reaches a little above and below them; the star and the calendar,
     which Lucide draws inside a margin, run from the baseline to the capitals' top. Each keeps the
     room its full size takes, so the text doesn't move and a tap anywhere the full-size box was
-    still ticks. An open card's day, star and ⋯ are buttons the ⋯'s size, centered on one line;
+    still ticks. An open card's star, day and ⋯ are buttons the ⋯'s size, centered on one line;
     its star and calendar are drawn as small as the row's, and a day's calendar stands on the day's
     baseline. Where the app's web view lacks CSS's `cap` unit (before Chrome 118
     and Safari 17.2) they keep their full size.

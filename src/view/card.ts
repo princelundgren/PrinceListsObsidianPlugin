@@ -184,8 +184,8 @@ function createCardElement(): HTMLElement {
 	head.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	body.createDiv({ cls: CARD_NOTES_CLASS });
 	const tools = head.createDiv({ cls: 'princelists-card-tools' });
-	buildWhenPicker(tools);
 	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
+	buildWhenPicker(tools);
 	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
 	return el;
