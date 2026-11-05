@@ -14,7 +14,7 @@ export interface PrinceListsSettings {
 export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	newListFolder: '',
 	archiveDelayHours: DEFAULT_ARCHIVE_DELAY_HOURS,
-	showScheduleButton: true,
+	showScheduleButton: false,
 };
 
 const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {
@@ -64,7 +64,7 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 				},
 			},
 			{
-				name: 'Schedule button',
+				name: 'Show Schedule button',
 				desc: "Shows a button in a list's header that opens the Schedule.",
 				control: {
 					type: 'toggle',
