@@ -841,9 +841,10 @@ button.princelists-card-star.is-starred svg {
 	}
 
 	/* A day's calendar stands on the day's baseline, as on its row, and the button is as tall as the ⋯.
-	   Wrapping lets align-content center the line when mobile makes the button taller. */
+	   A grid, so its one row stays centered when mobile makes the button taller. */
 	.princelists-when-button:has(> .princelists-when-icon) {
-		flex-wrap: wrap;
+		display: grid;
+		grid-auto-flow: column;
 		align-content: center;
 		align-items: baseline;
 		padding-block: calc((var(--princelists-icon-slot) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
