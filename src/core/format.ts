@@ -1,6 +1,7 @@
+import { clearFormatting } from './clear-formatting';
 import { codeBlock, toggleLineFormat, type LineFormat } from './format-lines';
 
-export type Format = 'bold' | 'italic' | 'strikethrough' | 'underline' | 'code' | 'link' | 'codeBlock' | LineFormat;
+export type Format = 'bold' | 'italic' | 'strikethrough' | 'underline' | 'code' | 'link' | 'codeBlock' | 'clearFormatting' | LineFormat;
 
 /** Replace `from`..`to` with `insert`, then select `selectionStart`..`selectionEnd` in the new text. */
 export interface FormatEdit {
@@ -28,6 +29,8 @@ export function formatSelection(text: string, start: number, end: number, format
 			return link(text, start, end);
 		case 'codeBlock':
 			return codeBlock(text, start, end);
+		case 'clearFormatting':
+			return clearFormatting(text, start, end);
 		case 'bulleted':
 		case 'numbered':
 		case 'checklist':

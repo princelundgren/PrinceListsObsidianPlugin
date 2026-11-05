@@ -1,4 +1,3 @@
-import { selectAll } from '@codemirror/commands';
 import type { EditorView } from '@codemirror/view';
 import type { Format } from '../core/format';
 import { changeField } from './field-undo';
@@ -19,7 +18,6 @@ export interface EditableText {
 	replaceSelection(text: string): void;
 	/** Adds the pictures to the notes, as a paste would; the title takes none. */
 	pastePictures(pictures: File[]): void;
-	selectAll(): void;
 	format(format: Format): void;
 	focus(): void;
 }
@@ -35,7 +33,6 @@ export function notesText(view: PrinceListView, editor: EditorView): EditableTex
 		pastePictures: (pictures) => {
 			pastePictures(view, pictures);
 		},
-		selectAll: () => selectAll(editor),
 		format: (format) => runNotesBarAction(editor, format),
 		focus: () => editor.focus(),
 	};
@@ -52,7 +49,6 @@ export function fieldText(field: HTMLTextAreaElement): EditableText {
 		},
 		replaceSelection: (insert) => changeField(field, () => field.setRangeText(insert, field.selectionStart, field.selectionEnd, 'end')),
 		pastePictures: () => undefined,
-		selectAll: () => field.select(),
 		format: (format) => applyFormat(field, format),
 		focus: () => field.focus(),
 	};

@@ -19,12 +19,13 @@ const FORMATS: readonly FormatItem[] = [
 	{ format: 'italic', icon: 'italic', label: 'Italic' },
 	{ format: 'strikethrough', icon: 'strikethrough', label: 'Strikethrough' },
 	{ format: 'underline', icon: 'underline', label: 'Underline' },
+	{ format: 'clearFormatting', icon: 'eraser', label: 'Clear formatting' },
 ];
 
 const PARAGRAPHS: readonly FormatItem[] = [
+	{ format: 'checklist', icon: 'check-square', label: 'Task list' },
 	{ format: 'bulleted', icon: 'list', label: 'Bullet list' },
 	{ format: 'numbered', icon: 'list-ordered', label: 'Numbered list' },
-	{ format: 'checklist', icon: 'check-square', label: 'Task list' },
 ];
 
 /**
@@ -120,12 +121,6 @@ function addClipboardItems(menu: Menu, text: EditableText): void {
 			.setIcon('clipboard-type')
 			.setDisabled(text.isReadOnly)
 			.onClick(() => runFocused(text, () => void paste(text, 'plain'))),
-	);
-	menu.addItem((entry) =>
-		entry
-			.setTitle('Select all')
-			.setIcon('box-select')
-			.onClick(() => runFocused(text, () => text.selectAll())),
 	);
 }
 
