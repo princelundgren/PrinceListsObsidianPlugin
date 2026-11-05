@@ -150,12 +150,11 @@ Compared with Obsidian's own editor side by side on desktop:
   item right after it, where Obsidian ends it, so that line keeps its marks **(owner, 2026-11-05)**.
   Tags stay whole too, so `#_tag_` keeps its name **(owner, 2026-11-05)**. Inline code keeps its
   backticks when its text, alone or with the rest of its word, would read as Markdown without them,
-  so `` `a**b**c` `` doesn't turn bold, unlike Obsidian's own Clear formatting **(owner,
-  2026-11-05)**. The list's background menu doesn't cover the list note **(call)**. A press of a
-  button
-  other than the main one on a picture the editor draws, or on a drawn block, leaves it drawn and
-  the editor's focus as it was: Windows opens the menu on release, after a focus would have shown
-  the Markdown.
+  so `` `a**b**c` `` doesn't turn bold, unlike Obsidian's own Clear formatting
+  **(owner, 2026-11-05)**. The list's background menu doesn't cover the list note **(call)**. A
+  press of a button other than the main one on a picture the editor draws, or on a drawn block,
+  leaves it drawn and the editor's focus as it was: Windows opens the menu on release, after a focus
+  would have shown the Markdown.
   - Obsidian documents no way to open its own editor menu outside a note's editor, and plugins
     can't make its submenus, so the text menu is the plugin's own and flat.
   - In the card's title and in the notes, the card's and the list's, the text menu takes the place
