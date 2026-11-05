@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { itemRow } from '../../src/core/display';
 import { parseItemLine } from '../../src/core/item-line';
-import { dayAfter, dayLabelKind, dayOf, daysFrom, setWhen, whenOf } from '../../src/core/when';
+import { dayAfter, dayLabel, dayLabelKind, dayOf, daysFrom, setWhen, whenOf } from '../../src/core/when';
 
 describe('whenOf', () => {
 	test.each(['- [ ] a ⏳ 2026-10-30', '- [ ] a ⌛ 2026-10-30', '- [ ] a ⏳️ 2026-10-30'])('reads %s', (line) => {
@@ -73,5 +73,16 @@ describe('days', () => {
 	test('dayLabelKind keeps the year only for a date in another year', () => {
 		const kinds = ['2026-12-31', '2027-01-01', '2025-12-31', '2026-01-01'].map((day) => dayLabelKind(day, '2026-12-25'));
 		expect(kinds).toEqual(['weekday', 'date', 'date', 'date-this-year']);
+	});
+	// Node's built-in ICU data supplies the month and weekday names.
+	test.each([
+		['2026-11-05', 'en', 'Today'],
+		['2026-11-06', 'en', 'Tomorrow'],
+		['2026-11-09', 'en', 'Monday'],
+		['2026-11-12', 'en', 'Nov 12'],
+		['2027-01-04', 'en', 'Jan 4, 2027'],
+		['2026-11-12', 'sv', '12 nov.'],
+	])('dayLabel shows %s in %s as %s', (day, language, label) => {
+		expect(dayLabel(day, '2026-11-05', language)).toBe(label);
 	});
 });

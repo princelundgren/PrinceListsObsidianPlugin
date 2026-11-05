@@ -71,6 +71,20 @@ export function dayLabelKind(day: string, today: string): DayLabelKind {
 	return day.slice(0, 4) === today.slice(0, 4) ? 'date-this-year' : 'date';
 }
 
+const LABEL_FORMATS: Record<Exclude<DayLabelKind, 'today' | 'tomorrow'>, Intl.DateTimeFormatOptions> = {
+	weekday: { weekday: 'long' },
+	'date-this-year': { month: 'short', day: 'numeric' },
+	date: { year: 'numeric', month: 'short', day: 'numeric' },
+};
+
+/** A row's short day, "Today", "Tomorrow", a weekday or a date, with weekdays and dates in `language`. */
+export function dayLabel(day: string, today: string, language: string): string {
+	const kind = dayLabelKind(day, today);
+	if (kind === 'today') return 'Today';
+	if (kind === 'tomorrow') return 'Tomorrow';
+	return new Intl.DateTimeFormat(language, { ...LABEL_FORMATS[kind], timeZone: 'UTC' }).format(utcOf(day));
+}
+
 // The tail's fields and tags, and the block ID and trailing whitespace after them.
 function splitTail(tail: string): { fields: string; end: string } {
 	const trimmed = tail.trimEnd();
