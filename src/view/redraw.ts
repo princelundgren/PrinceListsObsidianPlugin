@@ -1,3 +1,4 @@
+import { emptyHint } from '../core/empty-hint';
 import { isListText } from '../obsidian/marker';
 import { hasNoItems } from './add-button';
 import { dismissCard, refreshCard } from './card';
@@ -40,7 +41,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		const field = placeField(view, kept);
 		if (field?.keeps) slot = field.el;
 		view.rowsHeldBack = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field, drawn);
-		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint(view.showsAddButton()) });
+		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint(ADD_KEY_NAME, view.showsAddButton()) });
 		// Room to scroll the last row clear of the floating "+".
 		fresh.createDiv({ cls: 'princelists-end' });
 	} else {
@@ -62,12 +63,6 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	if (kept && kept === view.listNoteEl) refreshListNote(view);
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);
 	listScrollEl.scrollTop = scrollTop;
-}
-
-// Names a "+" only where the settings show one; Enter in the title starts the first item.
-function emptyHint(showsPlus: boolean): string {
-	if (ADD_KEY_NAME === null) return showsPlus ? 'Tap + to add an item' : 'Press Enter in the title to add an item';
-	return showsPlus ? `Press ${ADD_KEY_NAME} or + to add an item` : `Press ${ADD_KEY_NAME} to add an item`;
 }
 
 // Where a redraw puts the card: a slot for the card that keeps focus, or the card, updated.
