@@ -1196,6 +1196,10 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `--file-line-width`, so titles and rows line up with a note's. That's always the readable line
   width: no documented API reads Obsidian's "Readable line length" setting, so with it off a
   note fills the pane while a list doesn't.
+- **On a phone, a list's sides line up with the view header's buttons instead (owner,
+  2026-11-05):** the side padding is `--size-4-3`, the header's inset in 1.15.0's `app.css`
+  (undocumented), half a note's, so a list uses more of a narrow screen. A tablet keeps a note's
+  margins.
 - **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
   and keyboard, and desktop's status bar.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.

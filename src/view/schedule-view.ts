@@ -74,6 +74,7 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	async onOpen(): Promise<void> {
 		this.contentEl.addClass('princelists-content', 'princelists-schedule');
 		this.contentEl.toggleClass('princelists-is-mobile', Platform.isMobile);
+		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);
 		const { workspace, metadataCache, vault } = this.app;
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) void this.refresh();
