@@ -15,7 +15,7 @@ import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
 import { cardNotesSource } from './notes-source';
 import { ownElement } from './own-rows';
-import { buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
+import { addTickZone, buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
 export const CARD_CLASS = 'princelists-card';
@@ -177,14 +177,15 @@ function endCard(view: PrinceListView, card: Card): void {
 
 function createCardElement(): HTMLElement {
 	const el = createEl('li', { cls: [ITEM_CLASS, CARD_CLASS], attr: { tabindex: -1 } });
+	addTickZone(el);
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
 	const head = body.createDiv({ cls: 'princelists-card-head' });
 	head.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	body.createDiv({ cls: CARD_NOTES_CLASS });
 	const tools = head.createDiv({ cls: 'princelists-card-tools' });
-	buildWhenPicker(tools);
 	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
+	buildWhenPicker(tools);
 	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
 	return el;

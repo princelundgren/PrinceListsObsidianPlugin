@@ -81,14 +81,15 @@ textarea.princelists-title {
 	display: flex;
 	align-items: flex-start;
 	gap: var(--size-4-2);
-	padding: var(--size-4-1) 0;
+	--princelists-row-padding: var(--size-4-1);
+	padding: var(--princelists-row-padding) 0;
 	line-height: var(--line-height-normal);
 }
 
 /* On mobile a one-line row is 40px tall, the size Obsidian 1.15 gives its undocumented
    --touch-size-s, so a finger doesn't land on the next row. */
 .princelists-is-mobile .princelists-item {
-	padding: calc((40px - var(--line-height-normal) * 1em) / 2) 0;
+	--princelists-row-padding: calc((40px - var(--line-height-normal) * 1em) / 2);
 }
 
 /* The row's full height beside the checkbox ticks it too, up to the title. It sits behind the box,
@@ -112,6 +113,15 @@ textarea.princelists-title {
 	width: calc(var(--checkbox-size) + var(--size-4-2));
 }
 
+/* The open card's starts at its edge and is as tall as the title's first line with the padding
+   around it, since the notes make the card tall. */
+.princelists-content .princelists-card > .princelists-tick-zone {
+	inset-inline-start: 0;
+	inset-block-end: auto;
+	width: calc(var(--size-4-2) + var(--checkbox-size) + var(--size-4-2));
+	height: calc(var(--princelists-row-padding) + var(--line-height-normal) * 1em + var(--size-4-2));
+}
+
 /* The row's parts sit on the title's first baseline, so they stay on its first line when it wraps and
    a smaller day still lines up with it. An open card or title field lines its checkbox up the same
    way. */
@@ -129,17 +139,15 @@ textarea.princelists-title {
 	display: inline-block;
 }
 
-/* Lowered from the baseline until its middle meets the middle of the title's lowercase letters, as
-   Obsidian lowers its own task checkbox, and as much taken off its top margin, so it takes no more
-   room above the baseline than it shows. The font is the row's, so 1ex is the title's. Two classes
-   outrank Obsidian's own input[type=checkbox] rule. */
+/* Its bottom on the title's baseline: with no text inside, its baseline is its bottom edge. The cap
+   rules below draw it smaller and lower it to center it on the capitals. Positioned,
+   so it paints above the tick zone before it. Two classes outrank Obsidian's own
+   input[type=checkbox] rule. */
 .princelists-item .princelists-checkbox {
-	--princelists-lowered-by: calc(var(--checkbox-size) / 2 - 0.5ex);
 	flex: none;
 	align-self: baseline;
 	position: relative;
-	top: var(--princelists-lowered-by);
-	margin: calc(-1 * var(--princelists-lowered-by)) 0 0;
+	margin: 0;
 	font-size: inherit;
 	font-family: inherit;
 }
@@ -202,11 +210,13 @@ textarea.princelists-title {
 	margin-bottom: 0;
 }
 
-/* The open card: raised above the list, in place of its row (spec, "Layout"). Its margins stay inside
-   the pane, so mobile gets no sideways scrolling. */
+/* The open card: raised above the list, in place of its row (spec, "Layout"). It reaches into the
+   view's side margin by its padding and border, and up by its border with the row's own padding
+   above the title, so the checkbox and title stay where the row had them; the margin is wider than
+   that, so mobile gets no sideways scrolling. */
 .princelists-item.princelists-card {
-	margin: var(--size-4-2) 0;
-	padding: var(--size-4-2);
+	margin: calc(-1 * var(--border-width)) calc(-1 * (var(--size-4-2) + var(--border-width))) var(--size-4-2);
+	padding: var(--princelists-row-padding) var(--size-4-2) var(--size-4-2);
 	border: var(--border-width) solid var(--background-modifier-border);
 	border-radius: var(--radius-m);
 	background-color: var(--background-primary);
@@ -599,9 +609,9 @@ button.princelists-new-item {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The title, with the card's When, star and ⋯ on its first line. They sit in the title's row only,
-   so the notes and the format bar under it span the card. In a pane too narrow for both, such as a
-   sidebar, they move to a line of their own under the title, still on the right. */
+/* The title, with the card's star, When and ⋯ on its first line. They sit in the title's row only,
+   so the notes and the format bar under it span the card. In a pane too narrow for both they move to
+   a line of their own under the title, still on the right. */
 .princelists-card-head {
 	display: flex;
 	flex-wrap: wrap;
@@ -620,6 +630,14 @@ button.princelists-new-item {
 	display: flex;
 	align-items: center;
 	gap: var(--size-2-1);
+}
+
+/* In a view about as narrow as a sidebar or a phone, they always have that line, so the title keeps
+   the width. */
+@container (max-width: 480px) {
+	.princelists-card-head > .princelists-card-title {
+		flex-basis: 100%;
+	}
 }
 
 /* Under the notes editor while it has focus, its first icon lined up with the notes' text. On a
@@ -696,7 +714,8 @@ button.princelists-collapse:not(:focus-visible) {
 	min-height: var(--input-height);
 }
 
-/* The taller row still centered on the title's first line. */
+/* The taller buttons take only a line of text's height: centered on the title's first line beside
+   it, or on a line of their own under it. */
 .princelists-is-mobile .princelists-card-tools {
 	margin-block: calc((var(--line-height-normal) * 1em - var(--input-height)) / 2);
 }
@@ -705,6 +724,7 @@ button.princelists-collapse:not(:focus-visible) {
 textarea.princelists-heading-field {
 	margin: var(--size-4-4) 0 var(--size-4-1);
 	padding-bottom: var(--size-4-1);
+	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-weight: var(--font-bold);
 }
@@ -727,27 +747,9 @@ textarea.princelists-heading-field {
 
 .princelists-when {
 	flex: none;
-	display: flex;
 	align-self: baseline;
-	align-items: baseline;
-	gap: var(--size-2-1);
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
-}
-
-/* Lowered as the checkbox is: the star to the middle of the title's lowercase letters, and the day's
-   icon to the middle of the day's. */
-.princelists-star svg,
-.princelists-when > .princelists-when-icon svg {
-	--princelists-lowered-by: calc(var(--icon-size) / 2 - 0.5ex);
-	position: relative;
-	top: var(--princelists-lowered-by);
-	margin-top: calc(-1 * var(--princelists-lowered-by));
-}
-
-.princelists-when-icon {
-	display: flex;
-	--icon-size: var(--icon-xs);
 }
 
 .princelists-card-when {
@@ -767,7 +769,6 @@ textarea.princelists-heading-field {
 .princelists-when-button {
 	display: flex;
 	align-items: center;
-	gap: var(--size-2-1);
 	font-size: var(--font-ui-small);
 }
 
@@ -793,6 +794,62 @@ button.princelists-card-star.is-starred svg {
 	cursor: pointer;
 }
 
+/* Registered, so the row's 1cap is computed there and an icon in a smaller font inherits the title's. */
+@property --princelists-title-cap {
+	syntax: '<length>';
+	inherits: true;
+	initial-value: 0px;
+}
+
+/* The checkbox and the star share one box a fifth taller than the title's capitals, centered on
+   them. Lucide draws inside a twelfth of its box on each side, so the star runs from the baseline
+   to the capitals' top. Each keeps the slot its full size takes, so
+   the text and the tick zone stay where they were. The box's border and tick follow its size.
+   Without the cap unit they keep their full size. */
+@supports (height: 1cap) {
+	.princelists-item {
+		--princelists-checkbox-slot: var(--checkbox-size);
+		--princelists-title-cap: 1cap;
+		--princelists-mark-size: calc(1.2 * var(--princelists-title-cap));
+		--princelists-mark-drop: calc(0.1 * var(--princelists-title-cap));
+	}
+
+	.princelists-item .princelists-checkbox {
+		--checkbox-size: var(--princelists-mark-size);
+		top: var(--princelists-mark-drop);
+		margin-inline: calc((var(--princelists-checkbox-slot) - var(--checkbox-size)) / 2);
+	}
+
+	.princelists-star {
+		justify-content: center;
+		width: var(--icon-size);
+	}
+
+	.princelists-star svg {
+		--icon-size: var(--princelists-mark-size);
+		position: relative;
+		top: var(--princelists-mark-drop);
+	}
+
+	/* The open card's star, day and ⋯ are buttons of one size, centered on one line. The star, and
+	   the calendar when there is no day, are as small as the row's, centered in that box. */
+	button.princelists-card-star,
+	.princelists-when-button {
+		--princelists-icon-slot: var(--icon-size);
+	}
+
+	button.princelists-card-star > svg,
+	.princelists-when-button > svg {
+		--icon-size: var(--princelists-mark-size);
+		margin: calc((var(--princelists-icon-slot) - var(--icon-size)) / 2);
+	}
+
+	/* A day's button holds only its text, and is as tall as the ⋯. */
+	.princelists-when-button:not(:has(> svg)) {
+		padding-block: calc((var(--princelists-icon-slot) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
+	}
+}
+
 /* The hint sits centered in the space below the list note. */
 .princelists-sizer.princelists-is-empty {
 	display: flex;
@@ -813,32 +870,44 @@ button.princelists-card-star.is-starred svg {
 	margin-block: var(--size-4-2);
 }
 
-/* The collapse arrow sits in the margin left of its heading, drawn as Obsidian's own fold icon. */
+/* A heading's text lines up with the item titles, and its collapse arrow, drawn as Obsidian's own
+   fold icon, sits in the checkboxes' column. A list inside another note has no arrow, so its headings
+   keep to the edge rather than leave the column empty. */
 .princelists-heading {
 	position: relative;
+	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
 }
 
+.princelists-block .princelists-heading {
+	padding-inline-start: 0;
+}
+
+/* The arrow's target is as wide as a row's tick zone, the column and the gap after it, and runs from
+   the space above the heading to its bottom. Its content box is the column beside the heading's line. */
 button.princelists-collapse {
 	position: absolute;
-	inset-inline-end: 100%;
-	top: 0;
+	inset-block: calc(-1 * var(--size-4-4)) 0;
+	inset-inline-start: 0;
+	box-sizing: content-box;
+	width: var(--checkbox-size);
+	height: auto;
 	display: flex;
 	align-items: center;
-	padding: 0 var(--size-2-1);
+	justify-content: center;
+	padding-block: var(--size-4-4) var(--size-4-1);
+	padding-inline: 0 var(--size-4-2);
 	font-size: inherit;
-	height: calc(var(--line-height-normal) * 1em);
 	background: none;
 	border: none;
 	color: var(--collapse-icon-color);
-	opacity: 0;
 	--icon-size: 10px;
 	--icon-stroke: 4px;
 }
 
-/* On mobile, wider into the margin for a finger, with the icon still beside its heading. */
-.princelists-is-mobile button.princelists-collapse {
-	justify-content: flex-end;
-	min-width: var(--size-4-5);
+/* In a view it also takes in part of the margin, as the tick zone does. */
+.princelists-content button.princelists-collapse {
+	inset-inline-start: calc(-1 * var(--size-4-3));
+	padding-inline-start: var(--size-4-3);
 }
 
 .princelists-is-collapsed .princelists-collapse {
@@ -853,20 +922,6 @@ button.princelists-collapse {
    classes, to outrank Obsidian's rule that mirrors icons there. */
 .mod-rtl .princelists-is-collapsed .princelists-collapse svg.svg-icon {
 	transform: rotate(90deg);
-}
-
-.princelists-heading:hover .princelists-collapse,
-.princelists-heading.princelists-is-collapsed .princelists-collapse,
-.princelists-is-mobile .princelists-collapse,
-.princelists-collapse:focus-visible {
-	opacity: 1;
-}
-
-/* A touchscreen with a desktop system has no hover either. */
-@media (hover: none) {
-	button.princelists-collapse {
-		opacity: 1;
-	}
 }
 
 /* Room below the last row, so it can scroll clear of mobile's navigation bar. */
