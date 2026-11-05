@@ -720,6 +720,40 @@ textarea.princelists-heading-field {
 	fill: currentColor;
 }
 
+/* The star and the day's icon are drawn as tall as their text's capitals, bottoms on its baseline, and
+   the checkbox a little taller, centered on the capitals. Each keeps the slot its full size takes, so
+   the text and the tick zone stay where they were. The box's border and tick follow its size.
+   Without the cap unit they keep their full size. */
+@supports (height: 1cap) {
+	.princelists-item {
+		--princelists-checkbox-slot: var(--checkbox-size);
+	}
+
+	.princelists-item .princelists-checkbox {
+		--checkbox-size: 1.2cap;
+		top: calc((var(--checkbox-size) - 1cap) / 2);
+		margin-inline: calc((var(--princelists-checkbox-slot) - var(--checkbox-size)) / 2);
+	}
+
+	.princelists-star {
+		justify-content: center;
+		width: var(--icon-size);
+	}
+
+	.princelists-star svg {
+		--icon-size: 1cap;
+	}
+
+	.princelists-when-icon {
+		justify-content: center;
+		width: var(--icon-size);
+	}
+
+	.princelists-when-icon svg {
+		--icon-size: 1cap;
+	}
+}
+
 .princelists-when {
 	flex: none;
 	display: flex;
@@ -730,14 +764,6 @@ textarea.princelists-heading-field {
 	font-size: var(--font-ui-small);
 }
 
-/* Lowered from the baseline until its middle meets the middle of the day's lowercase letters, and as
-   much taken off its top margin, so it takes no more room above the baseline than it shows. */
-.princelists-when > .princelists-when-icon svg {
-	--princelists-lowered-by: calc(var(--icon-size) / 2 - 0.5ex);
-	position: relative;
-	top: var(--princelists-lowered-by);
-	margin-top: calc(-1 * var(--princelists-lowered-by));
-}
 
 .princelists-when-icon {
 	display: flex;
