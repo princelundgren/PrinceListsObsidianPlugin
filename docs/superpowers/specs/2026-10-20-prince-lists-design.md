@@ -601,8 +601,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was, except that doubled
   `✔` marks collapse to the earliest and a leftover `✔` on an open line is dropped (see
   Completion). Step two hides an item's star too, and saving puts it back once.
-- **An item's When (step two):** the calendar icon at the card's top right sets it, and the
-  picker's own Clear or Reset removes it.
+- **An item's When (step two):** the calendar icon at the card's top right, or the day in its
+  place, sets it, and the picker's own Clear or Reset removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
   not on every keystroke. Switching to another window or app doesn't leave the field. The rename
   uses `fileManager.renameFile`, which updates links according to the user's link settings. Escape

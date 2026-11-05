@@ -10,7 +10,5 @@ export function addWhen(rowEl: HTMLElement, day: string, today: string): void {
 }
 
 export function fillWhen(el: HTMLElement, day: string, today: string): void {
-	el.empty();
-	setIcon(el.createSpan({ cls: 'princelists-when-icon' }), 'calendar');
-	el.createSpan({ text: dayLabel(day, today, getLanguage()) });
+	el.setText(dayLabel(day, today, getLanguage()));
 }

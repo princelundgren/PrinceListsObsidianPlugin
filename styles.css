@@ -742,17 +742,9 @@ textarea.princelists-heading-field {
 
 .princelists-when {
 	flex: none;
-	display: flex;
 	align-self: baseline;
-	align-items: baseline;
-	gap: var(--size-2-1);
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
-}
-
-.princelists-when-icon {
-	display: flex;
-	--icon-size: var(--icon-xs);
 }
 
 .princelists-card-when {
@@ -772,7 +764,6 @@ textarea.princelists-heading-field {
 .princelists-when-button {
 	display: flex;
 	align-items: center;
-	gap: var(--size-2-1);
 	font-size: var(--font-ui-small);
 }
 
@@ -798,16 +789,16 @@ button.princelists-card-star.is-starred svg {
 	cursor: pointer;
 }
 
-/* Registered, so the row's 1cap is computed there and the smaller day text inherits the title's. */
+/* Registered, so the row's 1cap is computed there and an icon in a smaller font inherits the title's. */
 @property --princelists-title-cap {
 	syntax: '<length>';
 	inherits: true;
 	initial-value: 0px;
 }
 
-/* The checkbox, the star and the day's icon share one box a fifth taller than the title's capitals,
-   centered on them. Lucide draws inside a twelfth of its box on each side, so the star and the
-   calendar run from the baseline to the capitals' top. Each keeps the slot its full size takes, so
+/* The checkbox and the star share one box a fifth taller than the title's capitals, centered on
+   them. Lucide draws inside a twelfth of its box on each side, so the star runs from the baseline
+   to the capitals' top. Each keeps the slot its full size takes, so
    the text and the tick zone stay where they were. The box's border and tick follow its size.
    Without the cap unit they keep their full size. */
 @supports (height: 1cap) {
@@ -824,14 +815,12 @@ button.princelists-card-star.is-starred svg {
 		margin-inline: calc((var(--princelists-checkbox-slot) - var(--checkbox-size)) / 2);
 	}
 
-	.princelists-star,
-	.princelists-when > .princelists-when-icon {
+	.princelists-star {
 		justify-content: center;
 		width: var(--icon-size);
 	}
 
-	.princelists-star svg,
-	.princelists-when-icon svg {
+	.princelists-star svg {
 		--icon-size: var(--princelists-mark-size);
 		position: relative;
 		top: var(--princelists-mark-drop);
@@ -850,13 +839,8 @@ button.princelists-card-star.is-starred svg {
 		margin: calc((var(--princelists-icon-slot) - var(--icon-size)) / 2);
 	}
 
-	/* A day's calendar stands on the day's baseline, as on its row, and the button is as tall as the ⋯.
-	   A grid, so its one row stays centered when mobile makes the button taller. */
-	.princelists-when-button:has(> .princelists-when-icon) {
-		display: grid;
-		grid-auto-flow: column;
-		align-content: center;
-		align-items: baseline;
+	/* A day's button holds only its text, and is as tall as the ⋯. */
+	.princelists-when-button:not(:has(> svg)) {
 		padding-block: calc((var(--princelists-icon-slot) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
 	}
 }

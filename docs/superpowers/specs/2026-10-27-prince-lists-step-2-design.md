@@ -24,7 +24,7 @@ only documented Obsidian APIs are used.
 - **A list can show inside another note,** such as a daily note, through a `princelists` code
   block. Its items can be ticked, added, deleted and dragged there, without cards.
 - **"Turn into list"** adds the marker to the note you're in.
-- **An item can have a When,** the day you plan to do it, shown with a calendar icon. A Schedule
+- **An item can have a When,** the day you plan to do it, shown as the day alone. A Schedule
   view gathers every list's items with a When: Today, with anything overdue, then Tomorrow, Next
   7 days and Later.
 - **An item can be starred.**
@@ -56,8 +56,8 @@ this met on 2026-10-30 **(owner)**.
 - **Written as Tasks' scheduled date,** ` ⏳ YYYY-MM-DD`, among the title line's trailing Tasks
   fields, so Tasks and its queries read it as scheduled. Tasks also accepts `⌛`; the plugin reads
   both and writes `⏳` **(call)**.
-- **In the view it never shows as `⏳`:** a row shows Lucide's `calendar` icon and the day
-  (owner: the icon, not the hourglass).
+- **In the view it never shows as `⏳`:** a row shows only the day, with no icon **(owner,
+  2026-11-05)**: a date reads as one without it, and the icon took room on a phone's row.
 - **Setting a When (call)** on an item that has one replaces its date in place. A new one goes at
   the end of the trailing Tasks fields and tags, so after any tags, before a block ID (` ^id`)
   and trailing whitespace if the line has them. Clearing it removes the field and the space before it.
@@ -259,8 +259,7 @@ this met on 2026-10-30 **(owner)**.
 
 - **Setting a When (owner, 2026-10-27):** the card's top right has a calendar icon, between the
   star and the ⋯, so the star comes before the day as on the row **(owner, 2026-11-05)**. Once the
-  item has a When, the day takes the icon's place, after its own calendar
-  icon. Clicking either opens the platform's date picker through an `<input type="date">`.
+  item has a When, its day takes the icon's place, with no icon, as on the row. Clicking either opens the platform's date picker through an `<input type="date">`.
   Obsidian has no date picker API, and the HTML input gives each platform's own picker.
   - **In a view or list block 480 px wide or narrower (owner, 2026-11-05),** such as a phone or a
     sidebar, the star, When and ⋯ always have a line of their own under the title, together at its
@@ -272,7 +271,7 @@ this met on 2026-10-30 **(owner)**.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's top right, and every platform's picker can
     already clear the day.
-- **On a row (call):** the calendar icon and a short day at the row's end: "Today", "Tomorrow", a
+- **On a row (call):** a short day at the row's end, with no icon: "Today", "Tomorrow", a
   weekday for the rest of the next seven days, or else the date, in the language set in Obsidian.
   A past day shows its date.
   - **A date in the current year has no year (owner, 2026-11-05),** such as "Nov 12", since the
@@ -421,15 +420,14 @@ this met on 2026-10-30 **(owner)**.
 - **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
   show: a list, the Schedule view and a list inside another note.
 - **Where the star and the day sit (owner, 2026-11-05):**
-  - On the title's first line: the day on its baseline, and the checkbox, the star and the day's
-    icon centered on its capital letters.
-  - The checkbox, the star and the day's icon are drawn in one box a fifth taller than the title's
-    capital letters. The checkbox reaches a little above and below them; the star and the calendar,
-    which Lucide draws inside a margin, run from the baseline to the capitals' top. Each keeps the
+  - On the title's first line: the day on its baseline, and the checkbox and the star centered on
+    its capital letters.
+  - The checkbox and the star are drawn in one box a fifth taller than the title's capital
+    letters. The checkbox reaches a little above and below them; the star, which Lucide draws
+    inside a margin, runs from the baseline to the capitals' top. Each keeps the
     room its full size takes, so the text doesn't move and a tap anywhere the full-size box was
     still ticks. An open card's star, day and ⋯ are buttons the ⋯'s size, centered on one line;
-    its star and calendar are drawn as small as the row's, and a day's calendar stands on the day's
-    baseline. Where the app's web view lacks CSS's `cap` unit (before Chrome 118
+    its star, and its calendar while it has no day, are drawn as small as the row's star. Where the app's web view lacks CSS's `cap` unit (before Chrome 118
     and Safari 17.2) they keep their full size.
   - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
     the day go to the row's right edge, so a title that wraps leaves no gap before them and the days line up. In a wider
