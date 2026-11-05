@@ -121,12 +121,6 @@ function addClipboardItems(menu: Menu, text: EditableText): void {
 			.setDisabled(text.isReadOnly)
 			.onClick(() => runFocused(text, () => void paste(text, 'plain'))),
 	);
-	menu.addItem((entry) =>
-		entry
-			.setTitle('Select all')
-			.setIcon('box-select')
-			.onClick(() => runFocused(text, () => text.selectAll())),
-	);
 }
 
 // The menu may have taken focus, and the notes and the card's title act only while they have it.

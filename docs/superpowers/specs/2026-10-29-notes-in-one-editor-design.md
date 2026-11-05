@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-04
+verified: 2026-11-05
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -141,7 +141,8 @@ Compared with Obsidian's own editor side by side on desktop:
   menu (step two, "Right-click menus"). Elsewhere in the notes, and in the card's title, a text
   menu with the names and icons of Obsidian's editor menu **(owner, 2026-11-04)**: Add link and Add
   external link; Bold, Italic, Strikethrough and Underline; in the notes, Bullet list, Numbered list
-  and Task list; then Cut, Copy, Paste, Paste as plain text and Select all. The list's background
+  and Task list; then Cut, Copy, Paste and Paste as plain text, with no Select all, which Cmd+A does
+  **(owner, 2026-11-05)**. The list's background
   menu doesn't cover the list note **(call)**. A press of a button
   other than the main one on a picture the editor draws, or on a drawn block, leaves it drawn and
   the editor's focus as it was: Windows opens the menu on release, after a focus would have shown
