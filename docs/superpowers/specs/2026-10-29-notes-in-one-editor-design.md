@@ -140,8 +140,8 @@ Compared with Obsidian's own editor side by side on desktop:
 - **Right-click on desktop:** on a link, Obsidian's link menu (step one); on a picture, the picture
   menu (step two, "Right-click menus"). Elsewhere in the notes, and in the card's title, a text
   menu with the names and icons of Obsidian's editor menu **(owner, 2026-11-04)**: Add link and Add
-  external link; Bold, Italic, Strikethrough, Underline and Clear formatting; in the notes, Bullet
-  list, Numbered list and Task list; then Cut, Copy, Paste and Paste as plain text, with no Select
+  external link; Bold, Italic, Strikethrough, Underline and Clear formatting; in the notes, Task
+  list, Bullet list and Numbered list; then Cut, Copy, Paste and Paste as plain text, with no Select
   all, which Cmd+A does **(owner, 2026-11-05)**. Clear formatting removes the bold, italic,
   strikethrough, underline, highlight and inline code marks of every span the selection touches, or
   the caret is in, and leaves links and list markers **(owner, 2026-11-05)**. Wikilinks, embeds,

@@ -23,9 +23,9 @@ const FORMATS: readonly FormatItem[] = [
 ];
 
 const PARAGRAPHS: readonly FormatItem[] = [
+	{ format: 'checklist', icon: 'check-square', label: 'Task list' },
 	{ format: 'bulleted', icon: 'list', label: 'Bullet list' },
 	{ format: 'numbered', icon: 'list-ordered', label: 'Numbered list' },
-	{ format: 'checklist', icon: 'check-square', label: 'Task list' },
 ];
 
 /**
