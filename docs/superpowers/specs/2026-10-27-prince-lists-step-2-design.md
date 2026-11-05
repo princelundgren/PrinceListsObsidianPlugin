@@ -455,14 +455,17 @@ Obsidian documents no way to put its editor in a plugin's view.
   link, as in a note, and Cmd+B or Cmd+I again takes it off **(call)**. The title's are registered
   on the view's own `scope`, as Cmd+Z is, and the notes' are in their editor's keymap; anywhere
   else the key stays Obsidian's.
-- **A format bar under the notes** while their editor has focus, in three groups: Undo and Redo;
-  Bold, Italic, Strikethrough and Underline; then Task list, Bullet list, Numbered list, Add link,
-  Add external link, Code and Code block, in one group so the bar stays short **(owner,
-  2026-11-05)**. A press keeps focus in the notes, so the phone's keyboard stays up, but for Add
-  link, whose search box takes it. The list note has it too. It has no Table button until a table
-  can be edited well, #213 **(owner, 2026-10-30)**.
+- **A format bar under the notes** while their editor has focus, in two groups: Bold, Italic,
+  Strikethrough and Underline; then Task list, Bullet list, Numbered list, Add link, Add external
+  link, Code and Code block, in one group so the bar stays short **(owner, 2026-11-05)**. It has
+  no Undo or Redo **(owner, 2026-11-05)**; Cmd+Z and Cmd+Shift+Z still undo and redo. A press
+  keeps focus in the notes, so the phone's keyboard stays up, but for Add link, whose search box
+  takes it. The list note has it too. It has no Table button until a table can be edited well,
+  #213 **(owner, 2026-10-30)**.
   - The buttons take the names and icons of Obsidian's own editor menu, where it has them
-    **(owner, 2026-11-04)**.
+    **(owner, 2026-11-04)**, but for Code block's icon: Lucide's `square-code`, a boxed `<>`, so
+    it doesn't look like Code's `</>` **(owner, 2026-11-05)**.
+  - Its first icon lines up with the notes' text **(owner, 2026-11-05)**.
   - Add link asks for a note or list in Obsidian's search box, then links to it as the vault's link
     settings say, with selected text as the link's text. Add external link wraps the selection in
     `[` and `]()`, as Cmd+K does.
@@ -478,8 +481,6 @@ Obsidian documents no way to put its editor in a plugin's view.
     so Underline wraps it in HTML's `<u>` and `</u>` **(owner, 2026-10-28)**. Both take their
     marks off again, as Bold does. No key is added for them **(call)**.
   - The buttons can't be reached with Tab, which would leave the notes **(call)**.
-  - Undo and Redo step through the editor's own history ([notes in one
-    editor](2026-10-29-notes-in-one-editor-design.md), "Undo (call)").
 - **A table and code in a card's notes are drawn as in a note,** with Obsidian's documented table
   and code variables: Obsidian's own style for them applies only inside its views.
 

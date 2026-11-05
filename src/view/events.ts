@@ -27,7 +27,7 @@ import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from '
 import { insertNoteLink } from './note-link-modal';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR, NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
 import { eventInDrawnListBlock } from './notes-blocks';
-import { runNotesBarAction } from './notes-keys';
+import { applyNotesFormat } from './notes-keys';
 import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
@@ -90,7 +90,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		const editor = barEditor(view, target);
 		if (!editor) return;
 		if (action === 'noteLink') insertNoteLink(view, notesText(view, editor));
-		else runNotesBarAction(editor, action);
+		else applyNotesFormat(editor, action);
 		return;
 	}
 	if (target.closest(`.${OPEN_AS_MARKDOWN_CLASS}`)) {

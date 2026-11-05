@@ -1,10 +1,9 @@
-import { defaultKeymap, historyKeymap, indentLess, indentMore, redo, undo } from '@codemirror/commands';
+import { defaultKeymap, historyKeymap, indentLess, indentMore, redo } from '@codemirror/commands';
 import { deleteMarkupBackward, insertNewlineContinueMarkupCommand } from '@codemirror/lang-markdown';
 import { syntaxTree } from '@codemirror/language';
 import type { EditorState, Extension, SelectionRange } from '@codemirror/state';
 import { keymap, type Command, type EditorView } from '@codemirror/view';
 import { formatSelection, type Format } from '../core/format';
-import type { EditorAction } from './format';
 
 // Cmd+Enter stays the list's add, and Escape the view's, which closes the card; only Tab indents.
 const LIST_KEYS = new Set(['Mod-Enter', 'Escape', 'Mod-[', 'Mod-]']);
@@ -26,13 +25,6 @@ export function notesKeymap(): Extension {
 	]);
 }
 
-/** Runs a format bar button in the editor: Undo and Redo through its history, the rest as the keys do. */
-export function runNotesBarAction(editor: EditorView, action: EditorAction): void {
-	if (action === 'undo') undo(editor);
-	else if (action === 'redo') redo(editor);
-	else applyNotesFormat(editor, action);
-}
-
 function formatCommand(format: Format): Command {
 	return (editor) => {
 		applyNotesFormat(editor, format);
@@ -40,8 +32,8 @@ function formatCommand(format: Format): Command {
 	};
 }
 
-// One change, as typing it would be.
-function applyNotesFormat(editor: EditorView, format: Format): void {
+/** Applies `format` to the editor's selection as one change, as typing it would be; nothing in a read-only editor. */
+export function applyNotesFormat(editor: EditorView, format: Format): void {
 	const { state } = editor;
 	if (state.readOnly) return;
 	const { from, to } = state.selection.main;

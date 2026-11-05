@@ -5,15 +5,10 @@ import { changeField } from './field-undo';
 export const FORMAT_BAR_CLASS = 'princelists-format-bar';
 const ACTION_ATTR = 'data-format';
 
-/** What a bar button does in the notes editor itself; Add link asks for a note first. */
-export type EditorAction = Format | 'undo' | 'redo';
-export type BarAction = EditorAction | 'noteLink';
+/** What a bar button does: a format in the notes editor, or Add link, which asks for a note first. */
+export type BarAction = Format | 'noteLink';
 
 const GROUPS: readonly (readonly { action: BarAction; icon: string; label: string }[])[] = [
-	[
-		{ action: 'undo', icon: 'undo-2', label: 'Undo' },
-		{ action: 'redo', icon: 'redo-2', label: 'Redo' },
-	],
 	[
 		{ action: 'bold', icon: 'bold', label: 'Bold' },
 		{ action: 'italic', icon: 'italic', label: 'Italic' },
@@ -27,7 +22,7 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 		{ action: 'noteLink', icon: 'link', label: 'Add link' },
 		{ action: 'link', icon: 'external-link', label: 'Add external link' },
 		{ action: 'code', icon: 'code-2', label: 'Code' },
-		{ action: 'codeBlock', icon: 'code', label: 'Code block' },
+		{ action: 'codeBlock', icon: 'square-code', label: 'Code block' },
 	],
 ];
 const ACTIONS = GROUPS.flat().map((button) => button.action);
