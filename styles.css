@@ -730,46 +730,6 @@ textarea.princelists-heading-field {
 	fill: currentColor;
 }
 
-/* Registered, so the row's 1cap is computed there and the smaller day text inherits the title's. */
-@property --princelists-title-cap {
-	syntax: '<length>';
-	inherits: true;
-	initial-value: 0px;
-}
-
-/* The checkbox, the star and the day's icon share one box a fifth taller than the title's capitals,
-   centered on them. Lucide draws inside a twelfth of its box on each side, so the star and the
-   calendar run from the baseline to the capitals' top. Each keeps the slot its full size takes, so
-   the text and the tick zone stay where they were. The box's border and tick follow its size.
-   Without the cap unit they keep their full size. */
-@supports (height: 1cap) {
-	.princelists-item {
-		--princelists-checkbox-slot: var(--checkbox-size);
-		--princelists-title-cap: 1cap;
-		--princelists-mark-size: calc(1.2 * var(--princelists-title-cap));
-		--princelists-mark-drop: calc(0.1 * var(--princelists-title-cap));
-	}
-
-	.princelists-item .princelists-checkbox {
-		--checkbox-size: var(--princelists-mark-size);
-		top: var(--princelists-mark-drop);
-		margin-inline: calc((var(--princelists-checkbox-slot) - var(--checkbox-size)) / 2);
-	}
-
-	.princelists-star,
-	.princelists-when > .princelists-when-icon {
-		justify-content: center;
-		width: var(--icon-size);
-	}
-
-	.princelists-star svg,
-	.princelists-when > .princelists-when-icon svg {
-		--icon-size: var(--princelists-mark-size);
-		position: relative;
-		top: var(--princelists-mark-drop);
-	}
-}
-
 .princelists-when {
 	flex: none;
 	display: flex;
@@ -826,6 +786,58 @@ button.princelists-card-star.is-starred svg {
 	padding: 0;
 	opacity: 0;
 	cursor: pointer;
+}
+
+/* Registered, so the row's 1cap is computed there and the smaller day text inherits the title's. */
+@property --princelists-title-cap {
+	syntax: '<length>';
+	inherits: true;
+	initial-value: 0px;
+}
+
+/* The checkbox, the star and the day's icon share one box a fifth taller than the title's capitals,
+   centered on them. Lucide draws inside a twelfth of its box on each side, so the star and the
+   calendar run from the baseline to the capitals' top. Each keeps the slot its full size takes, so
+   the text and the tick zone stay where they were. The box's border and tick follow its size.
+   Without the cap unit they keep their full size. */
+@supports (height: 1cap) {
+	.princelists-item {
+		--princelists-checkbox-slot: var(--checkbox-size);
+		--princelists-title-cap: 1cap;
+		--princelists-mark-size: calc(1.2 * var(--princelists-title-cap));
+		--princelists-mark-drop: calc(0.1 * var(--princelists-title-cap));
+	}
+
+	.princelists-item .princelists-checkbox {
+		--checkbox-size: var(--princelists-mark-size);
+		top: var(--princelists-mark-drop);
+		margin-inline: calc((var(--princelists-checkbox-slot) - var(--checkbox-size)) / 2);
+	}
+
+	.princelists-star,
+	.princelists-when > .princelists-when-icon {
+		justify-content: center;
+		width: var(--icon-size);
+	}
+
+	.princelists-star svg,
+	.princelists-when > .princelists-when-icon svg,
+	.princelists-when-button svg,
+	button.princelists-card-star svg {
+		--icon-size: var(--princelists-mark-size);
+		position: relative;
+		top: var(--princelists-mark-drop);
+	}
+
+	/* The open card's day and star stand on the day's baseline, as on its row; the ⋯ stays centered. */
+	.princelists-card-tools,
+	.princelists-when-button {
+		align-items: baseline;
+	}
+
+	.princelists-card-tools > button.princelists-card-actions {
+		align-self: center;
+	}
 }
 
 /* The hint sits centered in the space below the list note. */
