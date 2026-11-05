@@ -660,14 +660,16 @@ back only what was typed and leaves the empty line, which can be deleted like an
   its card and selects it. Clicking empty space closes the card and clears the selection.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks.
-- **A "+" in the pane's header (owner, 2026-10-27)** adds an item, on desktop and mobile, beside the
-  show-archived icon. It's a view action (`addAction`) named "New item" **(call)**, with its key:
-  "New item (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which
-  usually has no keyboard, shows "New item" alone **(owner, 2026-11-03)**.
-- **The floating "+" button (owner)** sits at the bottom right of the list pane, on mobile only
-  **(owner, 2026-10-27)**, under the thumb. It stays put while the list scrolls. Its accessible name
-  is "New item" **(call)**. Desktop has only the header's "+": the floating one, filled with the
-  accent color, drew the eye more than the list.
+- **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the show-archived icon.
+  It's a view action (`addAction`) named "New item" **(call)**, with its key: "New item
+  (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which usually
+  has no keyboard, shows "New item" alone **(owner, 2026-11-03)**. It shows only where the "Header
+  add button" setting puts it, by default nowhere **(owner, 2026-11-05)**.
+- **The floating "+" button (owner)** sits at the bottom right of the list pane, under the thumb.
+  It stays put while the list scrolls. Its name and tooltip are the header's: "New item" with its
+  key on desktop, "New item" alone on mobile **(owner, 2026-11-05)**. It shows on
+  desktop and mobile by default, and the "Floating add button" setting can keep it to one of them
+  or turn it off **(owner, 2026-11-05)**.
   - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
     fields included. An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
@@ -1185,14 +1187,18 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   `--file-line-width`, so titles and rows line up with a note's. That's always the readable line
   width: no documented API reads Obsidian's "Readable line length" setting, so with it off a
   note fills the pane while a list doesn't.
-- **Put mobile's floating "+" outside the scrolling element,** and check it against the mobile navbar
-  and keyboard.
+- **Put the floating "+" outside the scrolling element,** and check it against the mobile navbar
+  and keyboard, and desktop's status bar.
   - It sits on the view's `containerEl`, which the plugin's own class makes `position: relative`.
   - It keeps above mobile's floating navbar with Obsidian's `--view-bottom-spacing`, as Bases
     does **(call)**. The variable is undocumented, read from 1.14.4's `app.css`, and unset on
     desktop. If Obsidian drops it, the "+" sits lower on mobile, under the floating navbar, and the
     edge scroll, its second user, takes the bottom of the view for the bottom of what is visible,
     so dragging toward the navbar scrolls late.
+  - On desktop it sits `--size-4-8` higher, clear of the status bar over the window's bottom right
+    **(owner, 2026-11-05)**. Obsidian documents no height for the bar, and 1.15 leaves the
+    documented `--status-bar-scroll-padding` unset, so that is the default theme's bar, 31px,
+    rounded up. A theme with a taller bar covers the button's bottom edge again.
 
 ### Where `✔` goes
 

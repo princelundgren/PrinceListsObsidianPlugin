@@ -1,6 +1,7 @@
 import type { EditorView } from '@codemirror/view';
 import { type Component, debounce, type Menu, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
+import { showsOn } from '../core/button-platforms';
 import { CollapsedHeadings } from '../core/collapsed';
 import { ListEditing, type Typed } from '../core/editing';
 import { followLine, type OwnEdit } from '../core/follow';
@@ -12,6 +13,7 @@ import { serialQueue } from '../core/queue';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
+import type { PrinceListsSettings } from '../obsidian/settings';
 import { openAsMarkdown } from '../obsidian/switch';
 import { buildNewItemButton, newItem } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
@@ -56,8 +58,8 @@ export class PrinceListView extends TextFileView {
 	readonly dragsRows = true;
 	readonly dragsHeadings = true;
 	filterEl: HTMLInputElement | null = null;
-	newItemButton: HTMLButtonElement | null = null;
-	newItemAction: HTMLElement | null = null;
+	private newItemButton: HTMLButtonElement | null = null;
+	private newItemAction: HTMLElement | null = null;
 	private archivedButton: HTMLElement | null = null;
 	private scheduleAction: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
@@ -91,7 +93,7 @@ export class PrinceListView extends TextFileView {
 	constructor(
 		leaf: WorkspaceLeaf,
 		readonly archiveDelay: ArchiveDelay,
-		private readonly showsScheduleButton: () => boolean,
+		private readonly settings: () => Readonly<PrinceListsSettings>,
 	) {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
@@ -176,12 +178,13 @@ export class PrinceListView extends TextFileView {
 		const dragHost = listDragHost(this);
 		enableMouseDrag(dragHost);
 		if (Platform.isMobile) enableTouchDrag(dragHost);
-		if (Platform.isMobile) this.newItemButton = buildNewItemButton(this);
-		this.newItemAction = this.addAction('plus', labelWithKey('New item', ADD_KEY_NAME), () => newItem(this));
+		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
+		this.newItemButton = buildNewItemButton(this, newItemLabel);
+		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
 		this.archivedButton = this.addAction('square-check-big', 'Show archived items', () => this.toggleArchived());
 		// Each action goes left of the ones before, so this one sits leftmost.
 		this.scheduleAction = this.addAction(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
-		this.syncHeaderButtons();
+		this.syncButtons();
 	}
 
 	protected async onClose(): Promise<void> {
@@ -281,7 +284,7 @@ export class PrinceListView extends TextFileView {
 	render(focusing: Element | null = null): void {
 		this.redrawFiltered.cancel();
 		redraw(this, focusing);
-		this.syncHeaderButtons();
+		this.syncButtons();
 	}
 
 	toggleArchived(): void {
@@ -299,10 +302,28 @@ export class PrinceListView extends TextFileView {
 		this.listNoteEditor = null;
 	}
 
-	/** Shows or hides the header's buttons to match the text and the settings. */
-	syncHeaderButtons(): void {
-		this.scheduleAction?.toggle(isListText(this.text) && this.showsScheduleButton());
+	/** Shows or hides the view's buttons to match the text and the settings. */
+	syncButtons(): void {
+		const isList = isListText(this.text);
+		const showsFloating = isList && this.showsFloatingAdd();
+		this.newItemButton?.toggle(showsFloating);
+		this.contentEl.toggleClass('princelists-has-floating-add', showsFloating);
+		this.newItemAction?.toggle(isList && this.showsHeaderAdd());
+		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
 		this.syncArchivedButton();
+	}
+
+	/** Whether the settings show a "+" that adds an item on this device, in a note that is a list. */
+	showsAddButton(): boolean {
+		return this.showsFloatingAdd() || this.showsHeaderAdd();
+	}
+
+	private showsFloatingAdd(): boolean {
+		return showsOn(this.settings().floatingAddButton, Platform.isMobile);
+	}
+
+	private showsHeaderAdd(): boolean {
+		return showsOn(this.settings().headerAddButton, Platform.isMobile);
 	}
 
 	// The header's checkbox shows only on a list, and is lit while archived items show.

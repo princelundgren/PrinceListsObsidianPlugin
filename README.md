@@ -49,7 +49,7 @@ You can embed lists in normal notes.
 
 **Items**
 
-- **Add** with the **+**, and **drag** to reorder.
+- **Add** with the floating **+**, and **drag** to reorder. The settings can put a **+** in the list's header instead, or as well, on desktop, mobile or both.
 - **Star** an item and give it a date.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
 - **Delete** with Undo.
