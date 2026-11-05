@@ -68,6 +68,7 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸`npm test` and `a**b**c` and `d`‸')).toBe('‸npm test and `a**b**c` and d‸');
 		expect(clear('‸``d`e`` and f`‸')).toBe('‸``d`e`` and f`‸');
 		expect(clear('‸`$5` `#tag` `&amp;` `<b>` `[x]`‸')).toBe('‸`$5` `#tag` `&amp;` `<b>` `[x]`‸');
+		expect(clear('‸`snake_case` `C#`‸')).toBe('‸`snake_case` `C#`‸');
 		expect(clear('‸`https://a.b` `- item` `1. item` `> quote` `---`‸')).toBe('‸`https://a.b` `- item` `1. item` `> quote` `---`‸');
 	});
 
