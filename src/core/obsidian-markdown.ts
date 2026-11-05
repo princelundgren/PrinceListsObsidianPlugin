@@ -59,9 +59,9 @@ function addOpaque(cx: InlineContext, name: string, from: number, close: number,
 }
 
 /**
- * A $$ math block or %% comment block, taken whole: as the list's parse reads them, a line whose text
- * starts with the delimiter at its first column opens one, unless it closes it too, and the next line
- * holding it closes it.
+ * A $$ math block or %% comment block, taken whole: a line that starts with the delimiter at its first
+ * column opens one, unless it closes it too, and the next line holding it closes it. Inside a list item
+ * or quote, only the inline parsers keep them whole, and only within one paragraph.
  */
 function delimitedBlock(name: string, delimiter: string): BlockParser {
 	const opens = (line: Line) => line.text.startsWith(delimiter);

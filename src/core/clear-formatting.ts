@@ -8,7 +8,7 @@ interface Span {
 }
 
 // The blocks whose text is read as inline Markdown, so an underline's tags pair only within one.
-const INLINE_BLOCK = /^(?:Paragraph|ATXHeading\d|SetextHeading\d|TableCell)$/;
+const INLINE_BLOCK = /^(?:Paragraph|Task|ATXHeading\d|SetextHeading\d|TableCell)$/;
 
 // Each span Clear formatting removes, and the name of its marks.
 const SPAN_MARKS: Record<string, string> = {

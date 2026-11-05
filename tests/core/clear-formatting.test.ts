@@ -34,10 +34,12 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸**a**\n*b*\n- ~~c~~‸')).toBe('‸a\nb\n- c‸');
 	});
 
-	test('pairs an underline only within its paragraph, heading or table cell', () => {
+	test('pairs an underline only within its paragraph, task, heading or table cell', () => {
 		expect(clear('<u>a\n\nb‸c</u> d')).toBe('<u>a\n\nb‸c</u> d');
 		expect(clear('# <u>a\n\n## b‸c</u>')).toBe('# <u>a\n\n## b‸c</u>');
 		expect(clear('| <u>a | b‸c</u> |\n| - | - |')).toBe('| <u>a | b‸c</u> |\n| - | - |');
+		expect(clear('- [ ] <u>a\n- [ ] b‸c</u>')).toBe('- [ ] <u>a\n- [ ] b‸c</u>');
+		expect(clear('<u>a\n- [ ] b‸c</u>')).toBe('<u>a\n- [ ] b‸c</u>');
 	});
 
 	test('clears a whole span when the selection takes in only part of it', () => {
@@ -72,7 +74,7 @@ describe('formatSelection: clear formatting', () => {
 		expect(clear('‸$$\na*b*\n\nc*d*\n$$\n\n%%\n*e*\n\n*f*\n%%‸')).toBe('‸$$\na*b*\n\nc*d*\n$$\n\n%%\n*e*\n\n*f*\n%%‸');
 	});
 
-	test('opens a math or comment block only at the top level, as the list reads them', () => {
+	test('opens a math or comment block only at the top level', () => {
 		expect(clear('‸> $$\n> a\n\n**c**‸')).toBe('‸> $$\n> a\n\nc‸');
 		expect(clear('‸- $$\n  x\n- **y**‸')).toBe('‸- $$\n  x\n- y‸');
 	});
