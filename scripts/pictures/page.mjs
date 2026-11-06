@@ -221,8 +221,19 @@ export async function showAlone(session, file, view) {
 	await showStateAlone(session, views[view]);
 }
 
-/** Shows the Schedule alone in the main area. */
-export const showScheduleAlone = (session) => showStateAlone(session, { type: 'princelists-schedule' });
+/** Opens the Schedule in the right sidebar, as its ribbon icon does, leaving the main area active. */
+export async function showScheduleInSidebar(session) {
+	await session.evaluate(`(async () => { await app.workspace.ensureSideLeaf('princelists-schedule', 'right', { active: false }); })()`);
+	await sleep(600);
+}
+
+/** Closes the Schedule and the right sidebar, as a copy of the demo vault starts. */
+export async function closeSchedule(session) {
+	await session.evaluate(`(() => {
+		for (const leaf of app.workspace.getLeavesOfType('princelists-schedule')) leaf.detach();
+		app.workspace.rightSplit.collapse();
+	})()`);
+}
 
 async function showStateAlone(session, state) {
 	await session.evaluate(`(async () => {
