@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { datedItems, groupSchedule, scheduleGroup, unarchived, type ScheduledItem } from '../../src/core/schedule';
+import { datedItems, groupSchedule, matchesSchedule, scheduleGroup, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../../src/core/schedule';
 
 const now = new Date(2026, 9, 27, 12, 0);
 const list = { path: 'Lists/Home.md', name: 'Home' };
@@ -29,6 +29,11 @@ describe('datedItems and unarchived', () => {
 			{ title: 'under a heading', titleLine: 11, day: '2026-11-02', done: false, starred: true, order: 4 },
 		]);
 		expect(items[0]).toMatchObject({ listPath: 'Lists/Home.md', listName: 'Home', line: '- [ ] open ⏳ 2026-10-28' });
+	});
+
+	test("keep each item's notes, without their indent", () => {
+		const text = ['---', 'princelists: true', '---', '- [ ] call ⏳ 2026-10-28', '', '  Ask about **Friday**', '  - [ ] bring keys', '- [ ] bare ⏳ 2026-10-28', ''].join('\n');
+		expect(datedItems(text, 3, list).map((item) => item.notes)).toEqual(['Ask about **Friday**\n- [ ] bring keys', '']);
 	});
 });
 
@@ -95,6 +100,7 @@ describe('groupSchedule', () => {
 		done: false,
 		day,
 		order,
+		notes: '',
 	});
 
 	test('sorts by day, then list name, then place in the list, and leaves out empty groups', () => {
@@ -104,5 +110,66 @@ describe('groupSchedule', () => {
 			['today', ['Home 0', 'Groceries 9', 'Home 1', 'Home 2']],
 			['week', ['Groceries 5']],
 		]);
+	});
+});
+
+describe('matchesSchedule', () => {
+	const item: ScheduledItem = {
+		listPath: 'Lists/Groceries.md',
+		listName: 'Groceries',
+		titleLine: 3,
+		line: '- [ ] Buy **milk** ⏳ 2026-10-28',
+		title: 'Buy **milk**',
+		starred: false,
+		done: false,
+		day: '2026-10-28',
+		order: 0,
+		notes: 'The oat one',
+	};
+
+	test.each([
+		['', true],
+		['MILK', true],
+		['**milk**', true],
+		['oat', true],
+		['grocer', true],
+		['bread', false],
+		['2026-10-28', false],
+	])('%j matches: %s', (query, matches) => {
+		expect(matchesSchedule(item, query)).toBe(matches);
+	});
+});
+
+describe('shownSchedule', () => {
+	const item = (title: string, day: string): ScheduledItem => ({
+		listPath: 'Home.md',
+		listName: 'Home',
+		titleLine: 0,
+		line: `- [ ] ${title}`,
+		title,
+		starred: false,
+		done: false,
+		day,
+		order: 0,
+		notes: '',
+	});
+	const items = [item('Call Ann', '2026-10-27'), item('Call Bo', '2026-10-28'), item('Shop', '2026-10-28')];
+	const shown = (query: string, collapsed: ScheduleGroup[]) =>
+		shownSchedule(items, '2026-10-27', query, new Set(collapsed)).map(({ group, collapsed, items }) => [group, collapsed, items.map((i) => i.title)]);
+
+	test('a collapsed group shows only its heading while nothing filters', () => {
+		expect(shown('', ['tomorrow'])).toEqual([
+			['today', false, ['Call Ann']],
+			['tomorrow', true, []],
+		]);
+	});
+
+	test('while filtering, only matches show, collapsed groups included, and a group without one goes', () => {
+		expect(shown('call', ['tomorrow'])).toEqual([
+			['today', false, ['Call Ann']],
+			['tomorrow', true, ['Call Bo']],
+		]);
+		expect(shown('shop', [])).toEqual([['tomorrow', false, ['Shop']]]);
+		expect(shown('nothing like it', [])).toEqual([]);
 	});
 });
