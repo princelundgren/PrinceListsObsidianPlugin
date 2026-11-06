@@ -1,7 +1,7 @@
 ---
 princelists: true
 ---
-For someone new on the team. Their buddy goes through it with them, and unticks it all for the next person.
+For the new designer starting this week. Their buddy goes through it with them.
 
 ## Day one
 - [ ] set up the laptop ⭐

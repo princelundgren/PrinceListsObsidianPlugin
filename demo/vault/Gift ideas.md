@@ -20,7 +20,7 @@ Ideas as they come up, so there's always something ready. About 40 to 60 each.
 ## Sam
 - [ ] order the board game ⏳ 2026-11-03
 
-	The birthday is next week, so order it now.
+	The birthday is the week after, so it arrives in time.
 - [x] concert tickets ✔ 2026-10-14 20:30
 
 	Bought two, for the show next month.

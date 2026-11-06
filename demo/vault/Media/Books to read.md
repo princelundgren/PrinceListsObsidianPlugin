@@ -21,7 +21,7 @@ What to read next, and a line on each one read.
 	Read it before seeing the film.
 
 ## Read
-- [x] The Remains of the Day ✔ 2026-10-17 22:40
+- [x] The Remains of the Day ✔ 2026-10-28 07:45
 
 	Kazuo Ishiguro. Quiet, sad and very good. Lend it to Mom.
 - [x] Station Eleven ✔ 2026-10-03 23:10

@@ -6,7 +6,7 @@ Getting ready for a 10 km race. Three runs a week, each week a little longer.
 > [!tip] Easy means easy
 > On easy runs you can still talk in full sentences. Most runs should feel like that.
 
-## Week 1
+## Week 1, done
 - [x] easy run, 4 km ✔ 2026-10-19 18:20 ⏳ 2026-10-19
 - [x] intervals: 6 × 400 m ✔ 2026-10-21 07:10 ⏳ 2026-10-21
 - [x] long run, 6 km ✔ 2026-10-24 09:30 ⏳ 2026-10-24
