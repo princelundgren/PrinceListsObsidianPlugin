@@ -137,7 +137,8 @@ this met on 2026-10-30 **(owner)**.
   shown only on a list. A magnifier was tried first and looked too much like Obsidian's own search.
   A press while the field is open closes it and shows every row, as Escape does. While it's open
   the icon is pressed, in the active icon color on desktop; on mobile Obsidian gives a header's
-  icons one color, so the open field shows it there **(call)**. The field's row ends with the
+  icons one color, as its own bookmark icon shows, so the open field shows it there
+  (owner, 2026-11-06). The field's row ends with the
   show-archived toggle, which the icon replaced in the header (step one, "Done and archived").
 - **As you type, items whose title or notes don't contain the text hide (call).** The match ignores
   case and compares the text as written, Markdown included, with no Unicode normalization. The
