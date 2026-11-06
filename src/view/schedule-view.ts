@@ -14,7 +14,7 @@ import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
+import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { FIND_KEY_NAME } from './keys';
 import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
@@ -276,7 +276,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const now = new Date();
 		const today = dayOf(now);
 		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
-		const groups = shownSchedule(dated, today, { query: this.filter ?? '', starredOnly: this.starredOnly }, this.collapsed);
+		const groups = shownSchedule(dated, today, { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly }, this.collapsed);
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
 		const drawn = JSON.stringify([today, dated.length === 0, shown]);

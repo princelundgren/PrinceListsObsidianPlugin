@@ -1,4 +1,5 @@
-import { setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
+import { prepareFuzzySearch, setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
+import type { Find } from '../core/display';
 
 export const FILTER_CLASS = 'princelists-filter';
 
@@ -41,6 +42,17 @@ export interface FilterHost {
 	readonly redrawFiltered: Debouncer<[], void>;
 	/** Puts back what the field's row changed, before the view is drawn without it. */
 	filterClosed?(): void;
+}
+
+/**
+ * What `query` finds, with Obsidian's fuzzy search for words: its letters in order, with gaps,
+ * ignoring case and accents. Spaces around it are ignored, and null for no text, which filters nothing.
+ */
+export function findOf(query: string): Find | null {
+	const text = query.trim();
+	if (text === '') return null;
+	const search = prepareFuzzySearch(text);
+	return { text, fuzzyMatches: (shown) => search(shown) !== null };
 }
 
 /** The icon that opens and closes the field. */
