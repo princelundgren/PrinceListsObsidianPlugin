@@ -55,7 +55,8 @@ this project.
   privacy rule).
 - **It must work on mobile:** no Node.js or Electron APIs in `src/`.
 - **Styling:** use only Obsidian's CSS variables and its built-in icons (`setIcon`, Lucide). Never
-  hard-code colors.
+  hard-code colors. No `:has()`: the directory's review warns it's slow. Mark the element with a
+  class instead (#164, #302). A test checks.
 - **Listeners:**
   - Workspace, vault, metadata cache, `window` and `document` listeners go through
     `registerEvent` or `registerDomEvent`, so the plugin unloads cleanly.
