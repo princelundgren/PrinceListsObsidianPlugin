@@ -18,7 +18,7 @@ import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, keepOneLine, TITLE_CLASS } from './fields';
 import { notesText } from './editable-text';
-import { ARCHIVED_TOGGLE_CLASS, filterBlur, filterInput, filterKeyDown } from './filter';
+import { ARCHIVED_TOGGLE_CLASS, filterInput, filterKeyDown } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { barActionAt, FORMAT_BAR_CLASS } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
@@ -150,7 +150,8 @@ function barEditor(view: PrinceListView, target: HTMLElement): EditorView | null
 }
 
 // A press anywhere on the format bar, between its buttons too, would take focus from the notes
-// editor, which ends its visit, and one on the archived toggle would close an empty Cmd+F field.
+// editor, which ends its visit, and one on the archived toggle would take it from the filter field,
+// putting a phone's keyboard away.
 function keepFieldFocused(evt: MouseEvent): void {
 	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, .${ARCHIVED_TOGGLE_CLASS}`)) evt.preventDefault();
 }
@@ -263,10 +264,6 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 	// FocusEvent types it as an EventTarget; between elements it is an Element or null.
 	const related = evt.relatedTarget as Node | null;
 	const focusing = related?.instanceOf(HTMLElement) ? related : null;
-	if (target === view.filterField?.inputEl) {
-		filterBlur(view);
-		return;
-	}
 	const card = view.card;
 	// From the path: closing a list block's title field in the card's notes removes the field first.
 	const inCard = card !== null && pathUnder(view.contentEl, evt).includes(card.el);

@@ -130,11 +130,14 @@ this met on 2026-10-30 **(owner)**.
 - **Cmd+F, while a list has focus, opens a filter field** at the top of the list, below the list
   note **(call)**. It's registered on the view's own `scope`, as Cmd+Z is, so it applies only
   while the list has focus and isn't a default hotkey. Cmd+F in a Markdown note is untouched.
-- **A "Find in list" command** opens the same field, for mobile and for anyone who wants
-  another hotkey. It has no default hotkey **(call)**.
-- **A search icon opens it too (owner, 2026-11-06),** on desktop and mobile: a `search` view action
-  in a list's header named "Find in list", with its key on desktop as "New item" has, shown only on
-  a list. When the field is open, it puts the cursor back in it. The field's row ends with the
+- **A "Filter list" command (owner, 2026-11-06)** opens the same field, for mobile and for anyone
+  who wants another hotkey. It has no default hotkey **(call)**, and its id stays `find-in-list`.
+- **A filter icon opens and closes it (owner, 2026-11-06),** on desktop and mobile: a `list-filter`
+  view action in a list's header named "Filter list", with its key on desktop as "New item" has,
+  shown only on a list. A magnifier was tried first and looked too much like Obsidian's own search.
+  A press while the field is open closes it and shows every row, as Escape does. While it's open
+  the icon is pressed, in the active icon color on desktop; on mobile Obsidian gives a header's
+  icons one color, so the open field shows it there **(call)**. The field's row ends with the
   show-archived toggle, which the icon replaced in the header (step one, "Done and archived").
 - **As you type, items whose title or notes don't contain the text hide (call).** The match ignores
   case and compares the text as written, Markdown included, with no Unicode normalization. The
@@ -144,16 +147,19 @@ this met on 2026-10-30 **(owner)**.
 - **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and
   can't match.
 - **Archived items are searched only while "Show archived items" is on.**
-- **Escape in the field ends the filter** and shows every row again, and so does leaving the field
-  while it's empty. Like "Show archived items", it isn't remembered **(call)**.
+- **Escape in the field ends the filter** and shows every row again, as the filter icon does.
+- **The field stays open when focus leaves it (owner, 2026-11-06),** empty or not, until Escape,
+  the filter icon, or another note or the list closing ends it. Like "Show archived items", it
+  isn't remembered **(call)**.
 - **Everything else works while filtering (call):** ticking, cards, dragging and adding. A drop
   goes after the visible row above it, as it does past hidden archived rows. A new item, or an item
   whose card is open, stays shown while its card is open even if it doesn't match.
-- **The Schedule filters too (owner, 2026-11-06).** Cmd+F while it has focus, or "Find in list"
+- **The Schedule filters too (owner, 2026-11-06).** Cmd+F while it has focus, or "Filter list"
   while it's the active view, opens a field under its description, which reads "Find in
-  schedule". One command keeps one hotkey for both views. A search icon at the right of its title
-  opens it too, since a sidebar hides a view's header **(owner, 2026-11-06)**; its row has no
-  archived toggle, since the Schedule never shows archived items. It works as a list's field, and:
+  schedule". One command keeps one hotkey for both views. A filter icon at the right of its title,
+  "Filter schedule", opens and closes it too, since a sidebar hides a view's header
+  **(owner, 2026-11-06)**; its row has no archived toggle, since the Schedule never shows archived
+  items. It works as a list's field, and:
   - **The list's name is searched too (owner, 2026-11-06),** besides the title and notes, so
     typing a list's name shows its dated items.
   - **A group shows while one of its items shows, collapsed ones too (owner, 2026-11-06),** and a
@@ -299,8 +305,8 @@ this met on 2026-10-30 **(owner)**.
 - **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
   ribbon hidden or doesn't know the command.
 - **So can a list's header (owner, 2026-11-05):** a `calendar-clock` view action named "Open
-  schedule", left of Find in list, which shows once the settings turn it on; it's off by
-  default. Like Find in list, it shows only on a list. The ⋯ menu's item stays either way.
+  schedule", left of Filter list, which shows once the settings turn it on; it's off by
+  default. Like Filter list, it shows only on a list. The ⋯ menu's item stays either way.
 - **Its groups (owner, 2026-10-27):** Today, which includes everything overdue, then Tomorrow,
   Next 7 days and Later. An earlier "Next month", 8 to 31 days ahead, read as the calendar month
   and seemed to leave a gap after the week.

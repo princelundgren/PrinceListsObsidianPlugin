@@ -1,4 +1,4 @@
-// In To do, an item is ticked and grays out, then the search icon opens the find row, whose Show
+// In To do, an item is ticked and grays out, then the filter icon opens the filter row, whose Show
 // archived items toggle brings back three items ticked days ago and hides them again.
 import { boundsOf, drawnMouse, hover, middleOf, pressEscape, setFolders, showAlone, sleep, undoingChanges } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
@@ -20,7 +20,7 @@ const scene = {
 	async shoot(session, out) {
 		const mouse = drawnMouse(session, REST.x, REST.y);
 		const box = middleOf(await boundsOf(session, '.princelists-item:nth-child(4) .princelists-checkbox'));
-		const find = middleOf(await boundsOf(session, '.view-action[aria-label^="Find in list"]'));
+		const find = middleOf(await boundsOf(session, '.view-action[aria-label^="Filter list"]'));
 		await undoingChanges(session, 'To do.md', 'Attachments', () => recordGif(session, scene, out, async () => {
 			await pointer(session, REST.x, REST.y, 'move');
 			await sleep(900);

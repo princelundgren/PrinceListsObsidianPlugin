@@ -709,6 +709,12 @@ button.princelists-archived-toggle.princelists-archived-shown {
 	color: var(--color-blue);
 }
 
+/* A filter icon while its field is open, in the header or beside the Schedule's title. Its own icon colors, so a hover keeps it too. */
+.princelists-filter-open {
+	--icon-color: var(--icon-color-active);
+	--icon-color-hover: var(--icon-color-active);
+}
+
 /* On mobile, each takes a finger-sized box, as Obsidian's own buttons there do, with its icon its usual size. */
 .princelists-is-mobile button.princelists-card-actions,
 .princelists-is-mobile button.princelists-card-star,
@@ -944,7 +950,7 @@ button.princelists-collapse {
 	padding-bottom: calc(var(--size-4-8) + var(--view-bottom-spacing, 0px));
 }
 
-/* The search icon sits at the title's end, centered on it. */
+/* The filter icon sits at the title's end, centered on it. */
 .princelists-schedule-title-row {
 	display: flex;
 	align-items: center;

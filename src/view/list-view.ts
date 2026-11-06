@@ -22,7 +22,7 @@ import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
-import { ARCHIVED_TOGGLE_CLASS, FILTER_PAUSE_MS, openFilter, type FilterField, type FilterHost } from './filter';
+import { ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, toggleFilter, type FilterField, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
@@ -181,7 +181,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
 		this.newItemButton = buildNewItemButton(this, newItemLabel);
 		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
-		this.findAction = this.addAction('search', labelWithKey('Find in list', FIND_KEY_NAME), () => openFilter(this));
+		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.
 		this.scheduleAction = this.addAction(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
 		this.syncButtons();
@@ -287,6 +287,11 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.syncButtons();
 	}
 
+	/** The toggle is part of the field, so archived items hide again with it. */
+	filterClosed(): void {
+		this.showArchived = false;
+	}
+
 	toggleArchived(): void {
 		this.showArchived = !this.showArchived;
 		this.render();
@@ -332,9 +337,13 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		return showsOn(this.settings().headerAddButton, Platform.isMobile);
 	}
 
-	// The header's search icon shows only on a list. The toggle in Cmd+F's row is lit while archived items show.
+	// The header's filter icon shows only on a list, pressed while the field is open. The toggle in
+	// the field's row is lit while archived items show.
 	private syncFindButtons(): void {
-		this.findAction?.toggle(isListText(this.text));
+		if (this.findAction) {
+			this.findAction.toggle(isListText(this.text));
+			syncFilterButton(this.findAction, this);
+		}
 		const button = this.filterField?.rowEl.querySelector<HTMLElement>(`.${ARCHIVED_TOGGLE_CLASS}`);
 		if (!button) return;
 		button.toggleClass('princelists-archived-shown', this.showArchived);

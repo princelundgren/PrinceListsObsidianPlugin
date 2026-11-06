@@ -14,7 +14,7 @@ import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import { buildFilterField, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, openFilter, registerFilterEvents, removeFilterField, type FilterField, type FilterHost } from './filter';
+import { buildFilterField, FILTER_ICON, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, openFilter, registerFilterEvents, removeFilterField, syncFilterButton, toggleFilter, type FilterField, type FilterHost } from './filter';
 import { FIND_KEY_NAME } from './keys';
 import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
@@ -61,6 +61,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+	private readonly findButton: HTMLElement;
 	private readonly filterSlotEl: HTMLElement;
 	// Drawn again on each change, apart from the title and the find field above it, which keeps focus.
 	private readonly groupsEl: HTMLElement;
@@ -74,9 +75,10 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const titleRow = sizer.createDiv({ cls: 'princelists-schedule-title-row' });
 		titleRow.createDiv({ cls: 'princelists-schedule-title', text: 'Schedule', attr: { role: 'heading', 'aria-level': 1 } });
 		// Here rather than in the view's header, which a sidebar hides.
-		const findButton = titleRow.createEl('button', { cls: FIND_BUTTON_CLASS });
-		setIcon(findButton, 'search');
-		setTooltip(findButton, labelWithKey('Find in schedule', FIND_KEY_NAME));
+		this.findButton = titleRow.createEl('button', { cls: FIND_BUTTON_CLASS });
+		setIcon(this.findButton, FILTER_ICON);
+		setTooltip(this.findButton, labelWithKey('Filter schedule', FIND_KEY_NAME));
+		syncFilterButton(this.findButton, this);
 		sizer.createDiv({ cls: 'princelists-schedule-about', text: SCHEDULE_ABOUT });
 		this.filterSlotEl = sizer.createDiv();
 		this.groupsEl = sizer.createDiv();
@@ -180,7 +182,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	private onClick(evt: MouseEvent): void {
 		const target = targetOf(evt);
 		if (target?.closest(`.${FIND_BUTTON_CLASS}`)) {
-			openFilter(this);
+			toggleFilter(this);
 			return;
 		}
 		const heading = target?.closest(`.${COLLAPSE_CLASS}`)?.closest(`.${HEADING_CLASS}`);
@@ -247,6 +249,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.redrawFiltered.cancel();
 		if (this.filter === null) removeFilterField(this);
 		else if (!this.filterField) this.filterField = buildFilterField(this.filterSlotEl, this.filter, 'Find in schedule');
+		syncFilterButton(this.findButton, this);
 		this.draw();
 	}
 
