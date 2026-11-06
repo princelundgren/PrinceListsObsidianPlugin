@@ -188,6 +188,8 @@ Only the maintainer releases.
    - Compare the README's pictures and `docs/listing/` with the release, and retake with the scripts
      any whose view of the plugin changed. The README loads its pictures from `main`, so a retake
      shows there once it merges.
+   - Compare each retaken GIF's last frame with its alt text in the README. A GIF that scrolls
+     a fixed distance can stop short of what the alt text says once the demo vault grows.
    - Compare the README's text (Full feature list, Good to know, Quick start) with the pull requests
      merged since the last tag.
 2. **Bump the version in a pull request.** Set `minAppVersion` in `manifest.json` if it changes,
