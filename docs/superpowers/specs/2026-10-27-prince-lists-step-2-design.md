@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-05
+verified: 2026-11-06
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -20,7 +20,7 @@ only documented Obsidian APIs are used.
 ## At a glance
 
 - **Checklists** in an item's notes can be ticked in its card.
-- **Cmd+F** filters the open list.
+- **Cmd+F** filters the open list, or the Schedule.
 - **A list can show inside another note,** such as a daily note, through a `princelists` code
   block. Its items can be ticked, added, deleted and dragged there, without cards.
 - **"Turn into list"** adds the marker to the note you're in.
@@ -125,7 +125,7 @@ this met on 2026-10-30 **(owner)**.
   bullet, since a top-level one is an item.
 - **The row shows nothing about a checklist (call).** A progress count wasn't asked for.
 
-### Cmd+F: filter the list (owner: this list only)
+### Cmd+F: filter the list or the Schedule (owner: the open view only)
 
 - **Cmd+F, while a list has focus, opens a filter field** at the top of the list, below the list
   note **(call)**. It's registered on the view's own `scope`, as Cmd+Z is, so it applies only
@@ -145,6 +145,15 @@ this met on 2026-10-30 **(owner)**.
 - **Everything else works while filtering (call):** ticking, cards, dragging and adding. A drop
   goes after the visible row above it, as it does past hidden archived rows. A new item, or an item
   whose card is open, stays shown while its card is open even if it doesn't match.
+- **The Schedule filters too (owner, 2026-11-06).** Cmd+F while it has focus, or "Find in list"
+  while it's the active view, opens a field under its description, which reads "Find in
+  schedule". One command keeps one hotkey for both views. It works as a list's field, and:
+  - **The list's name is searched too (owner, 2026-11-06),** besides the title and notes, so
+    typing a list's name shows its dated items.
+  - **A group shows while one of its items shows, collapsed ones too (owner, 2026-11-06),** and a
+    collapsed group is collapsed again when the filter ends, as a list's sections are.
+  - **With no match, nothing shows under the field (call),** as in a list; the message for a
+    Schedule with no dated items would be wrong.
 
 ### A list inside another note (owner)
 

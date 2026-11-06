@@ -70,7 +70,7 @@ You can embed lists in normal notes.
 
 **Keys and devices**
 
-- **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters, Cmd+Shift+A shows or hides archived items, Cmd+Z undoes, and Cmd+B, Cmd+I and Cmd+K format. Use Ctrl on Windows and Linux.
+- **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters a list or the Schedule, Cmd+Shift+A shows or hides archived items, Cmd+Z undoes, and Cmd+B, Cmd+I and Cmd+K format. Use Ctrl on Windows and Linux.
 - **Right-click menus** on items, headings, pictures and the list. On desktop, text in a card or the list's note gets a menu too: add a link, format, and paste with or without formatting.
 - **Made for touch:** a floating **+**, finger-sized buttons, and hold to drag.
 - **Fits your theme,** light or dark.
