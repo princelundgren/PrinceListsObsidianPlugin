@@ -845,7 +845,7 @@ button.princelists-card-star.is-starred svg {
 	}
 
 	/* A day's button holds only its text, and is as tall as the ⋯. */
-	.princelists-when-button:not(:has(> svg)) {
+	.princelists-when-button.is-dated {
 		padding-block: calc((var(--princelists-icon-slot) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
 	}
 }

@@ -27,6 +27,7 @@ export function showWhen(card: Card, day: string | null): void {
 	} else {
 		fillWhen(button, day, dayOf(new Date()));
 	}
+	button.toggleClass('is-dated', day !== null);
 	if (card.el.doc.activeElement !== input) input.value = day ?? '';
 }
 
