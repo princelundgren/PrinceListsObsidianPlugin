@@ -150,7 +150,7 @@ demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
 - **`demo/vault/`:** the demo vault the pictures are taken in: made-up lists, notes and drawn
   pictures. The docs check reads its notes like any other doc.
 - **`docs/listing/`:** the community listing's screenshots, which the release step compares against
-  and the maintainer uploads from.
+  and the maintainer uploads from. The listing takes at most five desktop and five phone shots.
 - **`scripts/`:** Node scripts that aren't part of the plugin, such as the docs check. Its
   `node:test` tests sit beside it, outside `tests/`, because vitest collects the test files there.
   `scripts/pictures/` copies the demo vault and takes the README's stills and GIFs and the listing's
