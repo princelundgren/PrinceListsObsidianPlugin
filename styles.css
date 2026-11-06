@@ -673,6 +673,7 @@ button.princelists-card-star,
 .princelists-format-bar button,
 .princelists-when-button,
 button.princelists-archived-toggle,
+button.princelists-starred-toggle,
 button.princelists-find-button {
 	flex: none;
 	height: auto;
@@ -687,6 +688,7 @@ button.princelists-card-actions:not(:focus-visible),
 button.princelists-card-star:not(:focus-visible),
 .princelists-format-bar button:not(:focus-visible),
 button.princelists-archived-toggle:not(:focus-visible),
+button.princelists-starred-toggle:not(:focus-visible),
 button.princelists-find-button:not(:focus-visible),
 button.princelists-collapse:not(:focus-visible) {
 	box-shadow: none;
@@ -698,6 +700,7 @@ button.princelists-collapse:not(:focus-visible) {
 	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button,
 	button.princelists-archived-toggle:hover,
+	button.princelists-starred-toggle:hover,
 	button.princelists-find-button:hover {
 		background-color: var(--background-modifier-hover);
 		color: var(--icon-color-hover);
@@ -707,6 +710,15 @@ button.princelists-collapse:not(:focus-visible) {
 /* Blue while archived items show, as their checkboxes are; after the hover rule, so a hover keeps it. */
 button.princelists-archived-toggle.princelists-archived-shown {
 	color: var(--color-blue);
+}
+
+/* Filled yellow while only starred items show, as a starred row's star is. */
+button.princelists-starred-toggle.princelists-starred-only {
+	color: var(--color-yellow);
+}
+
+button.princelists-starred-toggle.princelists-starred-only svg {
+	fill: currentColor;
 }
 
 /* A filter icon while its field is open, in the header or beside the Schedule's title. Its own icon colors, so a hover keeps it too. */
@@ -721,6 +733,7 @@ button.princelists-archived-toggle.princelists-archived-shown {
 .princelists-is-mobile .princelists-format-bar button,
 .princelists-is-mobile .princelists-when-button,
 .princelists-is-mobile button.princelists-archived-toggle,
+.princelists-is-mobile button.princelists-starred-toggle,
 .princelists-is-mobile button.princelists-find-button,
 .princelists-is-mobile button.princelists-block-trash {
 	justify-content: center;

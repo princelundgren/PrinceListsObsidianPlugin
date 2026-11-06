@@ -6,6 +6,7 @@ import type { ListModel } from '../core/parse';
 import { dayOf } from '../core/when';
 import { addCollapseArrow } from './collapse';
 import { addHiddenLabel } from './dom';
+import { findOf } from './filter';
 import type { PrinceListView } from './list-view';
 import { renderInline, type MarkdownHost } from './notes';
 import { addStar, addWhen } from './row-marks';
@@ -158,10 +159,10 @@ export function renderList(
 	return drawnCount(shown) < drawnCount(sections);
 }
 
-// What hides rows in the view: archived items, Cmd+F's query and collapsed headings, with the item on
-// `keepLine` shown regardless of the last two.
+// What hides rows in the view: archived items, Cmd+F's query, "Show starred only" and collapsed
+// headings, with the item on `keepLine` shown regardless of all but the first.
 export function rowFilter(view: PrinceListView, keepLine: number | null): RowFilter {
-	return { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms, query: view.filter ?? '', keepLine, collapsed: view.collapsed.lines() };
+	return { showArchived: view.showArchived, starredOnly: view.starredOnly, archiveDelayMs: view.archiveDelay.ms, find: findOf(view.filter ?? ''), keepLine, collapsed: view.collapsed.lines() };
 }
 
 export function buildHeading(

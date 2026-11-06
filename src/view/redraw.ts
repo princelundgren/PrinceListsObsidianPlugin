@@ -4,7 +4,7 @@ import { hasNoItems } from './add-button';
 import { dismissCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
 import { buildListNote, buildListTitle, refreshListNote } from './fields';
-import { addArchivedToggle, buildFilterField } from './filter';
+import { addArchivedToggle, addStarredToggle, buildFilterField } from './filter';
 import { ADD_KEY_NAME } from './keys';
 import type { PrinceListView } from './list-view';
 import { drawnRows, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
@@ -39,6 +39,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 			slot = fresh.createDiv();
 		} else {
 			view.filterField = buildFilterField(fresh, view.filter, 'Find in list');
+			addStarredToggle(view.filterField);
 			addArchivedToggle(view.filterField);
 		}
 		const card = placeCard(view, kept);
@@ -56,6 +57,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		view.headingField = null;
 		view.listNoteEl = null;
 		view.filter = null;
+		view.starredOnly = false;
 		view.filterField = null;
 		view.rowsHeldBack = false;
 		fresh.createEl('p', { text: "This note isn't a list" });

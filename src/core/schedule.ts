@@ -1,5 +1,5 @@
 import { isArchived } from './archive';
-import { matchesQuery, timelessItemRow } from './display';
+import { timelessItemRow, whenMatches, type Find } from './display';
 import { getItemNotes } from './edit-items';
 import { splitLines } from './lines';
 import { parseList } from './parse';
@@ -45,9 +45,9 @@ export function unarchived(items: readonly ScheduledItem[], now: Date, archiveDe
 	return items.filter((item) => !(item.done && isArchived(item.line, now, archiveDelayMs)));
 }
 
-/** Whether Cmd+F's `query` finds the item in its title, its notes or its list's name, as a list's filter matches. */
-export function matchesSchedule(item: ScheduledItem, query: string): boolean {
-	return matchesQuery(item.title, item.notes, query) || matchesQuery(item.listName, '', query);
+/** Whether `find` finds the item: its title, its notes or its list's name fuzzily, or its day as exact text. */
+export function matchesSchedule(item: ScheduledItem, find: Find): boolean {
+	return [item.title, item.notes, item.listName].some((text) => find.fuzzyMatches(text)) || whenMatches(item.day, find);
 }
 
 // Today takes everything overdue too.
@@ -65,23 +65,32 @@ export function groupSchedule(items: readonly ScheduledItem[], today: string): {
 	);
 }
 
+export interface ScheduleFilter {
+	/** What Cmd+F's field finds, or null while it holds nothing. */
+	find: Find | null;
+	/** "Show starred only": hides every item that isn't starred. */
+	starredOnly: boolean;
+}
+
 export interface ShownGroup {
 	group: ScheduleGroup;
-	/** The heading's arrow shows it collapsed, whether or not a query shows items under it. */
+	/** The heading's arrow shows it collapsed, whether or not a filter shows items under it. */
 	collapsed: boolean;
 	items: ScheduledItem[];
 }
 
 /**
- * The Schedule's groups as drawn: only the items `query` matches, and a group only while one does. A
- * collapsed group has no items under it, unless a query filters the Schedule.
+ * The Schedule's groups as drawn: only the items `filter` matches, and a group only while one does. A
+ * collapsed group has no items under it, unless a query or "Show starred only" filters the Schedule.
  */
-export function shownSchedule(items: readonly ScheduledItem[], today: string, query: string, collapsed: ReadonlySet<ScheduleGroup>): ShownGroup[] {
+export function shownSchedule(items: readonly ScheduledItem[], today: string, filter: ScheduleFilter, collapsed: ReadonlySet<ScheduleGroup>): ShownGroup[] {
+	const { find, starredOnly } = filter;
+	const filtering = find !== null || starredOnly;
 	return groupSchedule(
-		items.filter((item) => matchesSchedule(item, query)),
+		items.filter((item) => (!starredOnly || item.starred) && (find === null || matchesSchedule(item, find))),
 		today,
 	).map(({ group, items: matches }) => {
 		const isCollapsed = collapsed.has(group);
-		return { group, collapsed: isCollapsed, items: isCollapsed && query === '' ? [] : matches };
+		return { group, collapsed: isCollapsed, items: isCollapsed && !filtering ? [] : matches };
 	});
 }

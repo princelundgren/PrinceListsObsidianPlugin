@@ -5,5 +5,6 @@
 	"minAppVersion": "1.13.4",
 	"description": "Todo lists on plain Markdown notes, with sections, item notes and drag and drop.",
 	"author": "Prince Lundgren",
+	"authorUrl": "https://princelundgren.com",
 	"isDesktopOnly": false
 }

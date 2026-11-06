@@ -1,4 +1,4 @@
-import { debounce, ItemView, Notice, Platform, Scope, setIcon, setTooltip, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
+import { debounce, ItemView, type Menu, Notice, Platform, Scope, setIcon, setTooltip, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
@@ -14,7 +14,7 @@ import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import { buildFilterField, FILTER_ICON, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, openFilter, registerFilterEvents, removeFilterField, syncFilterButton, toggleFilter, type FilterField, type FilterHost } from './filter';
+import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { FIND_KEY_NAME } from './keys';
 import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
@@ -58,6 +58,8 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	private drawn: string | null = null;
 	filter: string | null = null;
 	filterField: FilterField | null = null;
+	/** Off each time the Schedule opens, as its filter is. */
+	starredOnly = false;
 	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
@@ -115,6 +117,9 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
 		this.registerEvent(this.archiveDelay.onChange(() => this.draw()));
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
+		this.registerDomEvent(this.contentEl, 'mousedown', (evt) => {
+			if (targetOf(evt)?.closest(FILTER_TOGGLE_SELECTOR)) evt.preventDefault();
+		});
 		registerFilterEvents(this, this.contentEl);
 		await this.refresh();
 	}
@@ -125,6 +130,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.drawn = null;
 		this.redrawFiltered.cancel();
 		this.filter = null;
+		this.starredOnly = false;
 		removeFilterField(this);
 		this.lists.clear();
 		this.collapsed.clear();
@@ -183,6 +189,10 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const target = targetOf(evt);
 		if (target?.closest(`.${FIND_BUTTON_CLASS}`)) {
 			toggleFilter(this);
+			return;
+		}
+		if (target?.closest(`.${STARRED_TOGGLE_CLASS}`)) {
+			toggleStarredOnly(this);
 			return;
 		}
 		const heading = target?.closest(`.${COLLAPSE_CLASS}`)?.closest(`.${HEADING_CLASS}`);
@@ -245,20 +255,28 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		if (leaf.view instanceof PrinceListView && leaf.view.file === file) openItem(leaf.view, item.titleLine, item.line);
 	}
 
+	onPaneMenu(menu: Menu, source: string): void {
+		super.onPaneMenu(menu, source);
+		addStarredOnlyItem(menu, this.starredOnly, () => toggleStarredOnly(this));
+	}
+
 	render(): void {
 		this.redrawFiltered.cancel();
 		if (this.filter === null) removeFilterField(this);
-		else if (!this.filterField) this.filterField = buildFilterField(this.filterSlotEl, this.filter, 'Find in schedule');
+		else if (!this.filterField) {
+			this.filterField = buildFilterField(this.filterSlotEl, this.filter, 'Find in schedule');
+			addStarredToggle(this.filterField);
+		}
 		syncFilterButton(this.findButton, this);
+		syncStarredToggle(this.filterField, this.starredOnly);
 		this.draw();
 	}
 
 	private draw(): void {
 		const now = new Date();
 		const today = dayOf(now);
-		const query = this.filter ?? '';
 		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
-		const groups = shownSchedule(dated, today, query, this.collapsed);
+		const groups = shownSchedule(dated, today, { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly }, this.collapsed);
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
 		const drawn = JSON.stringify([today, dated.length === 0, shown]);

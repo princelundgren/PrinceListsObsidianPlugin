@@ -39,12 +39,20 @@ export interface SectionRows {
 	collapsed: boolean;
 }
 
+/** What Cmd+F's field holds: the text as typed, and the view's fuzzy search for it, which core only calls. */
+export interface Find {
+	text: string;
+	fuzzyMatches: (text: string) => boolean;
+}
+
 export interface RowFilter {
 	showArchived: boolean;
+	/** "Show starred only": hides every item that isn't starred. */
+	starredOnly: boolean;
 	/** How long after its tick a done item is archived. */
 	archiveDelayMs: number;
-	/** What Cmd+F's field holds; '' filters nothing. */
-	query: string;
+	/** What Cmd+F's field finds, or null while it holds nothing. */
+	find: Find | null;
 	/** The open card's item, which shows whether or not it matches or its section is collapsed. */
 	keepLine: number | null;
 	/** The heading lines whose sections show only the heading while nothing filters the list. */
@@ -54,12 +62,12 @@ export interface RowFilter {
 const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 
 // Every heading stays, even when all of its items are hidden, and so does content the plugin leaves
-// alone, except while a query filters the list: then only the items that match show, and a heading
-// only while one of its items does. A collapsed section shows only its heading, unless a query
-// filters the list. Archived is worked out from `now` on each redraw, never written
+// alone, except while a query or "Show starred only" filters the list: then only the items that match
+// show, and a heading only while one of its items does. A collapsed section shows only its heading,
+// unless the list is filtered. Archived is worked out from `now` on each redraw, never written
 // down (spec, "Done and archived").
 export function visibleSections(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter): SectionRows[] {
-	const filtering = filter.query !== '';
+	const filtering = filter.find !== null || filter.starredOnly;
 	return model.sections.map(({ headingLine, items }, i) => {
 		const start = headingLine ?? model.contentStart;
 		const end = model.sections[i + 1]?.headingLine ?? lines.length;
@@ -68,7 +76,7 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, filter.archiveDelayMs);
 			if (!isShown(row, filter.showArchived)) return [];
 			if (item.titleLine === filter.keepLine) return [row];
-			if (filtering) return itemMatches(lines, item, row, filter.query) ? [row] : [];
+			if (filtering) return (!filter.starredOnly || row.starred) && itemMatches(lines, item, row, filter.find) ? [row] : [];
 			return collapsed ? [] : [row];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
@@ -88,14 +96,14 @@ export function isItemVisible(lines: readonly Line[], model: ListModel, now: Dat
 	return visibleSections(lines, model, now, filter).some(({ rows }) => rows.some((row) => row.kind === 'item' && row.titleLine === titleLine));
 }
 
-// As typed: no Unicode normalization, and Markdown matched as written.
-export function matchesQuery(title: string, notes: string, query: string): boolean {
-	const lowered = query.toLowerCase();
-	return title.toLowerCase().includes(lowered) || notes.toLowerCase().includes(lowered);
+function itemMatches(lines: readonly Line[], item: ItemBlock, row: ItemRow, find: Find | null): boolean {
+	if (find === null) return true;
+	return find.fuzzyMatches(row.title) || find.fuzzyMatches(getItemNotes(lines, item)) || whenMatches(row.when, find);
 }
 
-function itemMatches(lines: readonly Line[], item: ItemBlock, row: ItemRow, query: string): boolean {
-	return matchesQuery(row.title, getItemNotes(lines, item), query);
+/** Whether the typed text is part of `when`, the day as the file writes it: a fuzzy match would let "2026-11" find 2026-12-01 too. */
+export function whenMatches(when: string | null, find: Find): boolean {
+	return when !== null && when.includes(find.text);
 }
 
 // A done item is hidden once it is archived, unless "Show archived items" is on.

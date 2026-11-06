@@ -140,14 +140,36 @@ this met on 2026-10-30 **(owner)**.
   icons one color, as its own bookmark icon shows, so the open field shows it there
   (owner, 2026-11-06). The field's row ends with the
   show-archived toggle, which the icon replaced in the header (step one, "Done and archived").
-- **As you type, items whose title or notes don't contain the text hide (call).** The match ignores
-  case and compares the text as written, Markdown included, with no Unicode normalization. The
-  list redraws once typing pauses for 100 ms, not at every letter, and at once when the field is
-  emptied **(call)**.
+- **As you type, items the text doesn't find hide.** The match is fuzzy, with Obsidian's
+  `prepareFuzzySearch` (owner, 2026-11-06): the text's letters in order, with gaps between them,
+  so "mlk" finds "oat milk". A wrong or swapped letter finds nothing, and neither does another
+  word order. It ignores case and folds accents as Obsidian does, so "e" finds "é" (owner,
+  2026-11-06). Two letters can match a long note, which the owner accepted.
+  - **It searches the title, the notes and the When as the file writes it (owner, 2026-11-06),**
+    each on its own, Markdown included. The When matches letter for letter, as part of the day,
+    not fuzzily, so `2026-11` finds November's items, where fuzzily it would find `2026-12-01`
+    too (owner, 2026-11-06). The words a row shows for its day ("Tomorrow", "Fri") don't match,
+    since they change each day and with Obsidian's language.
+  - **Spaces around the text are ignored,** and spaces alone filter nothing **(call)**.
+  - **The view builds the matcher and passes it to core,** which has no Obsidian imports **(call)**.
+  - **The list redraws once typing pauses for 100 ms,** not at every letter, and at once when the
+    field is emptied **(call)**.
 - **A heading shows while one of its items shows (call).** Headings themselves aren't searched.
 - **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and
   can't match.
 - **Archived items are searched only while "Show archived items" is on.**
+- **"Show starred only" hides every item that isn't starred (owner, 2026-11-06),** in a list and
+  in the Schedule. A star toggle in the field's row, before a list's archived toggle, turns it on
+  and off, and so does an item of that name in the pane's menu: a list's ⋯ menu, beside "Show
+  archived items", and the Schedule's, which in a sidebar opens from a right-click on its tab. It
+  filters as typed text does: a heading or group shows while one of its items shows, collapsed
+  ones included, and content the plugin leaves alone hides. With text in the field too, an item
+  shows only if it's starred and matches. The toggle is yellow and filled while it's on, as a
+  row's star is, and a press on it doesn't take focus from the field **(call)**. Its tooltip stays
+  "Show starred only", and it has no key **(call)**. It's on only while the field is open, so the
+  lit toggle always shows why items are hidden: the menu item opens the field when it's closed,
+  without focusing it **(call)**, and closing the field turns it off (owner, 2026-11-06). It
+  isn't remembered (owner, 2026-11-06).
 - **Escape in the field ends the filter** and shows every row again, as the filter icon does.
 - **The field stays open when focus leaves it (owner, 2026-11-06),** empty or not, until Escape,
   the filter icon, or another note or the list closing ends it. Like "Show archived items", it
@@ -161,8 +183,8 @@ this met on 2026-10-30 **(owner)**.
   "Filter schedule", opens and closes it too, since a sidebar hides a view's header
   **(owner, 2026-11-06)**; its row has no archived toggle, since the Schedule never shows archived
   items. It works as a list's field, and:
-  - **The list's name is searched too (owner, 2026-11-06),** besides the title and notes, so
-    typing a list's name shows its dated items.
+  - **The list's name is searched too (owner, 2026-11-06),** besides the title, the notes and
+    the When, so typing a list's name shows its dated items.
   - **A group shows while one of its items shows, collapsed ones too (owner, 2026-11-06),** and a
     collapsed group is collapsed again when the filter ends, as a list's sections are.
   - **With no match, nothing shows under the field (call),** as in a list; the message for a
@@ -517,16 +539,16 @@ The block fields this section described are gone.
 - **The heading menu gains "Edit in Markdown",** with the caret at the end of the heading's line,
   on desktop and on mobile, and Collapse or Expand all headings ("Collapsing a heading").
 - **Right-clicking the list's background on desktop** opens the list menu: New item, New heading,
-  Edit in Markdown, Show archived items, Collapse or Expand all headings, and Open schedule. The
-  background is anywhere a click lands on no row, heading, field, link or notes editor: the list
-  note is its editor, and gets no list menu ([notes in one
+  Edit in Markdown, Show archived items, Show starred only, Collapse or Expand all headings, and
+  Open schedule. The background is anywhere a click lands on no row, heading, field, link or notes
+  editor: the list note is its editor, and gets no list menu ([notes in one
   editor](2026-10-29-notes-in-one-editor-design.md), "Keys and touch").
   - New item and New heading go at the end of the section the click is in: under the nearest
     heading above it, or in the part before the first heading **(owner)**. New item goes after the
     section's last item, before any text below it that isn't an item, which an item can't follow
     without joining it **(call)**.
   - Edit in Markdown puts the caret at the end of that section's last line **(call)**.
-  - Show archived items and Open schedule do what they do in the pane's ⋯ menu.
+  - Show archived items, Show starred only and Open schedule do what they do in the pane's ⋯ menu.
   - Mobile has no background menu: the plugin opens no menu on a long-press (step one, "Touch on
     mobile").
 - **Right-clicking a picture on desktop** in a card's notes or the list note opens the picture's

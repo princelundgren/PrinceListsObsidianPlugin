@@ -52,7 +52,7 @@ You can embed lists in normal notes.
 - **Add** with the floating **+**, and **drag** to reorder. The settings can put a **+** in the list's header instead, or as well, on desktop, mobile or both.
 - **Star** an item and give it a date.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
-- **Find:** the filter icon in a list's header opens a field that filters it, with the toggle that shows archived items. The field stays open until the icon or Escape closes it. The Schedule has one beside its title.
+- **Find:** the filter icon in a list's header opens a field that filters it by title and notes, matching the letters you type in order, so "mlk" finds "oat milk", and by date as written, such as "2026-11". Toggles beside it show only starred items, or archived items too. The field stays open until the icon or Escape closes it. The Schedule has one beside its title, with the starred toggle.
 - **Delete** with Undo.
 
 **Notes on an item**

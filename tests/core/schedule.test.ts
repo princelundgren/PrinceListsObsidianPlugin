@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { datedItems, groupSchedule, matchesSchedule, scheduleGroup, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../../src/core/schedule';
+import type { Find } from '../../src/core/display';
+import { containing } from './edit-helpers';
 
 const now = new Date(2026, 9, 27, 12, 0);
 const list = { path: 'Lists/Home.md', name: 'Home' };
@@ -128,34 +130,43 @@ describe('matchesSchedule', () => {
 	};
 
 	test.each([
-		['', true],
 		['MILK', true],
 		['**milk**', true],
 		['oat', true],
 		['grocer', true],
 		['bread', false],
-		['2026-10-28', false],
+		['2026-10-28', true],
 	])('%j matches: %s', (query, matches) => {
-		expect(matchesSchedule(item, query)).toBe(matches);
+		expect(matchesSchedule(item, containing(query) as Find)).toBe(matches);
+	});
+
+	test('matches the day as exact text, never fuzzily', () => {
+		const anyDay = (text: string) => ({ text, fuzzyMatches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) });
+		expect(matchesSchedule(item, anyDay('2026-10'))).toBe(true);
+		expect(matchesSchedule(item, anyDay('2026-11'))).toBe(false);
 	});
 });
 
 describe('shownSchedule', () => {
-	const item = (title: string, day: string): ScheduledItem => ({
+	const item = (title: string, day: string, starred = false): ScheduledItem => ({
 		listPath: 'Home.md',
 		listName: 'Home',
 		titleLine: 0,
 		line: `- [ ] ${title}`,
 		title,
-		starred: false,
+		starred,
 		done: false,
 		day,
 		order: 0,
 		notes: '',
 	});
-	const items = [item('Call Ann', '2026-10-27'), item('Call Bo', '2026-10-28'), item('Shop', '2026-10-28')];
-	const shown = (query: string, collapsed: ScheduleGroup[]) =>
-		shownSchedule(items, '2026-10-27', query, new Set(collapsed)).map(({ group, collapsed, items }) => [group, collapsed, items.map((i) => i.title)]);
+	const items = [item('Call Ann', '2026-10-27'), item('Call Bo', '2026-10-28', true), item('Shop', '2026-10-28')];
+	const shown = (query: string, collapsed: ScheduleGroup[], starredOnly = false) =>
+		shownSchedule(items, '2026-10-27', { find: containing(query), starredOnly }, new Set(collapsed)).map(({ group, collapsed, items }) => [
+			group,
+			collapsed,
+			items.map((i) => i.title),
+		]);
 
 	test('a collapsed group shows only its heading while nothing filters', () => {
 		expect(shown('', ['tomorrow'])).toEqual([
@@ -171,5 +182,11 @@ describe('shownSchedule', () => {
 		]);
 		expect(shown('shop', [])).toEqual([['tomorrow', false, ['Shop']]]);
 		expect(shown('nothing like it', [])).toEqual([]);
+	});
+
+	test('starred only shows only starred items, collapsed groups included, and a group without one goes', () => {
+		expect(shown('', ['tomorrow'], true)).toEqual([['tomorrow', true, ['Call Bo']]]);
+		expect(shown('call', [], true)).toEqual([['tomorrow', false, ['Call Bo']]]);
+		expect(shown('shop', [], true)).toEqual([]);
 	});
 });

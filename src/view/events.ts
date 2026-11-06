@@ -18,7 +18,7 @@ import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, keepOneLine, TITLE_CLASS } from './fields';
 import { notesText } from './editable-text';
-import { ARCHIVED_TOGGLE_CLASS, filterInput, filterKeyDown } from './filter';
+import { ARCHIVED_TOGGLE_CLASS, FILTER_TOGGLE_SELECTOR, filterInput, filterKeyDown, STARRED_TOGGLE_CLASS, toggleStarredOnly } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { barActionAt, FORMAT_BAR_CLASS } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
@@ -82,6 +82,10 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	}
 	if (target.closest(`.${ARCHIVED_TOGGLE_CLASS}`)) {
 		view.toggleArchived();
+		return;
+	}
+	if (target.closest(`.${STARRED_TOGGLE_CLASS}`)) {
+		toggleStarredOnly(view);
 		return;
 	}
 	if (handleLinkClick(view.app, view.sourcePath, evt, target)) return;
@@ -150,10 +154,9 @@ function barEditor(view: PrinceListView, target: HTMLElement): EditorView | null
 }
 
 // A press anywhere on the format bar, between its buttons too, would take focus from the notes
-// editor, which ends its visit, and one on the archived toggle would take it from the filter field,
-// putting a phone's keyboard away.
+// editor, which ends its visit, as one on the filter field's toggles would take it from the field.
 function keepFieldFocused(evt: MouseEvent): void {
-	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, .${ARCHIVED_TOGGLE_CLASS}`)) evt.preventDefault();
+	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, ${FILTER_TOGGLE_SELECTOR}`)) evt.preventDefault();
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
