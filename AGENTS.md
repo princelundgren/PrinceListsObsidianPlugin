@@ -195,6 +195,9 @@ Only the maintainer releases.
 2. **Bump the version in a pull request.** Set `minAppVersion` in `manifest.json` if it changes,
    then run `npm version patch|minor|major --no-git-tag-version`. That updates `package.json`,
    `package-lock.json`, `manifest.json` and `versions.json`.
+   - Write the release notes before it merges. From the merge until the release is published, the
+     directory finds no release for `manifest.json`'s version and shows an error, so merge, tag and
+     publish follow each other.
 3. **Tag after the merge.** Tag that commit on `main` with exactly the version (`x.y.z`, no `v`)
    and push the tag. The release workflow waits for the maintainer's approval in the `release`
    environment, stops if the tag isn't `manifest.json`'s version, then builds a draft release with
