@@ -26,11 +26,14 @@ async function checkboxOf(session, title) {
 /** Shows Groceries alone in the main area. */
 export const showGroceries = (session) => showAlone(session, 'Groceries.md', 'list');
 
-/** Shows Groceries alone beside the file explorer, its folders set as the desktop shots show them. */
-export async function showGroceriesWithFolders(session) {
+/** Shows `file` alone as `view` (see showAlone) beside the file explorer, its folders set as the desktop shots show them. */
+export async function showWithFolders(session, file, view) {
 	await setFolders(session, ['Home', 'Media', 'Projects', 'Travel']);
-	await showGroceries(session);
+	await showAlone(session, file, view);
 }
+
+/** Shows Groceries alone beside the file explorer. */
+export const showGroceriesWithFolders = (session) => showWithFolders(session, 'Groceries.md', 'list');
 
 /**
  * Ticks two items in the open Groceries with `press` (`click` or `tap`), runs `act`, then puts the
