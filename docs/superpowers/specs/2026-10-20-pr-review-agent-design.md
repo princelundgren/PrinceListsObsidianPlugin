@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-10-30
+verified: 2026-11-06
 governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
 ---
 
@@ -27,6 +27,10 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   - Issues are 🔴 critical (fix before merge) or 🟡 suggestions, each with line references, the
     problem, a suggested fix with code, and the reason. The summary adds one line on what's done
     well **(owner, 2026-10-21)**.
+  - **A 🟡 names a change to make (owner, 2026-11-06):** to a line the pull request adds or changes,
+    or to a doc the change makes untrue. A finding about code the change neither touches nor makes
+    wrong, or one that only asks to check or confirm something, isn't posted: it leaves the author
+    nothing to do. The 🔴 bar is unchanged, and the lines left out above stay out.
   - The prompt is used under CC BY 4.0
     ([source](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files/review-code),
     [license](https://creativecommons.org/licenses/by/4.0/)). The workflow's comment above it lists
