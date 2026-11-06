@@ -35,7 +35,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		}
 		if (view.filter === null) view.filterEl = null;
 		else if (kept && kept === view.filterEl) slot = fresh.createDiv();
-		else view.filterEl = buildFilterField(view, fresh);
+		else view.filterEl = buildFilterField(fresh, view.filter, 'Find in list');
 		const card = placeCard(view, kept);
 		if (card?.keeps) slot = card.el;
 		const field = placeField(view, kept);
