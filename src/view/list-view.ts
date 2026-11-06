@@ -22,7 +22,7 @@ import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
-import { ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, toggleFilter, type FilterField, type FilterHost } from './filter';
+import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
@@ -41,6 +41,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	// Off each time a list opens: clear() turns it off, and it stays out of getState and local
 	// storage, so nothing restores it (spec, "Done and archived").
 	showArchived = false;
+	/** Off each time a list opens, as showArchived is. */
+	starredOnly = false;
 	card: Card | null = null;
 	listTitle: ListTitleSession | null = null;
 	listNote: ListNoteSession | null = null;
@@ -158,6 +160,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.listNoteEl = null;
 		this.headingField = null;
 		this.showArchived = false;
+		this.starredOnly = false;
 		this.filter = null;
 		this.collapsed.clear();
 		this.outsideChanges++;
@@ -223,6 +226,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 					.setChecked(this.showArchived)
 					.onClick(() => this.toggleArchived()),
 			);
+			addStarredOnlyItem(menu, this.starredOnly, () => toggleStarredOnly(this));
 		}
 		menu.addItem((item) =>
 			item
@@ -337,13 +341,14 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		return showsOn(this.settings().headerAddButton, Platform.isMobile);
 	}
 
-	// The header's filter icon shows only on a list, pressed while the field is open. The toggle in
-	// the field's row is lit while archived items show.
+	// The header's filter icon shows only on a list, pressed while the field is open. The toggles in
+	// the field's row are lit while archived items show and while only starred ones do.
 	private syncFindButtons(): void {
 		if (this.findAction) {
 			this.findAction.toggle(isListText(this.text));
 			syncFilterButton(this.findAction, this);
 		}
+		syncStarredToggle(this.filterField, this.starredOnly);
 		const button = this.filterField?.rowEl.querySelector<HTMLElement>(`.${ARCHIVED_TOGGLE_CLASS}`);
 		if (!button) return;
 		button.toggleClass('princelists-archived-shown', this.showArchived);

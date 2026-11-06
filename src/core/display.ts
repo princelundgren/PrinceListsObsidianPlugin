@@ -41,6 +41,8 @@ export interface SectionRows {
 
 export interface RowFilter {
 	showArchived: boolean;
+	/** "Show starred only": hides every item that isn't starred. */
+	starredOnly: boolean;
 	/** How long after its tick a done item is archived. */
 	archiveDelayMs: number;
 	/** What Cmd+F's field holds; '' filters nothing. */
@@ -54,12 +56,12 @@ export interface RowFilter {
 const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 
 // Every heading stays, even when all of its items are hidden, and so does content the plugin leaves
-// alone, except while a query filters the list: then only the items that match show, and a heading
-// only while one of its items does. A collapsed section shows only its heading, unless a query
-// filters the list. Archived is worked out from `now` on each redraw, never written
+// alone, except while a query or "Show starred only" filters the list: then only the items that match
+// show, and a heading only while one of its items does. A collapsed section shows only its heading,
+// unless the list is filtered. Archived is worked out from `now` on each redraw, never written
 // down (spec, "Done and archived").
 export function visibleSections(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter): SectionRows[] {
-	const filtering = filter.query !== '';
+	const filtering = filter.query !== '' || filter.starredOnly;
 	return model.sections.map(({ headingLine, items }, i) => {
 		const start = headingLine ?? model.contentStart;
 		const end = model.sections[i + 1]?.headingLine ?? lines.length;
@@ -68,7 +70,7 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, filter.archiveDelayMs);
 			if (!isShown(row, filter.showArchived)) return [];
 			if (item.titleLine === filter.keepLine) return [row];
-			if (filtering) return itemMatches(lines, item, row, filter.query) ? [row] : [];
+			if (filtering) return (!filter.starredOnly || row.starred) && itemMatches(lines, item, row, filter.query) ? [row] : [];
 			return collapsed ? [] : [row];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };

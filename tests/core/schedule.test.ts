@@ -141,21 +141,25 @@ describe('matchesSchedule', () => {
 });
 
 describe('shownSchedule', () => {
-	const item = (title: string, day: string): ScheduledItem => ({
+	const item = (title: string, day: string, starred = false): ScheduledItem => ({
 		listPath: 'Home.md',
 		listName: 'Home',
 		titleLine: 0,
 		line: `- [ ] ${title}`,
 		title,
-		starred: false,
+		starred,
 		done: false,
 		day,
 		order: 0,
 		notes: '',
 	});
-	const items = [item('Call Ann', '2026-10-27'), item('Call Bo', '2026-10-28'), item('Shop', '2026-10-28')];
-	const shown = (query: string, collapsed: ScheduleGroup[]) =>
-		shownSchedule(items, '2026-10-27', query, new Set(collapsed)).map(({ group, collapsed, items }) => [group, collapsed, items.map((i) => i.title)]);
+	const items = [item('Call Ann', '2026-10-27'), item('Call Bo', '2026-10-28', true), item('Shop', '2026-10-28')];
+	const shown = (query: string, collapsed: ScheduleGroup[], starredOnly = false) =>
+		shownSchedule(items, '2026-10-27', { query, starredOnly }, new Set(collapsed)).map(({ group, collapsed, items }) => [
+			group,
+			collapsed,
+			items.map((i) => i.title),
+		]);
 
 	test('a collapsed group shows only its heading while nothing filters', () => {
 		expect(shown('', ['tomorrow'])).toEqual([
@@ -171,5 +175,11 @@ describe('shownSchedule', () => {
 		]);
 		expect(shown('shop', [])).toEqual([['tomorrow', false, ['Shop']]]);
 		expect(shown('nothing like it', [])).toEqual([]);
+	});
+
+	test('starred only shows only starred items, collapsed groups included, and a group without one goes', () => {
+		expect(shown('', ['tomorrow'], true)).toEqual([['tomorrow', true, ['Call Bo']]]);
+		expect(shown('call', [], true)).toEqual([['tomorrow', false, ['Call Bo']]]);
+		expect(shown('shop', [], true)).toEqual([]);
 	});
 });

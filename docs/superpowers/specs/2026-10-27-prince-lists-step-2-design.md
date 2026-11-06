@@ -148,6 +148,17 @@ this met on 2026-10-30 **(owner)**.
 - **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and
   can't match.
 - **Archived items are searched only while "Show archived items" is on.**
+- **"Show starred only" hides every item that isn't starred (owner, 2026-11-06),** in a list and
+  in the Schedule. A star toggle in the field's row, before a list's archived toggle, turns it on
+  and off, and so does an item of that name in the pane's ⋯ menu, as "Show archived items" has. It
+  filters as typed text does: a heading or group shows while one of its items shows, collapsed
+  ones included, and content the plugin leaves alone hides. With text in the field too, an item
+  shows only if it's starred and matches. The toggle is yellow and filled while it's on, as a
+  row's star is, and a press on it doesn't take focus from the field **(call)**. Its tooltip stays
+  "Show starred only", and it has no key **(call)**. It's on only while the field is open, so the
+  lit toggle always shows why items are hidden: the menu item opens the field when it's closed,
+  without focusing it **(call)**, and closing the field turns it off (owner, 2026-11-06). It
+  isn't remembered (owner, 2026-11-06).
 - **Escape in the field ends the filter** and shows every row again, as the filter icon does.
 - **The field stays open when focus leaves it (owner, 2026-11-06),** empty or not, until Escape,
   the filter icon, or another note or the list closing ends it. Like "Show archived items", it
@@ -517,16 +528,16 @@ The block fields this section described are gone.
 - **The heading menu gains "Edit in Markdown",** with the caret at the end of the heading's line,
   on desktop and on mobile, and Collapse or Expand all headings ("Collapsing a heading").
 - **Right-clicking the list's background on desktop** opens the list menu: New item, New heading,
-  Edit in Markdown, Show archived items, Collapse or Expand all headings, and Open schedule. The
-  background is anywhere a click lands on no row, heading, field, link or notes editor: the list
-  note is its editor, and gets no list menu ([notes in one
+  Edit in Markdown, Show archived items, Show starred only, Collapse or Expand all headings, and
+  Open schedule. The background is anywhere a click lands on no row, heading, field, link or notes
+  editor: the list note is its editor, and gets no list menu ([notes in one
   editor](2026-10-29-notes-in-one-editor-design.md), "Keys and touch").
   - New item and New heading go at the end of the section the click is in: under the nearest
     heading above it, or in the part before the first heading **(owner)**. New item goes after the
     section's last item, before any text below it that isn't an item, which an item can't follow
     without joining it **(call)**.
   - Edit in Markdown puts the caret at the end of that section's last line **(call)**.
-  - Show archived items and Open schedule do what they do in the pane's ⋯ menu.
+  - Show archived items, Show starred only and Open schedule do what they do in the pane's ⋯ menu.
   - Mobile has no background menu: the plugin opens no menu on a long-press (step one, "Touch on
     mobile").
 - **Right-clicking a picture on desktop** in a card's notes or the list note opens the picture's

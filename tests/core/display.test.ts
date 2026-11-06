@@ -15,7 +15,7 @@ const sectionsOf = (
 	archiveDelayMs = DAY,
 ) => {
 	const { lines, model } = list(text);
-	return visibleSections(lines, model, now, { showArchived, archiveDelayMs, query, keepLine, collapsed });
+	return visibleSections(lines, model, now, { showArchived, starredOnly: false, archiveDelayMs, query, keepLine, collapsed });
 };
 
 const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false, when: string | null = null) => ({
@@ -210,6 +210,45 @@ describe('visibleSections, filtered', () => {
 	});
 });
 
+describe('visibleSections, starred only', () => {
+	const now = new Date(2026, 9, 21, 12, 0);
+	const text = 'Intro\n- [ ] Buy milk ⭐\n- [ ] Bread\n## Garden\n- [ ] Rake\n## Old\n- [x] milk jug ⭐ ✔ 2026-10-01 10:00\n- [ ] Seeds ⭐\n';
+	const starred = (filter: { query?: string; showArchived?: boolean; keepLine?: number | null; collapsed?: ReadonlySet<number> } = {}) => {
+		const { lines, model } = list(text);
+		const { query = '', showArchived = false, keepLine = null, collapsed = new Set<number>() } = filter;
+		return visibleSections(lines, model, now, { showArchived, starredOnly: true, archiveDelayMs: DAY, query, keepLine, collapsed });
+	};
+
+	test('shows only starred items, and a heading only while one of its items shows', () => {
+		expect(starred()).toEqual([
+			{ heading: null, rows: [row(1, 'Buy milk', false, 'Buy milk', false, true)], collapsed: false },
+			{ heading: null, rows: [], collapsed: false },
+			{ heading: { line: 5, text: 'Old' }, rows: [row(7, 'Seeds', false, 'Seeds', false, true)], collapsed: false },
+		]);
+	});
+
+	test('with a query, shows only the starred items it matches', () => {
+		expect(starred({ query: 'seed' }).flatMap((section) => section.rows)).toEqual([row(7, 'Seeds', false, 'Seeds', false, true)]);
+		expect(starred({ query: 'bread' }).flatMap((section) => section.rows)).toEqual([]);
+	});
+
+	test('keeps an archived starred item hidden unless archived items are shown', () => {
+		expect(starred({ showArchived: true })[2]?.rows.map((shown) => shown.kind === 'item' && shown.title)).toEqual(['milk jug', 'Seeds']);
+	});
+
+	test('shows the starred items of a collapsed section', () => {
+		expect(starred({ collapsed: new Set([5]) })[2]).toEqual({
+			heading: { line: 5, text: 'Old' },
+			rows: [row(7, 'Seeds', false, 'Seeds', false, true)],
+			collapsed: true,
+		});
+	});
+
+	test("shows the open card's item though it isn't starred", () => {
+		expect(starred({ keepLine: 4 })[1]).toEqual({ heading: { line: 3, text: 'Garden' }, rows: [row(4, 'Rake')], collapsed: false });
+	});
+});
+
 test('matchesQuery compares without normalizing', () => {
 	expect(matchesQuery('Buy milk', '', 'MILK')).toBe(true);
 	expect(matchesQuery('cafe\u0301', '', 'caf\u00e9')).toBe(false);
@@ -242,7 +281,7 @@ describe('isItemVisible', () => {
 	const text = '---\nprincelists: true\n---\n- [ ] a\n## B\n- [ ] b\n## C\n- [ ] c\n- [x] old ✔ 2026-10-01 10:00\n';
 	const visible = (titleLine: number, query = '', collapsed: ReadonlySet<number> = new Set()) => {
 		const { lines, model } = list(text);
-		return isItemVisible(lines, model, now, { showArchived: false, archiveDelayMs: DAY, query, keepLine: null, collapsed }, titleLine);
+		return isItemVisible(lines, model, now, { showArchived: false, starredOnly: false, archiveDelayMs: DAY, query, keepLine: null, collapsed }, titleLine);
 	};
 
 	test('an item in an open section, with no filter, is visible', () => {

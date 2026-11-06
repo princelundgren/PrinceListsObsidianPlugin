@@ -169,7 +169,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private shownSections(): SectionRows[] {
 		const lines = splitLines(this.editing.text);
 		const model = parseList(lines, contentStartLine(this.editing.text));
-		return visibleSections(lines, model, new Date(), { showArchived: false, archiveDelayMs: this.archiveDelay.ms, query: '', keepLine: null, collapsed: new Set() });
+		return visibleSections(lines, model, new Date(), { showArchived: false, starredOnly: false, archiveDelayMs: this.archiveDelay.ms, query: '', keepLine: null, collapsed: new Set() });
 	}
 
 	// A change from outside often leaves every row as drawn, such as a list view's save of an item's notes.
