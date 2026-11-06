@@ -14,7 +14,7 @@ Make a list from the ribbon, a folder, or a note you already have.
 
 Ticked items hide after a day, or the time you choose in the settings. The filter icon finds items by their text, and can bring the hidden ones back, with blue checkboxes.
 
-![In a todo list, an item is ticked and grays out, then the filter icon in the pane's header opens a field, its toggle brings back three items ticked days ago with blue checkboxes, and typing book leaves the three items that mention it, until the filter icon closes the field again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/filter.gif)
+![In a todo list, an item is ticked and grays out, then the filter icon in the pane's header opens a field, its toggle brings back three items ticked days ago with blue checkboxes, and typing book leaves four items, three that mention it and one whose note has its letters in order, until the filter icon closes the field again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/filter.gif)
 
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 
