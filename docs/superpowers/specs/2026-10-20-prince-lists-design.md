@@ -676,6 +676,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05).
+  - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
+    the card, one press closes the menu and the card together (#301).
 - **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the show-archived icon.
   It's a view action (`addAction`) named "New item" **(call)**, with its key: "New item
   (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which usually
