@@ -1,6 +1,6 @@
-// On a phone, Groceries with lemons' notes open.
-import { PHONE, showGroceries, titleOf, withTickedGroceries } from '../listing.mjs';
-import { middleOf, sleep, still, tap } from '../page.mjs';
+// On a phone, Groceries with its Bakery section collapsed.
+import { PHONE, showGroceries, withTickedGroceries } from '../listing.mjs';
+import { headingBounds, middleOf, sleep, still, tap } from '../page.mjs';
 
 const scene = {
 	name: 'phone-1-groceries',
@@ -8,9 +8,9 @@ const scene = {
 	setup: showGroceries,
 	async shoot(session, out) {
 		await withTickedGroceries(session, tap, async () => {
-			const { x, y } = middleOf(await titleOf(session, 'lemons'));
+			const { x, y } = middleOf(await headingBounds(session, 'Bakery', '.princelists-collapse'));
 			await tap(session, x, y);
-			await sleep(1000);
+			await sleep(400);
 			await still(session, scene, out);
 		});
 	},
