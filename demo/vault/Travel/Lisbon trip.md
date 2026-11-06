@@ -7,7 +7,7 @@ Four days in Lisbon. Take the [[Packing list]], and comfortable shoes: the city 
 - [x] book the flights ✔ 2026-10-09 21:15
 - [x] book the apartment ✔ 2026-10-11 10:40
 
-	| | |
+	| apartment | |
 	| --- | --- |
 	| check-in | from 3 pm |
 	| check-out | by 11 am |

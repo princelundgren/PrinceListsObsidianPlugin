@@ -5,7 +5,7 @@ Anything that comes up, before it has a home. Move each one to its list, or just
 
 - [ ] look into a gym nearby
 
-	| | price | note |
+	| gym | price | note |
 	| --- | --- | --- |
 	| the one on the corner | 25 a month | small, open all night |
 	| the pool | 40 a month | has a sauna |
@@ -18,4 +18,4 @@ Anything that comes up, before it has a home. Move each one to its list, or just
 - [ ] parking spot: B-42
 - [x] return the package ✔ 2026-10-25 12:15
 
-	The label is printed, in the hallway drawer.
+	Dropped off at the post office; the receipt is in the hallway drawer.
