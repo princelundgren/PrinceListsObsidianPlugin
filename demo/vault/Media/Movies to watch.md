@@ -20,6 +20,7 @@ Films people keep recommending. Star the ones for this month.
 	> Everyone says it's the perfect film. Find out.
 - [ ] The Grand Budapest Hotel
 - [ ] Ponyo
+- [x] Past Lives ✔ 2026-10-11 21:40
 - [ ] Dune: Part Two
 
 	Rewatch part one first:
@@ -34,3 +35,5 @@ Films people keep recommending. Star the ones for this month.
 	- [ ] The Others
 	- [ ] Shaun of the Dead
 - [x] Everything Everywhere All at Once ✔ 2026-10-19 23:05
+
+	Loud, strange and very moving. Watch it again with someone new.
