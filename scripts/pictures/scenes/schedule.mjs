@@ -1,6 +1,6 @@
 // The Schedule opens from the ribbon in the right sidebar and scrolls through dated items from
 // several lists, under Today, Tomorrow, Next 7 days and the start of Later.
-import { boundsOf, closeSchedule, drawnMouse, hover, middleOf, scroll, showAlone, sleep } from '../page.mjs';
+import { boundsOf, closeSchedule, drawnMouse, headingBounds, hover, middleOf, scroll, showAlone, sleep } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
 import { recordGif } from '../record.mjs';
 
@@ -43,7 +43,9 @@ const scene = {
 				await sleep(300);
 				await scrollBy(320);
 				await sleep(900);
-				await scrollBy(320);
+				// However many dated items the vault has, the GIF ends with Later's heading in view.
+				const later = await headingBounds(session, 'Later');
+				await scrollBy(later.y - 200);
 				await sleep(1400);
 			});
 		} finally {
