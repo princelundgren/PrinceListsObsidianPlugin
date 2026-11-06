@@ -1,5 +1,6 @@
 import { isArchived } from './archive';
-import { timelessItemRow } from './display';
+import { matchesQuery, timelessItemRow } from './display';
+import { getItemNotes } from './edit-items';
 import { splitLines } from './lines';
 import { parseList } from './parse';
 import { daysFrom } from './when';
@@ -16,6 +17,7 @@ export interface ScheduledItem {
 	day: string;
 	/** The item's place in its list. */
 	order: number;
+	notes: string;
 }
 
 export type ScheduleGroup = 'today' | 'tomorrow' | 'week' | 'later';
@@ -27,12 +29,13 @@ export function datedItems(text: string, contentStart: number, list: { path: str
 	const lines = splitLines(text);
 	const items = parseList(lines, contentStart).sections.flatMap((section) => section.items);
 	const scheduled: ScheduledItem[] = [];
-	items.forEach(({ titleLine }, order) => {
+	items.forEach((item, order) => {
+		const { titleLine } = item;
 		const line = lines[titleLine]?.text ?? '';
 		const row = timelessItemRow(line, titleLine);
 		if (row.when === null) return;
 		const { title, starred, done, when: day } = row;
-		scheduled.push({ listPath: list.path, listName: list.name, titleLine, line, title, starred, done, day, order });
+		scheduled.push({ listPath: list.path, listName: list.name, titleLine, line, title, starred, done, day, order, notes: getItemNotes(lines, item) });
 	});
 	return scheduled;
 }
@@ -40,6 +43,11 @@ export function datedItems(text: string, contentStart: number, list: { path: str
 /** The items that are open, or done and not yet archived at `now` with `archiveDelayMs`. */
 export function unarchived(items: readonly ScheduledItem[], now: Date, archiveDelayMs: number): ScheduledItem[] {
 	return items.filter((item) => !(item.done && isArchived(item.line, now, archiveDelayMs)));
+}
+
+/** Whether Cmd+F's `query` finds the item in its title, its notes or its list's name, as a list's filter matches. */
+export function matchesSchedule(item: ScheduledItem, query: string): boolean {
+	return matchesQuery(item.title, item.notes, query) || matchesQuery(item.listName, '', query);
 }
 
 // Today takes everything overdue too.
@@ -55,4 +63,25 @@ export function groupSchedule(items: readonly ScheduledItem[], today: string): {
 	return GROUP_ORDER.map((group) => ({ group, items: sorted.filter((item) => scheduleGroup(item.day, today) === group) })).filter(
 		({ items }) => items.length > 0,
 	);
+}
+
+export interface ShownGroup {
+	group: ScheduleGroup;
+	/** The heading's arrow shows it collapsed, whether or not a query shows items under it. */
+	collapsed: boolean;
+	items: ScheduledItem[];
+}
+
+/**
+ * The Schedule's groups as drawn: only the items `query` matches, and a group only while one does. A
+ * collapsed group has no items under it, unless a query filters the Schedule.
+ */
+export function shownSchedule(items: readonly ScheduledItem[], today: string, query: string, collapsed: ReadonlySet<ScheduleGroup>): ShownGroup[] {
+	return groupSchedule(
+		items.filter((item) => matchesSchedule(item, query)),
+		today,
+	).map(({ group, items: matches }) => {
+		const isCollapsed = collapsed.has(group);
+		return { group, collapsed: isCollapsed, items: isCollapsed && query === '' ? [] : matches };
+	});
 }

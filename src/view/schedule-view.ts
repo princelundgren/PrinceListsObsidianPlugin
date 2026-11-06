@@ -1,23 +1,24 @@
-import { ItemView, Notice, Platform, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
+import { debounce, ItemView, Notice, Platform, Scope, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
-import { datedItems, groupSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
+import { datedItems, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
-import { addHiddenLabel, targetOf } from './dom';
+import { targetOf } from './dom';
+import { buildFilterField, FILTER_PAUSE_MS, filterBlur, filterInput, filterKeyDown, openFilter, type FilterHost } from './filter';
 import { PrinceListView } from './list-view';
-import { handleLinkClick, renderInline, type MarkdownHost } from './notes';
+import { handleLinkClick, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
-import { addTickZone, CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
-import { addStar, addWhen } from './row-marks';
+import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
+import { buildScheduleRow } from './schedule-row';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
@@ -36,7 +37,7 @@ interface ReadList {
 }
 
 // Every list's items with a When, by day (spec, "When and the Schedule view").
-export class ScheduleView extends ItemView implements MarkdownHost {
+export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	// A static view, as Obsidian's docs class a calendar: a link opens in the main area, not in its place.
 	override navigation = false;
 	private lists = new Map<string, ReadList>();
@@ -51,16 +52,33 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 	private updatedPaths: Set<string> | null = null;
 	private refreshes = 0;
 	private blocks: Component[] = [];
-	// Today, the groups and the collapsed ones as drawn last. Every field counts: the rows keep these items, and ticks use their lines.
+	// Today and the groups as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
 	private drawn: string | null = null;
+	filter: string | null = null;
+	filterEl: HTMLInputElement | null = null;
+	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+	private readonly filterSlotEl: HTMLElement;
+	// Drawn again on each change, apart from the title and the find field above it, which keeps focus.
+	private readonly groupsEl: HTMLElement;
 
 	constructor(
 		leaf: WorkspaceLeaf,
 		private readonly archiveDelay: ArchiveDelay,
 	) {
 		super(leaf);
+		const sizer = this.scrollEl.createDiv({ cls: 'princelists-sizer' });
+		sizer.createDiv({ cls: 'princelists-schedule-title', text: 'Schedule', attr: { role: 'heading', 'aria-level': 1 } });
+		sizer.createDiv({ cls: 'princelists-schedule-about', text: SCHEDULE_ABOUT });
+		this.filterSlotEl = sizer.createDiv();
+		this.groupsEl = sizer.createDiv();
+		// Only while the Schedule has focus, as in a list: elsewhere Cmd+F stays Obsidian's search.
+		this.scope = new Scope(this.app.scope);
+		this.scope.register(['Mod'], 'f', () => {
+			openFilter(this);
+			return false;
+		});
 	}
 
 	getViewType(): string {
@@ -88,6 +106,15 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
 		this.registerEvent(this.archiveDelay.onChange(() => this.draw()));
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
+		this.registerDomEvent(this.contentEl, 'input', (evt) => {
+			if (evt.target === this.filterEl) filterInput(this);
+		});
+		this.registerDomEvent(this.contentEl, 'keydown', (evt) => {
+			if (evt.target === this.filterEl && !evt.isComposing) filterKeyDown(this, evt);
+		});
+		this.registerDomEvent(this.contentEl, 'focusout', (evt) => {
+			if (evt.target === this.filterEl) filterBlur(this);
+		});
 		await this.refresh();
 	}
 
@@ -95,6 +122,10 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		// A refresh still reading draws nothing once it finishes.
 		this.refreshes++;
 		this.drawn = null;
+		this.redrawFiltered.cancel();
+		this.filter = null;
+		this.filterEl?.remove();
+		this.filterEl = null;
 		this.lists.clear();
 		this.collapsed.clear();
 		this.removeBlocks();
@@ -210,48 +241,46 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 		if (leaf.view instanceof PrinceListView && leaf.view.file === file) openItem(leaf.view, item.titleLine, item.line);
 	}
 
+	render(): void {
+		this.redrawFiltered.cancel();
+		if (this.filter === null) {
+			this.filterEl?.remove();
+			this.filterEl = null;
+		} else if (!this.filterEl) {
+			this.filterEl = buildFilterField(this.filterSlotEl, this.filter, 'Find in schedule');
+		}
+		this.draw();
+	}
+
 	private draw(): void {
 		const now = new Date();
 		const today = dayOf(now);
-		const groups = groupSchedule([...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms)), today);
-		const drawn = JSON.stringify([today, groups, [...this.collapsed].sort()]);
+		const query = this.filter ?? '';
+		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
+		const groups = shownSchedule(dated, today, query, this.collapsed);
+		// No row shows its notes, so saving them alone draws nothing again.
+		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
+		const drawn = JSON.stringify([today, dated.length === 0, shown]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;
 		this.removeBlocks();
-		this.scrollEl.empty();
-		const sizer = this.scrollEl.createDiv({ cls: 'princelists-sizer' });
-		sizer.createDiv({ cls: 'princelists-schedule-title', text: 'Schedule', attr: { role: 'heading', 'aria-level': 1 } });
-		sizer.createDiv({ cls: 'princelists-schedule-about', text: SCHEDULE_ABOUT });
-		if (groups.length === 0) sizer.createDiv({ cls: 'princelists-schedule-empty', text: "No items have a date. Pick a day with the calendar icon on an item's card." });
-		for (const { group, items } of groups) {
-			const heading = sizer.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
+		this.groupsEl.empty();
+		if (dated.length === 0) this.groupsEl.createDiv({ cls: 'princelists-schedule-empty', text: "No items have a date. Pick a day with the calendar icon on an item's card." });
+		for (const { group, collapsed, items } of groups) {
+			const heading = this.groupsEl.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
 			this.headings.set(heading, group);
-			const collapsed = this.collapsed.has(group);
 			addCollapseArrow(heading, collapsed);
-			if (collapsed) continue;
-			const list = sizer.createEl('ul', { cls: ITEMS_CLASS });
-			for (const item of items) list.append(this.buildRow(item, today));
+			if (items.length === 0) continue;
+			const list = this.groupsEl.createEl('ul', { cls: ITEMS_CLASS });
+			for (const item of items) {
+				const { rowEl, block } = buildScheduleRow(this, item, today);
+				if (block) this.blocks.push(block);
+				this.rows.set(rowEl, item);
+				list.append(rowEl);
+			}
 		}
 		this.scrollEl.scrollTop = scroll;
-	}
-
-	private buildRow(item: ScheduledItem, today: string): HTMLLIElement {
-		const rowEl = createEl('li', { cls: ITEM_CLASS });
-		rowEl.toggleClass('is-done', item.done);
-		addTickZone(rowEl);
-		const box = rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' });
-		box.checked = item.done;
-		addHiddenLabel(box, item.title);
-		const text = rowEl.createDiv({ cls: 'princelists-schedule-text' });
-		const titleLine = text.createDiv({ cls: 'princelists-schedule-title-line' });
-		const block = renderInline(this, item.listPath, titleLine.createDiv({ cls: 'princelists-item-title' }), item.title);
-		if (block) this.blocks.push(block);
-		if (item.starred) addStar(titleLine);
-		addWhen(titleLine, item.day, today);
-		text.createDiv({ cls: 'princelists-schedule-list', text: item.listName });
-		this.rows.set(rowEl, item);
-		return rowEl;
 	}
 
 	private removeBlocks(): void {

@@ -107,13 +107,15 @@ export default class PrinceListsPlugin extends Plugin {
 				return true;
 			},
 		});
-		// On mobile, where Cmd+F needs a keyboard.
+		// On mobile, where Cmd+F needs a keyboard. The Schedule's find too, so one hotkey finds in both.
 		this.addCommand({
 			id: 'find-in-list',
 			name: 'Find in list',
 			checkCallback: (checking) => {
-				const view = this.app.workspace.getActiveViewOfType(PrinceListView);
-				if (!view?.file || !isListText(view.text)) return false;
+				const { workspace } = this.app;
+				const list = workspace.getActiveViewOfType(PrinceListView);
+				const view = workspace.getActiveViewOfType(ScheduleView) ?? (list?.file && isListText(list.text) ? list : null);
+				if (!view) return false;
 				if (!checking) openFilter(view);
 				return true;
 			},

@@ -22,6 +22,7 @@ import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
+import { FILTER_PAUSE_MS, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
@@ -31,11 +32,9 @@ import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
-const FILTER_PAUSE_MS = 100;
-
 // canAcceptExtension stays at its default of false: true would open every note clicked from a
 // list pane in the list view.
-export class PrinceListView extends TextFileView {
+export class PrinceListView extends TextFileView implements FilterHost {
 	// The exact file text, apart from the inherited `data`, with every keystroke applied to it for
 	// getViewData and Obsidian's merge, and the line-based state that follows it.
 	readonly editing = new ListEditing(contentStartLine);
