@@ -95,8 +95,9 @@ jobs:
                   # The review prompt is GitHub Docs' "Review code" prompt file
                   # (https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files/review-code),
                   # CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Changed: it reads AGENTS.md
-                  # first, reviews this pull request instead of selected code, adds drift from docs/, keeps
-                  # Good Practices to one line, drops the editor's focus input, and adds how to read and post.
+                  # first, reviews this pull request instead of selected code, adds drift from docs/, posts a
+                  # Suggestion only when it names a change, keeps Good Practices to one line, drops the
+                  # editor's focus input, and adds how to read and post.
                   prompt: |
                       REPO: ${{ github.repository }}
                       PR NUMBER: ${{ github.event.pull_request.number }}
@@ -144,7 +145,7 @@ jobs:
                       Provide feedback as:
 
                       **🔴 Critical Issues** - Must fix before merge
-                      **🟡 Suggestions** - Improvements to consider
+                      **🟡 Suggestions** - Changes that would improve this pull request
                       **✅ Good Practices** - What's done well, in one line
 
                       For each issue:
@@ -152,6 +153,8 @@ jobs:
                       - Clear explanation of the problem
                       - Suggested solution with code example
                       - Rationale for the change
+
+                      Post a 🟡 only when it names a change to make: to a line this pull request adds or changes, or to a doc the change makes untrue. Leave out a finding about code the change neither touches nor makes wrong, and one that only asks to check or confirm something.
 
                       Be constructive and educational in your feedback.
 
