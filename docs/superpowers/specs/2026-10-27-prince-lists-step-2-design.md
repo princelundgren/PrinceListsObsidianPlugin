@@ -150,7 +150,8 @@ this met on 2026-10-30 **(owner)**.
 - **Archived items are searched only while "Show archived items" is on.**
 - **"Show starred only" hides every item that isn't starred (owner, 2026-11-06),** in a list and
   in the Schedule. A star toggle in the field's row, before a list's archived toggle, turns it on
-  and off, and so does an item of that name in the pane's ⋯ menu, as "Show archived items" has. It
+  and off, and so does an item of that name in the pane's menu: a list's ⋯ menu, beside "Show
+  archived items", and the Schedule's, which in a sidebar opens from a right-click on its tab. It
   filters as typed text does: a heading or group shows while one of its items shows, collapsed
   ones included, and content the plugin leaves alone hides. With text in the field too, an item
   shows only if it's starred and matches. The toggle is yellow and filled while it's on, as a

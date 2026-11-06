@@ -232,7 +232,7 @@ describe('visibleSections, starred only', () => {
 		expect(starred({ query: 'bread' }).flatMap((section) => section.rows)).toEqual([]);
 	});
 
-	test('keeps an archived starred item hidden unless archived items are shown', () => {
+	test('shows an archived starred item while archived items are shown', () => {
 		expect(starred({ showArchived: true })[2]?.rows.map((shown) => shown.kind === 'item' && shown.title)).toEqual(['milk jug', 'Seeds']);
 	});
 
