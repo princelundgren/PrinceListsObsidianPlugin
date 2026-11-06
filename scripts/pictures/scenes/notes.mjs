@@ -8,7 +8,7 @@ const scene = {
 	name: 'notes',
 	phone: false,
 	// With the left sidebar collapsed, this width makes the open item 520 wide.
-	page: { width: 644, height: 760 },
+	page: { width: 626, height: 760 },
 	scale: 2,
 	theme: 'dark',
 	async setup(session) {
@@ -35,7 +35,7 @@ const scene = {
 			})()`);
 			await click(session, end.x, end.y);
 			// Off the format bar, whose buttons show tooltips.
-			await hover(session, 640, 756);
+			await hover(session, scene.page.width - 4, 756);
 			await sleep(800);
 			await still(session, scene, out);
 		} finally {
