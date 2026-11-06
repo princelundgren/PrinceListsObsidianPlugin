@@ -65,23 +65,31 @@ export function groupSchedule(items: readonly ScheduledItem[], today: string): {
 	);
 }
 
+export interface ScheduleFilter {
+	/** What Cmd+F's field holds; '' filters nothing. */
+	query: string;
+	/** "Show starred only": hides every item that isn't starred. */
+	starredOnly: boolean;
+}
+
 export interface ShownGroup {
 	group: ScheduleGroup;
-	/** The heading's arrow shows it collapsed, whether or not a query shows items under it. */
+	/** The heading's arrow shows it collapsed, whether or not a filter shows items under it. */
 	collapsed: boolean;
 	items: ScheduledItem[];
 }
 
 /**
- * The Schedule's groups as drawn: only the items `query` matches, and a group only while one does. A
- * collapsed group has no items under it, unless a query filters the Schedule.
+ * The Schedule's groups as drawn: only the items `filter` matches, and a group only while one does. A
+ * collapsed group has no items under it, unless a query or "Show starred only" filters the Schedule.
  */
-export function shownSchedule(items: readonly ScheduledItem[], today: string, query: string, collapsed: ReadonlySet<ScheduleGroup>): ShownGroup[] {
+export function shownSchedule(items: readonly ScheduledItem[], today: string, filter: ScheduleFilter, collapsed: ReadonlySet<ScheduleGroup>): ShownGroup[] {
+	const filtering = filter.query !== '' || filter.starredOnly;
 	return groupSchedule(
-		items.filter((item) => matchesSchedule(item, query)),
+		items.filter((item) => (!filter.starredOnly || item.starred) && matchesSchedule(item, filter.query)),
 		today,
 	).map(({ group, items: matches }) => {
 		const isCollapsed = collapsed.has(group);
-		return { group, collapsed: isCollapsed, items: isCollapsed && query === '' ? [] : matches };
+		return { group, collapsed: isCollapsed, items: isCollapsed && !filtering ? [] : matches };
 	});
 }

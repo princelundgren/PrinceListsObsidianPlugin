@@ -1,4 +1,4 @@
-import { setIcon, type App, type Component, type Debouncer, type WorkspaceLeaf } from 'obsidian';
+import { setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
 
 export const FILTER_CLASS = 'princelists-filter';
 
@@ -8,7 +8,16 @@ export const FIND_BUTTON_CLASS = 'princelists-find-button';
 /** A list's show-archived toggle, at the end of the field's row. */
 export const ARCHIVED_TOGGLE_CLASS = 'princelists-archived-toggle';
 
-/** Cmd+F's field, in a row that a list also gives its archived toggle. */
+/** The show-starred-only toggle, in the field's row of a list and of the Schedule. */
+export const STARRED_TOGGLE_CLASS = 'princelists-starred-toggle';
+
+/**
+ * The toggles in the field's row. A press on one mustn't take focus from the field, which would put
+ * a phone's keyboard away, so a view prevents the default of a mousedown on them.
+ */
+export const FILTER_TOGGLE_SELECTOR = `.${STARRED_TOGGLE_CLASS}, .${ARCHIVED_TOGGLE_CLASS}`;
+
+/** Cmd+F's field, in a row with its starred toggle, and in a list its archived toggle. */
 export interface FilterField {
 	rowEl: HTMLElement;
 	inputEl: HTMLInputElement;
@@ -22,6 +31,8 @@ export interface FilterHost {
 	/** Cmd+F's query, or null while its field is closed. */
 	filter: string | null;
 	filterField: FilterField | null;
+	/** "Show starred only": on only while the field is open, so its star toggle always shows it. */
+	starredOnly: boolean;
 	readonly app: App;
 	readonly leaf: WorkspaceLeaf;
 	/** Draws the view again, with the field while `filter` isn't null. */
@@ -61,6 +72,34 @@ export function buildFilterField(parent: HTMLElement, query: string, placeholder
 		attr: { placeholder },
 	});
 	return { rowEl, inputEl };
+}
+
+export function addStarredToggle(field: FilterField): void {
+	const button = field.rowEl.createEl('button', { cls: STARRED_TOGGLE_CLASS });
+	setIcon(button, 'star');
+	setTooltip(button, 'Show starred only');
+}
+
+/** Lights the field's starred toggle while only starred items show. */
+export function syncStarredToggle(field: FilterField | null, starredOnly: boolean): void {
+	const button = field?.rowEl.querySelector<HTMLElement>(`.${STARRED_TOGGLE_CLASS}`);
+	button?.toggleClass('princelists-starred-only', starredOnly);
+	button?.setAttribute('aria-pressed', String(starredOnly));
+}
+
+/**
+ * Turns "Show starred only" on or off. Turned on from a menu with the field closed, it opens the
+ * field without focusing it, so the lit toggle shows why items are hidden.
+ */
+export function toggleStarredOnly(view: FilterHost): void {
+	view.starredOnly = !view.starredOnly;
+	if (view.starredOnly && view.filter === null) view.filter = '';
+	view.render();
+}
+
+/** The pane menu's "Show starred only", checked while it's on. */
+export function addStarredOnlyItem(menu: Menu, starredOnly: boolean, toggle: () => void): void {
+	menu.addItem((item) => item.setTitle('Show starred only').setIcon('star').setChecked(starredOnly).onClick(toggle));
 }
 
 export function addArchivedToggle(field: FilterField): void {
@@ -106,6 +145,7 @@ export function removeFilterField(view: FilterHost): void {
 
 function closeFilter(view: FilterHost): void {
 	view.filter = null;
+	view.starredOnly = false;
 	view.filterClosed?.();
 	view.render();
 }

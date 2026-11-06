@@ -11,6 +11,7 @@ import { addItem, followPlace } from './add-button';
 import { CARD_CLASS, focusCardTitle, isNewEmptyItem } from './card';
 import { deleteHeadingAt, deleteItemAt } from './delete';
 import { NOTE_CLASS } from './fields';
+import { addStarredOnlyItem, toggleStarredOnly } from './filter';
 import { addHeading, openHeadingField } from './heading-field';
 import { itemQuickMenu } from './item-quick-menu';
 import type { PrinceListView } from './list-view';
@@ -123,6 +124,7 @@ export function listMenu(view: PrinceListView, model: ListModel, section: Sectio
 			.setChecked(view.showArchived)
 			.onClick(() => view.toggleArchived()),
 	);
+	addStarredOnlyItem(menu, view.starredOnly, () => toggleStarredOnly(view));
 	addCollapseAllEntries(view, model, menu);
 	menu.addSeparator();
 	menu.addItem((entry) =>
