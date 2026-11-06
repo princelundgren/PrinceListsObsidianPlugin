@@ -835,7 +835,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     as done items; an eye was tried first and read as unrelated to them. It toggles what the menu
     item toggles, and is blue while archived items show, as their checkboxes are. A press on it
     doesn't take focus from the field, as the format bar's buttons don't, so an empty field stays
-    open under it. It's out of the tab order, since Cmd+Shift+A is the keyboard's way. Archived
+    open under it. It's out of the tab order, since Cmd+Shift+A is the keyboard's way **(call)**. Archived
     items stay shown after the find closes, until they're hidden or the list closes.
   - **Cmd+Shift+A toggles it too (owner, 2026-11-03),** Ctrl+Shift+A on Windows and Linux, while a
     list has focus, its fields included. It's registered on the view's own `scope`, as
