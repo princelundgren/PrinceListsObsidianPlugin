@@ -12,12 +12,12 @@ import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
-import { addHiddenLabel, targetOf } from './dom';
+import { targetOf } from './dom';
 import { PrinceListView } from './list-view';
-import { handleLinkClick, renderInline, type MarkdownHost } from './notes';
+import { handleLinkClick, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
-import { addTickZone, CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
-import { addStar, addWhen } from './row-marks';
+import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
+import { buildScheduleRow } from './schedule-row';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
@@ -231,27 +231,14 @@ export class ScheduleView extends ItemView implements MarkdownHost {
 			addCollapseArrow(heading, collapsed);
 			if (collapsed) continue;
 			const list = sizer.createEl('ul', { cls: ITEMS_CLASS });
-			for (const item of items) list.append(this.buildRow(item, today));
+			for (const item of items) {
+				const { rowEl, block } = buildScheduleRow(this, item, today);
+				if (block) this.blocks.push(block);
+				this.rows.set(rowEl, item);
+				list.append(rowEl);
+			}
 		}
 		this.scrollEl.scrollTop = scroll;
-	}
-
-	private buildRow(item: ScheduledItem, today: string): HTMLLIElement {
-		const rowEl = createEl('li', { cls: ITEM_CLASS });
-		rowEl.toggleClass('is-done', item.done);
-		addTickZone(rowEl);
-		const box = rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' });
-		box.checked = item.done;
-		addHiddenLabel(box, item.title);
-		const text = rowEl.createDiv({ cls: 'princelists-schedule-text' });
-		const titleLine = text.createDiv({ cls: 'princelists-schedule-title-line' });
-		const block = renderInline(this, item.listPath, titleLine.createDiv({ cls: 'princelists-item-title' }), item.title);
-		if (block) this.blocks.push(block);
-		if (item.starred) addStar(titleLine);
-		addWhen(titleLine, item.day, today);
-		text.createDiv({ cls: 'princelists-schedule-list', text: item.listName });
-		this.rows.set(rowEl, item);
-		return rowEl;
 	}
 
 	private removeBlocks(): void {
