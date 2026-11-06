@@ -15,6 +15,11 @@ const ADD_KEY = 'Enter';
 /** The add key's name on this platform, as "Cmd+Enter", or null on mobile. */
 export const ADD_KEY_NAME = modKeyName(Platform, ADD_KEY);
 
+const FIND_KEY = 'f';
+
+/** The find key's name on this platform, as "Cmd+F", or null on mobile. */
+export const FIND_KEY_NAME = modKeyName(Platform, FIND_KEY.toUpperCase());
+
 const ARCHIVED_KEY = 'A';
 
 /** The show-archived key's name on this platform, as "Cmd+Shift+A", or null on mobile. */
@@ -38,12 +43,12 @@ export function registerListKeys(view: PrinceListView): void {
 		return false;
 	});
 	// Only while the list has focus: elsewhere Cmd+F stays Obsidian's search.
-	register(['Mod'], 'f', () => {
+	register(['Mod'], FIND_KEY, () => {
 		if (!isListText(view.text)) return true;
 		openFilter(view);
 		return false;
 	});
-	// As the header's checkbox does, in every field too. In a note that isn't a list, the key is Obsidian's.
+	// As the archived toggle does, in every field too. In a note that isn't a list, the key is Obsidian's.
 	register(['Mod', 'Shift'], ARCHIVED_KEY, () => {
 		if (!isListText(view.text)) return true;
 		view.toggleArchived();

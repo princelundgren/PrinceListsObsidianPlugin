@@ -1,7 +1,8 @@
-import { debounce, ItemView, Notice, Platform, Scope, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
+import { debounce, ItemView, Notice, Platform, Scope, setIcon, setTooltip, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
+import { labelWithKey } from '../core/key-name';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
@@ -13,7 +14,8 @@ import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import { buildFilterField, FILTER_PAUSE_MS, filterBlur, filterInput, filterKeyDown, openFilter, type FilterHost } from './filter';
+import { buildFilterField, FILTER_ICON, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, openFilter, registerFilterEvents, removeFilterField, syncFilterButton, toggleFilter, type FilterField, type FilterHost } from './filter';
+import { FIND_KEY_NAME } from './keys';
 import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
@@ -55,10 +57,11 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	// Today and the groups as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
 	private drawn: string | null = null;
 	filter: string | null = null;
-	filterEl: HTMLInputElement | null = null;
+	filterField: FilterField | null = null;
 	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+	private readonly findButton: HTMLElement;
 	private readonly filterSlotEl: HTMLElement;
 	// Drawn again on each change, apart from the title and the find field above it, which keeps focus.
 	private readonly groupsEl: HTMLElement;
@@ -69,7 +72,13 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	) {
 		super(leaf);
 		const sizer = this.scrollEl.createDiv({ cls: 'princelists-sizer' });
-		sizer.createDiv({ cls: 'princelists-schedule-title', text: 'Schedule', attr: { role: 'heading', 'aria-level': 1 } });
+		const titleRow = sizer.createDiv({ cls: 'princelists-schedule-title-row' });
+		titleRow.createDiv({ cls: 'princelists-schedule-title', text: 'Schedule', attr: { role: 'heading', 'aria-level': 1 } });
+		// Here rather than in the view's header, which a sidebar hides.
+		this.findButton = titleRow.createEl('button', { cls: FIND_BUTTON_CLASS });
+		setIcon(this.findButton, FILTER_ICON);
+		setTooltip(this.findButton, labelWithKey('Filter schedule', FIND_KEY_NAME));
+		syncFilterButton(this.findButton, this);
 		sizer.createDiv({ cls: 'princelists-schedule-about', text: SCHEDULE_ABOUT });
 		this.filterSlotEl = sizer.createDiv();
 		this.groupsEl = sizer.createDiv();
@@ -106,15 +115,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
 		this.registerEvent(this.archiveDelay.onChange(() => this.draw()));
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
-		this.registerDomEvent(this.contentEl, 'input', (evt) => {
-			if (evt.target === this.filterEl) filterInput(this);
-		});
-		this.registerDomEvent(this.contentEl, 'keydown', (evt) => {
-			if (evt.target === this.filterEl && !evt.isComposing) filterKeyDown(this, evt);
-		});
-		this.registerDomEvent(this.contentEl, 'focusout', (evt) => {
-			if (evt.target === this.filterEl) filterBlur(this);
-		});
+		registerFilterEvents(this, this.contentEl);
 		await this.refresh();
 	}
 
@@ -124,8 +125,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.drawn = null;
 		this.redrawFiltered.cancel();
 		this.filter = null;
-		this.filterEl?.remove();
-		this.filterEl = null;
+		removeFilterField(this);
 		this.lists.clear();
 		this.collapsed.clear();
 		this.removeBlocks();
@@ -181,6 +181,10 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 
 	private onClick(evt: MouseEvent): void {
 		const target = targetOf(evt);
+		if (target?.closest(`.${FIND_BUTTON_CLASS}`)) {
+			toggleFilter(this);
+			return;
+		}
 		const heading = target?.closest(`.${COLLAPSE_CLASS}`)?.closest(`.${HEADING_CLASS}`);
 		const group = heading && this.headings.get(heading);
 		if (group) {
@@ -243,12 +247,9 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 
 	render(): void {
 		this.redrawFiltered.cancel();
-		if (this.filter === null) {
-			this.filterEl?.remove();
-			this.filterEl = null;
-		} else if (!this.filterEl) {
-			this.filterEl = buildFilterField(this.filterSlotEl, this.filter, 'Find in schedule');
-		}
+		if (this.filter === null) removeFilterField(this);
+		else if (!this.filterField) this.filterField = buildFilterField(this.filterSlotEl, this.filter, 'Find in schedule');
+		syncFilterButton(this.findButton, this);
 		this.draw();
 	}
 

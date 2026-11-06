@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-05
+verified: 2026-11-06
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -678,7 +678,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05).
   - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
     the card, one press closes the menu and the card together (#301).
-- **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the show-archived icon.
+- **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the filter icon.
   It's a view action (`addAction`) named "New item" **(call)**, with its key: "New item
   (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which usually
   has no keyboard, shows "New item" alone **(owner, 2026-11-03)**. It shows only where the "Header
@@ -827,14 +827,20 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **"Show archived items" in the pane's ⋯ menu (owner, 2026-11-05; archived is the owner's word)**
   shows archived items again, gray, in place. The name says what it shows, since the ⋯ menu also
   holds Obsidian's and other plugins' items, where "Show archived" alone was unclear.
-  - **It's also a ticked-checkbox icon in the pane's header (owner, 2026-10-27),** because the ⋯
-    menu alone was hard to find on mobile. The icon is the same shape as the list's own
-    checkboxes, so it reads as done items; an eye was tried first and read as unrelated to them.
-    It toggles the same setting as the menu item, is blue while archived items show, as their
-    checkboxes are. It shows only on a list.
+  - **It's also a ticked-checkbox toggle at the end of the find field's row (owner, 2026-11-06),**
+    which the filter icon in the pane's header opens (step two, "Cmd+F"), because the ⋯ menu alone
+    is hard to find on mobile. The header holds the filter icon in its place, so a phone, where
+    Cmd+F needs a keyboard, can reach the find field; showing archived items there takes two taps,
+    which the owner accepted. The icon is the same shape as the list's own checkboxes, so it reads
+    as done items; an eye was tried first and read as unrelated to them. It toggles what the menu
+    item toggles, and is blue while archived items show, as their checkboxes are. A press on it
+    doesn't take focus from the field, as the format bar's buttons don't, so a phone's keyboard
+    stays up, and Tab reaches it as it does any button **(call)**. Closing the field hides
+    archived items again, as it clears its text, since the toggle is part of it; that includes
+    ones shown from the ⋯ menu or with Cmd+Shift+A while it was closed (owner, 2026-11-06).
   - **Cmd+Shift+A toggles it too (owner, 2026-11-03),** Ctrl+Shift+A on Windows and Linux, while a
     list has focus, its fields included. It's registered on the view's own `scope`, as
-    Cmd+Enter is, so it isn't a default hotkey, and there's no command for it. The icon's tooltip
+    Cmd+Enter is, so it isn't a default hotkey, and there's no command for it. The toggle's tooltip
     names the key: "Show archived items (Cmd+Shift+A)" or "Hide archived items (Cmd+Shift+A)",
     with Ctrl on Windows and Linux. Mobile, which usually has no keyboard, shows no key **(owner,
     2026-11-03)**.

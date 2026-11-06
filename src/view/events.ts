@@ -18,7 +18,7 @@ import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, keepOneLine, TITLE_CLASS } from './fields';
 import { notesText } from './editable-text';
-import { filterBlur, filterInput, filterKeyDown } from './filter';
+import { ARCHIVED_TOGGLE_CLASS, filterInput, filterKeyDown } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { barActionAt, FORMAT_BAR_CLASS } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
@@ -40,7 +40,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
-	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepNotesFocused(evt));
+	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepFieldFocused(evt));
 	view.registerDomEvent(contentEl, 'beforeinput', (evt) => onBeforeInput(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
@@ -78,6 +78,10 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		const line = heading ? lineOf(heading) : null;
 		if (line !== null) view.collapsed.toggle(line);
 		view.render();
+		return;
+	}
+	if (target.closest(`.${ARCHIVED_TOGGLE_CLASS}`)) {
+		view.toggleArchived();
 		return;
 	}
 	if (handleLinkClick(view.app, view.sourcePath, evt, target)) return;
@@ -146,9 +150,10 @@ function barEditor(view: PrinceListView, target: HTMLElement): EditorView | null
 }
 
 // A press anywhere on the format bar, between its buttons too, would take focus from the notes
-// editor, which ends its visit.
-function keepNotesFocused(evt: MouseEvent): void {
-	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}`)) evt.preventDefault();
+// editor, which ends its visit, and one on the archived toggle would take it from the filter field,
+// putting a phone's keyboard away.
+function keepFieldFocused(evt: MouseEvent): void {
+	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, .${ARCHIVED_TOGGLE_CLASS}`)) evt.preventDefault();
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
@@ -190,7 +195,7 @@ function onBeforeInput(view: PrinceListView, evt: InputEvent): void {
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
 // among the view's own few textareas.
 function onInput(view: PrinceListView, evt: Event): void {
-	if (view.filterEl && evt.target === view.filterEl) {
+	if (view.filterField && evt.target === view.filterField.inputEl) {
 		filterInput(view);
 		return;
 	}
@@ -207,7 +212,7 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	// block in the notes, such as Escape in its title field, is the block's.
 	if (evt.isComposing || !target?.instanceOf(HTMLElement) || eventInDrawnListBlock(view.contentEl, evt)) return;
 	if (evt.key === 'Escape') {
-		if (target === view.filterEl) {
+		if (target === view.filterField?.inputEl) {
 			filterKeyDown(view, evt);
 		} else if (view.card?.el.contains(target)) {
 			evt.preventDefault();
@@ -259,10 +264,6 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 	// FocusEvent types it as an EventTarget; between elements it is an Element or null.
 	const related = evt.relatedTarget as Node | null;
 	const focusing = related?.instanceOf(HTMLElement) ? related : null;
-	if (target === view.filterEl) {
-		filterBlur(view);
-		return;
-	}
 	const card = view.card;
 	// From the path: closing a list block's title field in the card's notes removes the field first.
 	const inCard = card !== null && pathUnder(view.contentEl, evt).includes(card.el);

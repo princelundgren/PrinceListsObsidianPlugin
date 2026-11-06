@@ -588,11 +588,6 @@ button.princelists-new-item {
 	box-shadow: var(--shadow-s);
 }
 
-/* The header's archived button while archived items show. */
-.princelists-archived-shown {
-	color: var(--color-blue);
-}
-
 @media (hover: hover) {
 	button.princelists-new-item:hover {
 		background-color: var(--interactive-accent-hover);
@@ -672,11 +667,13 @@ button.princelists-new-item {
 	gap: var(--size-2-1);
 }
 
-/* Icons on the card's own background. */
+/* Icon buttons on the view's own background: the card's, the find row's and the Schedule's title's. */
 button.princelists-card-actions,
 button.princelists-card-star,
 .princelists-format-bar button,
-.princelists-when-button {
+.princelists-when-button,
+button.princelists-archived-toggle,
+button.princelists-find-button {
 	flex: none;
 	height: auto;
 	padding: var(--size-2-2);
@@ -689,6 +686,8 @@ button.princelists-card-star,
 button.princelists-card-actions:not(:focus-visible),
 button.princelists-card-star:not(:focus-visible),
 .princelists-format-bar button:not(:focus-visible),
+button.princelists-archived-toggle:not(:focus-visible),
+button.princelists-find-button:not(:focus-visible),
 button.princelists-collapse:not(:focus-visible) {
 	box-shadow: none;
 }
@@ -697,10 +696,23 @@ button.princelists-collapse:not(:focus-visible) {
 	button.princelists-card-actions:hover,
 	button.princelists-card-star:hover,
 	.princelists-format-bar button:hover,
-	.princelists-when-picker:hover .princelists-when-button {
+	.princelists-when-picker:hover .princelists-when-button,
+	button.princelists-archived-toggle:hover,
+	button.princelists-find-button:hover {
 		background-color: var(--background-modifier-hover);
 		color: var(--icon-color-hover);
 	}
+}
+
+/* Blue while archived items show, as their checkboxes are; after the hover rule, so a hover keeps it. */
+button.princelists-archived-toggle.princelists-archived-shown {
+	color: var(--color-blue);
+}
+
+/* A filter icon while its field is open, in the header or beside the Schedule's title. Its own icon colors, so a hover keeps it too. */
+.princelists-filter-open {
+	--icon-color: var(--icon-color-active);
+	--icon-color-hover: var(--icon-color-active);
 }
 
 /* On mobile, each takes a finger-sized box, as Obsidian's own buttons there do, with its icon its usual size. */
@@ -708,6 +720,8 @@ button.princelists-collapse:not(:focus-visible) {
 .princelists-is-mobile button.princelists-card-star,
 .princelists-is-mobile .princelists-format-bar button,
 .princelists-is-mobile .princelists-when-button,
+.princelists-is-mobile button.princelists-archived-toggle,
+.princelists-is-mobile button.princelists-find-button,
 .princelists-is-mobile button.princelists-block-trash {
 	justify-content: center;
 	min-width: var(--input-height);
@@ -865,9 +879,16 @@ button.princelists-card-star.is-starred svg {
 	color: var(--text-faint);
 }
 
-.princelists-filter {
-	width: 100%;
+.princelists-filter-row {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-1);
 	margin-block: var(--size-4-2);
+}
+
+.princelists-filter {
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 /* A heading's text lines up with the item titles, and its collapse arrow, drawn as Obsidian's own
@@ -929,9 +950,18 @@ button.princelists-collapse {
 	padding-bottom: calc(var(--size-4-8) + var(--view-bottom-spacing, 0px));
 }
 
+/* The filter icon sits at the title's end, centered on it. */
+.princelists-schedule-title-row {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	margin: 0 0 var(--size-4-2);
+}
+
 /* The list's title style, so the Schedule reads as a page beside the lists. */
 .princelists-schedule-title {
-	margin: 0 0 var(--size-4-2);
+	flex: 1 1 auto;
+	min-width: 0;
 	font-family: var(--inline-title-font);
 	font-size: var(--inline-title-size);
 	font-weight: var(--inline-title-weight);
