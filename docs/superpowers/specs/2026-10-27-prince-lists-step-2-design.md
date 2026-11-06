@@ -140,10 +140,20 @@ this met on 2026-10-30 **(owner)**.
   icons one color, as its own bookmark icon shows, so the open field shows it there
   (owner, 2026-11-06). The field's row ends with the
   show-archived toggle, which the icon replaced in the header (step one, "Done and archived").
-- **As you type, items whose title or notes don't contain the text hide (call).** The match ignores
-  case and compares the text as written, Markdown included, with no Unicode normalization. The
-  list redraws once typing pauses for 100 ms, not at every letter, and at once when the field is
-  emptied **(call)**.
+- **As you type, items the text doesn't find hide.** The match is fuzzy, with Obsidian's
+  `prepareFuzzySearch` (owner, 2026-11-06): the text's letters in order, with gaps between them,
+  so "mlk" finds "oat milk". A wrong or swapped letter finds nothing, and neither does another
+  word order. It ignores case and folds accents as Obsidian does, so "e" finds "é" (owner,
+  2026-11-06). Two letters can match a long note, which the owner accepted.
+  - **It searches the title, the notes and the When as the file writes it (owner, 2026-11-06),**
+    each on its own, Markdown included. The When matches letter for letter, as part of the day,
+    not fuzzily, so `2026-11` finds November's items, where fuzzily it would find `2026-12-01`
+    too (owner, 2026-11-06). The words a row shows for its day ("Tomorrow", "Fri") don't match,
+    since they change each day and with Obsidian's language.
+  - **Spaces around the text are ignored,** and spaces alone filter nothing **(call)**.
+  - **The view builds the matcher and passes it to core,** which has no Obsidian imports **(call)**.
+  - **The list redraws once typing pauses for 100 ms,** not at every letter, and at once when the
+    field is emptied **(call)**.
 - **A heading shows while one of its items shows (call).** Headings themselves aren't searched.
 - **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and
   can't match.
@@ -173,8 +183,8 @@ this met on 2026-10-30 **(owner)**.
   "Filter schedule", opens and closes it too, since a sidebar hides a view's header
   **(owner, 2026-11-06)**; its row has no archived toggle, since the Schedule never shows archived
   items. It works as a list's field, and:
-  - **The list's name is searched too (owner, 2026-11-06),** besides the title and notes, so
-    typing a list's name shows its dated items.
+  - **The list's name is searched too (owner, 2026-11-06),** besides the title, the notes and
+    the When, so typing a list's name shows its dated items.
   - **A group shows while one of its items shows, collapsed ones too (owner, 2026-11-06),** and a
     collapsed group is collapsed again when the filter ends, as a list's sections are.
   - **With no match, nothing shows under the field (call),** as in a list; the message for a
