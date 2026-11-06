@@ -132,6 +132,10 @@ this met on 2026-10-30 **(owner)**.
   while the list has focus and isn't a default hotkey. Cmd+F in a Markdown note is untouched.
 - **A "Find in list" command** opens the same field, for mobile and for anyone who wants
   another hotkey. It has no default hotkey **(call)**.
+- **A search icon opens it too (owner, 2026-11-06),** on desktop and mobile: a `search` view action
+  in a list's header named "Find in list", with its key on desktop as "New item" has, shown only on
+  a list. When the field is open, it puts the cursor back in it. The field's row ends with the
+  show-archived toggle, which the icon replaced in the header (step one, "Done and archived").
 - **As you type, items whose title or notes don't contain the text hide (call).** The match ignores
   case and compares the text as written, Markdown included, with no Unicode normalization. The
   list redraws once typing pauses for 100 ms, not at every letter, and at once when the field is
@@ -147,7 +151,9 @@ this met on 2026-10-30 **(owner)**.
   whose card is open, stays shown while its card is open even if it doesn't match.
 - **The Schedule filters too (owner, 2026-11-06).** Cmd+F while it has focus, or "Find in list"
   while it's the active view, opens a field under its description, which reads "Find in
-  schedule". One command keeps one hotkey for both views. It works as a list's field, and:
+  schedule". One command keeps one hotkey for both views. A search icon at the right of its title
+  opens it too, since a sidebar hides a view's header **(owner, 2026-11-06)**; its row has no
+  archived toggle, since the Schedule never shows archived items. It works as a list's field, and:
   - **The list's name is searched too (owner, 2026-11-06),** besides the title and notes, so
     typing a list's name shows its dated items.
   - **A group shows while one of its items shows, collapsed ones too (owner, 2026-11-06),** and a
@@ -293,8 +299,8 @@ this met on 2026-10-30 **(owner)**.
 - **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
   ribbon hidden or doesn't know the command.
 - **So can a list's header (owner, 2026-11-05):** a `calendar-clock` view action named "Open
-  schedule", left of Show archived items, which shows once the settings turn it on; it's off by
-  default. Like Show archived items, it shows only on a list. The ⋯ menu's item stays either way.
+  schedule", left of Find in list, which shows once the settings turn it on; it's off by
+  default. Like Find in list, it shows only on a list. The ⋯ menu's item stays either way.
 - **Its groups (owner, 2026-10-27):** Today, which includes everything overdue, then Tomorrow,
   Next 7 days and Later. An earlier "Next month", 8 to 31 days ahead, read as the calendar month
   and seemed to leave a gap after the week.

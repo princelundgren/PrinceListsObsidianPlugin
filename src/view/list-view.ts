@@ -22,8 +22,8 @@ import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents } from './events';
-import { FILTER_PAUSE_MS, type FilterHost } from './filter';
-import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, registerListKeys } from './keys';
+import { ARCHIVED_TOGGLE_CLASS, FILTER_PAUSE_MS, openFilter, type FilterField, type FilterHost } from './filter';
+import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
@@ -56,10 +56,10 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	readonly collapsed = new CollapsedHeadings(this.editing);
 	readonly dragsRows = true;
 	readonly dragsHeadings = true;
-	filterEl: HTMLInputElement | null = null;
+	filterField: FilterField | null = null;
 	private newItemButton: HTMLButtonElement | null = null;
 	private newItemAction: HTMLElement | null = null;
-	private archivedButton: HTMLElement | null = null;
+	private findAction: HTMLElement | null = null;
 	private scheduleAction: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
 	readonly blocks = new Map<HTMLElement, Component>();
@@ -181,7 +181,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
 		this.newItemButton = buildNewItemButton(this, newItemLabel);
 		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
-		this.archivedButton = this.addAction('square-check-big', 'Show archived items', () => this.toggleArchived());
+		this.findAction = this.addAction('search', labelWithKey('Find in list', FIND_KEY_NAME), () => openFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.
 		this.scheduleAction = this.addAction(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
 		this.syncButtons();
@@ -310,7 +310,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.contentEl.toggleClass('princelists-has-floating-add', showsFloating);
 		this.newItemAction?.toggle(isList && this.showsHeaderAdd());
 		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
-		this.syncArchivedButton();
+		this.syncFindButtons();
 	}
 
 	/** Follows a change to where the "+" buttons show: an empty list is drawn again, since its hint names them. */
@@ -332,11 +332,11 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		return showsOn(this.settings().headerAddButton, Platform.isMobile);
 	}
 
-	// The header's checkbox shows only on a list, and is lit while archived items show.
-	private syncArchivedButton(): void {
-		const button = this.archivedButton;
+	// The header's search icon shows only on a list. The toggle in Cmd+F's row is lit while archived items show.
+	private syncFindButtons(): void {
+		this.findAction?.toggle(isListText(this.text));
+		const button = this.filterField?.rowEl.querySelector<HTMLElement>(`.${ARCHIVED_TOGGLE_CLASS}`);
 		if (!button) return;
-		button.toggle(isListText(this.text));
 		button.toggleClass('princelists-archived-shown', this.showArchived);
 		button.setAttribute('aria-pressed', String(this.showArchived));
 		setTooltip(button, labelWithKey(this.showArchived ? 'Hide archived items' : 'Show archived items', ARCHIVED_KEY_NAME));
