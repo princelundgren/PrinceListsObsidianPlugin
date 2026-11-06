@@ -25,8 +25,9 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     findings only, no nits the linters catch, and the rule or design section each finding breaks.
     The owner revisits that after a few real reviews, so a review shouldn't ask to restore them.
   - Issues are 🔴 critical (fix before merge) or 🟡 suggestions, each with line references, the
-    problem, a suggested fix with code, and the reason. The summary adds one line on what's done
-    well **(owner, 2026-10-21)**.
+    problem, a suggested fix with code, and the reason. The summary adds what's done well and what
+    the review checked and found sound, and an empty 🔴 or 🟡 section reads only "None."
+    **(owner, 2026-11-06)**.
   - **A 🟡 names a change to make (owner, 2026-11-06):** to a line the pull request adds or changes,
     or to a doc the change makes untrue. A finding about code the change neither touches nor makes
     wrong, or one that only asks to check or confirm something, isn't posted: it leaves the author

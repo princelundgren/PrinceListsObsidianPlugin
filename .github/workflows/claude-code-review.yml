@@ -96,8 +96,9 @@ jobs:
                   # (https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files/review-code),
                   # CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Changed: it reads AGENTS.md
                   # first, reviews this pull request instead of selected code, adds drift from docs/, posts a
-                  # Suggestion only when it names a change, keeps Good Practices to one line, drops the
-                  # editor's focus input, and adds how to read and post.
+                  # Suggestion only when it names a change, leaves an empty section at "None." and puts
+                  # what it checked and found sound under Good Practices, drops the editor's focus
+                  # input, and adds how to read and post.
                   prompt: |
                       REPO: ${{ github.repository }}
                       PR NUMBER: ${{ github.event.pull_request.number }}
@@ -146,7 +147,7 @@ jobs:
 
                       **🔴 Critical Issues** - Must fix before merge
                       **🟡 Suggestions** - Changes that would improve this pull request
-                      **✅ Good Practices** - What's done well, in one line
+                      **✅ Good Practices** - What's done well, and what you checked and found sound
 
                       For each issue:
                       - Specific line references
@@ -155,6 +156,8 @@ jobs:
                       - Rationale for the change
 
                       Post a 🟡 only when it names a change to make: to a line this pull request adds or changes, or to a doc the change makes untrue. Leave out a finding about code the change neither touches nor makes wrong, and one that only asks to check or confirm something.
+
+                      A 🔴 or 🟡 section with nothing to post reads exactly "None.", with nothing after it. What you checked and found sound goes under ✅.
 
                       Be constructive and educational in your feedback.
 
