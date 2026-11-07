@@ -1,5 +1,6 @@
 import type { HistoryWrite } from '../core/history';
 import { closeCard, isNewEmptyItem } from './card';
+import { TAG_INPUT_CLASS } from './card-tags';
 import { targetOf } from './dom';
 import { stepField } from './field-undo';
 import type { PrinceListView } from './list-view';
@@ -30,11 +31,16 @@ function stepFieldAt(evt: KeyboardEvent, direction: 'undo' | 'redo'): boolean {
 }
 
 // A field keeps the browser's undo: the view's fields, and Obsidian's under the same scope, such as the pane's title.
+// An empty tag input has no typing to undo, so the key undoes the list's last edit, such as a tag it added.
 function isInField(evt: KeyboardEvent): boolean {
 	const target = targetOf(evt);
 	if (!target) return false;
-	if (target.instanceOf(HTMLInputElement)) return target.type !== 'checkbox';
+	if (target.instanceOf(HTMLInputElement)) return target.type !== 'checkbox' && !isEmptyTagInput(target);
 	return target.instanceOf(HTMLTextAreaElement) || target.isContentEditable;
+}
+
+function isEmptyTagInput(input: HTMLInputElement): boolean {
+	return input.hasClass(TAG_INPUT_CLASS) && input.value === '';
 }
 
 function writeStep(view: PrinceListView, step: (text: string) => HistoryWrite | null, notice: string): void {

@@ -8,6 +8,7 @@ import { parseItemLine } from '../core/item-line';
 import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
+import { buildCardTags, buildTagButton, closeTagInput, showCardTags } from './card-tags';
 import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
@@ -118,6 +119,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 		showDone(card.el, row);
 		showWhen(card, row.when);
 		showStar(card.el, row.starred);
+		showCardTags(card.el, row.tailTags);
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	const focused = card.el.doc.activeElement;
@@ -132,13 +134,15 @@ export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement)
 }
 
 // Everything after the title stays hidden while it is edited (spec, "Editing"), so leaving the field
-// shows the title as the line now reads.
+// shows the title as the line now reads, and a tag typed at its end with the card's other tags.
 export function cardTitleBlur(view: PrinceListView, field: HTMLTextAreaElement): void {
 	view.editing.blurTitle();
 	const card = view.card;
 	if (!card || card.lostAt !== null) return;
 	field.value = view.editing.selectedTitle();
 	fitHeight(field);
+	const row = rowAt(view, view.editing.selected);
+	if (row) showCardTags(card.el, row.tailTags);
 }
 
 // An outside change took the card's item. A card with focus stays until it loses it, so the field
@@ -170,6 +174,7 @@ function sayFieldLost(view: PrinceListView, typed: string, field: 'title' | 'not
 
 function endCard(view: PrinceListView, card: Card): void {
 	view.card = null;
+	closeTagInput(view);
 	view.editing.close();
 	card.editor?.destroy();
 	card.editor = null;
@@ -182,8 +187,10 @@ function createCardElement(): HTMLElement {
 	const body = el.createDiv({ cls: 'princelists-card-body' });
 	const head = body.createDiv({ cls: 'princelists-card-head' });
 	head.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
+	buildCardTags(body);
 	body.createDiv({ cls: CARD_NOTES_CLASS });
 	const tools = head.createDiv({ cls: 'princelists-card-tools' });
+	buildTagButton(tools);
 	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
 	buildWhenPicker(tools);
 	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
