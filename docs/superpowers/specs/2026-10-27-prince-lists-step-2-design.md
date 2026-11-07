@@ -141,7 +141,8 @@ this met on 2026-10-30 **(owner)**.
   (owner, 2026-11-06). The field's row ends with the
   show-archived toggle, which the icon replaced in the header (step one, "Done and archived").
 - **The field is Obsidian's own search field (owner, 2026-11-07),** whose clear button shows once
-  it holds text and empties it as deleting the text does, keeping focus in it.
+  it holds text and empties it as deleting the text does, keeping focus in it. Like Obsidian's own,
+  it shows a magnifying glass and reads "Search..." (owner, 2026-11-07).
 - **As you type, items the text doesn't find hide.** The match is fuzzy, with Obsidian's
   `prepareFuzzySearch` (owner, 2026-11-06): the text's letters in order, with gaps between them,
   so "mlk" finds "oat milk". A wrong or swapped letter finds nothing, and neither does another
@@ -181,8 +182,8 @@ this met on 2026-10-30 **(owner)**.
   goes after the visible row above it, as it does past hidden archived rows. A new item, or an item
   whose card is open, stays shown while its card is open even if it doesn't match.
 - **The Schedule filters too (owner, 2026-11-06).** Cmd+F while it has focus, or "Filter list"
-  while it's the active view, opens a field under its description, which reads "Find in
-  schedule". One command keeps one hotkey for both views. A filter icon at the right of its title,
+  while it's the active view, opens a field under its description, which reads "Search..."
+  as a list's does. One command keeps one hotkey for both views. A filter icon at the right of its title,
   "Filter schedule", opens and closes it too, since a sidebar hides a view's header
   **(owner, 2026-11-06)**; its row has no archived toggle, since the Schedule never shows archived
   items. It works as a list's field, and:

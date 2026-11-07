@@ -80,10 +80,10 @@ export function openFilter(view: FilterHost): void {
 }
 
 /** Obsidian's search field, whose clear button empties it as typing does, filtering `view` as it changes. */
-export function buildFilterField(view: FilterHost, parent: HTMLElement, placeholder: string): FilterField {
+export function buildFilterField(view: FilterHost, parent: HTMLElement): FilterField {
 	const rowEl = parent.createDiv({ cls: 'princelists-filter-row' });
 	const search = new SearchComponent(rowEl.createDiv({ cls: FILTER_CLASS }))
-		.setPlaceholder(placeholder)
+		.setPlaceholder('Search...')
 		.setValue(view.filter ?? '')
 		.onChange((value) => filterInput(view, value));
 	return { rowEl, inputEl: search.inputEl };
