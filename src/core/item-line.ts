@@ -66,20 +66,8 @@ export function parseItemLine(text: string): ItemLineParts | null {
 	const blockId = BLOCK_ID_PATTERN.exec(trimmed)?.[0] ?? '';
 	const body = trimmed.slice(0, trimmed.length - blockId.length);
 
-	// Whitespace between fields is skipped while matching, as Tasks does after each field.
-	let fieldsStart = body.length;
-	for (let matched = true; matched; ) {
-		const visible = body.slice(0, fieldsStart).trimEnd();
-		matched = false;
-		for (const pattern of TRAILING_FIELDS) {
-			const found = pattern.exec(visible);
-			if (found) {
-				fieldsStart = found.index;
-				matched = true;
-				break;
-			}
-		}
-	}
+	const peeled = peelFields(body);
+	const fieldsStart = peeled[peeled.length - 1]?.index ?? body.length;
 
 	let tailStart = fieldsStart;
 	while (tailStart > 0 && /\s/.test(body.charAt(tailStart - 1))) tailStart--;
@@ -93,6 +81,42 @@ export function parseItemLine(text: string): ItemLineParts | null {
 		marks,
 		tail: body.slice(tailStart) + blockId + trailing,
 	};
+}
+
+// Whitespace between fields is skipped while matching, as Tasks does after each field. The fields
+// come right to left, each from its match's start (a tag's includes the space before it) to its end.
+function peelFields(body: string): { index: number; end: number }[] {
+	const peeled: { index: number; end: number }[] = [];
+	let fieldsStart = body.length;
+	for (let matched = true; matched; ) {
+		const visible = body.slice(0, fieldsStart).trimEnd();
+		matched = false;
+		for (const pattern of TRAILING_FIELDS) {
+			const found = pattern.exec(visible);
+			if (found) {
+				peeled.push({ index: found.index, end: found.index + found[0].length });
+				fieldsStart = found.index;
+				matched = true;
+				break;
+			}
+		}
+	}
+	return peeled;
+}
+
+/** The tail's fields and tags, and the block ID and trailing whitespace after them. */
+export function splitTail(tail: string): { fields: string; end: string } {
+	const trimmed = tail.trimEnd();
+	const blockId = BLOCK_ID_PATTERN.exec(trimmed)?.[0] ?? '';
+	const fields = trimmed.slice(0, trimmed.length - blockId.length);
+	return { fields, end: tail.slice(fields.length) };
+}
+
+/** The spans of the fields `parseItemLine` peels off `fields`, left to right, without the whitespace between them. */
+export function tailFields(fields: string): { from: number; to: number }[] {
+	return peelFields(fields)
+		.map(({ index, end }) => ({ from: index + (/\s/.test(fields.charAt(index)) ? 1 : 0), to: end }))
+		.reverse();
 }
 
 export function joinItemLine(p: ItemLineParts): string {
