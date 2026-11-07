@@ -12,3 +12,10 @@ export function addWhen(rowEl: HTMLElement, day: string, today: string): void {
 export function fillWhen(el: HTMLElement, day: string, today: string): void {
 	el.setText(dayLabel(day, today, getLanguage()));
 }
+
+/** Adds a chip per tag in `tags`, as `#tag`, or nothing for no tags. A chip takes no listener: a click reaches the row's. */
+export function addTags(parent: HTMLElement, tags: readonly string[]): void {
+	if (tags.length === 0) return;
+	const strip = parent.createSpan({ cls: 'princelists-tags' });
+	for (const tag of tags) strip.createSpan({ cls: 'princelists-tag', text: `#${tag}` });
+}

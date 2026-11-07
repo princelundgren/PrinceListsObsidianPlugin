@@ -779,6 +779,33 @@ textarea.princelists-heading-field {
 	font-size: var(--font-ui-small);
 }
 
+/* A row's tags follow its title, which Obsidian's renderer draws, so they can't flow inside it. They
+   wrap among themselves when the line is full. */
+.princelists-tags {
+	flex: 0 1 auto;
+	align-self: baseline;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-1);
+	max-width: 100%;
+}
+
+.princelists-tag {
+	font-size: var(--tag-size);
+	font-weight: var(--tag-weight);
+	color: var(--tag-color);
+	background-color: var(--tag-background);
+	border: var(--tag-border-width) solid var(--tag-border-color);
+	padding: var(--tag-padding-y) var(--tag-padding-x);
+	border-radius: var(--tag-radius);
+	line-height: var(--line-height-tight);
+	overflow-wrap: break-word;
+}
+
+.princelists-item.is-done .princelists-tag {
+	color: var(--checklist-done-color);
+}
+
 .princelists-card-when {
 	display: flex;
 	align-items: center;
@@ -994,11 +1021,22 @@ button.princelists-collapse {
 }
 
 /* In a view or list block about as narrow as a sidebar, the star and the day move to the row's right
-   edge, so a title that wraps leaves no gap before them, and the days line up. */
+   edge, so a title that wraps leaves no gap before them, and the days line up. In a tagged row the
+   tags take that room instead of the title, so they follow the title as in a wider pane. */
 @container (max-width: 480px) {
 	.princelists-item > .princelists-item-title,
 	.princelists-item > .princelists-schedule-text,
 	.princelists-schedule-title-line > .princelists-item-title {
+		flex: 1 1 auto;
+	}
+
+	.princelists-item.is-tagged > .princelists-item-title,
+	.princelists-schedule-title-line.is-tagged > .princelists-item-title {
+		flex: 0 1 auto;
+	}
+
+	.princelists-item.is-tagged > .princelists-tags,
+	.princelists-schedule-title-line.is-tagged > .princelists-tags {
 		flex: 1 1 auto;
 	}
 }

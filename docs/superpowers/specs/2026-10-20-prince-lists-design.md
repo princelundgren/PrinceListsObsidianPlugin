@@ -550,7 +550,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   so no empty column makes them read as items (owner, 2026-11-06). In step two, an arrow in the
   checkboxes' column collapses a heading's section (step two's design, "Collapsing a heading").
 - **Items** show a checkbox and a title, one per line. In step two a row also shows its star and
-  its When.
+  its When, and a row shows its tags too (filtering by tag's design, "Rows").
 - **Item titles and headings are rendered as Markdown (owner, 2026-10-21),** with Obsidian's own
   rendering, as in any note: bold is bold, and links can be clicked. A click on a link in a row
   opens the link. It doesn't tick the item or open the card.
