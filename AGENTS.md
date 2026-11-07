@@ -17,12 +17,13 @@ this project.
   - [The design](docs/superpowers/specs/2026-10-20-prince-lists-design.md) says what the plugin does
     and why, and [step two's design](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md)
     adds what step two builds. [Notes in one editor](docs/superpowers/specs/2026-10-29-notes-in-one-editor-design.md)
-    replaced step two's block-at-a-time notes.
+    replaced step two's block-at-a-time notes. [Filtering by tag](docs/superpowers/specs/2026-11-07-tag-filter-design.md)
+    shows items' tags on rows and cards, and filters a list and the Schedule by them.
     - Decisions marked **(owner)** are the maintainer's. Don't change one without an issue the
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
   - The plans in `docs/superpowers/plans/` give the tasks, with exact interfaces and tests. The
-    latest one for the plugin is [notes in one editor](docs/superpowers/plans/2026-10-29-notes-in-one-editor.md),
+    latest one for the plugin is [filtering by tag](docs/superpowers/plans/2026-11-07-tag-filter.md),
     and [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
     README's and the listing's pictures. Implement a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.

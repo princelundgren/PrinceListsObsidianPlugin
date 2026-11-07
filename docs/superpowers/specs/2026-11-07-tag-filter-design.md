@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 tracking: ["#325"]
 ---
 
