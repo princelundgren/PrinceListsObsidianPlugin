@@ -61,11 +61,10 @@ export interface RowFilter {
 
 const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 
-// Every heading stays, even when all of its items are hidden, and so does content the plugin leaves
-// alone, except while a query or "Show starred only" filters the list: then only the items that match
-// show, and a heading only while one of its items does. A collapsed section shows only its heading,
-// unless the list is filtered. Archived is worked out from `now` on each redraw, never written
-// down (spec, "Done and archived").
+// Every heading stays, even when all of its items are hidden. Content the plugin leaves alone stays
+// too, except while a query or "Show starred only" filters the list: then only the items that match
+// show under the headings. A collapsed section shows only its heading, unless the list is filtered.
+// Archived is worked out from `now` on each redraw, never written down (spec, "Done and archived").
 export function visibleSections(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter): SectionRows[] {
 	const filtering = filter.find !== null || filter.starredOnly;
 	return model.sections.map(({ headingLine, items }, i) => {
@@ -80,7 +79,7 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 			return collapsed ? [] : [row];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
-		if (filtering) return { heading: shown.length > 0 ? heading : null, rows: shown, collapsed };
+		if (filtering) return { heading, rows: shown, collapsed };
 		if (collapsed) return { heading, rows: shown, collapsed };
 		for (const block of model.untouched) {
 			if (block.start < start || block.start >= end) continue;

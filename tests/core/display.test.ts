@@ -175,14 +175,14 @@ describe('visibleSections, filtered', () => {
 	test('keeps an item whose title or notes hold the query, ignoring case', () => {
 		expect(sectionsOf(text, now, false, 'MILK')).toEqual([
 			{ heading: null, rows: [row(2, 'Buy milk'), row(3, 'Bread')], collapsed: false },
-			{ heading: null, rows: [], collapsed: false },
-			{ heading: null, rows: [], collapsed: false },
+			{ heading: { line: 6, text: 'Garden' }, rows: [], collapsed: false },
+			{ heading: { line: 8, text: 'Old' }, rows: [], collapsed: false },
 		]);
 		expect(sectionsOf(text, now, false, '**bold**')[0]?.rows).toEqual([row(3, 'Bread')]);
 	});
 
-	test('shows a heading only while one of its items shows', () => {
-		expect(sectionsOf(text, now, false, 'rake').map((section) => section.heading?.text ?? null)).toEqual([null, 'Garden', null]);
+	test('shows every heading, with or without an item that matches', () => {
+		expect(sectionsOf(text, now, false, 'rake').map((section) => section.heading?.text ?? null)).toEqual([null, 'Garden', 'Old']);
 	});
 
 	test('hides content the plugin leaves alone while the query is not empty', () => {
@@ -192,7 +192,7 @@ describe('visibleSections, filtered', () => {
 	});
 
 	test('keeps a matching archived item hidden unless archived items are shown', () => {
-		expect(sectionsOf(text, now, false, 'jug')[2]).toEqual({ heading: null, rows: [], collapsed: false });
+		expect(sectionsOf(text, now, false, 'jug')[2]).toEqual({ heading: { line: 8, text: 'Old' }, rows: [], collapsed: false });
 		expect(sectionsOf(text, now, true, 'jug')[2]).toEqual({
 			heading: { line: 8, text: 'Old' },
 			rows: [row(9, 'milk jug', true, 'milk jug', true)],
@@ -202,7 +202,7 @@ describe('visibleSections, filtered', () => {
 
 	test('keeps the item on keepLine hidden while it is archived and archived items are hidden', () => {
 		expect(sectionsOf(text, now, false, '', 9)[2]).toEqual({ heading: { line: 8, text: 'Old' }, rows: [], collapsed: false });
-		expect(sectionsOf(text, now, false, 'rake', 9)[2]).toEqual({ heading: null, rows: [], collapsed: false });
+		expect(sectionsOf(text, now, false, 'rake', 9)[2]).toEqual({ heading: { line: 8, text: 'Old' }, rows: [], collapsed: false });
 	});
 
 	test('shows the item on keepLine without matching, and its heading', () => {
@@ -219,10 +219,10 @@ describe('visibleSections, starred only', () => {
 		return visibleSections(lines, model, now, { showArchived, starredOnly: true, archiveDelayMs: DAY, find: containing(query), keepLine, collapsed });
 	};
 
-	test('shows only starred items, and a heading only while one of its items shows', () => {
+	test('shows only starred items, and every heading', () => {
 		expect(starred()).toEqual([
 			{ heading: null, rows: [row(1, 'Buy milk', false, 'Buy milk', false, true)], collapsed: false },
-			{ heading: null, rows: [], collapsed: false },
+			{ heading: { line: 3, text: 'Garden' }, rows: [], collapsed: false },
 			{ heading: { line: 5, text: 'Old' }, rows: [row(7, 'Seeds', false, 'Seeds', false, true)], collapsed: false },
 		]);
 	});

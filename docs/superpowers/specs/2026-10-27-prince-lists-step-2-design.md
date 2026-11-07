@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-06
+verified: 2026-11-07
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -154,7 +154,8 @@ this met on 2026-10-30 **(owner)**.
   - **The view builds the matcher and passes it to core,** which has no Obsidian imports **(call)**.
   - **The list redraws once typing pauses for 100 ms,** not at every letter, and at once when the
     field is emptied **(call)**.
-- **A heading shows while one of its items shows (call).** Headings themselves aren't searched.
+- **Every heading shows while filtering (owner, 2026-11-07),** whether or not one of its items
+  matches, so the list keeps its shape. Headings themselves aren't searched.
 - **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and
   can't match.
 - **Archived items are searched only while "Show archived items" is on.**
@@ -162,14 +163,14 @@ this met on 2026-10-30 **(owner)**.
   in the Schedule. A star toggle in the field's row, before a list's archived toggle, turns it on
   and off, and so does an item of that name in the pane's menu: a list's ⋯ menu, beside "Show
   archived items", and the Schedule's, which in a sidebar opens from a right-click on its tab. It
-  filters as typed text does: a heading or group shows while one of its items shows, collapsed
-  ones included, and content the plugin leaves alone hides. With text in the field too, an item
-  shows only if it's starred and matches. The toggle is yellow and filled while it's on, as a
-  row's star is, and a press on it doesn't take focus from the field **(call)**. Its tooltip stays
-  "Show starred only", and it has no key **(call)**. It's on only while the field is open, so the
-  lit toggle always shows why items are hidden: the menu item opens the field when it's closed,
-  without focusing it **(call)**, and closing the field turns it off (owner, 2026-11-06). It
-  isn't remembered (owner, 2026-11-06).
+  filters as typed text does: every heading shows, a Schedule group shows while one of its items
+  shows, collapsed ones included, and content the plugin leaves alone hides. With text in the
+  field too, an item shows only if it's starred and matches. The toggle is yellow and filled
+  while it's on, as a row's star is, and a press on it doesn't take focus from the field
+  **(call)**. Its tooltip stays "Show starred only", and it has no key **(call)**. It's on only
+  while the field is open, so the lit toggle always shows why items are hidden: the menu item
+  opens the field when it's closed, without focusing it **(call)**, and closing the field turns it
+  off (owner, 2026-11-06). It isn't remembered (owner, 2026-11-06).
 - **Escape in the field ends the filter** and shows every row again, as the filter icon does.
 - **The field stays open when focus leaves it (owner, 2026-11-06),** empty or not, until Escape,
   the filter icon, or another note or the list closing ends it. Like "Show archived items", it
