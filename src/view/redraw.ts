@@ -4,7 +4,7 @@ import { hasNoItems } from './add-button';
 import { dismissCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
 import { buildListNote, buildListTitle, refreshListNote } from './fields';
-import { addArchivedToggle, addStarredToggle, buildFilterField } from './filter';
+import { addArchivedToggle, addStarredToggle, buildFilterField, NO_MATCH_CLASS, NO_MATCH_HINT } from './filter';
 import { ADD_KEY_NAME } from './keys';
 import type { PrinceListView } from './list-view';
 import { drawnRows, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
@@ -37,8 +37,10 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 			view.filterField = null;
 		} else if (kept && kept === view.filterField?.rowEl) {
 			slot = fresh.createDiv();
+		} else if (view.filterField) {
+			fresh.append(view.filterField.rowEl);
 		} else {
-			view.filterField = buildFilterField(fresh, view.filter, 'Find in list');
+			view.filterField = buildFilterField(view, fresh, 'Find in list');
 			addStarredToggle(view.filterField);
 			addArchivedToggle(view.filterField);
 		}
@@ -46,8 +48,10 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		if (card?.keeps) slot = card.el;
 		const field = placeField(view, kept);
 		if (field?.keeps) slot = field.el;
-		view.rowsHeldBack = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field, drawn);
+		const listDrawn = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field, drawn);
+		view.rowsHeldBack = listDrawn.heldBack;
 		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint(ADD_KEY_NAME, view.showsAddButton()) });
+		if (listDrawn.foundNothing) fresh.createDiv({ cls: NO_MATCH_CLASS, text: NO_MATCH_HINT });
 		// Room to scroll the last row clear of the floating "+".
 		fresh.createDiv({ cls: 'princelists-end' });
 	} else {

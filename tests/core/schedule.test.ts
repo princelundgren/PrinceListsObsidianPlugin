@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { datedItems, groupSchedule, matchesSchedule, scheduleGroup, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../../src/core/schedule';
+import { datedItems, groupSchedule, matchesSchedule, scheduleFindsNothing, scheduleGroup, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../../src/core/schedule';
 import type { Find } from '../../src/core/display';
 import { containing } from './edit-helpers';
 
@@ -188,5 +188,18 @@ describe('shownSchedule', () => {
 		expect(shown('', ['tomorrow'], true)).toEqual([['tomorrow', true, ['Call Bo']]]);
 		expect(shown('call', [], true)).toEqual([['tomorrow', false, ['Call Bo']]]);
 		expect(shown('shop', [], true)).toEqual([]);
+	});
+
+	test('finds nothing only while a filter is on and no item matches it', () => {
+		const findsNothing = (query: string, starredOnly = false) => {
+			const filter = { find: containing(query), starredOnly };
+			return scheduleFindsNothing(items, shownSchedule(items, '2026-10-27', filter, new Set()), filter);
+		};
+		expect(findsNothing('nothing like it')).toBe(true);
+		expect(findsNothing('shop', true)).toBe(true);
+		expect(findsNothing('call')).toBe(false);
+		expect(findsNothing('')).toBe(false);
+		const none = { find: containing('call'), starredOnly: false };
+		expect(scheduleFindsNothing([], [], none)).toBe(false);
 	});
 });

@@ -18,7 +18,7 @@ import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, keepOneLine, TITLE_CLASS } from './fields';
 import { notesText } from './editable-text';
-import { ARCHIVED_TOGGLE_CLASS, FILTER_TOGGLE_SELECTOR, filterInput, filterKeyDown, STARRED_TOGGLE_CLASS, toggleStarredOnly } from './filter';
+import { ARCHIVED_TOGGLE_CLASS, FILTER_TOGGLE_SELECTOR, filterKeyDown, STARRED_TOGGLE_CLASS, toggleStarredOnly } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { barActionAt, FORMAT_BAR_CLASS } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
@@ -198,10 +198,6 @@ function onBeforeInput(view: PrinceListView, evt: InputEvent): void {
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
 // among the view's own few textareas.
 function onInput(view: PrinceListView, evt: Event): void {
-	if (view.filterField && evt.target === view.filterField.inputEl) {
-		filterInput(view);
-		return;
-	}
 	const target = Array.from(view.contentEl.querySelectorAll('textarea')).find((field) => field === evt.target);
 	if (!target) return;
 	if (target.hasClass(CARD_TITLE_CLASS)) cardTitleInput(view, target);

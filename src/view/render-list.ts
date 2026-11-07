@@ -1,5 +1,5 @@
 import { Platform, type Component } from 'obsidian';
-import { visibleSections, withoutRange, type ItemRow, type RowFilter, type SectionRows } from '../core/display';
+import { findsNothing, visibleSections, withoutRange, type ItemRow, type RowFilter, type SectionRows } from '../core/display';
 import type { LineRange } from '../core/follow';
 import type { Line } from '../core/lines';
 import type { ListModel } from '../core/parse';
@@ -87,7 +87,7 @@ export interface FieldPlace {
 // true to its text between redraws (PrinceListView.applyOwnText). Rendered titles and headings record
 // their Component in `blocks`, keyed by their element. A row or heading in `drawn` that shows the same
 // moves here with its Component, and only its line changes. Rows inside `skip`, the list note being
-// typed, aren't drawn; the result says whether any were left out.
+// typed, aren't drawn.
 export function renderList(
 	view: PrinceListView,
 	el: HTMLElement,
@@ -98,7 +98,7 @@ export function renderList(
 	skip: LineRange | null,
 	field: FieldPlace | null,
 	drawn: DrawnRows,
-): boolean {
+): ListDrawn {
 	let placed = card === null;
 	let fieldPlaced = field === null;
 	let list: HTMLUListElement | null = null;
@@ -120,7 +120,8 @@ export function renderList(
 	};
 	const sourcePath = view.sourcePath;
 	const today = dayOf(new Date());
-	const sections = visibleSections(lines, model, new Date(), rowFilter(view, view.selected));
+	const filter = rowFilter(view, view.selected);
+	const sections = visibleSections(lines, model, new Date(), filter);
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {
 		if (section.heading) {
@@ -156,7 +157,15 @@ export function renderList(
 	}
 	if (!placed && card) items().append(card.el);
 	if (!fieldPlaced && field) el.append(field.el);
-	return drawnCount(shown) < drawnCount(sections);
+	return { heldBack: drawnCount(shown) < drawnCount(sections), foundNothing: findsNothing(model, filter, sections) };
+}
+
+/** What renderList drew. */
+export interface ListDrawn {
+	/** Rows inside `skip` were left out. */
+	heldBack: boolean;
+	/** A filter is on and no item matches it. */
+	foundNothing: boolean;
 }
 
 // What hides rows in the view: archived items, Cmd+F's query, "Show starred only" and collapsed

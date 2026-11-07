@@ -1037,6 +1037,13 @@ button.princelists-collapse {
 	overflow-wrap: break-word;
 }
 
+/* In the rows' own flow, so the rows above it don't move as it comes and goes. */
+.princelists-no-match {
+	padding-block: var(--size-4-12);
+	text-align: center;
+	color: var(--text-faint);
+}
+
 .princelists-schedule-empty {
 	color: var(--text-faint);
 }
