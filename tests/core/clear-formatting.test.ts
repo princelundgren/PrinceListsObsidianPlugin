@@ -137,4 +137,8 @@ describe('formatSelection: clear formatting', () => {
 	test('reads each line in its block, so a fenced code block keeps its markers', () => {
 		expect(clear('```\n‸**a**‸\n```')).toBe('```\n‸**a**‸\n```');
 	});
+
+	test('keeps an emoji tag whole', () => {
+		expect(clear('‸*a* #❄️-_x_‸')).toBe('‸a #❄️-_x_‸');
+	});
 });
