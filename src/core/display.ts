@@ -2,9 +2,11 @@ import { isArchived } from './archive';
 import { splitAtx } from './edit-headings';
 import { getItemNotes } from './edit-items';
 import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
+import { itemTags } from './item-tags';
 import type { Line } from './lines';
 import type { ItemBlock, ListModel } from './parse';
 import { splitStar } from './star';
+import { carriesTags, stripTags } from './tags';
 import { whenOf } from './when';
 
 export interface ItemRow {
@@ -19,6 +21,10 @@ export interface ItemRow {
 	starred: boolean;
 	/** The item's When, `YYYY-MM-DD`, or null. */
 	when: string | null;
+	/** The item's tags without their `#`: the title's, then the tail's. */
+	tags: string[];
+	/** The tail's tags, which the card shows apart from the title. */
+	tailTags: string[];
 }
 
 /** A block the plugin leaves alone, such as a paragraph, table or code block, as its raw lines. */
@@ -53,6 +59,8 @@ export interface RowFilter {
 	archiveDelayMs: number;
 	/** What Cmd+F's field finds, or null while it holds nothing. */
 	find: Find | null;
+	/** The lit tags: an item shows only if it carries every one. */
+	tags: readonly string[];
 	/** The open card's item, which shows whether or not it matches or its section is collapsed. */
 	keepLine: number | null;
 	/** The heading lines whose sections show only the heading while nothing filters the list. */
@@ -62,8 +70,9 @@ export interface RowFilter {
 const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 
 // Every heading stays, even when all of its items are hidden. Content the plugin leaves alone stays
-// too, except while a query or "Show starred only" filters the list: then only the items that match
-// show under the headings. A collapsed section shows only its heading, unless the list is filtered.
+// too, except while a query, "Show starred only" or a lit tag filters the list: then only the items
+// that match show under the headings. A collapsed section shows only its heading, unless the list
+// is filtered.
 // Archived is worked out from `now` on each redraw, never written down (spec, "Done and archived").
 export function visibleSections(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter): SectionRows[] {
 	const filtering = isFiltered(filter);
@@ -75,7 +84,7 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, filter.archiveDelayMs);
 			if (!isShown(row, filter.showArchived)) return [];
 			if (item.titleLine === filter.keepLine) return [row];
-			if (filtering) return (!filter.starredOnly || row.starred) && itemMatches(lines, item, row, filter.find) ? [row] : [];
+			if (filtering) return (!filter.starredOnly || row.starred) && carriesTags(row.tags, filter.tags) && itemMatches(lines, item, row, filter.find) ? [row] : [];
 			return collapsed ? [] : [row];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
@@ -96,9 +105,27 @@ export function findsNothing(model: ListModel, filter: RowFilter, sections: read
 	return isFiltered(filter) && hasItems && sections.every(({ rows }) => rows.length === 0);
 }
 
-/** Whether a query or "Show starred only" filters what shows. */
-export function isFiltered(filter: { find: Find | null; starredOnly: boolean }): boolean {
-	return filter.find !== null || filter.starredOnly;
+/** Whether a query, "Show starred only" or a lit tag filters what shows. */
+export function isFiltered(filter: { find: Find | null; starredOnly: boolean; tags: readonly string[] }): boolean {
+	return filter.find !== null || filter.starredOnly || filter.tags.length > 0;
+}
+
+/**
+ * The tags the strip offers for a list: those of every item shown (archived ones only while
+ * `shown.showArchived`), in file order, and the lit ones, whether or not an item carries them.
+ */
+export function listStripTags(
+	lines: readonly Line[],
+	model: ListModel,
+	now: Date,
+	shown: { showArchived: boolean; archiveDelayMs: number },
+	lit: readonly string[],
+): string[] {
+	const carried = model.sections.flatMap(({ items }) => items).flatMap((item) => {
+		const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, shown.archiveDelayMs);
+		return isShown(row, shown.showArchived) ? [row.tags] : [];
+	});
+	return stripTags(carried, lit);
 }
 
 /** Whether visibleSections draws the item on `titleLine` as a row. */
@@ -145,7 +172,8 @@ export function timelessItemRow(text: string, titleLine: number): Omit<ItemRow, 
 	const parts = parseItemLine(text) as ItemLineParts;
 	const { plain, star } = splitStar(parts.title);
 	const label = plain === '' ? (parts.marks + parts.tail).trim() : plain;
-	return { kind: 'item', titleLine, title: plain, label, done: isDoneStatus(parts.status), starred: star !== '', when: whenOf(text) };
+	const { tags, tailTags } = itemTags(text);
+	return { kind: 'item', titleLine, title: plain, label, done: isDoneStatus(parts.status), starred: star !== '', when: whenOf(text), tags, tailTags };
 }
 
 function firstLine(row: ListRow): number {

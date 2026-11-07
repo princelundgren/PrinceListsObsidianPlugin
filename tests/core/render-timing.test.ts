@@ -1,18 +1,20 @@
 import { expect, test } from 'vitest';
-import { visibleSections } from '../../src/core/display';
+import { listStripTags, visibleSections } from '../../src/core/display';
 import { ListEditing } from '../../src/core/editing';
 import { needsMarkdown } from '../../src/core/inline';
 import { splitLines } from '../../src/core/lines';
 import { parseList } from '../../src/core/parse';
 import { contentStartOf } from './edit-helpers';
 
-// 500 items under 5 headings, every third with a note, and every tenth title with Markdown in it.
+// 500 items under 5 headings, every third with a note, every tenth title with Markdown and a tag in it,
+// and every seventh with a tag in its tail.
 let text = '---\nprincelists: true\n---\nA note\n\n';
 for (let h = 0; h < 5; h++) {
 	text += `## Section ${h}\n`;
 	for (let i = 0; i < 100; i++) {
-		const title = i % 10 === 0 ? `**item ${i}** [[Link ${i}]]` : `item ${i}`;
-		text += `- [ ] ${title} 📅 2026-10-30\n` + (i % 3 === 0 ? '\n\tA note.\n' : '');
+		const title = i % 10 === 0 ? `**item ${i}** [[Link ${i}]] #title` : `item ${i}`;
+		const tag = i % 7 === 0 ? ' #tail' : '';
+		text += `- [ ] ${title}${tag} 📅 2026-10-30\n` + (i % 3 === 0 ? '\n\tA note.\n' : '');
 	}
 }
 
@@ -28,16 +30,22 @@ function fastest(run: () => void): number {
 	return ms;
 }
 
-// The core's part of a redraw: one parse, the visible rows, and which titles and headings need
-// Obsidian's renderer. What the renderer itself costs can only be seen in Obsidian (manual check 11).
+// The core's part of a redraw: one parse, the visible rows, the strip's tags, and which titles and
+// headings need Obsidian's renderer. What the renderer itself costs can only be seen in Obsidian
+// (manual check 11).
 test("the core's part of a redraw of 500 items takes under 50 ms, and 50 of the 505 titles and headings need the renderer", () => {
 	let rendered = 0;
+	let strip: string[] = [];
 	const ms = fastest(() => {
 		const lines = splitLines(text);
-		const sections = visibleSections(lines, parseList(lines, 3), new Date(2026, 9, 21), { showArchived: false, starredOnly: false, archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() });
+		const model = parseList(lines, 3);
+		const now = new Date(2026, 9, 21);
+		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, tags: [], archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() });
+		strip = listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: 86_400_000 }, []);
 		rendered = sections.flatMap((s) => [s.heading?.text ?? '', ...s.rows.map((r) => (r.kind === 'item' ? r.title : ''))]).filter(needsMarkdown).length;
 	});
 	expect(rendered).toBe(50);
+	expect(strip).toEqual(['tail', 'title']);
 	expect(ms).toBeLessThan(50);
 });
 

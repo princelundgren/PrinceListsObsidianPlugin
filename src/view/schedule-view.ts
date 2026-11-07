@@ -276,7 +276,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const now = new Date();
 		const today = dayOf(now);
 		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
-		const filter = { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly };
+		const filter = { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly, tags: [] };
 		const groups = shownSchedule(dated, today, filter, this.collapsed);
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
