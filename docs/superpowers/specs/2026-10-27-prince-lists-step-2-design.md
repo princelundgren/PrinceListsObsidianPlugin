@@ -188,8 +188,11 @@ this met on 2026-10-30 **(owner)**.
     the When, so typing a list's name shows its dated items.
   - **A group shows while one of its items shows, collapsed ones too (owner, 2026-11-06),** and a
     collapsed group is collapsed again when the filter ends, as a list's sections are.
-  - **With no match, nothing shows under the field (call),** as in a list; the message for a
-    Schedule with no dated items would be wrong.
+- **With no match, "No items match" shows (owner, 2026-11-07),** centered across the pane, below
+  a list's headings or in the Schedule in place of its groups. It sits in the rows' own flow
+  rather than centered in the space left, so nothing above it moves as it comes and goes
+  **(call)**. A list with no items keeps its own hint, and a Schedule with no dated items its own
+  message.
 
 ### A list inside another note (owner)
 

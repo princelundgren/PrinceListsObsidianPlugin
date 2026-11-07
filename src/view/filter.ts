@@ -24,6 +24,10 @@ export interface FilterField {
 	inputEl: HTMLInputElement;
 }
 
+/** What a list or the Schedule shows while a filter is on and no item matches it. */
+export const NO_MATCH_HINT = 'No items match';
+export const NO_MATCH_CLASS = 'princelists-no-match';
+
 /** How long typing in Cmd+F's field pauses before the rows are drawn again. */
 export const FILTER_PAUSE_MS = 100;
 

@@ -6,7 +6,7 @@ import { labelWithKey } from '../core/key-name';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
-import { datedItems, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
+import { datedItems, scheduleFindsNothing, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
@@ -14,7 +14,7 @@ import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
+import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, NO_MATCH_CLASS, NO_MATCH_HINT, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { FIND_KEY_NAME } from './keys';
 import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
@@ -276,7 +276,8 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const now = new Date();
 		const today = dayOf(now);
 		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
-		const groups = shownSchedule(dated, today, { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly }, this.collapsed);
+		const filter = { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly };
+		const groups = shownSchedule(dated, today, filter, this.collapsed);
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
 		const drawn = JSON.stringify([today, dated.length === 0, shown]);
@@ -286,6 +287,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.removeBlocks();
 		this.groupsEl.empty();
 		if (dated.length === 0) this.groupsEl.createDiv({ cls: 'princelists-schedule-empty', text: "No items have a date. Pick a day with the calendar icon on an item's card." });
+		if (scheduleFindsNothing(dated, groups, filter)) this.groupsEl.createDiv({ cls: NO_MATCH_CLASS, text: NO_MATCH_HINT });
 		for (const { group, collapsed, items } of groups) {
 			const heading = this.groupsEl.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
 			this.headings.set(heading, group);

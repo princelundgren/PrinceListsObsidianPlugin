@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { headingText, isItemVisible, itemRow, visibleSections } from '../../src/core/display';
+import { findsNothing, headingText, isItemVisible, itemRow, visibleSections, type RowFilter } from '../../src/core/display';
 import { tickLine } from '../../src/core/item-line';
 import { containing, list, readFixture } from './edit-helpers';
 
@@ -284,6 +284,33 @@ describe('visibleSections, collapsed', () => {
 
 	test("the open card's item shows in a collapsed section", () => {
 		expect(sectionsOf(text, now, false, '', 5, collapsed)[1]?.rows).toEqual([row(5, 'b')]);
+	});
+});
+
+describe('findsNothing', () => {
+	const now = new Date(2026, 9, 21, 12, 0);
+	const text = 'Intro\n## Garden\n- [ ] Rake\n';
+	const filter = (query: string, starredOnly = false): RowFilter => ({ showArchived: false, starredOnly, archiveDelayMs: DAY, find: containing(query), keepLine: null, collapsed: new Set() });
+	const nothing = (listText: string, rowFilter: RowFilter) => {
+		const { lines, model } = list(listText);
+		return findsNothing(model, rowFilter, visibleSections(lines, model, now, rowFilter));
+	};
+
+	test('is true while a query matches no item', () => {
+		expect(nothing(text, filter('milk'))).toBe(true);
+		expect(nothing(text, filter('rake'))).toBe(false);
+	});
+
+	test('is true while "Show starred only" finds no starred item', () => {
+		expect(nothing(text, filter('', true))).toBe(true);
+	});
+
+	test('is false while nothing filters the list', () => {
+		expect(nothing(text, filter(''))).toBe(false);
+	});
+
+	test('is false for a list with no items, which shows its own hint', () => {
+		expect(nothing('Intro\n## Garden\n', filter('milk'))).toBe(false);
 	});
 });
 

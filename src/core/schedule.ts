@@ -1,5 +1,5 @@
 import { isArchived } from './archive';
-import { timelessItemRow, whenMatches, type Find } from './display';
+import { isFiltered, timelessItemRow, whenMatches, type Find } from './display';
 import { getItemNotes } from './edit-items';
 import { splitLines } from './lines';
 import { parseList } from './parse';
@@ -79,13 +79,18 @@ export interface ShownGroup {
 	items: ScheduledItem[];
 }
 
+/** Whether a filter is on and `groups`, shownSchedule's of `items` for `filter`, hold none of them. */
+export function scheduleFindsNothing(items: readonly ScheduledItem[], groups: readonly ShownGroup[], filter: ScheduleFilter): boolean {
+	return isFiltered(filter) && items.length > 0 && groups.every((group) => group.items.length === 0);
+}
+
 /**
  * The Schedule's groups as drawn: only the items `filter` matches, and a group only while one does. A
  * collapsed group has no items under it, unless a query or "Show starred only" filters the Schedule.
  */
 export function shownSchedule(items: readonly ScheduledItem[], today: string, filter: ScheduleFilter, collapsed: ReadonlySet<ScheduleGroup>): ShownGroup[] {
 	const { find, starredOnly } = filter;
-	const filtering = find !== null || starredOnly;
+	const filtering = isFiltered(filter);
 	return groupSchedule(
 		items.filter((item) => (!starredOnly || item.starred) && (find === null || matchesSchedule(item, find))),
 		today,
