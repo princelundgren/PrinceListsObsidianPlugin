@@ -171,7 +171,7 @@ export interface ListDrawn {
 // What hides rows in the view: archived items, Cmd+F's query, "Show starred only", lit tags and
 // collapsed headings, with the item on `keepLine` shown regardless of all but the first.
 export function rowFilter(view: PrinceListView, keepLine: number | null): RowFilter {
-	return { showArchived: view.showArchived, starredOnly: view.starredOnly, tags: [], archiveDelayMs: view.archiveDelay.ms, find: findOf(view.filter ?? ''), keepLine, collapsed: view.collapsed.lines() };
+	return { showArchived: view.showArchived, starredOnly: view.starredOnly, tags: view.litTags, archiveDelayMs: view.archiveDelay.ms, find: findOf(view.filter ?? ''), keepLine, collapsed: view.collapsed.lines() };
 }
 
 export function buildHeading(

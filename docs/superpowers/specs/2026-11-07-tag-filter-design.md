@@ -113,6 +113,8 @@ nothing is written in the background, and only documented Obsidian APIs are used
   list then looks as it does today until the filter icon, Cmd+F or "Filter list" opens it.
 - **A change shows at once** in open lists and the Schedule, and a stored value that isn't one of
   the two reads as "Always" **(call)**.
+- **A change that hides the strip turns lit tags off (call),** such as "While filtering" with the
+  field closed, so no hidden tag filters the rows.
 
 ## Rows
 

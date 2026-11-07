@@ -32,6 +32,7 @@ import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS, TICK_SELECTOR } from './render-list';
+import { stripClick } from './tag-strip';
 import { showTextMenu } from './text-menu';
 import { queueTick } from './tick';
 
@@ -88,6 +89,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		toggleStarredOnly(view);
 		return;
 	}
+	if (stripClick(view, target)) return;
 	if (handleLinkClick(view.app, view.sourcePath, evt, target)) return;
 	if (target.instanceOf(HTMLInputElement) && target.hasClass(WHEN_INPUT_CLASS)) {
 		whenClick(target);

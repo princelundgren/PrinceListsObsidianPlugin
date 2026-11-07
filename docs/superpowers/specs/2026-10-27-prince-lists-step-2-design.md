@@ -135,7 +135,9 @@ this met on 2026-10-30 **(owner)**.
 - **A filter icon opens and closes it (owner, 2026-11-06),** on desktop and mobile: a `list-filter`
   view action in a list's header named "Filter list", with its key on desktop as "New item" has,
   shown only on a list. A magnifier was tried first and looked too much like Obsidian's own search.
-  A press while the field is open closes it and shows every row, as Escape does. While it's open
+  A press while the field is open closes it, as Escape does, which shows every row once no tag is
+  lit, or with "Tag strip" set to "While filtering"
+  ([filtering by tag](2026-11-07-tag-filter-design.md), "Filtering"). While it's open
   the icon is pressed, in the active icon color on desktop; on mobile Obsidian gives a header's
   icons one color, as its own bookmark icon shows, so the open field shows it there
   (owner, 2026-11-06). The field's row ends with the
@@ -174,7 +176,8 @@ this met on 2026-10-30 **(owner)**.
   while the field is open, so the lit toggle always shows why items are hidden: the menu item
   opens the field when it's closed, without focusing it **(call)**, and closing the field turns it
   off (owner, 2026-11-06). It isn't remembered (owner, 2026-11-06).
-- **Escape in the field ends the filter** and shows every row again, as the filter icon does.
+- **Escape in the field ends the filter,** as the filter icon does, and shows every row again once
+  no tag is lit, or with "Tag strip" set to "While filtering".
 - **The field stays open when focus leaves it (owner, 2026-11-06),** empty or not, until Escape,
   the filter icon, or another note or the list closing ends it. Like "Show archived items", it
   isn't remembered **(call)**.
@@ -586,7 +589,8 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the two "+" buttons', below.
+the plugin as it was before the page existed, except the two "+" buttons', below, and "Tag
+strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"

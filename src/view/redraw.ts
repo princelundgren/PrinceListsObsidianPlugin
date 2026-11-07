@@ -1,3 +1,4 @@
+import { listStripTags } from '../core/display';
 import { emptyHint } from '../core/empty-hint';
 import { isListText } from '../obsidian/marker';
 import { hasNoItems } from './add-button';
@@ -8,6 +9,7 @@ import { addArchivedToggle, addStarredToggle, buildFilterField, NO_MATCH_CLASS, 
 import { ADD_KEY_NAME } from './keys';
 import type { PrinceListView } from './list-view';
 import { drawnRows, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
+import { buildTagStrip, showsTagStrip } from './tag-strip';
 
 // Draws everything again from the view's text, except the title, list note, card or heading field that
 // holds focus, or is about to (`focusing`): those stay in place and update after blur. The list note,
@@ -44,6 +46,10 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 			addStarredToggle(view.filterField);
 			addArchivedToggle(view.filterField);
 		}
+		if (showsTagStrip(view)) {
+			const shown = { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms };
+			buildTagStrip(fresh, listStripTags(lines, model, new Date(), shown, view.litTags), view.litTags);
+		}
 		const card = placeCard(view, kept);
 		if (card?.keeps) slot = card.el;
 		const field = placeField(view, kept);
@@ -62,6 +68,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		view.listNoteEl = null;
 		view.filter = null;
 		view.starredOnly = false;
+		view.litTags = [];
 		view.filterField = null;
 		view.rowsHeldBack = false;
 		fresh.createEl('p', { text: "This note isn't a list" });

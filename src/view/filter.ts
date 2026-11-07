@@ -1,5 +1,7 @@
 import { prepareFuzzySearch, SearchComponent, setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
 import type { Find } from '../core/display';
+import type { TagStripMode } from '../core/tag-strip-mode';
+import { CLEAR_TAGS_CLASS, STRIP_TAG_CLASS } from './tag-strip';
 
 export const FILTER_CLASS = 'princelists-filter';
 
@@ -13,10 +15,11 @@ export const ARCHIVED_TOGGLE_CLASS = 'princelists-archived-toggle';
 export const STARRED_TOGGLE_CLASS = 'princelists-starred-toggle';
 
 /**
- * The toggles in the field's row. A press on one mustn't take focus from the field, which would put
- * a phone's keyboard away, so a view prevents the default of a mousedown on them.
+ * The toggles in the field's row and the tag strip's buttons. A press on one mustn't take focus from
+ * the field, which would put a phone's keyboard away, so a view prevents the default of a mousedown
+ * on them.
  */
-export const FILTER_TOGGLE_SELECTOR = `.${STARRED_TOGGLE_CLASS}, .${ARCHIVED_TOGGLE_CLASS}`;
+export const FILTER_TOGGLE_SELECTOR = `.${STARRED_TOGGLE_CLASS}, .${ARCHIVED_TOGGLE_CLASS}, .${STRIP_TAG_CLASS}, .${CLEAR_TAGS_CLASS}`;
 
 /** Cmd+F's field, in a row with its starred toggle, and in a list its archived toggle. */
 export interface FilterField {
@@ -38,8 +41,14 @@ export interface FilterHost {
 	filterField: FilterField | null;
 	/** "Show starred only": on only while the field is open, so its star toggle always shows it. */
 	starredOnly: boolean;
+	/** The tags lit in the tag strip: only items carrying every one show. */
+	litTags: string[];
 	readonly app: App;
 	readonly leaf: WorkspaceLeaf;
+	/** The view's own element, which holds the field, the tag strip and the rows. */
+	readonly contentEl: HTMLElement;
+	/** Whether the tag strip shows always, or only while the field is open. */
+	tagStripMode(): TagStripMode;
 	/** Draws the view again, with the field while `filter` isn't null. */
 	render(): void;
 	/** `render`, once typing pauses for FILTER_PAUSE_MS. */
@@ -121,7 +130,10 @@ export function addArchivedToggle(field: FilterField): void {
 	setIcon(field.rowEl.createEl('button', { cls: ARCHIVED_TOGGLE_CLASS }), 'square-check-big');
 }
 
-/** The filter icon's press: opens the field, or closes it and shows every row again. */
+/**
+ * The filter icon's press: opens the field, or closes it, which shows every row again unless the
+ * strip shows always and a tag in it is lit.
+ */
 export function toggleFilter(view: FilterHost): void {
 	if (view.filter === null) openFilter(view);
 	else closeFilter(view);
@@ -157,6 +169,7 @@ export function removeFilterField(view: FilterHost): void {
 function closeFilter(view: FilterHost): void {
 	view.filter = null;
 	view.starredOnly = false;
+	if (view.tagStripMode() === 'filtering') view.litTags = [];
 	view.filterClosed?.();
 	view.render();
 }
