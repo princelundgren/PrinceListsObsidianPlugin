@@ -756,10 +756,10 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 	margin-block: calc((var(--line-height-normal) * 1em - var(--input-height)) / 2);
 }
 
-/* A day's text gets the room on each side that a small icon has in its box, so the gaps between the
+/* A day's text gets the room on each side that an icon has in its box, so the gaps between the
    card's tools match. */
 .princelists-is-mobile .princelists-when-button.is-dated {
-	padding-inline: calc((var(--input-height) - var(--princelists-mark-size, var(--icon-size))) / 2);
+	padding-inline: calc((var(--input-height) - var(--icon-size)) / 2);
 }
 
 /* Rename heading's field reads as the heading it edits. */
@@ -994,9 +994,9 @@ button.princelists-card-star.is-starred svg {
 		top: var(--princelists-mark-drop);
 	}
 
-	/* The open card's tag, star, day and ⋯ are buttons of one size, centered on one line. The tag,
-	   the star, and the calendar when there is no day, are as small as the row's star, centered in
-	   that box. */
+	/* The open card's tag, star, day and ⋯ are buttons of one size, centered on one line. Except on
+	   a phone, the tag, the star, and the calendar when there is no day, are as small as the row's
+	   star, centered in that box. */
 	button.princelists-card-tag-button,
 	button.princelists-card-star,
 	.princelists-when-button {
@@ -1008,6 +1008,12 @@ button.princelists-card-star.is-starred svg {
 	.princelists-when-button > svg {
 		--icon-size: var(--princelists-mark-size);
 		margin: calc((var(--princelists-icon-slot) - var(--icon-size)) / 2);
+	}
+
+	.princelists-is-mobile button.princelists-card-tag-button > svg,
+	.princelists-is-mobile button.princelists-card-star > svg,
+	.princelists-is-mobile .princelists-when-button > svg {
+		--icon-size: var(--princelists-icon-slot);
 	}
 
 	/* A day's button holds only its text, and is as tall as the ⋯. */
