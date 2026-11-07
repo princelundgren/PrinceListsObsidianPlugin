@@ -162,6 +162,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.showArchived = false;
 		this.starredOnly = false;
 		this.filter = null;
+		this.filterField = null;
 		this.collapsed.clear();
 		this.outsideChanges++;
 		// Nothing of the old file stays, not even a field with focus, which render() would keep.

@@ -264,7 +264,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.redrawFiltered.cancel();
 		if (this.filter === null) removeFilterField(this);
 		else if (!this.filterField) {
-			this.filterField = buildFilterField(this.filterSlotEl, this.filter, 'Find in schedule');
+			this.filterField = buildFilterField(this, this.filterSlotEl, 'Find in schedule');
 			addStarredToggle(this.filterField);
 		}
 		syncFilterButton(this.findButton, this);

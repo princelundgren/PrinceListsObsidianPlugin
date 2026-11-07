@@ -37,8 +37,10 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 			view.filterField = null;
 		} else if (kept && kept === view.filterField?.rowEl) {
 			slot = fresh.createDiv();
+		} else if (view.filterField) {
+			fresh.append(view.filterField.rowEl);
 		} else {
-			view.filterField = buildFilterField(fresh, view.filter, 'Find in list');
+			view.filterField = buildFilterField(view, fresh, 'Find in list');
 			addStarredToggle(view.filterField);
 			addArchivedToggle(view.filterField);
 		}

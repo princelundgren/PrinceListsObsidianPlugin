@@ -140,6 +140,8 @@ this met on 2026-10-30 **(owner)**.
   icons one color, as its own bookmark icon shows, so the open field shows it there
   (owner, 2026-11-06). The field's row ends with the
   show-archived toggle, which the icon replaced in the header (step one, "Done and archived").
+- **The field is Obsidian's own search field (owner, 2026-11-07),** whose clear button shows once
+  it holds text and empties it as deleting the text does, keeping focus in it.
 - **As you type, items the text doesn't find hide.** The match is fuzzy, with Obsidian's
   `prepareFuzzySearch` (owner, 2026-11-06): the text's letters in order, with gaps between them,
   so "mlk" finds "oat milk". A wrong or swapped letter finds nothing, and neither does another

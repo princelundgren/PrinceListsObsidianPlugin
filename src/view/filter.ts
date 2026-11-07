@@ -1,4 +1,4 @@
-import { prepareFuzzySearch, setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
+import { prepareFuzzySearch, SearchComponent, setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
 import type { Find } from '../core/display';
 
 export const FILTER_CLASS = 'princelists-filter';
@@ -79,15 +79,14 @@ export function openFilter(view: FilterHost): void {
 	view.filterField?.inputEl.select();
 }
 
-export function buildFilterField(parent: HTMLElement, query: string, placeholder: string): FilterField {
+/** Obsidian's search field, whose clear button empties it as typing does, filtering `view` as it changes. */
+export function buildFilterField(view: FilterHost, parent: HTMLElement, placeholder: string): FilterField {
 	const rowEl = parent.createDiv({ cls: 'princelists-filter-row' });
-	const inputEl = rowEl.createEl('input', {
-		cls: FILTER_CLASS,
-		type: 'search',
-		value: query,
-		attr: { placeholder },
-	});
-	return { rowEl, inputEl };
+	const search = new SearchComponent(rowEl.createDiv({ cls: FILTER_CLASS }))
+		.setPlaceholder(placeholder)
+		.setValue(view.filter ?? '')
+		.onChange((value) => filterInput(view, value));
+	return { rowEl, inputEl: search.inputEl };
 }
 
 export function addStarredToggle(field: FilterField): void {
@@ -128,19 +127,15 @@ export function toggleFilter(view: FilterHost): void {
 	else closeFilter(view);
 }
 
-/** Listens on `el`, the view's own element, for typing and Escape in the field. */
+/** Listens on `el`, the view's own element, for Escape in the field. */
 export function registerFilterEvents(view: FilterHost & Component, el: HTMLElement): void {
-	const isField = (evt: Event): boolean => evt.target === view.filterField?.inputEl;
-	view.registerDomEvent(el, 'input', (evt) => {
-		if (isField(evt)) filterInput(view);
-	});
 	view.registerDomEvent(el, 'keydown', (evt) => {
-		if (isField(evt) && !evt.isComposing) filterKeyDown(view, evt);
+		if (evt.target === view.filterField?.inputEl && !evt.isComposing) filterKeyDown(view, evt);
 	});
 }
 
-export function filterInput(view: FilterHost): void {
-	view.filter = view.filterField?.inputEl.value ?? '';
+function filterInput(view: FilterHost, value: string): void {
+	view.filter = value;
 	if (view.filter === '') view.render();
 	else view.redrawFiltered();
 }
