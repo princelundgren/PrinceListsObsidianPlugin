@@ -3,6 +3,7 @@ import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '
 import { archiveDelayHoursOf, archiveDelayMs } from './core/archive';
 import { buttonPlatformsOf } from './core/button-platforms';
 import { serialQueue } from './core/queue';
+import { tagStripModeOf } from './core/tag-strip-mode';
 import { ArchiveDelay } from './obsidian/archive-delay';
 import { createList, openNewList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
@@ -15,6 +16,7 @@ import { openFilter } from './view/filter';
 import { ListBlock } from './view/list-block';
 import { PrinceListView } from './view/list-view';
 import { ScheduleView } from './view/schedule-view';
+import { followTagStripMode } from './view/tag-strip';
 
 export default class PrinceListsPlugin extends Plugin {
 	settings: PrinceListsSettings = { ...DEFAULT_SETTINGS };
@@ -29,7 +31,7 @@ export default class PrinceListsPlugin extends Plugin {
 		await this.loadSettings();
 		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, this.archiveDelay, () => this.settings));
-		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf, this.archiveDelay));
+		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf, this.archiveDelay, () => this.settings.tagStrip));
 		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) =>
 			ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath, this.archiveDelay)),
 		);
@@ -155,11 +157,12 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onExternalSettingsChange() {
 		const before = this.archiveDelay.ms;
-		const { floatingAddButton, headerAddButton } = this.settings;
+		const { floatingAddButton, headerAddButton, tagStrip } = this.settings;
 		await this.loadSettings();
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
 		if (this.settings.floatingAddButton !== floatingAddButton || this.settings.headerAddButton !== headerAddButton) this.syncAddButtons();
 		else this.syncListButtons();
+		if (this.settings.tagStrip !== tagStrip) this.followTagStripModeInLists();
 	}
 
 	/** Called by the settings tab after it saves `key`. */
@@ -167,6 +170,7 @@ export default class PrinceListsPlugin extends Plugin {
 		if (key === 'archiveDelayHours') this.archiveDelay.changed();
 		if (key === 'showScheduleButton') this.syncListButtons();
 		if (key === 'floatingAddButton' || key === 'headerAddButton') this.syncAddButtons();
+		if (key === 'tagStrip') this.followTagStripModeInLists();
 	}
 
 	private listViews(): PrinceListView[] {
@@ -181,6 +185,10 @@ export default class PrinceListsPlugin extends Plugin {
 		for (const view of this.listViews()) view.syncAddButtons();
 	}
 
+	private followTagStripModeInLists(): void {
+		for (const view of this.listViews()) followTagStripMode(view);
+	}
+
 	private async loadSettings(): Promise<void> {
 		const stored = (await this.loadData()) as Partial<PrinceListsSettings> | null;
 		this.settings = {
@@ -189,6 +197,7 @@ export default class PrinceListsPlugin extends Plugin {
 			archiveDelayHours: archiveDelayHoursOf(stored?.archiveDelayHours),
 			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
 			headerAddButton: buttonPlatformsOf(stored?.headerAddButton, DEFAULT_SETTINGS.headerAddButton),
+			tagStrip: tagStripModeOf(stored?.tagStrip),
 		};
 	}
 

@@ -1,6 +1,7 @@
 import { type App, PluginSettingTab, type Plugin, type SettingDefinitionItem } from 'obsidian';
 import { type ArchiveDelayHours, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import type { ButtonPlatforms } from '../core/button-platforms';
+import { DEFAULT_TAG_STRIP_MODE, type TagStripMode } from '../core/tag-strip-mode';
 import { openSchedule } from './open-schedule';
 
 export interface PrinceListsSettings {
@@ -14,6 +15,8 @@ export interface PrinceListsSettings {
 	floatingAddButton: ButtonPlatforms;
 	/** Where a list's header shows its "+". */
 	headerAddButton: ButtonPlatforms;
+	/** Whether a list and the Schedule show their tag strip always, or only while the filter field is open. */
+	tagStrip: TagStripMode;
 }
 
 export const DEFAULT_SETTINGS: PrinceListsSettings = {
@@ -22,6 +25,7 @@ export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	showScheduleButton: false,
 	floatingAddButton: 'both',
 	headerAddButton: 'off',
+	tagStrip: DEFAULT_TAG_STRIP_MODE,
 };
 
 const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {
@@ -38,6 +42,11 @@ const BUTTON_PLATFORM_NAMES: Record<ButtonPlatforms, string> = {
 	desktop: 'Desktop only',
 	mobile: 'Mobile only',
 	off: 'Off',
+};
+
+const TAG_STRIP_NAMES: Record<TagStripMode, string> = {
+	always: 'Always',
+	filtering: 'While filtering',
 };
 
 type SettingsHost = Plugin & { settings: PrinceListsSettings; settingChanged(key: keyof PrinceListsSettings): void };
@@ -75,6 +84,16 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 					key: 'archiveDelayHours',
 					defaultValue: DEFAULT_SETTINGS.archiveDelayHours,
 					options: ARCHIVE_DELAY_NAMES,
+				},
+			},
+			{
+				name: 'Tag strip',
+				desc: "Where a list and the Schedule show their items' tags, to filter by: always, or only while the filter field is open.",
+				control: {
+					type: 'dropdown',
+					key: 'tagStrip',
+					defaultValue: DEFAULT_SETTINGS.tagStrip,
+					options: TAG_STRIP_NAMES,
 				},
 			},
 			{

@@ -10,6 +10,7 @@ import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import type { TagStripMode } from '../core/tag-strip-mode';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
@@ -43,6 +44,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	showArchived = false;
 	/** Off each time a list opens, as showArchived is. */
 	starredOnly = false;
+	/** None each time a list opens, as starredOnly is. */
+	litTags: string[] = [];
 	card: Card | null = null;
 	listTitle: ListTitleSession | null = null;
 	listNote: ListNoteSession | null = null;
@@ -90,6 +93,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	readonly listScrollEl: HTMLElement;
 	/** What the view draws, at Obsidian's readable line width, as a Markdown view's sizer. */
 	readonly listSizerEl: HTMLElement;
+	readonly tagStripMode = (): TagStripMode => this.settings().tagStrip;
 
 	constructor(
 		leaf: WorkspaceLeaf,
@@ -161,6 +165,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.headingField = null;
 		this.showArchived = false;
 		this.starredOnly = false;
+		this.litTags = [];
 		this.filter = null;
 		this.filterField = null;
 		this.collapsed.clear();

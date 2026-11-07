@@ -667,13 +667,14 @@ button.princelists-new-item {
 	gap: var(--size-2-1);
 }
 
-/* Icon buttons on the view's own background: the card's, the find row's and the Schedule's title's. */
+/* Icon buttons on the view's own background: the card's, the find row's, the tag strip's and the Schedule's title's. */
 button.princelists-card-actions,
 button.princelists-card-star,
 .princelists-format-bar button,
 .princelists-when-button,
 button.princelists-archived-toggle,
 button.princelists-starred-toggle,
+button.princelists-clear-tags,
 button.princelists-find-button {
 	flex: none;
 	height: auto;
@@ -683,12 +684,14 @@ button.princelists-find-button {
 	color: var(--icon-color);
 }
 
-/* No button shadow on the icon buttons, but Obsidian's ring when the keyboard focuses one. */
+/* No button shadow on the icon buttons and strip tags, but Obsidian's ring when the keyboard focuses one. */
 button.princelists-card-actions:not(:focus-visible),
 button.princelists-card-star:not(:focus-visible),
 .princelists-format-bar button:not(:focus-visible),
 button.princelists-archived-toggle:not(:focus-visible),
 button.princelists-starred-toggle:not(:focus-visible),
+button.princelists-clear-tags:not(:focus-visible),
+button.princelists-strip-tag:not(:focus-visible),
 button.princelists-find-button:not(:focus-visible),
 button.princelists-collapse:not(:focus-visible) {
 	box-shadow: none;
@@ -701,6 +704,7 @@ button.princelists-collapse:not(:focus-visible) {
 	.princelists-when-picker:hover .princelists-when-button,
 	button.princelists-archived-toggle:hover,
 	button.princelists-starred-toggle:hover,
+	button.princelists-clear-tags:hover,
 	button.princelists-find-button:hover {
 		background-color: var(--background-modifier-hover);
 		color: var(--icon-color-hover);
@@ -804,6 +808,59 @@ textarea.princelists-heading-field {
 
 .princelists-item.is-done .princelists-tag {
 	color: var(--checklist-done-color);
+}
+
+/* The tag strip above the rows, which wraps onto more lines when its tags don't fit across. */
+.princelists-tag-strip {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-1);
+	margin-block: var(--size-4-2);
+}
+
+/* Each strip tag is a button drawn as a tag in a note. */
+button.princelists-strip-tag {
+	height: auto;
+	font-size: var(--tag-size);
+	font-weight: var(--tag-weight);
+	color: var(--tag-color);
+	background-color: var(--tag-background);
+	border: var(--tag-border-width) solid var(--tag-border-color);
+	padding: var(--tag-padding-y) var(--tag-padding-x);
+	border-radius: var(--tag-radius);
+	line-height: var(--line-height-tight);
+	max-width: 100%;
+	overflow-wrap: break-word;
+}
+
+/* WCAG 2.2's minimum target size. */
+button.princelists-strip-tag,
+button.princelists-clear-tags {
+	min-width: 24px;
+	min-height: 24px;
+}
+
+@media (hover: hover) {
+	button.princelists-strip-tag:hover {
+		color: var(--tag-color-hover);
+		background-color: var(--tag-background-hover);
+		border-color: var(--tag-border-color-hover);
+	}
+}
+
+/* After the hover rule, so a hover keeps it. */
+button.princelists-strip-tag.is-lit {
+	color: var(--text-on-accent);
+	background-color: var(--interactive-accent);
+	border-color: var(--interactive-accent);
+}
+
+@media (hover: hover) {
+	button.princelists-strip-tag.is-lit:hover {
+		background-color: var(--interactive-accent-hover);
+		border-color: var(--interactive-accent-hover);
+	}
 }
 
 .princelists-card-when {

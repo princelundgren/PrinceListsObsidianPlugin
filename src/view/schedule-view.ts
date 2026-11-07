@@ -7,6 +7,7 @@ import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { datedItems, scheduleFindsNothing, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
+import type { TagStripMode } from '../core/tag-strip-mode';
 import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
@@ -60,6 +61,8 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	filterField: FilterField | null = null;
 	/** Off each time the Schedule opens, as its filter is. */
 	starredOnly = false;
+	/** The tags lit in the tag strip: only items carrying every one show. */
+	litTags: string[] = [];
 	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
@@ -71,6 +74,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	constructor(
 		leaf: WorkspaceLeaf,
 		private readonly archiveDelay: ArchiveDelay,
+		readonly tagStripMode: () => TagStripMode,
 	) {
 		super(leaf);
 		const sizer = this.scrollEl.createDiv({ cls: 'princelists-sizer' });
