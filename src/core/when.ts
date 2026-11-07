@@ -1,4 +1,4 @@
-import { BLOCK_ID_PATTERN, findRunStart, joinItemLine, parseItemLine, TASKS_SIGNIFIERS } from './item-line';
+import { findRunStart, joinItemLine, parseItemLine, splitTail, TASKS_SIGNIFIERS } from './item-line';
 
 export type DayLabelKind = 'today' | 'tomorrow' | 'weekday' | 'date-this-year' | 'date';
 
@@ -83,14 +83,6 @@ export function dayLabel(day: string, today: string, language: string): string {
 	if (kind === 'today') return 'Today';
 	if (kind === 'tomorrow') return 'Tomorrow';
 	return new Intl.DateTimeFormat(language, { ...LABEL_FORMATS[kind], timeZone: 'UTC' }).format(utcOf(day));
-}
-
-// The tail's fields and tags, and the block ID and trailing whitespace after them.
-function splitTail(tail: string): { fields: string; end: string } {
-	const trimmed = tail.trimEnd();
-	const blockId = BLOCK_ID_PATTERN.exec(trimmed)?.[0] ?? '';
-	const fields = trimmed.slice(0, trimmed.length - blockId.length);
-	return { fields, end: tail.slice(fields.length) };
 }
 
 function utcOf(day: string): number {

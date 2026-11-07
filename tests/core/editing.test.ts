@@ -163,7 +163,7 @@ describe('a visit to the list note across a typing session', () => {
 		notesEditor(state, 'listNote').type('Old\n# Typed\n- [ ] y\nmore');
 		const { lines, model } = list(state.text);
 		const drawn = (range: { start: number; end: number } | null) =>
-			withoutRange(visibleSections(lines, model, new Date(2026, 9, 21), { showArchived: false, starredOnly: false, archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() }), range).flatMap((section) => [
+			withoutRange(visibleSections(lines, model, new Date(2026, 9, 21), { showArchived: false, starredOnly: false, tags: [], archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() }), range).flatMap((section) => [
 				section.heading?.text ?? null,
 				...section.rows.map((row) => (row.kind === 'item' ? row.title : row.text)),
 			]);

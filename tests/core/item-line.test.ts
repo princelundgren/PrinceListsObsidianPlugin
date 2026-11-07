@@ -2,6 +2,7 @@ import process from 'node:process';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import {
 	TASKS_SIGNIFIERS,
+	tailFields,
 	formatStamp,
 	isDoneStatus,
 	isRepeating,
@@ -279,4 +280,16 @@ test('formatStamp is local time on a 24-hour clock, zero-padded', () => {
 test('TASKS_SIGNIFIERS is the design’s 18', () => {
 	expect([...TASKS_SIGNIFIERS].sort()).toEqual([...'🔺⏫🔼🔽⏬🛫➕⏳⌛📅📆🗓✅❌🔁🏁🆔⛔'.match(/./gu) as string[]].sort());
 	expect(TASKS_SIGNIFIERS).toHaveLength(18);
+});
+
+describe('tailFields', () => {
+	const slices = (fields: string) => tailFields(fields).map(({ from, to }) => fields.slice(from, to));
+
+	test('gives each field left to right, without the whitespace between them', () => {
+		expect(slices('⏳ 2026-11-08 #frozen 🔼')).toEqual(['⏳ 2026-11-08', '#frozen', '🔼']);
+	});
+
+	test('splits a tag glued to a field that follows it', () => {
+		expect(slices('#frozen⏳ 2026-11-08')).toEqual(['#frozen', '⏳ 2026-11-08']);
+	});
 });

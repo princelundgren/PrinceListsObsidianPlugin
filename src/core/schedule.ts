@@ -3,6 +3,7 @@ import { isFiltered, timelessItemRow, whenMatches, type Find } from './display';
 import { getItemNotes } from './edit-items';
 import { splitLines } from './lines';
 import { parseList } from './parse';
+import { carriesTags, stripTags } from './tags';
 import { daysFrom } from './when';
 
 export interface ScheduledItem {
@@ -13,6 +14,10 @@ export interface ScheduledItem {
 	line: string;
 	title: string;
 	starred: boolean;
+	/** The item's tags without their `#`: the title's, then the tail's. */
+	tags: string[];
+	/** The tail's tags. */
+	tailTags: string[];
 	done: boolean;
 	day: string;
 	/** The item's place in its list. */
@@ -34,8 +39,8 @@ export function datedItems(text: string, contentStart: number, list: { path: str
 		const line = lines[titleLine]?.text ?? '';
 		const row = timelessItemRow(line, titleLine);
 		if (row.when === null) return;
-		const { title, starred, done, when: day } = row;
-		scheduled.push({ listPath: list.path, listName: list.name, titleLine, line, title, starred, done, day, order, notes: getItemNotes(lines, item) });
+		const { title, starred, done, when: day, tags, tailTags } = row;
+		scheduled.push({ listPath: list.path, listName: list.name, titleLine, line, title, starred, tags, tailTags, done, day, order, notes: getItemNotes(lines, item) });
 	});
 	return scheduled;
 }
@@ -58,8 +63,11 @@ export function scheduleGroup(day: string, today: string): ScheduleGroup {
 	return days <= 7 ? 'week' : 'later';
 }
 
+const inScheduleOrder = (items: readonly ScheduledItem[]) =>
+	[...items].sort((a, b) => a.day.localeCompare(b.day) || a.listName.localeCompare(b.listName) || a.order - b.order);
+
 export function groupSchedule(items: readonly ScheduledItem[], today: string): { group: ScheduleGroup; items: ScheduledItem[] }[] {
-	const sorted = [...items].sort((a, b) => a.day.localeCompare(b.day) || a.listName.localeCompare(b.listName) || a.order - b.order);
+	const sorted = inScheduleOrder(items);
 	return GROUP_ORDER.map((group) => ({ group, items: sorted.filter((item) => scheduleGroup(item.day, today) === group) })).filter(
 		({ items }) => items.length > 0,
 	);
@@ -70,6 +78,8 @@ export interface ScheduleFilter {
 	find: Find | null;
 	/** "Show starred only": hides every item that isn't starred. */
 	starredOnly: boolean;
+	/** The lit tags: an item shows only if it carries every one. */
+	tags: readonly string[];
 }
 
 export interface ShownGroup {
@@ -86,16 +96,22 @@ export function scheduleFindsNothing(items: readonly ScheduledItem[], groups: re
 
 /**
  * The Schedule's groups as drawn: only the items `filter` matches, and a group only while one does. A
- * collapsed group has no items under it, unless a query or "Show starred only" filters the Schedule.
+ * collapsed group has no items under it, unless a query, "Show starred only" or a lit tag filters
+ * the Schedule.
  */
 export function shownSchedule(items: readonly ScheduledItem[], today: string, filter: ScheduleFilter, collapsed: ReadonlySet<ScheduleGroup>): ShownGroup[] {
-	const { find, starredOnly } = filter;
+	const { find, starredOnly, tags } = filter;
 	const filtering = isFiltered(filter);
 	return groupSchedule(
-		items.filter((item) => (!starredOnly || item.starred) && (find === null || matchesSchedule(item, find))),
+		items.filter((item) => (!starredOnly || item.starred) && carriesTags(item.tags, tags) && (find === null || matchesSchedule(item, find))),
 		today,
 	).map(({ group, items: matches }) => {
 		const isCollapsed = collapsed.has(group);
 		return { group, collapsed: isCollapsed, items: isCollapsed && !filtering ? [] : matches };
 	});
+}
+
+/** The tags the strip offers for the Schedule: those of `items` in the Schedule's order, and the lit ones. */
+export function scheduleStripTags(items: readonly ScheduledItem[], lit: readonly string[]): string[] {
+	return stripTags(inScheduleOrder(items).map((item) => item.tags), lit);
 }

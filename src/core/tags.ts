@@ -28,3 +28,22 @@ export function tagOfTyped(typed: string): string | null {
 	const body = trimmed.startsWith('#') ? trimmed.slice(1) : trimmed;
 	return isTagBody(body) ? body : null;
 }
+
+/** Whether `tags` meet every lit tag: each is one of them, or a parent of one (`shop` lit shows `shop/frozen`). */
+export function carriesTags(tags: readonly string[], lit: readonly string[]): boolean {
+	return lit.every((l) => tags.some((t) => sameTag(t, l) || t.toLowerCase().startsWith(`${l.toLowerCase()}/`)));
+}
+
+/** The tag strip's tags: those `carried` by the items, then `lit`, each tag once in the casing met first, sorted without regard to case. */
+export function stripTags(carried: Iterable<readonly string[]>, lit: readonly string[]): string[] {
+	const strip: string[] = [];
+	for (const tags of [...carried, lit]) {
+		for (const tag of tags) if (!strip.some((kept) => sameTag(kept, tag))) strip.push(tag);
+	}
+	return strip.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+}
+
+/** `lit` without `tag` when it is lit, else with `tag` at the end. */
+export function toggleTag(lit: readonly string[], tag: string): string[] {
+	return lit.some((l) => sameTag(l, tag)) ? lit.filter((l) => !sameTag(l, tag)) : [...lit, tag];
+}
