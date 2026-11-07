@@ -988,13 +988,16 @@ button.princelists-card-star.is-starred svg {
 		top: var(--princelists-mark-drop);
 	}
 
-	/* The open card's star, day and ⋯ are buttons of one size, centered on one line. The star, and
-	   the calendar when there is no day, are as small as the row's, centered in that box. */
+	/* The open card's tag, star, day and ⋯ are buttons of one size, centered on one line. The tag,
+	   the star, and the calendar when there is no day, are as small as the row's star, centered in
+	   that box. */
+	button.princelists-card-tag-button,
 	button.princelists-card-star,
 	.princelists-when-button {
 		--princelists-icon-slot: var(--icon-size);
 	}
 
+	button.princelists-card-tag-button > svg,
 	button.princelists-card-star > svg,
 	.princelists-when-button > svg {
 		--icon-size: var(--princelists-mark-size);
