@@ -331,7 +331,8 @@ this met on 2026-10-30 **(owner)**.
 - **The Schedule view** is a view of its own, opened with an "Open schedule" command and a ribbon
   icon **(call)**. The icon is Lucide's `calendar-clock`, not `calendar`, which the Daily notes
   core plugin's ribbon button uses **(owner, 2026-10-27)**. It gathers, from every list in the vault, the items with a When
-  that are open or done but not yet archived.
+  that are open or done but not yet archived. A row shows its tags too, after the title and before
+  the star (filtering by tag's design, "Rows").
 - **A list's ⋯ menu also has "Open schedule" (owner, 2026-10-27),** for anyone who keeps the
   ribbon hidden or doesn't know the command.
 - **So can a list's header (owner, 2026-11-05):** a `calendar-clock` view action named "Open

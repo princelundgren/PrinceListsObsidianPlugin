@@ -129,7 +129,8 @@ nothing is written in the background, and only documented Obsidian APIs are used
     the title for its tags, at the title's start. The star and the day stay where they are, on the
     title's first line at the right. A row without tags looks as it does today.
   - **In a wider pane (owner),** the tags follow the title on its line, with the star and the day
-    after them. They wrap with the title's words when the line is full **(call)**.
+    after them. The title's text is drawn by Obsidian's renderer, so the tags can't flow inside it:
+    they follow it and wrap among themselves when the line is full **(call)**.
 - **The reading order is title, tags, star, day at every width (call),** so a screen reader reads
   a row the same way on a phone and a desktop; only the layout moves the tags to their own line.
 - **A done item's chips are gray,** as its title is **(call)**.
