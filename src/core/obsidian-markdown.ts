@@ -1,4 +1,5 @@
 import { GFM, parser, type BlockContext, type BlockParser, type DelimiterType, type InlineContext, type InlineParser, type Line, type MarkdownConfig } from '@lezer/markdown';
+import { tagBodyAt } from './tags';
 
 const EQUALS = 61;
 const DOLLAR = 36;
@@ -30,15 +31,13 @@ const wikiLink: InlineParser = {
 	before: 'Link',
 };
 
-const TAG_BODY = /^[\p{L}\p{N}\p{M}_\-/]+/u;
-
-// A #tag's letters, digits, `_`, `-` and `/`, taken whole so its underscores don't read as italic. As
-// in Obsidian, a tag follows a space, the start of the text or a mark that may open a span.
+// A #tag as `tagBodyAt` reads it, taken whole so its underscores don't read as italic. As in
+// Obsidian, a tag follows a space, the start of the text or a mark that may open a span.
 const tag: InlineParser = {
 	name: 'Tag',
 	parse(cx, next, pos) {
 		if (next !== HASH || !(pos === cx.offset || /[\s*_~=]/.test(cx.slice(pos - 1, pos)))) return -1;
-		const body = TAG_BODY.exec(cx.slice(pos + 1, cx.end))?.[0];
+		const body = tagBodyAt(cx.slice(pos + 1, cx.end));
 		if (!body) return -1;
 		return cx.addElement(cx.elt('Tag', pos, pos + 1 + body.length));
 	},

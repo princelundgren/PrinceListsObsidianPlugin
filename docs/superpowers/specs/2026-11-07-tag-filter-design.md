@@ -1,5 +1,6 @@
 ---
-status: approved
+status: building
+governs: [src/**, styles.css]
 tracking: ["#325"]
 ---
 
@@ -39,12 +40,15 @@ nothing is written in the background, and only documented Obsidian APIs are used
 - **A tag is what Obsidian reads as one** (Obsidian Help, "Tags"): letters, numbers, `_`, `-`,
   `/` and other Unicode characters, emoji included, with at least one that isn't a number, so
   `#1984` isn't a tag.
-- **Core has one tag rule (call),** shared by the item reader and the notes editor's `Tag` parser
-  (`src/core/obsidian-markdown.ts`), so a row, the strip and the notes agree on what a tag is.
-  Today that parser accepts `#1984` and stops at an emoji; the build moves it to Obsidian's format,
-  and the notes editor follows.
+- **Core has one tag rule (call),** shared by the item reader and the `Tag` parser
+  (`src/core/obsidian-markdown.ts`), which reads a title's tags and is also what Clear formatting
+  uses (the notes editor itself reads no tags), so a row, the strip and Clear formatting agree on
+  what a tag is. That parser accepted `#1984` and stopped at an emoji; it now follows Obsidian's
+  format, and Clear formatting follows.
 - **The tail keeps Tasks' rule for what it holds,** which accepts `#1984` (`item-line.ts`). A
   tail `#1984` stays hidden on the row, as today, and isn't a tag here.
+- **A tail field such as `#frozen;` stays a Tasks field (call),** hidden, and isn't a tag here,
+  though Obsidian reads `#frozen` in it: the tail's fields are Tasks' and are read whole.
 - **Obsidian's metadata cache isn't used for this (call),** although it indexes tags
   (`CachedMetadata.tags`, `getAllTags`): core has no Obsidian imports, the cache catches up only
   after the view's own writes, and it also counts tags in the notes, headings and frontmatter.
@@ -190,7 +194,7 @@ Each in the pull request that makes it untrue:
    written first.
 2. **Which tags count:** a tag in the title, in the tail, in the notes (not counted), nested, in
    another case, with an emoji, and a lookalike (`#1984`, a `#` inside a link or inline code), the
-   same in the notes editor, Clear formatting (which keeps a tag whole) and the item reader. Core
+   same in Clear formatting (which keeps a tag whole) and the item reader. Core
    tests.
 3. **A tag in a title, tapped:** what Obsidian's renderer draws for it and what a tap does there, on
    desktop and on a phone. If it opens nothing useful, the owner decides what it does.
