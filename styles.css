@@ -604,9 +604,9 @@ button.princelists-new-item {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The title, with the card's star, When and ⋯ on its first line. They sit in the title's row only,
-   so the notes and the format bar under it span the card. In a pane too narrow for both they move to
-   a line of their own under the title, still on the right. */
+/* The title, with the card's tag button, star, When and ⋯ on its first line. They sit in the
+   title's row only, so the notes and the format bar under it span the card. In a pane too narrow
+   for both they move to a line of their own under the title, still on the right. */
 .princelists-card-head {
 	display: flex;
 	flex-wrap: wrap;
@@ -670,6 +670,7 @@ button.princelists-new-item {
 /* Icon buttons on the view's own background: the card's, the find row's, the tag strip's and the Schedule's title's. */
 button.princelists-card-actions,
 button.princelists-card-star,
+button.princelists-card-tag-button,
 .princelists-format-bar button,
 .princelists-when-button,
 button.princelists-archived-toggle,
@@ -687,6 +688,8 @@ button.princelists-find-button {
 /* No button shadow on the icon buttons and strip tags, but Obsidian's ring when the keyboard focuses one. */
 button.princelists-card-actions:not(:focus-visible),
 button.princelists-card-star:not(:focus-visible),
+button.princelists-card-tag-button:not(:focus-visible),
+button.princelists-card-tag-remove:not(:focus-visible),
 .princelists-format-bar button:not(:focus-visible),
 button.princelists-archived-toggle:not(:focus-visible),
 button.princelists-starred-toggle:not(:focus-visible),
@@ -700,6 +703,7 @@ button.princelists-collapse:not(:focus-visible) {
 @media (hover: hover) {
 	button.princelists-card-actions:hover,
 	button.princelists-card-star:hover,
+	button.princelists-card-tag-button:hover,
 	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button,
 	button.princelists-archived-toggle:hover,
@@ -734,6 +738,7 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 /* On mobile, each takes a finger-sized box, as Obsidian's own buttons there do, with its icon its usual size. */
 .princelists-is-mobile button.princelists-card-actions,
 .princelists-is-mobile button.princelists-card-star,
+.princelists-is-mobile button.princelists-card-tag-button,
 .princelists-is-mobile .princelists-format-bar button,
 .princelists-is-mobile .princelists-when-button,
 .princelists-is-mobile button.princelists-archived-toggle,
@@ -836,7 +841,9 @@ button.princelists-strip-tag {
 
 /* WCAG 2.2's minimum target size. */
 button.princelists-strip-tag,
-button.princelists-clear-tags {
+button.princelists-clear-tags,
+button.princelists-card-tag-button,
+button.princelists-card-tag-remove {
 	min-width: 24px;
 	min-height: 24px;
 }
@@ -861,6 +868,45 @@ button.princelists-strip-tag.is-lit {
 		background-color: var(--interactive-accent-hover);
 		border-color: var(--interactive-accent-hover);
 	}
+}
+
+/* The card's tags under its title, then the tag input while it's open. */
+.princelists-card-tags {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-1);
+	margin-top: var(--size-4-1);
+}
+
+.princelists-card-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--size-2-1);
+	padding-inline-end: var(--size-2-1);
+}
+
+/* The × takes the chip's own color, on the chip's background. */
+button.princelists-card-tag-remove {
+	--icon-size: var(--icon-xs);
+	flex: none;
+	justify-content: center;
+	height: auto;
+	padding: 0;
+	border-radius: var(--tag-radius);
+	background-color: transparent;
+	color: inherit;
+}
+
+@media (hover: hover) {
+	button.princelists-card-tag-remove:hover {
+		background-color: var(--background-modifier-hover);
+	}
+}
+
+input.princelists-tag-input {
+	flex: 0 1 12em;
+	min-width: 6em;
 }
 
 .princelists-card-when {

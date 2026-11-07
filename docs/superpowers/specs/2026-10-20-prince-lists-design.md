@@ -601,10 +601,12 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 ### Editing
 
-- **Item titles (call):** edit them in the open card. Everything after the title is hidden while
-  you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was, except that doubled
-  `✔` marks collapse to the earliest and a leftover `✔` on an open line is dropped (see
-  Completion). Step two hides an item's star too, and saving puts it back once.
+- **Item titles (call):** edit them in the open card. Everything after the title is hidden in the
+  title field while you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was,
+  except that doubled `✔` marks collapse to the earliest and a leftover `✔` on an open line is
+  dropped (see Completion). Step two hides an item's star too, and saving puts it back once. The
+  card shows the tail's tags under the title, each with an × that takes it off ([filtering by
+  tag](2026-11-07-tag-filter-design.md), "The card").
 - **An item's When (step two):** the calendar icon at the card's top right, or the day in its
   place, sets it, and the picker's own Clear or Reset removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
@@ -988,7 +990,8 @@ needs no code.
     another. Once the title has nothing left to undo, Cmd+Z does nothing. Leaving the title, or the
     window, closes it and ends its history; Cmd+Z after that steps through the list's history, as
     before.
-  - Other fields, such as the list's title, keep the browser's text undo. It changes only
+  - Other fields, such as the list's title, keep the browser's text undo, except an empty tag input
+    in a card ([filtering by tag](2026-11-07-tag-filter-design.md), "The card"). It changes only
     the field with focus. The browser keeps one text history for the whole page, so once the field
     has nothing left to undo, Cmd+Z does nothing rather than reach typing in another field, which
     nothing would save.

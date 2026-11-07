@@ -13,6 +13,7 @@ import {
 	openCard,
 } from './card';
 import { toggleCardStar } from './card-star';
+import { cardTagsClick, escapeTagInput } from './card-tags';
 import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
@@ -127,6 +128,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (view.card?.el.contains(target)) {
+		if (cardTagsClick(view, target)) return;
 		if (target.closest(`.${CARD_STAR_CLASS}`)) {
 			toggleCardStar(view);
 			return;
@@ -215,6 +217,9 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	if (evt.key === 'Escape') {
 		if (target === view.filterField?.inputEl) {
 			filterKeyDown(view, evt);
+		} else if (target === view.tagInput?.input) {
+			evt.preventDefault();
+			escapeTagInput(view);
 		} else if (view.card?.el.contains(target)) {
 			evt.preventDefault();
 			closeCard(view);

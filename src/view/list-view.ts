@@ -18,6 +18,7 @@ import type { PrinceListsSettings } from '../obsidian/settings';
 import { openAsMarkdown } from '../obsidian/switch';
 import { buildNewItemButton, hasNoItems, newItem } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
+import { closeTagInput } from './card-tags';
 import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
@@ -31,6 +32,7 @@ import type { HeadingField } from './heading-field';
 import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
+import type { TagSuggest } from './tag-suggest';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
 // canAcceptExtension stays at its default of false: true would open every note clicked from a
@@ -47,6 +49,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** None each time a list opens, as starredOnly is. */
 	litTags: string[] = [];
 	card: Card | null = null;
+	/** The open card's tag input and its type-ahead, or null while it is closed. */
+	tagInput: { input: HTMLInputElement; suggest: TagSuggest } | null = null;
 	listTitle: ListTitleSession | null = null;
 	listNote: ListNoteSession | null = null;
 	// Not `titleEl`: ItemView has an undocumented `titleEl`, the pane header's title, which Obsidian
@@ -198,6 +202,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 
 	protected async onClose(): Promise<void> {
 		this.viewClosed = true;
+		closeTagInput(this);
 		this.redrawFiltered.cancel();
 		this.endListNote();
 		this.dropListNoteEditor();

@@ -148,7 +148,8 @@ nothing is written in the background, and only documented Obsidian APIs are used
   typed there can't be seen again in the view; showing them fixes that.
 - **The tag button opens a type-ahead (owner):** an input with Obsidian's `AbstractInputSuggest`
   (`@since` 1.4.10, older than `minAppVersion` 1.13.4). It suggests this list's tags **(call)**,
-  the same set the strip shows, and "New tag" for anything else. Other lists' tags aren't offered:
+  the same set the strip shows with no tag lit, less the item's own, and `New tag: #<tag>` for
+  anything else. Other lists' tags aren't offered:
   the metadata cache would hold them, but with their notes', headings' and frontmatter's tags,
   which this design doesn't count. A leading `#` is optional, and text that isn't a tag (a space,
   only numbers) isn't offered **(call)**.
@@ -163,7 +164,9 @@ nothing is written in the background, and only documented Obsidian APIs are used
     line with no title, such as `- [ ] #errand` or `- [ ]  ⭐ #errand`, the space after `]` stays,
     so the line is still an item, as step two's star rule keeps it (step two, "Star (owner)").
   - Cmd+Z undoes it, as it does the plugin's other edits (step one, the "Undo" rule under "Saving,
-    outside changes, sync conflicts, undo").
+    outside changes, sync conflicts, undo"). The tag input stays focused after each tag it adds, so
+    while it's empty Cmd+Z and Cmd+Shift+Z step through the list's history; with text in it they
+    undo the typing, as in other fields **(call)**.
 
 ## The Schedule
 
