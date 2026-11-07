@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { isTagBody, sameTag, tagBodyAt, tagOfTyped } from '../../src/core/tags';
+import { carriesTags, isTagBody, sameTag, stripTags, tagBodyAt, tagOfTyped, toggleTag } from '../../src/core/tags';
 
 describe('tagBodyAt', () => {
 	test('reads letters, numbers, _ - / and marks', () => {
@@ -64,5 +64,35 @@ describe('tagOfTyped', () => {
 		for (const typed of ['#', '# frozen', '1984', 'frozen pantry', '##frozen']) {
 			expect(tagOfTyped(typed)).toBeNull();
 		}
+	});
+});
+
+describe('carriesTags', () => {
+	test('is true when every lit tag is carried, or is a parent of a carried tag', () => {
+		expect(carriesTags(['shop/frozen'], ['Shop'])).toBe(true);
+		expect(carriesTags(['a', 'b'], ['B', 'a'])).toBe(true);
+		expect(carriesTags(['a'], [])).toBe(true);
+	});
+
+	test('is false when a lit tag is missing, or only starts the same letters as a carried tag', () => {
+		expect(carriesTags(['shopping'], ['shop'])).toBe(false);
+		expect(carriesTags(['a'], ['a', 'b'])).toBe(false);
+	});
+});
+
+describe('stripTags', () => {
+	test('lists each tag once in the casing met first, carried before lit, sorted without regard to case', () => {
+		expect(stripTags([['b', 'A'], ['a', 'c']], ['Z'])).toEqual(['A', 'b', 'c', 'Z']);
+	});
+
+	test('keeps a lit tag no item carries', () => {
+		expect(stripTags([], ['x'])).toEqual(['x']);
+	});
+});
+
+describe('toggleTag', () => {
+	test('takes out a lit tag whatever its casing, and adds an unlit one at the end', () => {
+		expect(toggleTag(['Frozen'], 'frozen')).toEqual([]);
+		expect(toggleTag(['a'], 'b')).toEqual(['a', 'b']);
 	});
 });
