@@ -40,7 +40,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		} else if (view.filterField) {
 			fresh.append(view.filterField.rowEl);
 		} else {
-			view.filterField = buildFilterField(view, fresh, 'Find in list');
+			view.filterField = buildFilterField(view, fresh);
 			addStarredToggle(view.filterField);
 			addArchivedToggle(view.filterField);
 		}
