@@ -6,7 +6,7 @@ import { labelWithKey } from '../core/key-name';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
-import { datedItems, scheduleFindsNothing, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
+import { datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
@@ -22,6 +22,7 @@ import { handleLinkClick, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
 import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
 import { buildScheduleRow } from './schedule-row';
+import { buildTagStrip, showsTagStrip, stripClick } from './tag-strip';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
@@ -55,7 +56,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	private updatedPaths: Set<string> | null = null;
 	private refreshes = 0;
 	private blocks: Component[] = [];
-	// Today and the groups as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
+	// Today, the groups and the tag strip as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
 	private drawn: string | null = null;
 	filter: string | null = null;
 	filterField: FilterField | null = null;
@@ -135,6 +136,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.redrawFiltered.cancel();
 		this.filter = null;
 		this.starredOnly = false;
+		this.litTags = [];
 		removeFilterField(this);
 		this.lists.clear();
 		this.collapsed.clear();
@@ -191,6 +193,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 
 	private onClick(evt: MouseEvent): void {
 		const target = targetOf(evt);
+		if (target && stripClick(this, target)) return;
 		if (target?.closest(`.${FIND_BUTTON_CLASS}`)) {
 			toggleFilter(this);
 			return;
@@ -280,16 +283,18 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const now = new Date();
 		const today = dayOf(now);
 		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
-		const filter = { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly, tags: [] };
+		const filter = { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly, tags: this.litTags };
 		const groups = shownSchedule(dated, today, filter, this.collapsed);
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
-		const drawn = JSON.stringify([today, dated.length === 0, shown]);
+		const strip = showsTagStrip(this) ? scheduleStripTags(dated, this.litTags) : null;
+		const drawn = JSON.stringify([today, dated.length === 0, shown, strip, this.litTags]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;
 		this.removeBlocks();
 		this.groupsEl.empty();
+		if (strip) buildTagStrip(this.groupsEl, strip, this.litTags);
 		if (dated.length === 0) this.groupsEl.createDiv({ cls: 'princelists-schedule-empty', text: "No items have a date. Pick a day with the calendar icon on an item's card." });
 		if (scheduleFindsNothing(dated, groups, filter)) this.groupsEl.createDiv({ cls: NO_MATCH_CLASS, text: NO_MATCH_HINT });
 		for (const { group, collapsed, items } of groups) {

@@ -162,7 +162,7 @@ export default class PrinceListsPlugin extends Plugin {
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
 		if (this.settings.floatingAddButton !== floatingAddButton || this.settings.headerAddButton !== headerAddButton) this.syncAddButtons();
 		else this.syncListButtons();
-		if (this.settings.tagStrip !== tagStrip) this.followTagStripModeInLists();
+		if (this.settings.tagStrip !== tagStrip) this.followTagStripModeInViews();
 	}
 
 	/** Called by the settings tab after it saves `key`. */
@@ -170,7 +170,7 @@ export default class PrinceListsPlugin extends Plugin {
 		if (key === 'archiveDelayHours') this.archiveDelay.changed();
 		if (key === 'showScheduleButton') this.syncListButtons();
 		if (key === 'floatingAddButton' || key === 'headerAddButton') this.syncAddButtons();
-		if (key === 'tagStrip') this.followTagStripModeInLists();
+		if (key === 'tagStrip') this.followTagStripModeInViews();
 	}
 
 	private listViews(): PrinceListView[] {
@@ -185,8 +185,9 @@ export default class PrinceListsPlugin extends Plugin {
 		for (const view of this.listViews()) view.syncAddButtons();
 	}
 
-	private followTagStripModeInLists(): void {
+	private followTagStripModeInViews(): void {
 		for (const view of this.listViews()) followTagStripMode(view);
+		for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_SCHEDULE)) if (leaf.view instanceof ScheduleView) followTagStripMode(leaf.view);
 	}
 
 	private async loadSettings(): Promise<void> {
