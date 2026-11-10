@@ -694,7 +694,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   It's a view action (`addAction`) named "New item" **(call)**, with its key: "New item
   (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which usually
   has no keyboard, shows "New item" alone **(owner, 2026-11-03)**. It shows only where the "Header
-  add button" setting puts it, by default nowhere **(owner, 2026-11-05)**.
+  add button" setting puts it, by default nowhere **(owner, 2026-11-05)**, and hides while
+  selecting on mobile ([selecting several rows](2026-11-07-select-several-design.md), "On mobile").
 - **The floating "+" button (owner)** sits at the bottom right of the list pane, under the thumb.
   It stays put while the list scrolls. Its name and tooltip are the header's: "New item" with its
   key on desktop, "New item" alone on mobile **(owner, 2026-11-05)**. It shows on

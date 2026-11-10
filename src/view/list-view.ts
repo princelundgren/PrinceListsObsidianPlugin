@@ -340,7 +340,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		const showsFloating = isList && !this.selecting && this.showsFloatingAdd();
 		this.newItemButton?.toggle(showsFloating);
 		this.contentEl.toggleClass('princelists-has-floating-add', showsFloating);
-		this.newItemAction?.toggle(isList && this.showsHeaderAdd());
+		this.newItemAction?.toggle(isList && !this.selecting && this.showsHeaderAdd());
 		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
 		this.syncFindButtons();
 		syncSelectionBar(this);
