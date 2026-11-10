@@ -181,20 +181,21 @@ textarea.princelists-title {
 	background-color: var(--text-selection);
 }
 
-/* While selecting on mobile, each checkbox is a selection circle, filled while its row is selected and
-   never showing a tick, so nothing looks ticked by mistake (spec, "Ticking"). An open card keeps its
-   box, which still ticks. The checked and selected rules outrank Obsidian's own checked and hover ones. */
-.princelists-selecting .princelists-item:not(.princelists-card) .princelists-checkbox {
+/* While selecting on mobile, each of the view's own checkboxes is a selection circle, filled while its row
+   is selected and never showing a tick, so nothing looks ticked by mistake (spec, "Ticking"). An open card
+   keeps its box, and so do a list block's rows, which still tick in their own note: the child path reaches
+   only the view's rows. The checked and selected rules outrank Obsidian's own checked and hover ones. */
+.princelists-selecting .princelists-sizer > .princelists-items > .princelists-item:not(.princelists-card) > .princelists-checkbox {
 	--checkbox-radius: 50%;
 	--checkbox-marker-color: transparent;
 }
 
-.princelists-selecting .princelists-item:not(.princelists-card) .princelists-checkbox:checked {
+.princelists-selecting .princelists-sizer > .princelists-items > .princelists-item:not(.princelists-card) > .princelists-checkbox:checked {
 	border-color: var(--checkbox-border-color);
 	background-color: transparent;
 }
 
-.princelists-selecting .princelists-item.princelists-selected:not(.princelists-card) .princelists-checkbox {
+.princelists-selecting .princelists-sizer > .princelists-items > .princelists-item.princelists-selected:not(.princelists-card) > .princelists-checkbox {
 	border-color: var(--interactive-accent);
 	background-color: var(--interactive-accent);
 }
