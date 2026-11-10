@@ -32,7 +32,7 @@ const BUTTONS: readonly { button: BarButton; label: string; icon: string }[] = [
  * the floating "+" goes, hidden until syncSelectionBar shows it.
  */
 export function buildSelectionBar(view: PrinceListView): HTMLElement {
-	const el = view.containerEl.createDiv({ cls: 'princelists-selection-bar' });
+	const el = view.containerEl.createDiv({ cls: 'princelists-selection-bar', attr: { role: 'toolbar', 'aria-label': 'Selection' } });
 	el.hide();
 	const top = el.createDiv({ cls: 'princelists-selection-bar-top' });
 	const countEl = top.createSpan({ cls: 'princelists-selection-count' });
@@ -41,7 +41,10 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 	const actions = new Map<HTMLElement, () => void>([[done, () => clearSelection(view)]]);
 	const buttons = new Map<BarButton, HTMLButtonElement>();
 	for (const { button, label, icon } of BUTTONS) {
-		const buttonEl = actionsEl.createEl('button', { cls: `princelists-selection-action princelists-selection-${button}` });
+		const buttonEl = actionsEl.createEl('button', {
+			cls: `princelists-selection-action princelists-selection-${button}`,
+			attr: opensMenu(button) ? { 'aria-haspopup': 'menu' } : {},
+		});
 		setIcon(buttonEl.createSpan({ cls: 'princelists-selection-icon' }), icon);
 		buttonEl.createSpan({ text: label });
 		buttons.set(button, buttonEl);
@@ -80,9 +83,13 @@ export function syncSelectionBar(view: PrinceListView): void {
 // Move to and Delete act as the selection menu's entries do; Tick, Star and Date open a menu of their
 // group's entries above the button.
 function act(view: PrinceListView, button: BarButton, buttonEl: HTMLElement): void {
-	if (button === 'move') moveToHeading(view);
-	else if (button === 'delete') deleteSelection(view);
-	else showGroupMenu(view, button, buttonEl);
+	if (opensMenu(button)) showGroupMenu(view, button, buttonEl);
+	else if (button === 'move') moveToHeading(view);
+	else deleteSelection(view);
+}
+
+function opensMenu(button: BarButton): button is EntryGroup {
+	return button !== 'move' && button !== 'delete';
 }
 
 function showGroupMenu(view: PrinceListView, group: EntryGroup, buttonEl: HTMLElement): void {
