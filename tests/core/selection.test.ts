@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { ListEditing } from '../../src/core/editing';
 import { ownEdit } from '../../src/core/follow';
 import { splitLines } from '../../src/core/lines';
@@ -189,5 +189,27 @@ describe('RowSelection', () => {
 		selection.toggle(7);
 		editing.outsideChange(TEXT.replace('- [ ] c', '- [ ] c2'));
 		expect(selection.lines()).toEqual([5]);
+	});
+
+	// Spies on the editing's own track and untrack: a line left tracked is followed through every later edit.
+	test('clear stops tracking every line it tracked, the range included', () => {
+		const { editing, selection } = selectionIn(TEXT);
+		const tracked = new Set<object>();
+		const track = editing.track.bind(editing);
+		const untrack = editing.untrack.bind(editing);
+		vi.spyOn(editing, 'track').mockImplementation((line) => {
+			const made = track(line);
+			tracked.add(made);
+			return made;
+		});
+		vi.spyOn(editing, 'untrack').mockImplementation((row) => {
+			tracked.delete(row);
+			untrack(row);
+		});
+		selection.toggle(3);
+		selection.extend(1, SHOWN);
+		selection.extend(1, SHOWN);
+		selection.clear();
+		expect(tracked.size).toBe(0);
 	});
 });
