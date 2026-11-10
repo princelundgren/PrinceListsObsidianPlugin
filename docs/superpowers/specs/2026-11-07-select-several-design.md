@@ -87,7 +87,7 @@ nothing is written in the background, and only documented Obsidian APIs are used
 - **Cmd+click on a link** in a title still opens it in a new tab, as Obsidian does: the link wins
   over selecting **(call)**.
 - **Cmd+Enter with several rows selected** adds the new item below the last selected item in list
-  order **(call)**.
+  order **(call)**, and the selection ends as its card opens.
 
 ## On mobile
 
