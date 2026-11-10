@@ -27,7 +27,8 @@ export interface RowDragHost {
 	untrack(tracked: TrackedLine): void;
 	/**
 	 * The lines a drag from the row on `line` carries, `line` among them: the selection's while that
-	 * row is one of two or more selected, else `[line]`, which ends the host's selection.
+	 * row is one of two or more selected, else `[line]`. That ends the host's selection, except for
+	 * the only selected row while selecting on mobile, which stays selected.
 	 */
 	dragged(line: number): readonly number[];
 	/** Moves the dragged row on `line`, both it and `drop` as the drawn rows number them. */
@@ -68,6 +69,9 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 		dragged: (line) => {
 			const selected = view.selection.linesWith(line);
 			if (selected) return selected;
+			// Selecting on mobile ends only with Done, Delete or the last row tapped away (selecting
+			// several rows, "On mobile").
+			if (view.selecting && view.selection.has(line)) return [line];
 			clearSelection(view);
 			return [line];
 		},
