@@ -746,11 +746,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star button's "Add star" and "Remove star";
     and "Remove", as in Remove image.
-- **With two or more rows selected, right-clicking a selected row opens the selection's menu
-  (owner, 2026-11-07)** instead: Move to heading…, Tick and Untick, Add star and Remove star, the four date entries, and
-  Delete in red, naming what goes. Each acts on every selected item at once and shows an Undo
-  message, and a right-click on a row outside the selection opens that row's own menu ([selecting
-  several rows](2026-11-07-select-several-design.md), "The actions").
+- **With two or more rows selected, right-clicking a selected row opens the selection's menu (owner,
+  2026-11-07)** instead: Move to heading…, Tick and Untick, Add star and Remove star, the four date
+  entries, and Delete in red, naming what goes. Each acts on every selected item at once and shows
+  an Undo message, and a right-click on a row outside the selection opens that row's own menu
+  ([selecting several rows](2026-11-07-select-several-design.md), "The actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading and Delete heading. Step two adds Edit in Markdown, Collapse all headings and Expand all
   headings, and a menu on the list's background (step two's design, "Right-click menus").

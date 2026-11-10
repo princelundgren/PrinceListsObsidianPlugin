@@ -65,7 +65,8 @@ nothing is written in the background, and only documented Obsidian APIs are used
   and drops the rest **(call)**.
 - **It's never written to the file and isn't remembered (call).** Closing the list ends it.
 - **It ends** with Escape, a click on empty space, or a plain click on a row, which opens that row's
-  card as today **(call)**. On mobile, Done ends it ("On mobile").
+  card as today **(call)**. An open menu or dialog takes the first Escape, and Escape in a text
+  field is the field's **(call)**. On mobile, Done ends it ("On mobile").
 
 ## On desktop
 
