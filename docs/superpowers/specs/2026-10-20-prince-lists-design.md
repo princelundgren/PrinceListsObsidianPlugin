@@ -826,10 +826,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - Holding an item row never opens a menu. A hold let go without moving starts selecting instead
     ([selecting several rows](2026-11-07-select-several-design.md), "On mobile"): the row lifts
     and goes back, writing nothing, as before.
-  - **A drag of a selected row moves every selected row,** as on desktop. The held row lifts with
-    how many rows it carries, and the others stay in place until the drop redraws the list. A drag
-    of a row outside the selection drags it alone and ends selecting ([selecting several
-    rows](2026-11-07-select-several-design.md), "Dragging the selection").
+  - **A drag of a selected row moves every selected row,** as on desktop, and selecting goes on.
+    Once the held row moves, it shows how many rows it carries, and the others stay in place until
+    the drop redraws the list. A drag of a row outside the selection drags it alone and ends
+    selecting ([selecting several rows](2026-11-07-select-several-design.md), "Dragging the
+    selection").
   - A swipe without a hold scrolls the list.
   - **The drop line works as on desktop (call).** A move drops where it shows, and an item
     dropped over its own place stays as it is in the file.
