@@ -23,8 +23,11 @@ export function shownRows(listEl: HTMLElement): ShownRow[] {
 	}));
 }
 
-/** A dragged item's drop, a dragged heading's, which moves its whole section, or a dragged selection's. */
-export type RowDrop = { item: Drop } | { section: SectionDrop } | { group: GroupDrop };
+/**
+ * A dragged item's drop, a dragged heading's, which moves its whole section, or a dragged selection's,
+ * with the rows the drag carries at their lines when it was aimed.
+ */
+export type RowDrop = { item: Drop } | { section: SectionDrop } | { group: GroupDrop; rows: readonly number[] };
 
 export function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { line: number; below: boolean }): RowDrop | null {
 	if (dragged.kind === 'heading') {
@@ -38,7 +41,7 @@ export function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { l
 /** A dragged selection's drop, aimed as groupDropAt aims it with the rows on `moving`. */
 export function aimGroupDrop(shown: readonly ShownRow[], moving: readonly number[], over: { line: number; below: boolean }): RowDrop | null {
 	const group = groupDropAt(shown, moving, over);
-	return group && { group };
+	return group && { group, rows: moving };
 }
 
 // Takes the drop line off `marked` and shows it for `drop`. Returns the element that shows it now.
@@ -55,13 +58,12 @@ export function markDrop(listEl: HTMLElement, marked: HTMLElement | null, drop: 
 export function queueDrop(view: PrinceListView, line: number, drop: RowDrop): void {
 	if ('item' in drop) queueMove(view, line, drop.item.place);
 	else if ('section' in drop) queueSectionMove(view, line, drop.section.before);
-	else queueSelectionDrop(view, line, drop.group.place);
+	else queueSelectionDrop(view, drop.rows, drop.group.place);
 }
 
-// The selection the drag carried, as it is now, which the message counts: a selected heading's
-// selected items come with it, so they aren't counted.
-function queueSelectionDrop(view: PrinceListView, line: number, place: GroupPlace): void {
-	const rows = view.selection.linesWith(line) ?? [line];
+// The message counts what moves by name: a selected heading's selected items come with it, so they
+// aren't counted.
+function queueSelectionDrop(view: PrinceListView, rows: readonly number[], place: GroupPlace): void {
 	const { items, headings } = groupCount(view.text, contentStartLine(view.text), rows);
 	queueGroupMove(view, rows, place, `${countPhrase(items, headings)} moved.`);
 }
