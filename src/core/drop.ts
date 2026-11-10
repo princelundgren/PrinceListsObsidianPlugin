@@ -1,3 +1,4 @@
+import type { GroupPlace } from './group-actions';
 import type { ItemPlace } from './list-actions';
 
 /** A row or heading the view shows, by its first line. Hidden rows aren't shown. */
@@ -77,6 +78,30 @@ export function sectionDropAt(shown: readonly ShownRow[], dragged: number, over:
 	if (before?.line === dragged || before?.line === next?.line) return null;
 	if (before) return { before: before.line, line: before.line, above: true };
 	return { before: null, line: (shown[shown.length - 1] as ShownRow).line, above: false };
+}
+
+/** Where a dragged selection goes, and the row the drop line shows under, or above when `above`. */
+export interface GroupDrop {
+	place: GroupPlace;
+	line: number;
+	above: boolean;
+}
+
+/**
+ * The drop for the pointer over the shown row on `over.line` while the rows on `moving` are dragged,
+ * read without the moving rows. A selection with a heading goes as sections, before the first heading
+ * shown at or after the gap, or to the end under the last row; any other goes as items, as dropAt
+ * places one. A drop that would change nothing still aims. null when the line isn't shown or is moving.
+ */
+export function groupDropAt(shown: readonly ShownRow[], moving: readonly number[], over: { line: number; below: boolean }): GroupDrop | null {
+	const kept = shown.filter((row) => !moving.includes(row.line));
+	const at = kept.findIndex((row) => row.line === over.line);
+	if (at === -1) return null;
+	const gap = over.below ? at + 1 : at;
+	if (!shown.some((row) => row.kind === 'heading' && moving.includes(row.line))) return dropAbove(kept, gap);
+	const before = kept.slice(gap).find((row) => row.kind === 'heading');
+	if (before) return { place: { beforeSection: before.line }, line: before.line, above: true };
+	return { place: { beforeSection: null }, line: (kept[kept.length - 1] as ShownRow).line, above: false };
 }
 
 // The drop for the gap before shown[gap]: after the nearest item above it, or first under the nearest
