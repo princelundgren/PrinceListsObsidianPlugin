@@ -6,6 +6,9 @@ import { stepField } from './field-undo';
 import type { PrinceListView } from './list-view';
 import { enqueueAt, writeAction } from './write';
 
+/** Said when the list's last edit can't be taken back. */
+export const CANT_UNDO_NOTICE = "This list changed elsewhere, so it can't be undone.";
+
 // Cmd+Z and Cmd+Shift+Z while the view has focus (spec, "Saving, outside changes, sync conflicts,
 // undo"). Each returns false, so Obsidian cancels the key's default, or true to leave the key to a
 // field.
@@ -14,8 +17,13 @@ export function undoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
 	if (isInField(evt)) return true;
 	// Closing the card removes the item, which is the undo of adding it.
 	if (isNewEmptyItem(view)) closeCard(view);
-	else writeStep(view, (text) => view.editing.history.undo(text), "This list changed elsewhere, so it can't be undone.");
+	else undoStep(view);
 	return false;
+}
+
+/** Takes the list's last edit back, as Cmd+Z does outside a field, on the view's write queue. */
+export function undoStep(view: PrinceListView): void {
+	writeStep(view, (text) => view.editing.history.undo(text), CANT_UNDO_NOTICE);
 }
 
 export function redoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
