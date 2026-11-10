@@ -124,6 +124,19 @@ describe('planGroupDelete', () => {
 		expect(followLine(5, undo.edit)).toBe(7);
 	});
 
+	test('the undo maps lines back past an item with notes', () => {
+		const text = FRONT + '- [ ] x\n- [ ] a\n  n1\n  n2\n- [ ] b\n';
+		for (const rows of [[4], [4, 7]]) {
+			const plan = planGroupDelete(text, 3, rows);
+			if (!plan) throw new Error('expected a delete');
+			const history = new EditHistory();
+			history.wrote(text, plan.next, plan.edit);
+			const undo = history.undo(plan.next);
+			if (!undo) throw new Error('expected an undo');
+			expect(followLine(3, undo.edit)).toBe(3);
+		}
+	});
+
 	test('deleting one row is the single delete', () => {
 		expect(planGroupDelete(TEXT, 3, [3])?.next).toBe(planItemDelete(TEXT, 3, 3)?.next);
 		expect(planGroupDelete(TEXT, 3, [6])?.next).toBe(planHeadingDelete(TEXT, 3, 6)?.next);
