@@ -24,7 +24,7 @@ import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
-import { registerFieldEvents } from './events';
+import { registerFieldEvents, swallowClickAfterHold } from './events';
 import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
@@ -203,7 +203,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		if (Platform.isMobile) enableTouchDrag(dragHost);
 		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
 		this.newItemButton = buildNewItemButton(this, newItemLabel);
-		if (Platform.isMobile) buildSelectionBar(this);
+		if (Platform.isMobile) swallowClickAfterHold(this, buildSelectionBar(this));
 		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
 		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.
