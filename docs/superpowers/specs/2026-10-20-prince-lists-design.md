@@ -994,10 +994,10 @@ needs no code.
 - **Undo (1b, call):**
   - Cmd+Z and Cmd+Shift+Z step through the plugin's own edits, using the same guarded write.
   - They're keys only, with no Undo or Redo command **(owner, 2026-10-22)**, so without a keyboard
-    the list's undo on mobile is the Undo button after a delete or any action from the selection's
-    bar ([selecting several rows](2026-11-07-select-several-design.md), "The actions"). A card's
-    notes have no Undo or Redo button either **(owner, 2026-11-05)** (step two, "Formatting in a
-    card").
+    the list's undo on mobile is the Undo button after a delete, any action from the selection's
+    bar, or a drag of the selection ([selecting several rows](2026-11-07-select-several-design.md),
+    "The actions"). A card's notes have no Undo or Redo button either **(owner, 2026-11-05)** (step
+    two, "Formatting in a card").
   - The history is cleared when the file changes from outside, so undo never throws away someone
     else's change.
   - Typing in a field makes one step for each time the field has focus, and so does each visit to
