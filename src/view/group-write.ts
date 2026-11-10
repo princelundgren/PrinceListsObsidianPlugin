@@ -8,15 +8,16 @@ import { CHANGED_ELSEWHERE_NOTICE, writePlanned } from './write';
 
 /**
  * Shows `message` with an Undo button that takes the list's last edit back, as Cmd+Z does, while the
- * list still holds `after`, the text the action left; otherwise the button says it can't be undone.
- * The check and the undo run in one slot of the view's write queue, so a write queued before the
- * click lands first.
+ * list still holds `after`, the text the action left. It does nothing once the list holds `before`
+ * again, as after Cmd+Z, and on any other change says it can't be undone. The check and the undo
+ * run in one slot of the view's write queue, so a write queued before the click lands first.
  */
-export function offerGroupUndo(view: PrinceListView, message: string, after: string): void {
+export function offerGroupUndo(view: PrinceListView, message: string, before: string, after: string): void {
 	const file = view.file;
 	showUndoNotice(message, () =>
 		void view.enqueue(async () => {
 			const sameFile = !view.viewClosed && view.file === file;
+			if (sameFile && view.text === before) return;
 			if (sameFile && view.text === after) await undoNow(view);
 			else new Notice(CANT_UNDO_NOTICE);
 		}),
@@ -49,14 +50,17 @@ export function queueGroupAction<T extends PlannedGroupEdit>(
 				new Notice(CHANGED_ELSEWHERE_NOTICE);
 				return;
 			}
+			// The text the written plan was made from: a rerun after typing plans again.
+			let before = view.text;
 			const written = await writePlanned(view, (text) => {
+				before = text;
 				const lines = linesNow();
 				return lines && plan(text, contentStartLine(text), lines);
 			});
 			if (!written) return;
 			// Obsidian's echo of the write returns early in setViewData, so the view draws the change.
 			view.render();
-			offerGroupUndo(view, message(written), written.next);
+			offerGroupUndo(view, message(written), before, written.next);
 		} finally {
 			for (const row of tracked) view.editing.untrack(row);
 		}
