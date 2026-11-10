@@ -149,7 +149,8 @@ function stillSectionBefore(model: ListModel, group: Group, index: number): Sect
 }
 
 // Each loose item after the one before it, the first to the landing place; then each section before
-// the first heading after the landing section that isn't moving. A step that changes nothing is skipped.
+// the first heading after the landing section that isn't moving. A step that changes nothing is
+// skipped, and so are the sections that already end the run before that heading in order.
 function steps(text: string, contentStart: number, model: ListModel, group: Group, landing: Landing): OwnEdit[] {
 	const edits: OwnEdit[] = [];
 	let running = text;
@@ -165,10 +166,22 @@ function steps(text: string, contentStart: number, model: ListModel, group: Grou
 		place = { after: item.titleLine };
 	}
 	const before = stillSectionFrom(model, group, model.sections.indexOf(landing.section) + 1)?.headingLine ?? null;
-	for (const section of group.sections) {
-		take(planSectionMove(running, contentStart, now(section.headingLine as number), before === null ? null : now(before)));
+	for (const [index, section] of group.sections.entries()) {
+		const to = before === null ? null : now(before);
+		const rest = group.sections.slice(index).map((moving) => now(moving.headingLine as number));
+		if (inPlace(running, contentStart, rest, to)) break;
+		take(planSectionMove(running, contentStart, now(section.headingLine as number), to));
 	}
 	return edits;
+}
+
+// Whether the sections on `headings` already follow one another in that order right before the
+// heading on `before`, or at the end when null, so moving them there would only move empty lines.
+function inPlace(text: string, contentStart: number, headings: readonly number[], before: number | null): boolean {
+	const order = parseList(splitLines(text), contentStart).sections.map((section) => section.headingLine);
+	const from = order.indexOf(headings[0] as number);
+	const to = before === null ? order.length : order.indexOf(before);
+	return from !== -1 && to - from === headings.length && headings.every((heading, k) => order[from + k] === heading);
 }
 
 function placeNow(place: ItemPlace, now: (line: number) => number): ItemPlace {

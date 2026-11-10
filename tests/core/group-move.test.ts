@@ -92,9 +92,11 @@ describe('planGroupMove', () => {
 				}
 			}
 			const headings = model.sections.flatMap((s) => (s.headingLine === null ? [] : [s.headingLine]));
-			for (const heading of headings) {
+			for (const [index, heading] of headings.entries()) {
+				// The section's own place, which the heading drag never aims at: the group move writes nothing.
+				const own = headings[index + 1] ?? null;
 				for (const before of [...headings.filter((h) => h !== heading), null]) {
-					const single = outcome(() => planSectionMove(text, contentStart, heading, before));
+					const single = before === own ? null : outcome(() => planSectionMove(text, contentStart, heading, before));
 					const group = outcome(() => planGroupMove(text, contentStart, [heading], { beforeSection: before }));
 					expect(group, JSON.stringify({ text, row: heading, before })).toBe(single);
 				}
@@ -128,6 +130,19 @@ describe('planGroupMove', () => {
 	test('adds an empty line only where the final arrangement needs one', () => {
 		const text = 'Set\n===\n- [ ] s\n## H\n- [ ] h\n## K\n- [ ] i\n';
 		expect(planGroupMove(text, 0, [3, 6], { beforeSection: 0 })?.next).toBe('- [ ] i\n## H\n- [ ] h\n\nSet\n===\n- [ ] s\n## K\n');
+	});
+
+	test("leaves a section the drop puts where it already is, its empty lines included", () => {
+		const text = FRONT + '- [ ] Loose one\n- [ ] Loose two\n\n## Alpha\n- [ ] A1\n  a note line\n- [ ] A2\n- [ ] A3\n\n## Beta\n- [ ] B1\n- [ ] B2\n\n## Gamma\n- [ ] G1\n- [ ] G2\n';
+		expect(planGroupMove(text, 3, [12], { beforeSection: 16 })).toBeNull();
+		expect(planGroupMove(text, 3, [4, 12], { beforeSection: 16 })?.next).toBe(planItemMove(text, 3, 4, { after: 10 })?.next);
+	});
+
+	test('leaves sections that already end the run before the place in order, and moves the rest', () => {
+		const text = FRONT + '## B\n- [ ] b\n## C\n- [ ] c\n## D\n- [ ] d\n';
+		expect(planGroupMove(text, 3, [3, 5], { beforeSection: 7 })).toBeNull();
+		expect(planGroupMove(text, 3, [5, 7], { beforeSection: null })).toBeNull();
+		expect(body(planGroupMove(text, 3, [3, 7], { beforeSection: null })?.next)).toBe('## C\n- [ ] c\n## B\n- [ ] b\n## D\n- [ ] d\n');
 	});
 
 	test('maps each line', () => {
