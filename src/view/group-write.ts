@@ -3,18 +3,24 @@ import type { PlannedGroupEdit } from '../core/group-actions';
 import { contentStartLine } from '../obsidian/marker';
 import { showUndoNotice } from './delete';
 import type { PrinceListView } from './list-view';
-import { CANT_UNDO_NOTICE, undoStep } from './undo';
+import { CANT_UNDO_NOTICE, undoNow } from './undo';
 import { CHANGED_ELSEWHERE_NOTICE, writePlanned } from './write';
 
 /**
  * Shows `message` with an Undo button that takes the list's last edit back, as Cmd+Z does, while the
  * list still holds `after`, the text the action left; otherwise the button says it can't be undone.
+ * The check and the undo run in one slot of the view's write queue, so a write queued before the
+ * click lands first.
  */
 export function offerGroupUndo(view: PrinceListView, message: string, after: string): void {
-	showUndoNotice(message, () => {
-		if (view.text === after) undoStep(view);
-		else new Notice(CANT_UNDO_NOTICE);
-	});
+	const file = view.file;
+	showUndoNotice(message, () =>
+		void view.enqueue(async () => {
+			const sameFile = !view.viewClosed && view.file === file;
+			if (sameFile && view.text === after) await undoNow(view);
+			else new Notice(CANT_UNDO_NOTICE);
+		}),
+	);
 }
 
 /**
