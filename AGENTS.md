@@ -18,7 +18,8 @@ this project.
     and why, and [step two's design](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md)
     adds what step two builds. [Notes in one editor](docs/superpowers/specs/2026-10-29-notes-in-one-editor-design.md)
     replaced step two's block-at-a-time notes. [Filtering by tag](docs/superpowers/specs/2026-11-07-tag-filter-design.md)
-    shows items' tags on rows and cards, and filters a list and the Schedule by them.
+    shows items' tags on rows and cards, and filters a list and the Schedule by them. [Selecting several rows](docs/superpowers/specs/2026-11-07-select-several-design.md)
+    acts on many items and headings at once.
     - Decisions marked **(owner)** are the maintainer's. Don't change one without an issue the
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
