@@ -67,7 +67,7 @@ export function groupCount(text: string, contentStart: number, rows: readonly nu
 
 /**
  * The heading of the section a group move of the rows on `rows` to `place` puts its loose items in,
- * which a collapsed list opens to show them. null with no loose items, when they land before the
+ * so the view can open it to show them. null with no loose items, when they land before the
  * first heading, or when a row or the place is gone.
  */
 export function landingHeading(text: string, contentStart: number, rows: readonly number[], place: GroupPlace): number | null {

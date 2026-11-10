@@ -27,6 +27,15 @@ describe('RowSelection', () => {
 		expect(selection.anchor).toBe(3);
 	});
 
+	test('linesWith gives the selected lines for a row in a selection of two or more', () => {
+		const { selection } = selectionIn(TEXT);
+		selection.toggle(7);
+		expect(selection.linesWith(7)).toBeNull();
+		selection.toggle(3);
+		expect(selection.linesWith(7)).toEqual([3, 7]);
+		expect(selection.linesWith(5)).toBeNull();
+	});
+
 	test('selectRange selects the shown rows from the anchor', () => {
 		const { selection } = selectionIn(TEXT);
 		selection.setAnchor(4);

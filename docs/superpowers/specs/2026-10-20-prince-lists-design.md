@@ -802,6 +802,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
     It passes over content the plugin leaves alone, since a drag changes only the order of items.
     Dropped where it already shows, the item stays as it is in the file.
   - **A link or picture in a title drags as itself (call),** as in any note, not the row.
+  - **A drag of a selected row moves every selected row,** as one block with one Undo, and a drag
+    of a row outside the selection drags it alone and clears the selection ([selecting several
+    rows](2026-11-07-select-several-design.md), "Dragging the selection").
 - **Mobile (1b, owner):**
   - Hold an item and then move to drag it.
   - Holding an item row never opens a menu.

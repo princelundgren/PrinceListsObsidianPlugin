@@ -202,6 +202,25 @@ textarea.princelists-title {
 	transform: translateY(var(--princelists-lift, 0px));
 }
 
+/* How many rows a dragged selection carries, on the row it lifts, at the row's end. */
+.princelists-item[data-princelists-count]::after,
+.princelists-heading[data-princelists-count]::after {
+	content: attr(data-princelists-count);
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline-end: var(--size-4-1);
+	transform: translateY(-50%);
+	min-width: 1.6em;
+	padding: 0 var(--size-4-1);
+	border-radius: var(--radius-m);
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-bold);
+	line-height: 1.6em;
+	text-align: center;
+}
+
 /* A rendered title or heading is one paragraph, laid out as the line it replaces. */
 .princelists-item-title p,
 .princelists-heading p {

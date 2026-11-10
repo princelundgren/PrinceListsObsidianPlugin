@@ -2,19 +2,24 @@ import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { targetOf } from './dom';
 import { liftInPlace, type RowDragHost } from './drag-host';
-import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
+import { aimDrop, aimGroupDrop, markDrop, shownRows, type RowDrop } from './move';
 import { isInNestedBlock, ownClosest } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
 
 // Each row's drag carries a type of its own, this one with a random token added. Other drags, such as
 // a file's or a row's from another vault window, which has its own `current`, are left alone.
 const DRAG_TYPE = 'application/x-princelists-item';
+// On the row a dragged selection lifts: how many rows it carries, which styles.css draws.
+const COUNT_ATTR = 'data-princelists-count';
 
 interface MouseDrag {
 	host: RowDragHost;
 	type: string;
 	/** The dragged item's title line, or heading's line, as the drawn rows number it; null once it can't drop. */
 	row: TrackedLine;
+	rowEl: HTMLElement;
+	/** The other selected rows a dragged selection carries, as `row` is tracked; empty for one row. */
+	others: TrackedLine[];
 	kind: ShownRow['kind'];
 	drop: RowDrop | null;
 	/** The row or heading that shows the drop line. */
@@ -72,6 +77,8 @@ function endDrag(): void {
 	if (!current) return;
 	if (current.liftTimer !== null) window.clearTimeout(current.liftTimer);
 	current.host.untrack(current.row);
+	for (const other of current.others) current.host.untrack(other);
+	current.rowEl.removeAttribute(COUNT_ATTR);
 	showDrop(current, null);
 	current = null;
 }
@@ -86,7 +93,11 @@ function startDrag(host: RowDragHost, evt: DragEvent): MouseDrag | null {
 	const type = `${DRAG_TYPE}-${Math.random().toString(36).slice(2)}`;
 	evt.dataTransfer.setData(type, '');
 	evt.dataTransfer.effectAllowed = 'move';
-	const drag: MouseDrag = { host, type, row: host.track(line), kind, drop: null, marked: null, liftTimer: null };
+	const carried = host.dragged(line);
+	const others = carried.filter((other) => other !== line).map((other) => host.track(other));
+	const drag: MouseDrag = { host, type, row: host.track(line), rowEl: row, others, kind, drop: null, marked: null, liftTimer: null };
+	// Set during dragstart, so the image the browser takes of the row as it returns shows it too.
+	if (others.length > 0) row.setAttr(COUNT_ATTR, String(carried.length));
 	// After dragstart returns: Chromium cancels the drag if the row has moved from under the press (spec, "Dragging").
 	drag.liftTimer = window.setTimeout(() => {
 		drag.liftTimer = null;
@@ -117,11 +128,18 @@ function aim(drag: MouseDrag, evt: DragEvent): void {
 	const line = over ? lineOf(over) : null;
 	if (dragged === null || !over || line === null) return;
 	const { top, height } = over.getBoundingClientRect();
-	const below = evt.clientY > top + height / 2;
-	showDrop(drag, aimDrop(shownRows(drag.host.rowsEl), { line: dragged, kind: drag.kind }, { line, below }));
+	const at = { line, below: evt.clientY > top + height / 2 };
+	const shown = shownRows(drag.host.rowsEl);
+	if (drag.others.length === 0) showDrop(drag, aimDrop(shown, { line: dragged, kind: drag.kind }, at));
+	else showDrop(drag, aimGroupDrop(shown, [dragged, ...linesOf(drag.others)], at));
 }
 
 function showDrop(drag: MouseDrag, drop: RowDrop | null): void {
 	drag.marked = markDrop(drag.host.rowsEl, drag.marked, drop);
 	drag.drop = drop;
+}
+
+// The lines of the rows that are still there.
+function linesOf(rows: readonly TrackedLine[]): number[] {
+	return rows.flatMap((row) => (row.line === null ? [] : [row.line]));
 }
