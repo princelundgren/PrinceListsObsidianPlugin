@@ -681,7 +681,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 - **Selecting (call):** clicking an item, anywhere except its checkbox, the zone beside it
   ("Ticking") or a link in its title, opens its card and selects it. Clicking empty space closes
-  the card and clears the selection.
+  the card and clears the selection. While selecting on mobile, a tap on empty space keeps the
+  selection ([selecting several rows](2026-11-07-select-several-design.md), "On mobile").
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A
@@ -773,7 +774,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
 - **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On
-  mobile this is the only way to reach them **(owner)**. The button's accessible name is "Item
+  mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move
+  to, Tick, Star, Date and Delete for them through the selection's bar ([selecting several
+  rows](2026-11-07-select-several-design.md), "On mobile"). The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading and Delete heading **(owner, 2026-10-20)**. Step two adds Edit in Markdown, Collapse all
