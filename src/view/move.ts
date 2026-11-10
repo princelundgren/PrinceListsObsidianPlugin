@@ -1,5 +1,6 @@
 import { Notice } from 'obsidian';
 import { dropAt, groupDropAt, sectionDropAt, type Drop, type GroupDrop, type SectionDrop, type ShownRow } from '../core/drop';
+import type { TrackedLine } from '../core/editing';
 import { groupCount, landingHeading, planGroupMove, type GroupPlace } from '../core/group-actions';
 import { countPhrase } from '../core/group-edits';
 import { planItemMove, planSectionMove, type ItemPlace } from '../core/list-actions';
@@ -38,8 +39,23 @@ export function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { l
 	return item && { item };
 }
 
-/** A dragged selection's drop, aimed as groupDropAt aims it with the rows on `moving`. */
-export function aimGroupDrop(shown: readonly ShownRow[], moving: readonly number[], over: { line: number; below: boolean }): RowDrop | null {
+/**
+ * The drop for a drag aimed `over` a row: a dragged selection's when the drag carries `others`, aimed
+ * with those still there, else the dragged row's own.
+ */
+export function aimCarried(
+	shown: readonly ShownRow[],
+	dragged: ShownRow,
+	others: readonly TrackedLine[],
+	over: { line: number; below: boolean },
+): RowDrop | null {
+	if (others.length === 0) return aimDrop(shown, dragged, over);
+	const carried = others.flatMap((row) => (row.line === null ? [] : [row.line]));
+	return aimGroupDrop(shown, [dragged.line, ...carried], over);
+}
+
+// A dragged selection's drop, aimed as groupDropAt aims it with the rows on `moving`.
+function aimGroupDrop(shown: readonly ShownRow[], moving: readonly number[], over: { line: number; below: boolean }): RowDrop | null {
 	const group = groupDropAt(shown, moving, over);
 	return group && { group, rows: moving };
 }

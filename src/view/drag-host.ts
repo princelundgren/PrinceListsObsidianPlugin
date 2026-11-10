@@ -5,6 +5,9 @@ import type { PrinceListView } from './list-view';
 import { queueDrop, type RowDrop } from './move';
 import { clearSelection, selectOnHold } from './select';
 
+/** On the row a dragged selection lifts: how many rows it carries, which styles.css draws. */
+export const COUNT_ATTR = 'data-princelists-count';
+
 /** What dragging rows needs from the list view or a block showing a list. */
 export interface RowDragHost {
 	/** Owns the drag's listeners. */

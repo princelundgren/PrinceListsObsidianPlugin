@@ -1,16 +1,14 @@
 import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { targetOf } from './dom';
-import { liftInPlace, type RowDragHost } from './drag-host';
-import { aimDrop, aimGroupDrop, markDrop, shownRows, type RowDrop } from './move';
+import { COUNT_ATTR, liftInPlace, type RowDragHost } from './drag-host';
+import { aimCarried, markDrop, shownRows, type RowDrop } from './move';
 import { isInNestedBlock, ownClosest } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
 
 // Each row's drag carries a type of its own, this one with a random token added. Other drags, such as
 // a file's or a row's from another vault window, which has its own `current`, are left alone.
 const DRAG_TYPE = 'application/x-princelists-item';
-// On the row a dragged selection lifts: how many rows it carries, which styles.css draws.
-const COUNT_ATTR = 'data-princelists-count';
 
 interface MouseDrag {
 	host: RowDragHost;
@@ -129,17 +127,10 @@ function aim(drag: MouseDrag, evt: DragEvent): void {
 	if (dragged === null || !over || line === null) return;
 	const { top, height } = over.getBoundingClientRect();
 	const at = { line, below: evt.clientY > top + height / 2 };
-	const shown = shownRows(drag.host.rowsEl);
-	if (drag.others.length === 0) showDrop(drag, aimDrop(shown, { line: dragged, kind: drag.kind }, at));
-	else showDrop(drag, aimGroupDrop(shown, [dragged, ...linesOf(drag.others)], at));
+	showDrop(drag, aimCarried(shownRows(drag.host.rowsEl), { line: dragged, kind: drag.kind }, drag.others, at));
 }
 
 function showDrop(drag: MouseDrag, drop: RowDrop | null): void {
 	drag.marked = markDrop(drag.host.rowsEl, drag.marked, drop);
 	drag.drop = drop;
-}
-
-// The lines of the rows that are still there.
-function linesOf(rows: readonly TrackedLine[]): number[] {
-	return rows.flatMap((row) => (row.line === null ? [] : [row.line]));
 }
