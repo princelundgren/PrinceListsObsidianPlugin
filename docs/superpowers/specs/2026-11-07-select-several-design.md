@@ -155,8 +155,9 @@ nothing is written in the background, and only documented Obsidian APIs are used
   the items that need it. A repeating item, which can't be ticked here today, is skipped, and a
   message says how many were.
 - **Set date to today, Set date to tomorrow, Set date… and Remove date (call),** as on one item. Set
-  date… can't open a card for several items, so it opens a date picker of its own; which documented
-  route shows one is a risk below.
+  date… can't open a card for several items, so it opens a date picker of its own, titled "Set
+  date" with the buttons Cancel and Set **(call)**; which documented route shows one is a risk
+  below.
 - **Delete (call)** names what goes, such as "Delete 5 items" or "Delete 4 items and 1 heading", in
   red as today. A selected heading goes and keeps its items unless they're selected too, as Delete
   heading does.
