@@ -202,7 +202,7 @@ Each in the pull request that makes it untrue:
   while selecting on mobile a tap on a heading selects it.
 - **Step two, "Collapsing a heading":** while selecting on mobile, a tap on a heading selects it;
   Move to heading… expands a collapsed target.
-- **AGENTS.md, "Read before working":** this design, once approved.
+- **AGENTS.md, "Read before working":** links this design.
 
 ## Risks to check during the build
 
@@ -224,8 +224,9 @@ Each in the pull request that makes it untrue:
 4. **Hold and let go:** that a still hold let go reaches the view on iOS and Android after
    Obsidian's own `contextmenu` and its haptic, and that the tap after it is still swallowed (step
    one, "Touch on mobile").
-   - **Result:** on Android, a still hold let go starts selecting and the tap after it is
-     swallowed. Not checked on an iPhone or an iPad.
+   - **Result:** on Android, a still hold let go starts selecting. No tap follows a long press
+     there, so whether the tap after it is swallowed isn't shown. Not checked on an iPhone or an
+     iPad.
 5. **Android's back gesture** ending selection: only if Obsidian documents a way to hear it;
    otherwise Done alone ends it.
    - **Result:** Obsidian documents no way for a plugin to hear Back, so Done ends selecting. On
