@@ -4,6 +4,7 @@ import { closeCard } from './card';
 import type { PrinceListView } from './list-view';
 import { queueDrop, type RowDrop } from './move';
 import { clearSelection, selectOnHold } from './select';
+import { shownSelectionBar } from './selection-bar';
 
 /** On the row a dragged selection lifts: how many rows it carries, which styles.css draws. */
 export const COUNT_ATTR = 'data-princelists-count';
@@ -14,7 +15,7 @@ export interface RowDragHost {
 	readonly component: Component;
 	/** Holds every row and heading that drags. */
 	readonly rowsEl: HTMLElement;
-	/** The scroller a touch drag scrolls at its edges, and the element whose top is where it stops being visible. */
+	/** The scroller a touch drag scrolls at its edges, and the element whose top is where it stops being visible, read on each step. */
 	readonly edgeScroll: { scrollEl: HTMLElement; visibleBottomEl: HTMLElement } | null;
 	/** The scroller a lift scrolls to keep the row in place, or null where it is Obsidian's, as in a note. */
 	readonly liftScrollEl: HTMLElement | null;
@@ -49,7 +50,7 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 	return {
 		component: view,
 		rowsEl: view.listScrollEl,
-		edgeScroll: Platform.isMobile ? { scrollEl: view.listScrollEl, visibleBottomEl: visibleBottom(view) } : null,
+		edgeScroll: Platform.isMobile ? listEdgeScroll(view) : null,
 		liftScrollEl: view.listScrollEl,
 		dragsHeadings: true,
 		get swallowNextClick() {
@@ -96,6 +97,17 @@ export function liftInPlace(host: RowDragHost, row: HTMLElement): void {
 	const rowTop = row.getBoundingClientRect().top;
 	host.beforeLift();
 	if (host.liftScrollEl && row.isConnected) host.liftScrollEl.scrollTop += row.getBoundingClientRect().top - rowTop;
+}
+
+// While selecting, the list stops being visible at the selection's bar, which sits above the marker.
+function listEdgeScroll(view: PrinceListView): NonNullable<RowDragHost['edgeScroll']> {
+	const marker = visibleBottom(view);
+	return {
+		scrollEl: view.listScrollEl,
+		get visibleBottomEl() {
+			return shownSelectionBar(view) ?? marker;
+		},
+	};
 }
 
 // Its top is where the list stops being visible: mobile's floating navbar covers the bottom of the

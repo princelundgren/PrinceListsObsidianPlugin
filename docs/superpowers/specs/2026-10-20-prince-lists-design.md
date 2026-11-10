@@ -1238,7 +1238,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   - A lift takes the selection it carries, or ends it for a row outside, only once the finger has
     moved more than 5 px, since letting go before then selects instead.
   - **The edge scroll (call)** starts 56 px from the top of the list or from where it stops being
-    visible, and speeds up linearly to 12 px a frame at the edge and beyond.
+    visible, and speeds up linearly to 12 px a frame at the edge and beyond. While selecting, the
+    list stops being visible at the top of the selection's bar.
   - Kanban's `src/dnd/managers/DragManager.ts` is the reference.
   - Obsidian's own drag manager isn't public.
 - **A long-press on a folder in the mobile file explorer reaches `file-menu`,** with source

@@ -55,6 +55,11 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 	return el;
 }
 
+/** Mobile's bar while the view is selecting, which covers the list's bottom; null otherwise. */
+export function shownSelectionBar(view: PrinceListView): HTMLElement | null {
+	return view.selecting ? (bars.get(view)?.el ?? null) : null;
+}
+
 /**
  * Shows the bar while the view is selecting, with how many rows are selected and each button enabled
  * only while it has something to act on, and marks the view's content so checkboxes show as selection
