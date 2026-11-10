@@ -67,16 +67,22 @@ export function keepTextUnselected(view: PrinceListView, evt: MouseEvent): void 
 
 /**
  * Moves the range's far end one shown row up (-1) or down (1), from the open card's item when a card
- * is open, which closes. Returns false, doing nothing, when there is no anchor.
+ * is open, which closes. Returns whether it moved: false when the anchor isn't a shown row, such as
+ * an empty new item that closing its card removed.
  */
 export function extendSelection(view: PrinceListView, step: 1 | -1): boolean {
 	const cardLine = closeCardForSelection(view);
 	if (cardLine !== null) view.selection.setAnchor(cardLine);
-	if (view.selection.anchor === null) return false;
-	view.selection.extend(step, selectableLines(view));
-	focusList(view);
-	drawSelection(view);
-	return true;
+	const shown = selectableLines(view);
+	const anchor = view.selection.anchor;
+	const moves = anchor !== null && shown.includes(anchor);
+	if (moves) {
+		view.selection.extend(step, shown);
+		drawSelection(view);
+	}
+	// A card that closed took focus with it.
+	if (moves || cardLine !== null) focusList(view);
+	return moves;
 }
 
 /** Ends the selection. Returns whether any row was selected. */
