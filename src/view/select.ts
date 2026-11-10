@@ -7,8 +7,8 @@ import { shownRows } from './move';
 import { ownClosest, ownElements } from './own-rows';
 import { CHECKBOX_CLASS, END_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, LINE_ATTR, lineOf, TICK_SELECTOR } from './render-list';
 
-/** The class on a selected row or heading. */
-export const SELECTED_CLASS = 'princelists-selected';
+// The class on a selected row or heading.
+const SELECTED_CLASS = 'princelists-selected';
 const STATUS_CLASS = 'princelists-selection-status';
 const ROW_SELECTOR = `.${ITEM_CLASS}[${LINE_ATTR}], .${HEADING_CLASS}[${LINE_ATTR}]`;
 

@@ -21,8 +21,8 @@ export function undoKey(view: PrinceListView, evt: KeyboardEvent): boolean {
 	return false;
 }
 
-/** Takes the list's last edit back, as Cmd+Z does outside a field, on the view's write queue. */
-export function undoStep(view: PrinceListView): void {
+// Takes the list's last edit back, as Cmd+Z does outside a field, on the view's write queue.
+function undoStep(view: PrinceListView): void {
 	enqueueAt(view, null, () => undoNow(view));
 }
 

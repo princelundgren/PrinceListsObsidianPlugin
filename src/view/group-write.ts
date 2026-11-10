@@ -6,14 +6,12 @@ import type { PrinceListView } from './list-view';
 import { CANT_UNDO_NOTICE, undoNow } from './undo';
 import { CHANGED_ELSEWHERE_NOTICE, writePlanned } from './write';
 
-/**
- * Shows `message` with an Undo button that takes the list's last edit back, as Cmd+Z does, while that
- * edit is still the action's: the list holds `after`, the text the action left, and Cmd+Z would bring
- * back `before`. It does nothing once the list holds `before` again, as after Cmd+Z, and on any other
- * change, a later edit that left the same text included, says it can't be undone. The check and the
- * undo run in one slot of the view's write queue, so a write queued before the click lands first.
- */
-export function offerGroupUndo(view: PrinceListView, message: string, before: string, after: string): void {
+// Shows `message` with an Undo button that takes the list's last edit back, as Cmd+Z does, while that
+// edit is still the action's: the list holds `after`, the text the action left, and Cmd+Z would bring
+// back `before`. It does nothing once the list holds `before` again, as after Cmd+Z, and on any other
+// change, a later edit that left the same text included, says it can't be undone. The check and the
+// undo run in one slot of the view's write queue, so a write queued before the click lands first.
+function offerGroupUndo(view: PrinceListView, message: string, before: string, after: string): void {
 	const file = view.file;
 	showUndoNotice(message, () =>
 		void view.enqueue(async () => {

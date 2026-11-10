@@ -30,7 +30,7 @@ export function shownRows(listEl: HTMLElement): ShownRow[] {
  */
 export type RowDrop = { item: Drop } | { section: SectionDrop } | { group: GroupDrop; rows: readonly number[] };
 
-export function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { line: number; below: boolean }): RowDrop | null {
+function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { line: number; below: boolean }): RowDrop | null {
 	if (dragged.kind === 'heading') {
 		const section = sectionDropAt(shown, dragged.line, over);
 		return section && { section };
