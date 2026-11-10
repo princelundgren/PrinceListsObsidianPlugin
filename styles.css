@@ -554,8 +554,8 @@ textarea.princelists-title {
 	padding-inline: var(--size-4-3);
 }
 
-/* It takes focus so that the view's keys and Escape reach it once a click selects rows; the rows'
-   background shows the selection. */
+/* It takes focus so that the view's keys and Escape reach it once a click selects rows, and when its
+   tab becomes active; the rows' background shows the selection. */
 .princelists-scroll:focus {
 	outline: none;
 }

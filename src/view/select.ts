@@ -123,6 +123,20 @@ export function newItemBelowSelection(view: PrinceListView): void {
 	else newItem(view);
 }
 
+/**
+ * Focuses the list each time the view's leaf becomes active, such as from its tab, when nothing in the
+ * view has focus and no card, heading field or filter is open, so the view's keys and Escape reach it.
+ */
+export function focusListWhenActive(view: PrinceListView): void {
+	view.registerEvent(
+		view.app.workspace.on('active-leaf-change', (leaf) => {
+			if (leaf !== view.leaf || view.card || view.headingField || view.filterField) return;
+			if (view.containerEl.contains(view.containerEl.doc.activeElement)) return;
+			focusList(view);
+		}),
+	);
+}
+
 // The open card's item, closing the card, or null with no card open.
 function closeCardForSelection(view: PrinceListView): number | null {
 	if (!view.card) return null;

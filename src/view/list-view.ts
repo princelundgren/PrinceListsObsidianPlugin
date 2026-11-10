@@ -33,6 +33,7 @@ import type { HeadingField } from './heading-field';
 import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
+import { focusListWhenActive } from './select';
 import type { TagSuggest } from './tag-suggest';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
@@ -109,7 +110,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	) {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
-		// Focusable, but not in the tab order, so focus stays in the view when a click selects rows (select.ts).
+		// Focusable, but not in the tab order, so focus can stay in the view, where its keys reach it (select.ts).
 		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll', attr: { tabindex: -1 } });
 		this.listSizerEl = this.listScrollEl.createDiv({ cls: 'princelists-sizer' });
 		// Here, so the scope is in place before the view first takes focus.
@@ -189,6 +190,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		await super.onOpen();
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
 		registerFieldEvents(this);
+		focusListWhenActive(this);
 		registerFileRedraws(this);
 		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);
 		// The collapse arrows always show where there's no hover.
