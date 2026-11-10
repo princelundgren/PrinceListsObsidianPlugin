@@ -4,7 +4,7 @@ import { edgeStep, HOLD_MS, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../c
 import { CARD_CLASS } from './card';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import { COUNT_ATTR, liftInPlace, type RowDragHost } from './drag-host';
+import { carry, COUNT_ATTR, liftInPlace, type RowDragHost } from './drag-host';
 import { aimCarried, markDrop, shownRows, type RowDrop } from './move';
 import { ownClosest, ownElements } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
@@ -121,9 +121,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 		lift.armed = true;
 		const line = lift.item.line;
 		if (line === null || !current.row.isConnected) return;
-		const carried = host.dragged(line);
-		lift.others = carried.filter((other) => other !== line).map((other) => host.track(other));
-		if (lift.others.length > 0) current.row.setAttr(COUNT_ATTR, String(carried.length));
+		lift.others = carry(host, line, current.row);
 	};
 
 	const lift = (current: Press): void => {

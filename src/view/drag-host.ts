@@ -89,6 +89,18 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 }
 
 /**
+ * Asks `host` which rows a drag from `rowEl`, on `line`, carries, and tracks those other than `line`.
+ * When there are any, marks `rowEl` with how many rows it carries. Returns them, for the drag to
+ * untrack when it ends.
+ */
+export function carry(host: RowDragHost, line: number, rowEl: HTMLElement): TrackedLine[] {
+	const carried = host.dragged(line);
+	const others = carried.filter((other) => other !== line).map((other) => host.track(other));
+	if (others.length > 0) rowEl.setAttr(COUNT_ATTR, String(carried.length));
+	return others;
+}
+
+/**
  * Closes what a lift closes (`beforeLift`), then scrolls `liftScrollEl` by however far that moved
  * `row`, such as a taller card above it closing, so the row stays under the pointer as far as the
  * scroller can go.

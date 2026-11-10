@@ -1,7 +1,7 @@
 import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { targetOf } from './dom';
-import { COUNT_ATTR, liftInPlace, type RowDragHost } from './drag-host';
+import { carry, COUNT_ATTR, liftInPlace, type RowDragHost } from './drag-host';
 import { aimCarried, markDrop, shownRows, type RowDrop } from './move';
 import { isInNestedBlock, ownClosest } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
@@ -91,11 +91,9 @@ function startDrag(host: RowDragHost, evt: DragEvent): MouseDrag | null {
 	const type = `${DRAG_TYPE}-${Math.random().toString(36).slice(2)}`;
 	evt.dataTransfer.setData(type, '');
 	evt.dataTransfer.effectAllowed = 'move';
-	const carried = host.dragged(line);
-	const others = carried.filter((other) => other !== line).map((other) => host.track(other));
+	// During dragstart, so the image the browser takes of the row as it returns shows the count too.
+	const others = carry(host, line, row);
 	const drag: MouseDrag = { host, type, row: host.track(line), rowEl: row, others, kind, drop: null, marked: null, liftTimer: null };
-	// Set during dragstart, so the image the browser takes of the row as it returns shows it too.
-	if (others.length > 0) row.setAttr(COUNT_ATTR, String(carried.length));
 	// After dragstart returns: Chromium cancels the drag if the row has moved from under the press (spec, "Dragging").
 	drag.liftTimer = window.setTimeout(() => {
 		drag.liftTimer = null;
