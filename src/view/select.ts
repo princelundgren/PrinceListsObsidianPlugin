@@ -21,8 +21,9 @@ const announcers = new WeakMap<PrinceListView, { status: HTMLElement; describerI
 /**
  * Handles a click on a row, a heading, a checkbox or the zone beside one with Cmd or Shift held:
  * Cmd adds or removes the row, Shift selects the shown rows from the anchor to it. An open card closes
- * first, its item selected. Returns whether it handled the click. A plain click on a row starts over
- * from it, and one on empty space ends the selection; both return false.
+ * first, its item selected. Returns whether it handled the click. A plain click on a row or heading,
+ * not on a checkbox or beside one, starts over from it, and one on empty space ends the selection;
+ * both return false.
  */
 export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
 	if (isEmptySpace(view, target)) {
@@ -35,7 +36,7 @@ export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTM
 	const adds = Keymap.isModifier(evt, 'Mod');
 	const ranges = Keymap.isModifier(evt, 'Shift');
 	if (!adds && !ranges) {
-		if (rowEl?.hasClass(ITEM_CLASS) && !target.closest(TICK_SELECTOR)) {
+		if (!target.closest(TICK_SELECTOR)) {
 			view.selection.clear();
 			view.selection.setAnchor(line);
 			drawSelection(view);
