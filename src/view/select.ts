@@ -19,21 +19,21 @@ let describers = 0;
 const announcers = new WeakMap<PrinceListView, { status: HTMLElement; describerId: string }>();
 
 /**
- * Handles a click on a row, a heading, a checkbox or the zone beside one with Cmd or Shift held:
- * Cmd adds or removes the row, Shift selects the shown rows from the anchor to it. An open card closes
- * first, its item selected. Returns whether it handled the click. A plain click on a row or heading,
- * not on a checkbox or beside one, starts over from it, and one on empty space ends the selection;
- * both return false.
+ * Handles a click on a row, a heading, a checkbox or the zone beside one with Cmd or Shift held, or a
+ * tap on one while selecting on mobile: Cmd and the tap add or remove the row, Shift selects the shown
+ * rows from the anchor to it. An open card closes first, its item selected. Returns whether it handled
+ * the click. A plain click on a row or heading, not on a checkbox or beside one, starts over from it,
+ * and one on empty space ends the selection, except while selecting; both return false.
  */
 export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
 	if (isEmptySpace(view, target)) {
-		clearSelection(view);
+		if (!view.selecting) clearSelection(view);
 		return false;
 	}
 	const rowEl = selectableRowAt(view, target);
 	const line = rowEl ? lineOf(rowEl) : null;
 	if (line === null) return false;
-	const adds = Keymap.isModifier(evt, 'Mod');
+	const adds = view.selecting || Keymap.isModifier(evt, 'Mod');
 	const ranges = Keymap.isModifier(evt, 'Shift');
 	if (!adds && !ranges) {
 		if (!target.closest(TICK_SELECTOR)) {
@@ -85,7 +85,19 @@ export function extendSelection(view: PrinceListView, step: 1 | -1): boolean {
 	return moves;
 }
 
-/** Ends the selection. Returns whether any row was selected. */
+/**
+ * A still hold let go on the row on `line`, on mobile. Not yet selecting, it starts selecting with that
+ * row and `cardLine`, the item whose card the hold closed, if any. While selecting, it selects the shown
+ * rows from the last row tapped to it, as Shift+click does.
+ */
+export function selectOnHold(view: PrinceListView, line: number, cardLine: number | null): void {
+	if (view.selecting) view.selection.addRangeTo(line, selectableLines(view));
+	else view.selection.startWith(line, cardLine);
+	view.selecting = true;
+	drawSelection(view);
+}
+
+/** Ends the selection, and with it selecting on mobile. Returns whether any row was selected. */
 export function clearSelection(view: PrinceListView): boolean {
 	const hadRows = view.selection.size > 0;
 	view.selection.clear();
@@ -95,7 +107,7 @@ export function clearSelection(view: PrinceListView): boolean {
 
 /**
  * Drops the selected rows that no longer show, marks the rest, and announces how many are selected.
- * Runs after every redraw.
+ * Selecting on mobile ends once none is left, and its bar follows. Runs after every redraw.
  */
 export function drawSelection(view: PrinceListView): void {
 	view.selection.keepOnly(new Set(selectableLines(view)));
@@ -107,6 +119,9 @@ export function drawSelection(view: PrinceListView): void {
 	}
 	const count = selected.size === 0 ? '' : `${selected.size} selected`;
 	if (status.getText() !== count) status.setText(count);
+	const wasSelecting = view.selecting;
+	if (selected.size === 0) view.selecting = false;
+	if (wasSelecting) view.syncButtons();
 }
 
 /**

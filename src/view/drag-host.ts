@@ -3,7 +3,7 @@ import type { TrackedLine } from '../core/editing';
 import { closeCard } from './card';
 import type { PrinceListView } from './list-view';
 import { queueDrop, type RowDrop } from './move';
-import { clearSelection } from './select';
+import { clearSelection, selectOnHold } from './select';
 
 /** What dragging rows needs from the list view or a block showing a list. */
 export interface RowDragHost {
@@ -29,10 +29,19 @@ export interface RowDragHost {
 	dragged(line: number): readonly number[];
 	/** Moves the dragged row on `line`, both it and `drop` as the drawn rows number them. */
 	drop(line: number, drop: RowDrop): void;
+	/** A row lifted on `line` and let go without moving: selects it, or nothing where rows don't select. */
+	selectHold(line: number): void;
 }
 
 // Only the touch drag scrolls at the edges, so only mobile gets the element that marks the bottom one.
 export function listDragHost(view: PrinceListView): RowDragHost {
+	// The item whose card the latest lift closed, which a hold let go selects with the held row; only a
+	// touch hold selects, so only mobile keeps it.
+	let cardItem: TrackedLine | null = null;
+	const forgetCardItem = (): void => {
+		if (cardItem) view.editing.untrack(cardItem);
+		cardItem = null;
+	};
 	return {
 		component: view,
 		rowsEl: view.listScrollEl,
@@ -45,7 +54,12 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 		set swallowNextClick(value: boolean) {
 			view.swallowNextClick = value;
 		},
-		beforeLift: () => closeCard(view),
+		beforeLift: () => {
+			forgetCardItem();
+			const line = Platform.isMobile && view.card ? view.selected : null;
+			cardItem = line === null ? null : view.editing.track(line);
+			closeCard(view);
+		},
 		track: (line) => view.editing.track(line),
 		untrack: (tracked) => view.editing.untrack(tracked),
 		dragged: (line) => {
@@ -54,7 +68,15 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 			clearSelection(view);
 			return [line];
 		},
-		drop: (line, drop) => queueDrop(view, line, drop),
+		drop: (line, drop) => {
+			forgetCardItem();
+			queueDrop(view, line, drop);
+		},
+		selectHold: (line) => {
+			const card = cardItem?.line ?? null;
+			forgetCardItem();
+			selectOnHold(view, line, card);
+		},
 	};
 }
 

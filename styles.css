@@ -181,6 +181,24 @@ textarea.princelists-title {
 	background-color: var(--text-selection);
 }
 
+/* While selecting on mobile, each checkbox is a selection circle, filled while its row is selected and
+   never showing a tick, so nothing looks ticked by mistake (spec, "Ticking"). An open card keeps its
+   box, which still ticks. The checked and selected rules outrank Obsidian's own checked and hover ones. */
+.princelists-selecting .princelists-item:not(.princelists-card) .princelists-checkbox {
+	--checkbox-radius: 50%;
+	--checkbox-marker-color: transparent;
+}
+
+.princelists-selecting .princelists-item:not(.princelists-card) .princelists-checkbox:checked {
+	border-color: var(--checkbox-border-color);
+	background-color: transparent;
+}
+
+.princelists-selecting .princelists-item.princelists-selected:not(.princelists-card) .princelists-checkbox {
+	border-color: var(--interactive-accent);
+	background-color: var(--interactive-accent);
+}
+
 /* The drop line while a row is dragged: under the row or heading the item will follow, or above the
    first row for the top of the list. Drawn inside the element, so nothing moves. */
 .princelists-drop-below {
@@ -643,6 +661,84 @@ button.princelists-new-item {
 
 .princelists-has-floating-add .princelists-end {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
+}
+
+/* Mobile's bar while selecting, in the floating "+"'s place and kept above the navigation bar the same
+   way (spec, "Touch on mobile"): how many are selected and Done, then a row of actions. */
+.princelists-view {
+	--princelists-selection-bar-height: calc(2 * var(--size-4-12));
+}
+
+.princelists-selection-bar {
+	position: absolute;
+	left: var(--size-4-4);
+	right: var(--size-4-4);
+	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px));
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	max-width: var(--file-line-width);
+	height: var(--princelists-selection-bar-height);
+	margin: 0 auto;
+	padding: 0 var(--size-4-2);
+	border: var(--border-width) solid var(--background-modifier-border);
+	border-radius: var(--radius-l);
+	background-color: var(--background-primary);
+	box-shadow: var(--shadow-s);
+}
+
+.princelists-selection-bar-top,
+.princelists-selection-actions {
+	display: flex;
+	flex: 1;
+	align-items: center;
+}
+
+.princelists-selection-bar-top {
+	justify-content: space-between;
+	padding-inline-start: var(--size-4-2);
+	font-size: var(--font-ui-small);
+}
+
+.princelists-selection-actions {
+	justify-content: space-around;
+}
+
+.princelists-selection-bar button {
+	height: auto;
+	padding: var(--size-2-2) var(--size-4-2);
+	background-color: transparent;
+	box-shadow: none;
+	color: var(--text-normal);
+}
+
+.princelists-selection-bar button.princelists-selection-done {
+	color: var(--text-accent);
+	font-weight: var(--font-semibold);
+}
+
+.princelists-selection-bar button.princelists-selection-action {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--size-2-1);
+	font-size: var(--font-ui-smaller);
+}
+
+.princelists-selection-bar button.princelists-selection-delete {
+	color: var(--text-error);
+}
+
+.princelists-selection-bar button:disabled {
+	color: var(--text-faint);
+}
+
+.princelists-selection-icon {
+	display: flex;
+}
+
+.princelists-selecting .princelists-end {
+	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px));
 }
 
 /* The title, with the card's tag button, star, When and ⋯ on its first line. They sit in the

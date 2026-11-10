@@ -28,7 +28,7 @@ interface Lift {
 	/** Where the finger was at the lift. */
 	fromX: number;
 	fromY: number;
-	/** Set once the finger has moved past the tolerance since the lift: only then may an edge scroll start. */
+	/** Set once the finger has moved past the tolerance since the lift: only then may an edge scroll start, and the release drop. */
 	armed: boolean;
 }
 
@@ -161,12 +161,16 @@ export function enableTouchDrag(host: RowDragHost): void {
 	});
 	component.registerDomEvent(rowsEl, 'pointerup', (evt) => {
 		if (!press || press.pointerId !== evt.pointerId) return;
-		const drop = press.lift?.drop;
-		const line = press.lift?.item.line;
+		const lift = press.lift;
+		const line = lift?.item.line;
 		const stillThere = press.row.isConnected;
 		endPress();
+		if (!lift || line === null || line === undefined) return;
+		// A lift the finger never moved past the tolerance from is a hold let go: it selects, and drops
+		// nothing (selecting several rows, "On mobile").
+		if (!lift.armed) host.selectHold(line);
 		// A redraw since the last move means the drop's lines may be stale.
-		if (drop && line !== null && line !== undefined && stillThere) host.drop(line, drop);
+		else if (lift.drop && stillThere) host.drop(line, lift.drop);
 	});
 	component.registerDomEvent(rowsEl, 'pointercancel', (evt) => {
 		if (press?.pointerId === evt.pointerId) endPress();

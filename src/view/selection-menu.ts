@@ -23,9 +23,8 @@ export function addGroupEntries(view: PrinceListView, menu: Menu, only?: EntryGr
 	const text = view.text;
 	const contentStart = contentStartLine(text);
 	const state = groupState(text, contentStart, view.selection.lines());
-	const listHasHeadings = view.parse().model.sections.some((section) => section.headingLine !== null);
 	let previous: string | null = null;
-	for (const entry of groupEntries(state, listHasHeadings, only)) {
+	for (const entry of groupEntries(state, listHasHeadings(view), only)) {
 		const part = PARTS[entry];
 		if (previous !== null && part !== previous) menu.addSeparator();
 		previous = part;
@@ -42,6 +41,11 @@ export function addGroupEntries(view: PrinceListView, menu: Menu, only?: EntryGr
 			menu.addItem((item) => item.setTitle(title).setIcon(icon).onClick(() => act(view, entry)));
 		}
 	}
+}
+
+/** Whether the view's list has a heading, which Move to heading… needs. */
+export function listHasHeadings(view: PrinceListView): boolean {
+	return view.parse().model.sections.some((section) => section.headingLine !== null);
 }
 
 /** Opens the heading picker, then moves the selected rows to the end of the section picked. */
