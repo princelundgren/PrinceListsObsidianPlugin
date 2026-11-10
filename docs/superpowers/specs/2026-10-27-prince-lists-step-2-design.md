@@ -461,7 +461,8 @@ this met on 2026-10-30 **(owner)**.
   redraws and edits, following its line as a selection does **(call)**. Nothing is written to the
   file.
 - **Adding into a collapsed section expands it (call):** New item from its heading menu, an item
-  dropped under the heading, or Cmd+Enter with an item in it selected.
+  dropped under the heading, Cmd+Enter with an item in it selected, or Move to heading… picking it
+  ([selecting several rows](2026-11-07-select-several-design.md), "The actions").
 - **A collapsed section drags as any section does.** While Cmd+F filters the list, matches in a
   collapsed section show, and the section is collapsed again when the filter ends **(call)**.
 - **Collapse all headings and Expand all headings (owner, 2026-10-28)** are in a heading's menu,
