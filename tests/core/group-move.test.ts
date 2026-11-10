@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { UnsafeEditError } from '../../src/core/edit-check';
 import { ListEditing } from '../../src/core/editing';
-import { planGroupMove, type GroupPlace } from '../../src/core/group-actions';
+import { groupCount, landingHeading, planGroupMove, type GroupPlace } from '../../src/core/group-actions';
 import { splitLines } from '../../src/core/lines';
 import { planItemMove, planSectionMove, type ItemPlace } from '../../src/core/list-actions';
 import { RowSelection } from '../../src/core/selection';
@@ -140,5 +140,35 @@ describe('planGroupMove', () => {
 		if (!plan) throw new Error('expected the move to change the text');
 		editing.applyOwn(plan.next, plan.edit);
 		expect(selection.lines()).toEqual([4, 5]);
+	});
+});
+
+describe('groupCount', () => {
+	test("counts the selected headings, and the selected items outside their sections", () => {
+		expect(groupCount(TEXT, 3, [7, 3, 4, 5])).toEqual({ items: 2, headings: 1 });
+	});
+
+	test('counts a row that is neither an item nor a heading for nothing', () => {
+		expect(groupCount(TEXT, 3, [3, 99])).toEqual({ items: 1, headings: 0 });
+	});
+});
+
+describe('landingHeading', () => {
+	test('names the heading of the section the loose items land in', () => {
+		expect(landingHeading(TEXT, 3, [3], { firstUnder: 6 })).toBe(6);
+		expect(landingHeading(TEXT, 3, [3], { endOf: 4 })).toBe(4);
+	});
+
+	test("names the section above the drop for a selection with a heading", () => {
+		expect(landingHeading(TEXT, 3, [3, 4], { beforeSection: null })).toBe(6);
+	});
+
+	test('is null when the items land before the first heading', () => {
+		expect(landingHeading(TEXT, 3, [7], { endOf: null })).toBeNull();
+	});
+
+	test('is null with no loose items, or when a row is gone', () => {
+		expect(landingHeading(TEXT, 3, [4], { beforeSection: null })).toBeNull();
+		expect(landingHeading(TEXT, 3, [3, 99], { endOf: 4 })).toBeNull();
 	});
 });
