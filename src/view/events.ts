@@ -33,6 +33,7 @@ import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS, TICK_SELECTOR } from './render-list';
+import { clearSelection, keepTextUnselected, onSelectClick } from './select';
 import { stripClick } from './tag-strip';
 import { showTextMenu } from './text-menu';
 import { queueTick } from './tick';
@@ -42,7 +43,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
-	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepFieldFocused(evt));
+	view.registerDomEvent(contentEl, 'mousedown', (evt) => onMouseDown(view, evt));
 	view.registerDomEvent(contentEl, 'beforeinput', (evt) => onBeforeInput(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
@@ -92,6 +93,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	}
 	if (stripClick(view, target)) return;
 	if (handleLinkClick(view.app, view.sourcePath, evt, target)) return;
+	if (onSelectClick(view, evt, target)) return;
 	if (target.instanceOf(HTMLInputElement) && target.hasClass(WHEN_INPUT_CLASS)) {
 		whenClick(target);
 		return;
@@ -163,6 +165,11 @@ function keepFieldFocused(evt: MouseEvent): void {
 	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, ${FILTER_TOGGLE_SELECTOR}`)) evt.preventDefault();
 }
 
+function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
+	keepFieldFocused(evt);
+	keepTextUnselected(view, evt);
+}
+
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
 	if (!target || isInNestedBlock(view.contentEl, target)) return;
@@ -230,6 +237,8 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 			// Cancels: the blur that follows finds the name unchanged.
 			target.value = view.listTitle?.before ?? target.value;
 			target.blur();
+		} else if (clearSelection(view)) {
+			evt.preventDefault();
 		}
 	} else if (evt.key === 'Enter') {
 		// Cmd+Enter is the view's own key, which adds an item, so it doesn't also close a card.

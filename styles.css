@@ -175,6 +175,12 @@ textarea.princelists-title {
 	-webkit-touch-callout: none;
 }
 
+/* Selected rows and headings, in the background Obsidian gives selected text. */
+.princelists-selected {
+	border-radius: var(--radius-s);
+	background-color: var(--text-selection);
+}
+
 /* The drop line while a row is dragged: under the row or heading the item will follow, or above the
    first row for the top of the list. Drawn inside the element, so nothing moves. */
 .princelists-drop-below {
@@ -544,6 +550,22 @@ textarea.princelists-title {
 }
 
 /* On a phone, the sides line up with the view header's buttons, which Obsidian insets by this much. */
+/* It takes focus so that the view's keys and Escape reach it once a click selects rows; the rows'
+   background shows the selection. */
+.princelists-scroll:focus {
+	outline: none;
+}
+
+/* Heard by screen readers, not seen: how many rows are selected. */
+.princelists-selection-status {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
 .princelists-is-phone .princelists-scroll {
 	padding-inline: var(--size-4-3);
 }
