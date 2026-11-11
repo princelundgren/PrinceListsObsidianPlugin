@@ -9,7 +9,7 @@ import { aimCarried, markDrop, shownRows, type RowDrop } from './move';
 import { ownClosest, ownElements } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 
-const LIFTED_CLASS = 'princelists-lifted';
+export const LIFTED_CLASS = 'princelists-lifted';
 const LIFT_OFFSET = '--princelists-lift';
 
 interface Lift {

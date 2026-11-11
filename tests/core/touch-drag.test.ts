@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { edgeStep, HOLD_MS, isStillHold, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../../src/core/touch-drag';
+import { edgeStep, HOLD_MS, isInPlace, isStillHold, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../../src/core/touch-drag';
 
 describe('overRow', () => {
 	const boxes: RowBox[] = [
@@ -40,6 +40,18 @@ describe('edgeStep', () => {
 
 	test("follows the scroller's own top", () => {
 		expect(edgeStep(100, 100, 700)).toBe(-12);
+	});
+});
+
+describe('isInPlace', () => {
+	const press = { x: 100, y: 100 };
+
+	test('a point exactly MOVE_TOLERANCE_PX away is in place', () => {
+		expect(isInPlace(press, { x: 100, y: 100 + MOVE_TOLERANCE_PX })).toBe(true);
+	});
+
+	test('a point 4 px away on each axis, 5.7 px by distance, is not', () => {
+		expect(isInPlace(press, { x: 96, y: 104 })).toBe(false);
 	});
 });
 

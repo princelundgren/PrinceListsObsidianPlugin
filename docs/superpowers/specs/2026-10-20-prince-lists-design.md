@@ -812,9 +812,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **Desktop (1a):** drag items with the mouse, within and between sections. An item's notes move
   with it. In step two, headings drag too, each with its whole section (step two's design,
   "Dragging a heading").
-  - A press held still as long as a touch hold and let go in place starts selecting instead
-    **(owner, 2026-11-11)** ([selecting several rows](2026-11-07-select-several-design.md),
-    "Starting to select").
+  - A press held still as long as a touch hold, which lifts the row once that time passes, and
+    let go in place starts selecting instead **(owner, 2026-11-11)** ([selecting several
+    rows](2026-11-07-select-several-design.md), "Starting to select").
   - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
     item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
     drag, a click reopens the card. The card closes just after `dragstart`, not during it:

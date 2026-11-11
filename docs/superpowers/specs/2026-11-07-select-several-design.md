@@ -82,8 +82,10 @@ only documented Obsidian APIs are used.
     (`armed` in `src/view/drag-touch.ts`), so a lift that moves and comes back still drags
     **(call)**. A hold that moves still drags a single row.
   - **With a mouse,** a press held as long as the touch hold (`HOLD_MS` in
-    `src/core/touch-drag.ts`) and let go within the same tolerance **(call)**. Moving first starts
-    the browser's drag, which drags the row as today. The click that follows the release opens no
+    `src/core/touch-drag.ts`) and let go within the same tolerance **(call)**. Once the hold time
+    is reached the row shows it **(owner, 2026-11-11)**, lifted as a touch hold lifts it **(call)**.
+    Moving past the tolerance drops the lift and selects nothing, and moving far enough starts the
+    browser's drag, which drags the row as today. The click that follows the release opens no
     card. Only the main button with no modifier counts, and only on a row's or a heading's own
     area: not on its checkbox or the zone beside it, a link, the collapse arrow, a field or inside
     the open card **(call)**.
@@ -271,8 +273,9 @@ Each in the pull request that makes it untrue:
    - **Result:** On macOS, Obsidian 1.14.5, a press held still for 700 ms on a row, sent as DevTools
      input events, gives `pointerdown`, `pointerup` and one `click`, and no `dragstart`. The row is
      selected and no card opens. A press that moves 20 px, before or after the hold time, selects
-     nothing. A hold on a checkbox ticks and one on a link opens it. Not checked on Windows, nor
-     with a physical mouse.
+     nothing. A hold on a checkbox ticks and one on a link opens it. The row is lifted once the
+     hold time passes, and a move of 8.5 px drops the lift. Not checked on Windows, nor with a
+     physical mouse.
 8. **The bar on desktop:** that it sits at the bottom of a narrow pane, a split pane and a pop-out
    window without covering the last rows or the status bar.
    - **Result:** on macOS, in a 327 px pane at the window's right edge, under the status bar, the
