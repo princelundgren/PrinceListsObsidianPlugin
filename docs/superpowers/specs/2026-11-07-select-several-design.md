@@ -83,9 +83,14 @@ only documented Obsidian APIs are used.
   - **With a mouse,** a press held as long as the touch hold (`HOLD_MS` in
     `src/core/touch-drag.ts`) and let go within the same tolerance **(call)**. Moving first starts
     the browser's drag, which drags the row as today. The click that follows the release opens no
-    card.
+    card. Only the main button with no modifier counts, and only on a row's or a heading's own
+    area: not on its checkbox or the zone beside it, a link, the collapse arrow, a field or inside
+    the open card **(call)**.
 - **Select in a row's or a heading's menu (owner, 2026-11-11):** the right-click menu, a card's ⋯
-  and the heading menu. It starts selecting with that row, or adds it while selecting **(call)**.
+  and the heading menu. It starts selecting with that row, or adds it while selecting, and shows
+  only while that row isn't selected: a selected row's right-click opens the selection's menu
+  instead **(call)**. The ⋯ of a new empty item has no Select, as selecting it would remove it
+  **(call)**.
 - **Cmd+click adds or removes a row (owner), and Shift+click selects every shown row between the
   anchor and the click (owner);** either starts selecting **(owner, 2026-11-11)**. The anchor is
   the open card's item, or the last row clicked, tapped or held **(call)**. A second Shift+click
@@ -259,6 +264,11 @@ Each in the pull request that makes it untrue:
 7. **Holding with a mouse:** that a press held still on a draggable row, in Obsidian's own
    window, sends `pointerup` and then one `click` without starting the browser's drag, on macOS and
    Windows, and that the click opens no card.
+   - **Result:** On macOS, Obsidian 1.14.5, a press held still for 700 ms on a row, sent as DevTools
+     input events, gives `pointerdown`, `pointerup` and one `click`, and no `dragstart`. The row is
+     selected and no card opens. A press that moves 20 px, before or after the hold time, selects
+     nothing. A hold on a checkbox ticks and one on a link opens it. Not checked on Windows, nor
+     with a physical mouse.
 8. **The bar on desktop:** that it sits at the bottom of a narrow pane, a split pane and a pop-out
    window without covering the last rows or the status bar.
    - **Result:** on macOS, in a 327 px pane at the window's right edge, under the status bar, the

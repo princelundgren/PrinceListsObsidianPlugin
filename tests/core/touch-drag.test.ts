@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { edgeStep, overRow, type RowBox } from '../../src/core/touch-drag';
+import { edgeStep, HOLD_MS, isStillHold, MOVE_TOLERANCE_PX, overRow, type RowBox } from '../../src/core/touch-drag';
 
 describe('overRow', () => {
 	const boxes: RowBox[] = [
@@ -40,5 +40,29 @@ describe('edgeStep', () => {
 
 	test("follows the scroller's own top", () => {
 		expect(edgeStep(100, 100, 700)).toBe(-12);
+	});
+});
+
+describe('isStillHold', () => {
+	const press = { x: 100, y: 100, at: 1000 };
+
+	test('a press held for HOLD_MS and let go in place is a still hold', () => {
+		expect(isStillHold(press, { x: 100, y: 100, at: press.at + HOLD_MS })).toBe(true);
+	});
+
+	test('a release before HOLD_MS is not', () => {
+		expect(isStillHold(press, { x: 100, y: 100, at: press.at + HOLD_MS - 1 })).toBe(false);
+	});
+
+	test('a release farther than MOVE_TOLERANCE_PX is not', () => {
+		expect(isStillHold(press, { x: 100 + MOVE_TOLERANCE_PX + 1, y: 100, at: press.at + HOLD_MS })).toBe(false);
+	});
+
+	test('a release 4 px away on each axis, 5.7 px by distance, is not', () => {
+		expect(isStillHold(press, { x: 104, y: 104, at: press.at + HOLD_MS })).toBe(false);
+	});
+
+	test('a release exactly MOVE_TOLERANCE_PX away is still a hold', () => {
+		expect(isStillHold(press, { x: 100 + MOVE_TOLERANCE_PX, y: 100, at: press.at + HOLD_MS })).toBe(true);
 	});
 });

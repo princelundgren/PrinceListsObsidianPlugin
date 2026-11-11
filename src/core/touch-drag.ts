@@ -3,6 +3,18 @@ export const MOVE_TOLERANCE_PX = 5;
 export const EDGE_ZONE_PX = 56;
 export const EDGE_STEP_MAX_PX = 12;
 
+/** Where and when a pointer was pressed or let go, in the page's pixels and `timeStamp` milliseconds. */
+export interface PointerMark {
+	x: number;
+	y: number;
+	at: number;
+}
+
+/** Whether a press held for `HOLD_MS` and let go within `MOVE_TOLERANCE_PX` of where it began, by distance. */
+export function isStillHold(press: PointerMark, release: PointerMark): boolean {
+	return release.at - press.at >= HOLD_MS && Math.hypot(release.x - press.x, release.y - press.y) <= MOVE_TOLERANCE_PX;
+}
+
 /** A shown row's, heading's or untouched block's first line and vertical extent in the scroller's content coordinates. */
 export interface RowBox {
 	line: number;

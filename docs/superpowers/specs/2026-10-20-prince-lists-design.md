@@ -739,8 +739,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
 ### Item actions (owner)
 
 - **On desktop, right-click an item** for New item below, New heading below and Delete item
-  **(call)**. Delete item removes the item and its notes, and its name says what goes **(owner,
-  2026-10-29)**. Step two adds Edit in Markdown.
+  **(call)**, and Select, which starts selecting with it **(owner, 2026-11-11)** ([selecting several rows](2026-11-07-select-several-design.md),
+  "Starting to select"). Delete item removes the item and its notes, and its name says what goes
+  **(owner, 2026-10-29)**. Step two adds Edit in Markdown.
 - **A row's right-click menu also does what the item's card does (owner, 2026-10-29),** so an item
   needn't be opened for it: Tick or Untick, Add star or Remove star, then Set date to today, Set
   date to tomorrow, Set date…, and Remove date when it has one. Each entry says what the item holds
@@ -761,8 +762,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   opens that row's own menu
   ([selecting several rows](2026-11-07-select-several-design.md), "The actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
-  heading and Delete heading. Step two adds Edit in Markdown, Collapse all headings and Expand all
-  headings, and a menu on the list's background (step two's design, "Right-click menus").
+  heading and Delete heading, and Select **(owner, 2026-11-11)**. Step two adds Edit in Markdown,
+  Collapse all headings and Expand all headings, and a menu on the list's background (step two's design, "Right-click menus").
   - New item adds one as the first item under the heading. In a section without items, it goes
     after the section's content **(call)**: directly under the heading, a paragraph there would
     join the item as a lazy line, and a setext heading spans more than one line.
@@ -781,8 +782,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
-  heading and Delete heading **(owner, 2026-10-20)**. Step two adds Edit in Markdown, Collapse all
-  headings and Expand all headings. It's a tap, not a long-press, so there is still no long-press
+  heading and Delete heading **(owner, 2026-10-20)**, and Select **(owner, 2026-11-11)**. Step two
+  adds Edit in Markdown, Collapse all headings and Expand all headings. It's a tap, not a long-press, so there is still no long-press
   menu. With a card open, the tap only closes the card ("Selecting and adding"). While selecting,
   the tap selects the heading instead, and the selection's actions sit in a bar at the bottom
   ([selecting several rows](2026-11-07-select-several-design.md), "While selecting").
@@ -808,6 +809,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **Desktop (1a):** drag items with the mouse, within and between sections. An item's notes move
   with it. In step two, headings drag too, each with its whole section (step two's design,
   "Dragging a heading").
+  - A press held still as long as a touch hold and let go in place starts selecting instead
+    **(owner, 2026-11-11)** ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select").
   - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
     item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
     drag, a click reopens the card. The card closes just after `dragstart`, not during it:

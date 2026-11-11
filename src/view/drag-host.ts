@@ -41,8 +41,8 @@ export interface RowDragHost {
 
 // Only the touch drag scrolls at the edges, so only mobile gets the element that marks the bottom one.
 export function listDragHost(view: PrinceListView): RowDragHost {
-	// The item whose card the latest lift closed, which a hold let go selects with the held row; only a
-	// touch hold selects, so only mobile keeps it.
+	// The item whose card the latest lift closed, which a touch hold let go selects with the held row; a mouse
+	// hold closes the card at its release (hold-mouse.ts), so only mobile keeps it.
 	let cardItem: TrackedLine | null = null;
 	const forgetCardItem = (): void => {
 		if (cardItem) view.editing.untrack(cardItem);
