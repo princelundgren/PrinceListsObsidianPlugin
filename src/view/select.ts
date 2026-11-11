@@ -99,15 +99,16 @@ export function extendSelection(view: PrinceListView, step: 1 | -1): boolean {
 }
 
 /**
- * A hold let go without moving on the row on `line`. Not yet selecting, it starts selecting with that
- * row and `cardLine`, the item whose card the hold closed, if any. While selecting, it selects the shown
+ * A hold reaching the hold time on the row on `line`. Not yet selecting, it starts selecting with that
+ * row and `cardLine`, the open card's item, if any. While selecting, it selects the shown
  * rows to it from `cardLine`, or with no card from the last row clicked, tapped or held, as
- * Shift+click does.
+ * Shift+click does; a row already selected changes nothing, since the hold may be the start of
+ * dragging the selection.
  */
 export function selectOnHold(view: PrinceListView, line: number, cardLine: number | null): void {
 	if (view.selecting) {
 		if (cardLine !== null) view.selection.setAnchor(cardLine);
-		view.selection.addRangeTo(line, selectableLines(view));
+		if (!view.selection.has(line)) view.selection.addRangeTo(line, selectableLines(view));
 	} else view.selection.startWith(line, cardLine);
 	view.selecting = true;
 	drawSelection(view);

@@ -185,9 +185,9 @@ These are wanted later, roughly in this order. The file format already leaves ro
 - **Lists shared across vaults.** The plugin builds nothing to share a list between vaults.
   - **A note from outside the vault is allowed in any vault (owner, 2026-10-20).** Opened from two
     vaults' windows, it works as a list in each. Nothing is built for this.
-- **A long-press menu on item rows on mobile.** The owner chose: holding drags, or, let go without
-  moving, starts selecting ([selecting several rows](2026-11-07-select-several-design.md), "Starting
-  to select").
+- **A long-press menu on item rows on mobile.** The owner chose: holding starts selecting, and a
+  move after it drags ([selecting several rows](2026-11-07-select-several-design.md), "Starting to
+  select").
 
 ## Constraints
 
@@ -820,9 +820,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **Desktop (1a):** drag items with the mouse, within and between sections. An item's notes move
   with it. In step two, headings drag too, each with its whole section (step two's design,
   "Dragging a heading").
-  - A press held still as long as a touch hold, which lifts the row once that time passes, and
-    let go in place starts selecting instead **(owner, 2026-11-11)** ([selecting several
-    rows](2026-11-07-select-several-design.md), "Starting to select").
+  - A press held still as long as a touch hold lifts the row and starts selecting once that time
+    passes **(owner, 2026-11-11)** ([selecting several rows](2026-11-07-select-several-design.md),
+    "Starting to select").
   - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
     item is removed then, and if it was the row being dragged, the drag ends. The cost: after a
     drag, a click reopens the card. The card closes just after `dragstart`, not during it:
@@ -836,17 +836,18 @@ back only what was typed and leaves the empty line, which can be deleted like an
     Dropped where it already shows, the item stays as it is in the file.
   - **A link or picture in a title drags as itself (call),** as in any note, not the row.
   - **A drag of a selected row moves every selected row,** as one block with one Undo, and a drag
-    of a row outside the selection drags it alone and clears the selection ([selecting several
-    rows](2026-11-07-select-several-design.md), "Dragging the selection").
+    with a mouse and no hold, of a row outside the selection, drags it alone and clears the
+    selection ([selecting several rows](2026-11-07-select-several-design.md), "Dragging the
+    selection").
 - **Mobile (1b, owner):**
   - Hold an item and then move to drag it.
-  - Holding an item row never opens a menu. A hold let go without moving starts selecting instead
-    ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select"): the row
-    lifts and goes back, writing nothing, as before.
+  - Holding an item row never opens a menu. The hold starts selecting as the row lifts
+    ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select"), and a
+    release without moving writes nothing.
   - **A drag of a selected row moves every selected row,** as on desktop, and selecting goes on.
     Once the held row moves, it shows how many rows it carries, and the others stay in place until
-    the drop redraws the list. A drag of a row outside the selection drags it alone and ends
-    selecting ([selecting several rows](2026-11-07-select-several-design.md), "Dragging the
+    the drop redraws the list. The hold that starts a drag selects its row first, so it carries the
+    selection ([selecting several rows](2026-11-07-select-several-design.md), "Dragging the
     selection").
   - A swipe without a hold scrolls the list.
   - **The drop line works as on desktop (call).** A move drops where it shows, and an item
@@ -1238,9 +1239,9 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   after a still hold, 800 ms by its code. A device confirmed the event (its haptic comes with it);
   the 800 ms wasn't measured. On an Android emulator a dispatched `contextmenu` on a block's row or
   the list's background opens no menu; a real hold on Android isn't checked.
-  - Because holding drags, or starts selecting when let go without moving, item rows must not open
-    a menu, and a heading opens its menu on a tap. So on mobile, cancel `contextmenu` on rows and
-    headings, in the capture phase.
+  - Because holding starts selecting and dragging, item rows must not open a menu, and a heading
+    opens its menu on a tap. So on mobile, cancel `contextmenu` on rows and headings, in the capture
+    phase.
   - On an iPhone, a hold opens no menu and selects no text, and the tap that ends it is swallowed
     ([1a checks](../notes/2026-10-22-1a-checks.md)).
   - After a canceled hold, the next click is swallowed, as spike 2 does after a lift: WebKit still
@@ -1253,8 +1254,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   (`docs/superpowers/notes/2026-10-21-spike-touch.md`).
   - Once a row is lifted, a non-passive `touchmove` handler calls `preventDefault` to stop
     scrolling.
-  - A lift takes the selection it carries, or ends it for a row outside, only once the finger has
-    moved more than 5 px, since letting go before then selects instead.
+  - A lift selects its row, and takes the selection it carries once the finger has moved more
+    than 5 px.
   - **The edge scroll (call)** starts 56 px from the top of the list or from where it stops being
     visible, and speeds up linearly to 12 px a frame at the edge and beyond. While selecting, the
     list stops being visible at the top of the selection's bar.

@@ -27,8 +27,8 @@ only documented Obsidian APIs are used.
 
 ## At a glance
 
-- **One way of selecting, on desktop and mobile (owner, 2026-11-11).** Hold a row and let go
-  without moving, or pick Select in its menu, to start selecting; on desktop Cmd+click,
+- **One way of selecting, on desktop and mobile (owner, 2026-11-11).** Hold a row still for the
+  hold time, or pick Select in its menu, to start selecting; on desktop Cmd+click,
   Shift+click, Shift+Up and Shift+Down start it too **(owner)**. While selecting, a click or a tap
   adds or removes a row, and a bar at the bottom holds the actions **(owner)**.
 - **Dragging a selected row drags the whole selection** as one block. A selected heading brings its
@@ -76,19 +76,20 @@ only documented Obsidian APIs are used.
 
 - **Before selecting, a plain click opens the card, as today (owner),** and a click on the
   checkbox or beside it ticks that one item.
-- **Holding a row and letting go without moving (owner; with a mouse, owner, 2026-11-11).**
-  - **By touch,** today that lifts the row and puts it back, writing nothing, so the gesture is
-    free. "Without moving" means the finger never passed the drag's 5 px tolerance after the lift
-    (`armed` in `src/view/drag-touch.ts`), so a lift that moves and comes back still drags
-    **(call)**. A hold that moves still drags a single row.
-  - **With a mouse,** a press held as long as the touch hold (`HOLD_MS` in
-    `src/core/touch-drag.ts`) and let go within the same tolerance **(call)**. Once the hold time
-    is reached the row shows it **(owner, 2026-11-11)**, lifted as a touch hold lifts it **(call)**.
-    Moving past the tolerance drops the lift and selects nothing, and moving far enough starts the
-    browser's drag, which drags the row as today. The click that follows the release opens no
-    card. Only the main button with no modifier counts, and only on a row's or a heading's own
-    area: not on its checkbox or the zone beside it, a link, the collapse arrow, a field or inside
-    the open card **(call)**.
+- **Holding a row still for the hold time (owner; with a mouse, owner, 2026-11-11).** The row is
+  selected as soon as the hold time (`HOLD_MS` in `src/core/touch-drag.ts`) is reached, by touch or
+  with a mouse, while the finger or the button is still down **(owner, 2026-11-11)**. A move after
+  that drags the selection the hold joined, so a hold that moves one row leaves it selected, with
+  the bar showing **(owner, 2026-11-11)**.
+  - **By touch,** the row selects as it lifts for the drag. The release writes nothing and is no
+    tap.
+  - **With a mouse,** the press stays within the touch's 5 px tolerance until the hold time
+    **(call)**, and the row lifts as a touch hold lifts it until the release **(call)**. Moving past
+    the tolerance before then selects nothing, and moving far enough starts the browser's drag,
+    which drags the row as today. The click that follows the release opens no card. Only the main
+    button with no modifier counts, and only on a row's or a heading's own area: not on its
+    checkbox or the zone beside it, a link, the collapse arrow, a field or inside the open card
+    **(call)**.
 - **Select, first in a row's or a heading's menu (owner, 2026-11-11; step one, "Item actions"):**
   the right-click menu **(owner, 2026-11-11)**, and a card's ⋯ and the heading menu on mobile
   **(call)**. It starts selecting with that row, or adds it while selecting, and shows only while
@@ -104,16 +105,18 @@ only documented Obsidian APIs are used.
   nothing. In a card's title or notes they keep selecting text. Moving between rows with the arrows
   alone, and opening a card from the keyboard, are #125's **(call)**.
 - **With a card open,** each of these closes it, and the card's item and the row are both selected
-  **(call)**. This changes step one's "while a card is open, a click outside it only closes it" for
-  these only **(owner)**.
+  **(call)**. A mouse hold closes it once the button is up, or as the drag starts, since a card
+  closing above the row can move it from under the button **(call)**. This changes step one's
+  "while a card is open, a click outside it only closes it" for these only **(owner)**.
 
 ## While selecting
 
 - **A click or a tap on a row or a heading adds or removes it (owner; on desktop, owner
   2026-11-11),** and one on a heading doesn't open the heading menu. Cmd+click does the same.
-  Shift+click, and holding another row and letting go, select every shown row between it and the
-  anchor, as a first Shift+click does **(call)**. A click or a tap on a link in a title still opens
-  it **(call)**.
+  Shift+click, and holding another row, select every shown row between it and the anchor, as a
+  first Shift+click does **(call)**, and a move after that hold drags them all. Holding a selected
+  row changes nothing, since it may start dragging the selection **(call)**. A click or a tap on
+  a link in a title still opens it **(call)**.
 - **Each row's checkbox shows as a selection circle,** and a click or a tap on it or beside it
   selects, so nothing is ticked by mistake.
 - **A bar replaces the floating "+" at the bottom of the pane:** "5 selected" with Done, and Move
@@ -149,7 +152,8 @@ only documented Obsidian APIs are used.
 ## Dragging the selection
 
 - **Dragging a selected row drags every selected row (owner);** dragging a row outside the
-  selection drags that row alone and ends selecting **(call)**.
+  selection drags that row alone and ends selecting **(call)**. That is only a mouse drag started
+  without a hold: a hold selects its row first, and every touch drag starts with one.
 - **What lifts (call):** the row under the pointer or finger, with the number of rows it carries.
   The other selected rows stay in place until the drop redraws the list, as only a heading lifts
   in step two's section drag on mobile.
@@ -216,7 +220,7 @@ Left out on purpose, each for its reason:
 Each in the pull request that makes it untrue:
 
 - **Step one, "Selecting and adding":** a click with Cmd or Shift held, Shift+Up or Shift+Down, a
-  hold let go or Select starts selecting instead of only closing the card; while selecting, a click
+  hold or Select starts selecting instead of only closing the card; while selecting, a click
   selects instead of opening a card, Cmd+Enter adds below the selection, and the bar takes the
   floating "+"'s place.
 - **Step one, "Ticking":** with Cmd or Shift held, and while selecting, a click on the checkbox or
@@ -224,8 +228,8 @@ Each in the pull request that makes it untrue:
 - **Step one, "Item actions":** the selection's menu, and Select in an item's and a heading's
   menus; while selecting, a click or a tap on a heading selects it instead of opening the heading
   menu.
-- **Step one, "Dragging" and "Touch on mobile":** a hold let go without moving, by touch or with a
-  mouse, starts selecting; a drag of a selected row moves the selection.
+- **Step one, "Dragging" and "Touch on mobile":** a hold that reaches the hold time, by touch or
+  with a mouse, starts selecting; a drag of a selected row moves the selection.
 - **Step one, "Undo":** "the list's only undo on mobile stays the Undo button after a delete" no
   longer holds: every group action shows one.
 - **Step two, "Dragging a heading":** a selection with a heading drops as a section does, and
@@ -252,12 +256,13 @@ Each in the pull request that makes it untrue:
    - **Result:** on Android, the bar sits above the navigation bar and the keyboard, and the last
      row scrolls clear of it; at the bar's 48 px buttons, the clearance was checked again without
      the keyboard. Not checked on an iPhone or an iPad.
-4. **Hold and let go:** that a still hold let go reaches the view on iOS and Android after
-   Obsidian's own `contextmenu` and its haptic, and that the tap after it is still swallowed (step
-   one, "Touch on mobile").
-   - **Result:** on Android, a still hold let go starts selecting. No tap follows a long press
-     there, so whether the tap after it is swallowed isn't shown. Not checked on an iPhone or an
-     iPad.
+4. **The hold on mobile:** that a still hold reaches the view on iOS and Android after Obsidian's
+   own `contextmenu` and its haptic, and that the tap after it is still swallowed (step one, "Touch
+   on mobile").
+   - **Result:** on Android, a held row is selected 505 ms after the press, with the finger still
+     down, and a move after it drags the selected row and keeps it selected. No tap follows a long
+     press there, so whether the tap after it is swallowed isn't shown. Not checked on an iPhone or
+     an iPad.
 5. **Android's back gesture** ending selection: only if Obsidian documents a way to hear it;
    otherwise Done alone ends it.
    - **Result:** Obsidian documents no way for a plugin to hear Back, so Done ends selecting. On
@@ -271,11 +276,11 @@ Each in the pull request that makes it untrue:
    window, sends `pointerup` and then one `click` without starting the browser's drag, on macOS and
    Windows, and that the click opens no card.
    - **Result:** On macOS, Obsidian 1.14.5, a press held still for 700 ms on a row, sent as DevTools
-     input events, gives `pointerdown`, `pointerup` and one `click`, and no `dragstart`. The row is
-     selected and no card opens. A press that moves 20 px, before or after the hold time, selects
-     nothing. A hold on a checkbox ticks and one on a link opens it. The row is lifted once the
-     hold time passes, and a move of 8.5 px drops the lift. Not checked on Windows, nor with a
-     physical mouse.
+     input events, gives `pointerdown`, `pointerup` and one `click`, and no `dragstart`, and no card
+     opens. The row is lifted and selected by 0.8 s with the button still down, and a move after
+     that starts the browser's drag, which moves the row and keeps it selected. A press that moves
+     20 px before the hold time selects nothing. A hold on a checkbox ticks and one on a link opens
+     it. Not checked on Windows, nor with a physical mouse.
 8. **The bar on desktop:** that it sits at the bottom of a narrow pane, a split pane and a pop-out
    window without covering the last rows or the status bar.
    - **Result:** on macOS, in a 327 px pane at the window's right edge, under the status bar, the

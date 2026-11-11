@@ -98,7 +98,7 @@ function startDrag(host: RowDragHost, evt: DragEvent): MouseDrag | null {
 	// "Dragging"), as closing the card or ending the selection, which shrinks the room below the last row, can do.
 	drag.liftTimer = window.setTimeout(() => {
 		drag.liftTimer = null;
-		liftInPlace(host, row, () => {
+		liftInPlace(host.liftScrollEl, row, () => {
 			host.beforeLift();
 			if (!others) host.endSelection();
 		});

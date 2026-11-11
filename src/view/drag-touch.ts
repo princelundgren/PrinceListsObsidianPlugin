@@ -115,8 +115,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 		});
 	};
 
-	// Only now is the lift a drag, so only now does it take the selection, or end it for a row outside:
-	// a hold let go without moving selects instead (selecting several rows, "Starting to select").
+	// Only now is the lift a drag, so only now does it take the selection, which the lift's hold joined.
 	const arm = (current: Press, lift: Lift): void => {
 		lift.armed = true;
 		const line = lift.item.line;
@@ -128,7 +127,13 @@ export function enableTouchDrag(host: RowDragHost): void {
 	const lift = (current: Press): void => {
 		current.timer = null;
 		const rowTop = current.row.getBoundingClientRect().top;
-		liftInPlace(host, current.row, () => host.beforeLift());
+		// The hold selects as the row lifts (selecting several rows, "Starting to select"), before the
+		// rows are measured, as the bar taking the "+"'s place can move them.
+		liftInPlace(host.liftScrollEl, current.row, () => {
+			host.beforeLift();
+			const held = lineOf(current.row);
+			if (current.row.isConnected && held !== null) host.selectHold(held);
+		});
 		const line = lineOf(current.row);
 		if (!current.row.isConnected || line === null) return;
 		const shift = rowTop - current.row.getBoundingClientRect().top;
@@ -181,11 +186,8 @@ export function enableTouchDrag(host: RowDragHost): void {
 		const stillThere = press.row.isConnected;
 		endPress();
 		if (!lift || line === null || line === undefined) return;
-		// A lift the finger never moved past the tolerance from is a hold let go: it selects, and drops
-		// nothing (selecting several rows, "Starting to select").
-		if (!lift.armed) host.selectHold(line);
 		// A redraw since the last move means the drop's lines may be stale.
-		else if (lift.drop && stillThere) host.drop(line, lift.drop);
+		if (lift.armed && lift.drop && stillThere) host.drop(line, lift.drop);
 	});
 	component.registerDomEvent(rowsEl, 'pointercancel', (evt) => {
 		if (press?.pointerId === evt.pointerId) endPress();
