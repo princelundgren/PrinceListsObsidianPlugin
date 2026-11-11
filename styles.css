@@ -175,10 +175,21 @@ textarea.princelists-title {
 	-webkit-touch-callout: none;
 }
 
-/* Selected rows and headings, in the background Obsidian gives selected text. */
+/* Selected rows and headings, marked as Obsidian marks selected files in its file list. A run of selected
+   rows reads as one block, rounded only at its first and last row. */
 .princelists-selected {
-	border-radius: var(--radius-s);
-	background-color: var(--text-selection);
+	background-color: var(--nav-item-background-selected);
+	color: var(--nav-item-color-selected);
+}
+
+.princelists-selected.princelists-selected-first {
+	border-start-start-radius: var(--radius-s);
+	border-start-end-radius: var(--radius-s);
+}
+
+.princelists-selected.princelists-selected-last {
+	border-end-start-radius: var(--radius-s);
+	border-end-end-radius: var(--radius-s);
 }
 
 /* While selecting on mobile, each of the view's own checkboxes is a selection circle, filled while its row
@@ -664,10 +675,12 @@ button.princelists-new-item {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* Mobile's bar while selecting, in the floating "+"'s place and kept above the navigation bar the same
-   way (spec, "Touch on mobile"): how many are selected and Done, then a row of actions. */
+/* The bar while selecting, in the floating "+"'s place on mobile and kept above the navigation bar the same
+   way (spec, "The bar"): how many are selected and Done, then a row of actions with Delete apart past a
+   divider. Every button takes at least 48 by 48 with 8 between them, and the height holds two rows of them
+   with 8 around and between, and the bar's border. */
 .princelists-view {
-	--princelists-selection-bar-height: calc(2 * var(--size-4-12));
+	--princelists-selection-bar-height: calc(2 * var(--size-4-12) + 3 * var(--size-4-2) + 2 * var(--border-width));
 }
 
 .princelists-selection-bar {
@@ -681,7 +694,8 @@ button.princelists-new-item {
 	max-width: var(--file-line-width);
 	height: var(--princelists-selection-bar-height);
 	margin: 0 auto;
-	padding: 0 var(--size-4-2);
+	padding: var(--size-4-2);
+	gap: var(--size-4-2);
 	border: var(--border-width) solid var(--background-modifier-border);
 	border-radius: var(--radius-l);
 	background-color: var(--background-primary);
@@ -693,6 +707,7 @@ button.princelists-new-item {
 	display: flex;
 	flex: 1;
 	align-items: center;
+	gap: var(--size-4-2);
 }
 
 .princelists-selection-bar-top {
@@ -701,13 +716,18 @@ button.princelists-new-item {
 	font-size: var(--font-ui-small);
 }
 
-.princelists-selection-actions {
-	justify-content: space-around;
+.princelists-selection-divider {
+	align-self: stretch;
+	margin-inline-start: auto;
+	border-inline-start: var(--border-width) solid var(--background-modifier-border);
 }
 
 .princelists-selection-bar button {
-	height: auto;
-	padding: var(--size-2-2) var(--size-4-2);
+	box-sizing: border-box;
+	min-width: var(--size-4-12);
+	height: 100%;
+	min-height: var(--size-4-12);
+	padding: var(--size-2-2);
 	background-color: transparent;
 	box-shadow: none;
 	color: var(--text-normal);
@@ -722,6 +742,7 @@ button.princelists-new-item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	justify-content: center;
 	gap: var(--size-2-1);
 	font-size: var(--font-ui-smaller);
 }

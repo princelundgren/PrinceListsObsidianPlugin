@@ -28,8 +28,8 @@ const BUTTONS: readonly { button: BarButton; label: string; icon: string }[] = [
 
 /**
  * Builds mobile's bar for acting on the selection (selecting several rows, "On mobile"): how many rows
- * are selected, Done, then Move to, Tick, Star, Date and Delete. It goes on the view's container where
- * the floating "+" goes, hidden until syncSelectionBar shows it.
+ * are selected, Done, then Move to, Tick, Star and Date, and Delete apart past a divider. It goes on
+ * the view's container where the floating "+" goes, hidden until syncSelectionBar shows it.
  */
 export function buildSelectionBar(view: PrinceListView): HTMLElement {
 	const el = view.containerEl.createDiv({ cls: 'princelists-selection-bar', attr: { role: 'toolbar', 'aria-label': 'Selection' } });
@@ -41,6 +41,7 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 	const actions = new Map<HTMLElement, () => void>([[done, () => clearSelection(view)]]);
 	const buttons = new Map<BarButton, HTMLButtonElement>();
 	for (const { button, label, icon } of BUTTONS) {
+		if (button === 'delete') actionsEl.createDiv({ cls: 'princelists-selection-divider', attr: { 'aria-hidden': 'true' } });
 		const buttonEl = actionsEl.createEl('button', {
 			cls: `princelists-selection-action princelists-selection-${button}`,
 			attr: opensMenu(button) ? { 'aria-haspopup': 'menu' } : {},
