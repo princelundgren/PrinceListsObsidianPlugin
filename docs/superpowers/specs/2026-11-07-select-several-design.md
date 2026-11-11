@@ -114,6 +114,9 @@ only documented Obsidian APIs are used.
 - **Right-click on a selected row** opens the selection's menu **(owner)**; on a row outside the
   selection it opens that row's own menu, as today, and leaves the selection **(call)**.
 - **Dragging a selected row drags the whole selection** ("Dragging the selection").
+- **With a card open,** such as one a row's own menu opened, a click or a tap outside it only closes
+  it, as step one's "while a card is open, a click outside it only closes it" says **(owner,
+  2026-10-27)**; Cmd+click and Shift+click still select, as in "Starting to select" **(call)**.
 - **Cmd+Enter adds the new item below the last selected item** in list order **(call)**, and
   selecting ends as its card opens. With only headings selected it adds one as "+" does.
 - **Cmd+click on a link** in a title still opens it in a new tab, as Obsidian does: the link wins
@@ -258,6 +261,11 @@ Each in the pull request that makes it untrue:
    Windows, and that the click opens no card.
 8. **The bar on desktop:** that it sits at the bottom of a narrow pane, a split pane and a pop-out
    window without covering the last rows or the status bar.
+   - **Result:** on macOS, in a 327 px pane at the window's right edge, under the status bar, the
+     bar is 295 px wide, inside the pane, with its bottom 17 px above the status bar's top. In a
+     429-row list scrolled to the end, the last row ends above the bar. The bar needs about 327 px
+     of pane, so in a narrower one Delete is clipped; how a narrower pane lays it out is open, for
+     the owner to decide.
 
 ## Order (call)
 

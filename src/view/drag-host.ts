@@ -27,11 +27,12 @@ export interface RowDragHost {
 	track(line: number): TrackedLine;
 	untrack(tracked: TrackedLine): void;
 	/**
-	 * The lines a drag from the row on `line` carries, `line` among them: the selection's while that
-	 * row is one of two or more selected, else `[line]`. That ends the host's selection, except for
-	 * the only selected row while selecting on mobile, which stays selected.
+	 * The selection's lines, `line` among them, when the row on `line` is selected, which a drag from it
+	 * carries; otherwise null. Changes nothing, so a drag can ask during `dragstart`.
 	 */
-	dragged(line: number): readonly number[];
+	dragged(line: number): readonly number[] | null;
+	/** Ends the host's selection, for a drag of a row outside it; nothing where rows don't select. */
+	endSelection(): void;
 	/** Moves the dragged row on `line`, both it and `drop` as the drawn rows number them. */
 	drop(line: number, drop: RowDrop): void;
 	/** A row lifted on `line` and let go without moving: selects it, or nothing where rows don't select. */
@@ -67,15 +68,8 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 		},
 		track: (line) => view.editing.track(line),
 		untrack: (tracked) => view.editing.untrack(tracked),
-		dragged: (line) => {
-			const selected = view.selection.linesWith(line);
-			if (selected) return selected;
-			// Selecting on mobile ends only with Done, Delete or the last row tapped away (selecting
-			// several rows, "On mobile").
-			if (view.selecting && view.selection.has(line)) return [line];
-			clearSelection(view);
-			return [line];
-		},
+		dragged: (line) => view.selection.linesWith(line),
+		endSelection: () => clearSelection(view),
 		drop: (line, drop) => {
 			forgetCardItem();
 			queueDrop(view, line, drop);
@@ -89,25 +83,26 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 }
 
 /**
- * Asks `host` which rows a drag from `rowEl`, on `line`, carries, and tracks those other than `line`.
- * When there are any, marks `rowEl` with how many rows it carries. Returns them, for the drag to
- * untrack when it ends.
+ * Asks `host` whether a drag from `rowEl`, on `line`, carries the selection, and tracks its rows other
+ * than `line`. When there are any, marks `rowEl` with how many rows it carries. Returns them, empty for
+ * a selection of that row alone, for the drag to untrack when it ends; null when the row isn't selected.
  */
-export function carry(host: RowDragHost, line: number, rowEl: HTMLElement): TrackedLine[] {
+export function carry(host: RowDragHost, line: number, rowEl: HTMLElement): TrackedLine[] | null {
 	const carried = host.dragged(line);
+	if (!carried) return null;
 	const others = carried.filter((other) => other !== line).map((other) => host.track(other));
 	if (others.length > 0) rowEl.setAttr(COUNT_ATTR, String(carried.length));
 	return others;
 }
 
 /**
- * Closes what a lift closes (`beforeLift`), then scrolls `liftScrollEl` by however far that moved
- * `row`, such as a taller card above it closing, so the row stays under the pointer as far as the
- * scroller can go.
+ * Runs `close`, which closes what the lift closes, then scrolls `liftScrollEl` by however far that
+ * moved `row`, such as a taller card above it closing or the selection bar's room below the last row
+ * going, so the row stays under the pointer as far as the scroller can go.
  */
-export function liftInPlace(host: RowDragHost, row: HTMLElement): void {
+export function liftInPlace(host: RowDragHost, row: HTMLElement, close: () => void): void {
 	const rowTop = row.getBoundingClientRect().top;
-	host.beforeLift();
+	close();
 	if (host.liftScrollEl && row.isConnected) host.liftScrollEl.scrollTop += row.getBoundingClientRect().top - rowTop;
 }
 

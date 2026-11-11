@@ -40,18 +40,22 @@ function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { line: nu
 }
 
 /**
- * The drop for a drag aimed `over` a row: a dragged selection's when the drag carries `others`, aimed
- * with those still there, else the dragged row's own.
+ * The drop for a drag aimed `over` a row: a dragged selection's when the drag carries the selection,
+ * with `others` its other rows, aimed with those still there, one selected row included; else, with
+ * `others` null, the dragged row's own. A selection of one row aims only where the row's own drop
+ * would, so it shows no drop line where the move changes nothing.
  */
 export function aimCarried(
 	shown: readonly ShownRow[],
 	dragged: ShownRow,
-	others: readonly TrackedLine[],
+	others: readonly TrackedLine[] | null,
 	over: { line: number; below: boolean },
 ): RowDrop | null {
-	if (others.length === 0) return aimDrop(shown, dragged, over);
-	const carried = others.flatMap((row) => (row.line === null ? [] : [row.line]));
-	return aimGroupDrop(shown, [dragged.line, ...carried], over);
+	const own = aimDrop(shown, dragged, over);
+	if (!others) return own;
+	const moving = [dragged.line, ...others.flatMap((row) => (row.line === null ? [] : [row.line]))];
+	if (moving.length === 1 && !own) return null;
+	return aimGroupDrop(shown, moving, over);
 }
 
 // A dragged selection's drop, aimed as groupDropAt aims it with the rows on `moving`.

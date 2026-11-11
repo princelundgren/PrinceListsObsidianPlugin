@@ -27,10 +27,10 @@ describe('RowSelection', () => {
 		expect(selection.anchor).toBe(3);
 	});
 
-	test('linesWith gives the selected lines for a row in a selection of two or more', () => {
+	test('linesWith gives the selected lines for any selected row', () => {
 		const { selection } = selectionIn(TEXT);
 		selection.toggle(7);
-		expect(selection.linesWith(7)).toBeNull();
+		expect(selection.linesWith(7)).toEqual([7]);
 		selection.toggle(3);
 		expect(selection.linesWith(7)).toEqual([3, 7]);
 		expect(selection.linesWith(5)).toBeNull();

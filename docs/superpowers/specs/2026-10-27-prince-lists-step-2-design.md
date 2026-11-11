@@ -417,9 +417,9 @@ this met on 2026-10-30 **(owner)**.
 - **A section ends at the next heading of any level (call),** as step one's sections do, so
   dragging a `##` doesn't take a `###` below it along.
 - **It's started as an item drag is:** with the mouse on desktop, and by holding and then moving
-  on mobile, where a tap still opens the heading menu, or selects the heading while selecting
-  ([selecting several rows](2026-11-07-select-several-design.md), "On mobile"). The drag closes an
-  open card first. A heading whose name field is open doesn't drag **(call)**.
+  on mobile, where a tap still opens the heading menu. While selecting, a click or a tap selects
+  the heading ([selecting several rows](2026-11-07-select-several-design.md), "While selecting").
+  The drag closes an open card first. A heading whose name field is open doesn't drag **(call)**.
 - **A section drops only between sections (call):** before another heading, or at the end of the
   list. The drop line shows above the heading it will go before, or under the last row for the
   end. It never drops above the items before the first heading, which would join the moved
@@ -447,8 +447,8 @@ this met on 2026-10-30 **(owner)**.
   hard to hit. It is drawn as Obsidian's own fold arrows are (owner, 2026-10-27): its `right-triangle`
   icon in `--collapse-icon-color`, turned to point right and in `--collapse-icon-color-collapsed`
   while collapsed. Only a click or tap on the arrow toggles; a tap on the heading still opens its menu
-  on mobile, or selects the heading while selecting ([selecting several
-  rows](2026-11-07-select-several-design.md), "On mobile").
+  on mobile, and while selecting a click or a tap selects the heading ([selecting several
+  rows](2026-11-07-select-several-design.md), "While selecting").
 - **Its target is as wide as a row's tick zone (call):** the column and the gap after it, reaching
   into the view's margin. It runs from the space above the heading to the heading's bottom.
 - **It always shows (owner, 2026-11-05),** so a heading has something in the column where an item

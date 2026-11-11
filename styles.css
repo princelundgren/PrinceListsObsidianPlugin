@@ -192,8 +192,8 @@ textarea.princelists-title {
 	border-end-end-radius: var(--radius-s);
 }
 
-/* While selecting on mobile, each of the view's own checkboxes is a selection circle, filled while its row
-   is selected and never showing a tick, so nothing looks ticked by mistake (spec, "Ticking"). An open card
+/* While selecting, each of the view's own checkboxes is a selection circle, filled while its row is
+   selected and never showing a tick, so nothing looks ticked by mistake (spec, "Ticking"). An open card
    keeps its box, and so do a list block's rows, which still tick in their own note: the child path reaches
    only the view's rows. The checked and selected rules outrank Obsidian's own checked and hover ones. */
 .princelists-selecting .princelists-sizer > .princelists-items > .princelists-item:not(.princelists-card) > .princelists-checkbox {
@@ -675,10 +675,10 @@ button.princelists-new-item {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The bar while selecting, in the floating "+"'s place on mobile and kept above the navigation bar the same
-   way (spec, "The bar"): how many are selected and Done, then a row of actions with Delete apart past a
-   divider. Every button takes at least 48 by 48 with 8 between them, and the height holds two rows of them
-   with 8 around and between, and the bar's border. */
+/* The bar while selecting, in the floating "+"'s place and kept above mobile's navigation bar and
+   desktop's status bar the same way (spec, "The bar"): how many are selected and Done, then a row of
+   actions with Delete apart past a divider. Every button takes at least 48 by 48 with 8 between them, and
+   the height holds two rows of them with 8 around and between, and the bar's border. */
 .princelists-view {
 	--princelists-selection-bar-height: calc(2 * var(--size-4-12) + 3 * var(--size-4-2) + 2 * var(--border-width));
 }
@@ -687,7 +687,7 @@ button.princelists-new-item {
 	position: absolute;
 	left: var(--size-4-4);
 	right: var(--size-4-4);
-	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px));
+	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 	display: flex;
 	flex-direction: column;
 	box-sizing: border-box;
@@ -760,7 +760,7 @@ button.princelists-new-item {
 }
 
 .princelists-selecting .princelists-end {
-	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px));
+	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
 /* The title, with the card's tag button, star, When and ⋯ on its first line. They sit in the
