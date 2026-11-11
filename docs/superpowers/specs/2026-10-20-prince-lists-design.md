@@ -756,6 +756,14 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star button's "Add star" and "Remove star";
     and "Remove", as in Remove image.
+- **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
+  of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick and the
+  star; the date entries; New item below and New heading below; Edit in Markdown; Delete item. The
+  card's ⋯ has the same without the card's own entries. The heading menu groups Select; New item,
+  New heading below and Rename heading; Edit in Markdown; Collapse or Expand all headings
+  **(call)**; Delete heading. That is more groups than the three or so in Apple's [Context
+  menus](https://developer.apple.com/design/human-interface-guidelines/context-menus), which also
+  puts the most-used entries first and destructive ones last.
 - **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected
   row included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Add star and
   Remove star, the four date entries, and Delete in red, naming what goes. Each acts on every

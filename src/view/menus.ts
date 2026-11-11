@@ -23,9 +23,9 @@ import { selectRow } from './select';
 import { addGroupEntries } from './selection-menu';
 import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
-// The item actions, from a right-click on desktop and the card's ⋯ (spec, "Item actions").
-export function itemMenu(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
-	addSelectEntry(view, anchor, menu);
+// The item actions, from a right-click on desktop and the card's ⋯, after Select and the card's own
+// entries (spec, "Item actions").
+function itemMenu(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 	menu.addItem((entry) =>
 		entry
 			.setTitle('New item below')
@@ -38,12 +38,14 @@ export function itemMenu(view: PrinceListView, anchor: TrackedLine, menu: Menu):
 			.setIcon('heading')
 			.onClick(atLine(anchor, (line) => addHeading(view, { afterItem: line }))),
 	);
+	menu.addSeparator();
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Edit in Markdown')
 			.setIcon('file-text')
 			.onClick(atLine(anchor, (line) => editItemInMarkdown(view, line))),
 	);
+	menu.addSeparator();
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Delete item')
@@ -76,6 +78,7 @@ export function headingMenu(view: PrinceListView, model: ListModel, section: Sec
 			.setIcon('pencil')
 			.onClick(atLine(anchor, (line) => openHeadingField(view, line))),
 	);
+	menu.addSeparator();
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Edit in Markdown')
@@ -139,8 +142,8 @@ export function listMenu(view: PrinceListView, model: ListModel, section: Sectio
 	);
 }
 
-// Select, for a row that isn't selected: it starts selecting with the row, or adds it while selecting.
-// Not on a new empty item, which selecting would remove with its card.
+// Select, first and in a group of its own, for a row that isn't selected: it starts selecting with the
+// row, or adds it while selecting. Not on a new empty item, which selecting would remove with its card.
 function addSelectEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 	if (anchor.line !== null && (view.selection.has(anchor.line) || isNewEmptyItem(view, anchor.line))) return;
 	menu.addItem((entry) =>
@@ -149,6 +152,7 @@ function addSelectEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu): 
 			.setIcon('square-check')
 			.onClick(atLine(anchor, (line) => selectRow(view, line))),
 	);
+	menu.addSeparator();
 }
 
 function addCollapseAllEntries(view: PrinceListView, model: ListModel, menu: Menu): void {
@@ -219,7 +223,9 @@ export function showCardMenu(view: PrinceListView, button: HTMLElement): void {
 	const item = line === null ? undefined : itemAt(view.parse().model, line);
 	if (!item) return;
 	const menu = new Menu();
-	itemMenu(view, trackWhileShown(view, item.titleLine, menu), menu);
+	const anchor = trackWhileShown(view, item.titleLine, menu);
+	addSelectEntry(view, anchor, menu);
+	itemMenu(view, anchor, menu);
 	const { left, bottom, width } = button.getBoundingClientRect();
 	menu.showAtPosition({ x: left, y: bottom, width, overlap: true, left: true }, button.doc);
 }
@@ -241,6 +247,7 @@ function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
 	const menu = new Menu();
 	if (item && row) {
 		const anchor = trackWhileShown(view, item.titleLine, menu);
+		addSelectEntry(view, anchor, menu);
 		// The open card shows its box, star and date already, so it gets what its ⋯ has.
 		if (!row.classList.contains(CARD_CLASS)) itemQuickMenu(view, item, row, anchor, menu);
 		itemMenu(view, anchor, menu);

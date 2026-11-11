@@ -89,11 +89,11 @@ only documented Obsidian APIs are used.
     card. Only the main button with no modifier counts, and only on a row's or a heading's own
     area: not on its checkbox or the zone beside it, a link, the collapse arrow, a field or inside
     the open card **(call)**.
-- **Select in a row's or a heading's menu:** the right-click menu **(owner, 2026-11-11)**, and a
-  card's ⋯ and the heading menu on mobile **(call)**. It starts selecting with that row, or adds it
-  while selecting, and shows only while that row isn't selected: a selected row's right-click opens
-  the selection's menu instead **(call)**. The ⋯ of a new empty item has no Select, as selecting it
-  would remove it **(call)**.
+- **Select, first in a row's or a heading's menu (owner, 2026-11-11; step one, "Item actions"):**
+  the right-click menu **(owner, 2026-11-11)**, and a card's ⋯ and the heading menu on mobile
+  **(call)**. It starts selecting with that row, or adds it while selecting, and shows only while
+  that row isn't selected: a selected row's right-click opens the selection's menu instead
+  **(call)**. The ⋯ of a new empty item has no Select, as selecting it would remove it **(call)**.
 - **Cmd+click adds or removes a row (owner), and Shift+click selects every shown row between the
   anchor and the click (owner);** either starts selecting **(owner, 2026-11-11)**. The anchor is
   the open card's item, or the last row clicked, tapped or held **(call)**. A second Shift+click
