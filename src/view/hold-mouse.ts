@@ -56,6 +56,8 @@ export function enableMouseHold(view: PrinceListView): void {
 	view.registerDomEvent(rowsEl, 'dragstart', forgetPress);
 	view.registerDomEvent(rowsEl, 'pointercancel', forgetPress);
 	view.registerDomEvent(rowsEl, 'pointerleave', forgetPress);
+	// Switching away mid-hold loses the pointerup, which would leave the row lifted.
+	view.registerDomEvent(rowsEl.win, 'blur', forgetPress);
 }
 
 function holdRow(view: PrinceListView, row: HTMLElement): void {
