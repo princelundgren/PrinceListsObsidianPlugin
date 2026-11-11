@@ -24,8 +24,10 @@ this project.
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
   - The plans in `docs/superpowers/plans/` give the tasks, with exact interfaces and tests. The
-    latest one for the plugin is [filtering by tag](docs/superpowers/plans/2026-11-07-tag-filter.md),
-    and [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
+    latest ones for the plugin are
+    [filtering by tag](docs/superpowers/plans/2026-11-07-tag-filter.md) and
+    [one way of selecting](docs/superpowers/plans/2026-11-11-one-way-of-selecting.md), and
+    [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
     README's and the listing's pictures. Implement a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.
 

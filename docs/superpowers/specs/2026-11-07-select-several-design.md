@@ -58,7 +58,8 @@ only documented Obsidian APIs are used.
 - **Selected rows are marked as Obsidian marks selected files** in its file list,
   `--nav-item-background-selected` behind the row and `--nav-item-color-selected` for its text
   ([Navigation](https://docs.obsidian.md/Reference/CSS+variables/Components/Navigation)). A run of
-  selected rows reads as one block, rounded only at its ends **(call)**. Checked in Obsidian's
+  selected rows reads as one block, rounded only at its ends **(call)**; a heading's or an
+  untouched block's margin still shows as a gap within a run. Checked in Obsidian's
   default theme in light and dark mode. Assistive technology hears which rows are selected and how
   many: rows hold a checkbox and headings have `role="heading"`, so `aria-selected` alone isn't
   valid on them, and the builder names the pattern used in the pull request **(call)**.
@@ -75,7 +76,7 @@ only documented Obsidian APIs are used.
 
 - **Before selecting, a plain click opens the card, as today (owner),** and a click on the
   checkbox or beside it ticks that one item.
-- **Holding a row and letting go without moving (owner; with a mouse, owner 2026-11-11).**
+- **Holding a row and letting go without moving (owner; with a mouse, owner, 2026-11-11).**
   - **By touch,** today that lifts the row and puts it back, writing nothing, so the gesture is
     free. "Without moving" means the finger never passed the drag's 5 px tolerance after the lift
     (`armed` in `src/view/drag-touch.ts`), so a lift that moves and comes back still drags
@@ -86,11 +87,11 @@ only documented Obsidian APIs are used.
     card. Only the main button with no modifier counts, and only on a row's or a heading's own
     area: not on its checkbox or the zone beside it, a link, the collapse arrow, a field or inside
     the open card **(call)**.
-- **Select in a row's or a heading's menu (owner, 2026-11-11):** the right-click menu, a card's ⋯
-  and the heading menu. It starts selecting with that row, or adds it while selecting, and shows
-  only while that row isn't selected: a selected row's right-click opens the selection's menu
-  instead **(call)**. The ⋯ of a new empty item has no Select, as selecting it would remove it
-  **(call)**.
+- **Select in a row's or a heading's menu:** the right-click menu **(owner, 2026-11-11)**, and a
+  card's ⋯ and the heading menu on mobile **(call)**. It starts selecting with that row, or adds it
+  while selecting, and shows only while that row isn't selected: a selected row's right-click opens
+  the selection's menu instead **(call)**. The ⋯ of a new empty item has no Select, as selecting it
+  would remove it **(call)**.
 - **Cmd+click adds or removes a row (owner), and Shift+click selects every shown row between the
   anchor and the click (owner);** either starts selecting **(owner, 2026-11-11)**. The anchor is
   the open card's item, or the last row clicked, tapped or held **(call)**. A second Shift+click
@@ -136,7 +137,8 @@ only documented Obsidian APIs are used.
 - **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
   CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
-  48 by 48 dp with 8 between ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
+  48 by 48 dp with 8 between
+  ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
   Delete sits apart at the far end, past a divider, so a near miss on Date doesn't reach it
   **(call)**. The bar is the same on desktop.
 - **Done ends selecting,** and so does Delete or removing the last selected row **(call)**. Other
@@ -212,8 +214,9 @@ Left out on purpose, each for its reason:
 Each in the pull request that makes it untrue:
 
 - **Step one, "Selecting and adding":** a click with Cmd or Shift held, Shift+Up or Shift+Down, a
-  hold let go or Select starts selecting instead of only closing the card; while selecting, a click selects instead of
-  opening a card, Cmd+Enter adds below the selection, and the bar takes the floating "+"'s place.
+  hold let go or Select starts selecting instead of only closing the card; while selecting, a click
+  selects instead of opening a card, Cmd+Enter adds below the selection, and the bar takes the
+  floating "+"'s place.
 - **Step one, "Ticking":** with Cmd or Shift held, and while selecting, a click on the checkbox or
   beside it selects; while selecting, checkboxes show as selection circles.
 - **Step one, "Item actions":** the selection's menu, and Select in an item's and a heading's
@@ -245,7 +248,8 @@ Each in the pull request that makes it untrue:
 3. **The mobile bar:** it sits above Obsidian's own navigation bar and the on-screen keyboard
    without covering the last rows, on an iPhone, an iPad and Android.
    - **Result:** on Android, the bar sits above the navigation bar and the keyboard, and the last
-     row scrolls clear of it. Not checked on an iPhone or an iPad.
+     row scrolls clear of it; at the bar's 48 px buttons, the clearance was checked again without
+     the keyboard. Not checked on an iPhone or an iPad.
 4. **Hold and let go:** that a still hold let go reaches the view on iOS and Android after
    Obsidian's own `contextmenu` and its haptic, and that the tap after it is still swallowed (step
    one, "Touch on mobile").

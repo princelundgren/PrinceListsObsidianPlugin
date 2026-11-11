@@ -101,11 +101,14 @@ export function extendSelection(view: PrinceListView, step: 1 | -1): boolean {
 /**
  * A hold let go without moving on the row on `line`. Not yet selecting, it starts selecting with that
  * row and `cardLine`, the item whose card the hold closed, if any. While selecting, it selects the shown
- * rows from the last row clicked, tapped or held to it, as Shift+click does.
+ * rows to it from `cardLine`, or with no card from the last row clicked, tapped or held, as
+ * Shift+click does.
  */
 export function selectOnHold(view: PrinceListView, line: number, cardLine: number | null): void {
-	if (view.selecting) view.selection.addRangeTo(line, selectableLines(view));
-	else view.selection.startWith(line, cardLine);
+	if (view.selecting) {
+		if (cardLine !== null) view.selection.setAnchor(cardLine);
+		view.selection.addRangeTo(line, selectableLines(view));
+	} else view.selection.startWith(line, cardLine);
 	view.selecting = true;
 	drawSelection(view);
 }
@@ -189,7 +192,10 @@ export function focusListWhenActive(view: PrinceListView): void {
 	);
 }
 
-// The open card's item, closing the card, or null with no card open.
+/**
+ * Closes the open card and returns its item's line, so a way into selecting can select it too;
+ * null with no card open.
+ */
 export function closeCardForSelection(view: PrinceListView): number | null {
 	if (!view.card) return null;
 	const line = view.selected;
