@@ -1,6 +1,6 @@
 ---
-status: live
-verified: 2026-11-10
+status: building
+verified: 2026-11-11
 governs: [src/**, styles.css]
 tracking: ["#79"]
 ---
@@ -16,9 +16,10 @@ dates or deletes them (#79). Mobile gets all of it, not a lighter version: sorti
 possible with only a phone at hand **(owner)**.
 
 **How decisions are marked:** as in the [step one design](2026-10-20-prince-lists-design.md).
-**(owner)** means the owner decided it on 2026-11-07; **(call)** means the designer did, and a
-builder may revisit it. Step one's rules still hold: an edit replaces only the lines it concerns,
-nothing is written in the background, and only documented Obsidian APIs are used.
+**(owner)** means the owner decided it on 2026-11-07, and **(owner, 2026-11-11)** after trying
+the first build; **(call)** means the designer did, and a builder may revisit it. Step one's rules
+still hold: an edit replaces only the lines it concerns, nothing is written in the background, and
+only documented Obsidian APIs are used.
 
 **Keys:** Cmd in this design means Obsidian's `Mod` key, which is Ctrl on Windows and Linux.
 **Mobile** means phones and tablets used by touch, as in step one; a mouse or pen on a tablet is
@@ -26,10 +27,10 @@ nothing is written in the background, and only documented Obsidian APIs are used
 
 ## At a glance
 
-- **Desktop:** a click still opens an item's card. Cmd+click adds or removes a row, Shift+click
-  selects a range, and Shift+Up and Shift+Down grow or shrink it **(owner)**.
-- **Mobile:** hold a row and let go without moving to start selecting. Then a tap adds or removes a
-  row, and a bar at the bottom holds the actions **(owner)**.
+- **One way of selecting, on desktop and mobile (owner, 2026-11-11).** Hold a row and let go
+  without moving, or pick Select in its menu, to start selecting; on desktop Cmd+click,
+  Shift+click, Shift+Up and Shift+Down start it too **(owner)**. While selecting, a click or a tap
+  adds or removes a row, and a bar at the bottom holds the actions **(owner)**.
 - **Dragging a selected row drags the whole selection** as one block. A selected heading brings its
   section **(owner)**.
 - **Move to heading…** sends the selection under a heading picked from a list, with no drag
@@ -43,10 +44,9 @@ nothing is written in the background, and only documented Obsidian APIs are used
 
 - **Rows and headings,** in the list view. The open card's item counts as selected, as it does
   today ("Selecting and adding" in step one): it is where a range starts.
-- **A group is two rows or more (call).** On desktop, one selected row keeps its own menu and
-  actions, as today; the selection's menu and the Undo message start at two. On mobile the bar acts
-  on whatever is selected, one row included, since it's the only way to act while selecting, and
-  every bar action shows the Undo message.
+- **One selected row is enough (owner, 2026-11-11).** Selecting is one mode on desktop and mobile,
+  so the bar, the selection's menu and the Undo message act on whatever is selected, one row
+  included.
 - **A selected heading is its own row (call),** on desktop and mobile alike: its items aren't
   selected with it. It brings its whole section when dragged, as a heading drag does, and the
   actions skip it ("The actions").
@@ -55,71 +55,89 @@ nothing is written in the background, and only documented Obsidian APIs are used
   such as by collapsing its heading, a filter, or a tick with "Hide ticked items after" set to at
   once, leaves the selection, so no action reaches a row that can't be seen **(call)**. A selected
   heading still brings its hidden rows when dragged, as a heading drag does.
-- **Selected rows are marked** with a background from Obsidian's own CSS variables **(call)**,
-  checked in Obsidian's default theme in light and dark mode. Assistive technology hears which rows
-  are selected and how many: rows hold a checkbox and headings have `role="heading"`, so
-  `aria-selected` alone isn't valid on them, and the builder names the pattern used in the pull
-  request **(call)**.
+- **Selected rows are marked as Obsidian marks selected files** in its file list,
+  `--nav-item-background-selected` behind the row and `--nav-item-color-selected` for its text
+  ([Navigation](https://docs.obsidian.md/Reference/CSS+variables/Components/Navigation)). A run of
+  selected rows reads as one block, rounded only at its ends **(call)**. Checked in Obsidian's
+  default theme in light and dark mode. Assistive technology hears which rows are selected and how
+  many: rows hold a checkbox and headings have `role="heading"`, so `aria-selected` alone isn't
+  valid on them, and the builder names the pattern used in the pull request **(call)**.
 - **It follows its rows through the view's own edits,** as a collapsed heading follows its line
   (step two, "Collapsing a heading"). A change from outside keeps the rows the view can still find
   and drops the rest **(call)**.
 - **It's never written to the file and isn't remembered (call).** Closing the list ends it.
-- **It ends** with Escape, a click on empty space, or a plain click on a row, which opens that row's
-  card as today **(call)**. An open menu or dialog takes the first Escape, and Escape in a text
-  field is the field's **(call)**. On mobile, Done ends it ("On mobile").
+- **It ends** with Done, Escape, or removing the last selected row **(call)**. A click or a tap on
+  empty space keeps it, so a near miss between rows doesn't lose it **(call)**. An open menu or
+  dialog takes the first Escape, and Escape in a text field is the field's **(call)**. Once it
+  ends, a click opens a card again.
 
-## On desktop
+## Starting to select
 
-- **A plain click opens the card, as today (owner).** Opening an item stays the common action.
-- **Cmd+click adds or removes a row (owner).** With a card open, it closes the card, and the card's
-  item and the clicked row are both selected. This changes step one's "while a card is open, a
-  click outside it only closes it" for a click with Cmd or Shift held only **(owner)**.
-- **Shift+click selects every shown row between the anchor and the click (owner).** The anchor is
-  the open card's item, or the last row clicked plainly or with Cmd **(call)**. A second Shift+click
+- **Before selecting, a plain click opens the card, as today (owner),** and a click on the
+  checkbox or beside it ticks that one item.
+- **Holding a row and letting go without moving (owner; with a mouse, owner 2026-11-11).**
+  - **By touch,** today that lifts the row and puts it back, writing nothing, so the gesture is
+    free. "Without moving" means the finger never passed the drag's 5 px tolerance after the lift
+    (`armed` in `src/view/drag-touch.ts`), so a lift that moves and comes back still drags
+    **(call)**. A hold that moves still drags a single row.
+  - **With a mouse,** a press held as long as the touch hold (`HOLD_MS` in
+    `src/core/touch-drag.ts`) and let go within the same tolerance **(call)**. Moving first starts
+    the browser's drag, which drags the row as today. The click that follows the release opens no
+    card.
+- **Select in a row's or a heading's menu (owner, 2026-11-11):** the right-click menu, a card's ⋯
+  and the heading menu. It starts selecting with that row, or adds it while selecting **(call)**.
+- **Cmd+click adds or removes a row (owner), and Shift+click selects every shown row between the
+  anchor and the click (owner);** either starts selecting **(owner, 2026-11-11)**. The anchor is
+  the open card's item, or the last row clicked, tapped or held **(call)**. A second Shift+click
   replaces the range rather than adding to it, and a Shift+click with no anchor selects that row
   alone, as Cmd+click does **(call)**.
-- **Shift+Up and Shift+Down grow or shrink the range from the anchor (owner)** while the list has
-  focus and no field does; with no anchor they do nothing. In a card's title or notes they keep
-  selecting text. Moving between rows with the arrows alone, and opening a card from the keyboard,
-  are #125's **(call)**.
-- **The checkbox and the zone beside it (call):** a plain click ticks that one item, as today, and
-  the selection stays. With Cmd or Shift held, the click selects instead of ticking.
+- **Shift+Up and Shift+Down grow or shrink the range from the anchor (owner),** and start selecting
+  **(owner, 2026-11-11)**, while the list has focus and no field does; with no anchor they do
+  nothing. In a card's title or notes they keep selecting text. Moving between rows with the arrows
+  alone, and opening a card from the keyboard, are #125's **(call)**.
+- **With a card open,** each of these closes it, and the card's item and the row are both selected
+  **(call)**. This changes step one's "while a card is open, a click outside it only closes it" for
+  these only **(owner)**.
+
+## While selecting
+
+- **A click or a tap on a row or a heading adds or removes it (owner; on desktop, owner
+  2026-11-11),** and one on a heading doesn't open the heading menu. Cmd+click does the same.
+  Shift+click, and holding another row and letting go, select every shown row between it and the
+  anchor, as a first Shift+click does **(call)**. A click or a tap on a link in a title still opens
+  it **(call)**.
+- **Each row's checkbox shows as a selection circle,** and a click or a tap on it or beside it
+  selects, so nothing is ticked by mistake.
+- **A bar replaces the floating "+" at the bottom of the pane:** "5 selected" with Done, and Move
+  to, Tick, Star, Date and Delete. On desktop it takes the same place whether or not the floating
+  "+" shows there, and the "+" in the pane's header hides **(call)**.
+- **Right-click on a selected row** opens the selection's menu **(owner)**; on a row outside the
+  selection it opens that row's own menu, as today, and leaves the selection **(call)**.
+- **Dragging a selected row drags the whole selection** ("Dragging the selection").
+- **Cmd+Enter adds the new item below the last selected item** in list order **(call)**, and
+  selecting ends as its card opens. With only headings selected it adds one as "+" does.
 - **Cmd+click on a link** in a title still opens it in a new tab, as Obsidian does: the link wins
   over selecting **(call)**.
-- **Cmd+Enter with several rows selected** adds the new item below the last selected item in list
-  order **(call)**, and the selection ends as its card opens.
 
-## On mobile
+## The bar
 
-- **Holding a row and letting go without moving starts selecting (owner).** Today that lifts the
-  row and puts it back, writing nothing, so the gesture is free. "Without moving" means the finger
-  never passed the drag's 5 px tolerance after the lift (`armed` in `src/view/drag-touch.ts`), so a
-  lift that moves and comes back still drags **(call)**. A hold that moves still drags a single
-  row.
-- **With a card open (call),** the lift closes it, as today, and the card's item and the held row
-  are both selected, as Cmd+click does on desktop.
-- **While selecting (owner):**
-  - A tap on a row or a heading adds or removes it, and a tap on a heading doesn't open the
-    heading menu. A tap on empty space keeps the selection, so a tap between rows doesn't lose it,
-    and a tap on a link in a title still opens it, as Cmd+click does on desktop **(call)**.
-  - Holding another row and letting go selects every shown row between it and the last row tapped,
-    as Shift+click does **(call)**.
-  - Each row's checkbox shows as a selection circle, so nothing is ticked by mistake.
-  - A bar replaces the floating "+" at the bottom: "5 selected" with Done, and Move to, Tick,
-    Star, Date and Delete. The "+" in the pane's header hides too **(call)**.
-  - Holding a selected row and moving it drags the whole selection.
-- **The bar's buttons (call):** Move to opens the heading picker and Delete deletes, as the menu's
+- **Its buttons (call):** Move to opens the heading picker and Delete deletes, as the menu's
   entries do. Tick, Star and Date each open a small menu of the selection menu's entries for them,
   so a mixed selection gets both Tick and Untick. A button whose entries all hide, such as Tick
   with only headings selected, is disabled; Move to is disabled while a heading is selected.
-- **Done ends selecting,** and so does Delete or tapping away the last selected row **(call)**.
-  Other actions keep the selection, so several can follow each other.
+- **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
+  CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
+  ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
+  48 by 48 dp with 8 between ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
+  Delete sits apart at the far end, past a divider, so a near miss on Date doesn't reach it
+  **(call)**. The bar is the same on desktop.
+- **Done ends selecting,** and so does Delete or removing the last selected row **(call)**. Other
+  actions keep the selection, so several can follow each other.
 
 ## Dragging the selection
 
 - **Dragging a selected row drags every selected row (owner);** dragging a row outside the
-  selection drags that row alone and clears the selection, which on mobile ends selecting
-  **(call)**.
+  selection drags that row alone and ends selecting **(call)**.
 - **What lifts (call):** the row under the pointer or finger, with the number of rows it carries.
   The other selected rows stay in place until the drop redraws the list, as only a heading lifts
   in step two's section drag on mobile.
@@ -140,9 +158,8 @@ nothing is written in the background, and only documented Obsidian APIs are used
 
 ## The actions
 
-- **On desktop, right-clicking a selected row opens the selection's menu (owner)** while two or more
-  rows are selected; right-clicking a row outside it opens that row's own menu, as today, and leaves
-  the selection.
+- **The selection's menu** opens with a right-click on a selected row ("While selecting"), and the
+  bar's Tick, Star and Date open parts of it ("The bar").
 - **Move to heading… (owner)** opens a picker, Obsidian's `SuggestModal`, that lists "Top of the
   list" and then the list's headings in order, and narrows as you type **(call)**. A pick sends the
   selected items to the end of that section, after its last item, as the background menu's New item
@@ -150,8 +167,7 @@ nothing is written in the background, and only documented Obsidian APIs are used
   the part before the first heading. A heading name used twice shows its place, such as "Frozen,
   2 of 2" **(call)**. A collapsed target section expands, as step two's adding does. It shows only
   while no heading is selected, and in a list with headings: sections reorder by dragging
-  **(call)**. Items under the picked
-  heading that are selected move to the end too.
+  **(call)**. Items under the picked heading that are selected move to the end too.
 - **Tick and Untick, Add star and Remove star (call)** show by what the selection holds: Tick
   while any selected item is unticked, Untick while any is ticked, both for a mix. Each changes only
   the items that need it. A repeating item, which can't be ticked here today, is skipped, and a
@@ -187,20 +203,21 @@ Left out on purpose, each for its reason:
 
 Each in the pull request that makes it untrue:
 
-- **Step one, "Selecting and adding":** a click with Cmd or Shift held selects instead of only
-  closing the card; Cmd+Enter with several rows selected; while selecting on mobile, the bar takes
-  the floating "+"'s place.
-- **Step one, "Ticking":** with Cmd or Shift held, a click on the checkbox or beside it selects;
-  while selecting on mobile, checkboxes show as selection circles.
-- **Step one, "Item actions":** the selection's menu; while selecting on mobile, a tap on a heading
-  selects it instead of opening the heading menu.
-- **Step one, "Dragging" and "Touch on mobile":** a hold let go without moving starts selecting; a
-  drag of a selected row moves the selection.
+- **Step one, "Selecting and adding":** a click with Cmd or Shift held, Shift+Up or Shift+Down, a
+  hold let go or Select starts selecting instead of only closing the card; while selecting, a click selects instead of
+  opening a card, Cmd+Enter adds below the selection, and the bar takes the floating "+"'s place.
+- **Step one, "Ticking":** with Cmd or Shift held, and while selecting, a click on the checkbox or
+  beside it selects; while selecting, checkboxes show as selection circles.
+- **Step one, "Item actions":** the selection's menu, and Select in an item's and a heading's
+  menus; while selecting, a click or a tap on a heading selects it instead of opening the heading
+  menu.
+- **Step one, "Dragging" and "Touch on mobile":** a hold let go without moving, by touch or with a
+  mouse, starts selecting; a drag of a selected row moves the selection.
 - **Step one, "Undo":** "the list's only undo on mobile stays the Undo button after a delete" no
   longer holds: every group action shows one.
 - **Step two, "Dragging a heading":** a selection with a heading drops as a section does, and
-  while selecting on mobile a tap on a heading selects it.
-- **Step two, "Collapsing a heading":** while selecting on mobile, a tap on a heading selects it;
+  while selecting a click or a tap on a heading selects it.
+- **Step two, "Collapsing a heading":** while selecting, a click or a tap on a heading selects it;
   Move to heading… expands a collapsed target.
 - **AGENTS.md, "Read before working":** links this design.
 
@@ -236,6 +253,12 @@ Each in the pull request that makes it untrue:
    - **Result:** the list's scroller takes focus at `tabindex="-1"`, so the keys reach the view
      with no row focusable; checked on macOS, also after switching tabs and back.
 
+7. **Holding with a mouse:** that a press held still on a draggable row, in Obsidian's own
+   window, sends `pointerup` and then one `click` without starting the browser's drag, on macOS and
+   Windows, and that the click opens no card.
+8. **The bar on desktop:** that it sits at the bottom of a narrow pane, a split pane and a pop-out
+   window without covering the last rows or the status bar.
+
 ## Order (call)
 
 1. Core: moving several blocks in one write, and the actions over several items, with tests.
@@ -243,3 +266,6 @@ Each in the pull request that makes it untrue:
 3. Desktop: dragging the selection.
 4. The selection's menu, Move to heading… included.
 5. Mobile: hold to start, taps, the bar, and dragging.
+6. The bar sized for a finger, and how selected rows look.
+7. One way of selecting on desktop: the mode, the bar there, and one selected row as a group.
+8. Starting by holding with a mouse, and Select in the menus.
