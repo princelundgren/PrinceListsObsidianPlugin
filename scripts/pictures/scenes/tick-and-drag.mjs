@@ -1,5 +1,5 @@
 // On a phone, in Groceries, bananas is ticked, then "+" adds croissants with a short note, which is
-// held and dragged to the top of Bakery.
+// held and dragged to the top of Bakery, and Done ends the selecting the hold started.
 import { boundsOf, fingerDown, fingerSlide, fingerUp, headingBounds, middleOf, showAlone, sleep, tap, type, undoingChanges } from '../page.mjs';
 import { recordGif } from '../record.mjs';
 
@@ -47,6 +47,10 @@ const scene = {
 					await fingerSlide(session, from, to, 900);
 					await sleep(300);
 					await fingerUp(session, to.x, to.y);
+					await sleep(1000);
+					// The hold selected croissants, so Done ends selecting.
+					const done = middleOf(await boundsOf(session, '.princelists-selection-done'));
+					await tap(session, done.x, done.y);
 					await sleep(1500);
 				});
 			} finally {

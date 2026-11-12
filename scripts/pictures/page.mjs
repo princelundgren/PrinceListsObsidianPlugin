@@ -289,9 +289,24 @@ export async function undoingChanges(session, note, folder, act) {
 	}
 }
 
+/** Returns the scene's clip, worked out now when it is a function, or undefined when it has none. */
+export async function clipOf(session, scene) {
+	return typeof scene.clip === 'function' ? scene.clip(session) : scene.clip;
+}
+
+/**
+ * Returns the bounds of the pane matching the CSS `pane` selector, by default the active one in the
+ * main area, without the part the status bar covers. A clip for a picture of one view alone.
+ */
+export async function paneClip(session, pane = '.workspace-leaf.mod-active') {
+	const bounds = await boundsOf(session, pane);
+	const statusBarTop = await session.evaluate(`document.querySelector('.status-bar')?.getBoundingClientRect().top ?? Infinity`);
+	return { ...bounds, height: Math.min(bounds.y + bounds.height, statusBarTop) - bounds.y };
+}
+
 /** Saves the scene's clip as `<out>/<scene name>.webp`. */
 export async function still(session, scene, out) {
-	const clip = typeof scene.clip === 'function' ? await scene.clip(session) : scene.clip;
+	const clip = await clipOf(session, scene);
 	const { data } = await session.send('Page.captureScreenshot', { format: 'png', ...(clip && { clip: { ...clip, scale: 1 } }) });
 	const folder = await mkdtemp(join(tmpdir(), 'princelists-still-'));
 	try {

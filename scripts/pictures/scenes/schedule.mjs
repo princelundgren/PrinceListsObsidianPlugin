@@ -1,6 +1,6 @@
-// The Schedule opens from the ribbon in the right sidebar and scrolls through dated items from
-// several lists, under Today, Tomorrow, Next 7 days and the start of Later.
-import { boundsOf, closeSchedule, drawnMouse, headingBounds, hover, middleOf, scroll, showAlone, sleep } from '../page.mjs';
+// The Schedule in the right sidebar scrolls through dated items from several lists, under Today,
+// Tomorrow, Next 7 days and the start of Later.
+import { boundsOf, closeSchedule, drawnMouse, headingBounds, hover, middleOf, paneClip, scroll, showAlone, showScheduleInSidebar, sleep } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
 import { recordGif } from '../record.mjs';
 
@@ -19,12 +19,13 @@ const scene = {
 		await showAlone(session, 'To do.md', 'list');
 		await hover(session, REST.x, REST.y);
 	},
+	clip: (session) => paneClip(session, '.mod-right-split'),
 	async shoot(session, out) {
 		try {
 			await session.evaluate('app.workspace.leftSplit.collapse()');
-			await sleep(600);
-			const mouse = drawnMouse(session, REST.x, REST.y);
-			const ribbon = middleOf(await boundsOf(session, '.side-dock-ribbon-action[aria-label="Open schedule"]'));
+			await showScheduleInSidebar(session);
+			const { x, y } = middleOf(await boundsOf(session, '.mod-right-split .princelists-schedule'));
+			const mouse = drawnMouse(session, x, y);
 			const scrollBy = async (distance) => {
 				for (let moved = 0; moved < distance; moved += SCROLL_STEP) {
 					await scroll(session, mouse.at.x, mouse.at.y, SCROLL_STEP);
@@ -32,15 +33,8 @@ const scene = {
 				}
 			};
 			await recordGif(session, scene, out, async () => {
-				await pointer(session, REST.x, REST.y, 'move');
-				await sleep(800);
-				await mouse.glide(ribbon.x, ribbon.y, 700);
-				await sleep(250);
-				await mouse.click();
-				await sleep(1300);
-				const schedule = middleOf(await boundsOf(session, '.mod-right-split .princelists-schedule'));
-				await mouse.glide(schedule.x, schedule.y + 30, 600);
-				await sleep(300);
+				await pointer(session, x, y, 'move');
+				await sleep(1200);
 				await scrollBy(320);
 				await sleep(900);
 				// However many dated items the vault has, the GIF ends with Later's heading in view.

@@ -16,13 +16,21 @@ Ticked items hide after a day, or the time you choose in the settings. The filte
 
 ![In a todo list, an item is ticked and grays out, then the filter icon in the pane's header opens a field, its toggle brings back three items ticked days ago with blue checkboxes, and typing book leaves four items, three that mention it and one whose note has its letters in order, until the filter icon closes the field again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/filter.gif)
 
+Tag items to group them across sections. The list's tags sit above its items, and a click shows only the items that have one.
+
+![In a grocery list, lemons is opened and gets the curry tag from the tag button, picked from the suggestions, then #curry in the strip of tags above the list leaves the five items for the curry, under their headings](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tags.gif)
+
+Hold an item to select it, then click or tap others to add them. Move, tick, star, date or delete them all at once.
+
+![In a todo list, a row is held until it is selected and two more are clicked to join it, then dragging one takes all three under the Admin heading, and Star in the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
+
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.webp" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the notes" width="520">
 
 The Schedule shows the dated items from all your lists.
 
-![The Schedule opens from the ribbon in the right sidebar and scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
+![The Schedule in the right sidebar scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
 It works great on your phone too.
 
@@ -51,8 +59,11 @@ You can embed lists in normal notes.
 
 - **Add** with the floating **+**, and **drag** to reorder. The settings can put a **+** in the list's header instead, or as well, on desktop, mobile or both.
 - **Star** an item and give it a date.
+- **Tags:** write a tag on an item, or add it from the tag button in its card, with suggestions. Items show their tags as labels.
+- **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, ticks, stars, dates or deletes them all at once, with Undo, and dragging one drags them all. A selected heading brings its section.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
-- **Find:** the filter icon in a list's header opens a field that filters it by title and notes, matching the letters you type in order, so "mlk" finds "oat milk", and by date as written, such as "2026-11". Toggles beside it show only starred items, or archived items too. The field stays open until the icon or Escape closes it. The Schedule has one beside its title, with the starred toggle.
+- **Find:** the filter icon in a list's header opens a field that filters it by title and notes, matching the letters you type in order, so "mlk" finds "oat milk", and by date as written, such as "2026-11". Toggles beside it show only starred items, or archived items too. Headings stay, a message says when nothing matches, and a button clears the field. The field stays open until the icon or Escape closes it. The Schedule has one beside its title, with the starred toggle.
+- **Filter by tag:** a strip of the list's tags sits above its items. Click a tag to show only the items that have it, or two to show those that have both. A setting shows the strip always or only while the filter is open. The Schedule has one too. Nested tags count under their parent, and case doesn't matter.
 - **Delete** with Undo.
 
 **Notes on an item**
@@ -73,7 +84,7 @@ You can embed lists in normal notes.
 
 - **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters a list or the Schedule, Cmd+Shift+A shows or hides archived items, Cmd+Z undoes, and Cmd+B, Cmd+I and Cmd+K format. Use Ctrl on Windows and Linux.
 - **Right-click menus** on items, headings, pictures and the list. On desktop, text in a card or the list's note gets a menu too: add a link, format, and paste with or without formatting.
-- **Made for touch:** a floating **+**, finger-sized buttons, and hold to drag.
+- **Made for touch:** a floating **+**, finger-sized buttons, and hold to select or drag.
 - **Fits your theme,** light or dark.
 
 ## Quick start

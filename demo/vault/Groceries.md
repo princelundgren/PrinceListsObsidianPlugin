@@ -7,12 +7,12 @@ For the big shop on Saturday. Check the pantry first.
 - [ ] bananas
 
 	Not too ripe, they're for the whole week.
-- [ ] spinach ⭐
+- [ ] spinach ⭐ #curry
 - [ ] lemons
 
 	3 or 4, for the fish and the dressing.
-- [ ] tomatoes on the vine
-- [ ] fresh basil
+- [ ] tomatoes on the vine #soup
+- [ ] fresh basil #soup
 
 	For the [[Weeknight dinners#Ideas|tomato and lentil soup]] and a *pesto*.
 
@@ -23,7 +23,7 @@ For the big shop on Saturday. Check the pantry first.
 
 ## Bakery
 - [ ] sourdough loaf
-- [ ] tortillas
+- [ ] tortillas #tacos
 
 	Small ones, for the black bean tacos.
 
@@ -32,19 +32,19 @@ For the big shop on Saturday. Check the pantry first.
 - [ ] greek yogurt
 
 	**Full fat**, the big tub. *Plain*, not vanilla.
-- [ ] cheddar
+- [ ] cheddar #tacos
 - [ ] eggs ×12
 
 ## Pantry
 - [ ] olive oil ⭐
 
 	Extra virgin, the 1 l bottle. ==Not the spray.==
-- [ ] basmati rice
-- [ ] chickpeas
+- [ ] basmati rice #curry
+- [ ] chickpeas #curry
 
 	- two cans for the curry
 	- one for hummus
-- [ ] coconut milk
+- [ ] coconut milk #curry
 - [x] coffee beans ✔ 2026-10-22 18:40
 
 ## Household

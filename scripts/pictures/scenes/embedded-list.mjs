@@ -1,6 +1,6 @@
 // An ordinary note in the editor: a princelists block naming Hardware store is typed in, and the
 // list shows in its place once the cursor leaves the block.
-import { boundsOf, drawnMouse, hover, middleOf, pressEnter, showAlone, sleep, type, undoingChanges } from '../page.mjs';
+import { boundsOf, drawnMouse, hover, middleOf, paneClip, pressEnter, showAlone, sleep, type, undoingChanges } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
 import { recordGif } from '../record.mjs';
 
@@ -16,6 +16,7 @@ const scene = {
 	phone: false,
 	// With the left sidebar collapsed, this width makes the note's text column 520 wide.
 	page: { width: 644, height: 640 },
+	clip: paneClip,
 	scale: 1,
 	theme: 'dark',
 	async setup(session) {
