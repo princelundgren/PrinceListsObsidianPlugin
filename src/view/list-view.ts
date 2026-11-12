@@ -10,6 +10,7 @@ import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import { RowSelection } from '../core/selection';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { contentStartLine, isListText } from '../obsidian/marker';
@@ -23,15 +24,18 @@ import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
-import { registerFieldEvents } from './events';
+import { registerFieldEvents, swallowClickAfterHold } from './events';
 import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
+import { enableMouseHold } from './hold-mouse';
 import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
+import { focusListWhenActive } from './select';
+import { buildSelectionBar, syncSelectionBar } from './selection-bar';
 import type { TagSuggest } from './tag-suggest';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
@@ -63,6 +67,10 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** Cmd+F's query, or null while its field is closed. Like showArchived, nothing restores it. */
 	filter: string | null = null;
 	readonly collapsed = new CollapsedHeadings(this.editing);
+	/** The rows selected to act on together; never saved, so closing the list ends it. */
+	readonly selection = new RowSelection(this.editing);
+	/** Whether the view is selecting: from the first row selected until none is, with the bar in place of the floating "+". */
+	selecting = false;
 	readonly dragsRows = true;
 	readonly dragsHeadings = true;
 	filterField: FilterField | null = null;
@@ -88,8 +96,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** Set once the view closes, so a tap still queued then does nothing. */
 	viewClosed = false;
 	/**
-	 * Set by a hold canceled on a row or heading, or a row lifted to drag, so the click that ends it
-	 * opens nothing.
+	 * Set by a hold canceled on a row or heading, a row lifted to drag, or a row held with a mouse, so
+	 * the click that ends it opens nothing.
 	 */
 	swallowNextClick = false;
 	// The list scrolls here, not in contentEl, so nothing relies on Obsidian's stylesheet scrolling
@@ -106,7 +114,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	) {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
-		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+		// Focusable, but not in the tab order, so focus can stay in the view, where its keys reach it (select.ts).
+		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll', attr: { tabindex: -1 } });
 		this.listSizerEl = this.listScrollEl.createDiv({ cls: 'princelists-sizer' });
 		// Here, so the scope is in place before the view first takes focus.
 		registerListKeys(this);
@@ -173,6 +182,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.filter = null;
 		this.filterField = null;
 		this.collapsed.clear();
+		this.selection.clear();
 		this.outsideChanges++;
 		// Nothing of the old file stays, not even a field with focus, which render() would keep.
 		this.listSizerEl.empty();
@@ -184,6 +194,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		await super.onOpen();
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
 		registerFieldEvents(this);
+		focusListWhenActive(this);
 		registerFileRedraws(this);
 		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);
 		// The collapse arrows always show where there's no hover.
@@ -191,8 +202,11 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		const dragHost = listDragHost(this);
 		enableMouseDrag(dragHost);
 		if (Platform.isMobile) enableTouchDrag(dragHost);
+		if (Platform.isDesktop) enableMouseHold(this);
 		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
 		this.newItemButton = buildNewItemButton(this, newItemLabel);
+		const selectionBar = buildSelectionBar(this);
+		swallowClickAfterHold(this, selectionBar);
 		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
 		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.
@@ -206,6 +220,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.redrawFiltered.cancel();
 		this.endListNote();
 		this.dropListNoteEditor();
+		this.selection.clear();
 		await super.onClose();
 	}
 
@@ -322,15 +337,16 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.listNoteEditor = null;
 	}
 
-	/** Shows or hides the view's buttons to match the text and the settings. */
+	/** Shows or hides the view's buttons, and the selection bar, to match the text, the settings and selecting. */
 	syncButtons(): void {
 		const isList = isListText(this.text);
-		const showsFloating = isList && this.showsFloatingAdd();
+		const showsFloating = isList && !this.selecting && this.showsFloatingAdd();
 		this.newItemButton?.toggle(showsFloating);
 		this.contentEl.toggleClass('princelists-has-floating-add', showsFloating);
-		this.newItemAction?.toggle(isList && this.showsHeaderAdd());
+		this.newItemAction?.toggle(isList && !this.selecting && this.showsHeaderAdd());
 		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
 		this.syncFindButtons();
+		syncSelectionBar(this);
 	}
 
 	/** Follows a change to where the "+" buttons show: an empty list is drawn again, since its hint names them. */

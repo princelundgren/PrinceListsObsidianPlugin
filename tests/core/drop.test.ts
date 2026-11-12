@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { dropAt, moveFromDrawn, sectionDropAt, type ShownRow } from '../../src/core/drop';
+import { dropAt, groupDropAt, moveFromDrawn, sectionDropAt, type ShownRow } from '../../src/core/drop';
 import { ListEditing } from '../../src/core/editing';
 import { planRemoval } from '../../src/core/empty-item';
 import { splitLines } from '../../src/core/lines';
@@ -152,5 +152,29 @@ describe('a drag in a list block', () => {
 		expect(dragAfterNewItem(null, 5, upper(3))).toEqual(['Bread', 'Milk', 'Eggs']);
 		expect(dragAfterNewItem(null, 5, lower(3))).toEqual(['Milk', 'Bread', 'Eggs']);
 		expect(dragAfterNewItem(null, 3, lower(5))).toEqual(['Eggs', 'Bread', 'Milk']);
+	});
+});
+
+describe('groupDropAt', () => {
+	const shown = [item(3), heading(4), item(5), heading(6), item(7)];
+
+	test('aims items past the moving rows', () => {
+		expect(groupDropAt(shown, [3, 7], lower(5))).toEqual({ place: { after: 5 }, line: 5, above: false });
+	});
+	test('aims first under a heading', () => {
+		expect(groupDropAt(shown, [5, 7], lower(4))).toEqual({ place: { firstUnder: 4 }, line: 4, above: false });
+	});
+	test('skips an untouched row as an item drop does', () => {
+		expect(groupDropAt([item(3), untouched(4), item(5)], [5], lower(4))).toEqual({ place: { after: 3 }, line: 3, above: false });
+	});
+	test('aims a selection with a heading as a section', () => {
+		expect(groupDropAt(shown, [3, 6], upper(4))).toEqual({ place: { beforeSection: 4 }, line: 4, above: true });
+	});
+	test('aims a section to the end under the last row', () => {
+		expect(groupDropAt(shown, [4], lower(7))).toEqual({ place: { beforeSection: null }, line: 7, above: false });
+	});
+	test('gives null over a moving row or a row not shown', () => {
+		expect(groupDropAt(shown, [3, 5], upper(5))).toBeNull();
+		expect(groupDropAt(shown, [3, 5], lower(9))).toBeNull();
 	});
 });
