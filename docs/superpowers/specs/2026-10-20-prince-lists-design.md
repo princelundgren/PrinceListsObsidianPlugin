@@ -186,8 +186,8 @@ These are wanted later, roughly in this order. The file format already leaves ro
   - **A note from outside the vault is allowed in any vault (owner, 2026-10-20).** Opened from two
     vaults' windows, it works as a list in each. Nothing is built for this.
 - **A long-press menu on item rows on mobile.** The owner chose: holding drags, or, let go without
-  moving, starts selecting ([selecting several rows](2026-11-07-select-several-design.md), "On
-  mobile").
+  moving, starts selecting ([selecting several rows](2026-11-07-select-several-design.md), "Starting
+  to select").
 
 ## Constraints
 
@@ -596,9 +596,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   make the card tall (owner, 2026-11-05). While a card is open another row's zone only closes it
   ("Selecting").
 - **With Cmd or Shift held, a click on the checkbox or beside it selects the row** instead of
-  ticking it ([selecting several rows](2026-11-07-select-several-design.md), "On desktop"). While
-  selecting on mobile, a tap there selects too, and the checkboxes show as selection circles,
-  filled while the row is selected ("On mobile").
+  ticking it ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select").
+  While selecting, a click or a tap there selects too, and the checkboxes show as selection circles,
+  filled while the row is selected ("While selecting").
 - **On mobile a one-line row is 40px tall (owner, 2026-11-05),** the size Obsidian 1.15 gives its
   undocumented `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows
   denser.
@@ -680,15 +680,16 @@ back only what was typed and leaves the empty line, which can be deleted like an
 ### Selecting and adding
 
 - **Selecting (call):** clicking an item, anywhere except its checkbox, the zone beside it
-  ("Ticking") or a link in its title, opens its card and selects it. Clicking empty space closes
-  the card and clears the selection. While selecting on mobile, a tap on empty space keeps the
-  selection ([selecting several rows](2026-11-07-select-several-design.md), "On mobile").
+  ("Ticking") or a link in its title, opens its card and makes it the anchor. Clicking empty space
+  closes the card and clears the anchor. While selecting, a click or a tap on an item selects it
+  instead of opening its card, and one on empty space keeps the selection ([selecting several
+  rows](2026-11-07-select-several-design.md), "While selecting").
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A
-    click on a row or heading with Cmd or Shift held selects it instead: the card closes, and its
-    item stays selected with the clicked row ([selecting several
-    rows](2026-11-07-select-several-design.md), "On desktop").
+    click on a row or heading with Cmd or Shift held starts selecting instead: the card closes, and
+    its item stays selected with the clicked row ([selecting several
+    rows](2026-11-07-select-several-design.md), "Starting to select").
   - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
     the card, one press closes the menu and the card together (#301).
 - **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the filter icon.
@@ -696,16 +697,16 @@ back only what was typed and leaves the empty line, which can be deleted like an
   (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which usually
   has no keyboard, shows "New item" alone **(owner, 2026-11-03)**. It shows only where the "Header
   add button" setting puts it, by default nowhere **(owner, 2026-11-05)**, and hides while
-  selecting on mobile ([selecting several rows](2026-11-07-select-several-design.md), "On mobile").
+  selecting ([selecting several rows](2026-11-07-select-several-design.md), "While selecting").
 - **The floating "+" button (owner)** sits at the bottom right of the list pane, under the thumb.
   It stays put while the list scrolls. Its name and tooltip are the header's: "New item" with its
   key on desktop, "New item" alone on mobile **(owner, 2026-11-05)**. It shows on
   desktop and mobile by default, and the "Floating add button" setting can keep it to one of them
-  or turn it off **(owner, 2026-11-05)**. While selecting on mobile, the selection's bar takes its
-  place ([selecting several rows](2026-11-07-select-several-design.md), "On mobile").
+  or turn it off **(owner, 2026-11-05)**. While selecting, the selection's bar takes its place
+  ([selecting several rows](2026-11-07-select-several-design.md), "The bar").
   - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
-    fields included. With several rows selected, it adds the new item below the last selected
-    item in list order instead. An empty list shows a gray hint saying how to add an item.
+    fields included. While selecting, it adds the new item below the last selected item in list
+    order instead. An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.
@@ -753,10 +754,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star button's "Add star" and "Remove star";
     and "Remove", as in Remove image.
-- **With two or more rows selected, right-clicking a selected row opens the selection's menu (owner,
-  2026-11-07)** instead: Move to heading…, Tick and Untick, Add star and Remove star, the four date
-  entries, and Delete in red, naming what goes. Each acts on every selected item at once and shows
-  an Undo message, and a right-click on a row outside the selection opens that row's own menu
+- **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected
+  row included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Add star and
+  Remove star, the four date entries, and Delete in red, naming what goes. Each acts on every
+  selected item at once and shows an Undo message, and a right-click on a row outside the selection
+  opens that row's own menu
   ([selecting several rows](2026-11-07-select-several-design.md), "The actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading and Delete heading. Step two adds Edit in Markdown, Collapse all headings and Expand all
@@ -776,14 +778,14 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On
   mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move
   to, Tick, Star, Date and Delete for them through the selection's bar ([selecting several
-  rows](2026-11-07-select-several-design.md), "On mobile"). The button's accessible name is "Item
+  rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading and Delete heading **(owner, 2026-10-20)**. Step two adds Edit in Markdown, Collapse all
   headings and Expand all headings. It's a tap, not a long-press, so there is still no long-press
   menu. With a card open, the tap only closes the card ("Selecting and adding"). While selecting,
   the tap selects the heading instead, and the selection's actions sit in a bar at the bottom
-  ([selecting several rows](2026-11-07-select-several-design.md), "On mobile").
+  ([selecting several rows](2026-11-07-select-several-design.md), "While selecting").
 - **New heading below (owner, 2026-10-20)** adds an empty heading at that point and opens the
   same field as Rename heading, with the cursor in it. Escape, or an empty name, removes the
   heading again.
@@ -824,8 +826,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **Mobile (1b, owner):**
   - Hold an item and then move to drag it.
   - Holding an item row never opens a menu. A hold let go without moving starts selecting instead
-    ([selecting several rows](2026-11-07-select-several-design.md), "On mobile"): the row lifts
-    and goes back, writing nothing, as before.
+    ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select"): the row
+    lifts and goes back, writing nothing, as before.
   - **A drag of a selected row moves every selected row,** as on desktop, and selecting goes on.
     Once the held row moves, it shows how many rows it carries, and the others stay in place until
     the drop redraws the list. A drag of a row outside the selection drags it alone and ends
@@ -1268,11 +1270,12 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     visible, so dragging toward the navbar scrolls late.
   - **The selection's bar sits as the "+" does (call)**, which it replaces while selecting, with the
     same room kept below the last row ([selecting several
-    rows](2026-11-07-select-several-design.md), "On mobile").
-  - On desktop it sits `--size-4-8` higher, clear of the status bar over the window's bottom right
-    **(owner, 2026-11-05)**. Obsidian documents no height for the bar, and 1.15 leaves the
-    documented `--status-bar-scroll-padding` unset, so that is the default theme's bar, 31px,
-    rounded up. A theme with a taller bar covers the button's bottom edge again.
+    rows](2026-11-07-select-several-design.md), "The bar").
+  - On desktop the "+" sits `--size-4-8` higher, clear of the status bar over the window's bottom
+    right **(owner, 2026-11-05)**, and the selection's bar follows it **(call)**. Obsidian documents
+    no height for the status bar, and 1.15 leaves the documented `--status-bar-scroll-padding`
+    unset, so that is the default theme's status bar, 31px, rounded up. A theme with a taller status
+    bar covers their bottom edge again.
 
 ### Where `✔` goes
 

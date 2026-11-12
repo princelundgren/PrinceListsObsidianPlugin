@@ -36,10 +36,10 @@ export class RowSelection {
 		return [...lines].sort((a, b) => a - b);
 	}
 
-	/** The selected lines, ascending, while `line` is one of two or more selected rows; otherwise null. */
+	/** The selected lines, ascending, while `line` is selected, alone or with others; otherwise null. */
 	linesWith(line: number): number[] | null {
 		const lines = this.lines();
-		return lines.length >= 2 && lines.includes(line) ? lines : null;
+		return lines.includes(line) ? lines : null;
 	}
 
 	/** Makes `line` the anchor and ends the range; its rows stay selected. */

@@ -22,10 +22,11 @@ const announcers = new WeakMap<PrinceListView, { status: HTMLElement; describerI
 
 /**
  * Handles a click on a row, a heading, a checkbox or the zone beside one with Cmd or Shift held, or a
- * tap on one while selecting on mobile: Cmd and the tap add or remove the row, Shift selects the shown
- * rows from the anchor to it. An open card closes first, its item selected. Returns whether it handled
- * the click. A plain click on a row or heading, not on a checkbox or beside one, starts over from it,
- * and one on empty space ends the selection, except while selecting; both return false.
+ * click or a tap on one while selecting: Cmd and the plain click or tap add or remove the row, Shift
+ * selects the shown rows from the anchor to it, and either starts selecting. An open card closes
+ * first, its item selected; while selecting, a plain click or tap only closes it. Returns whether it
+ * handled the click. Before selecting, a plain click on a row or heading, not on a checkbox or beside
+ * it, makes it the anchor, and one on empty space clears the anchor; both return false.
  */
 export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
 	if (isEmptySpace(view, target)) {
@@ -35,8 +36,16 @@ export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTM
 	const rowEl = selectableRowAt(view, target);
 	const line = rowEl ? lineOf(rowEl) : null;
 	if (line === null) return false;
-	const adds = view.selecting || Keymap.isModifier(evt, 'Mod');
+	const toggles = Keymap.isModifier(evt, 'Mod');
 	const ranges = Keymap.isModifier(evt, 'Shift');
+	// A card a row's own menu opened while selecting: the click only closes it (step one, "Selecting and adding").
+	if (view.selecting && view.card && !toggles && !ranges) {
+		evt.preventDefault();
+		closeCard(view);
+		focusList(view);
+		return true;
+	}
+	const adds = view.selecting || toggles;
 	if (!adds && !ranges) {
 		if (!target.closest(TICK_SELECTOR)) {
 			view.selection.clear();
@@ -55,6 +64,7 @@ export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTM
 		if (cardLine !== null && !view.selection.has(cardLine)) view.selection.toggle(cardLine);
 		view.selection.toggle(line);
 	}
+	view.selecting = true;
 	focusList(view);
 	drawSelection(view);
 	return true;
@@ -69,8 +79,8 @@ export function keepTextUnselected(view: PrinceListView, evt: MouseEvent): void 
 
 /**
  * Moves the range's far end one shown row up (-1) or down (1), from the open card's item when a card
- * is open, which closes. Returns whether it moved: false when the anchor isn't a shown row, such as
- * an empty new item that closing its card removed.
+ * is open, which closes, and starts selecting. Returns whether it moved: false when the anchor isn't a
+ * shown row, such as an empty new item that closing its card removed.
  */
 export function extendSelection(view: PrinceListView, step: 1 | -1): boolean {
 	const cardLine = closeCardForSelection(view);
@@ -80,6 +90,7 @@ export function extendSelection(view: PrinceListView, step: 1 | -1): boolean {
 	const moves = anchor !== null && shown.includes(anchor);
 	if (moves) {
 		view.selection.extend(step, shown);
+		view.selecting = true;
 		drawSelection(view);
 	}
 	// A card that closed took focus with it.
@@ -88,7 +99,7 @@ export function extendSelection(view: PrinceListView, step: 1 | -1): boolean {
 }
 
 /**
- * A still hold let go on the row on `line`, on mobile. Not yet selecting, it starts selecting with that
+ * A hold let go without moving on the row on `line`. Not yet selecting, it starts selecting with that
  * row and `cardLine`, the item whose card the hold closed, if any. While selecting, it selects the shown
  * rows from the last row tapped to it, as Shift+click does.
  */
@@ -99,7 +110,7 @@ export function selectOnHold(view: PrinceListView, line: number, cardLine: numbe
 	drawSelection(view);
 }
 
-/** Ends the selection, and with it selecting on mobile. Returns whether any row was selected. */
+/** Ends the selection, and with it selecting. Returns whether any row was selected. */
 export function clearSelection(view: PrinceListView): boolean {
 	const hadRows = view.selection.size > 0;
 	view.selection.clear();
@@ -109,7 +120,8 @@ export function clearSelection(view: PrinceListView): boolean {
 
 /**
  * Drops the selected rows that no longer show, marks the rest, and announces how many are selected.
- * Selecting on mobile ends once none is left, and its bar follows. Runs after every redraw.
+ * Selecting ends once none is left. The bar follows only while selecting, so a way into selecting sets
+ * `view.selecting` before calling this. Runs after every redraw.
  */
 export function drawSelection(view: PrinceListView): void {
 	view.selection.keepOnly(new Set(selectableLines(view)));
@@ -133,8 +145,8 @@ export function drawSelection(view: PrinceListView): void {
 }
 
 /**
- * Cmd+Enter: with two or more rows selected, adds an item below the last selected item in list order;
- * otherwise adds one as "+" does. Either way the selection ends.
+ * Cmd+Enter: with an item selected, adds an item below the last selected item in list order; with
+ * no item selected, adds one as "+" does. Either way the selection ends.
  */
 export function newItemBelowSelection(view: PrinceListView): void {
 	if (!isListText(view.text)) return;
@@ -142,7 +154,7 @@ export function newItemBelowSelection(view: PrinceListView): void {
 	const items = new Set(shownRows(view.listScrollEl).filter((row) => row.kind === 'item').map((row) => row.line));
 	const lastItem = selected.filter((line) => items.has(line)).pop();
 	clearSelection(view);
-	if (selected.length >= 2 && lastItem !== undefined) addItem(view, { after: lastItem });
+	if (lastItem !== undefined) addItem(view, { after: lastItem });
 	else newItem(view);
 }
 
@@ -185,9 +197,11 @@ function isEmptySpace(view: PrinceListView, target: HTMLElement): boolean {
 	return target === view.listScrollEl || target === view.listSizerEl || target.hasClass(ITEMS_CLASS) || target.hasClass(END_CLASS);
 }
 
-// The rows aren't focusable (#125), so the list takes focus, which keeps the view's keys and Escape
-// reaching it once the card that had focus is gone.
-function focusList(view: PrinceListView): void {
+/**
+ * Focuses the list without scrolling it, so the view's keys and Escape keep reaching the view once what
+ * had focus, such as a card or the bar, is gone. The rows themselves aren't focusable (#125).
+ */
+export function focusList(view: PrinceListView): void {
 	view.listScrollEl.focus({ preventScroll: true });
 }
 

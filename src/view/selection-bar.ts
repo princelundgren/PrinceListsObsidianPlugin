@@ -4,10 +4,10 @@ import { barButtons, type BarButton, type EntryGroup } from '../core/group-menu'
 import { contentStartLine } from '../obsidian/marker';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
-import { clearSelection } from './select';
+import { clearSelection, focusList } from './select';
 import { addGroupEntries, deleteSelection, listHasHeadings, moveToHeading } from './selection-menu';
 
-/** The class on the view's content while selecting on mobile, which draws checkboxes as selection circles. */
+/** The class on the view's content while selecting, which draws checkboxes as selection circles. */
 const SELECTING_CLASS = 'princelists-selecting';
 
 interface SelectionBar {
@@ -27,9 +27,9 @@ const BUTTONS: readonly { button: BarButton; label: string; icon: string }[] = [
 ];
 
 /**
- * Builds mobile's bar for acting on the selection (selecting several rows, "On mobile"): how many rows
- * are selected, Done, then Move to, Tick, Star and Date, and Delete apart past a divider. It goes on
- * the view's container where the floating "+" goes, hidden until syncSelectionBar shows it.
+ * Builds the bar for acting on the selection (selecting several rows, "The bar"): how many rows are
+ * selected, Done, then Move to, Tick, Star and Date, and Delete apart past a divider. It goes on the
+ * view's container where the floating "+" goes, hidden until syncSelectionBar shows it.
  */
 export function buildSelectionBar(view: PrinceListView): HTMLElement {
 	const el = view.containerEl.createDiv({ cls: 'princelists-selection-bar', attr: { role: 'toolbar', 'aria-label': 'Selection' } });
@@ -59,7 +59,7 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 	return el;
 }
 
-/** Mobile's bar while the view is selecting, which covers the list's bottom; null otherwise. */
+/** The bar while the view is selecting, which covers the list's bottom; null otherwise. */
 export function shownSelectionBar(view: PrinceListView): HTMLElement | null {
 	return view.selecting ? (bars.get(view)?.el ?? null) : null;
 }
@@ -67,12 +67,13 @@ export function shownSelectionBar(view: PrinceListView): HTMLElement | null {
 /**
  * Shows the bar while the view is selecting, with how many rows are selected and each button enabled
  * only while it has something to act on, and marks the view's content so checkboxes show as selection
- * circles. Hides both otherwise.
+ * circles. Hides both otherwise, first moving focus to the list if the bar holds it.
  */
 export function syncSelectionBar(view: PrinceListView): void {
 	view.contentEl.toggleClass(SELECTING_CLASS, view.selecting);
 	const bar = bars.get(view);
 	if (!bar) return;
+	if (!view.selecting && bar.el.contains(bar.el.doc.activeElement)) focusList(view);
 	bar.el.toggle(view.selecting);
 	if (!view.selecting) return;
 	const rows = view.selection.lines();

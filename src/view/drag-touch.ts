@@ -15,8 +15,8 @@ const LIFT_OFFSET = '--princelists-lift';
 interface Lift {
 	/** The dragged item's title line, or heading's line, as the drawn rows number it; null once it can't drop. */
 	item: TrackedLine;
-	/** The other selected rows a dragged selection carries, as `item` is tracked; empty for one row, and until armed. */
-	others: TrackedLine[];
+	/** The other selected rows a dragged selection carries, as `item` is tracked, empty for one; null for a row that isn't selected, and until armed. */
+	others: TrackedLine[] | null;
 	kind: ShownRow['kind'];
 	/** Every row and heading with its extent at the lift, in the scroller's content coordinates, or from rowsEl's top without one. */
 	boxes: { el: HTMLElement; top: number; bottom: number }[];
@@ -63,7 +63,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 		if (!lift) return;
 		if (lift.frame !== null) window.cancelAnimationFrame(lift.frame);
 		host.untrack(lift.item);
-		for (const other of lift.others) host.untrack(other);
+		for (const other of lift.others ?? []) host.untrack(other);
 		ending.row.removeAttribute(COUNT_ATTR);
 		markDrop(rowsEl, lift.marked, null);
 		ending.row.removeClass(LIFTED_CLASS);
@@ -116,18 +116,19 @@ export function enableTouchDrag(host: RowDragHost): void {
 	};
 
 	// Only now is the lift a drag, so only now does it take the selection, or end it for a row outside:
-	// a hold let go without moving selects instead (selecting several rows, "On mobile").
+	// a hold let go without moving selects instead (selecting several rows, "Starting to select").
 	const arm = (current: Press, lift: Lift): void => {
 		lift.armed = true;
 		const line = lift.item.line;
 		if (line === null || !current.row.isConnected) return;
 		lift.others = carry(host, line, current.row);
+		if (!lift.others) host.endSelection();
 	};
 
 	const lift = (current: Press): void => {
 		current.timer = null;
 		const rowTop = current.row.getBoundingClientRect().top;
-		liftInPlace(host, current.row);
+		liftInPlace(host, current.row, () => host.beforeLift());
 		const line = lineOf(current.row);
 		if (!current.row.isConnected || line === null) return;
 		const shift = rowTop - current.row.getBoundingClientRect().top;
@@ -137,7 +138,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 			return { el, top: rect.top - top + scrollTop(), bottom: rect.bottom - top + scrollTop() };
 		});
 		const kind = current.row.hasClass(HEADING_CLASS) ? 'heading' : 'item';
-		current.lift = { item: host.track(line), others: [], kind, boxes, scrollAtLift: scrollTop(), shift, drop: null, marked: null, frame: null, fromX: current.x, fromY: current.y, armed: false };
+		current.lift = { item: host.track(line), others: null, kind, boxes, scrollAtLift: scrollTop(), shift, drop: null, marked: null, frame: null, fromX: current.x, fromY: current.y, armed: false };
 		current.row.addClass(LIFTED_CLASS);
 		// So a redraw detaches it, which ends the drag.
 		forgetDrawn(current.row);
@@ -181,7 +182,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 		endPress();
 		if (!lift || line === null || line === undefined) return;
 		// A lift the finger never moved past the tolerance from is a hold let go: it selects, and drops
-		// nothing (selecting several rows, "On mobile").
+		// nothing (selecting several rows, "Starting to select").
 		if (!lift.armed) host.selectHold(line);
 		// A redraw since the last move means the drop's lines may be stale.
 		else if (lift.drop && stillThere) host.drop(line, lift.drop);

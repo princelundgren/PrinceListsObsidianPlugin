@@ -68,7 +68,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	readonly collapsed = new CollapsedHeadings(this.editing);
 	/** The rows selected to act on together; never saved, so closing the list ends it. */
 	readonly selection = new RowSelection(this.editing);
-	/** Whether the view is selecting, on mobile only: from a still hold until no row is selected, with a bar in place of the floating "+". */
+	/** Whether the view is selecting: from the first row selected until none is, with the bar in place of the floating "+". */
 	selecting = false;
 	readonly dragsRows = true;
 	readonly dragsHeadings = true;
@@ -203,7 +203,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		if (Platform.isMobile) enableTouchDrag(dragHost);
 		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
 		this.newItemButton = buildNewItemButton(this, newItemLabel);
-		if (Platform.isMobile) swallowClickAfterHold(this, buildSelectionBar(this));
+		const selectionBar = buildSelectionBar(this);
+		if (Platform.isMobile) swallowClickAfterHold(this, selectionBar);
 		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
 		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.
@@ -334,7 +335,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.listNoteEditor = null;
 	}
 
-	/** Shows or hides the view's buttons, and mobile's selection bar, to match the text, the settings and selecting. */
+	/** Shows or hides the view's buttons, and the selection bar, to match the text, the settings and selecting. */
 	syncButtons(): void {
 		const isList = isListText(this.text);
 		const showsFloating = isList && !this.selecting && this.showsFloatingAdd();

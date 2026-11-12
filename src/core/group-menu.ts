@@ -3,7 +3,7 @@ import { countPhrase, type GroupState, type PlannedGroupChange } from './group-e
 /** An entry of the selection's menu. */
 export type GroupEntry = 'move' | 'tick' | 'untick' | 'addStar' | 'removeStar' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'delete';
 
-/** The entries mobile's bar shows one group of at a time. */
+/** The entries the bar shows one group of at a time. */
 export type EntryGroup = 'tick' | 'star' | 'date';
 
 /** What a tick, star or date entry changed, for its Undo message. */
@@ -37,7 +37,7 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 	return order.filter((entry) => shows[entry]);
 }
 
-/** A button of mobile's bar that acts on the selection. */
+/** A button of the bar that acts on the selection. */
 export type BarButton = 'move' | EntryGroup | 'delete';
 
 /**
