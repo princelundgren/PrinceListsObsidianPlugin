@@ -2,12 +2,12 @@ import { Platform, Scope, type Modifier } from 'obsidian';
 import type { Format } from '../core/format';
 import { modKeyName } from '../core/key-name';
 import { isListText } from '../obsidian/marker';
-import { newItem } from './add-button';
 import { targetOf } from './dom';
 import { openFilter } from './filter';
 import { applyFormat } from './format';
 import type { PrinceListView } from './list-view';
 import { eventInDrawnListBlock } from './notes-blocks';
+import { extendSelection, newItemBelowSelection } from './select';
 import { redoKey, undoKey } from './undo';
 
 const ADD_KEY = 'Enter';
@@ -39,9 +39,12 @@ export function registerListKeys(view: PrinceListView): void {
 	// In every field too, a card's included, as "+" would. In a note that isn't a list, the key is Obsidian's.
 	register(['Mod'], ADD_KEY, () => {
 		if (!isListText(view.text)) return true;
-		newItem(view);
+		newItemBelowSelection(view);
 		return false;
 	});
+	// Not in a field, where Shift+Up and Shift+Down keep selecting text.
+	register(['Shift'], 'ArrowUp', (evt) => isInField(evt) || !extendSelection(view, -1));
+	register(['Shift'], 'ArrowDown', (evt) => isInField(evt) || !extendSelection(view, 1));
 	// Only while the list has focus: elsewhere Cmd+F stays Obsidian's search.
 	register(['Mod'], FIND_KEY, () => {
 		if (!isListText(view.text)) return true;
@@ -66,4 +69,11 @@ function formatKey(view: PrinceListView, evt: KeyboardEvent, format: Format): bo
 	if (!view.card?.el.contains(field)) return true;
 	applyFormat(field, format);
 	return false;
+}
+
+function isInField(evt: KeyboardEvent): boolean {
+	const target = targetOf(evt);
+	if (!target) return false;
+	if (target.instanceOf(HTMLInputElement)) return target.type !== 'checkbox';
+	return target.instanceOf(HTMLTextAreaElement) || target.isContentEditable;
 }

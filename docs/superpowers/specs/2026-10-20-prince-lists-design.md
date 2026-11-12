@@ -593,6 +593,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   edge and is only as tall as its title's first line and the padding around it, since the notes
   make the card tall (owner, 2026-11-05). While a card is open another row's zone only closes it
   ("Selecting").
+- **With Cmd or Shift held, a click on the checkbox or beside it selects the row** instead of
+  ticking it ([selecting several rows](2026-11-07-select-several-design.md), "On desktop").
 - **On mobile a one-line row is 40px tall (owner, 2026-11-05),** the size Obsidian 1.15 gives its
   undocumented `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows
   denser.
@@ -678,7 +680,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
   the card and clears the selection.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
-    zone beside another row's only closes the card, as empty space does (owner, 2026-11-05).
+    zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A
+    click on a row or heading with Cmd or Shift held selects it instead: the card closes, and its
+    item stays selected with the clicked row ([selecting several
+    rows](2026-11-07-select-several-design.md), "On desktop").
   - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
     the card, one press closes the menu and the card together (#301).
 - **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the filter icon.
@@ -692,7 +697,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   desktop and mobile by default, and the "Floating add button" setting can keep it to one of them
   or turn it off **(owner, 2026-11-05)**.
   - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
-    fields included. An empty list shows a gray hint saying how to add an item.
+    fields included. With several rows selected, it adds the new item below the last selected
+    item in list order instead. An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.

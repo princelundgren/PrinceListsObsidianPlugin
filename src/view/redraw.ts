@@ -8,7 +8,8 @@ import { buildListNote, buildListTitle, refreshListNote } from './fields';
 import { addArchivedToggle, addStarredToggle, buildFilterField, NO_MATCH_CLASS, NO_MATCH_HINT } from './filter';
 import { ADD_KEY_NAME } from './keys';
 import type { PrinceListView } from './list-view';
-import { drawnRows, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
+import { drawnRows, END_CLASS, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
+import { drawSelection } from './select';
 import { buildTagStrip, showsTagStrip } from './tag-strip';
 
 // Draws everything again from the view's text, except the title, list note, card or heading field that
@@ -59,7 +60,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint(ADD_KEY_NAME, view.showsAddButton()) });
 		if (listDrawn.foundNothing) fresh.createDiv({ cls: NO_MATCH_CLASS, text: NO_MATCH_HINT });
 		// Room to scroll the last row clear of the floating "+".
-		fresh.createDiv({ cls: 'princelists-end' });
+		fresh.createDiv({ cls: END_CLASS });
 	} else {
 		dismissCard(view);
 		view.endListNote();
@@ -81,6 +82,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	if (kept && kept === view.listNoteEl) refreshListNote(view);
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);
 	listScrollEl.scrollTop = scrollTop;
+	drawSelection(view);
 }
 
 // Where a redraw puts the card: a slot for the card that keeps focus, or the card, updated.

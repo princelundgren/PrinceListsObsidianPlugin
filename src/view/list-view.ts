@@ -10,6 +10,7 @@ import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import { RowSelection } from '../core/selection';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { contentStartLine, isListText } from '../obsidian/marker';
@@ -32,6 +33,7 @@ import type { HeadingField } from './heading-field';
 import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
+import { focusListWhenActive } from './select';
 import type { TagSuggest } from './tag-suggest';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
@@ -63,6 +65,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** Cmd+F's query, or null while its field is closed. Like showArchived, nothing restores it. */
 	filter: string | null = null;
 	readonly collapsed = new CollapsedHeadings(this.editing);
+	/** The rows selected to act on together; never saved, so closing the list ends it. */
+	readonly selection = new RowSelection(this.editing);
 	readonly dragsRows = true;
 	readonly dragsHeadings = true;
 	filterField: FilterField | null = null;
@@ -106,7 +110,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	) {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
-		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+		// Focusable, but not in the tab order, so focus can stay in the view, where its keys reach it (select.ts).
+		this.listScrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll', attr: { tabindex: -1 } });
 		this.listSizerEl = this.listScrollEl.createDiv({ cls: 'princelists-sizer' });
 		// Here, so the scope is in place before the view first takes focus.
 		registerListKeys(this);
@@ -173,6 +178,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.filter = null;
 		this.filterField = null;
 		this.collapsed.clear();
+		this.selection.clear();
 		this.outsideChanges++;
 		// Nothing of the old file stays, not even a field with focus, which render() would keep.
 		this.listSizerEl.empty();
@@ -184,6 +190,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		await super.onOpen();
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
 		registerFieldEvents(this);
+		focusListWhenActive(this);
 		registerFileRedraws(this);
 		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);
 		// The collapse arrows always show where there's no hover.
@@ -206,6 +213,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.redrawFiltered.cancel();
 		this.endListNote();
 		this.dropListNoteEditor();
+		this.selection.clear();
 		await super.onClose();
 	}
 
