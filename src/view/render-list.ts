@@ -17,6 +17,8 @@ const TICK_ZONE_CLASS = 'princelists-tick-zone';
 /** What a click lands on to tick a row: its checkbox, or the wider zone behind it. */
 export const TICK_SELECTOR = `.${CHECKBOX_CLASS}, .${TICK_ZONE_CLASS}`;
 export const ITEMS_CLASS = 'princelists-items';
+/** The room after the last row, so it scrolls clear of the floating "+". */
+export const END_CLASS = 'princelists-end';
 export const HEADING_CLASS = 'princelists-heading';
 export const OPEN_AS_MARKDOWN_CLASS = 'princelists-open-as-markdown';
 // A row's or heading's first line. The plugin's own name: Markdown that Obsidian renders carries its

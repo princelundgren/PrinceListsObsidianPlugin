@@ -39,12 +39,10 @@ function offerUndo(view: PrinceListView, file: TFile, undo: PlannedDelete['undo'
 	showUndoNotice(message, () => void view.enqueue(() => undoDelete(view, file, undo)));
 }
 
-// A notice with an Undo button for a few seconds (spec, "Item actions").
+// Undo goes after the message, where Obsidian puts its own notices' actions (spec, "Undoing a delete").
 export function showUndoNotice(message: string, onUndo: () => void): void {
-	const fragment = createFragment();
-	fragment.createSpan({ text: message });
-	const button = fragment.createEl('button', { cls: 'princelists-undo', text: 'Undo' });
-	new Notice(fragment, 6000);
+	const notice = new Notice(message, 6000);
+	const button = notice.containerEl.createEl('button', { cls: 'princelists-undo', text: 'Undo' });
 	// Not delegated or registered: the notice isn't in a view, and this listener goes with its button.
 	button.addEventListener('click', onUndo, { once: true });
 }
