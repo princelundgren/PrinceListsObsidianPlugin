@@ -1,5 +1,7 @@
 ---
-status: draft
+status: building
+verified: 2026-11-10
+governs: [src/**, styles.css]
 tracking: ["#79"]
 ---
 
