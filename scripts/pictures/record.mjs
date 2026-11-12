@@ -3,6 +3,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { toGif } from './encode.mjs';
+import { clipOf } from './page.mjs';
 
 /**
  * Runs `act` while saving each frame the page paints as a PNG in `folder`. Returns the `frames` in
@@ -36,12 +37,16 @@ export async function record(session, act, folder) {
 	return { screen, frames: frames.map(({ file, arrived }, index) => ({ file, ms: (frames[index + 1]?.arrived ?? end) - arrived })) };
 }
 
-/** Records `act` and saves it as `<out>/<scene name>.gif`, at the scene's page size. */
+/**
+ * Records `act` and saves it as `<out>/<scene name>.gif`: the scene's clip, taken before `act`
+ * runs, or else its whole page.
+ */
 export async function recordGif(session, scene, out, act) {
+	const clip = await clipOf(session, scene);
 	const folder = await mkdtemp(join(tmpdir(), 'princelists-gif-'));
 	try {
 		const { frames, screen } = await record(session, act, folder);
-		toGif(frames, join(out, `${scene.name}.gif`), scene.page, screen);
+		toGif(frames, join(out, `${scene.name}.gif`), scene.page, screen, clip);
 	} finally {
 		await rm(folder, { recursive: true, force: true });
 	}
