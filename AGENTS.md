@@ -221,7 +221,6 @@ Agents never push to `main`, merge pull requests, push tags or publish releases.
 
 The notes live only in the GitHub release, and are written for people using the plugin. Leave out a
 section with nothing in it, and any change they wouldn't notice, such as docs, tests or tooling.
-Name only the checks that ran on this release.
 
 ```markdown
 One sentence on what this release gives you.
@@ -237,8 +236,6 @@ One sentence on what this release gives you.
 ### Fixed
 - What no longer goes wrong (#123)
 - What's gone, and why (#123)
-
-Checked by hand with Obsidian x.y.z on <the platforms checked>.
 
 **Install:** in Obsidian, go to Settings → Community plugins → Browse and search for PrinceLists, or open its [listing](https://community.obsidian.md/plugins/princelists).
 
