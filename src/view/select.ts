@@ -9,6 +9,8 @@ import { CHECKBOX_CLASS, END_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, LINE
 
 // The class on a selected row or heading.
 const SELECTED_CLASS = 'princelists-selected';
+const SELECTED_FIRST_CLASS = 'princelists-selected-first';
+const SELECTED_LAST_CLASS = 'princelists-selected-last';
 const STATUS_CLASS = 'princelists-selection-status';
 const ROW_SELECTOR = `.${ITEM_CLASS}[${LINE_ATTR}], .${HEADING_CLASS}[${LINE_ATTR}]`;
 
@@ -113,10 +115,16 @@ export function drawSelection(view: PrinceListView): void {
 	view.selection.keepOnly(new Set(selectableLines(view)));
 	const selected = new Set(view.selection.lines());
 	const { status, describerId } = announcerOf(view);
-	for (const rowEl of ownElements(view.listScrollEl, ROW_SELECTOR)) {
+	const rowEls = ownElements(view.listScrollEl, ROW_SELECTOR);
+	const isSelected = rowEls.map((rowEl) => {
 		const line = lineOf(rowEl);
-		markRow(rowEl, line !== null && selected.has(line) && !rowEl.hasClass(CARD_CLASS), describerId);
-	}
+		return line !== null && selected.has(line) && !rowEl.hasClass(CARD_CLASS);
+	});
+	rowEls.forEach((rowEl, i) => {
+		const here = isSelected[i] === true;
+		const place = { first: here && isSelected[i - 1] !== true, last: here && isSelected[i + 1] !== true };
+		markRow(rowEl, here, place, describerId);
+	});
 	const count = selected.size === 0 ? '' : `${selected.size} selected`;
 	if (status.getText() !== count) status.setText(count);
 	const wasSelecting = view.selecting;
@@ -183,8 +191,10 @@ function focusList(view: PrinceListView): void {
 	view.listScrollEl.focus({ preventScroll: true });
 }
 
-function markRow(rowEl: HTMLElement, isSelected: boolean, describerId: string): void {
+function markRow(rowEl: HTMLElement, isSelected: boolean, place: { first: boolean; last: boolean }, describerId: string): void {
 	rowEl.toggleClass(SELECTED_CLASS, isSelected);
+	rowEl.toggleClass(SELECTED_FIRST_CLASS, place.first);
+	rowEl.toggleClass(SELECTED_LAST_CLASS, place.last);
 	// aria-selected isn't valid on a list item or a heading; aria-describedby is valid on any element.
 	const described = rowEl.hasClass(HEADING_CLASS) ? rowEl : rowEl.querySelector(`.${CHECKBOX_CLASS}`);
 	if (!described) return;
