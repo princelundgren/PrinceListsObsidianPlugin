@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { GroupState } from '../../src/core/group-edits';
-import { changeMessage, groupEntries } from '../../src/core/group-menu';
+import { barButtons, changeMessage, groupEntries } from '../../src/core/group-menu';
 
 const NONE: GroupState = {
 	items: 0,
@@ -51,6 +51,29 @@ describe('groupEntries', () => {
 		expect(groupEntries(MIXED, true, 'star')).toEqual(['addStar', 'removeStar']);
 		expect(groupEntries(MIXED, true, 'date')).toEqual(['today', 'tomorrow', 'pickDate', 'removeDate']);
 		expect(groupEntries({ ...NONE, headings: 2 }, true, 'tick')).toEqual([]);
+	});
+});
+
+describe('barButtons', () => {
+	test('enables every button for a mixed selection of items in a list with headings', () => {
+		expect(barButtons(MIXED, true)).toEqual({ move: true, tick: true, star: true, date: true, delete: true });
+	});
+
+	test('enables only Delete for a selection of headings', () => {
+		expect(barButtons({ ...NONE, headings: 2 }, true)).toEqual({ move: false, tick: false, star: false, date: false, delete: true });
+	});
+
+	test('disables Move to while a heading is selected', () => {
+		expect(barButtons({ ...MIXED, headings: 1 }, true).move).toBe(false);
+	});
+
+	test('disables Move to in a list without headings', () => {
+		expect(barButtons(MIXED, false).move).toBe(false);
+	});
+
+	test('enables Tick and Star for one item, whatever it holds', () => {
+		const ticked = { ...NONE, items: 1, anyTicked: true, anyUnstarred: true };
+		expect(barButtons(ticked, true)).toEqual({ move: true, tick: true, star: true, date: true, delete: true });
 	});
 });
 

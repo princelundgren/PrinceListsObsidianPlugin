@@ -55,10 +55,18 @@ export function registerFieldEvents(view: PrinceListView): void {
 	// In the capture phase, so it is stopped before it reaches a row or bubbles up from one.
 	if (Platform.isMobile) {
 		view.registerDomEvent(contentEl, 'contextmenu', (evt) => onHoldMenu(view, evt), { capture: true });
-		view.registerDomEvent(contentEl, 'click', (evt) => swallowClick(view, evt), { capture: true });
-		// A hold that sent no click must not eat a later tap, nor a right-click with a mouse, which sends no touch.
-		view.registerDomEvent(contentEl, 'pointerdown', () => (view.swallowNextClick = false), { capture: true });
+		swallowClickAfterHold(view, contentEl);
 	}
+}
+
+/**
+ * Stops the click that follows a hold on the view's rows from reaching anything in `el`, in the capture
+ * phase. For the view's content, and for the selection bar, which a hold can show under the finger.
+ */
+export function swallowClickAfterHold(view: PrinceListView, el: HTMLElement): void {
+	view.registerDomEvent(el, 'click', (evt) => swallowClick(view, evt), { capture: true });
+	// A hold that sent no click must not eat a later tap, nor a right-click with a mouse, which sends no touch.
+	view.registerDomEvent(el, 'pointerdown', () => (view.swallowNextClick = false), { capture: true });
 }
 
 function onChange(view: PrinceListView, evt: Event): void {

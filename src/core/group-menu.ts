@@ -37,6 +37,26 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 	return order.filter((entry) => shows[entry]);
 }
 
+/** A button of mobile's bar that acts on the selection. */
+export type BarButton = 'move' | EntryGroup | 'delete';
+
+/**
+ * Whether each of the bar's buttons has something to act on for a selection that holds `state`: Move
+ * to while Move to heading… shows, Tick, Star and Date while any entry of their group does, and Delete
+ * while anything is selected.
+ */
+export function barButtons(state: GroupState, listHasHeadings: boolean): Record<BarButton, boolean> {
+	const entries = groupEntries(state, listHasHeadings);
+	const showsAny = (group: EntryGroup): boolean => ENTRY_GROUPS[group].some((entry) => entries.includes(entry));
+	return {
+		move: entries.includes('move'),
+		tick: showsAny('tick'),
+		star: showsAny('star'),
+		date: showsAny('date'),
+		delete: entries.includes('delete'),
+	};
+}
+
 /** The Undo message for `change` on `written.changed` items, naming the repeating items a tick skipped. */
 export function changeMessage(change: GroupChange, written: Pick<PlannedGroupChange, 'changed' | 'skipped'>): string {
 	const items = countPhrase(written.changed, 0);

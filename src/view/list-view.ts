@@ -24,7 +24,7 @@ import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
-import { registerFieldEvents } from './events';
+import { registerFieldEvents, swallowClickAfterHold } from './events';
 import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
 import { registerFileRedraws } from './notes-drawing';
@@ -34,6 +34,7 @@ import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
 import { focusListWhenActive } from './select';
+import { buildSelectionBar, syncSelectionBar } from './selection-bar';
 import type { TagSuggest } from './tag-suggest';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
@@ -67,6 +68,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	readonly collapsed = new CollapsedHeadings(this.editing);
 	/** The rows selected to act on together; never saved, so closing the list ends it. */
 	readonly selection = new RowSelection(this.editing);
+	/** Whether the view is selecting, on mobile only: from a still hold until no row is selected, with a bar in place of the floating "+". */
+	selecting = false;
 	readonly dragsRows = true;
 	readonly dragsHeadings = true;
 	filterField: FilterField | null = null;
@@ -200,6 +203,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		if (Platform.isMobile) enableTouchDrag(dragHost);
 		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
 		this.newItemButton = buildNewItemButton(this, newItemLabel);
+		if (Platform.isMobile) swallowClickAfterHold(this, buildSelectionBar(this));
 		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
 		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.
@@ -330,15 +334,16 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.listNoteEditor = null;
 	}
 
-	/** Shows or hides the view's buttons to match the text and the settings. */
+	/** Shows or hides the view's buttons, and mobile's selection bar, to match the text, the settings and selecting. */
 	syncButtons(): void {
 		const isList = isListText(this.text);
-		const showsFloating = isList && this.showsFloatingAdd();
+		const showsFloating = isList && !this.selecting && this.showsFloatingAdd();
 		this.newItemButton?.toggle(showsFloating);
 		this.contentEl.toggleClass('princelists-has-floating-add', showsFloating);
-		this.newItemAction?.toggle(isList && this.showsHeaderAdd());
+		this.newItemAction?.toggle(isList && !this.selecting && this.showsHeaderAdd());
 		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
 		this.syncFindButtons();
+		syncSelectionBar(this);
 	}
 
 	/** Follows a change to where the "+" buttons show: an empty list is drawn again, since its hint names them. */

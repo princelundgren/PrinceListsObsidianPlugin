@@ -64,6 +64,24 @@ export class RowSelection {
 		else this.setRange(anchor, to, shown);
 	}
 
+	/** Starts over with `line` selected, and `also` too unless null, and makes `line` the anchor. */
+	startWith(line: number, also: number | null): void {
+		this.clear();
+		if (also !== null && also !== line) this.toggle(also);
+		this.toggle(line);
+	}
+
+	/**
+	 * Replaces the range with the shown rows from the anchor to `to`, as selectRange does; with no shown
+	 * anchor, adds `to` if it isn't selected and makes it the anchor. It never removes `to`.
+	 */
+	addRangeTo(to: number, shown: readonly number[]): void {
+		const anchor = this.anchor;
+		if (anchor !== null && shown.includes(anchor)) this.setRange(anchor, to, shown);
+		else if (this.has(to)) this.setAnchor(to);
+		else this.toggle(to);
+	}
+
 	/** Moves the range's far end one shown row up or down from where it is; does nothing with no shown anchor. */
 	extend(step: 1 | -1, shown: readonly number[]): void {
 		const anchor = this.anchor;

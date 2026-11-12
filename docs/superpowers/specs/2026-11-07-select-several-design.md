@@ -100,12 +100,13 @@ nothing is written in the background, and only documented Obsidian APIs are used
   are both selected, as Cmd+click does on desktop.
 - **While selecting (owner):**
   - A tap on a row or a heading adds or removes it, and a tap on a heading doesn't open the
-    heading menu.
+    heading menu. A tap on empty space keeps the selection, so a tap between rows doesn't lose it,
+    and a tap on a link in a title still opens it, as Cmd+click does on desktop **(call)**.
   - Holding another row and letting go selects every shown row between it and the last row tapped,
     as Shift+click does **(call)**.
   - Each row's checkbox shows as a selection circle, so nothing is ticked by mistake.
   - A bar replaces the floating "+" at the bottom: "5 selected" with Done, and Move to, Tick,
-    Star, Date and Delete.
+    Star, Date and Delete. The "+" in the pane's header hides too **(call)**.
   - Holding a selected row and moving it drags the whole selection.
 - **The bar's buttons (call):** Move to opens the heading picker and Delete deletes, as the menu's
   entries do. Tick, Star and Date each open a small menu of the selection menu's entries for them,

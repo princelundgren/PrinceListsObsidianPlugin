@@ -77,6 +77,42 @@ describe('RowSelection', () => {
 		expect(selection.anchor).toBe(5);
 	});
 
+	test("startWith selects the held row and the closed card's item, the held row the anchor", () => {
+		const { selection } = selectionIn(TEXT);
+		selection.startWith(5, 3);
+		expect(selection.lines()).toEqual([3, 5]);
+		expect(selection.anchor).toBe(5);
+	});
+
+	test('startWith drops the rows selected before', () => {
+		const { selection } = selectionIn(TEXT);
+		selection.toggle(7);
+		selection.startWith(5, null);
+		expect(selection.lines()).toEqual([5]);
+		expect(selection.anchor).toBe(5);
+	});
+
+	test('addRangeTo selects the shown rows from the last row tapped and keeps the rows tapped before', () => {
+		const { selection } = selectionIn(TEXT);
+		selection.toggle(3);
+		selection.toggle(5);
+		selection.addRangeTo(7, SHOWN);
+		expect(selection.lines()).toEqual([3, 5, 6, 7]);
+	});
+
+	test('addRangeTo with no shown anchor adds a selected row rather than removing it', () => {
+		const { selection } = selectionIn(TEXT);
+		selection.toggle(6);
+		selection.toggle(4);
+		selection.keepOnly(new Set([3, 5, 6, 7]));
+		selection.addRangeTo(6, [3, 5, 6, 7]);
+		expect(selection.lines()).toEqual([6]);
+		expect(selection.anchor).toBe(6);
+		selection.keepOnly(new Set([3, 5, 7]));
+		selection.addRangeTo(7, [3, 5, 7]);
+		expect(selection.lines()).toEqual([7]);
+	});
+
 	test('extend grows and shrinks the range from the anchor', () => {
 		const { selection } = selectionIn(TEXT);
 		selection.toggle(5);
