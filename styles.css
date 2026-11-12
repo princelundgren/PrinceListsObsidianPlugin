@@ -714,6 +714,12 @@ button.princelists-new-item {
 	gap: var(--size-4-2);
 }
 
+/* Move to, Tick, Star, Date, the divider, then Delete: the actions as wide as the widest of them. */
+.princelists-selection-actions {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr) auto 1fr;
+}
+
 .princelists-selection-bar-top {
 	font-size: var(--font-ui-small);
 	white-space: nowrap;
@@ -777,7 +783,6 @@ button.princelists-new-item {
 
 .princelists-selection-bar button.princelists-selection-action {
 	display: flex;
-	flex: 1 0 auto;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
