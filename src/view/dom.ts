@@ -25,10 +25,11 @@ export function replaceKeeping(target: HTMLElement, fresh: HTMLElement, kept: HT
 }
 
 // A textarea as tall as its text, so a title wraps like text and notes need no scrolling of their own.
-// It must be in the document, or its scrollHeight is 0.
+// It must be in the document, or its scrollHeight is 0, and have the field class, whose CSS reads the
+// height.
 export function fitHeight(textarea: HTMLTextAreaElement): void {
-	textarea.setCssProps({ height: 'auto' });
-	textarea.setCssProps({ height: `${textarea.scrollHeight}px` });
+	textarea.setCssProps({ '--princelists-fit-height': 'auto' });
+	textarea.setCssProps({ '--princelists-fit-height': `${textarea.scrollHeight}px` });
 }
 
 export const HIDDEN_LABEL_CLASS = 'princelists-hidden-label';
