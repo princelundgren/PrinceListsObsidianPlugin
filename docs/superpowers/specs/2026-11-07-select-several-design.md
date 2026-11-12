@@ -81,10 +81,12 @@ only documented Obsidian APIs are used.
   with a mouse, while the finger or the button is still down **(owner, 2026-11-11)**. A move after
   that drags the selection the hold joined, so a hold that moves one row leaves it selected, with
   the bar showing **(owner, 2026-11-11)**.
-  - **By touch,** the row selects as it lifts for the drag. The release writes nothing and is no
-    tap.
+  - **The held row shows as selected (owner, 2026-11-12),** not lifted: the lift's outline and
+    background hid the highlight until the release.
+  - **By touch,** the row lifts for the drag once the finger moves it. The release writes nothing
+    and is no tap.
   - **With a mouse,** the press stays within the touch's 5 px tolerance until the hold time
-    **(call)**, and the row lifts as a touch hold lifts it until the release **(call)**. Moving past
+    **(call)**, and the row never lifts, since the browser's drag shows its own picture. Moving past
     the tolerance before then selects nothing, and moving far enough starts the browser's drag,
     which drags the row as today. The click that follows the release opens no card. Only the main
     button with no modifier counts, and only on a row's or a heading's own area: not on its
@@ -291,10 +293,10 @@ Each in the pull request that makes it untrue:
    Windows, and that the click opens no card.
    - **Result:** On macOS, Obsidian 1.14.5, a press held still for 700 ms on a row, sent as DevTools
      input events, gives `pointerdown`, `pointerup` and one `click`, and no `dragstart`, and no card
-     opens. The row is lifted and selected by 0.8 s with the button still down, and a move after
-     that starts the browser's drag, which moves the row and keeps it selected. A press that moves
-     20 px before the hold time selects nothing. A hold on a checkbox ticks and one on a link opens
-     it. Not checked on Windows, nor with a physical mouse.
+     opens. The row shows as selected, with no outline, by 0.8 s with the button still down, and a
+     move after that starts the browser's drag, which moves the row and keeps it selected. A press
+     that moves 20 px before the hold time selects nothing. A hold on a checkbox ticks and one on a
+     link opens it. Not checked on Windows, nor with a physical mouse.
 8. **The bar on desktop:** that it sits at the bottom of a narrow pane, a split pane and a pop-out
    window without covering the last rows or the status bar.
    - **Result:** on macOS, in a 327 px pane at the window's right edge, under the status bar, the

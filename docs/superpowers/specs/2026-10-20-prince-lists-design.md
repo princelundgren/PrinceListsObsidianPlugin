@@ -820,7 +820,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **Desktop (1a):** drag items with the mouse, within and between sections. An item's notes move
   with it. In step two, headings drag too, each with its whole section (step two's design,
   "Dragging a heading").
-  - A press held still as long as a touch hold lifts the row and starts selecting once that time
+  - A press held still as long as a touch hold selects the row and starts selecting once that time
     passes **(owner, 2026-11-11)** ([selecting several rows](2026-11-07-select-several-design.md),
     "Starting to select").
   - A drag closes any open card first, the way a click elsewhere does **(call)**. An empty new
@@ -841,8 +841,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
     selection").
 - **Mobile (1b, owner):**
   - Hold an item and then move to drag it.
-  - Holding an item row never opens a menu. The hold starts selecting as the row lifts
-    ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select"), and a
+  - Holding an item row never opens a menu. The hold selects the row and starts selecting, and the
+    row lifts once the finger moves it
+    ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select"). A
     release without moving writes nothing.
   - **A drag of a selected row moves every selected row,** as on desktop, and selecting goes on.
     Once the held row moves, it shows how many rows it carries, and the others stay in place until
