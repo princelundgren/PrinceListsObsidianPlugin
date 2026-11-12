@@ -1,8 +1,8 @@
 ---
-status: live
-verified: 2026-11-07
+status: building
+verified: 2026-11-12
 governs: [src/**, styles.css]
-tracking: ["#325"]
+tracking: ["#325", "#340"]
 ---
 
 # PrinceLists for Obsidian: filtering by tag
@@ -16,7 +16,8 @@ Schedule, by them. It isn't only for groceries: a to-do or packing list narrows 
 **(owner)**.
 
 **How decisions are marked:** as in the [step one design](2026-10-20-prince-lists-design.md).
-**(owner)** means the owner decided it on 2026-11-07; **(call)** means the designer did, and a
+**(owner)** means the owner decided it on 2026-11-07, and **(owner, #340)** what the owner asked
+for in #340; **(call)** means the designer did, and a
 builder may revisit it. Step one's rules still hold: an edit replaces only the lines it concerns,
 nothing is written in the background, and only documented Obsidian APIs are used.
 
@@ -143,17 +144,47 @@ nothing is written in the background, and only documented Obsidian APIs are used
 - **A tag button left of the star (owner),** so the card's top reads tag, star, day, ⋯, as a
   closed row reads title, tags, star, day. Its icon is a tag from Obsidian's built-in Lucide set
   **(call)**, and its tooltip is "Add tag".
-- **The item's tags show in the card (owner),** under the title, each with an × that takes it off.
-  These are the tags in its tail; a tag in the title stays in the title field, where it's edited as
-  text **(call)**. Today the card hides the tail while you edit (step one, "Editing"), so a tag
-  typed there can't be seen again in the view; showing them fixes that.
-- **The tag button opens a type-ahead (owner):** an input with Obsidian's `AbstractInputSuggest`
-  (`@since` 1.4.10, older than `minAppVersion` 1.13.4). It suggests this list's tags **(call)**,
-  the same set the strip shows with no tag lit, less the item's own, and `New tag: #<tag>` for
-  anything else. Other lists' tags aren't offered:
-  the metadata cache would hold them, but with their notes', headings' and frontmatter's tags,
-  which this design doesn't count. A leading `#` is optional, and text that isn't a tag (a space,
-  only numbers) isn't offered **(call)**.
+- **The item's tags follow the title, as on a closed row (owner, #340),** each with an × that takes
+  it off. These are the tags in its tail; a tag in the title stays in the title field, where it's
+  edited as text **(call)**. Today the card hides the tail while you edit (step one, "Editing"), so
+  a tag typed there can't be seen again in the view; showing them fixes that.
+  - **The title field is as wide as its text (call),** with CSS `field-sizing: content` (Chromium
+    123, Safari 26.2), so the tags follow it on its line. Once the title wraps it takes the full
+    width and the tags go to the line under it, as a closed row's do. An empty field is as wide as
+    its placeholder.
+  - **In a web view without `field-sizing` (call),** such as iOS and iPadOS before 26.2, the field
+    keeps the full width and the tags go on the line under the title. An `@supports` rule picks
+    the layout, so no script measures the text.
+  - **In a view 480 pixels wide or narrower,** the title and its tags take the head's first line,
+    and the tag button, star, day and ⋯ the line under it, as the title alone does today
+    **(call)**.
+- **The tag button opens a small popover under it (owner, #340),** over the card's content, so
+  opening it moves nothing. It holds one field with Obsidian's `AbstractInputSuggest` (`@since`
+  1.4.10, older than `minAppVersion` 1.13.4). It suggests this list's tags **(call)**, the same set
+  the strip shows with no tag lit, less the item's own, and `New tag: #<tag>` for anything else.
+  Other lists' tags aren't offered: the metadata cache would hold them, but with their notes',
+  headings' and frontmatter's tags, which this design doesn't count. A leading `#` is optional, and
+  text that isn't a tag (a space, only numbers) isn't offered **(call)**.
+  - **The popover is the plugin's own element in the card (call),** under the tag button with its
+    end edge at the end of the card's top row of buttons, so it stays inside the card, and no wider
+    than the card. It uses the card's border, radius and shadow variables, at `--layer-popover`
+    (30 in Obsidian 1.15). Obsidian adds its suggestions to the page's body at z-index 60, above it
+    (checked in 1.15). The HTML `popover` attribute would draw it in the browser's top layer, above
+    those suggestions. Of what Obsidian documents, a `Menu` can't hold a field, a `Modal` can't sit
+    at a button, `HoverPopover` is a hover preview, shown after a wait, and `PopoverSuggest` is the
+    base of the suggestion list itself.
+  - **It closes on a pick, on Escape, or on a tap outside it (owner, #340),** and a second press of
+    the tag button closes it too **(call)**. A tap outside is focus leaving its field for another
+    part of the window; switching to another app leaves it open, as it leaves the list's title
+    field **(call)**. Outside the card, that tap also closes the card, as today.
+  - **After a pick or Escape, focus goes back to the tag button (call),** so another tag is one
+    more press. A second Escape closes the card.
+  - **A screen reader (call):** the tag button says whether the popover is open
+    (`aria-expanded`), and the field's label is "Add tag", not only its placeholder, given as the
+    plugin's other fields' labels are, so it shows no tooltip. Opening it moves focus to the
+    field. Obsidian's suggestions carry no roles (checked in 1.15), and the
+    plugin doesn't add any to Obsidian's elements, so a screen reader isn't told what's suggested;
+    Enter adds the highlighted one, the first unless the arrows move it.
 - **Typing a tag at the end of the title keeps working (owner):** the file reads it as the tail, as
   it does today, and it then shows in the card with the others.
 - **Adding or removing a tag changes only the item's line (call),** like setting a When:
@@ -165,9 +196,9 @@ nothing is written in the background, and only documented Obsidian APIs are used
     line with no title, such as `- [ ] #errand` or `- [ ]  ⭐ #errand`, the space after `]` stays,
     so the line is still an item, as step two's star rule keeps it (step two, "Star (owner)").
   - Cmd+Z undoes it, as it does the plugin's other edits (step one, the "Undo" rule under "Saving,
-    outside changes, sync conflicts, undo"). The tag input stays focused after each tag it adds, so
-    while it's empty Cmd+Z and Cmd+Shift+Z step through the list's history; with text in it they
-    undo the typing, as in other fields **(call)**.
+    outside changes, sync conflicts, undo"), from the tag button once the popover closes. In the
+    popover's field, Cmd+Z and Cmd+Shift+Z step through the list's history while it's empty and
+    undo the typing once it has text, as in other fields **(call)**.
 
 ## The Schedule
 
@@ -185,6 +216,7 @@ Each in the pull request that makes it untrue:
 - **Step one, "Layout (owner)":** a row shows its tags as well as its checkbox, title, star and
   When.
 - **Step one, "Editing":** the card shows the tail's tags, though the title field still hides them.
+- **Step one, "Editing" (#340):** the card's tags follow the title instead of sitting under it.
 - **Step two, "When and the Schedule view":** a Schedule row shows its tags too.
 - **Step two, "Cmd+F":** the filter icon and Escape show every row only once no tag is lit, or with
   "While filtering".
@@ -207,6 +239,15 @@ Each in the pull request that makes it untrue:
    screen in a way that makes the strip worse than no strip. Checked by hand on a phone; if it
    does, the owner decides between a fixed height and scrolling sideways.
 5. **Tap targets:** strip tags and the clear button meet 24 by 24 CSS pixels on a phone.
+6. **A pick by click or tap:** if a press on one of Obsidian's suggestions takes focus from the
+   field before the pick lands, closing on focus loss would drop the pick. Checked on macOS and on
+   Android before that rule is kept; if it fails, the owner decides how the popover closes.
+7. **The popover near the list's end and on a phone:** opened on the last row, or above a phone's
+   keyboard, it's scrolled into view with the suggestions under it. Checked on macOS and on
+   Android.
+8. **The title field's width and height:** an empty, a short and a wrapping title, typing that
+   wraps or unwraps it, a done item, and a narrow pane, with the field's height still fitting its
+   text.
 
 ## Order (call)
 
@@ -216,3 +257,5 @@ Each in the pull request that makes it untrue:
 3. The strip, filtering and the clear button in a list, with the setting.
 4. The card's tag button, chips and type-ahead.
 5. The Schedule's strip.
+6. The card's tag popover (#340).
+7. The card's tags after the title (#340).
