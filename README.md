@@ -22,7 +22,7 @@ Tag items to group them across sections. The list's tags sit above its items, an
 
 Hold an item to select it, then click or tap others to add them. Move, tick, star, date or delete them all at once.
 
-![In a todo list, a row is held until it is selected, two more are clicked to join it, and Move to in the bar at the bottom puts all three under the Admin heading, where they stay selected](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
+![In a todo list, a row is held until it is selected and two more are clicked to join it, then dragging one takes all three under the Admin heading, and Star in the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
 
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 

@@ -1,12 +1,13 @@
-// In To do, a row is held until it is selected, two more are clicked to join it, and the bar's Move to
-// puts all three under the Admin heading, where they stay selected.
+// In To do, a row is held until it is selected, two more are clicked to join it, dragging one takes all
+// three under the Admin heading, Add star from the bar's Star stars them, and Done ends selecting.
 import { titleOf } from '../listing.mjs';
-import { boundsOf, drawnMouse, hover, middleOf, paneClip, showAlone, sleep, undoingChanges } from '../page.mjs';
+import { boundsOf, drawnMouse, headingBounds, hover, middleOf, paneClip, showAlone, sleep, undoingChanges } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
 import { recordGif } from '../record.mjs';
 
 const REST = { x: 520, y: 120 };
-const ROWS = ['renew the car insurance', 'call the plumber about the kitchen tap', 'book a dentist appointment'];
+// None starred yet, so Star changes all three.
+const ROWS = ['call the plumber about the kitchen tap', 'return the library books', 'book a dentist appointment'];
 // Longer than the hold time, so the row is selected while the button is still down.
 const HOLD_MS = 900;
 
@@ -27,18 +28,24 @@ const scene = {
 		try {
 			await session.evaluate('app.workspace.leftSplit.collapse()');
 			await sleep(600);
-			await undoingChanges(session, 'To do.md', 'Attachments', () => recordGif(session, scene, out, () => selectAndMove(session)));
+			await undoingChanges(session, 'To do.md', 'Attachments', () => recordGif(session, scene, out, () => selectDragAndStar(session)));
 		} finally {
 			await session.evaluate('app.workspace.leftSplit.expand()');
 		}
 	},
 };
 
-async function selectAndMove(session) {
+async function selectDragAndStar(session) {
 	const mouse = drawnMouse(session, REST.x, REST.y);
 	const titleStart = async (title) => {
 		const { x, y, height } = await titleOf(session, title);
 		return { x: x + 40, y: y + height / 2 };
+	};
+	const clickOn = async (selector, ms, text) => {
+		const { x, y } = middleOf(await boundsOf(session, selector, text));
+		await mouse.glide(x, y, ms);
+		await sleep(300);
+		await mouse.click();
 	};
 	await pointer(session, REST.x, REST.y, 'move');
 	await sleep(800);
@@ -56,16 +63,15 @@ async function selectAndMove(session) {
 		await mouse.click();
 		await sleep(600);
 	}
-	const move = middleOf(await boundsOf(session, '.princelists-selection-move'));
-	await mouse.glide(move.x, move.y, 700);
-	await sleep(300);
-	await mouse.click();
-	await sleep(900);
-	const admin = middleOf(await boundsOf(session, '.prompt .suggestion-item', 'Admin'));
-	await mouse.glide(admin.x, admin.y, 600);
-	await sleep(300);
-	await mouse.click();
-	await sleep(900);
+	const admin = await headingBounds(session, 'Admin');
+	await mouse.drag(mouse.at.x, admin.y + admin.height * 0.75, 1000);
+	await sleep(1000);
+	await clickOn('.princelists-selection-star', 800);
+	await sleep(700);
+	await clickOn('.menu-item', 400, 'Add star');
+	await sleep(1100);
+	await clickOn('.princelists-selection-done', 700);
+	await sleep(700);
 	await mouse.glide(REST.x, REST.y, 600);
 	await sleep(2200);
 }
