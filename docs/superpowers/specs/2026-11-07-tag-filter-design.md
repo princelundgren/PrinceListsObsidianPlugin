@@ -177,8 +177,8 @@ nothing is written in the background, and only documented Obsidian APIs are used
     the tag button closes it too **(call)**. A tap outside is focus leaving its field for another
     part of the window; switching to another app leaves it open, as it leaves the list's title
     field **(call)**. Outside the card, that tap also closes the card, as today.
-  - **Then focus goes back to the tag button (call),** so another tag is one more press. A second
-    Escape closes the card.
+  - **After a pick or Escape, focus goes back to the tag button (call),** so another tag is one
+    more press. A second Escape closes the card.
   - **A screen reader (call):** the tag button says whether the popover is open
     (`aria-expanded`), and the field's label is "Add tag", not only its placeholder, given as the
     plugin's other fields' labels are, so it shows no tooltip. Opening it moves focus to the
