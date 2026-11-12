@@ -1,5 +1,5 @@
 ---
-status: building
+status: live
 verified: 2026-11-12
 governs: [src/**, styles.css]
 tracking: ["#325", "#340"]
@@ -155,6 +155,9 @@ nothing is written in the background, and only documented Obsidian APIs are used
   - **In a web view without `field-sizing` (call),** such as iOS and iPadOS before 26.2, the field
     keeps the full width and the tags go on the line under the title. An `@supports` rule picks
     the layout, so no script measures the text.
+  - **A click or tap beside a short title puts the caret at its end (call),** where it landed
+    when the field had the full width. The press keeps focus where it was, so a phone's keyboard
+    stays up.
   - **In a view 480 pixels wide or narrower,** the title and its tags take the head's first line,
     and the tag button, star, day and ⋯ the line under it, as the title alone does today
     **(call)**.

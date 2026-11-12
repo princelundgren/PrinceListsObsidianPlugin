@@ -821,9 +821,9 @@ button.princelists-new-item {
 	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The title, with the card's tag button, star, When and ⋯ on its first line. They sit in the
-   title's row only, so the notes and the format bar under it span the card. In a pane too narrow
-   for both they move to a line of their own under the title, still on the right. */
+/* The title and its tags, with the card's tag button, star, When and ⋯ on its first line. They sit
+   in the title's row only, so the notes and the format bar under it span the card. In a pane too
+   narrow for both they move to a line of their own under the title, still on the right. */
 .princelists-card-head {
 	position: relative;
 	display: flex;
@@ -832,7 +832,7 @@ button.princelists-new-item {
 	gap: var(--size-4-2);
 }
 
-.princelists-card-head > .princelists-card-title {
+.princelists-card-head > .princelists-card-title-line {
 	flex: 1;
 	min-width: 8em;
 }
@@ -848,7 +848,7 @@ button.princelists-new-item {
 /* In a view about as narrow as a sidebar or a phone, they always have that line, so the title keeps
    the width. */
 @container (max-width: 480px) {
-	.princelists-card-head > .princelists-card-title {
+	.princelists-card-head > .princelists-card-title-line {
 		flex-basis: 100%;
 	}
 }
@@ -1108,13 +1108,33 @@ button.princelists-strip-tag.is-lit {
 	}
 }
 
-/* The card's tags under its title. */
+/* The card's tags follow its title, as on a closed row: where field-sizing works the title is as
+   wide as its text, and elsewhere it keeps the full width, with the tags on the line under it. */
+.princelists-card-title-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--size-4-1);
+}
+
+.princelists-card-title-line > textarea.princelists-card-title {
+	flex: 1 1 100%;
+}
+
+@supports (field-sizing: content) {
+	.princelists-card-title-line > textarea.princelists-card-title {
+		field-sizing: content;
+		flex: 0 1 auto;
+		width: auto;
+		max-width: 100%;
+	}
+}
+
 .princelists-card-tags {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--size-4-1);
-	margin-top: var(--size-4-1);
 }
 
 .princelists-card-tag {

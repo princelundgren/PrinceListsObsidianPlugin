@@ -6,10 +6,12 @@ import {
 	CARD_ACTIONS_CLASS,
 	CARD_STAR_CLASS,
 	CARD_TITLE_CLASS,
+	CARD_TITLE_LINE_CLASS,
 	cardTitleBlur,
 	cardTitleInput,
 	closeCard,
 	dismissCard,
+	focusCardTitleEnd,
 	openCard,
 } from './card';
 import { toggleCardStar } from './card-star';
@@ -136,6 +138,10 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (view.card?.el.contains(target)) {
+		if (target.hasClass(CARD_TITLE_LINE_CLASS)) {
+			focusCardTitleEnd(view);
+			return;
+		}
 		if (cardTagsClick(view, target)) return;
 		if (target.closest(`.${CARD_STAR_CLASS}`)) {
 			toggleCardStar(view);
@@ -177,8 +183,15 @@ function keepTagFieldFocused(view: PrinceListView, evt: MouseEvent): void {
 	if (target && isOpenTagButton(view, target)) evt.preventDefault();
 }
 
+// The title is only as wide as its text, so a press beside it lands on its line: the click that
+// follows puts the caret in the title, and the field that has focus keeps it until then.
+function keepFocusBesideTitle(evt: MouseEvent): void {
+	if (targetOf(evt)?.hasClass(CARD_TITLE_LINE_CLASS)) evt.preventDefault();
+}
+
 function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
 	keepFieldFocused(evt);
+	keepFocusBesideTitle(evt);
 	keepTagFieldFocused(view, evt);
 	keepTextUnselected(view, evt);
 }

@@ -21,6 +21,7 @@ import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, wri
 
 export const CARD_CLASS = 'princelists-card';
 export const CARD_TITLE_CLASS = 'princelists-card-title';
+export const CARD_TITLE_LINE_CLASS = 'princelists-card-title-line';
 export const CARD_NOTES_CLASS = 'princelists-card-notes';
 export const CARD_ACTIONS_CLASS = 'princelists-card-actions';
 export const CARD_STAR_CLASS = 'princelists-card-star';
@@ -186,8 +187,9 @@ function createCardElement(): HTMLElement {
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
 	const head = body.createDiv({ cls: CARD_HEAD_CLASS });
-	head.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
-	buildCardTags(body);
+	const titleLine = head.createDiv({ cls: CARD_TITLE_LINE_CLASS });
+	titleLine.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
+	buildCardTags(titleLine);
 	body.createDiv({ cls: CARD_NOTES_CLASS });
 	const tools = head.createDiv({ cls: 'princelists-card-tools' });
 	buildTagButton(tools);
@@ -250,4 +252,12 @@ async function removeEmptyItem(view: PrinceListView, file: TFile, pending: Track
 		// The card went without its row, and the item may have stayed.
 		if (view.file === file) view.render();
 	}
+}
+
+/** Puts the caret at the end of the open card's title, where a click past its text would. */
+export function focusCardTitleEnd(view: PrinceListView): void {
+	const title = view.card?.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
+	if (!title) return;
+	title.focus();
+	title.setSelectionRange(title.value.length, title.value.length);
 }
