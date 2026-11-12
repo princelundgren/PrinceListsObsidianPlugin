@@ -436,6 +436,8 @@ this met on 2026-10-30 **(owner)**.
 - **One Cmd+Z puts it back.** While Cmd+F filters the list, a section moves with its hidden rows.
 - **The edge scrolling and the redraw rule** are step one's for items.
 - **Headings don't drag in a list inside another note (call)** in step two; items do.
+- **A dragged selection with a heading in it drops as a section does** ([selecting several
+  rows](2026-11-07-select-several-design.md), "Dragging the selection").
 
 ### Collapsing a heading (owner)
 

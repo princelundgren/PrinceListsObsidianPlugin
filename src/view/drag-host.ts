@@ -3,6 +3,7 @@ import type { TrackedLine } from '../core/editing';
 import { closeCard } from './card';
 import type { PrinceListView } from './list-view';
 import { queueDrop, type RowDrop } from './move';
+import { clearSelection } from './select';
 
 /** What dragging rows needs from the list view or a block showing a list. */
 export interface RowDragHost {
@@ -21,6 +22,11 @@ export interface RowDragHost {
 	/** The dragged row's line as the drawn rows number it, which the drop is aimed with; null once it can't drop, such as when the row is gone or, in a block, after any draw. */
 	track(line: number): TrackedLine;
 	untrack(tracked: TrackedLine): void;
+	/**
+	 * The lines a drag from the row on `line` carries, `line` among them: the selection's while that
+	 * row is one of two or more selected, else `[line]`, which ends the host's selection.
+	 */
+	dragged(line: number): readonly number[];
 	/** Moves the dragged row on `line`, both it and `drop` as the drawn rows number them. */
 	drop(line: number, drop: RowDrop): void;
 }
@@ -42,6 +48,12 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 		beforeLift: () => closeCard(view),
 		track: (line) => view.editing.track(line),
 		untrack: (tracked) => view.editing.untrack(tracked),
+		dragged: (line) => {
+			const selected = view.selection.linesWith(line);
+			if (selected) return selected;
+			clearSelection(view);
+			return [line];
+		},
 		drop: (line, drop) => queueDrop(view, line, drop),
 	};
 }

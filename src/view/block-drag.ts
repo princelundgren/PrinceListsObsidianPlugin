@@ -49,6 +49,7 @@ export function blockDragHost(block: ListBlock): RowDragHost {
 			block.dragging = false;
 			block.drawIfChanged();
 		},
+		dragged: (line) => [line],
 		drop: (line, drop) => {
 			if ('item' in drop && drag) queueBlockMove(block, drag, line, drop.item.place);
 		},

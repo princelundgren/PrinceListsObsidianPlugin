@@ -1,9 +1,12 @@
 import { Notice } from 'obsidian';
-import { dropAt, sectionDropAt, type Drop, type SectionDrop, type ShownRow } from '../core/drop';
+import { dropAt, groupDropAt, sectionDropAt, type Drop, type GroupDrop, type SectionDrop, type ShownRow } from '../core/drop';
+import { groupCount, landingHeading, planGroupMove, type GroupPlace } from '../core/group-actions';
+import { countPhrase } from '../core/group-edits';
 import { planItemMove, planSectionMove, type ItemPlace } from '../core/list-actions';
 import { contentStartLine } from '../obsidian/marker';
 import { followPlace } from './add-button';
 import { expandFor } from './collapse';
+import { queueGroupAction } from './group-write';
 import type { PrinceListView } from './list-view';
 import { ownElement, ownElements } from './own-rows';
 import { HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
@@ -20,8 +23,11 @@ export function shownRows(listEl: HTMLElement): ShownRow[] {
 	}));
 }
 
-/** A dragged item's drop, or a dragged heading's, which moves its whole section. */
-export type RowDrop = { item: Drop } | { section: SectionDrop };
+/**
+ * A dragged item's drop, a dragged heading's, which moves its whole section, or a dragged selection's,
+ * with the rows the drag carries at their lines when it was aimed.
+ */
+export type RowDrop = { item: Drop } | { section: SectionDrop } | { group: GroupDrop; rows: readonly number[] };
 
 export function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { line: number; below: boolean }): RowDrop | null {
 	if (dragged.kind === 'heading') {
@@ -32,11 +38,17 @@ export function aimDrop(shown: readonly ShownRow[], dragged: ShownRow, over: { l
 	return item && { item };
 }
 
+/** A dragged selection's drop, aimed as groupDropAt aims it with the rows on `moving`. */
+export function aimGroupDrop(shown: readonly ShownRow[], moving: readonly number[], over: { line: number; below: boolean }): RowDrop | null {
+	const group = groupDropAt(shown, moving, over);
+	return group && { group, rows: moving };
+}
+
 // Takes the drop line off `marked` and shows it for `drop`. Returns the element that shows it now.
 export function markDrop(listEl: HTMLElement, marked: HTMLElement | null, drop: RowDrop | null): HTMLElement | null {
 	marked?.removeClass(DROP_ABOVE, DROP_BELOW);
 	if (!drop) return null;
-	const { line, above } = 'item' in drop ? drop.item : drop.section;
+	const { line, above } = 'item' in drop ? drop.item : 'section' in drop ? drop.section : drop.group;
 	const next = ownElement(listEl, `[${LINE_ATTR}="${line}"]`);
 	next?.addClass(above ? DROP_ABOVE : DROP_BELOW);
 	return next;
@@ -45,7 +57,15 @@ export function markDrop(listEl: HTMLElement, marked: HTMLElement | null, drop: 
 // `line` is the dragged row's: an item's title line, or a heading's.
 export function queueDrop(view: PrinceListView, line: number, drop: RowDrop): void {
 	if ('item' in drop) queueMove(view, line, drop.item.place);
-	else queueSectionMove(view, line, drop.section.before);
+	else if ('section' in drop) queueSectionMove(view, line, drop.section.before);
+	else queueSelectionDrop(view, drop.rows, drop.group.place);
+}
+
+// The message counts what moves by name: a selected heading's selected items come with it, so they
+// aren't counted.
+function queueSelectionDrop(view: PrinceListView, rows: readonly number[], place: GroupPlace): void {
+	const { items, headings } = groupCount(view.text, contentStartLine(view.text), rows);
+	queueGroupMove(view, rows, place, `${countPhrase(items, headings)} moved.`);
 }
 
 // The move waits on the view's write queue, and its item and place follow the edits that land before
@@ -98,4 +118,41 @@ export function queueSectionMove(view: PrinceListView, headingLine: number, befo
 			if (anchor) view.editing.untrack(anchor);
 		}
 	});
+}
+
+/**
+ * Moves the rows on `rows` to `place` in one write, on the view's write queue, as queueMove does one
+ * item: the rows and the place's line follow the edits that land first, and a collapsed section the
+ * loose items land in opens. After the move it offers `message` with an Undo button.
+ */
+export function queueGroupMove(view: PrinceListView, rows: readonly number[], place: GroupPlace, message: string): void {
+	const heading = landingHeading(view.text, contentStartLine(view.text), rows, place);
+	if (heading !== null) view.collapsed.expand(heading);
+	const at = placeLine(place);
+	queueGroupAction(
+		view,
+		at === null ? rows : [...rows, at],
+		(text, contentStart, now) => {
+			if (at === null) return planGroupMove(text, contentStart, now, place);
+			return planGroupMove(text, contentStart, now.slice(0, -1), placeAt(place, now[now.length - 1] as number));
+		},
+		() => message,
+	);
+}
+
+// The line a place is on, or null for one on none.
+function placeLine(place: GroupPlace): number | null {
+	if (place === 'first') return null;
+	if ('after' in place) return place.after;
+	if ('firstUnder' in place) return place.firstUnder;
+	return 'beforeSection' in place ? place.beforeSection : place.endOf;
+}
+
+// The place on `line` instead of its own; a place on no line stays as it is.
+function placeAt(place: GroupPlace, line: number): GroupPlace {
+	if (place === 'first') return place;
+	if ('after' in place) return { after: line };
+	if ('firstUnder' in place) return { firstUnder: line };
+	if ('beforeSection' in place) return place.beforeSection === null ? place : { beforeSection: line };
+	return place.endOf === null ? place : { endOf: line };
 }
