@@ -625,9 +625,11 @@ textarea.princelists-title {
 	margin: 0 auto;
 }
 
-/* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on mobile". */
+/* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on mobile". Its width
+   decides whether the selection bar takes one row. */
 .princelists-view {
 	position: relative;
+	container: princelists-view / inline-size;
 }
 
 /* Its top is where the list stops being visible (spec, "Touch on mobile"). */
@@ -676,10 +678,12 @@ button.princelists-new-item {
 }
 
 /* The bar while selecting, in the floating "+"'s place and kept above mobile's navigation bar and
-   desktop's status bar the same way (spec, "The bar"): how many are selected and Done, then a row of
-   actions with Delete apart past a divider. Every button takes at least 48 by 48 with 8 between them, and
-   the height holds two rows of them with 8 around and between, and the bar's border. */
-.princelists-view {
+   desktop's status bar the same way (spec, "The bar"): Done and how many are selected, then the actions
+   spread across the bar, with Delete apart past a divider. A view too narrow for one row puts Done and
+   the count on a row above the actions. Every button takes at least 48 by 48 with 8 between them, and
+   the height holds the rows with 8 around and between, and the bar's border. */
+.princelists-selection-bar,
+.princelists-content {
 	--princelists-selection-bar-height: calc(2 * var(--size-4-12) + 3 * var(--size-4-2) + 2 * var(--border-width));
 }
 
@@ -710,16 +714,73 @@ button.princelists-new-item {
 	gap: var(--size-4-2);
 }
 
+/* Move to, Tick, Star, Date, the divider, then Delete: the actions as wide as the widest of them. */
+.princelists-selection-actions {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr) auto 1fr;
+}
+
 .princelists-selection-bar-top {
-	justify-content: space-between;
-	padding-inline-start: var(--size-4-2);
 	font-size: var(--font-ui-small);
+	white-space: nowrap;
+}
+
+/* Room for "999 selected", so the actions stay put as the count grows. */
+.princelists-selection-count {
+	min-width: 10ch;
+	font-variant-numeric: tabular-nums;
 }
 
 .princelists-selection-divider {
-	align-self: stretch;
-	margin-inline-start: auto;
+	height: var(--size-4-6);
 	border-inline-start: var(--border-width) solid var(--background-modifier-border);
+}
+
+.princelists-selection-bar > .princelists-selection-divider {
+	display: none;
+}
+
+@container princelists-view (min-width: 520px) {
+	.princelists-selection-bar,
+	.princelists-content {
+		--princelists-selection-bar-height: calc(var(--size-4-12) + 2 * var(--size-4-2) + 2 * var(--border-width));
+	}
+
+	.princelists-selection-bar {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.princelists-selection-bar-top {
+		flex: none;
+		align-self: stretch;
+	}
+
+	.princelists-selection-bar > .princelists-selection-divider {
+		display: block;
+	}
+}
+
+/* In a view too narrow for five labelled buttons, such as a sidebar, they show only their icons, the
+   gaps tighten, and the buttons narrow below 48 rather than spill out of the bar. */
+@container princelists-view (max-width: 359px) {
+	.princelists-selection-bar {
+		left: var(--size-4-2);
+		right: var(--size-4-2);
+	}
+
+	.princelists-selection-actions {
+		grid-template-columns: repeat(4, minmax(0, 1fr)) auto minmax(0, 1fr);
+		gap: var(--size-4-1);
+	}
+
+	.princelists-selection-bar button.princelists-selection-action {
+		min-width: 0;
+	}
+
+	.princelists-selection-label {
+		display: none;
+	}
 }
 
 .princelists-selection-bar button {
@@ -729,13 +790,17 @@ button.princelists-new-item {
 	min-height: var(--size-4-12);
 	padding: var(--size-2-2);
 	background-color: transparent;
-	box-shadow: none;
 	color: var(--text-normal);
 }
 
-.princelists-selection-bar button.princelists-selection-done {
-	color: var(--text-accent);
-	font-weight: var(--font-semibold);
+.princelists-selection-bar button:not(:focus-visible) {
+	box-shadow: none;
+}
+
+@media (hover: hover) {
+	.princelists-selection-bar button:enabled:hover {
+		background-color: var(--background-modifier-hover);
+	}
 }
 
 .princelists-selection-bar button.princelists-selection-action {
@@ -745,6 +810,7 @@ button.princelists-new-item {
 	justify-content: center;
 	gap: var(--size-2-1);
 	font-size: var(--font-ui-smaller);
+	white-space: nowrap;
 }
 
 .princelists-selection-bar button.princelists-selection-delete {

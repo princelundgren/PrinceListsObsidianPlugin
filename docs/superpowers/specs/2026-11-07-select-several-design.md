@@ -119,7 +119,7 @@ only documented Obsidian APIs are used.
   a link in a title still opens it **(call)**.
 - **Each row's checkbox shows as a selection circle,** and a click or a tap on it or beside it
   selects, so nothing is ticked by mistake.
-- **A bar replaces the floating "+" at the bottom of the pane:** "5 selected" with Done, and Move
+- **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
   to, Tick, Star, Date and Delete. On desktop it takes the same place whether or not the floating
   "+" shows there, and the "+" in the pane's header hides **(call)**.
 - **Right-click on a selected row** opens the selection's menu **(owner)**; on a row outside the
@@ -146,6 +146,14 @@ only documented Obsidian APIs are used.
   ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
   Delete sits apart at the far end, past a divider, so a near miss on Date doesn't reach it
   **(call)**. The bar is the same on desktop.
+- **One row where it fits (owner, 2026-11-12):** Done, an ✕ named "Done", and the count come
+  first, then the actions spread across the bar, every button an icon. A view narrower than 520
+  px, such as a phone's, puts Done and the count on a row above the actions **(call: the
+  width)**.
+- **Icons only where even that doesn't fit (owner, 2026-11-12):** in a view narrower than 360 px,
+  such as a sidebar, the actions lose their labels, keeping them as tooltips and names, the gaps
+  tighten, and the buttons narrow below 48 px rather than spill out of the bar **(call: the
+  width)**.
 - **Done ends selecting,** and so does Delete or removing the last selected row **(call)**. Other
   actions keep the selection, so several can follow each other.
 
@@ -285,9 +293,8 @@ Each in the pull request that makes it untrue:
    window without covering the last rows or the status bar.
    - **Result:** on macOS, in a 327 px pane at the window's right edge, under the status bar, the
      bar is 295 px wide, inside the pane, with its bottom 17 px above the status bar's top. In a
-     429-row list scrolled to the end, the last row ends above the bar. The bar needs about 327 px
-     of pane, so in a narrower one Delete is clipped; how a narrower pane lays it out is open, for
-     the owner to decide.
+     429-row list scrolled to the end, the last row ends above the bar. In panes from 340 px down
+     to 200 px, every action stays inside the bar.
 
 ## Order (call)
 
