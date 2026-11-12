@@ -1,10 +1,10 @@
-import { Modal, Setting, type App } from 'obsidian';
+import { Modal, Platform, Setting, type App } from 'obsidian';
 import { whenClick } from './card-when';
 
 /**
  * Asks for a date with the platform's own date picker, which opens when the user clicks or taps the
- * input, then hands the chosen day (YYYY-MM-DD) to `onSet`. Set, or Enter in the input, sets it;
- * Cancel, or Set with no date, sets none.
+ * input, then hands the chosen day (YYYY-MM-DD) to `onSet`. On Android, choosing a day sets it.
+ * Elsewhere, Set or Enter in the input sets it; Cancel, or Set with no date, sets none.
  */
 export class DateModal extends Modal {
 	private input: HTMLInputElement | null = null;
@@ -28,6 +28,11 @@ export class DateModal extends Modal {
 		this.input = input;
 		// The modal's own element, which closing it removes with the listener.
 		input.addEventListener('click', () => whenClick(input));
+		// iOS fills an empty input with today as its picker opens, so a change there isn't a choice.
+		if (Platform.isAndroidApp) {
+			input.addEventListener('change', () => this.set());
+			return;
+		}
 		new Setting(this.contentEl)
 			.addButton((button) => button.setButtonText('Cancel').onClick(() => this.close()))
 			.addButton((button) =>
