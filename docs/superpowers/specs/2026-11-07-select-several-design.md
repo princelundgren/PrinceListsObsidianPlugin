@@ -110,9 +110,10 @@ only documented Obsidian APIs are used.
   nothing. In a card's title or notes they keep selecting text. Moving between rows with the arrows
   alone, and opening a card from the keyboard, are #125's **(call)**.
 - **With a card open,** each of these closes it, and the card's item and the row are both selected
-  **(call)**. A mouse hold closes it once the button is up, or as the drag starts, since a card
-  closing above the row can move it from under the button **(call)**. This changes step one's
-  "while a card is open, a click outside it only closes it" for these only **(owner)**.
+  **(call)**, unless the item is new and empty, which closing its card removes **(call)**. A mouse
+  hold closes it once the button is up, or as the drag starts, since a card closing above the row
+  can move it from under the button **(call)**. This changes step one's "while a card is open, a
+  click outside it only closes it" for these only **(owner)**.
 
 ## While selecting
 
