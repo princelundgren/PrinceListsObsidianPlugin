@@ -7,7 +7,7 @@ import type { PrinceListView } from './list-view';
 import { clearSelection, focusList } from './select';
 import { addGroupEntries, deleteSelection, listHasHeadings, moveToHeading } from './selection-menu';
 
-/** The class on the view's content while selecting, which draws checkboxes as selection circles. */
+/** The class on the view's content while selecting. */
 const SELECTING_CLASS = 'princelists-selecting';
 
 interface SelectionBar {
@@ -70,8 +70,8 @@ export function shownSelectionBar(view: PrinceListView): HTMLElement | null {
 
 /**
  * Shows the bar while the view is selecting, with how many rows are selected and each button enabled
- * only while it has something to act on, and marks the view's content so checkboxes show as selection
- * circles. Hides both otherwise, first moving focus to the list if the bar holds it.
+ * only while it has something to act on, and marks the view's content as selecting. Hides both
+ * otherwise, first moving focus to the list if the bar holds it.
  */
 export function syncSelectionBar(view: PrinceListView): void {
 	view.contentEl.toggleClass(SELECTING_CLASS, view.selecting);

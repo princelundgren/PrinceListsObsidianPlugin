@@ -597,8 +597,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   ("Selecting").
 - **With Cmd or Shift held, a click on the checkbox or beside it selects the row** instead of
   ticking it ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select").
-  While selecting, a click or a tap there selects too, and the checkboxes show as selection circles,
-  filled while the row is selected ("While selecting").
+  While selecting, a click or a tap there selects too ("While selecting").
 - **On mobile a one-line row is 40px tall (owner, 2026-11-05),** the size Obsidian 1.15 gives its
   undocumented `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows
   denser.

@@ -119,8 +119,9 @@ only documented Obsidian APIs are used.
   first Shift+click does **(call)**, and a move after that hold drags them all. Holding a selected
   row changes nothing, since it may start dragging the selection **(call)**. A click or a tap on
   a link in a title still opens it **(call)**.
-- **Each row's checkbox shows as a selection circle,** and a click or a tap on it or beside it
-  selects, so nothing is ticked by mistake.
+- **Checkboxes keep their look, and only the highlight marks a selected row (owner,
+  2026-11-12):** a filled selection circle looked like a ticked box. A click or a tap on a
+  checkbox or beside it selects, so nothing is ticked by mistake.
 - **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
   to, Tick, Star, Date and Delete. On desktop it takes the same place whether or not the floating
   "+" shows there, and the "+" in the pane's header hides **(call)**.
@@ -239,7 +240,7 @@ Each in the pull request that makes it untrue:
   selects instead of opening a card, Cmd+Enter adds below the selection, and the bar takes the
   floating "+"'s place.
 - **Step one, "Ticking":** with Cmd or Shift held, and while selecting, a click on the checkbox or
-  beside it selects; while selecting, checkboxes show as selection circles.
+  beside it selects.
 - **Step one, "Item actions":** the selection's menu, and Select in an item's and a heading's
   menus; while selecting, a click or a tap on a heading selects it instead of opening the heading
   menu.
