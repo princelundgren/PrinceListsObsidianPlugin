@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-07
+verified: 2026-11-12
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -610,8 +610,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   title field while you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was,
   except that doubled `✔` marks collapse to the earliest and a leftover `✔` on an open line is
   dropped (see Completion). Step two hides an item's star too, and saving puts it back once. The
-  card shows the tail's tags under the title, each with an × that takes it off ([filtering by
-  tag](2026-11-07-tag-filter-design.md), "The card").
+  card shows the tail's tags after the title, as a closed row does, each with an × that takes it
+  off ([filtering by tag](2026-11-07-tag-filter-design.md), "The card").
 - **An item's When (step two):** the calendar icon at the card's top right, or the day in its
   place, sets it, and the picker's own Clear or Reset removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,

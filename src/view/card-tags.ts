@@ -20,9 +20,9 @@ export function buildTagButton(tools: HTMLElement): void {
 	setIcon(tools.createEl('button', { cls: TAG_BUTTON_CLASS, attr: { 'aria-label': 'Add tag', 'aria-expanded': 'false' }, prepend: true }), 'tag');
 }
 
-/** Adds the card's tags box to `body`, hidden until it has a tag. */
-export function buildCardTags(body: HTMLElement): void {
-	body.createDiv({ cls: CARD_TAGS_CLASS }).hide();
+/** Adds the card's tags box to `titleLine`, after the title, hidden until it has a tag. */
+export function buildCardTags(titleLine: HTMLElement): void {
+	titleLine.createDiv({ cls: CARD_TAGS_CLASS }).hide();
 }
 
 /**
