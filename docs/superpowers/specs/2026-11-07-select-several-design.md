@@ -198,8 +198,11 @@ only documented Obsidian APIs are used.
   message says how many were.
 - **Set date to today, Set date to tomorrow, Set date… and Remove date (call),** as on one item. Set
   date… can't open a card for several items, so it opens a date picker of its own, titled "Set
-  date" with the buttons Cancel and Set **(call)**. It is a `Modal` with a date input, which opens
-  the platform's own date picker when the user clicks or taps it.
+  date" **(call)**. It is a `Modal` with a date input, which opens the platform's own date picker
+  when the user clicks or taps it. Neither phone opens that picker from code: iOS has no
+  `showPicker()` for a date input, and in Obsidian's Android WebView it shows nothing.
+  - **On mobile, choosing a day sets it (owner, 2026-11-12),** with no Set or Cancel to tap. On
+    desktop, where a date can be typed, the buttons Cancel and Set stay **(call)**.
 - **Delete (call)** names what goes, such as "Delete 5 items" or "Delete 4 items and 1 heading", in
   red as today. A selected heading goes and keeps its items unless they're selected too, as Delete
   heading does.
@@ -258,7 +261,8 @@ Each in the pull request that makes it untrue:
    menu choice, which may not count as a user action with Native menus on (step one, "Item
    actions"). Find a documented route; if none works, the owner decides.
    - **Result:** the `Modal` above. It sets the date on macOS with Native menus off, and on Android,
-     where a tap on the input opens Android's own calendar. Not checked with Native menus on.
+     where a tap on the input opens Android's own calendar and choosing a day sets it. Not checked
+     with Native menus on, nor on iOS.
 3. **The mobile bar:** it sits above Obsidian's own navigation bar and the on-screen keyboard
    without covering the last rows, on an iPhone, an iPad and Android.
    - **Result:** on Android, the bar sits above the navigation bar and the keyboard, and the last
