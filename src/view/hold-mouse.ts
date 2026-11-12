@@ -1,5 +1,5 @@
 import { HOLD_MS, isInPlace, type PointerMark } from '../core/touch-drag';
-import { CARD_CLASS } from './card';
+import { CARD_CLASS, isNewEmptyItem } from './card';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
@@ -76,13 +76,14 @@ export function enableMouseHold(view: PrinceListView): void {
 	});
 }
 
-// Selects the held row with the open card's item, and returns whether a card is open. The card stays
-// open while the button is down, since closing it can move the row from under the press, and Chromium
-// cancels a drag that starts from a row that moved (step one, "Dragging").
+// Selects the held row with the open card's item, unless that item is new and empty, which closing the
+// card removes. Returns whether a card is open. The card stays open while the button is down, since
+// closing it can move the row from under the press, and Chromium cancels a drag that starts from a row
+// that moved (step one, "Dragging").
 function holdRow(view: PrinceListView, row: HTMLElement): boolean {
 	const line = lineOf(row);
 	if (line === null || !row.isConnected) return false;
 	view.swallowNextClick = true;
-	selectOnHold(view, line, view.card ? view.selected : null);
+	selectOnHold(view, line, view.card && !isNewEmptyItem(view) ? view.selected : null);
 	return view.card !== null;
 }
