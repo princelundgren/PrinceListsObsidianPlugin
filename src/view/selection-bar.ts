@@ -1,4 +1,4 @@
-import { Menu, setIcon } from 'obsidian';
+import { Menu, setIcon, setTooltip } from 'obsidian';
 import { groupState } from '../core/group-edits';
 import { barButtons, type BarButton, type EntryGroup } from '../core/group-menu';
 import { contentStartLine } from '../obsidian/marker';
@@ -27,16 +27,19 @@ const BUTTONS: readonly { button: BarButton; label: string; icon: string }[] = [
 ];
 
 /**
- * Builds the bar for acting on the selection (selecting several rows, "The bar"): how many rows are
- * selected, Done, then Move to, Tick, Star and Date, and Delete apart past a divider. It goes on the
- * view's container where the floating "+" goes, hidden until syncSelectionBar shows it.
+ * Builds the bar for acting on the selection (selecting several rows, "The bar"): Done and how many
+ * rows are selected, then Move to, Tick, Star and Date, and Delete apart past a divider. It goes on
+ * the view's container where the floating "+" goes, hidden until syncSelectionBar shows it.
  */
 export function buildSelectionBar(view: PrinceListView): HTMLElement {
 	const el = view.containerEl.createDiv({ cls: 'princelists-selection-bar', attr: { role: 'toolbar', 'aria-label': 'Selection' } });
 	el.hide();
 	const top = el.createDiv({ cls: 'princelists-selection-bar-top' });
+	const done = top.createEl('button', { cls: 'princelists-selection-done', attr: { 'aria-label': 'Done' } });
+	setTooltip(done, 'Done');
+	setIcon(done, 'x');
 	const countEl = top.createSpan({ cls: 'princelists-selection-count' });
-	const done = top.createEl('button', { cls: 'princelists-selection-done', text: 'Done' });
+	el.createDiv({ cls: 'princelists-selection-divider', attr: { 'aria-hidden': 'true' } });
 	const actionsEl = el.createDiv({ cls: 'princelists-selection-actions' });
 	const actions = new Map<HTMLElement, () => void>([[done, () => clearSelection(view)]]);
 	const buttons = new Map<BarButton, HTMLButtonElement>();
