@@ -809,6 +809,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
 - **Undoing a delete (call):** after Delete item or Delete heading, a message with an **Undo** button
   shows for a few seconds. Removing an empty new item or heading is a cancel, with no Undo.
   Obsidian's File recovery core plugin, when enabled, is the backstop.
+  - **Undo sits where Obsidian puts its own notices' actions (owner, 2026-11-12),** in the accent
+    color with no button background: below the message, or at its right edge on a phone. The
+    notice lays it out, so its place doesn't depend on the message's length. `Notice.addButton`
+    does this but isn't in the API, so the button is the plugin's, added after the message.
 - **Delete item and Delete heading show in red (owner, 2026-10-20)** in every menu that has them,
   through `MenuItem.setWarning(true)`. The red comes from the `is-warning` class, so with Settings →
   Appearance → Native menus on, the desktop right-click menus may not show it (obsidian.md/help,

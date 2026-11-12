@@ -987,8 +987,22 @@ textarea.princelists-heading-field {
 	font-weight: var(--font-bold);
 }
 
-.princelists-undo {
-	margin-inline-start: var(--size-4-2);
+/* An action in a notice reads as accent text, as Obsidian's own do. */
+button.princelists-undo {
+	width: fit-content;
+	height: auto;
+	padding: 0;
+	border: none;
+	background: none;
+	box-shadow: none;
+	color: var(--text-accent);
+	font: inherit;
+	white-space: nowrap;
+}
+
+button.princelists-undo:hover {
+	background: none;
+	color: var(--text-accent-hover);
 }
 
 /* On the title's baseline. Filled, so it reads as set, not as a button. */
