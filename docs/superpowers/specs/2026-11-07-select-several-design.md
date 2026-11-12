@@ -58,7 +58,9 @@ only documented Obsidian APIs are used.
 - **Selected rows are marked as Obsidian marks selected files** in its file list,
   `--nav-item-background-selected` behind the row and `--nav-item-color-selected` for its text
   ([Navigation](https://docs.obsidian.md/Reference/CSS+variables/Components/Navigation)). A run of
-  selected rows reads as one block, rounded only at its ends **(call)**; a heading's or an
+  selected rows reads as one block, rounded only at its ends **(call)**. The highlight reaches into
+  the view's side margin, so it doesn't touch the checkbox **(owner, 2026-11-12)**, by the open
+  card's side padding **(call)**; a heading's or an
   untouched block's margin still shows as a gap within a run. Checked in Obsidian's
   default theme in light and dark mode. Assistive technology hears which rows are selected and how
   many: rows hold a checkbox and headings have `role="heading"`, so `aria-selected` alone isn't
