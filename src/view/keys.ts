@@ -7,7 +7,7 @@ import { openFilter } from './filter';
 import { applyFormat } from './format';
 import type { PrinceListView } from './list-view';
 import { eventInDrawnListBlock } from './notes-blocks';
-import { extendSelection, newItemBelowSelection } from './select';
+import { clearSelection, extendSelection, newItemBelowSelection } from './select';
 import { redoKey, undoKey } from './undo';
 
 const ADD_KEY = 'Enter';
@@ -45,6 +45,8 @@ export function registerListKeys(view: PrinceListView): void {
 	// Not in a field, where Shift+Up and Shift+Down keep selecting text.
 	register(['Shift'], 'ArrowUp', (evt) => isInField(evt) || !extendSelection(view, -1));
 	register(['Shift'], 'ArrowDown', (evt) => isInField(evt) || !extendSelection(view, 1));
+	// In the scope, so the Escape that closes an open menu or modal, whose scope is on top, keeps the selection.
+	register([], 'Escape', (evt) => evt.isComposing || isInField(evt) || isInCard(view, evt) || !clearSelection(view));
 	// Only while the list has focus: elsewhere Cmd+F stays Obsidian's search.
 	register(['Mod'], FIND_KEY, () => {
 		if (!isListText(view.text)) return true;
@@ -69,6 +71,10 @@ function formatKey(view: PrinceListView, evt: KeyboardEvent, format: Format): bo
 	if (!view.card?.el.contains(field)) return true;
 	applyFormat(field, format);
 	return false;
+}
+
+function isInCard(view: PrinceListView, evt: KeyboardEvent): boolean {
+	return view.card?.el.contains(targetOf(evt)) ?? false;
 }
 
 function isInField(evt: KeyboardEvent): boolean {

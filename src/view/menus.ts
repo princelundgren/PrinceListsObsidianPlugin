@@ -19,6 +19,7 @@ import { atLine, trackWhileShown } from './menu-anchor';
 import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
 import { ownElements } from './own-rows';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
+import { addGroupEntries } from './selection-menu';
 import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
 // The item actions, from a right-click on desktop and the card's ⋯ (spec, "Item actions").
@@ -213,6 +214,11 @@ function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
 	const heading = row ? null : target.closest(`.${HEADING_CLASS}`);
 	const line = row ? lineOf(row) : heading ? lineOf(heading) : null;
 	if (line === null) return null;
+	if (view.selection.linesWith(line)) {
+		const menu = new Menu();
+		addGroupEntries(view, menu);
+		return menu;
+	}
 	const { model } = view.parse();
 	const item = row ? itemAt(model, line) : undefined;
 	const section = heading ? model.sections.find((s) => s.headingLine === line) : undefined;

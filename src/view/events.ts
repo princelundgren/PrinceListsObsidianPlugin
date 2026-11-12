@@ -33,7 +33,7 @@ import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS, TICK_SELECTOR } from './render-list';
-import { clearSelection, keepTextUnselected, onSelectClick } from './select';
+import { keepTextUnselected, onSelectClick } from './select';
 import { stripClick } from './tag-strip';
 import { showTextMenu } from './text-menu';
 import { queueTick } from './tick';
@@ -237,8 +237,6 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 			// Cancels: the blur that follows finds the name unchanged.
 			target.value = view.listTitle?.before ?? target.value;
 			target.blur();
-		} else if (clearSelection(view)) {
-			evt.preventDefault();
 		}
 	} else if (evt.key === 'Enter') {
 		// Cmd+Enter is the view's own key, which adds an item, so it doesn't also close a card.
