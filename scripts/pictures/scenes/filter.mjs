@@ -1,7 +1,7 @@
 // In To do, an item is ticked and grays out, then the filter icon opens the filter row, whose Show
 // archived items toggle brings back items ticked days ago, and typing filters the list to the items
 // that match. The filter icon closes the row, which clears the text and hides archived items again.
-import { boundsOf, drawnMouse, hover, middleOf, setFolders, showAlone, sleep, type, undoingChanges } from '../page.mjs';
+import { boundsOf, drawnMouse, hover, middleOf, paneClip, setFolders, showAlone, sleep, type, undoingChanges } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
 import { recordGif } from '../record.mjs';
 
@@ -10,7 +10,9 @@ const REST = { x: 446, y: 332 };
 const scene = {
 	name: 'filter',
 	phone: false,
-	page: { width: 720, height: 603 },
+	// The list's pane alone, about 600 wide beside the file explorer.
+	page: { width: 840, height: 603 },
+	clip: paneClip,
 	scale: 1,
 	theme: 'dark',
 	async setup(session) {

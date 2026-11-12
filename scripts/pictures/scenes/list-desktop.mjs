@@ -1,7 +1,7 @@
 // In To do, a new item gets a title, notes with a link and a dropped picture, a star and a day, then
 // it's dragged into place and another item is ticked.
 import { fileURLToPath } from 'node:url';
-import { boundsOf, drawnMouse, hover, middleOf, pressEnter, pressEscape, pressKey, setFolders, showAlone, sleep, type, undoingChanges } from '../page.mjs';
+import { boundsOf, drawnMouse, hover, middleOf, paneClip, pressEnter, pressEscape, pressKey, setFolders, showAlone, sleep, type, undoingChanges } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
 import { recordGif } from '../record.mjs';
 
@@ -12,7 +12,9 @@ const REST = { x: 446, y: 332 };
 const scene = {
 	name: 'list-desktop',
 	phone: false,
-	page: { width: 720, height: 603 },
+	// The list's pane alone, about 600 wide beside the file explorer.
+	page: { width: 840, height: 603 },
+	clip: paneClip,
 	scale: 1,
 	theme: 'dark',
 	async setup(session) {

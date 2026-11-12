@@ -20,9 +20,14 @@ test('mergeShortFrames keeps the last frame however short it is', () => {
 });
 
 test('pageFilter keeps a frame whose screen is the page', () => {
-	assert.equal(pageFilter({ width: 720, height: 603 }, { width: 720, height: 603 }), 'crop=iw*1:ih*1:0:0,scale=720:603:flags=lanczos');
+	assert.equal(pageFilter({ width: 720, height: 603 }, { width: 720, height: 603 }), 'crop=iw*1:ih*1:iw*0:ih*0,scale=720:603:flags=lanczos');
 });
 
 test('pageFilter cuts a frame down to the page in the corner of a larger screen', () => {
-	assert.equal(pageFilter({ width: 200, height: 300 }, { width: 400, height: 900 }), `crop=iw*0.5:ih*${300 / 900}:0:0,scale=200:300:flags=lanczos`);
+	assert.equal(pageFilter({ width: 200, height: 300 }, { width: 400, height: 900 }), `crop=iw*0.5:ih*${300 / 900}:iw*0:ih*0,scale=200:300:flags=lanczos`);
+});
+
+test('pageFilter cuts a frame down to the clip, in whole pixels, wherever it is on the page', () => {
+	assert.equal(pageFilter({ width: 720, height: 603 }, { width: 1440, height: 1206 }, { x: 244.4, y: 40, width: 475.6, height: 537 }),
+		`crop=iw*${476 / 1440}:ih*${537 / 1206}:iw*${244 / 1440}:ih*${40 / 1206},scale=476:537:flags=lanczos`);
 });
