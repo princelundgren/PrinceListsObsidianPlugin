@@ -99,14 +99,35 @@ export function extendSelection(view: PrinceListView, step: 1 | -1): boolean {
 }
 
 /**
- * A hold let go without moving on the row on `line`. Not yet selecting, it starts selecting with that
- * row and `cardLine`, the item whose card the hold closed, if any. While selecting, it selects the shown
- * rows from the last row tapped to it, as Shift+click does.
+ * A hold reaching the hold time on the row on `line`. Not yet selecting, it starts selecting with that
+ * row and `cardLine`, the open card's item, if any. While selecting, it selects the shown
+ * rows to it from `cardLine`, or with no card from the last row clicked, tapped or held, as
+ * Shift+click does; a row already selected changes nothing, since the hold may be the start of
+ * dragging the selection.
  */
 export function selectOnHold(view: PrinceListView, line: number, cardLine: number | null): void {
-	if (view.selecting) view.selection.addRangeTo(line, selectableLines(view));
-	else view.selection.startWith(line, cardLine);
+	if (view.selecting) {
+		if (cardLine !== null) view.selection.setAnchor(cardLine);
+		if (!view.selection.has(line)) view.selection.addRangeTo(line, selectableLines(view));
+	} else view.selection.startWith(line, cardLine);
 	view.selecting = true;
+	drawSelection(view);
+}
+
+/**
+ * Select in a row's or a heading's menu: selects the row on `line`, with the open card's item, which
+ * closes the card. Starts selecting, or adds the rows while selecting.
+ */
+export function selectRow(view: PrinceListView, line: number): void {
+	const cardLine = closeCardForSelection(view);
+	if (view.selecting) {
+		if (cardLine !== null && !view.selection.has(cardLine)) view.selection.toggle(cardLine);
+		if (!view.selection.has(line)) view.selection.toggle(line);
+	} else {
+		view.selection.startWith(line, cardLine);
+	}
+	view.selecting = true;
+	focusList(view);
 	drawSelection(view);
 }
 
@@ -172,8 +193,11 @@ export function focusListWhenActive(view: PrinceListView): void {
 	);
 }
 
-// The open card's item, closing the card, or null with no card open.
-function closeCardForSelection(view: PrinceListView): number | null {
+/**
+ * Closes the open card and returns its item's line, so a way into selecting can select it too;
+ * null with no card open.
+ */
+export function closeCardForSelection(view: PrinceListView): number | null {
 	if (!view.card) return null;
 	const line = view.selected;
 	closeCard(view);

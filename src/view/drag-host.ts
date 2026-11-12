@@ -35,14 +35,14 @@ export interface RowDragHost {
 	endSelection(): void;
 	/** Moves the dragged row on `line`, both it and `drop` as the drawn rows number them. */
 	drop(line: number, drop: RowDrop): void;
-	/** A row lifted on `line` and let go without moving: selects it, or nothing where rows don't select. */
+	/** A row lifted on `line`: selects it, or nothing where rows don't select. */
 	selectHold(line: number): void;
 }
 
 // Only the touch drag scrolls at the edges, so only mobile gets the element that marks the bottom one.
 export function listDragHost(view: PrinceListView): RowDragHost {
-	// The item whose card the latest lift closed, which a hold let go selects with the held row; only a
-	// touch hold selects, so only mobile keeps it.
+	// The item whose card the latest lift closed, which a touch hold selects with the held row; a mouse
+	// hold closes the card itself (hold-mouse.ts), so only mobile keeps it.
 	let cardItem: TrackedLine | null = null;
 	const forgetCardItem = (): void => {
 		if (cardItem) view.editing.untrack(cardItem);
@@ -96,14 +96,14 @@ export function carry(host: RowDragHost, line: number, rowEl: HTMLElement): Trac
 }
 
 /**
- * Runs `close`, which closes what the lift closes, then scrolls `liftScrollEl` by however far that
- * moved `row`, such as a taller card above it closing or the selection bar's room below the last row
- * going, so the row stays under the pointer as far as the scroller can go.
+ * Runs `close`, which closes what the lift closes, then scrolls `scrollEl` by however far that moved
+ * `row`, such as a taller card above it closing or the selection bar's room below the last row going,
+ * so the row stays under the pointer as far as the scroller can go. A null `scrollEl` scrolls nothing.
  */
-export function liftInPlace(host: RowDragHost, row: HTMLElement, close: () => void): void {
+export function liftInPlace(scrollEl: HTMLElement | null, row: HTMLElement, close: () => void): void {
 	const rowTop = row.getBoundingClientRect().top;
 	close();
-	if (host.liftScrollEl && row.isConnected) host.liftScrollEl.scrollTop += row.getBoundingClientRect().top - rowTop;
+	if (scrollEl && row.isConnected) scrollEl.scrollTop += row.getBoundingClientRect().top - rowTop;
 }
 
 // While selecting, the list stops being visible at the selection's bar, which sits above the marker.

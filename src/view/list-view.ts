@@ -30,6 +30,7 @@ import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
+import { enableMouseHold } from './hold-mouse';
 import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
@@ -95,8 +96,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** Set once the view closes, so a tap still queued then does nothing. */
 	viewClosed = false;
 	/**
-	 * Set by a hold canceled on a row or heading, or a row lifted to drag, so the click that ends it
-	 * opens nothing.
+	 * Set by a hold canceled on a row or heading, a row lifted to drag, or a row held with a mouse, so
+	 * the click that ends it opens nothing.
 	 */
 	swallowNextClick = false;
 	// The list scrolls here, not in contentEl, so nothing relies on Obsidian's stylesheet scrolling
@@ -201,10 +202,11 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		const dragHost = listDragHost(this);
 		enableMouseDrag(dragHost);
 		if (Platform.isMobile) enableTouchDrag(dragHost);
+		if (Platform.isDesktop) enableMouseHold(this);
 		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
 		this.newItemButton = buildNewItemButton(this, newItemLabel);
 		const selectionBar = buildSelectionBar(this);
-		if (Platform.isMobile) swallowClickAfterHold(this, selectionBar);
+		swallowClickAfterHold(this, selectionBar);
 		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
 		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.

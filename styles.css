@@ -222,7 +222,7 @@ textarea.princelists-title {
 }
 
 /* The row held by a finger, as in spike 2: raised, outlined, and following the finger through the
-   offset the view sets (spec, "Dragging"). */
+   offset the view sets (spec, "Dragging"). A mouse hold shows it too, without the offset. */
 .princelists-lifted {
 	position: relative;
 	z-index: 1;
