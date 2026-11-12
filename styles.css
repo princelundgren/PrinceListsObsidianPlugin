@@ -8,6 +8,7 @@ textarea.princelists-field {
 	--background-modifier-form-field-hover: transparent;
 	display: block;
 	width: 100%;
+	height: var(--princelists-fit-height, auto);
 	min-height: 0;
 	margin: 0;
 	padding: 0;
