@@ -39,6 +39,7 @@ export function enableMouseHold(view: PrinceListView): void {
 		window.clearTimeout(press.holdTimer);
 		press = null;
 	};
+	view.register(forgetPress);
 	view.registerDomEvent(rowsEl, 'pointerdown', (evt) => {
 		forgetPress();
 		cardToClose = false;
@@ -64,6 +65,7 @@ export function enableMouseHold(view: PrinceListView): void {
 	view.registerDomEvent(rowsEl, 'dragstart', () => {
 		forgetPress();
 		cardToClose = false;
+		view.swallowNextClick = false;
 	});
 	view.registerDomEvent(rowsEl, 'pointercancel', forgetPress);
 	view.registerDomEvent(rowsEl, 'pointerleave', forgetPress);

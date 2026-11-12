@@ -1,6 +1,6 @@
 ---
-status: building
-verified: 2026-11-11
+status: live
+verified: 2026-11-12
 governs: [src/**, styles.css]
 tracking: ["#79"]
 ---
@@ -101,9 +101,10 @@ only documented Obsidian APIs are used.
   **(call)**. The ⋯ of a new empty item has no Select, as selecting it would remove it **(call)**.
 - **Cmd+click adds or removes a row (owner), and Shift+click selects every shown row between the
   anchor and the click (owner);** either starts selecting **(owner, 2026-11-11)**. The anchor is
-  the open card's item, or the last row clicked, tapped or held **(call)**. A second Shift+click
-  replaces the range rather than adding to it, and a Shift+click with no anchor selects that row
-  alone, as Cmd+click does **(call)**.
+  the open card's item, or the last row clicked or tapped, or held to start selecting; a
+  Shift+click, or a hold while selecting, keeps it **(call)**. A second Shift+click replaces the
+  range rather than adding to it, and a Shift+click with no anchor selects that row alone, as
+  Cmd+click does **(call)**.
 - **Shift+Up and Shift+Down grow or shrink the range from the anchor (owner),** and start selecting
   **(owner, 2026-11-11)**, while the list has focus and no field does; with no anchor they do
   nothing. In a card's title or notes they keep selecting text. Moving between rows with the arrows
