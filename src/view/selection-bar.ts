@@ -47,10 +47,11 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 		if (button === 'delete') actionsEl.createDiv({ cls: 'princelists-selection-divider', attr: { 'aria-hidden': 'true' } });
 		const buttonEl = actionsEl.createEl('button', {
 			cls: `princelists-selection-action princelists-selection-${button}`,
-			attr: opensMenu(button) ? { 'aria-haspopup': 'menu' } : {},
+			attr: { 'aria-label': label, ...(opensMenu(button) ? { 'aria-haspopup': 'menu' } : {}) },
 		});
+		setTooltip(buttonEl, label);
 		setIcon(buttonEl.createSpan({ cls: 'princelists-selection-icon' }), icon);
-		buttonEl.createSpan({ text: label });
+		buttonEl.createSpan({ cls: 'princelists-selection-label', text: label });
 		buttons.set(button, buttonEl);
 		actions.set(buttonEl, () => act(view, button, buttonEl));
 	}

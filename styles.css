@@ -761,6 +761,28 @@ button.princelists-new-item {
 	}
 }
 
+/* In a view too narrow for five labelled buttons, such as a sidebar, they show only their icons, the
+   gaps tighten, and the buttons narrow below 48 rather than spill out of the bar. */
+@container princelists-view (max-width: 359px) {
+	.princelists-selection-bar {
+		left: var(--size-4-2);
+		right: var(--size-4-2);
+	}
+
+	.princelists-selection-actions {
+		grid-template-columns: repeat(4, minmax(0, 1fr)) auto minmax(0, 1fr);
+		gap: var(--size-4-1);
+	}
+
+	.princelists-selection-bar button.princelists-selection-action {
+		min-width: 0;
+	}
+
+	.princelists-selection-label {
+		display: none;
+	}
+}
+
 .princelists-selection-bar button {
 	box-sizing: border-box;
 	min-width: var(--size-4-12);

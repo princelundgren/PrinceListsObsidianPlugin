@@ -150,6 +150,10 @@ only documented Obsidian APIs are used.
   first, then the actions spread across the bar, every button an icon. A view narrower than 520
   px, such as a phone's, puts Done and the count on a row above the actions **(call: the
   width)**.
+- **Icons only where even that doesn't fit (owner, 2026-11-12):** in a view narrower than 360 px,
+  such as a sidebar, the actions lose their labels, keeping them as tooltips and names, the gaps
+  tighten, and the buttons narrow below 48 px rather than spill out of the bar **(call: the
+  width)**.
 - **Done ends selecting,** and so does Delete or removing the last selected row **(call)**. Other
   actions keep the selection, so several can follow each other.
 
@@ -289,9 +293,8 @@ Each in the pull request that makes it untrue:
    window without covering the last rows or the status bar.
    - **Result:** on macOS, in a 327 px pane at the window's right edge, under the status bar, the
      bar is 295 px wide, inside the pane, with its bottom 17 px above the status bar's top. In a
-     429-row list scrolled to the end, the last row ends above the bar. With Done and the count on
-     a row of their own, the bar needs about 335 px of pane, so in a narrower one Delete is
-     clipped; how a pane that narrow lays it out is open, for the owner to decide.
+     429-row list scrolled to the end, the last row ends above the bar. In panes from 340 px down
+     to 200 px, every action stays inside the bar.
 
 ## Order (call)
 
