@@ -8,7 +8,7 @@ import { parseItemLine } from '../core/item-line';
 import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
-import { buildCardTags, buildTagButton, closeTagInput, showCardTags } from './card-tags';
+import { buildCardTags, buildTagButton, CARD_HEAD_CLASS, closeTagPopover, showCardTags } from './card-tags';
 import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
@@ -174,7 +174,7 @@ function sayFieldLost(view: PrinceListView, typed: string, field: 'title' | 'not
 
 function endCard(view: PrinceListView, card: Card): void {
 	view.card = null;
-	closeTagInput(view);
+	closeTagPopover(view);
 	view.editing.close();
 	card.editor?.destroy();
 	card.editor = null;
@@ -185,7 +185,7 @@ function createCardElement(): HTMLElement {
 	addTickZone(el);
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
-	const head = body.createDiv({ cls: 'princelists-card-head' });
+	const head = body.createDiv({ cls: CARD_HEAD_CLASS });
 	head.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	buildCardTags(body);
 	body.createDiv({ cls: CARD_NOTES_CLASS });

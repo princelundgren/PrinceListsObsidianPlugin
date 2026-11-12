@@ -13,7 +13,7 @@ import {
 	openCard,
 } from './card';
 import { toggleCardStar } from './card-star';
-import { cardTagsClick, escapeTagInput } from './card-tags';
+import { cardTagsClick, closeTagPopover, escapeTagPopover, isOpenTagButton } from './card-tags';
 import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
@@ -171,8 +171,15 @@ function keepFieldFocused(evt: MouseEvent): void {
 	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, ${FILTER_TOGGLE_SELECTOR}`)) evt.preventDefault();
 }
 
+// So the click that follows closes the popover: a focusout first would close it, and the click reopen it.
+function keepTagFieldFocused(view: PrinceListView, evt: MouseEvent): void {
+	const target = targetOf(evt);
+	if (target && isOpenTagButton(view, target)) evt.preventDefault();
+}
+
 function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
 	keepFieldFocused(evt);
+	keepTagFieldFocused(view, evt);
 	keepTextUnselected(view, evt);
 }
 
@@ -230,9 +237,9 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	if (evt.key === 'Escape') {
 		if (target === view.filterField?.inputEl) {
 			filterKeyDown(view, evt);
-		} else if (target === view.tagInput?.input) {
+		} else if (target === view.tagPopover?.input) {
 			evt.preventDefault();
-			escapeTagInput(view);
+			escapeTagPopover(view);
 		} else if (view.card?.el.contains(target)) {
 			evt.preventDefault();
 			closeCard(view);
@@ -295,6 +302,8 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 		else if (target.hasClass(TITLE_CLASS) && inWindow) commitListTitle(view, target);
 		else if (target.hasClass(HEADING_FIELD_CLASS) && inWindow) headingFieldBlur(view, target);
 	}
+	// Switching to another app leaves the popover open, as it leaves the list's title field.
+	if (target === view.tagPopover?.input && !view.tagPopover.el.contains(focusing) && target.doc.hasFocus()) closeTagPopover(view);
 	// A card whose item an outside change took closes once focus leaves it.
 	if (card && inCard && card.lostAt !== null && !card.el.contains(focusing)) dismissCard(view);
 }

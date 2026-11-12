@@ -17,7 +17,7 @@ Schedule, by them. It isn't only for groceries: a to-do or packing list narrows 
 
 **How decisions are marked:** as in the [step one design](2026-10-20-prince-lists-design.md).
 **(owner)** means the owner decided it on 2026-11-07, and **(owner, #340)** what the owner asked
-for in #340; **(call)** means the designer did, and a
+for in #340 or decided while it was built; **(call)** means the designer did, and a
 builder may revisit it. Step one's rules still hold: an edit replaces only the lines it concerns,
 nothing is written in the background, and only documented Obsidian APIs are used.
 
@@ -177,8 +177,11 @@ nothing is written in the background, and only documented Obsidian APIs are used
     the tag button closes it too **(call)**. A tap outside is focus leaving its field for another
     part of the window; switching to another app leaves it open, as it leaves the list's title
     field **(call)**. Outside the card, that tap also closes the card, as today.
-  - **After a pick or Escape, focus goes back to the tag button (call),** so another tag is one
-    more press. A second Escape closes the card.
+  - **While Obsidian's suggestions show, the first Escape closes only them (owner, #340),** as in
+    Obsidian's own fields: their keys are Obsidian's while they show, and an Escape it takes never
+    reaches the plugin (checked in 1.15). The next Escape closes the popover.
+  - **After a pick, Escape or a second press of the tag button, focus goes back to the tag button
+    (call),** so another tag is one more press. A second Escape closes the card.
   - **A screen reader (call):** the tag button says whether the popover is open
     (`aria-expanded`), and the field's label is "Add tag", not only its placeholder, given as the
     plugin's other fields' labels are, so it shows no tooltip. Opening it moves focus to the
