@@ -1,4 +1,4 @@
-// What the community listing's scenes share: their page sizes, and the ticks every Groceries shot shows.
+// What the community listing's scenes share: their page sizes, and the ticks the Groceries shots show.
 import { boundsOf, middleOf, setFolders, showAlone, sleep, undoingChanges } from './page.mjs';
 
 export const DESKTOP = { phone: false, page: { width: 1200, height: 800 }, scale: 2, theme: 'dark' };
