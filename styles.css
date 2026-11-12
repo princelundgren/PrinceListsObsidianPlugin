@@ -825,6 +825,7 @@ button.princelists-new-item {
    title's row only, so the notes and the format bar under it span the card. In a pane too narrow
    for both they move to a line of their own under the title, still on the right. */
 .princelists-card-head {
+	position: relative;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-start;
@@ -1107,7 +1108,7 @@ button.princelists-strip-tag.is-lit {
 	}
 }
 
-/* The card's tags under its title, then the tag input while it's open. */
+/* The card's tags under its title. */
 .princelists-card-tags {
 	display: flex;
 	flex-wrap: wrap;
@@ -1141,9 +1142,28 @@ button.princelists-card-tag-remove {
 	}
 }
 
+/* The tag popover hangs under the card's head, its end at the tools' end, over the card's content,
+   so opening it moves nothing. Obsidian's suggestions for its field draw above it. */
+.princelists-tag-popover {
+	position: absolute;
+	top: calc(100% + var(--size-2-2));
+	inset-inline-end: 0;
+	z-index: var(--layer-popover);
+	width: 16em;
+	max-width: 100%;
+	padding: var(--size-4-2);
+	border: var(--border-width) solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background-color: var(--background-primary);
+	box-shadow: var(--shadow-s);
+}
+
+.theme-dark .princelists-tag-popover {
+	background-color: var(--background-secondary);
+}
+
 input.princelists-tag-input {
-	flex: 0 1 12em;
-	min-width: 6em;
+	width: 100%;
 }
 
 .princelists-card-when {
