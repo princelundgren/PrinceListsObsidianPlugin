@@ -63,8 +63,9 @@ textarea.princelists-title {
 }
 
 .princelists-heading {
-	margin: var(--size-4-4) 0 var(--size-4-1);
+	margin: var(--size-4-4) calc(-1 * var(--princelists-reach, 0px)) var(--size-4-1);
 	padding-bottom: var(--size-4-1);
+	padding-inline-end: var(--princelists-reach, 0px);
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-size: inherit;
 	font-weight: var(--font-bold);
@@ -82,7 +83,8 @@ textarea.princelists-title {
 	align-items: flex-start;
 	gap: var(--size-4-2);
 	--princelists-row-padding: var(--size-4-1);
-	padding: var(--princelists-row-padding) 0;
+	margin-inline: calc(-1 * var(--princelists-reach, 0px));
+	padding: var(--princelists-row-padding) var(--princelists-reach, 0px);
 	line-height: var(--line-height-normal);
 }
 
@@ -103,7 +105,7 @@ textarea.princelists-title {
 
 /* In a view it also takes in part of the margin, which in a note is the editor's. */
 .princelists-content .princelists-tick-zone {
-	inset-inline-start: calc(-1 * var(--size-4-3));
+	inset-inline-start: calc(var(--princelists-reach, 0px) - var(--size-4-3));
 	width: calc(var(--size-4-3) + var(--checkbox-size) + var(--size-4-2));
 }
 
@@ -176,8 +178,11 @@ textarea.princelists-title {
 }
 
 /* Selected rows and headings, marked as Obsidian marks selected files in its file list. A run of selected
-   rows reads as one block, rounded only at its first and last row. */
+   rows reads as one block, rounded only at its first and last row. The highlight reaches into the view's
+   side margin by the open card's side padding, so it doesn't touch the checkbox. The checkbox, title,
+   tick zone and collapse arrow stay where they were, since their offsets add the reach. */
 .princelists-selected {
+	--princelists-reach: var(--size-4-2);
 	background-color: var(--nav-item-background-selected);
 	color: var(--nav-item-color-selected);
 }
@@ -1265,7 +1270,7 @@ button.princelists-card-star.is-starred svg {
    keep to the edge rather than leave the column empty. */
 .princelists-heading {
 	position: relative;
-	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
+	padding-inline-start: calc(var(--princelists-reach, 0px) + var(--checkbox-size) + var(--size-4-2));
 }
 
 .princelists-block .princelists-heading {
@@ -1296,7 +1301,7 @@ button.princelists-collapse {
 
 /* In a view it also takes in part of the margin, as the tick zone does. */
 .princelists-content button.princelists-collapse {
-	inset-inline-start: calc(-1 * var(--size-4-3));
+	inset-inline-start: calc(var(--princelists-reach, 0px) - var(--size-4-3));
 	padding-inline-start: var(--size-4-3);
 }
 
