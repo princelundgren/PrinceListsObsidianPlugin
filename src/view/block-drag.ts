@@ -54,6 +54,7 @@ export function blockDragHost(block: ListBlock): RowDragHost {
 		drop: (line, drop) => {
 			if ('item' in drop && drag) queueBlockMove(block, drag, line, drop.item.place);
 		},
+		selectsOnHold: false,
 		selectHold: () => undefined,
 	};
 }

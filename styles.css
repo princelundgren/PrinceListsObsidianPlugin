@@ -221,8 +221,8 @@ textarea.princelists-title {
 	box-shadow: inset 0 var(--size-2-1) 0 var(--interactive-accent);
 }
 
-/* The row held by a finger, as in spike 2: raised, outlined, and following the finger through the
-   offset the view sets (spec, "Dragging"). A mouse hold shows it too, without the offset. */
+/* The row a finger drags, as in spike 2: raised, outlined, and following the finger through the
+   offset the view sets (spec, "Dragging"). A row the hold didn't select lifts at the hold. */
 .princelists-lifted {
 	position: relative;
 	z-index: 1;
@@ -230,6 +230,11 @@ textarea.princelists-title {
 	background-color: var(--background-primary);
 	box-shadow: var(--shadow-l);
 	transform: translateY(var(--princelists-lift, 0px));
+}
+
+/* A lifted selected row keeps its highlight over its opaque background. */
+.princelists-lifted.princelists-selected {
+	background-image: linear-gradient(var(--nav-item-background-selected), var(--nav-item-background-selected));
 }
 
 /* How many rows a dragged selection carries, on the row it lifts, at the row's end. */

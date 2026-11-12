@@ -2,7 +2,6 @@ import { HOLD_MS, isInPlace, type PointerMark } from '../core/touch-drag';
 import { CARD_CLASS } from './card';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import { LIFTED_CLASS } from './drag-touch';
 import type { PrinceListView } from './list-view';
 import { ownClosest } from './own-rows';
 import { HEADING_CLASS, ITEM_CLASS, lineOf, TICK_SELECTOR } from './render-list';
@@ -19,9 +18,9 @@ interface MousePress extends PointerMark {
 /**
  * Selecting with a mouse by holding a row or a heading (spec, "Starting to select"): a press of the
  * main button, with no modifier, held in place as long as a touch hold selects the row as a touch
- * hold does, with the open card's item, and lifts it until the release. The card closes at the
- * release, or as the browser's drag starts. Moving past the touch tolerance first, or the browser's
- * drag, forgets the press. The click that follows the release is swallowed. Desktop only.
+ * hold does, with the open card's item. The card closes at the release, or as the browser's drag
+ * starts. Moving past the touch tolerance first, or the browser's drag, forgets the press. The click
+ * that follows the release is swallowed. Desktop only.
  */
 export function enableMouseHold(view: PrinceListView): void {
 	const rowsEl = view.listScrollEl;
@@ -38,7 +37,6 @@ export function enableMouseHold(view: PrinceListView): void {
 	const forgetPress = (): void => {
 		if (!press) return;
 		window.clearTimeout(press.holdTimer);
-		press.row.removeClass(LIFTED_CLASS);
 		press = null;
 	};
 	view.registerDomEvent(rowsEl, 'pointerdown', (evt) => {
@@ -69,7 +67,7 @@ export function enableMouseHold(view: PrinceListView): void {
 	});
 	view.registerDomEvent(rowsEl, 'pointercancel', forgetPress);
 	view.registerDomEvent(rowsEl, 'pointerleave', forgetPress);
-	// Switching away mid-hold loses the pointerup, which would leave the row lifted.
+	// Switching away mid-hold loses the pointerup, so the blur ends the press.
 	view.registerDomEvent(rowsEl.win, 'blur', () => {
 		forgetPress();
 		closeHeldCard();
@@ -82,7 +80,6 @@ export function enableMouseHold(view: PrinceListView): void {
 function holdRow(view: PrinceListView, row: HTMLElement): boolean {
 	const line = lineOf(row);
 	if (line === null || !row.isConnected) return false;
-	row.addClass(LIFTED_CLASS);
 	view.swallowNextClick = true;
 	selectOnHold(view, line, view.card ? view.selected : null);
 	return view.card !== null;

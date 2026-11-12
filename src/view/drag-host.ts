@@ -37,6 +37,8 @@ export interface RowDragHost {
 	drop(line: number, drop: RowDrop): void;
 	/** A row lifted on `line`: selects it, or nothing where rows don't select. */
 	selectHold(line: number): void;
+	/** Whether `selectHold` selects the row, which then shows the hold instead of the lift. */
+	readonly selectsOnHold: boolean;
 }
 
 // Only the touch drag scrolls at the edges, so only mobile gets the element that marks the bottom one.
@@ -74,6 +76,7 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 			forgetCardItem();
 			queueDrop(view, line, drop);
 		},
+		selectsOnHold: true,
 		selectHold: (line) => {
 			const card = cardItem?.line ?? null;
 			forgetCardItem();

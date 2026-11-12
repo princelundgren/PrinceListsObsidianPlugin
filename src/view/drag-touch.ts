@@ -9,7 +9,7 @@ import { aimCarried, markDrop, shownRows, type RowDrop } from './move';
 import { ownClosest, ownElements } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 
-export const LIFTED_CLASS = 'princelists-lifted';
+const LIFTED_CLASS = 'princelists-lifted';
 const LIFT_OFFSET = '--princelists-lift';
 
 interface Lift {
@@ -118,6 +118,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 	// Only now is the lift a drag, so only now does it take the selection, which the lift's hold joined.
 	const arm = (current: Press, lift: Lift): void => {
 		lift.armed = true;
+		current.row.addClass(LIFTED_CLASS);
 		const line = lift.item.line;
 		if (line === null || !current.row.isConnected) return;
 		lift.others = carry(host, line, current.row);
@@ -144,7 +145,8 @@ export function enableTouchDrag(host: RowDragHost): void {
 		});
 		const kind = current.row.hasClass(HEADING_CLASS) ? 'heading' : 'item';
 		current.lift = { item: host.track(line), others: null, kind, boxes, scrollAtLift: scrollTop(), shift, drop: null, marked: null, frame: null, fromX: current.x, fromY: current.y, armed: false };
-		current.row.addClass(LIFTED_CLASS);
+		// A row the hold selected shows as selected, and lifts once the finger moves it (arm).
+		if (!host.selectsOnHold) current.row.addClass(LIFTED_CLASS);
 		// So a redraw detaches it, which ends the drag.
 		forgetDrawn(current.row);
 		// The release of a lifted press is never a tap.
