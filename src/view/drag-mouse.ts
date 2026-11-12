@@ -1,8 +1,8 @@
 import type { ShownRow } from '../core/drop';
 import type { TrackedLine } from '../core/editing';
 import { targetOf } from './dom';
-import { liftInPlace, type RowDragHost } from './drag-host';
-import { aimDrop, markDrop, shownRows, type RowDrop } from './move';
+import { carry, COUNT_ATTR, liftInPlace, type RowDragHost } from './drag-host';
+import { aimCarried, markDrop, shownRows, type RowDrop } from './move';
 import { isInNestedBlock, ownClosest } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf, ROWS_DRAG } from './render-list';
 
@@ -15,6 +15,9 @@ interface MouseDrag {
 	type: string;
 	/** The dragged item's title line, or heading's line, as the drawn rows number it; null once it can't drop. */
 	row: TrackedLine;
+	rowEl: HTMLElement;
+	/** The other selected rows a dragged selection carries, as `row` is tracked, empty for one; null for a row that isn't selected. */
+	others: TrackedLine[] | null;
 	kind: ShownRow['kind'];
 	drop: RowDrop | null;
 	/** The row or heading that shows the drop line. */
@@ -72,6 +75,8 @@ function endDrag(): void {
 	if (!current) return;
 	if (current.liftTimer !== null) window.clearTimeout(current.liftTimer);
 	current.host.untrack(current.row);
+	for (const other of current.others ?? []) current.host.untrack(other);
+	current.rowEl.removeAttribute(COUNT_ATTR);
 	showDrop(current, null);
 	current = null;
 }
@@ -86,11 +91,17 @@ function startDrag(host: RowDragHost, evt: DragEvent): MouseDrag | null {
 	const type = `${DRAG_TYPE}-${Math.random().toString(36).slice(2)}`;
 	evt.dataTransfer.setData(type, '');
 	evt.dataTransfer.effectAllowed = 'move';
-	const drag: MouseDrag = { host, type, row: host.track(line), kind, drop: null, marked: null, liftTimer: null };
-	// After dragstart returns: Chromium cancels the drag if the row has moved from under the press (spec, "Dragging").
+	// During dragstart, so the image the browser takes of the row as it returns shows the count too.
+	const others = carry(host, line, row);
+	const drag: MouseDrag = { host, type, row: host.track(line), rowEl: row, others, kind, drop: null, marked: null, liftTimer: null };
+	// After dragstart returns: Chromium cancels the drag if the row has moved from under the press (spec,
+	// "Dragging"), as closing the card or ending the selection, which shrinks the room below the last row, can do.
 	drag.liftTimer = window.setTimeout(() => {
 		drag.liftTimer = null;
-		liftInPlace(host, row);
+		liftInPlace(host.liftScrollEl, row, () => {
+			host.beforeLift();
+			if (!others) host.endSelection();
+		});
 		// Not before the lift, whose own redraw keeps the row; a later redraw detaches it, as touch's does.
 		forgetDrawn(row);
 	});
@@ -117,8 +128,8 @@ function aim(drag: MouseDrag, evt: DragEvent): void {
 	const line = over ? lineOf(over) : null;
 	if (dragged === null || !over || line === null) return;
 	const { top, height } = over.getBoundingClientRect();
-	const below = evt.clientY > top + height / 2;
-	showDrop(drag, aimDrop(shownRows(drag.host.rowsEl), { line: dragged, kind: drag.kind }, { line, below }));
+	const at = { line, below: evt.clientY > top + height / 2 };
+	showDrop(drag, aimCarried(shownRows(drag.host.rowsEl), { line: dragged, kind: drag.kind }, drag.others, at));
 }
 
 function showDrop(drag: MouseDrag, drop: RowDrop | null): void {

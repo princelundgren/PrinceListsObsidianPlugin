@@ -63,8 +63,9 @@ textarea.princelists-title {
 }
 
 .princelists-heading {
-	margin: var(--size-4-4) 0 var(--size-4-1);
+	margin: var(--size-4-4) calc(-1 * var(--princelists-reach, 0px)) var(--size-4-1);
 	padding-bottom: var(--size-4-1);
+	padding-inline-end: var(--princelists-reach, 0px);
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-size: inherit;
 	font-weight: var(--font-bold);
@@ -82,7 +83,8 @@ textarea.princelists-title {
 	align-items: flex-start;
 	gap: var(--size-4-2);
 	--princelists-row-padding: var(--size-4-1);
-	padding: var(--princelists-row-padding) 0;
+	margin-inline: calc(-1 * var(--princelists-reach, 0px));
+	padding: var(--princelists-row-padding) var(--princelists-reach, 0px);
 	line-height: var(--line-height-normal);
 }
 
@@ -103,7 +105,7 @@ textarea.princelists-title {
 
 /* In a view it also takes in part of the margin, which in a note is the editor's. */
 .princelists-content .princelists-tick-zone {
-	inset-inline-start: calc(-1 * var(--size-4-3));
+	inset-inline-start: calc(var(--princelists-reach, 0px) - var(--size-4-3));
 	width: calc(var(--size-4-3) + var(--checkbox-size) + var(--size-4-2));
 }
 
@@ -175,6 +177,26 @@ textarea.princelists-title {
 	-webkit-touch-callout: none;
 }
 
+/* Selected rows and headings, marked as Obsidian marks selected files in its file list. A run of selected
+   rows reads as one block, rounded only at its first and last row. The highlight reaches into the view's
+   side margin by the open card's side padding, so it doesn't touch the checkbox. The checkbox, title,
+   tick zone and collapse arrow stay where they were, since their offsets add the reach. */
+.princelists-selected {
+	--princelists-reach: var(--size-4-2);
+	background-color: var(--nav-item-background-selected);
+	color: var(--nav-item-color-selected);
+}
+
+.princelists-selected.princelists-selected-first {
+	border-start-start-radius: var(--radius-s);
+	border-start-end-radius: var(--radius-s);
+}
+
+.princelists-selected.princelists-selected-last {
+	border-end-start-radius: var(--radius-s);
+	border-end-end-radius: var(--radius-s);
+}
+
 /* The drop line while a row is dragged: under the row or heading the item will follow, or above the
    first row for the top of the list. Drawn inside the element, so nothing moves. */
 .princelists-drop-below {
@@ -185,8 +207,8 @@ textarea.princelists-title {
 	box-shadow: inset 0 var(--size-2-1) 0 var(--interactive-accent);
 }
 
-/* The row held by a finger, as in spike 2: raised, outlined, and following the finger through the
-   offset the view sets (spec, "Dragging"). */
+/* The row a finger drags, as in spike 2: raised, outlined, and following the finger through the
+   offset the view sets (spec, "Dragging"). A row the hold didn't select lifts at the hold. */
 .princelists-lifted {
 	position: relative;
 	z-index: 1;
@@ -194,6 +216,30 @@ textarea.princelists-title {
 	background-color: var(--background-primary);
 	box-shadow: var(--shadow-l);
 	transform: translateY(var(--princelists-lift, 0px));
+}
+
+/* A lifted selected row keeps its highlight over its opaque background. */
+.princelists-lifted.princelists-selected {
+	background-image: linear-gradient(var(--nav-item-background-selected), var(--nav-item-background-selected));
+}
+
+/* How many rows a dragged selection carries, on the row it lifts, at the row's end. */
+.princelists-item[data-princelists-count]::after,
+.princelists-heading[data-princelists-count]::after {
+	content: attr(data-princelists-count);
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline-end: var(--size-4-1);
+	transform: translateY(-50%);
+	min-width: 1.6em;
+	padding: 0 var(--size-4-1);
+	border-radius: var(--radius-m);
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-bold);
+	line-height: 1.6em;
+	text-align: center;
 }
 
 /* A rendered title or heading is one paragraph, laid out as the line it replaces. */
@@ -548,15 +594,33 @@ textarea.princelists-title {
 	padding-inline: var(--size-4-3);
 }
 
+/* It takes focus so that the view's keys and Escape reach it once a click selects rows, and when its
+   tab becomes active; the rows' background shows the selection. */
+.princelists-scroll:focus {
+	outline: none;
+}
+
+/* Heard by screen readers, not seen: how many rows are selected. */
+.princelists-selection-status {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
 /* Always at the readable line width: no documented API reads Obsidian's setting for it. */
 .princelists-sizer {
 	max-width: var(--file-line-width);
 	margin: 0 auto;
 }
 
-/* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on mobile". */
+/* The view's own container places the "+"; --view-bottom-spacing: spec, "Touch on mobile". Its width
+   decides whether the selection bar takes one row. */
 .princelists-view {
 	position: relative;
+	container: princelists-view / inline-size;
 }
 
 /* Its top is where the list stops being visible (spec, "Touch on mobile"). */
@@ -602,6 +666,158 @@ button.princelists-new-item {
 
 .princelists-has-floating-add .princelists-end {
 	height: calc(var(--size-4-12) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
+}
+
+/* The bar while selecting, in the floating "+"'s place and kept above mobile's navigation bar and
+   desktop's status bar the same way (spec, "The bar"): Done and how many are selected, then the actions
+   spread across the bar, with Delete apart past a divider. A view too narrow for one row puts Done and
+   the count on a row above the actions. Every button takes at least 48 by 48 with 8 between them, and
+   the height holds the rows with 8 around and between, and the bar's border. */
+.princelists-selection-bar,
+.princelists-content {
+	--princelists-selection-bar-height: calc(2 * var(--size-4-12) + 3 * var(--size-4-2) + 2 * var(--border-width));
+}
+
+.princelists-selection-bar {
+	position: absolute;
+	left: var(--size-4-4);
+	right: var(--size-4-4);
+	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	max-width: var(--file-line-width);
+	height: var(--princelists-selection-bar-height);
+	margin: 0 auto;
+	padding: var(--size-4-2);
+	gap: var(--size-4-2);
+	border: var(--border-width) solid var(--background-modifier-border);
+	border-radius: var(--radius-l);
+	background-color: var(--background-primary);
+	box-shadow: var(--shadow-s);
+}
+
+.princelists-selection-bar-top,
+.princelists-selection-actions {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	gap: var(--size-4-2);
+}
+
+/* Move to, Tick, Star, Date, the divider, then Delete: the actions as wide as the widest of them. */
+.princelists-selection-actions {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr) auto 1fr;
+}
+
+.princelists-selection-bar-top {
+	font-size: var(--font-ui-small);
+	white-space: nowrap;
+}
+
+/* Room for "999 selected", so the actions stay put as the count grows. */
+.princelists-selection-count {
+	min-width: 10ch;
+	font-variant-numeric: tabular-nums;
+}
+
+.princelists-selection-divider {
+	height: var(--size-4-6);
+	border-inline-start: var(--border-width) solid var(--background-modifier-border);
+}
+
+.princelists-selection-bar > .princelists-selection-divider {
+	display: none;
+}
+
+@container princelists-view (min-width: 520px) {
+	.princelists-selection-bar,
+	.princelists-content {
+		--princelists-selection-bar-height: calc(var(--size-4-12) + 2 * var(--size-4-2) + 2 * var(--border-width));
+	}
+
+	.princelists-selection-bar {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.princelists-selection-bar-top {
+		flex: none;
+		align-self: stretch;
+	}
+
+	.princelists-selection-bar > .princelists-selection-divider {
+		display: block;
+	}
+}
+
+/* In a view too narrow for five labelled buttons, such as a sidebar, they show only their icons, the
+   gaps tighten, and the buttons narrow below 48 rather than spill out of the bar. */
+@container princelists-view (max-width: 359px) {
+	.princelists-selection-bar {
+		left: var(--size-4-2);
+		right: var(--size-4-2);
+	}
+
+	.princelists-selection-actions {
+		grid-template-columns: repeat(4, minmax(0, 1fr)) auto minmax(0, 1fr);
+		gap: var(--size-4-1);
+	}
+
+	.princelists-selection-bar button.princelists-selection-action {
+		min-width: 0;
+	}
+
+	.princelists-selection-label {
+		display: none;
+	}
+}
+
+.princelists-selection-bar button {
+	box-sizing: border-box;
+	min-width: var(--size-4-12);
+	height: 100%;
+	min-height: var(--size-4-12);
+	padding: var(--size-2-2);
+	background-color: transparent;
+	color: var(--text-normal);
+}
+
+.princelists-selection-bar button:not(:focus-visible) {
+	box-shadow: none;
+}
+
+@media (hover: hover) {
+	.princelists-selection-bar button:enabled:hover {
+		background-color: var(--background-modifier-hover);
+	}
+}
+
+.princelists-selection-bar button.princelists-selection-action {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-2-1);
+	font-size: var(--font-ui-smaller);
+	white-space: nowrap;
+}
+
+.princelists-selection-bar button.princelists-selection-delete {
+	color: var(--text-error);
+}
+
+.princelists-selection-bar button:disabled {
+	color: var(--text-faint);
+}
+
+.princelists-selection-icon {
+	display: flex;
+}
+
+.princelists-selecting .princelists-end {
+	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
 /* The title, with the card's tag button, star, When and ⋯ on its first line. They sit in the
@@ -771,8 +987,22 @@ textarea.princelists-heading-field {
 	font-weight: var(--font-bold);
 }
 
-.princelists-undo {
-	margin-inline-start: var(--size-4-2);
+/* An action in a notice reads as accent text, as Obsidian's own do. */
+button.princelists-undo {
+	width: fit-content;
+	height: auto;
+	padding: 0;
+	border: none;
+	background: none;
+	box-shadow: none;
+	color: var(--text-accent);
+	font: inherit;
+	white-space: nowrap;
+}
+
+button.princelists-undo:hover {
+	background: none;
+	color: var(--text-accent-hover);
 }
 
 /* On the title's baseline. Filled, so it reads as set, not as a button. */
@@ -1054,7 +1284,7 @@ button.princelists-card-star.is-starred svg {
    keep to the edge rather than leave the column empty. */
 .princelists-heading {
 	position: relative;
-	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
+	padding-inline-start: calc(var(--princelists-reach, 0px) + var(--checkbox-size) + var(--size-4-2));
 }
 
 .princelists-block .princelists-heading {
@@ -1085,7 +1315,7 @@ button.princelists-collapse {
 
 /* In a view it also takes in part of the margin, as the tick zone does. */
 .princelists-content button.princelists-collapse {
-	inset-inline-start: calc(-1 * var(--size-4-3));
+	inset-inline-start: calc(var(--princelists-reach, 0px) - var(--size-4-3));
 	padding-inline-start: var(--size-4-3);
 }
 

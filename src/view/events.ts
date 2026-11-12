@@ -33,6 +33,7 @@ import { eventInNestedBlock, isInNestedBlock, pathUnder } from './own-rows';
 import { showPictureMenu } from './picture-menu';
 import { registerPictureEvents } from './pictures';
 import { CHECKBOX_CLASS, HEADING_CLASS, ITEM_CLASS, lineOf, OPEN_AS_MARKDOWN_CLASS, TICK_SELECTOR } from './render-list';
+import { keepTextUnselected, onSelectClick } from './select';
 import { stripClick } from './tag-strip';
 import { showTextMenu } from './text-menu';
 import { queueTick } from './tick';
@@ -42,7 +43,7 @@ import { queueTick } from './tick';
 export function registerFieldEvents(view: PrinceListView): void {
 	const { contentEl } = view;
 	view.registerDomEvent(contentEl, 'click', (evt) => onClick(view, evt));
-	view.registerDomEvent(contentEl, 'mousedown', (evt) => keepFieldFocused(evt));
+	view.registerDomEvent(contentEl, 'mousedown', (evt) => onMouseDown(view, evt));
 	view.registerDomEvent(contentEl, 'beforeinput', (evt) => onBeforeInput(view, evt));
 	view.registerDomEvent(contentEl, 'input', (evt) => onInput(view, evt));
 	view.registerDomEvent(contentEl, 'change', (evt) => onChange(view, evt));
@@ -50,14 +51,20 @@ export function registerFieldEvents(view: PrinceListView): void {
 	view.registerDomEvent(contentEl, 'focusin', (evt) => onFocusIn(view, evt));
 	view.registerDomEvent(contentEl, 'focusout', (evt) => onFocusOut(view, evt));
 	registerPictureEvents(view);
+	swallowClickAfterHold(view, contentEl);
 	if (Platform.isDesktop) view.registerDomEvent(contentEl, 'contextmenu', (evt) => onContextMenu(view, evt));
 	// In the capture phase, so it is stopped before it reaches a row or bubbles up from one.
-	if (Platform.isMobile) {
-		view.registerDomEvent(contentEl, 'contextmenu', (evt) => onHoldMenu(view, evt), { capture: true });
-		view.registerDomEvent(contentEl, 'click', (evt) => swallowClick(view, evt), { capture: true });
-		// A hold that sent no click must not eat a later tap, nor a right-click with a mouse, which sends no touch.
-		view.registerDomEvent(contentEl, 'pointerdown', () => (view.swallowNextClick = false), { capture: true });
-	}
+	if (Platform.isMobile) view.registerDomEvent(contentEl, 'contextmenu', (evt) => onHoldMenu(view, evt), { capture: true });
+}
+
+/**
+ * Stops the click that follows a hold on the view's rows from reaching anything in `el`, in the capture
+ * phase. For the view's content, and for the selection bar, which a hold can show under the pointer.
+ */
+export function swallowClickAfterHold(view: PrinceListView, el: HTMLElement): void {
+	view.registerDomEvent(el, 'click', (evt) => swallowClick(view, evt), { capture: true });
+	// A hold that sent no click must not eat a later tap, nor a right-click with a mouse, which sends no touch.
+	view.registerDomEvent(el, 'pointerdown', () => (view.swallowNextClick = false), { capture: true });
 }
 
 function onChange(view: PrinceListView, evt: Event): void {
@@ -92,6 +99,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	}
 	if (stripClick(view, target)) return;
 	if (handleLinkClick(view.app, view.sourcePath, evt, target)) return;
+	if (onSelectClick(view, evt, target)) return;
 	if (target.instanceOf(HTMLInputElement) && target.hasClass(WHEN_INPUT_CLASS)) {
 		whenClick(target);
 		return;
@@ -161,6 +169,11 @@ function barEditor(view: PrinceListView, target: HTMLElement): EditorView | null
 // editor, which ends its visit, as one on the filter field's toggles would take it from the field.
 function keepFieldFocused(evt: MouseEvent): void {
 	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, ${FILTER_TOGGLE_SELECTOR}`)) evt.preventDefault();
+}
+
+function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
+	keepFieldFocused(evt);
+	keepTextUnselected(view, evt);
 }
 
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
