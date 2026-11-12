@@ -826,6 +826,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - Holding an item row never opens a menu. A hold let go without moving starts selecting instead
     ([selecting several rows](2026-11-07-select-several-design.md), "On mobile"): the row lifts
     and goes back, writing nothing, as before.
+  - **A drag of a selected row moves every selected row,** as on desktop, and selecting goes on.
+    Once the held row moves, it shows how many rows it carries, and the others stay in place until
+    the drop redraws the list. A drag of a row outside the selection drags it alone and ends
+    selecting ([selecting several rows](2026-11-07-select-several-design.md), "Dragging the
+    selection").
   - A swipe without a hold scrolls the list.
   - **The drop line works as on desktop (call).** A move drops where it shows, and an item
     dropped over its own place stays as it is in the file.
@@ -989,10 +994,10 @@ needs no code.
 - **Undo (1b, call):**
   - Cmd+Z and Cmd+Shift+Z step through the plugin's own edits, using the same guarded write.
   - They're keys only, with no Undo or Redo command **(owner, 2026-10-22)**, so without a keyboard
-    the list's undo on mobile is the Undo button after a delete or any action from the selection's
-    bar ([selecting several rows](2026-11-07-select-several-design.md), "The actions"). A card's
-    notes have no Undo or Redo button either **(owner, 2026-11-05)** (step two, "Formatting in a
-    card").
+    the list's undo on mobile is the Undo button after a delete, any action from the selection's
+    bar, or a drag of the selection ([selecting several rows](2026-11-07-select-several-design.md),
+    "The actions"). A card's notes have no Undo or Redo button either **(owner, 2026-11-05)** (step
+    two, "Formatting in a card").
   - The history is cleared when the file changes from outside, so undo never throws away someone
     else's change.
   - Typing in a field makes one step for each time the field has focus, and so does each visit to
@@ -1231,8 +1236,11 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   (`docs/superpowers/notes/2026-10-21-spike-touch.md`).
   - Once a row is lifted, a non-passive `touchmove` handler calls `preventDefault` to stop
     scrolling.
+  - A lift takes the selection it carries, or ends it for a row outside, only once the finger has
+    moved more than 5 px, since letting go before then selects instead.
   - **The edge scroll (call)** starts 56 px from the top of the list or from where it stops being
-    visible, and speeds up linearly to 12 px a frame at the edge and beyond.
+    visible, and speeds up linearly to 12 px a frame at the edge and beyond. While selecting, the
+    list stops being visible at the top of the selection's bar.
   - Kanban's `src/dnd/managers/DragManager.ts` is the reference.
   - Obsidian's own drag manager isn't public.
 - **A long-press on a folder in the mobile file explorer reaches `file-menu`,** with source

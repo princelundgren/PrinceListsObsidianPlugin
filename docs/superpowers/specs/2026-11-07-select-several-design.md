@@ -1,5 +1,5 @@
 ---
-status: building
+status: live
 verified: 2026-11-10
 governs: [src/**, styles.css]
 tracking: ["#79"]
@@ -87,7 +87,7 @@ nothing is written in the background, and only documented Obsidian APIs are used
 - **Cmd+click on a link** in a title still opens it in a new tab, as Obsidian does: the link wins
   over selecting **(call)**.
 - **Cmd+Enter with several rows selected** adds the new item below the last selected item in list
-  order **(call)**.
+  order **(call)**, and the selection ends as its card opens.
 
 ## On mobile
 
@@ -158,8 +158,8 @@ nothing is written in the background, and only documented Obsidian APIs are used
   message says how many were.
 - **Set date to today, Set date to tomorrow, Set date… and Remove date (call),** as on one item. Set
   date… can't open a card for several items, so it opens a date picker of its own, titled "Set
-  date" with the buttons Cancel and Set **(call)**; which documented route shows one is a risk
-  below.
+  date" with the buttons Cancel and Set **(call)**. It is a `Modal` with a date input, which opens
+  the platform's own date picker when the user clicks or taps it.
 - **Delete (call)** names what goes, such as "Delete 5 items" or "Delete 4 items and 1 heading", in
   red as today. A selected heading goes and keeps its items unless they're selected too, as Delete
   heading does.
@@ -202,7 +202,7 @@ Each in the pull request that makes it untrue:
   while selecting on mobile a tap on a heading selects it.
 - **Step two, "Collapsing a heading":** while selecting on mobile, a tap on a heading selects it;
   Move to heading… expands a collapsed target.
-- **AGENTS.md, "Read before working":** this design, once approved.
+- **AGENTS.md, "Read before working":** links this design.
 
 ## Risks to check during the build
 
@@ -210,18 +210,31 @@ Each in the pull request that makes it untrue:
    section plus loose items, a drop between them, a setext heading that needs the empty line, CRLF
    endings and no final newline. Every byte outside the moved lines stays, and edit-check refuses
    what would read differently. Core tests, written first.
+   - **Result:** core tests cover each case byte for byte, and a group refuses what a single move
+     refuses (`tests/core/group-move.test.ts`).
 2. **A date picker without a card:** Set date… for several items needs a date picker opened from a
    menu choice, which may not count as a user action with Native menus on (step one, "Item
    actions"). Find a documented route; if none works, the owner decides.
+   - **Result:** the `Modal` above. It sets the date on macOS with Native menus off, and on Android,
+     where a tap on the input opens Android's own calendar. Not checked with Native menus on.
 3. **The mobile bar:** it sits above Obsidian's own navigation bar and the on-screen keyboard
    without covering the last rows, on an iPhone, an iPad and Android.
+   - **Result:** on Android, the bar sits above the navigation bar and the keyboard, and the last
+     row scrolls clear of it. Not checked on an iPhone or an iPad.
 4. **Hold and let go:** that a still hold let go reaches the view on iOS and Android after
    Obsidian's own `contextmenu` and its haptic, and that the tap after it is still swallowed (step
    one, "Touch on mobile").
+   - **Result:** on Android, a still hold let go starts selecting. No tap follows a long press
+     there, so whether the tap after it is swallowed isn't shown. Not checked on an iPhone or an
+     iPad.
 5. **Android's back gesture** ending selection: only if Obsidian documents a way to hear it;
    otherwise Done alone ends it.
+   - **Result:** Obsidian documents no way for a plugin to hear Back, so Done ends selecting. On
+     Android, Back shows Obsidian's "Press back again to exit." and the selection stays.
 6. **Focus after Cmd+click:** with the card closed, Shift+Up and Shift+Down still reach the view,
    through its `scope`, without making rows focusable ahead of #125.
+   - **Result:** the list's scroller takes focus at `tabindex="-1"`, so the keys reach the view
+     with no row focusable; checked on macOS, also after switching tabs and back.
 
 ## Order (call)
 

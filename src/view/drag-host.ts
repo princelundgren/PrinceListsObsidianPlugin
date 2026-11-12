@@ -4,6 +4,10 @@ import { closeCard } from './card';
 import type { PrinceListView } from './list-view';
 import { queueDrop, type RowDrop } from './move';
 import { clearSelection, selectOnHold } from './select';
+import { shownSelectionBar } from './selection-bar';
+
+/** On the row a dragged selection lifts: how many rows it carries, which styles.css draws. */
+export const COUNT_ATTR = 'data-princelists-count';
 
 /** What dragging rows needs from the list view or a block showing a list. */
 export interface RowDragHost {
@@ -11,7 +15,7 @@ export interface RowDragHost {
 	readonly component: Component;
 	/** Holds every row and heading that drags. */
 	readonly rowsEl: HTMLElement;
-	/** The scroller a touch drag scrolls at its edges, and the element whose top is where it stops being visible. */
+	/** The scroller a touch drag scrolls at its edges, and the element whose top is where it stops being visible, read on each step. */
 	readonly edgeScroll: { scrollEl: HTMLElement; visibleBottomEl: HTMLElement } | null;
 	/** The scroller a lift scrolls to keep the row in place, or null where it is Obsidian's, as in a note. */
 	readonly liftScrollEl: HTMLElement | null;
@@ -24,7 +28,8 @@ export interface RowDragHost {
 	untrack(tracked: TrackedLine): void;
 	/**
 	 * The lines a drag from the row on `line` carries, `line` among them: the selection's while that
-	 * row is one of two or more selected, else `[line]`, which ends the host's selection.
+	 * row is one of two or more selected, else `[line]`. That ends the host's selection, except for
+	 * the only selected row while selecting on mobile, which stays selected.
 	 */
 	dragged(line: number): readonly number[];
 	/** Moves the dragged row on `line`, both it and `drop` as the drawn rows number them. */
@@ -45,7 +50,7 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 	return {
 		component: view,
 		rowsEl: view.listScrollEl,
-		edgeScroll: Platform.isMobile ? { scrollEl: view.listScrollEl, visibleBottomEl: visibleBottom(view) } : null,
+		edgeScroll: Platform.isMobile ? listEdgeScroll(view) : null,
 		liftScrollEl: view.listScrollEl,
 		dragsHeadings: true,
 		get swallowNextClick() {
@@ -65,6 +70,9 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 		dragged: (line) => {
 			const selected = view.selection.linesWith(line);
 			if (selected) return selected;
+			// Selecting on mobile ends only with Done, Delete or the last row tapped away (selecting
+			// several rows, "On mobile").
+			if (view.selecting && view.selection.has(line)) return [line];
 			clearSelection(view);
 			return [line];
 		},
@@ -81,6 +89,18 @@ export function listDragHost(view: PrinceListView): RowDragHost {
 }
 
 /**
+ * Asks `host` which rows a drag from `rowEl`, on `line`, carries, and tracks those other than `line`.
+ * When there are any, marks `rowEl` with how many rows it carries. Returns them, for the drag to
+ * untrack when it ends.
+ */
+export function carry(host: RowDragHost, line: number, rowEl: HTMLElement): TrackedLine[] {
+	const carried = host.dragged(line);
+	const others = carried.filter((other) => other !== line).map((other) => host.track(other));
+	if (others.length > 0) rowEl.setAttr(COUNT_ATTR, String(carried.length));
+	return others;
+}
+
+/**
  * Closes what a lift closes (`beforeLift`), then scrolls `liftScrollEl` by however far that moved
  * `row`, such as a taller card above it closing, so the row stays under the pointer as far as the
  * scroller can go.
@@ -89,6 +109,17 @@ export function liftInPlace(host: RowDragHost, row: HTMLElement): void {
 	const rowTop = row.getBoundingClientRect().top;
 	host.beforeLift();
 	if (host.liftScrollEl && row.isConnected) host.liftScrollEl.scrollTop += row.getBoundingClientRect().top - rowTop;
+}
+
+// While selecting, the list stops being visible at the selection's bar, which sits above the marker.
+function listEdgeScroll(view: PrinceListView): NonNullable<RowDragHost['edgeScroll']> {
+	const marker = visibleBottom(view);
+	return {
+		scrollEl: view.listScrollEl,
+		get visibleBottomEl() {
+			return shownSelectionBar(view) ?? marker;
+		},
+	};
 }
 
 // Its top is where the list stops being visible: mobile's floating navbar covers the bottom of the

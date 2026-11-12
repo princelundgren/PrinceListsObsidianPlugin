@@ -85,9 +85,9 @@ export function planGroupLineEdit(
 		const own = lines[row];
 		if (own && isHeading(model, row)) continue;
 		if (!own || !itemAt(model, row)) return null;
-		const text = change(own.text);
-		if (text === own.text) continue;
-		next[row] = { text, eol: own.eol };
+		const edited = change(own.text);
+		if (edited === own.text) continue;
+		next[row] = { text: edited, eol: own.eol };
 		changed++;
 		if (first === -1) first = row;
 	}

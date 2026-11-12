@@ -109,6 +109,7 @@ export class RowSelection {
 		this.chosen.clear();
 		this.range = [];
 		this.replaceAnchor(null);
+		this.replaceFarEnd(null);
 	}
 
 	private setRange(anchor: number, to: number, shown: readonly number[]): void {
