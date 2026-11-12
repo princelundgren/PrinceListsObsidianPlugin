@@ -719,6 +719,12 @@ button.princelists-new-item {
 	white-space: nowrap;
 }
 
+/* Room for "999 selected", so the actions stay put as the count grows. */
+.princelists-selection-count {
+	min-width: 10ch;
+	font-variant-numeric: tabular-nums;
+}
+
 .princelists-selection-divider {
 	height: var(--size-4-6);
 	border-inline-start: var(--border-width) solid var(--background-modifier-border);
