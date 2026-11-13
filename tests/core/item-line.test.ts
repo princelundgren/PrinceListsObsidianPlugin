@@ -337,4 +337,15 @@ describe('the end in parseItemLine', () => {
 		expect(performance.now() - started).toBeLessThan(1000);
 		expect(parts?.end).toBe('');
 	});
+
+	// Assumes a linear scan finishes in milliseconds and a quadratic one takes seconds at this size.
+	test('reads a line with a long run of 🔚 marks in well under a second', () => {
+		const line = `- [ ] a ${'🔚'.repeat(60_000)} x y 🔁 every day`;
+		const started = performance.now();
+
+		const parts = parseItemLine(line);
+
+		expect(performance.now() - started).toBeLessThan(1000);
+		expect(parts?.end).toBe('');
+	});
 });

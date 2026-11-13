@@ -55,7 +55,7 @@ const MARK_TIME_PATTERN = new RegExp(
 export const DONE_DATE_PATTERN = new RegExp(`✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
 const DONE_DATE_FIELD = new RegExp(DONE_DATE_PATTERN, 'g');
 const REPEAT_FIELD = new RegExp(`🔁${VS16} *[a-zA-Z0-9, !]+`);
-const END_FIELD = new RegExp(`🔚${VS16} *\\S+$`);
+const END_MARK = '🔚';
 
 export function parseItemLine(text: string): ItemLineParts | null {
 	const match = ITEM_PATTERN.exec(text);
@@ -82,13 +82,32 @@ export function parseItemLine(text: string): ItemLineParts | null {
 	return { before, status, afterStatus, title: title.slice(0, title.length - end.length), end, marks, tail };
 }
 
-// The `🔚` field at the end of `title` with the spaces before it, or '' when no space precedes it.
-// Matching the field alone and walking back over the spaces keeps a long run of them linear.
+// The `🔚` field at the end of `title` with the spaces before it, or '' when no space precedes it:
+// ` +🔚️? *\S+$`. The field is either a `🔚` run and spaces before the title's last run of
+// non-whitespace, or that last run starting with `🔚`. Walking back from the end, rather than
+// searching with a pattern, keeps a long run of spaces or of `🔚` linear.
 function endOf(title: string): string {
-	const field = END_FIELD.exec(title);
-	if (!field) return '';
-	const start = findRunStart(title, field.index, isSpace);
-	return start === field.index ? '' : title.slice(start);
+	const lastRun = findRunStart(title, title.length, (char) => !/\s/.test(char));
+	if (lastRun === title.length) return '';
+	const markBefore = endMarkBefore(title, lastRun);
+	const startsWithMark = title.startsWith(END_MARK, lastRun) && title.length - lastRun > END_MARK.length;
+	return (markBefore === null ? '' : withSpacesBefore(title, markBefore)) || (startsWithMark ? withSpacesBefore(title, lastRun) : '');
+}
+
+// Where a `🔚`, with or without U+FE0F, makes a run of its own right before the spaces that come before `runStart`.
+function endMarkBefore(title: string, runStart: number): number | null {
+	const gapStart = findRunStart(title, runStart, isSpace);
+	if (gapStart === runStart) return null;
+	for (const mark of [`${END_MARK}️`, END_MARK]) {
+		if (gapStart >= mark.length && title.startsWith(mark, gapStart - mark.length)) return gapStart - mark.length;
+	}
+	return null;
+}
+
+// `title` from the spaces before `at`, or '' when none precedes it.
+function withSpacesBefore(title: string, at: number): string {
+	const start = findRunStart(title, at, isSpace);
+	return start === at ? '' : title.slice(start);
 }
 
 // Whitespace between fields is skipped while matching, as Tasks does after each field. The fields
