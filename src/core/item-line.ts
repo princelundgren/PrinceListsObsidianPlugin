@@ -86,7 +86,7 @@ export function parseItemLine(text: string): ItemLineParts | null {
 // field is the title's last run of non-spaces, either starting with `🔚` itself or after a `🔚` run
 // of its own and spaces; at least one space must come before the `🔚`. Walking back from the end,
 // not a pattern, keeps a long run of spaces or of `🔚` linear.
-function endOf(title: string): string {
+export function endOf(title: string): string {
 	const lastRun = findRunStart(title, title.length, (char) => !/\s/.test(char));
 	if (lastRun === title.length) return '';
 	const separateMark = separateMarkBefore(title, lastRun);

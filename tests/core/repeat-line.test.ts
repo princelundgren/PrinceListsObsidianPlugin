@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { tickLine, untickLine } from '../../src/core/item-line';
 import {
 	anchorOf,
+	draftOf,
 	hasDate,
 	removeRepeat,
 	removeWhen,
@@ -167,6 +168,49 @@ describe('setRepeat', () => {
 		['- [ ] Countdown 🔚 5x', every(1, 'day'), { kind: 'times', left: 2 }, '- [ ] Countdown 🔚 2x ⏳ 2026-11-13 🔁 every day'],
 	] as const)('%s', (line, rule, end, expected) => {
 		expect(setRepeat(line, rule, end, today)).toBe(expected);
+	});
+});
+
+describe('setRepeat on a line that does not repeat yet', () => {
+	const today = '2026-11-13';
+
+	test('keeps a title 🔚 that is no end, as written', () => {
+		expect(setRepeat('- [ ] Trip 🔚 soon', every(1, 'day'), null, today)).toBe('- [ ] Trip 🔚 soon ⏳ 2026-11-13 🔁 every day');
+	});
+
+	test('keeps it, with the chosen end after it', () => {
+		expect(setRepeat('- [ ] Trip 🔚 soon', every(1, 'day'), { kind: 'times', left: 3 }, today)).toBe(
+			'- [ ] Trip 🔚 soon 🔚 3x ⏳ 2026-11-13 🔁 every day',
+		);
+	});
+});
+
+describe('draftOf', () => {
+	test('reads the rule and the end of a repeating line', () => {
+		expect(draftOf('- [ ] Review 🔚 3x ⏳ 2026-11-13 🔁 every 2 weeks when done')).toEqual({
+			rule: { every: 2, unit: 'week', onLast: false, whenDone: true },
+			end: { kind: 'times', left: 3 },
+		});
+	});
+
+	test.each(['- [ ] a ⏳ 2026-11-13 🔁 Every Day', '- [ ] a ⏳ 2026-11-13 🔁 every 1 day'])('reads %s as every day', (line) => {
+		expect(draftOf(line)).toEqual({ rule: every(1, 'day'), end: null });
+	});
+
+	test.each(['- [ ] a ⏳ 2026-11-13 🔁 every weekday', '- [ ] a 🔚 soon ⏳ 2026-11-13 🔁 every day'])('is read-only for %s', (line) => {
+		expect(draftOf(line)).toBe('read-only');
+	});
+
+	test('is every day with no end on a line that does not repeat', () => {
+		expect(draftOf('- [ ] Water plants ⏳ 2026-11-13')).toEqual({ rule: every(1, 'day'), end: null });
+	});
+
+	test('takes a readable 🔚 at the end of the title of a line that does not repeat as its end', () => {
+		expect(draftOf('- [ ] Countdown 🔚 5x')).toEqual({ rule: every(1, 'day'), end: { kind: 'times', left: 5 } });
+	});
+
+	test('leaves a title 🔚 that is no end out of the draft', () => {
+		expect(draftOf('- [ ] Trip 🔚 soon')).toEqual({ rule: every(1, 'day'), end: null });
 	});
 });
 
