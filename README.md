@@ -124,7 +124,7 @@ Stuff for the new apartment.
 
 - **`princelists: true`** makes a note a list.
 - **Headings** are sections, **checkboxes** are items, and lines indented under an item are its notes.
-- **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are.
+- **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are, except that ticking a repeating item moves its 📅 and 🛫 with its ⏳.
 - **`✔` with a time** marks when you ticked an item. Tasks still sees it as done.
 - **Only the lines you edit change.** The rest of the note stays as you wrote it.
 

@@ -209,8 +209,8 @@ only documented Obsidian APIs are used.
   **(call)**. Items under the picked heading that are selected move to the end too.
 - **Tick and Untick, Add star and Remove star (call)** show by what the selection holds: Tick
   while any selected item is unticked, Untick while any is ticked, both for a mix. Each changes only
-  the items that need it. A repeating item, which can't be ticked here today, is skipped, and a
-  message says how many were.
+  the items that need it. A repeating item moves to its next date, as ticking it alone does. An item
+  the plugin can't repeat is skipped, and a message says how many were.
 - **Set date to today, Set date to tomorrow, Set date… and Remove date (call),** as on one item. Set
   date… can't open a card for several items, so it opens a date picker of its own, titled "Set
   date" **(call)**. It is a `Modal` with a date input, which opens the platform's own date picker

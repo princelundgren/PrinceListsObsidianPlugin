@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-07
+verified: 2026-11-13
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -70,8 +70,9 @@ this met on 2026-10-30 **(owner)**.
 - **` ⭐` at the end of the title,** before any `✔` mark and the trailing Tasks fields, so Tasks
   still reads them. Tasks shows the star as part of the item's text.
 - **The order on a line with everything:**
-  `- [x] Buy milk ⭐ ✔ 2026-10-27 18:05 ⏳ 2026-10-30 ^id`. The title, then the star, then the `✔`
-  mark, then the Tasks fields with the When last, then a block ID.
+  `- [x] Buy milk ⭐ 🔚 5x ✔ 2026-10-27 18:05 🔁 every day ⏳ 2026-10-30 ^id`. The title, then the
+  star, then a repeating item's `🔚` end, then the `✔` mark, then the Tasks fields with the When
+  last, then a block ID.
 - **A title ending in a space and `⭐`** (with an optional U+FE0F) is starred **(call)**: `5⭐`
   isn't. The title is the text before any `✔` mark and the trailing Tasks fields, as the parser
   splits the line. The row hides the emoji and shows Lucide's `star` icon instead.
@@ -361,8 +362,9 @@ this met on 2026-10-30 **(owner)**.
   - **In a pane about as narrow as a sidebar (owner, 2026-11-04),** it has a sidebar's margins and
     the title at heading size, through a container query; the width where that starts, 480 px, is
     a **(call)**.
-- **Ticking works in place.** A repeating item (🔁) shows the same message as in its list instead
-  of ticking. A tick is worked out on the text the view last read, so a list changed, renamed or
+- **Ticking works in place.** A repeating item (🔁) moves to its next date and its row to that
+  day's group, with the notice and Undo of a tick in its list; one the plugin can't repeat shows the
+  same message as in its list instead of ticking. A tick is worked out on the text the view last read, so a list changed, renamed or
   deleted since then shows "This list changed elsewhere. Try again." and writes nothing, and so
   does a click that opens a list that's gone. Rows can't be dragged: their
   order comes from the days.

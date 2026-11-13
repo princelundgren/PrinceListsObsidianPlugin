@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-12
+verified: 2026-11-13
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -350,9 +350,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - The plugin keeps the marker and the character exactly as written.
   - Ticking writes `x`, and unticking writes a space.
 - **The item's first line is its title.**
-- **Repeating items (🔁) can't be ticked in step one (call).** The plugin shows them, but ticking
-  one shows a message instead. Ticking it without creating the next occurrence would quietly end
-  the repeat.
+- **Ticking a repeating item (🔁) moves it to its next date** instead of marking it done
+  ([repeating items](2026-11-13-repeating-items-design.md), "Ticking a repeating item"). A line the
+  plugin can't repeat is refused with a message, since ticking it would quietly end the repeat.
 
 ### Item notes (owner)
 
@@ -450,6 +450,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - 🔁 repeat
 - **Written the Tasks way:** at the end of the title line, as `YYYY-MM-DD`.
 - **Step one sets none of them.** It keeps any that are already there and never breaks them.
+- **Ticking a repeating item moves its 📅, ⏳ and 🛫 dates** together to the next one; the
+  other dates stay as written (repeating items design, "The next date").
 
 ### Completion (owner)
 
@@ -1080,7 +1082,7 @@ From here on the document is for the builder.
   - fences, HTML, `%%` and `$$` containing checkbox lines
   - marker and checkbox-character variants
   - where `✔` goes when the line has Tasks fields, tags or a block ID
-  - tick and untick; doubled marks; refusing to tick 🔁
+  - tick and untick; doubled marks; ticking 🔁 as the repeating items design's tests list
   - every row of the archived table
 - **Styling (call):** use only Obsidian's CSS variables and its built-in Lucide icons (`setIcon`),
   so the view follows light and dark mode and any theme. Obsidian's plugin guidelines warn that
