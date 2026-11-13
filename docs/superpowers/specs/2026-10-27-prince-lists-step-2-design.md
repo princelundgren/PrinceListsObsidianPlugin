@@ -135,8 +135,8 @@ this met on 2026-10-30 **(owner)**.
 - **A filter icon opens and closes it (owner, 2026-11-06),** on desktop and mobile: a `list-filter`
   view action in a list's header named "Filter list", with its key on desktop as "New item" has,
   shown only on a list. A magnifier was tried first and looked too much like Obsidian's own search.
-  A press while the field is open closes it, as Escape does, which shows every row once no tag is
-  lit, or with "Tag strip" set to "While filtering"
+  A press while the field is open closes it, as Escape does, which shows every row once nothing in the
+  tag strip is lit, or with "Tag strip" set to "While filtering"
   ([filtering by tag](2026-11-07-tag-filter-design.md), "Filtering"). While it's open
   the icon is pressed, in the active icon color on desktop; on mobile Obsidian gives a header's
   icons one color, as its own bookmark icon shows, so the open field shows it there
@@ -177,7 +177,7 @@ this met on 2026-10-30 **(owner)**.
   opens the field when it's closed, without focusing it **(call)**, and closing the field turns it
   off (owner, 2026-11-06). It isn't remembered (owner, 2026-11-06).
 - **Escape in the field ends the filter,** as the filter icon does, and shows every row again once
-  no tag is lit, or with "Tag strip" set to "While filtering".
+  nothing in the tag strip is lit, or with "Tag strip" set to "While filtering".
 - **The field stays open when focus leaves it (owner, 2026-11-06),** empty or not, until Escape,
   the filter icon, or another note or the list closing ends it. Like "Show archived items", it
   isn't remembered **(call)**.

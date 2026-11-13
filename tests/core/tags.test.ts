@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { carriesTags, isTagBody, sameTag, stripTags, tagBodyAt, tagOfTyped, toggleTag } from '../../src/core/tags';
+import { carriesTags, isAnyLit, isTagBody, litForStrip, meetsLitTags, NO_LIT_TAGS, sameTag, stripTags, tagBodyAt, tagOfTyped, toggleTag } from '../../src/core/tags';
 
 describe('tagBodyAt', () => {
 	test('reads letters, numbers, _ - / and marks', () => {
@@ -77,6 +77,45 @@ describe('carriesTags', () => {
 	test('is false when a lit tag is missing, or only starts the same letters as a carried tag', () => {
 		expect(carriesTags(['shopping'], ['shop'])).toBe(false);
 		expect(carriesTags(['a'], ['a', 'b'])).toBe(false);
+	});
+});
+
+describe('meetsLitTags', () => {
+	test('with nothing lit, meets every item', () => {
+		expect(meetsLitTags(['frozen'], NO_LIT_TAGS)).toBe(true);
+		expect(meetsLitTags([], NO_LIT_TAGS)).toBe(true);
+	});
+
+	test('with only No tag lit, meets only an item with no tag', () => {
+		const noTag = { tags: [], untagged: true };
+		expect(meetsLitTags([], noTag)).toBe(true);
+		expect(meetsLitTags(['frozen'], noTag)).toBe(false);
+	});
+
+	test('with tags and No tag lit, meets the items carrying every lit tag and the items with no tag', () => {
+		const frozenAndNoTag = { tags: ['frozen'], untagged: true };
+		expect(meetsLitTags(['Frozen'], frozenAndNoTag)).toBe(true);
+		expect(meetsLitTags([], frozenAndNoTag)).toBe(true);
+		expect(meetsLitTags(['pantry'], frozenAndNoTag)).toBe(false);
+		const twoAndNoTag = { tags: ['frozen', 'bulk'], untagged: true };
+		expect(meetsLitTags(['frozen', 'bulk'], twoAndNoTag)).toBe(true);
+		expect(meetsLitTags(['frozen'], twoAndNoTag)).toBe(false);
+	});
+});
+
+describe('isAnyLit', () => {
+	test('is true while a tag or No tag is lit', () => {
+		expect(isAnyLit(NO_LIT_TAGS)).toBe(false);
+		expect(isAnyLit({ tags: ['frozen'], untagged: false })).toBe(true);
+		expect(isAnyLit({ tags: [], untagged: true })).toBe(true);
+	});
+});
+
+describe('litForStrip', () => {
+	test('keeps what is lit while the strip has a tag, and puts No tag out once it has none', () => {
+		const noTag = { tags: [], untagged: true };
+		expect(litForStrip(noTag, ['frozen'])).toBe(noTag);
+		expect(litForStrip(noTag, [])).toEqual(NO_LIT_TAGS);
 	});
 });
 

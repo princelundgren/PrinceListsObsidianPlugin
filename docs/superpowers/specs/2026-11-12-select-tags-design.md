@@ -113,7 +113,7 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## Not in this design
 
-- **A No tag choice in the tag strip:** #383 **(owner)**, designed after this one **(call)**.
+- **A No tag choice in the tag strip:** #383 **(owner)**, in [filtering by tag](2026-11-07-tag-filter-design.md), "No tag".
 - **Renaming a tag across the list,** and tags on headings.
 - **The Schedule and lists inside other notes:** selecting is only in the list view (owner).
 

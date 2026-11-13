@@ -12,7 +12,7 @@ export interface TagTarget {
 	choose(tag: string): void;
 }
 
-/** The list's tags as its strip shows them with no tag lit, the order the tag type-ahead and popovers follow. */
+/** The list's tags as its strip shows them with nothing lit, the order the tag type-ahead and popovers follow. */
 export function stripTagOrder(view: PrinceListView): string[] {
 	const { lines, model } = view.parse();
 	const shown = { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms };
@@ -20,7 +20,7 @@ export function stripTagOrder(view: PrinceListView): string[] {
 }
 
 /**
- * A tag type-ahead: the list's tags, as its strip shows them with no tag lit, and the typed tag as
+ * A tag type-ahead: the list's tags, as its strip shows them with nothing lit, and the typed tag as
  * new, less the target's tags to leave out. Choosing one calls the target's `choose`.
  */
 export class TagSuggest extends AbstractInputSuggest<TagChoice> {

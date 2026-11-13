@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { findsNothing, headingText, isItemVisible, itemRow, listStripTags, visibleSections, type RowFilter } from '../../src/core/display';
 import { tickLine } from '../../src/core/item-line';
+import { NO_LIT_TAGS } from '../../src/core/tags';
 import { containing, list, readFixture } from './edit-helpers';
 
 const DAY = 86_400_000;
@@ -15,7 +16,7 @@ const sectionsOf = (
 	archiveDelayMs = DAY,
 ) => {
 	const { lines, model } = list(text);
-	return visibleSections(lines, model, now, { showArchived, starredOnly: false, tags: [], archiveDelayMs, find: containing(query), keepLine, collapsed });
+	return visibleSections(lines, model, now, { showArchived, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs, find: containing(query), keepLine, collapsed });
 };
 
 const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false, when: string | null = null, tags: string[] = [], tailTags: string[] = tags) => ({
@@ -218,7 +219,7 @@ describe('visibleSections, starred only', () => {
 	const starred = (filter: { query?: string; showArchived?: boolean; keepLine?: number | null; collapsed?: ReadonlySet<number> } = {}) => {
 		const { lines, model } = list(text);
 		const { query = '', showArchived = false, keepLine = null, collapsed = new Set<number>() } = filter;
-		return visibleSections(lines, model, now, { showArchived, starredOnly: true, tags: [], archiveDelayMs: DAY, find: containing(query), keepLine, collapsed });
+		return visibleSections(lines, model, now, { showArchived, starredOnly: true, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: containing(query), keepLine, collapsed });
 	};
 
 	test('shows only starred items, and every heading', () => {
@@ -262,7 +263,7 @@ describe('visibleSections, matching the date', () => {
 	test('matches the When as exact text, never fuzzily', () => {
 		const anyDay = { text: '2026-11', fuzzyMatches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) };
 		const { lines, model } = list(text);
-		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, tags: [], archiveDelayMs: DAY, find: anyDay, keepLine: null, collapsed: new Set() });
+		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: anyDay, keepLine: null, collapsed: new Set() });
 		expect(sections[0]?.rows.map((shown) => shown.kind === 'item' && shown.title)).toEqual(['Renew']);
 	});
 });
@@ -292,7 +293,7 @@ describe('visibleSections, collapsed', () => {
 describe('findsNothing', () => {
 	const now = new Date(2026, 9, 21, 12, 0);
 	const text = 'Intro\n## Garden\n- [ ] Rake\n';
-	const filter = (query: string, starredOnly = false): RowFilter => ({ showArchived: false, starredOnly, tags: [], archiveDelayMs: DAY, find: containing(query), keepLine: null, collapsed: new Set() });
+	const filter = (query: string, starredOnly = false): RowFilter => ({ showArchived: false, starredOnly, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: containing(query), keepLine: null, collapsed: new Set() });
 	const nothing = (listText: string, rowFilter: RowFilter) => {
 		const { lines, model } = list(listText);
 		return findsNothing(model, rowFilter, visibleSections(lines, model, now, rowFilter));
@@ -321,7 +322,7 @@ describe('isItemVisible', () => {
 	const text = '---\nprincelists: true\n---\n- [ ] a\n## B\n- [ ] b\n## C\n- [ ] c\n- [x] old ✔ 2026-10-01 10:00\n';
 	const visible = (titleLine: number, query = '', collapsed: ReadonlySet<number> = new Set()) => {
 		const { lines, model } = list(text);
-		return isItemVisible(lines, model, now, { showArchived: false, starredOnly: false, tags: [], archiveDelayMs: DAY, find: containing(query), keepLine: null, collapsed }, titleLine);
+		return isItemVisible(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: containing(query), keepLine: null, collapsed }, titleLine);
 	};
 
 	test('an item in an open section, with no filter, is visible', () => {
@@ -344,7 +345,7 @@ describe('isItemVisible', () => {
 describe('lit tags', () => {
 	const now = new Date(2026, 9, 21, 12, 0);
 	const text = 'Intro\n- [ ] Fries #frozen\n- [ ] Peas #Frozen/green ⭐\n- [ ] Bread\n## Garden\n- [ ] Rake #tools\n\tnotes #x\n- [x] Old #gone ✔ 2026-10-01 10:00\n';
-	const filter = (tags: string[], extra: Partial<RowFilter> = {}): RowFilter => ({ showArchived: false, starredOnly: false, tags, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set(), ...extra });
+	const filter = (tags: string[], extra: Partial<RowFilter> = {}): RowFilter => ({ showArchived: false, starredOnly: false, lit: { tags, untagged: false }, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set(), ...extra });
 	const titles = (rowFilter: RowFilter) => {
 		const { lines, model } = list(text);
 		return visibleSections(lines, model, now, rowFilter).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
@@ -385,5 +386,34 @@ describe('lit tags', () => {
 	test('the strip keeps the casing met first in file order, across headings', () => {
 		const { lines, model } = list('## Freezer\n- [ ] Fries #Frozen\n## Later\n- [ ] Peas #frozen\n');
 		expect(listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: DAY }, [])).toEqual(['Frozen']);
+	});
+});
+
+describe('No tag', () => {
+	const now = new Date(2026, 9, 21, 12, 0);
+	const text = '- [ ] Fries #frozen\n- [ ] #fridge Milk\n- [ ] Bread\n\tnotes #frozen\n## Dry #pantry\n- [ ] Rice\n- [ ] Salt #pantry\n- [ ] Year #1984\n';
+	const filter = (tags: string[], extra: Partial<RowFilter> = {}): RowFilter => ({ showArchived: false, starredOnly: false, lit: { tags, untagged: true }, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set(), ...extra });
+	const titles = (rowFilter: RowFilter) => {
+		const { lines, model } = list(text);
+		return visibleSections(lines, model, now, rowFilter).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
+	};
+
+	test("alone shows the items with no tag on their own line, whatever their notes or heading carry", () => {
+		expect(titles(filter([]))).toEqual(['Bread', 'Rice', 'Year']);
+	});
+
+	test('adds the items with no tag to those carrying every lit tag', () => {
+		expect(titles(filter(['frozen']))).toEqual(['Fries', 'Bread', 'Rice', 'Year']);
+		expect(titles(filter(['frozen', 'pantry']))).toEqual(['Bread', 'Rice', 'Year']);
+	});
+
+	test('combines with a query by AND', () => {
+		expect(titles(filter(['frozen'], { find: containing('bread') }))).toEqual(['Bread']);
+	});
+
+	test('findsNothing is true when every item has a tag', () => {
+		const { lines, model } = list('- [ ] Fries #frozen\n');
+		const noTag = filter([]);
+		expect(findsNothing(model, noTag, visibleSections(lines, model, now, noTag))).toBe(true);
 	});
 });

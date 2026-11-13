@@ -2,7 +2,7 @@
 status: live
 verified: 2026-11-13
 governs: [src/**, styles.css]
-tracking: ["#325", "#340"]
+tracking: ["#325", "#340", "#383"]
 ---
 
 # PrinceLists for Obsidian: filtering by tag
@@ -17,15 +17,18 @@ Schedule, by them. It isn't only for groceries: a to-do or packing list narrows 
 
 **How decisions are marked:** as in the [step one design](2026-10-20-prince-lists-design.md).
 **(owner)** means the owner decided it on 2026-11-07, and **(owner, #340)** what the owner asked
-for in #340 or decided while it was built; **(call)** means the designer did, and a
-builder may revisit it. Step one's rules still hold: an edit replaces only the lines it concerns,
-nothing is written in the background, and only documented Obsidian APIs are used.
+for in #340 or decided while it was built, and **(owner, #383)** the same for #383; **(call)**
+means the designer did, and a builder may revisit it. Step one's rules still hold: an edit replaces
+only the lines it concerns, nothing is written in the background, and only documented Obsidian APIs
+are used.
 
 ## At a glance
 
 - **A strip of the list's tags** sits between the list note and the rows. Tapping a tag shows only
   the items that carry it **(owner)**.
 - **Tags combine:** with two tags lit, only items carrying both show **(owner)**.
+- **No tag,** first in the strip, shows the items without a tag, alone or added to lit tags
+  **(owner, #383)**.
 - **A setting** shows the strip always, the default, or only while the filter field is open
   **(owner)**.
 - **Rows show their tags as labels,** and the open card adds and removes them **(owner)**.
@@ -77,9 +80,9 @@ nothing is written in the background, and only documented Obsidian APIs are used
 - **The strip keeps every tag while filtering (owner),** not only those of the items still shown,
   so what is lit can always be seen and turned off. A lit tag whose last item lost it stays in the
   strip, lit, until it's turned off **(call)**, so the filter never changes under you.
-- **A clear button at the strip's end (owner)** turns off every lit tag. It shows only while a tag
-  is lit, and clears only tags: typed text and "Show starred only" keep their own ways out
-  **(owner)**. It is an icon button with the tooltip "Clear tags" **(call)**.
+- **A clear button at the strip's end (owner)** turns off every lit tag, and No tag. It shows only
+  while one of them is lit, and clears only tags: typed text and "Show starred only" keep their own
+  ways out **(owner)**. It is an icon button with the tooltip "Clear tags" **(call)**.
 
 ## Filtering
 
@@ -104,6 +107,32 @@ nothing is written in the background, and only documented Obsidian APIs are used
   off too **(owner)**, as it turns off "Show starred only".
 - **The matching is core's:** the view passes the lit tags to core, as it passes the text matcher
   **(call)**.
+
+## No tag (owner, #383)
+
+The untagged items of a long list are hard to find by scrolling. No tag shows them, to tag them
+together ([tagging a selection](2026-11-12-select-tags-design.md)), or to see what is left once
+every tagged part of a list is done, such as what is left to buy.
+
+- **A toggle button first in the strip,** before the tags, labeled "No tag", without a `#`. It
+  has a strip tag's shape and size without the tag colors, with a dashed border, so it doesn't read
+  as a tag named `#notag` **(call)**; lit, it takes the accent color as a lit tag does.
+- **It is in every strip,** a list's and the Schedule's, so a list with no tags, which has no
+  strip, has no No tag. It stays when every item has a tag; lit, it then finds nothing.
+- **An item has no tag** when its own line carries none, by the rule in "An item's tags": a tag in
+  its notes or on the heading above doesn't count.
+- **Alone, it shows only the items with no tag.** With tags lit, it adds them to the items carrying
+  every lit tag: `#frozen` and No tag show the `#frozen` items and the untagged ones, and hide the
+  `#pantry` ones.
+- **Typed text and "Show starred only" still narrow** what it shows, as they narrow lit tags.
+- **Otherwise it is a lit tag (call):** the clear button turns it off, it isn't remembered, and
+  Escape, the filter icon and the setting treat it as they treat lit tags. Once the strip has no
+  tag left, such as when the last tagged item loses its tag, No tag goes out with the strip, so
+  nothing unseen filters the rows.
+- **Tagging rows it shows hides them,** since they no longer match, so they leave the selection,
+  and once none is left selecting ends, as it does when any selected row hides **(owner, #383)**.
+  Undo brings them back.
+- **The matching is core's,** with the lit tags **(call)**.
 
 ## The setting
 
