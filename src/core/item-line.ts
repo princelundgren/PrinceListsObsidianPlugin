@@ -55,7 +55,7 @@ const MARK_TIME_PATTERN = new RegExp(
 export const DONE_DATE_PATTERN = new RegExp(`✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
 const DONE_DATE_FIELD = new RegExp(DONE_DATE_PATTERN, 'g');
 const REPEAT_FIELD = new RegExp(`🔁${VS16} *[a-zA-Z0-9, !]+`);
-const END_FIELD = new RegExp(` +🔚${VS16} *\\S+$`);
+const END_FIELD = new RegExp(`🔚${VS16} *\\S+$`);
 
 export function parseItemLine(text: string): ItemLineParts | null {
 	const match = ITEM_PATTERN.exec(text);
@@ -78,8 +78,17 @@ export function parseItemLine(text: string): ItemLineParts | null {
 	const marks = trailingMarks(head);
 	const title = head.slice(0, head.length - marks.length);
 	const tail = body.slice(tailStart) + blockId + trailing;
-	const end = REPEAT_FIELD.test(tail) ? (END_FIELD.exec(title)?.[0] ?? '') : '';
+	const end = REPEAT_FIELD.test(tail) ? endOf(title) : '';
 	return { before, status, afterStatus, title: title.slice(0, title.length - end.length), end, marks, tail };
+}
+
+// The `🔚` field at the end of `title` with the spaces before it, or '' when no space precedes it.
+// Matching the field alone and walking back over the spaces keeps a long run of them linear.
+function endOf(title: string): string {
+	const field = END_FIELD.exec(title);
+	if (!field) return '';
+	const start = findRunStart(title, field.index, isSpace);
+	return start === field.index ? '' : title.slice(start);
 }
 
 // Whitespace between fields is skipped while matching, as Tasks does after each field. The fields

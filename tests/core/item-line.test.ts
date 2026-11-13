@@ -322,4 +322,19 @@ describe('the end in parseItemLine', () => {
 		expect(tickLine(open, new Date(2026, 10, 13, 9, 0))).toBe('- [x] Physio 🔚 5x ✔ 2026-11-13 09:00 🔁 every day ⏳ 2026-11-14');
 		expect(untickLine(tickLine(open, new Date(2026, 10, 13, 9, 0)))).toBe(open);
 	});
+
+	test('does not count a 🔚 with no space before it', () => {
+		expect(parseItemLine('- [ ] Physio🔚 5x 🔁 every day')).toMatchObject({ title: 'Physio🔚 5x', end: '' });
+	});
+
+	// Assumes a linear scan finishes in milliseconds and a quadratic one takes over a second here.
+	test('reads a line with a long run of spaces before the 🔚 in well under a second', () => {
+		const line = `- [ ] a${' '.repeat(30_000)}🔚 x y 🔁 every day`;
+		const started = performance.now();
+
+		const parts = parseItemLine(line);
+
+		expect(performance.now() - started).toBeLessThan(500);
+		expect(parts?.end).toBe('');
+	});
 });
