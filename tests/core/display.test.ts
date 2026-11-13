@@ -19,7 +19,7 @@ const sectionsOf = (
 	return visibleSections(lines, model, now, { showArchived, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs, find: containing(query), keepLine, collapsed });
 };
 
-const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false, when: string | null = null, tags: string[] = [], tailTags: string[] = tags) => ({
+const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false, when: string | null = null, tags: string[] = [], tailTags: string[] = tags, repeats = false) => ({
 	kind: 'item',
 	titleLine,
 	title,
@@ -30,6 +30,7 @@ const row = (titleLine: number, title: string, done = false, label = title, arch
 	when,
 	tags,
 	tailTags,
+	repeats,
 });
 const untouched = (start: number, text: string) => ({ kind: 'untouched', start, text });
 
@@ -130,6 +131,15 @@ describe('itemRow', () => {
 		const now = new Date(2026, 9, 21, 10, 0);
 		const ticked = tickLine('- [ ] a 📅 2026-10-30', now);
 		expect(itemRow(ticked, 4, now, DAY)).toEqual(row(4, 'a', true));
+	});
+
+	test.each([
+		['an open repeating line', '- [ ] water ⏳ 2026-11-13 🔁 every day', true],
+		['an open line whose repeat it cannot follow', '- [ ] fix the 🔁 every day bug', true],
+		['a done repeating line', '- [x] water ⏳ 2026-11-13 🔁 every day ✅ 2026-11-13', false],
+		['a 🔁 in the title that is no field', "- [ ] fix the 🔁 icon's color", false],
+	])('shows the repeat of %s: %s', (_, text, repeats) => {
+		expect(itemRow(text, 0, new Date(2026, 10, 14), DAY).repeats).toBe(repeats);
 	});
 
 	test('marks a done item archived 24 hours after its tick', () => {

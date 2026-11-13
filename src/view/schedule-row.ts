@@ -3,7 +3,7 @@ import type { ScheduledItem } from '../core/schedule';
 import { addHiddenLabel } from './dom';
 import { renderInline, type MarkdownHost } from './notes';
 import { addTickZone, CHECKBOX_CLASS, ITEM_CLASS } from './render-list';
-import { addStar, addTags, addWhen } from './row-marks';
+import { addRepeat, addStar, addTags, addWhen } from './row-marks';
 
 /** A Schedule row for `item`, and the Component its rendered title needs, which `host` must remove once the row goes. */
 export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today: string): { rowEl: HTMLLIElement; block: Component | null } {
@@ -20,6 +20,7 @@ export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today:
 	titleLine.toggleClass('is-tagged', item.tailTags.length > 0);
 	if (item.starred) addStar(titleLine);
 	addWhen(titleLine, item.day, today);
+	if (item.repeats) addRepeat(titleLine);
 	text.createDiv({ cls: 'princelists-schedule-list', text: item.listName });
 	return { rowEl, block };
 }

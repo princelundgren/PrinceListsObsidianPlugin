@@ -1029,6 +1029,19 @@ button.princelists-undo:hover {
 	font-size: var(--font-ui-small);
 }
 
+/* In the day's color and font size, just before it. */
+.princelists-repeat {
+	flex: none;
+	display: flex;
+	align-self: baseline;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.princelists-repeat svg {
+	--icon-size: 1em;
+}
+
 /* A row's tags follow its title, which Obsidian's renderer draws, so they can't flow inside it. They
    wrap among themselves when the line is full. */
 .princelists-tags {
@@ -1323,6 +1336,12 @@ button.princelists-card-star.is-starred svg {
 		--icon-size: var(--princelists-mark-size);
 		position: relative;
 		top: var(--princelists-mark-drop);
+	}
+
+	/* An icon on the baseline is centered half an em up; this centers it on the day's capitals. */
+	.princelists-repeat svg {
+		position: relative;
+		top: calc((1em - 1cap) / 2);
 	}
 
 	/* The open card's tag, star, day and ⋯ are buttons of one size, centered on one line. Except on

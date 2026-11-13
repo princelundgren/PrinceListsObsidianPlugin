@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-13
+verified: 2026-11-14
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -57,7 +57,8 @@ this met on 2026-10-30 **(owner)**.
   fields, so Tasks and its queries read it as scheduled. Tasks also accepts `⌛`; the plugin reads
   both and writes `⏳` **(call)**.
 - **In the view it never shows as `⏳`:** a row shows only the day, with no icon **(owner,
-  2026-11-05)**: a date reads as one without it, and the icon took room on a phone's row.
+  2026-11-05)**: a date reads as one without it, and the icon took room on a phone's row. A
+  repeating item's row also shows the `repeat` icon (repeating items' design, "Showing a repeat").
 - **Setting a When (call)** on an item that has one replaces its date in place. A new one goes at
   the end of the trailing Tasks fields and tags, so after any tags, before a block ID (` ^id`)
   and trailing whitespace if the line has them. Clearing it removes the field and the space before it.
@@ -314,7 +315,7 @@ this met on 2026-10-30 **(owner)**.
 
 - **Setting a When (owner, 2026-10-27):** the card's top right has a calendar icon, between the
   star and the ⋯, so the star comes before the day as on the row **(owner, 2026-11-05)**. Once the
-  item has a When, its day takes the icon's place, with no icon, as on the row. Clicking either
+  item has a When, its day takes the icon's place, with no icon of its own, as on the row. Clicking either
   opens the platform's date picker through an `<input type="date">`. Obsidian has no date picker
   API, and the HTML input gives each platform's own picker.
   - **In a view 480 px wide or narrower (owner, 2026-11-05),** such as a phone or a
@@ -327,9 +328,10 @@ this met on 2026-10-30 **(owner)**.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's top right, and every platform's picker can
     already clear the day.
-- **On a row (call):** a short day at the row's end, with no icon: "Today", "Tomorrow", a
+- **On a row (call):** a short day at the row's end, with no icon of its own: "Today", "Tomorrow", a
   weekday for the rest of the next seven days, or else the date, in the language set in Obsidian.
-  A past day shows its date.
+  A past day shows its date. A repeating item's `repeat` icon stands just before it (repeating
+  items' design, "Showing a repeat").
   - **A date in the current year has no year (owner, 2026-11-05),** such as "Nov 12", since the
     year took much of the row; one in another year keeps it, such as "Jan 4, 2027".
 - **The Schedule view** is a view of its own, opened with an "Open schedule" command and a ribbon
