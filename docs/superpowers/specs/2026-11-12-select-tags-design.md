@@ -42,8 +42,8 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   as one 360 or 375 px wide, gets the icons-only layout, whose buttons may narrow below 48 px, as
   in a sidebar today **(owner, 2026-11-12, in selecting several rows)**.
 - **The one-row layout moves up too (call: the width):** at 520 px Done and the count leave about
-  320 px, short of the 337 six buttons need, so it starts where every button keeps 48 px, about
-  540 px. The builder measures it in Obsidian and names the width in the PR.
+  320 px, short of the 337 six buttons need, so it starts where every button keeps 48 px: 542 px,
+  measured in Obsidian 1.15.1's default theme.
 - **A screen reader (call):** the button has `aria-expanded`, as the card's tag button has, and
   `aria-haspopup="dialog"`; the popover has `role="dialog"`, named "Tag the selection".
 
@@ -68,7 +68,9 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   title or its tail), then `New tag: #<tag>` for a typed tag the list lacks. A tag only some items
   have stays, since picking it gives it to the rest.
 - **Obsidian's suggestions** open in the page's body at z-index 60, above the popover, and may
-  cover the bar while they show **(call)**: the bar is not in use then.
+  cover the bar while they show **(call)**: the bar is not in use then. On Android with the
+  keyboard up they open under the field, above the keyboard, and a tap on one adds the tag
+  (checked on Android).
 - **A pick (owner)** adds the tag with `addTag` to each selected item, which leaves an item that has
   it, in its title or its tail, as it is. The popover closes **(owner)** and focus goes to the
   bar's Tag button, as the card's popover returns it to its tag button **(call)**.
@@ -86,7 +88,9 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   - A press on another bar button, which then does what it does: Done ends selecting, Star opens
     its menu.
   - Any change to the selection, such as an outside change dropping a row or a ticked row hiding,
-    so the chips and the next pick never describe rows that left.
+    so the chips and the next pick never describe rows that left. A change to a selected row's
+    text closes it too, such as Cmd+Z in the empty field undoing the list's last edit, or an outside
+    edit, so the chips never show tags from before it.
 
 ## The selection's menu
 
@@ -106,10 +110,6 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   only in its title counts as having it when adding, as `addTag` does, so a pick can change fewer
   items than the chip's count suggests; the message says how many it did.
 - **Headings (call)** get no tag and aren't counted, as they get no star or date.
-
-## Left to the builder
-
-- Where the suggestions open on a phone with the keyboard up; tagging must work on Android then.
 
 ## Not in this design
 

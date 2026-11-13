@@ -36,6 +36,7 @@ import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
 import { focusListWhenActive } from './select';
 import { buildSelectionBar, syncSelectionBar } from './selection-bar';
+import { buildSelectionTagPopover, closeSelectionTagPopover, placeSelectionTagPopover } from './selection-tag-popover';
 import type { TagSuggest } from './tag-suggest';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
@@ -207,6 +208,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.newItemButton = buildNewItemButton(this, newItemLabel);
 		const selectionBar = buildSelectionBar(this);
 		swallowClickAfterHold(this, selectionBar);
+		buildSelectionTagPopover(this);
 		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
 		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.
@@ -217,6 +219,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	protected async onClose(): Promise<void> {
 		this.viewClosed = true;
 		closeTagPopover(this);
+		closeSelectionTagPopover(this);
 		this.redrawFiltered.cancel();
 		this.endListNote();
 		this.dropListNoteEditor();
@@ -232,6 +235,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	onResize(): void {
 		super.onResize();
 		for (const field of this.contentEl.querySelectorAll('textarea')) fitHeight(field);
+		placeSelectionTagPopover(this);
 	}
 
 	// setViewState records a history entry when the view type changes, so Back would land on the

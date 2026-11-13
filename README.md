@@ -20,7 +20,7 @@ Tag items to group them across sections. The list's tags sit above its items, an
 
 ![In a grocery list, lemons is opened and gets the curry tag from the tag button, picked from the suggestions, then #curry in the strip of tags above the list leaves the five items for the curry, under their headings](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tags.gif)
 
-Hold an item to select it, then click or tap others to add them. Move, tick, star, date or delete them all at once.
+Hold an item to select it, then click or tap others to add them. Move, tick, star, tag, date or delete them all at once.
 
 ![In a todo list, a row is held until it is selected and two more are clicked to join it, then dragging one takes all three under the Admin heading, and Star in the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
 
@@ -60,7 +60,7 @@ You can embed lists in normal notes.
 - **Add** with the floating **+**, and **drag** to reorder. The settings can put a **+** in the list's header instead, or as well, on desktop, mobile or both.
 - **Star** an item and give it a date.
 - **Tags:** write a tag on an item, or add it from the tag button in its card, with suggestions. Items show their tags as labels.
-- **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, ticks, stars, dates or deletes them all at once, with Undo, and dragging one drags them all. A selected heading brings its section.
+- **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, ticks, stars, tags, dates or deletes them all at once, with Undo, and dragging one drags them all. A selected heading brings its section.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
 - **Find:** the filter icon in a list's header opens a field that filters it by title and notes, matching the letters you type in order, so "mlk" finds "oat milk", and by date as written, such as "2026-11". Toggles beside it show only starred items, or archived items too. Headings stay, a message says when nothing matches, and a button clears the field. The field stays open until the icon or Escape closes it. The Schedule has one beside its title, with the starred toggle.
 - **Filter by tag:** a strip of the list's tags sits above its items. Click a tag to show only the items that have it, or two to show those that have both. A setting shows the strip always or only while the filter is open. The Schedule has one too. Nested tags count under their parent, and case doesn't matter.
