@@ -109,7 +109,6 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## Left to the builder
 
-- Where the selection's tag counts are worked out, in `src/core/` with tests first, and the names.
 - Where the suggestions open on a phone with the keyboard up; tagging must work on Android then.
 
 ## Not in this design

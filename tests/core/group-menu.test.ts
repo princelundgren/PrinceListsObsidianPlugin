@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { GroupState } from '../../src/core/group-edits';
-import { barButtons, changeMessage, groupEntries } from '../../src/core/group-menu';
+import { barButtons, changeMessage, groupEntries, tagChangeMessage } from '../../src/core/group-menu';
 
 const NONE: GroupState = {
 	items: 0,
@@ -96,4 +96,10 @@ describe('changeMessage', () => {
 		expect(changeMessage('tick', { changed: 3, skipped: 1 })).toBe('3 items ticked. 1 repeating item skipped.');
 		expect(changeMessage('tick', { changed: 3, skipped: 2 })).toBe('3 items ticked. 2 repeating items skipped.');
 	});
+});
+
+test('names the tag and how many items the write changed', () => {
+	expect(tagChangeMessage('addTag', 'pantry', 3)).toBe('#pantry added to 3 items.');
+	expect(tagChangeMessage('removeTag', 'pantry', 5)).toBe('#pantry removed from 5 items.');
+	expect(tagChangeMessage('addTag', 'pantry', 1)).toBe('#pantry added to 1 item.');
 });
