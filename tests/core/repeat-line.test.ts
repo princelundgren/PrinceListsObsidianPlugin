@@ -4,6 +4,7 @@ import {
 	anchorOf,
 	canWrite,
 	draftOf,
+	ensureTickable,
 	hasDate,
 	removeRepeat,
 	removeWhen,
@@ -213,6 +214,38 @@ describe('draftOf', () => {
 
 	test('leaves a title 🔚 that is no end out of the draft', () => {
 		expect(draftOf('- [ ] Trip 🔚 soon')).toEqual({ rule: every(1, 'day'), end: null });
+	});
+});
+
+describe('ensureTickable', () => {
+	const today = '2026-11-13';
+
+	test('refuses what Save writes over a title 🔚 that is no end, with and without a chosen end', () => {
+		for (const end of [null, { kind: 'times', left: 3 } as const]) {
+			const written = setRepeat('- [ ] Trip 🔚 soon', every(1, 'day'), end, today);
+			expect(() => ensureTickable(written), written).toThrow(
+				expect.objectContaining({ problem: 'end', message: "This item's 🔚 end can't be read, so the repeat isn't saved." }),
+			);
+		}
+	});
+
+	test('refuses a line with a date that does not exist', () => {
+		expect(() => ensureTickable(setRepeat('- [ ] a ⏳ 2026-02-30', every(1, 'day'), null, today))).toThrow(
+			expect.objectContaining({ problem: 'date', message: "This item has a date that doesn't exist, so the repeat isn't saved." }),
+		);
+	});
+
+	test('keeps the tick\'s message for a tick', () => {
+		expect(() => tickRepeating('- [ ] a 🔚 soon ⏳ 2026-11-13 🔁 every day', now)).toThrow(
+			"This item's 🔚 end can't be read, so it isn't ticked.",
+		);
+	});
+
+	test('passes a plain line, and one with a readable end, unchanged', () => {
+		for (const end of [null, { kind: 'times', left: 3 } as const]) {
+			const written = setRepeat('- [ ] Water plants', every(3, 'day'), end, today);
+			expect(ensureTickable(written)).toBe(written);
+		}
 	});
 });
 

@@ -27,9 +27,16 @@ const MESSAGES: Record<RepeatProblem, string> = {
 	date: "This item has a date that doesn't exist, so it isn't ticked.",
 };
 
+// What a save says instead of the tick's message. A draft can't give a line whose rule can't be read, so
+// that problem keeps the tick's.
+const SAVE_MESSAGES: Partial<Record<RepeatProblem, string>> = {
+	end: "This item's 🔚 end can't be read, so the repeat isn't saved.",
+	date: "This item has a date that doesn't exist, so the repeat isn't saved.",
+};
+
 export class RepeatingItemError extends Error {
-	constructor(readonly problem: RepeatProblem) {
-		super(MESSAGES[problem]);
+	constructor(readonly problem: RepeatProblem, message: string = MESSAGES[problem]) {
+		super(message);
 		this.name = 'RepeatingItemError';
 	}
 }
@@ -158,6 +165,16 @@ export function setRepeat(line: string, rule: RepeatRule, end: RepeatEnd | null,
 	// An end after an empty title leaves the tail's first field touching it.
 	const needsSpace = repeating.title + newEnd + repeating.marks !== '' && !/^\s/.test(repeating.tail);
 	return joinItemLine({ ...repeating, end: newEnd, tail: needsSpace ? ` ${repeating.tail}` : repeating.tail });
+}
+
+/**
+ * `line` if it repeats in a way a tick can follow. Throws RepeatingItemError, with a message that says
+ * the repeat isn't saved, when it doesn't, so a save never writes a line the plugin then refuses to tick.
+ */
+export function ensureTickable(line: string): string {
+	const problem = repeatOf(line)?.problem;
+	if (problem) throw new RepeatingItemError(problem, SAVE_MESSAGES[problem]);
+	return line;
 }
 
 /** The line without its `🔁` and `🔚`, each with the spaces before it. */
