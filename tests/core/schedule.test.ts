@@ -229,12 +229,18 @@ describe('tags in the Schedule', () => {
 	const items = [item('Later', '2026-10-30', ['Frozen']), item('Soon', '2026-10-27', ['frozen', 'shop/a']), item('Plain', '2026-10-28', [])];
 
 	test('shownSchedule shows only items carrying every lit tag, parents included', () => {
-		const titles = (tags: string[]) => shownSchedule(items, '2026-10-27', { find: null, starredOnly: false, lit: { tags } }, new Set()).flatMap((g) => g.items.map((i) => i.title));
+		const titles = (tags: string[]) => shownSchedule(items, '2026-10-27', { find: null, starredOnly: false, lit: { tags, untagged: false } }, new Set()).flatMap((g) => g.items.map((i) => i.title));
 		expect(titles(['frozen'])).toEqual(['Soon', 'Later']);
 		expect(titles(['shop'])).toEqual(['Soon']);
 		expect(titles(['frozen', 'shop'])).toEqual(['Soon']);
-		const filter = { find: null, starredOnly: false, lit: { tags: ['nope'] } };
+		const filter = { find: null, starredOnly: false, lit: { tags: ['nope'], untagged: false } };
 		expect(scheduleFindsNothing(items, shownSchedule(items, '2026-10-27', filter, new Set()), filter)).toBe(true);
+	});
+
+	test('shownSchedule with No tag lit adds the items with no tag', () => {
+		const titles = (tags: string[]) => shownSchedule(items, '2026-10-27', { find: null, starredOnly: false, lit: { tags, untagged: true } }, new Set()).flatMap((g) => g.items.map((i) => i.title));
+		expect(titles([])).toEqual(['Plain']);
+		expect(titles(['shop'])).toEqual(['Soon', 'Plain']);
 	});
 
 	test("scheduleStripTags takes the casing of the first item in the Schedule's order, not the file's", () => {

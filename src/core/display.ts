@@ -6,7 +6,7 @@ import { itemTags } from './item-tags';
 import type { Line } from './lines';
 import type { ItemBlock, ListModel } from './parse';
 import { splitStar } from './star';
-import { carriesTags, stripTags, type LitTags } from './tags';
+import { isAnyLit, meetsLitTags, stripTags, type LitTags } from './tags';
 import { whenOf } from './when';
 
 export interface ItemRow {
@@ -70,7 +70,7 @@ export interface RowFilter {
 const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 
 // Every heading stays, even when all of its items are hidden. Content the plugin leaves alone stays
-// too, except while a query, "Show starred only" or a lit tag filters the list: then only the items
+// too, except while a query, "Show starred only", a lit tag or No tag filters the list: then only the items
 // that match show under the headings. A collapsed section shows only its heading, unless the list
 // is filtered.
 // Archived is worked out from `now` on each redraw, never written down (spec, "Done and archived").
@@ -84,7 +84,7 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, filter.archiveDelayMs);
 			if (!isShown(row, filter.showArchived)) return [];
 			if (item.titleLine === filter.keepLine) return [row];
-			if (filtering) return (!filter.starredOnly || row.starred) && carriesTags(row.tags, filter.lit.tags) && itemMatches(lines, item, row, filter.find) ? [row] : [];
+			if (filtering) return (!filter.starredOnly || row.starred) && meetsLitTags(row.tags, filter.lit) && itemMatches(lines, item, row, filter.find) ? [row] : [];
 			return collapsed ? [] : [row];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
@@ -105,9 +105,9 @@ export function findsNothing(model: ListModel, filter: RowFilter, sections: read
 	return isFiltered(filter) && hasItems && sections.every(({ rows }) => rows.length === 0);
 }
 
-/** Whether a query, "Show starred only" or a lit tag filters what shows. */
+/** Whether a query, "Show starred only", a lit tag or No tag filters what shows. */
 export function isFiltered(filter: { find: Find | null; starredOnly: boolean; lit: LitTags }): boolean {
-	return filter.find !== null || filter.starredOnly || filter.lit.tags.length > 0;
+	return filter.find !== null || filter.starredOnly || isAnyLit(filter.lit);
 }
 
 /**

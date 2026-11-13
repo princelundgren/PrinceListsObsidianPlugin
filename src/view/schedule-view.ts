@@ -8,7 +8,7 @@ import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import type { TagStripMode } from '../core/tag-strip-mode';
-import { NO_LIT_TAGS, type LitTags } from '../core/tags';
+import { litForStrip, NO_LIT_TAGS, type LitTags } from '../core/tags';
 import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
@@ -284,11 +284,12 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const now = new Date();
 		const today = dayOf(now);
 		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
+		const strip = showsTagStrip(this) ? scheduleStripTags(dated, this.litTags.tags) : null;
+		if (strip) this.litTags = litForStrip(this.litTags, strip);
 		const filter = { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly, lit: this.litTags };
 		const groups = shownSchedule(dated, today, filter, this.collapsed);
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
-		const strip = showsTagStrip(this) ? scheduleStripTags(dated, this.litTags.tags) : null;
 		const drawn = JSON.stringify([today, dated.length === 0, shown, strip, this.litTags]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;

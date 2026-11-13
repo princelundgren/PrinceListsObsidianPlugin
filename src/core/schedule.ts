@@ -3,7 +3,7 @@ import { isFiltered, timelessItemRow, whenMatches, type Find } from './display';
 import { getItemNotes } from './edit-items';
 import { splitLines } from './lines';
 import { parseList } from './parse';
-import { carriesTags, stripTags, type LitTags } from './tags';
+import { meetsLitTags, stripTags, type LitTags } from './tags';
 import { daysFrom } from './when';
 
 export interface ScheduledItem {
@@ -96,14 +96,14 @@ export function scheduleFindsNothing(items: readonly ScheduledItem[], groups: re
 
 /**
  * The Schedule's groups as drawn: only the items `filter` matches, and a group only while one does. A
- * collapsed group has no items under it, unless a query, "Show starred only" or a lit tag filters
- * the Schedule.
+ * collapsed group has no items under it, unless a query, "Show starred only", a lit tag or No tag
+ * filters the Schedule.
  */
 export function shownSchedule(items: readonly ScheduledItem[], today: string, filter: ScheduleFilter, collapsed: ReadonlySet<ScheduleGroup>): ShownGroup[] {
 	const { find, starredOnly, lit } = filter;
 	const filtering = isFiltered(filter);
 	return groupSchedule(
-		items.filter((item) => (!starredOnly || item.starred) && carriesTags(item.tags, lit.tags) && (find === null || matchesSchedule(item, find))),
+		items.filter((item) => (!starredOnly || item.starred) && meetsLitTags(item.tags, lit) && (find === null || matchesSchedule(item, find))),
 		today,
 	).map(({ group, items: matches }) => {
 		const isCollapsed = collapsed.has(group);

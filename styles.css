@@ -915,6 +915,7 @@ button.princelists-archived-toggle:not(:focus-visible),
 button.princelists-starred-toggle:not(:focus-visible),
 button.princelists-clear-tags:not(:focus-visible),
 button.princelists-strip-tag:not(:focus-visible),
+button.princelists-strip-no-tag:not(:focus-visible),
 button.princelists-find-button:not(:focus-visible),
 button.princelists-collapse:not(:focus-visible) {
 	box-shadow: none;
@@ -1081,6 +1082,7 @@ button.princelists-strip-tag {
 
 /* WCAG 2.2's minimum target size. */
 button.princelists-strip-tag,
+button.princelists-strip-no-tag,
 button.princelists-clear-tags,
 button.princelists-card-tag-button,
 button.princelists-card-tag-remove {
@@ -1096,15 +1098,37 @@ button.princelists-card-tag-remove {
 	}
 }
 
-/* After the hover rule, so a hover keeps it. */
-button.princelists-strip-tag.is-lit {
+/* No tag has a strip tag's shape without the tag colors, so it doesn't read as a tag. */
+button.princelists-strip-no-tag {
+	height: auto;
+	font-size: var(--tag-size);
+	/* The dashed border takes the place of padding, so No tag is a tag's size. */
+	padding: calc(var(--tag-padding-y) - var(--border-width)) calc(var(--tag-padding-x) - var(--border-width));
+	border-radius: var(--tag-radius);
+	line-height: var(--line-height-tight);
+	color: var(--text-muted);
+	background-color: transparent;
+	border: var(--border-width) dashed var(--background-modifier-border);
+}
+
+@media (hover: hover) {
+	button.princelists-strip-no-tag:hover {
+		color: var(--text-normal);
+		background-color: var(--background-modifier-hover);
+	}
+}
+
+/* After the hover rules, so a hover keeps it. */
+button.princelists-strip-tag.is-lit,
+button.princelists-strip-no-tag.is-lit {
 	color: var(--text-on-accent);
 	background-color: var(--interactive-accent);
 	border-color: var(--interactive-accent);
 }
 
 @media (hover: hover) {
-	button.princelists-strip-tag.is-lit:hover {
+	button.princelists-strip-tag.is-lit:hover,
+	button.princelists-strip-no-tag.is-lit:hover {
 		background-color: var(--interactive-accent-hover);
 		border-color: var(--interactive-accent-hover);
 	}

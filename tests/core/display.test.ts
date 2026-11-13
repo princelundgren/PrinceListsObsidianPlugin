@@ -345,7 +345,7 @@ describe('isItemVisible', () => {
 describe('lit tags', () => {
 	const now = new Date(2026, 9, 21, 12, 0);
 	const text = 'Intro\n- [ ] Fries #frozen\n- [ ] Peas #Frozen/green ⭐\n- [ ] Bread\n## Garden\n- [ ] Rake #tools\n\tnotes #x\n- [x] Old #gone ✔ 2026-10-01 10:00\n';
-	const filter = (tags: string[], extra: Partial<RowFilter> = {}): RowFilter => ({ showArchived: false, starredOnly: false, lit: { tags }, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set(), ...extra });
+	const filter = (tags: string[], extra: Partial<RowFilter> = {}): RowFilter => ({ showArchived: false, starredOnly: false, lit: { tags, untagged: false }, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set(), ...extra });
 	const titles = (rowFilter: RowFilter) => {
 		const { lines, model } = list(text);
 		return visibleSections(lines, model, now, rowFilter).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
@@ -386,5 +386,34 @@ describe('lit tags', () => {
 	test('the strip keeps the casing met first in file order, across headings', () => {
 		const { lines, model } = list('## Freezer\n- [ ] Fries #Frozen\n## Later\n- [ ] Peas #frozen\n');
 		expect(listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: DAY }, [])).toEqual(['Frozen']);
+	});
+});
+
+describe('No tag', () => {
+	const now = new Date(2026, 9, 21, 12, 0);
+	const text = '- [ ] Fries #frozen\n- [ ] #fridge Milk\n- [ ] Bread\n\tnotes #frozen\n## Dry #pantry\n- [ ] Rice\n- [ ] Salt #pantry\n- [ ] Year #1984\n';
+	const filter = (tags: string[], extra: Partial<RowFilter> = {}): RowFilter => ({ showArchived: false, starredOnly: false, lit: { tags, untagged: true }, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set(), ...extra });
+	const titles = (rowFilter: RowFilter) => {
+		const { lines, model } = list(text);
+		return visibleSections(lines, model, now, rowFilter).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
+	};
+
+	test("alone shows the items with no tag on their own line, whatever their notes or heading carry", () => {
+		expect(titles(filter([]))).toEqual(['Bread', 'Rice', 'Year']);
+	});
+
+	test('adds the items with no tag to those carrying every lit tag', () => {
+		expect(titles(filter(['frozen']))).toEqual(['Fries', 'Bread', 'Rice', 'Year']);
+		expect(titles(filter(['frozen', 'pantry']))).toEqual(['Bread', 'Rice', 'Year']);
+	});
+
+	test('combines with a query by AND', () => {
+		expect(titles(filter(['frozen'], { find: containing('bread') }))).toEqual(['Bread']);
+	});
+
+	test('findsNothing is true when every item has a tag', () => {
+		const { lines, model } = list('- [ ] Fries #frozen\n');
+		const noTag = filter([]);
+		expect(findsNothing(model, noTag, visibleSections(lines, model, now, noTag))).toBe(true);
 	});
 });

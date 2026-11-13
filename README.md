@@ -63,7 +63,7 @@ You can embed lists in normal notes.
 - **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, ticks, stars, tags, dates or deletes them all at once, with Undo, and dragging one drags them all. A selected heading brings its section.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
 - **Find:** the filter icon in a list's header opens a field that filters it by title and notes, matching the letters you type in order, so "mlk" finds "oat milk", and by date as written, such as "2026-11". Toggles beside it show only starred items, or archived items too. Headings stay, a message says when nothing matches, and a button clears the field. The field stays open until the icon or Escape closes it. The Schedule has one beside its title, with the starred toggle.
-- **Filter by tag:** a strip of the list's tags sits above its items. Click a tag to show only the items that have it, or two to show those that have both. A setting shows the strip always or only while the filter is open. The Schedule has one too. Nested tags count under their parent, and case doesn't matter.
+- **Filter by tag:** a strip of the list's tags sits above its items. Click a tag to show only the items that have it, or two to show those that have both. **No tag** shows the items without a tag, alone or added to a tag's. A setting shows the strip always or only while the filter is open. The Schedule has one too. Nested tags count under their parent, and case doesn't matter.
 - **Delete** with Undo.
 
 **Notes on an item**

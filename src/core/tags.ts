@@ -31,12 +31,36 @@ export function tagOfTyped(typed: string): string | null {
 
 /** What the tag strip has lit. */
 export interface LitTags {
-	/** The lit tags: an item shows only if it carries every one. */
+	/** The lit tags: an item shows if it carries every one, or, with No tag lit, if it carries none. */
 	readonly tags: readonly string[];
+	/** No tag: the items with no tag show as well. */
+	readonly untagged: boolean;
 }
 
 /** A strip with nothing lit. */
-export const NO_LIT_TAGS: LitTags = { tags: [] };
+export const NO_LIT_TAGS: LitTags = { tags: [], untagged: false };
+
+/** Whether a tag or No tag is lit. */
+export function isAnyLit(lit: LitTags): boolean {
+	return lit.tags.length > 0 || lit.untagged;
+}
+
+/**
+ * Whether an item carrying `tags` shows for `lit`: with No tag lit, an item with no tag shows, and
+ * so does one carrying every lit tag, once a tag is lit too.
+ */
+export function meetsLitTags(tags: readonly string[], lit: LitTags): boolean {
+	if (!lit.untagged) return carriesTags(tags, lit.tags);
+	return tags.length === 0 || (lit.tags.length > 0 && carriesTags(tags, lit.tags));
+}
+
+/**
+ * What stays lit in a strip of `tags`: all of `lit`, or nothing once the strip has no tag, so No tag
+ * never filters the rows of a list whose strip no longer shows.
+ */
+export function litForStrip(lit: LitTags, tags: readonly string[]): LitTags {
+	return tags.length === 0 ? NO_LIT_TAGS : lit;
+}
 
 /** Whether `tags` meet every lit tag: each is one of them, or a parent of one (`shop` lit shows `shop/frozen`). */
 export function carriesTags(tags: readonly string[], lit: readonly string[]): boolean {

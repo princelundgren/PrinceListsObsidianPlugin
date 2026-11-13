@@ -2,7 +2,7 @@ import { prepareFuzzySearch, SearchComponent, setIcon, setTooltip, type App, typ
 import type { Find } from '../core/display';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { NO_LIT_TAGS, type LitTags } from '../core/tags';
-import { CLEAR_TAGS_CLASS, STRIP_TAG_CLASS } from './tag-strip';
+import { CLEAR_TAGS_CLASS, NO_TAG_CLASS, STRIP_TAG_CLASS } from './tag-strip';
 
 export const FILTER_CLASS = 'princelists-filter';
 
@@ -20,7 +20,7 @@ export const STARRED_TOGGLE_CLASS = 'princelists-starred-toggle';
  * the field, which would put a phone's keyboard away, so a view prevents the default of a mousedown
  * on them.
  */
-export const FILTER_TOGGLE_SELECTOR = `.${STARRED_TOGGLE_CLASS}, .${ARCHIVED_TOGGLE_CLASS}, .${STRIP_TAG_CLASS}, .${CLEAR_TAGS_CLASS}`;
+export const FILTER_TOGGLE_SELECTOR = `.${STARRED_TOGGLE_CLASS}, .${ARCHIVED_TOGGLE_CLASS}, .${NO_TAG_CLASS}, .${STRIP_TAG_CLASS}, .${CLEAR_TAGS_CLASS}`;
 
 /** Cmd+F's field, in a row with its starred toggle, and in a list its archived toggle. */
 export interface FilterField {

@@ -1,5 +1,5 @@
 import { listStripTags } from '../core/display';
-import { NO_LIT_TAGS } from '../core/tags';
+import { litForStrip, NO_LIT_TAGS } from '../core/tags';
 import { emptyHint } from '../core/empty-hint';
 import { isListText } from '../obsidian/marker';
 import { hasNoItems } from './add-button';
@@ -50,7 +50,9 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		}
 		if (showsTagStrip(view)) {
 			const shown = { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms };
-			buildTagStrip(fresh, listStripTags(lines, model, new Date(), shown, view.litTags.tags), view.litTags);
+			const strip = listStripTags(lines, model, new Date(), shown, view.litTags.tags);
+			view.litTags = litForStrip(view.litTags, strip);
+			buildTagStrip(fresh, strip, view.litTags);
 		}
 		const card = placeCard(view, kept);
 		if (card?.keeps) slot = card.el;
