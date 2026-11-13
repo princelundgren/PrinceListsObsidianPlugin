@@ -116,7 +116,7 @@ workspace files when it opens it. These need Node.js 22 or later too:
 | `node scripts/pictures/shoot.mjs --port <port> --out <folder> <scene>...` | Take the named scenes in `scripts/pictures/scenes/` from a demo vault that Obsidian has open with a DevTools port, writing each as `<scene>.webp` or `<scene>.gif` in `<folder>`. It needs `cwebp` and `ffmpeg`, and stops unless the vault is a copy in the scene's theme with "Native menus" off |
 | `node scripts/pictures/shoot.mjs --port <port> --out <folder> --desktop` | Take every scene that isn't a phone's, in name order, the same way |
 | `node scripts/pictures/push-vault.mjs --port <port> <folder>` | Write the copy in `<folder>` and the build into the vault Obsidian has open on an emulator, after removing everything in it but its plugins. It stops if the open vault has notes and isn't a copy |
-| `node scripts/pictures/run-in-obsidian.mjs --port <port> <file.js> [<argument>]` | Run `<file.js>` as the body of an async function in the Obsidian page on a DevTools port, with `ARG` set to `<argument>`, and print what it returns: a string as it is, anything else as JSON. It's for checks by hand in a copy of the demo vault, so the file calls only what `obsidian.d.ts` documents, like the other scripts. Obsidian must answer within 15 seconds |
+| `node scripts/pictures/run-in-obsidian.mjs --port <port> <file.js> [<argument>]` | Run `<file.js>` as the body of an async function in the Obsidian page on a DevTools port, with `ARG` set to `<argument>`, and print what it returns: a string as it is, anything else as JSON, and nothing when it returns nothing. It's for checks by hand in a copy of the demo vault. The file must call only what `obsidian.d.ts` documents (Layout, `scripts/`). Obsidian must answer within 15 seconds |
 
 To make a demo vault: close an earlier copy in Obsidian if it's open, run the copy script, then
 `npm run build` and `npm run install-vault -- <folder>`. The first time, open the folder in
@@ -165,7 +165,9 @@ demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
   when it ends. The scripts reach Obsidian through its `app` global, calling only what
   `obsidian.d.ts` documents. They read the page only to find elements, where they are, which folders
   are open and whether it's a phone's, act through DevTools input events, and add only the drawn
-  pointer (`pointer.mjs`).
+  pointer (`pointer.mjs`). The folder also holds `run-in-obsidian.mjs`, which runs a check by hand
+  as page JavaScript. A check file calls only what `obsidian.d.ts` documents, and reads only
+  PrinceLists' own view, never Obsidian's.
 - **File size:** keep each file under about 300 lines; split by responsibility.
 
 ## Working on a change

@@ -24,9 +24,10 @@ async function main() {
 		throw new Error('Usage: node scripts/pictures/run-in-obsidian.mjs --port <port> <file.js> [<argument>]');
 	}
 	const [file, argument] = positionals;
+	const expression = pageExpression(readFileSync(file, 'utf8'), argument);
 	const session = await connect(Number(values.port));
 	try {
-		const value = await session.evaluate(pageExpression(readFileSync(file, 'utf8'), argument));
+		const value = await session.evaluate(expression);
 		if (value !== undefined) console.log(printable(value));
 	} finally {
 		session.close();
