@@ -1,5 +1,7 @@
 ---
-status: approved
+status: building
+verified: 2026-11-13
+governs: [src/**, styles.css]
 tracking: ["#320"]
 ---
 

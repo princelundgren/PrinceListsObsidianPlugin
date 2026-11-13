@@ -85,11 +85,11 @@ export function dayLabel(day: string, today: string, language: string): string {
 	return new Intl.DateTimeFormat(language, { ...LABEL_FORMATS[kind], timeZone: 'UTC' }).format(utcOf(day));
 }
 
-function utcOf(day: string): number {
+export function utcOf(day: string): number {
 	const [, year, month, date] = DAY_PATTERN.exec(day) ?? [];
 	return Date.UTC(Number(year), Number(month) - 1, Number(date));
 }
 
-function isRealDay(day: string): boolean {
+export function isRealDay(day: string): boolean {
 	return new Date(utcOf(day)).toISOString().startsWith(day);
 }
