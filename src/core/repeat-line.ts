@@ -1,5 +1,5 @@
-import { joinItemLine, parseItemLine, splitTail, tailFields, tickLine, TASKS_SIGNIFIERS } from './item-line';
-import { addDays, nextDay, readEnd, readRule, stepDay, type RepeatEnd, type RepeatRule } from './repeat';
+import { findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, tickLine, TASKS_SIGNIFIERS } from './item-line';
+import { addDays, nextDay, readEnd, readRule, stepDay, writeEnd, writeRule, type RepeatEnd, type RepeatRule } from './repeat';
 import { dayOf, daysFrom, isRealDay, setWhen } from './when';
 
 export type RepeatProblem = 'rule' | 'end' | 'date';
@@ -40,6 +40,8 @@ const DATE_FIELD = new RegExp(
 	`(📅|📆|🗓|⏳|⌛|🛫)️? *(\\d{4}-\\d{2}-\\d{2})(?=(?:\\s|$|${TASKS_SIGNIFIERS.join('|')}))`,
 	'g',
 );
+
+type ItemParts = NonNullable<ReturnType<typeof parseItemLine>>;
 
 interface DateField {
 	mark: string;
@@ -103,6 +105,52 @@ export function tickRepeating(line: string, now: Date): RepeatTick {
 	const moved = moveDates(fields, daysFrom(anchor, next));
 	if (moved === null) throw new RepeatingItemError('date');
 	return { kind: 'moved', line: joinItemLine({ ...counted, tail: moved + afterFields }), next };
+}
+
+/**
+ * The line repeating by `rule` and ending as `end` says, or never for null. A line with no date gets
+ * a `⏳` on `today`; an existing `🔁` and `🔚` are replaced in place.
+ */
+export function setRepeat(line: string, rule: RepeatRule, end: RepeatEnd | null, today: string): string {
+	if (!parseItemLine(line)) return line;
+	const dated = hasDate(line) ? line : setWhen(line, today);
+	const parts = parseItemLine(dated) as ItemParts;
+	const { fields, end: afterFields } = splitTail(parts.tail);
+	const field = `${REPEAT_MARK} ${writeRule(rule)}`;
+	const span = repeatSpan(fields);
+	const changed = span
+		? fields.slice(0, span.from) + field + fields.slice(span.to)
+		: `${fields} ${field}`;
+	// Reading again lets a `🔚` that sat in the title count as the end now that the line repeats.
+	const repeating = parseItemLine(joinItemLine({ ...parts, tail: changed + afterFields })) as ItemParts;
+	const newEnd = end === null ? '' : ` ${writeEnd(end)}`;
+	// An end after an empty title leaves the tail's first field touching it.
+	const needsSpace = repeating.title + newEnd + repeating.marks !== '' && !/^\s/.test(repeating.tail);
+	return joinItemLine({ ...repeating, end: newEnd, tail: needsSpace ? ` ${repeating.tail}` : repeating.tail });
+}
+
+/** The line without its `🔁` and `🔚`, each with the spaces before it. */
+export function removeRepeat(line: string): string {
+	const parts = parseItemLine(line);
+	if (!parts) return line;
+	const { fields, end: afterFields } = splitTail(parts.tail);
+	const span = repeatSpan(fields);
+	if (!span) return line;
+	const runStart = findRunStart(fields, span.from, (char) => /\s/.test(char));
+	const spaceEnd = span.to + fields.slice(span.to).search(/\S|$/);
+	const isGlued = spaceEnd === span.to && span.to < fields.length;
+	const startsLine = runStart === 0 && parts.title + parts.marks === '';
+	const kept = isGlued
+		? fields.slice(0, span.from) + fields.slice(span.to)
+		: fields.slice(0, runStart) + fields.slice(startsLine ? spaceEnd : span.to);
+	return joinItemLine({ ...parts, end: '', tail: kept + afterFields });
+}
+
+/** The line without its `⏳` and `⌛` dates, and without its repeat when that leaves it no date to repeat from. */
+export function removeWhen(line: string): { line: string; repeatRemoved: boolean } {
+	const withoutWhen = setWhen(line, null);
+	if (repeatOf(withoutWhen) === null || hasDate(withoutWhen)) return { line: withoutWhen, repeatRemoved: false };
+	return { line: removeRepeat(withoutWhen), repeatRemoved: true };
 }
 
 function repeatSpan(fields: string): { from: number; to: number } | undefined {

@@ -1,9 +1,13 @@
 import { describe, expect, test } from 'vitest';
+import { tickLine, untickLine } from '../../src/core/item-line';
 import {
 	anchorOf,
 	hasDate,
+	removeRepeat,
+	removeWhen,
 	repeatOf,
 	RepeatingItemError,
+	setRepeat,
 	tickRepeating,
 	type RepeatProblem,
 } from '../../src/core/repeat-line';
@@ -138,5 +142,77 @@ describe('tickRepeating', () => {
 		const line = '- [ ] a 🛫 9999-12-31 ⏳ 2026-11-13 🔁 every day';
 
 		expect(() => tickRepeating(line, now)).toThrow(expect.objectContaining({ problem: 'date' }));
+	});
+});
+
+describe('setRepeat', () => {
+	const today = '2026-11-13';
+
+	test.each([
+		['- [ ] Water plants', every(3, 'day'), null, '- [ ] Water plants ⏳ 2026-11-13 🔁 every 3 days'],
+		[
+			'- [ ] Physio ⭐ ⏳ 2026-11-13',
+			every(1, 'day'),
+			{ kind: 'times', left: 5 },
+			'- [ ] Physio ⭐ 🔚 5x ⏳ 2026-11-13 🔁 every day',
+		],
+		['- [ ] a 📅 2026-11-20', every(1, 'week'), null, '- [ ] a 📅 2026-11-20 🔁 every week'],
+		[
+			'- [ ] a 🔚 3x ⏳ 2026-11-20 🔁 every day #x ^id',
+			every(2, 'week'),
+			{ kind: 'date', day: '2027-01-01' },
+			'- [ ] a 🔚 2027-01-01 ⏳ 2026-11-20 🔁 every 2 weeks #x ^id',
+		],
+		['- [ ] a 🔚 3x ⏳ 2026-11-20 🔁 every day', every(1, 'day'), null, '- [ ] a ⏳ 2026-11-20 🔁 every day'],
+		['- [ ] Countdown 🔚 5x', every(1, 'day'), { kind: 'times', left: 2 }, '- [ ] Countdown 🔚 2x ⏳ 2026-11-13 🔁 every day'],
+	] as const)('%s', (line, rule, end, expected) => {
+		expect(setRepeat(line, rule, end, today)).toBe(expected);
+	});
+});
+
+describe('a line with no title', () => {
+	const today = '2026-11-13';
+
+	test.each([
+		[null, '- [ ] ⏳ 2026-11-13 🔁 every day'],
+		[{ kind: 'times', left: 5 } as const, '- [ ]  🔚 5x ⏳ 2026-11-13 🔁 every day'],
+	])('setRepeat with the end %j spaces the fields', (end, expected) => {
+		expect(setRepeat('- [ ] ', every(1, 'day'), end, today)).toBe(expected);
+	});
+
+	test.each(['- [ ]  🔚 5x 🔁 every day', '- [ ]  🔚 5x ⏳ 2026-11-13 🔁 every day', '- [ ] ⏳ 2026-11-13 🔁 every day'])(
+		'%s comes back from a tick and an untick byte for byte',
+		(line) => {
+			expect(untickLine(tickLine(line, now))).toBe(line);
+		},
+	);
+});
+
+describe('removeRepeat', () => {
+	test.each([
+		['- [ ] a ⏳ 2026-11-13 🔁 every day', '- [ ] a ⏳ 2026-11-13'],
+		['- [ ] a 🔚 5x ⏳ 2026-11-13 🔁 every day #x ^id', '- [ ] a ⏳ 2026-11-13 #x ^id'],
+		['- [ ] a 🔁 every day ⏳ 2026-11-13', '- [ ] a ⏳ 2026-11-13'],
+		['- [ ] 🔁 every day ⏳ 2026-11-13', '- [ ] ⏳ 2026-11-13'],
+		['- [ ] a ⏳ 2026-11-13', '- [ ] a ⏳ 2026-11-13'],
+	])('%s', (line, expected) => {
+		expect(removeRepeat(line)).toBe(expected);
+	});
+});
+
+describe('removeWhen', () => {
+	test('takes the repeat with the last date', () => {
+		expect(removeWhen('- [ ] a ⏳ 2026-11-13 🔁 every day')).toEqual({ line: '- [ ] a', repeatRemoved: true });
+	});
+
+	test('keeps the repeat while another date remains', () => {
+		expect(removeWhen('- [ ] a ⏳ 2026-11-13 📅 2026-11-20 🔁 every day')).toEqual({
+			line: '- [ ] a 📅 2026-11-20 🔁 every day',
+			repeatRemoved: false,
+		});
+	});
+
+	test('leaves a line that does not repeat as setWhen does', () => {
+		expect(removeWhen('- [ ] a ⏳ 2026-11-13')).toEqual({ line: '- [ ] a', repeatRemoved: false });
 	});
 });
