@@ -29,6 +29,15 @@ export function tagOfTyped(typed: string): string | null {
 	return isTagBody(body) ? body : null;
 }
 
+/** What the tag strip has lit. */
+export interface LitTags {
+	/** The lit tags: an item shows only if it carries every one. */
+	readonly tags: readonly string[];
+}
+
+/** A strip with nothing lit. */
+export const NO_LIT_TAGS: LitTags = { tags: [] };
+
 /** Whether `tags` meet every lit tag: each is one of them, or a parent of one (`shop` lit shows `shop/frozen`). */
 export function carriesTags(tags: readonly string[], lit: readonly string[]): boolean {
 	return lit.every((l) => tags.some((t) => sameTag(t, l) || t.toLowerCase().startsWith(`${l.toLowerCase()}/`)));

@@ -6,6 +6,7 @@ import { NO_LINES_MOVED, ownEdit } from '../../src/core/follow';
 import { planItemMove, type PlannedMove } from '../../src/core/list-actions';
 import { toggleLine } from '../../src/core/item-line';
 import { splitLines } from '../../src/core/lines';
+import { NO_LIT_TAGS } from '../../src/core/tags';
 import { contentStartOf, list, notesEditor } from './edit-helpers';
 
 const FRONTMATTER = '---\nprincelists: true\n---\n';
@@ -163,7 +164,7 @@ describe('a visit to the list note across a typing session', () => {
 		notesEditor(state, 'listNote').type('Old\n# Typed\n- [ ] y\nmore');
 		const { lines, model } = list(state.text);
 		const drawn = (range: { start: number; end: number } | null) =>
-			withoutRange(visibleSections(lines, model, new Date(2026, 9, 21), { showArchived: false, starredOnly: false, tags: [], archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() }), range).flatMap((section) => [
+			withoutRange(visibleSections(lines, model, new Date(2026, 9, 21), { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() }), range).flatMap((section) => [
 				section.heading?.text ?? null,
 				...section.rows.map((row) => (row.kind === 'item' ? row.title : row.text)),
 			]);

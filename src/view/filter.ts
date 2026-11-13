@@ -1,6 +1,7 @@
 import { prepareFuzzySearch, SearchComponent, setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
 import type { Find } from '../core/display';
 import type { TagStripMode } from '../core/tag-strip-mode';
+import { NO_LIT_TAGS, type LitTags } from '../core/tags';
 import { CLEAR_TAGS_CLASS, STRIP_TAG_CLASS } from './tag-strip';
 
 export const FILTER_CLASS = 'princelists-filter';
@@ -41,8 +42,8 @@ export interface FilterHost {
 	filterField: FilterField | null;
 	/** "Show starred only": on only while the field is open, so its star toggle always shows it. */
 	starredOnly: boolean;
-	/** The tags lit in the tag strip: only items carrying every one show. */
-	litTags: string[];
+	/** What the tag strip has lit. */
+	litTags: LitTags;
 	readonly app: App;
 	readonly leaf: WorkspaceLeaf;
 	/** The view's own element, which holds the field, the tag strip and the rows. */
@@ -169,7 +170,7 @@ export function removeFilterField(view: FilterHost): void {
 function closeFilter(view: FilterHost): void {
 	view.filter = null;
 	view.starredOnly = false;
-	if (view.tagStripMode() === 'filtering') view.litTags = [];
+	if (view.tagStripMode() === 'filtering') view.litTags = NO_LIT_TAGS;
 	view.filterClosed?.();
 	view.render();
 }

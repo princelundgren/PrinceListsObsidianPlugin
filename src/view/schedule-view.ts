@@ -8,6 +8,7 @@ import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import type { TagStripMode } from '../core/tag-strip-mode';
+import { NO_LIT_TAGS, type LitTags } from '../core/tags';
 import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
@@ -62,8 +63,8 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	filterField: FilterField | null = null;
 	/** Off each time the Schedule opens, as its filter is. */
 	starredOnly = false;
-	/** The tags lit in the tag strip: only items carrying every one show. */
-	litTags: string[] = [];
+	/** What the tag strip has lit. */
+	litTags: LitTags = NO_LIT_TAGS;
 	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
@@ -136,7 +137,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.redrawFiltered.cancel();
 		this.filter = null;
 		this.starredOnly = false;
-		this.litTags = [];
+		this.litTags = NO_LIT_TAGS;
 		removeFilterField(this);
 		this.lists.clear();
 		this.collapsed.clear();
@@ -283,11 +284,11 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const now = new Date();
 		const today = dayOf(now);
 		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
-		const filter = { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly, tags: this.litTags };
+		const filter = { find: findOf(this.filter ?? ''), starredOnly: this.starredOnly, lit: this.litTags };
 		const groups = shownSchedule(dated, today, filter, this.collapsed);
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
-		const strip = showsTagStrip(this) ? scheduleStripTags(dated, this.litTags) : null;
+		const strip = showsTagStrip(this) ? scheduleStripTags(dated, this.litTags.tags) : null;
 		const drawn = JSON.stringify([today, dated.length === 0, shown, strip, this.litTags]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;

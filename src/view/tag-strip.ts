@@ -1,5 +1,5 @@
 import { setIcon, setTooltip } from 'obsidian';
-import { sameTag, toggleTag } from '../core/tags';
+import { NO_LIT_TAGS, sameTag, toggleTag, type LitTags } from '../core/tags';
 import { addHiddenLabel } from './dom';
 import type { FilterHost } from './filter';
 
@@ -19,7 +19,7 @@ export function showsTagStrip(view: FilterHost): boolean {
  * tags with it, as closing the field does with "While filtering", so no hidden tag filters the rows.
  */
 export function followTagStripMode(view: FilterHost): void {
-	if (!showsTagStrip(view)) view.litTags = [];
+	if (!showsTagStrip(view)) view.litTags = NO_LIT_TAGS;
 	view.render();
 }
 
@@ -28,17 +28,17 @@ export function followTagStripMode(view: FilterHost): void {
  * it is one of `lit`, then "Clear tags" while a tag is lit. The view's delegated click listener hands
  * a press on one to `stripClick`.
  */
-export function buildTagStrip(parent: HTMLElement, tags: readonly string[], lit: readonly string[]): void {
+export function buildTagStrip(parent: HTMLElement, tags: readonly string[], lit: LitTags): void {
 	if (tags.length === 0) return;
 	const strip = parent.createDiv({ cls: TAG_STRIP_CLASS, attr: { role: 'group' } });
 	addHiddenLabel(strip, 'Tags');
 	for (const tag of tags) {
-		const isLit = lit.some((litTag) => sameTag(litTag, tag));
+		const isLit = lit.tags.some((litTag) => sameTag(litTag, tag));
 		const button = strip.createEl('button', { cls: STRIP_TAG_CLASS, text: `#${tag}`, attr: { 'aria-pressed': String(isLit) } });
 		button.toggleClass('is-lit', isLit);
 		tagOfButton.set(button, tag);
 	}
-	if (lit.length === 0) return;
+	if (lit.tags.length === 0) return;
 	const clear = strip.createEl('button', { cls: CLEAR_TAGS_CLASS });
 	setIcon(clear, 'x');
 	setTooltip(clear, 'Clear tags');
@@ -56,7 +56,7 @@ export function stripClick(view: FilterHost, target: HTMLElement): boolean {
 	if (!pressed) return false;
 	const strip = pressed.closest(`.${TAG_STRIP_CLASS}`);
 	const hadFocus = strip?.contains(pressed.doc.activeElement) ?? false;
-	view.litTags = tag === undefined ? [] : toggleTag(view.litTags, tag);
+	view.litTags = tag === undefined ? NO_LIT_TAGS : { tags: toggleTag(view.litTags.tags, tag) };
 	view.render();
 	if (hadFocus) focusStrip(view, tag ?? null);
 	return true;

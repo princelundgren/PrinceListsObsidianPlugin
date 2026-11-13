@@ -6,7 +6,7 @@ import { itemTags } from './item-tags';
 import type { Line } from './lines';
 import type { ItemBlock, ListModel } from './parse';
 import { splitStar } from './star';
-import { carriesTags, stripTags } from './tags';
+import { carriesTags, stripTags, type LitTags } from './tags';
 import { whenOf } from './when';
 
 export interface ItemRow {
@@ -59,8 +59,8 @@ export interface RowFilter {
 	archiveDelayMs: number;
 	/** What Cmd+F's field finds, or null while it holds nothing. */
 	find: Find | null;
-	/** The lit tags: an item shows only if it carries every one. */
-	tags: readonly string[];
+	/** What the tag strip has lit. */
+	lit: LitTags;
 	/** The open card's item, which shows whether or not it matches or its section is collapsed. */
 	keepLine: number | null;
 	/** The heading lines whose sections show only the heading while nothing filters the list. */
@@ -84,7 +84,7 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, filter.archiveDelayMs);
 			if (!isShown(row, filter.showArchived)) return [];
 			if (item.titleLine === filter.keepLine) return [row];
-			if (filtering) return (!filter.starredOnly || row.starred) && carriesTags(row.tags, filter.tags) && itemMatches(lines, item, row, filter.find) ? [row] : [];
+			if (filtering) return (!filter.starredOnly || row.starred) && carriesTags(row.tags, filter.lit.tags) && itemMatches(lines, item, row, filter.find) ? [row] : [];
 			return collapsed ? [] : [row];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
@@ -106,8 +106,8 @@ export function findsNothing(model: ListModel, filter: RowFilter, sections: read
 }
 
 /** Whether a query, "Show starred only" or a lit tag filters what shows. */
-export function isFiltered(filter: { find: Find | null; starredOnly: boolean; tags: readonly string[] }): boolean {
-	return filter.find !== null || filter.starredOnly || filter.tags.length > 0;
+export function isFiltered(filter: { find: Find | null; starredOnly: boolean; lit: LitTags }): boolean {
+	return filter.find !== null || filter.starredOnly || filter.lit.tags.length > 0;
 }
 
 /**

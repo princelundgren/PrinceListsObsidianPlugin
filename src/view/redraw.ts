@@ -1,4 +1,5 @@
 import { listStripTags } from '../core/display';
+import { NO_LIT_TAGS } from '../core/tags';
 import { emptyHint } from '../core/empty-hint';
 import { isListText } from '../obsidian/marker';
 import { hasNoItems } from './add-button';
@@ -49,7 +50,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		}
 		if (showsTagStrip(view)) {
 			const shown = { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms };
-			buildTagStrip(fresh, listStripTags(lines, model, new Date(), shown, view.litTags), view.litTags);
+			buildTagStrip(fresh, listStripTags(lines, model, new Date(), shown, view.litTags.tags), view.litTags);
 		}
 		const card = placeCard(view, kept);
 		if (card?.keeps) slot = card.el;
@@ -69,7 +70,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		view.listNoteEl = null;
 		view.filter = null;
 		view.starredOnly = false;
-		view.litTags = [];
+		view.litTags = NO_LIT_TAGS;
 		view.filterField = null;
 		view.rowsHeldBack = false;
 		fresh.createEl('p', { text: "This note isn't a list" });

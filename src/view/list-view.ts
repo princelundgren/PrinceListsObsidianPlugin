@@ -12,6 +12,7 @@ import { parseList, type ListModel } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import { RowSelection } from '../core/selection';
 import type { TagStripMode } from '../core/tag-strip-mode';
+import { NO_LIT_TAGS, type LitTags } from '../core/tags';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
@@ -52,7 +53,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** Off each time a list opens, as showArchived is. */
 	starredOnly = false;
 	/** None each time a list opens, as starredOnly is. */
-	litTags: string[] = [];
+	litTags: LitTags = NO_LIT_TAGS;
 	card: Card | null = null;
 	/** The open card's tag popover, its field and the field's type-ahead, or null while it is closed. */
 	tagPopover: { el: HTMLElement; input: HTMLInputElement; suggest: TagSuggest } | null = null;
@@ -179,7 +180,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.headingField = null;
 		this.showArchived = false;
 		this.starredOnly = false;
-		this.litTags = [];
+		this.litTags = NO_LIT_TAGS;
 		this.filter = null;
 		this.filterField = null;
 		this.collapsed.clear();
