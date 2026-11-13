@@ -88,14 +88,17 @@ emulator, with the steps each task lists. iOS isn't reachable for these checks; 
   - `type RepeatUnit = 'day' | 'week' | 'month' | 'year'`
   - `interface RepeatRule { every: number; unit: RepeatUnit; onLast: boolean; whenDone: boolean }`
   - `type RepeatEnd = { kind: 'date'; day: string } | { kind: 'times'; left: number }`
-  - `readRule(text: string): RepeatRule | null`, the text after `🔁` and its spaces
+  - `readRule(text: string): RepeatRule | null`, the text after `🔁` and its spaces; null for N
+    above 9999
   - `writeRule(rule: RepeatRule): string`, without the `🔁`
   - `readEnd(text: string): RepeatEnd | null`, the text after `🔚` and its spaces
   - `writeEnd(end: RepeatEnd): string`, with the `🔚`
-  - `addDays(day: string, days: number): string`; the days between two dates are `when.ts`'s
-    `daysFrom`, and the arithmetic uses its `utcOf`, both exported
-  - `stepDay(day: string, rule: RepeatRule): string`, one step
-  - `nextDay(anchor: string, rule: RepeatRule, today: string): string`, the date a tick gives
+  - `addDays(day: string, days: number): string | null`; the days between two dates are
+    `when.ts`'s `daysFrom`, and the arithmetic uses its `utcOf`, both exported
+  - `stepDay(day: string, rule: RepeatRule): string | null`, one step
+  - `nextDay(anchor: string, rule: RepeatRule, today: string): string | null`, the date a tick
+    gives
+  - The three give null for a date after 9999-12-31, which `YYYY-MM-DD` can't write.
   - `upcomingDays(anchor: string | null, rule: RepeatRule, end: RepeatEnd | null, today: string,
     count: number): string[]`, the dates the next `count` ticks give, stopping at the end
 
@@ -186,7 +189,8 @@ emulator, with the steps each task lists. iOS isn't reachable for these checks; 
     - `- [ ] Stretch 🔁 every day` becomes `- [ ] Stretch 🔁 every day ⏳ 2026-11-14`.
     - `- [ ] Walk ⏳ 2026-11-12 🔁 every day` gives `2026-11-14` at `new Date(2026, 10, 13, 23, 59)`
       and `2026-11-15` at `new Date(2026, 10, 14, 0, 1)`.
-    - Each problem above throws `RepeatingItemError` with that `problem`.
+    - Each problem above throws `RepeatingItemError` with that `problem`, and so does a move whose
+      `nextDay` is null (`⏳ 9999-12-31 🔁 every day`), with `date`.
   - `setRepeat`, today `2026-11-13`: `- [ ] Water plants` with every 3 days gives
     `- [ ] Water plants ⏳ 2026-11-13 🔁 every 3 days`; `- [ ] Physio ⭐ ⏳ 2026-11-13` with every
     day and `5x` gives `- [ ] Physio ⭐ 🔚 5x ⏳ 2026-11-13 🔁 every day`; a line with `📅` only gets
