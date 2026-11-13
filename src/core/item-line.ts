@@ -6,6 +6,8 @@ export interface ItemLineParts {
 	/** `] `. */
 	afterStatus: string;
 	title: string;
+	/** On a line whose tail has a `🔁`, the `🔚` field at the end of the title with the spaces before it, or ''. */
+	end: string;
 	/** The run of ✔ fields right before the tail, with its leading space, or ''. */
 	marks: string;
 	/** Trailing Tasks fields, #tags, block ID and trailing whitespace, verbatim, or ''. */
@@ -53,6 +55,7 @@ const MARK_TIME_PATTERN = new RegExp(
 export const DONE_DATE_PATTERN = new RegExp(`✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
 const DONE_DATE_FIELD = new RegExp(DONE_DATE_PATTERN, 'g');
 const REPEAT_FIELD = new RegExp(`🔁${VS16} *[a-zA-Z0-9, !]+`);
+const END_FIELD = new RegExp(` +🔚${VS16} *\\S+$`);
 
 export function parseItemLine(text: string): ItemLineParts | null {
 	const match = ITEM_PATTERN.exec(text);
@@ -73,14 +76,10 @@ export function parseItemLine(text: string): ItemLineParts | null {
 	while (tailStart > 0 && /\s/.test(body.charAt(tailStart - 1))) tailStart--;
 	const head = body.slice(0, tailStart);
 	const marks = trailingMarks(head);
-	return {
-		before,
-		status,
-		afterStatus,
-		title: head.slice(0, head.length - marks.length),
-		marks,
-		tail: body.slice(tailStart) + blockId + trailing,
-	};
+	const title = head.slice(0, head.length - marks.length);
+	const tail = body.slice(tailStart) + blockId + trailing;
+	const end = REPEAT_FIELD.test(tail) ? (END_FIELD.exec(title)?.[0] ?? '') : '';
+	return { before, status, afterStatus, title: title.slice(0, title.length - end.length), end, marks, tail };
 }
 
 // Whitespace between fields is skipped while matching, as Tasks does after each field. The fields
@@ -120,7 +119,7 @@ export function tailFields(fields: string): { from: number; to: number }[] {
 }
 
 export function joinItemLine(p: ItemLineParts): string {
-	return p.before + p.status + p.afterStatus + p.title + p.marks + p.tail;
+	return p.before + p.status + p.afterStatus + p.title + p.end + p.marks + p.tail;
 }
 
 export function isDoneStatus(status: string): boolean {
@@ -138,7 +137,7 @@ export function tickLine(text: string, now: Date): string {
 	// A hand-typed ✔ after the Tasks fields reads as a mark and leaves the fields in the title;
 	// that heals on untick.
 	const marks = ` ${formatStamp(now)}`;
-	return joinItemLine({ ...parts, status: 'x', marks, tail: spaced(parts.title + marks, parts.tail) });
+	return joinItemLine({ ...parts, status: 'x', marks, tail: spaced(parts.title + parts.end + marks, parts.tail) });
 }
 
 export function untickLine(text: string): string {
@@ -147,7 +146,7 @@ export function untickLine(text: string): string {
 	// Tasks' own untick removes its ✅ as well, so ours does too.
 	const tail = withoutDoneDates(parts.tail);
 	// With no title, the space tickLine put before the tail follows `] `, so it goes with the mark.
-	const tickedSpace = parts.title === '' && parts.marks !== '' && tail.startsWith(' ');
+	const tickedSpace = parts.title + parts.end === '' && parts.marks !== '' && tail.startsWith(' ');
 	return joinItemLine({ ...parts, status: ' ', marks: '', tail: tickedSpace ? tail.slice(1) : tail });
 }
 
@@ -161,7 +160,7 @@ export function setTitle(text: string, title: string): string {
 	const parts = parseItemLine(text);
 	if (!parts) return text;
 	const marks = isDoneStatus(parts.status) ? collapseMarks(parts.marks) : '';
-	return joinItemLine({ ...parts, title, marks, tail: spaced(title + marks, parts.tail) });
+	return joinItemLine({ ...parts, title, marks, tail: spaced(title + parts.end + marks, parts.tail) });
 }
 
 // Each ✅ field goes with the spaces before it.

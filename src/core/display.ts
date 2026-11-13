@@ -171,7 +171,7 @@ export function timelessItemRow(text: string, titleLine: number): Omit<ItemRow, 
 	// parseList makes an item only of a line parseItemLine reads.
 	const parts = parseItemLine(text) as ItemLineParts;
 	const { plain, star } = splitStar(parts.title);
-	const label = plain === '' ? (parts.marks + parts.tail).trim() : plain;
+	const label = plain === '' ? (parts.end + parts.marks + parts.tail).trim() : plain;
 	const { tags, tailTags } = itemTags(text);
 	return { kind: 'item', titleLine, title: plain, label, done: isDoneStatus(parts.status), starred: star !== '', when: whenOf(text), tags, tailTags };
 }

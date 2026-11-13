@@ -22,7 +22,7 @@ export function setStar(line: string, starred: boolean): string {
 	if (!parts) return line;
 	const { plain, star } = splitStar(parts.title);
 	if (starred === (star !== '')) return line;
-	const tagFirst = plain === '' && parts.marks === '' && TAG_FIRST.test(parts.tail);
+	const tagFirst = plain === '' && parts.end === '' && parts.marks === '' && TAG_FIRST.test(parts.tail);
 	if (starred) return joinItemLine({ ...parts, title: parts.title + STAR, tail: tagFirst ? ` ${parts.tail}` : parts.tail });
 	const tail = tagFirst && parts.tail.startsWith(' ') ? parts.tail.slice(1) : parts.tail;
 	return joinItemLine({ ...parts, title: plain, tail });

@@ -21,7 +21,7 @@ export interface Removal {
 // reads it as the tail.
 export function isEmptyItem(lines: readonly Line[], item: ItemBlock): boolean {
 	const parts = parseItemLine((lines[item.titleLine] as Line).text);
-	return parts !== null && (parts.title + parts.marks + parts.tail).trim() === '' && getItemNotes(lines, item) === '';
+	return parts !== null && (parts.title + parts.end + parts.marks + parts.tail).trim() === '' && getItemNotes(lines, item) === '';
 }
 
 // How closing the card removes the empty item it created at `titleLine` (spec, "Selecting and

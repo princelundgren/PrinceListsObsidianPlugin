@@ -13,7 +13,7 @@ export function addTag(line: string, tag: string): string {
 	const parts = parseItemLine(line);
 	if (!parts || !isTagBody(tag) || itemTags(line).tags.some((have) => sameTag(have, tag))) return line;
 	const { fields, end } = splitTail(parts.tail);
-	const hasNothingBeforeTag = (parts.title + parts.marks + fields).length === 0;
+	const hasNothingBeforeTag = (parts.title + parts.end + parts.marks + fields).length === 0;
 	return joinItemLine({ ...parts, tail: `${fields}${hasNothingBeforeTag ? '' : ' '}#${tag}${end}` });
 }
 
@@ -33,7 +33,7 @@ export function removeTag(line: string, tag: string): string {
 		const runStart = findRunStart(fields, from, isWhitespace);
 		const spaceEnd = to + fields.slice(to).search(/\S|$/);
 		const isGlued = spaceEnd === to && to < fields.length;
-		const startsAfterStatus = from === 0 && parts.title + parts.marks === '';
+		const startsAfterStatus = from === 0 && parts.title + parts.end + parts.marks === '';
 		const spaceBeforeIsGone = copied > runStart;
 		const takesSpaceAfter = !isGlued && (startsAfterStatus || spaceBeforeIsGone);
 		kept += fields.slice(copied, isGlued || takesSpaceAfter ? from : runStart);
