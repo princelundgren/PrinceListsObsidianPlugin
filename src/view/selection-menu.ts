@@ -2,6 +2,7 @@ import type { Menu } from 'obsidian';
 import { groupCount } from '../core/group-actions';
 import { countPhrase, groupState, planGroupDelete, planGroupLineEdit, planGroupTick, type PlannedGroupChange } from '../core/group-edits';
 import { changeMessage, groupEntries, type EntryGroup, type GroupChange, type GroupEntry } from '../core/group-menu';
+import { removeWhen } from '../core/repeat-line';
 import { setStar } from '../core/star';
 import { dayAfter, dayOf, setWhen } from '../core/when';
 import { contentStartLine } from '../obsidian/marker';
@@ -122,7 +123,7 @@ function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag'>)
 		case 'pickDate':
 			return new DateModal(view.app, (day) => changeSelection(view, 'setDate', lineEdit((line) => setWhen(line, day)))).open();
 		case 'removeDate':
-			return changeSelection(view, 'removeDate', lineEdit((line) => setWhen(line, null)));
+			return changeSelection(view, 'removeDate', lineEdit((line) => removeWhen(line).line));
 	}
 }
 

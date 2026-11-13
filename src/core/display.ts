@@ -5,6 +5,7 @@ import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
 import { itemTags } from './item-tags';
 import type { Line } from './lines';
 import type { ItemBlock, ListModel } from './parse';
+import { repeatOf } from './repeat-line';
 import { splitStar } from './star';
 import { isAnyLit, meetsLitTags, stripTags, type LitTags } from './tags';
 import { whenOf } from './when';
@@ -25,6 +26,8 @@ export interface ItemRow {
 	tags: string[];
 	/** The tail's tags, which the card shows apart from the title. */
 	tailTags: string[];
+	/** The item is open and has a `🔁` field, whether or not PrinceLists can follow it. */
+	repeats: boolean;
 }
 
 /** A block the plugin leaves alone, such as a paragraph, table or code block, as its raw lines. */
@@ -173,7 +176,8 @@ export function timelessItemRow(text: string, titleLine: number): Omit<ItemRow, 
 	const { plain, star } = splitStar(parts.title);
 	const label = plain === '' ? (parts.end + parts.marks + parts.tail).trim() : plain;
 	const { tags, tailTags } = itemTags(text);
-	return { kind: 'item', titleLine, title: plain, label, done: isDoneStatus(parts.status), starred: star !== '', when: whenOf(text), tags, tailTags };
+	const done = isDoneStatus(parts.status);
+	return { kind: 'item', titleLine, title: plain, label, done, starred: star !== '', when: whenOf(text), tags, tailTags, repeats: !done && repeatOf(text) !== null };
 }
 
 function firstLine(row: ListRow): number {

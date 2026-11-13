@@ -5,6 +5,14 @@ export function addStar(rowEl: HTMLElement): void {
 	setIcon(rowEl.createSpan({ cls: 'princelists-star' }), 'star');
 }
 
+/** The `Repeats` icon, just before the row's day, or at the row's end when it shows none. */
+export function addRepeat(rowEl: HTMLElement): void {
+	const icon = rowEl.createSpan({ cls: 'princelists-repeat', attr: { 'aria-label': 'Repeats' } });
+	setIcon(icon, 'repeat');
+	const when = rowEl.querySelector(':scope > .princelists-when');
+	if (when) rowEl.insertBefore(icon, when);
+}
+
 export function addWhen(rowEl: HTMLElement, day: string, today: string): void {
 	fillWhen(rowEl.createSpan({ cls: 'princelists-when' }), day, today);
 }

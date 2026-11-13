@@ -40,6 +40,18 @@ describe('datedItems and unarchived', () => {
 	});
 });
 
+describe('datedItems, repeats', () => {
+	test.each([
+		['an open repeating line', '- [ ] water ⏳ 2026-11-13 🔁 every day', true],
+		['an open line whose repeat it cannot follow', '- [ ] fix the 🔁 every day bug ⏳ 2026-11-13', true],
+		['a done repeating line', '- [x] water ⏳ 2026-11-13 🔁 every day ✅ 2026-11-13', false],
+		['a 🔁 in the title that is no field', "- [ ] fix the 🔁 icon's color ⏳ 2026-11-13", false],
+	])('reads %s', (_, line, repeats) => {
+		const text = ['---', 'princelists: true', '---', line, ''].join('\n');
+		expect(datedItems(text, 3, list)[0]?.repeats).toBe(repeats);
+	});
+});
+
 describe('unarchived', () => {
 	// A tick more than a day ahead counts as done long ago, and from its time once it is less than a day ahead.
 	const text = [
@@ -102,6 +114,7 @@ describe('groupSchedule', () => {
 		starred: false,
 		tags: [],
 		tailTags: [],
+		repeats: false,
 		done: false,
 		day,
 		order,
@@ -128,6 +141,7 @@ describe('matchesSchedule', () => {
 		starred: false,
 		tags: [],
 		tailTags: [],
+		repeats: false,
 		done: false,
 		day: '2026-10-28',
 		order: 0,
@@ -162,6 +176,7 @@ describe('shownSchedule', () => {
 		starred,
 		tags: [],
 		tailTags: [],
+		repeats: false,
 		done: false,
 		day,
 		order: 0,
@@ -221,6 +236,7 @@ describe('tags in the Schedule', () => {
 		starred: false,
 		tags,
 		tailTags: [],
+		repeats: false,
 		done: false,
 		day,
 		order,

@@ -7,7 +7,7 @@ import { setStar } from '../core/star';
 import { dayAfter, dayOf, setWhen } from '../core/when';
 import { openCard } from './card';
 import { whenClick, WHEN_INPUT_CLASS } from './card-when';
-import { queueLineEdit } from './line-edit';
+import { queueLineEdit, queueRemoveWhen } from './line-edit';
 import type { PrinceListView } from './list-view';
 import { atLine } from './menu-anchor';
 import { queueTickAt } from './tick';
@@ -16,7 +16,7 @@ import { queueTickAt } from './tick';
 // says what the item holds when the menu opens, and does just that.
 export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLElement, anchor: TrackedLine, menu: Menu): void {
 	const { done, starred, when } = timelessItemRow((view.lines()[item.titleLine] as Line).text, item.titleLine);
-	const setDay = (day: () => string | null) => atLine(anchor, (line) => queueLineEdit(view, line, (text) => setWhen(text, day())));
+	const setDay = (day: () => string) => atLine(anchor, (line) => queueLineEdit(view, line, (text) => setWhen(text, day())));
 	menu.addItem((entry) =>
 		entry
 			.setTitle(done ? 'Untick' : 'Tick')
@@ -33,7 +33,7 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 	menu.addItem((entry) => entry.setTitle('Set date to today').setIcon('calendar-check').onClick(setDay(() => dayOf(new Date()))));
 	menu.addItem((entry) => entry.setTitle('Set date to tomorrow').setIcon('calendar-plus').onClick(setDay(() => dayAfter(new Date()))));
 	menu.addItem((entry) => entry.setTitle('Set date…').setIcon('calendar').onClick(atLine(anchor, (line) => pickDate(view, line))));
-	if (when !== null) menu.addItem((entry) => entry.setTitle('Remove date').setIcon('calendar-x').onClick(setDay(() => null)));
+	if (when !== null) menu.addItem((entry) => entry.setTitle('Remove date').setIcon('calendar-x').onClick(atLine(anchor, (line) => queueRemoveWhen(view, line))));
 	menu.addSeparator();
 }
 

@@ -1,7 +1,7 @@
 import { Platform, setIcon } from 'obsidian';
 import { dayOf, setWhen } from '../core/when';
 import type { Card } from './card';
-import { queueLineEdit } from './line-edit';
+import { queueLineEdit, queueRemoveWhen } from './line-edit';
 import type { PrinceListView } from './list-view';
 import { fillWhen } from './row-marks';
 
@@ -43,5 +43,7 @@ export function whenChange(view: PrinceListView, input: HTMLInputElement): void 
 
 function setDay(view: PrinceListView, day: string | null): void {
 	const line = view.editing.selected;
-	if (line !== null) queueLineEdit(view, line, (text) => setWhen(text, day));
+	if (line === null) return;
+	if (day === null) queueRemoveWhen(view, line);
+	else queueLineEdit(view, line, (text) => setWhen(text, day));
 }

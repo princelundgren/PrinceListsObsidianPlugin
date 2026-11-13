@@ -18,6 +18,8 @@ export interface ScheduledItem {
 	tags: string[];
 	/** The tail's tags. */
 	tailTags: string[];
+	/** The item is open and has a `🔁` field. */
+	repeats: boolean;
 	done: boolean;
 	day: string;
 	/** The item's place in its list. */
@@ -39,8 +41,8 @@ export function datedItems(text: string, contentStart: number, list: { path: str
 		const line = lines[titleLine]?.text ?? '';
 		const row = timelessItemRow(line, titleLine);
 		if (row.when === null) return;
-		const { title, starred, done, when: day, tags, tailTags } = row;
-		scheduled.push({ listPath: list.path, listName: list.name, titleLine, line, title, starred, tags, tailTags, done, day, order, notes: getItemNotes(lines, item) });
+		const { title, starred, done, when: day, tags, tailTags, repeats } = row;
+		scheduled.push({ listPath: list.path, listName: list.name, titleLine, line, title, starred, tags, tailTags, repeats, done, day, order, notes: getItemNotes(lines, item) });
 	});
 	return scheduled;
 }
