@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { itemRow } from '../../src/core/display';
 import { parseItemLine } from '../../src/core/item-line';
-import { dayAfter, dayLabel, nextDayMessage, dayLabelKind, dayOf, daysFrom, setWhen, whenOf } from '../../src/core/when';
+import { dayAfter, dayLabel, dayLabelKind, dayOf, daysFrom, nextDayMessage, setWhen, whenOf } from '../../src/core/when';
 
 describe('whenOf', () => {
 	test.each(['- [ ] a ⏳ 2026-10-30', '- [ ] a ⌛ 2026-10-30', '- [ ] a ⏳️ 2026-10-30'])('reads %s', (line) => {

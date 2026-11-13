@@ -260,6 +260,18 @@ export function columnOf(prefix: string): number {
 	return column;
 }
 
+// Removes up to `width` columns of indentation, a tab moving to the next multiple of 4. A tab that
+// crosses `width` leaves its remaining columns as spaces, as CommonMark does. A lazy line is indented
+// less than the content column, which `width` always reaches, so it loses all its indentation.
+export function stripIndent(text: string, width: number): string {
+	let column = 0;
+	let i = 0;
+	for (; column < width && (text[i] === ' ' || text[i] === '\t'); i++) {
+		column = text[i] === '\t' ? column + 4 - (column % 4) : column + 1;
+	}
+	return ' '.repeat(Math.max(0, column - width)) + text.slice(i);
+}
+
 function trimBlankEnd(lines: readonly Line[], start: number, end: number): number {
 	while (end > start && isBlank((lines[end - 1] as Line).text)) end--;
 	return end;

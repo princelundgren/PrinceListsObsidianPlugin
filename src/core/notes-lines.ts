@@ -1,12 +1,11 @@
 import { Parser } from 'commonmark';
 import { replaceRun } from './edit-check';
-import { stripIndent } from './edit-items';
 import { isBlankAt } from './edit-lines';
 import { listNoteAround, noteText, replaceListNoteRun, writesBlankAfter } from './edit-list-note';
 import { itemNotesKeys } from './edit-piece';
 import type { LineRange } from './follow';
 import { dominantEol, spliceLines, type Line } from './lines';
-import { columnOf, isBlank, type ItemBlock, type ListModel } from './parse';
+import { columnOf, isBlank, stripIndent, type ItemBlock, type ListModel } from './parse';
 
 /**
  * Lines [from, to) of the notes, as the editor held them before the change, become `lines`.

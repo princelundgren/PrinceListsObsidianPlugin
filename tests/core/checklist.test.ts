@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
+import { checklistStatusAt, planNotesLineTick, toggleChecklistLine, untickChecklist } from '../../src/core/checklist';
 import { joinLines } from '../../src/core/lines';
 import { list } from './edit-helpers';
-import { checklistStatusAt, planNotesLineTick, toggleChecklistLine, untickChecklist } from '../../src/core/checklist';
 
 const TRIP = '- [ ] trip\n\n\tPack:\n\t- [ ] passport\n\t- [x] charger\n\t\t- [ ] cable\n\t1. [?] tickets\n';
 

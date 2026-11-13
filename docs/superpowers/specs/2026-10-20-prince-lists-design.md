@@ -450,7 +450,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - 🔁 repeat
 - **Written the Tasks way:** at the end of the title line, as `YYYY-MM-DD`.
 - **Step one sets none of them.** It keeps any that are already there and never breaks them.
-- **Ticking a repeating item moves its 📅, ⏳ and 🛫 dates** together to the next one; the
+- **Ticking a repeating item moves its 📅, ⏳ and 🛫 dates** by the same number of days; the
   other dates stay as written (repeating items design, "The next date").
 
 ### Completion (owner)

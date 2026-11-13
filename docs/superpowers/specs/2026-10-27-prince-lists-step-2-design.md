@@ -363,11 +363,11 @@ this met on 2026-10-30 **(owner)**.
     the title at heading size, through a container query; the width where that starts, 480 px, is
     a **(call)**.
 - **Ticking works in place.** A repeating item (🔁) moves to its next date and its row to that
-  day's group, with the notice and Undo of a tick in its list; one the plugin can't repeat shows the
-  same message as in its list instead of ticking. A tick is worked out on the text the view last read, so a list changed, renamed or
-  deleted since then shows "This list changed elsewhere. Try again." and writes nothing, and so
-  does a click that opens a list that's gone. Rows can't be dragged: their
-  order comes from the days.
+  day's group, with the notice and Undo of a tick in its list; one the plugin can't repeat shows
+  the same message as in its list instead of ticking. A tick is worked out on the text the view
+  last read, so a list changed, renamed or deleted since then shows "This list changed elsewhere.
+  Try again." and writes nothing, and so does a click that opens a list that's gone. Rows can't be
+  dragged: their order comes from the days.
 - **A day's heading collapses as a list's does (owner, 2026-11-05),** with the same arrow in the
   checkboxes' column, so it doesn't read as an item without its checkbox. As in a list, it isn't
   remembered: every day is open each time the view opens.

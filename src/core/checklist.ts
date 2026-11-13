@@ -1,9 +1,8 @@
 import { drawnBlocks } from './drawn-blocks';
-import { stripIndent } from './edit-items';
 import { joinItemLine, parseItemLine } from './item-line';
 import type { PlannedLineEdit } from './list-actions';
 import { joinLines, spliceLines, splitLines, type Line } from './lines';
-import { columnOf, itemAt, maskBlocks, parseList, type ItemBlock } from './parse';
+import { columnOf, itemAt, maskBlocks, parseList, stripIndent, type ItemBlock } from './parse';
 
 export function toggleChecklistLine(text: string): string {
 	const parts = parseItemLine(text);

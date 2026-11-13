@@ -100,6 +100,7 @@ describe('toggleItem on a repeating item', () => {
 		const text = shape('- [ ] chores ⏳ 2026-10-20 🔁 every day\n\t- [x] inbox zero\n\t\t- [-] plan\n');
 		const { lines, item } = list(text);
 		const after = joinLines(toggleItem(lines, item(0), now).lines);
+		expect(after).toBe(shape('- [ ] chores ⏳ 2026-10-21 🔁 every day\n\t- [ ] inbox zero\n\t\t- [ ] plan\n'));
 		const history = new EditHistory();
 		history.wrote(text, after, { start: 0, delta: 0, kind: 'change' });
 		expect(history.undo(after)?.next).toBe(text);

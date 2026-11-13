@@ -3,7 +3,7 @@ import { blockKey, replaceRun, UnsafeEditError } from './edit-check';
 import { gapEnd, hasLineBreak, isBlankAt } from './edit-lines';
 import { isDoneStatus, isRepeating, parseItemLine, tickLine, toggleLine, untickLine } from './item-line';
 import { dominantEol, spliceLines, type Line } from './lines';
-import { columnOf, isBlank, type ItemBlock, type ListModel, type Section } from './parse';
+import { columnOf, isBlank, stripIndent, type ItemBlock, type ListModel, type Section } from './parse';
 import { range, reorderChecked } from './reorder';
 import { RepeatingItemError, tickRepeating } from './repeat-line';
 import { setTitleKeepingStar } from './star';
@@ -194,16 +194,4 @@ function gapThatMoves(lines: readonly Line[], section: Section, item: ItemBlock)
 	if (isBlankAt(lines, item.titleLine - 1)) return after;
 	const previousIsAdjacent = section.items[k - 1]?.endLine === item.titleLine;
 	return section.items[k + 1]?.titleLine === after.end && !previousIsAdjacent ? after : null;
-}
-
-// Removes up to `width` columns of indentation, a tab moving to the next multiple of 4. A tab that
-// crosses `width` leaves its remaining columns as spaces, as CommonMark does. A lazy line is indented
-// less than the content column, which `width` always reaches, so it loses all its indentation.
-export function stripIndent(text: string, width: number): string {
-	let column = 0;
-	let i = 0;
-	for (; column < width && (text[i] === ' ' || text[i] === '\t'); i++) {
-		column = text[i] === '\t' ? column + 4 - (column % 4) : column + 1;
-	}
-	return ' '.repeat(Math.max(0, column - width)) + text.slice(i);
 }
