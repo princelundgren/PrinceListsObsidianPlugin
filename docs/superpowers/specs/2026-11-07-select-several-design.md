@@ -38,7 +38,8 @@ only documented Obsidian APIs are used.
 - **Tick, star, set a date and delete** act on every selected item at once **(owner)**, and each
   shows an Undo message **(owner)**.
 - **Only in the list view (owner).** Not in the Schedule, nor in a list inside another note. Tags
-  are their own design ([filtering by tag](2026-11-07-tag-filter-design.md)).
+  are their own designs ([filtering by tag](2026-11-07-tag-filter-design.md) and
+  [tagging a selection](2026-11-12-select-tags-design.md)).
 
 ## What the selection is
 
@@ -231,7 +232,7 @@ only documented Obsidian APIs are used.
 Left out on purpose, each for its reason:
 
 - **The Schedule and lists inside other notes:** sorting happens in the list itself **(owner)**.
-- **Tags:** their own design.
+- **Tags:** their own design, [tagging a selection](2026-11-12-select-tags-design.md).
 - **Moving between rows with the arrow keys alone, and Cmd+A:** #125 covers keyboard reach, and
   selecting everything is a later step once it's asked for **(call)**.
 
