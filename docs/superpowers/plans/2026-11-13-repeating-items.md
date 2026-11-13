@@ -196,7 +196,7 @@ emulator, with the steps each task lists. iOS isn't reachable for these checks; 
     `- [ ] a ⏳ 2026-11-13 📅 2026-11-20 🔁 every day` it keeps the repeat.
 - [ ] **Step 2:** `npm test` fails on the new tests.
 - [ ] **Step 3: Implement.** In `parseItemLine`, the end is read from the title once the marks are
-  off, with ` +🔚️? *\S+$`, and only when the tail matches `REPEAT_FIELD`; on such a line a
+  off, with ` +🔚${VS16} *\S+$`, with `item-line.ts`'s `VS16`, and only when the tail matches `REPEAT_FIELD`; on such a line a
   `🔚` still in the title is the problem `end`. Every join of
   `parts.title + parts.marks` in `src/core` adds `parts.end` between them. A date field is one of
   `📅 📆 🗓 ⏳ ⌛ 🛫` with its optional U+FE0F and spaces and a `YYYY-MM-DD`, ended as
