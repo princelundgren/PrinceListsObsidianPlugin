@@ -16,9 +16,9 @@ export interface LineRepeat {
 export type RepeatTick = { kind: 'moved'; line: string; next: string } | { kind: 'ended'; line: string };
 
 const MESSAGES: Record<RepeatProblem, string> = {
-	rule: "The repeat can't be read",
-	end: "The end of the repeat can't be read",
-	date: "A date on the line doesn't exist",
+	rule: "This item repeats in a way PrinceLists can't follow, so it isn't ticked.",
+	end: "This item's 🔚 end can't be read, so it isn't ticked.",
+	date: "This item has a date that doesn't exist, so it isn't ticked.",
 };
 
 export class RepeatingItemError extends Error {

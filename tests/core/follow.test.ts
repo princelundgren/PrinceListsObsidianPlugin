@@ -64,7 +64,7 @@ describe('followLine agrees with a fresh parse after each own edit', () => {
 
 	test('ticking moves nothing', () => {
 		const { lines, item } = list(text);
-		const edited = joinLines(toggleItem(lines, item(2), new Date(2026, 9, 21, 9, 0)));
+		const edited = joinLines(toggleItem(lines, item(2), new Date(2026, 9, 21, 9, 0)).lines);
 		const edit = ownEdit(item(2).titleLine, text, edited, 'change');
 		expect(titleLines(text).map((line) => followLine(line, edit))).toEqual(titleLines(edited));
 	});

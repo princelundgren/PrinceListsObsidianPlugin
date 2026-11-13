@@ -7,6 +7,7 @@ import type { PrinceListView } from './list-view';
 
 export const UNSAFE_EDIT_NOTICE = "This list's layout can't take that change. Make it in Markdown instead.";
 export const CHANGED_ELSEWHERE_NOTICE = 'This list changed elsewhere. Try again.';
+export const LATE_UNDO_NOTICE = "This list changed since the tick, so it can't be undone.";
 export const SAVE_FAILED_NOTICE = "Couldn't save the change to this list.";
 export const LOST_TYPING_NOTICE = 'This list changed elsewhere, and what you typed may not be in it.';
 
@@ -116,7 +117,7 @@ export function tryEdit<T>(edit: () => T): T | null {
 		return edit();
 	} catch (error) {
 		if (error instanceof RepeatingItemError) {
-			new Notice("Repeating items can't be ticked here yet.");
+			new Notice(error.message);
 		} else if (error instanceof UnsafeEditError) {
 			new Notice(UNSAFE_EDIT_NOTICE);
 		} else {

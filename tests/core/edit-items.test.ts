@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import {
-	RepeatingItemError,
 	UnsafeEditError,
 	deleteItem,
 	getItemNotes,
@@ -27,25 +26,79 @@ const now = new Date(2026, 9, 20, 23, 55);
 describe('toggleItem', () => {
 	test('ticks with a stamp and keeps the CRLF endings', () => {
 		const { lines, item } = list('- [ ] a\r\n- [ ] b\r\n');
-		expect(joinLines(toggleItem(lines, item(0), now))).toBe('- [x] a ✔ 2026-10-20 23:55\r\n- [ ] b\r\n');
+		expect(joinLines(toggleItem(lines, item(0), now).lines)).toBe('- [x] a ✔ 2026-10-20 23:55\r\n- [ ] b\r\n');
 	});
 	test('unticks a done item, whatever its status character', () => {
 		const { lines, item } = list('- [x] a ✔ 2026-10-20 23:55\n');
-		expect(joinLines(toggleItem(lines, item(0), now))).toBe('- [ ] a\n');
+		expect(joinLines(toggleItem(lines, item(0), now).lines)).toBe('- [ ] a\n');
 		const markers = list(readFixture('markers.md'));
 		for (const [n, expected] of [
 			[3, '- [ ] d'],
 			[4, '- [ ] e'],
 			[5, '- [ ] f'],
 		] as const) {
-			expect(toggleItem(markers.lines, markers.item(n), now)[n]?.text).toBe(expected);
+			expect(toggleItem(markers.lines, markers.item(n), now).lines[n]?.text).toBe(expected);
 		}
 	});
-	test('refuses to tick a repeating item, but unticks one', () => {
-		const open = list('- [ ] a 🔁 every week\n');
-		expect(() => toggleItem(open.lines, open.item(0), now)).toThrow(RepeatingItemError);
+	test('ticks an open item that does not repeat and unticks a done one, with no next date', () => {
+		const open = list('- [ ] a\n');
+		expect(toggleItem(open.lines, open.item(0), now).next).toBeNull();
 		const done = list('- [x] a ✔ 2026-10-20 23:55 🔁 every week\n');
-		expect(joinLines(toggleItem(done.lines, done.item(0), now))).toBe('- [ ] a 🔁 every week\n');
+		const toggled = toggleItem(done.lines, done.item(0), now);
+		expect(joinLines(toggled.lines)).toBe('- [ ] a 🔁 every week\n');
+		expect(toggled.next).toBeNull();
+	});
+	test('retitle makes the same toggle to a line', () => {
+		const { lines, item } = list('- [ ] a\n');
+		expect(toggleItem(lines, item(0), now).retitle('- [ ] b')).toBe('- [x] b ✔ 2026-10-20 23:55');
+	});
+});
+
+describe('toggleItem on a repeating item', () => {
+	const TEXT = '- [ ] chores ⏳ 2026-10-20 🔁 every day\n\t- [x] inbox zero\n\t\t- [-] plan\n- [ ] other\n';
+
+	test('moves the title line, unticks the whole checklist and names the next date', () => {
+		const { lines, item } = list(TEXT);
+		const toggled = toggleItem(lines, item(0), now);
+		expect(joinLines(toggled.lines)).toBe('- [ ] chores ⏳ 2026-10-21 🔁 every day\n\t- [ ] inbox zero\n\t\t- [ ] plan\n- [ ] other\n');
+		expect(toggled.next).toBe('2026-10-21');
+	});
+	test('retitle moves the date of the line a title field saved', () => {
+		const { lines, item } = list(TEXT);
+		expect(toggleItem(lines, item(0), now).retitle('- [ ] chores edited ⏳ 2026-10-20 🔁 every day')).toBe(
+			'- [ ] chores edited ⏳ 2026-10-21 🔁 every day',
+		);
+	});
+	test('leaves a step in a code fence, a callout or a %% comment as it is', () => {
+		const kept = '\t```\n\t- [x] in code\n\t```\n\t> [!note]\n\t> - [x] in callout\n\t%%\n\t- [x] in comment\n\t%%\n';
+		const { lines, item } = list(`- [ ] a ⏳ 2026-10-20 🔁 every day\n\t- [x] real\n${kept}\t- [x] after\n`);
+		expect(joinLines(toggleItem(lines, item(0), now).lines)).toBe(`- [ ] a ⏳ 2026-10-21 🔁 every day\n\t- [ ] real\n${kept}\t- [ ] after\n`);
+	});
+	test('keeps the checklist of an item that ends, and ticks it', () => {
+		const { lines, item } = list('- [ ] a 🔚 1x ⏳ 2026-10-20 🔁 every day\n\t- [x] step\n');
+		const toggled = toggleItem(lines, item(0), now);
+		expect(joinLines(toggled.lines)).toBe('- [x] a 🔚 1x ✔ 2026-10-20 23:55 ⏳ 2026-10-20 🔁 every day\n\t- [x] step\n');
+		expect(toggled.next).toBeNull();
+	});
+	test('two ticks in a row move two dates', () => {
+		const first = list(TEXT);
+		const once = toggleItem(first.lines, first.item(0), now);
+		const second = list(joinLines(once.lines));
+		const twice = toggleItem(second.lines, second.item(0), now);
+		expect([once.next, twice.next]).toEqual(['2026-10-21', '2026-10-22']);
+	});
+	test('refuses a line it cannot repeat with the problem', () => {
+		const { lines, item } = list('- [ ] a ⏳ 2026-10-20 🔁 every weekday\n');
+		expect(() => toggleItem(lines, item(0), now)).toThrow(expect.objectContaining({ problem: 'rule' }));
+	});
+	test.each([
+		['as is', (t: string) => t],
+		['with CRLF', crlf],
+		['without the final newline', (t: string) => t.replace(/\n$/, '')],
+	])('a move keeps the line endings, %s', (_, shape) => {
+		const { lines, item } = list(shape('- [ ] chores ⏳ 2026-10-20 🔁 every day\n\t- [x] inbox zero\n\t\t- [-] plan\n'));
+		const after = joinLines(toggleItem(lines, item(0), now).lines);
+		expect(after).toBe(shape('- [ ] chores ⏳ 2026-10-21 🔁 every day\n\t- [ ] inbox zero\n\t\t- [ ] plan\n'));
 	});
 });
 

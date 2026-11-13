@@ -1,10 +1,11 @@
-import { Notice } from 'obsidian';
+import { getLanguage, Notice } from 'obsidian';
 import { itemRow, timelessItemRow } from '../core/display';
 import { toggleItem } from '../core/edit-items';
 import type { OwnEdit } from '../core/follow';
-import { toggleLine } from '../core/item-line';
 import { joinLines, type Line } from '../core/lines';
 import { itemAt } from '../core/parse';
+import { nextDayMessage } from '../core/when';
+import { offerGroupUndo } from './group-write';
 import type { PrinceListView } from './list-view';
 import { lineOf, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit, writeAction } from './write';
@@ -50,12 +51,20 @@ async function tick(view: PrinceListView, row: HTMLElement | null, pending: { li
 		const item = itemAt(model, titleLine);
 		const now = new Date();
 		if (!item || done === timelessItemRow((lines[titleLine] as Line).text, titleLine).done) return;
-		const edited = tryEdit(() => toggleItem(lines, item, now));
-		if (!edited) return;
+		const toggled = tryEdit(() => toggleItem(lines, item, now));
+		if (!toggled) return;
+		const edited = toggled.lines;
 		// A title field with focus makes the same tick to the line it saved (syncTitleField).
-		const edit: OwnEdit = { start: titleLine, delta: 0, kind: 'change', retitle: (line) => toggleLine(line, now) };
-		const result = await writeAction(view, joinLines(edited), text, undefined, edit);
+		const edit: OwnEdit = { start: titleLine, delta: 0, kind: 'change', retitle: toggled.retitle };
+		const after = joinLines(edited);
+		const result = await writeAction(view, after, text, undefined, edit);
 		if (result === 'written') {
+			// A moved item stays open, so its row is drawn again, in its place or its new group.
+			if (toggled.next !== null) {
+				view.render();
+				offerGroupUndo(view, nextDayMessage(toggled.next, getLanguage()), text, after);
+				return;
+			}
 			// Obsidian's echo of this write returns early in setViewData, so the row is updated here. A
 			// tick moves no line, so the row still stands for this item. A redraw during the write,
 			// such as "Show archived items", drew from the text before the tick, so the view redraws again.

@@ -1,8 +1,8 @@
-import { RepeatingItemError } from './edit-items';
+import { RepeatingItemError, toggleItem } from './edit-items';
 import { headingText } from './display';
 import { followLine, moveEdit, type OwnEdit } from './follow';
 import type { PlannedGroupEdit } from './group-actions';
-import { isDoneStatus, isRepeating, parseItemLine, tickLine, untickLine } from './item-line';
+import { isDoneStatus, parseItemLine } from './item-line';
 import { joinLines, splitLines } from './lines';
 import { planHeadingDelete, planItemDelete } from './list-actions';
 import { itemAt, parseList, type ListModel } from './parse';
@@ -12,7 +12,7 @@ import { whenOf } from './when';
 export interface PlannedGroupChange extends PlannedGroupEdit {
 	/** The items whose line changed. */
 	changed: number;
-	/** The repeating items a tick left as they were. */
+	/** The items a tick left as they were because they can't repeat. */
 	skipped: number;
 }
 
@@ -96,24 +96,41 @@ export function planGroupLineEdit(
 }
 
 /**
- * Ticks (`done`) or unticks the items on `rows` in one write. A repeating item is left as it is and
- * counted in `skipped`; throws RepeatingItemError when every item the tick would change repeats.
- * Returns null when nothing changes.
+ * Ticks (`done`) or unticks the items on `rows` in one write; a repeating item moves to its next
+ * date, as `toggleItem` does. An item that can't repeat is left as it is and counted in `skipped`;
+ * throws the first one's RepeatingItemError when every item the tick would change was skipped. No
+ * line count changes, so the rows keep their lines. Returns null when nothing changes.
  */
 export function planGroupTick(text: string, contentStart: number, rows: readonly number[], done: boolean, now: Date): PlannedGroupChange | null {
+	let lines = splitLines(text);
+	const model = parseList(lines, contentStart);
+	let changed = 0;
 	let skipped = 0;
-	const plan = planGroupLineEdit(text, contentStart, rows, (line) => {
-		const parts = parseItemLine(line);
-		if (!parts || isDoneStatus(parts.status) === done) return line;
-		if (!done) return untickLine(line);
-		if (isRepeating(line)) {
+	let first = -1;
+	let firstError: RepeatingItemError | null = null;
+	for (const row of [...new Set(rows)].sort((a, b) => a - b)) {
+		const own = lines[row];
+		if (own && isHeading(model, row)) continue;
+		const item = itemAt(model, row);
+		if (!own || !item) return null;
+		const parts = parseItemLine(own.text);
+		if (!parts || isDoneStatus(parts.status) === done) continue;
+		try {
+			lines = toggleItem(lines, item, now).lines;
+		} catch (error) {
+			if (!(error instanceof RepeatingItemError)) throw error;
+			firstError ??= error;
 			skipped++;
-			return line;
+			continue;
 		}
-		return tickLine(line, now);
-	});
-	if (!plan && skipped > 0) throw new RepeatingItemError('rule');
-	return plan && { ...plan, skipped };
+		changed++;
+		if (first === -1) first = row;
+	}
+	if (changed === 0) {
+		if (firstError) throw firstError;
+		return null;
+	}
+	return { next: joinLines(lines), edit: { start: first, delta: 0, kind: 'change' }, changed, skipped };
 }
 
 /**

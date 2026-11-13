@@ -59,7 +59,7 @@ export function barButtons(state: GroupState, listHasHeadings: boolean): Record<
 	};
 }
 
-/** The Undo message for `change` on `written.changed` items, naming the repeating items a tick skipped. */
+/** The Undo message for `change` on `written.changed` items, naming the items a tick skipped because they can't repeat. */
 export function changeMessage(change: GroupChange, written: Pick<PlannedGroupChange, 'changed' | 'skipped'>): string {
 	const items = countPhrase(written.changed, 0);
 	const said = {
@@ -71,7 +71,7 @@ export function changeMessage(change: GroupChange, written: Pick<PlannedGroupCha
 		removeDate: `Date removed from ${items}.`,
 	}[change];
 	if (written.skipped === 0) return said;
-	return `${said} ${written.skipped} repeating ${written.skipped === 1 ? 'item' : 'items'} skipped.`;
+	return `${said} ${written.skipped} ${written.skipped === 1 ? 'item' : 'items'} that can't repeat skipped.`;
 }
 
 /** What a tag entry changed, for its Undo message. */
