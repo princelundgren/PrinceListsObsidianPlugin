@@ -149,4 +149,4 @@ Bug reports, ideas and pull requests are welcome.
 
 ## License
 
-[MIT](LICENSE). The built `main.js` includes commonmark.js, entities, mdurl, `@codemirror/lang-markdown` and `@lezer/markdown`, under their own licenses: see [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).
+[MIT](LICENSE). The built `main.js` includes commonmark.js, entities, mdurl, `@codemirror/lang-markdown` and `@lezer/markdown`, and adapts the Tasks plugin's field patterns, under their own licenses: see [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES).
