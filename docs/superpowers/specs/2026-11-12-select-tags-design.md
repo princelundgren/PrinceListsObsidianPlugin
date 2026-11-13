@@ -1,6 +1,7 @@
 ---
-status: approved
-verified: 2026-11-12
+status: building
+governs: [src/**, styles.css]
+verified: 2026-11-13
 tracking: ["#361"]
 ---
 
@@ -108,8 +109,6 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## Left to the builder
 
-- How the card's `TagSuggest` serves both: today it reads the open card's item for the tags to
-  leave out and adds to that item.
 - Where the selection's tag counts are worked out, in `src/core/` with tests first, and the names.
 - Where the suggestions open on a phone with the keyboard up; tagging must work on Android then.
 

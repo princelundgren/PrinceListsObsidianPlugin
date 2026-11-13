@@ -1,9 +1,10 @@
 import { setIcon } from 'obsidian';
-import { removeTag } from '../core/tag-edit';
+import { itemTags } from '../core/item-tags';
+import { addTag, removeTag } from '../core/tag-edit';
 import { addHiddenLabel } from './dom';
 import { queueLineEdit } from './line-edit';
 import type { PrinceListView } from './list-view';
-import { TagSuggest } from './tag-suggest';
+import { TagSuggest, type TagTarget } from './tag-suggest';
 
 const CARD_TAGS_CLASS = 'princelists-card-tags';
 const CARD_TAG_CLASS = 'princelists-card-tag';
@@ -66,10 +67,21 @@ export function toggleTagPopover(view: PrinceListView): void {
 	const el = head.createDiv({ cls: TAG_POPOVER_CLASS });
 	const input = el.createEl('input', { cls: TAG_INPUT_CLASS, type: 'text', attr: { placeholder: 'Tag' } });
 	addHiddenLabel(input, 'Add tag');
-	view.tagPopover = { el, input, suggest: new TagSuggest(view, input, () => escapeTagPopover(view)) };
+	view.tagPopover = { el, input, suggest: new TagSuggest(view, input, cardTagTarget(view)) };
 	button.setAttr('aria-expanded', 'true');
 	input.focus();
 	el.scrollIntoView({ block: 'nearest' });
+}
+
+// The open card's item when asked, which may have moved since the popover opened.
+function cardTagTarget(view: PrinceListView): TagTarget {
+	return {
+		tagsToLeaveOut: () => itemTags(view.selected === null ? '' : (view.parse().lines[view.selected]?.text ?? '')).tags,
+		choose: (tag) => {
+			if (view.selected !== null) queueLineEdit(view, view.selected, (text) => addTag(text, tag));
+			escapeTagPopover(view);
+		},
+	};
 }
 
 /** Closes the tag popover and its suggestions, whose own popover sits outside the view's element. */
