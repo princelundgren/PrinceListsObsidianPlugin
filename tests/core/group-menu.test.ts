@@ -21,6 +21,7 @@ describe('groupEntries', () => {
 			'untick',
 			'addStar',
 			'removeStar',
+			'tag',
 			'today',
 			'tomorrow',
 			'pickDate',
@@ -31,7 +32,7 @@ describe('groupEntries', () => {
 
 	test('shows only the entries that change something', () => {
 		const state = { ...NONE, items: 2, anyUnticked: true, anyStarred: true };
-		expect(groupEntries(state, true)).toEqual(['move', 'tick', 'removeStar', 'today', 'tomorrow', 'pickDate', 'delete']);
+		expect(groupEntries(state, true)).toEqual(['move', 'tick', 'removeStar', 'tag', 'today', 'tomorrow', 'pickDate', 'delete']);
 	});
 
 	test('hides Move to heading while a heading is selected', () => {
