@@ -56,11 +56,11 @@ describe('groupEntries', () => {
 
 describe('barButtons', () => {
 	test('enables every button for a mixed selection of items in a list with headings', () => {
-		expect(barButtons(MIXED, true)).toEqual({ move: true, tick: true, star: true, date: true, delete: true });
+		expect(barButtons(MIXED, true)).toEqual({ move: true, tick: true, star: true, tag: true, date: true, delete: true });
 	});
 
 	test('enables only Delete for a selection of headings', () => {
-		expect(barButtons({ ...NONE, headings: 2 }, true)).toEqual({ move: false, tick: false, star: false, date: false, delete: true });
+		expect(barButtons({ ...NONE, headings: 2 }, true)).toEqual({ move: false, tick: false, star: false, tag: false, date: false, delete: true });
 	});
 
 	test('disables Move to while a heading is selected', () => {
@@ -73,7 +73,7 @@ describe('barButtons', () => {
 
 	test('enables Tick and Star for one item, whatever it holds', () => {
 		const ticked = { ...NONE, items: 1, anyTicked: true, anyUnstarred: true };
-		expect(barButtons(ticked, true)).toEqual({ move: true, tick: true, star: true, date: true, delete: true });
+		expect(barButtons(ticked, true)).toEqual({ move: true, tick: true, star: true, tag: true, date: true, delete: true });
 	});
 });
 

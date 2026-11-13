@@ -706,10 +706,10 @@ button.princelists-new-item {
 	gap: var(--size-4-2);
 }
 
-/* Move to, Tick, Star, Date, the divider, then Delete: the actions as wide as the widest of them. */
+/* Move to, Tick, Star, Tag, Date, the divider, then Delete: the actions as wide as the widest of them. */
 .princelists-selection-actions {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr) auto 1fr;
+	grid-template-columns: repeat(5, 1fr) auto 1fr;
 }
 
 .princelists-selection-bar-top {
@@ -732,7 +732,9 @@ button.princelists-new-item {
 	display: none;
 }
 
-@container princelists-view (min-width: 520px) {
+/* The narrowest view where Done, the count and six labelled buttons keep 48 px on one row, measured in
+   Obsidian 1.15.1's default theme: at 541 the last button overflows the bar's padding. */
+@container princelists-view (min-width: 542px) {
 	.princelists-selection-bar,
 	.princelists-content {
 		--princelists-selection-bar-height: calc(var(--size-4-12) + 2 * var(--size-4-2) + 2 * var(--border-width));
@@ -753,16 +755,16 @@ button.princelists-new-item {
 	}
 }
 
-/* In a view too narrow for five labelled buttons, such as a sidebar, they show only their icons, the
-   gaps tighten, and the buttons narrow below 48 rather than spill out of the bar. */
-@container princelists-view (max-width: 359px) {
+/* In a view too narrow for six labelled buttons 48 wide, such as a phone's or a sidebar, they show only
+   their icons, the gaps tighten, and the buttons narrow below 48 rather than spill out of the bar. */
+@container princelists-view (max-width: 389px) {
 	.princelists-selection-bar {
 		left: var(--size-4-2);
 		right: var(--size-4-2);
 	}
 
 	.princelists-selection-actions {
-		grid-template-columns: repeat(4, minmax(0, 1fr)) auto minmax(0, 1fr);
+		grid-template-columns: repeat(5, minmax(0, 1fr)) auto minmax(0, 1fr);
 		gap: var(--size-4-1);
 	}
 

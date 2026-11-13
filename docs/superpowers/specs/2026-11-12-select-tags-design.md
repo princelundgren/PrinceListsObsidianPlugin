@@ -42,8 +42,8 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   as one 360 or 375 px wide, gets the icons-only layout, whose buttons may narrow below 48 px, as
   in a sidebar today **(owner, 2026-11-12, in selecting several rows)**.
 - **The one-row layout moves up too (call: the width):** at 520 px Done and the count leave about
-  320 px, short of the 337 six buttons need, so it starts where every button keeps 48 px, about
-  540 px. The builder measures it in Obsidian and names the width in the PR.
+  320 px, short of the 337 six buttons need, so it starts where every button keeps 48 px: 542 px,
+  measured in Obsidian 1.15.1's default theme.
 - **A screen reader (call):** the button has `aria-expanded`, as the card's tag button has, and
   `aria-haspopup="dialog"`; the popover has `role="dialog"`, named "Tag the selection".
 

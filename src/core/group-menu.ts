@@ -38,12 +38,12 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 }
 
 /** A button of the bar that acts on the selection. */
-export type BarButton = 'move' | EntryGroup | 'delete';
+export type BarButton = 'move' | EntryGroup | 'tag' | 'delete';
 
 /**
  * Whether each of the bar's buttons has something to act on for a selection that holds `state`: Move
- * to while Move to heading… shows, Tick, Star and Date while any entry of their group does, and Delete
- * while anything is selected.
+ * to while Move to heading… shows, Tick, Star and Date while any entry of their group does, Tag while
+ * any item is selected, and Delete while anything is selected.
  */
 export function barButtons(state: GroupState, listHasHeadings: boolean): Record<BarButton, boolean> {
 	const entries = groupEntries(state, listHasHeadings);
@@ -52,6 +52,7 @@ export function barButtons(state: GroupState, listHasHeadings: boolean): Record<
 		move: entries.includes('move'),
 		tick: showsAny('tick'),
 		star: showsAny('star'),
+		tag: state.items > 0,
 		date: showsAny('date'),
 		delete: entries.includes('delete'),
 	};

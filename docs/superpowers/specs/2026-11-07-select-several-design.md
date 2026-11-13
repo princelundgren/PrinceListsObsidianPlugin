@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-12
+verified: 2026-11-13
 governs: [src/**, styles.css]
 tracking: ["#79"]
 ---
@@ -72,8 +72,8 @@ only documented Obsidian APIs are used.
 - **It's never written to the file and isn't remembered (call).** Closing the list ends it.
 - **It ends** with Done, Escape, or removing the last selected row **(call)**. A click or a tap on
   empty space keeps it, so a near miss between rows doesn't lose it **(call)**. An open menu or
-  dialog takes the first Escape, and Escape in a text field is the field's **(call)**. Once it
-  ends, a click opens a card again.
+  dialog, the tag popover included, takes the first Escape, and Escape in a text field is the
+  field's **(call)**. Once it ends, a click opens a card again.
 
 ## Starting to select
 
@@ -128,8 +128,11 @@ only documented Obsidian APIs are used.
   2026-11-12):** a filled selection circle looked like a ticked box. A click or a tap on a
   checkbox or beside it selects, so nothing is ticked by mistake.
 - **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
-  to, Tick, Star, Date and Delete. On desktop it takes the same place whether or not the floating
-  "+" shows there, and the "+" in the pane's header hides **(call)**.
+  to, Tick, Star, Tag, Date and Delete. On desktop it takes the same place whether or not the
+  floating "+" shows there, and the "+" in the pane's header hides **(call)**.
+- **While the tag popover is open,** a click or a tap on a row, a heading, the tag strip or the
+  list's title only closes it: it selects nothing and opens nothing
+  ([tagging a selection](2026-11-12-select-tags-design.md), "What closes it").
 - **Right-click on a selected row** opens the selection's menu **(owner)**; on a row outside the
   selection it opens that row's own menu, as today, and leaves the selection **(call)**.
 - **Dragging a selected row drags the whole selection** ("Dragging the selection").
@@ -145,8 +148,10 @@ only documented Obsidian APIs are used.
 
 - **Its buttons (call):** Move to opens the heading picker and Delete deletes, as the menu's
   entries do. Tick, Star and Date each open a small menu of the selection menu's entries for them,
-  so a mixed selection gets both Tick and Untick. A button whose entries all hide, such as Tick
-  with only headings selected, is disabled; Move to is disabled while a heading is selected.
+  so a mixed selection gets both Tick and Untick. Tag opens the selection's tag popover
+  ([tagging a selection](2026-11-12-select-tags-design.md)). A button whose entries all hide, such
+  as Tick with only headings selected, is disabled; Move to is disabled while a heading is
+  selected.
 - **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
   CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
@@ -155,13 +160,13 @@ only documented Obsidian APIs are used.
   Delete sits apart at the far end, past a divider, so a near miss on Date doesn't reach it
   **(call)**. The bar is the same on desktop.
 - **One row where it fits (owner, 2026-11-12):** Done, an ✕ named "Done", and the count come
-  first, then the actions spread across the bar, every button an icon. A view narrower than 520
-  px, such as a phone's, puts Done and the count on a row above the actions **(call: the
-  width)**.
-- **Icons only where even that doesn't fit (owner, 2026-11-12):** in a view narrower than 360 px,
-  such as a sidebar, the actions lose their labels, keeping them as tooltips and names, the gaps
-  tighten, and the buttons narrow below 48 px rather than spill out of the bar **(call: the
-  width)**.
+  first, then the actions spread across the bar, every button an icon. A narrower view, such as
+  a phone's, puts Done and the count on a row above the actions.
+- **Icons only where even that doesn't fit (owner, 2026-11-12):** in a narrower view still, such
+  as a sidebar or a small phone, the actions lose their labels, keeping them as tooltips and
+  names, the gaps tighten, and the buttons narrow below 48 px rather than spill out of the bar.
+- **The widths** of both layouts are in [tagging a selection](2026-11-12-select-tags-design.md),
+  "The bar's Tag button".
 - **Done ends selecting,** and so does Delete or removing the last selected row **(call)**. Other
   actions keep the selection, so several can follow each other.
 
@@ -223,9 +228,9 @@ only documented Obsidian APIs are used.
 - **Each action is one write and one Cmd+Z step (call),** and follows step one's "Saving" as a
   one-off action: typing that lands while it waits makes it run once more on the new text.
 - **Every group action shows an Undo message (owner),** on desktop and mobile: a move, a drag, a
-  tick, a star, a date or a delete. Its button takes the same step back as Cmd+Z, as the message
-  after a delete does today. Without it, a phone could never take back a mistaken group move,
-  since undo there is otherwise only the message after a delete (step one, "Undo").
+  tick, a star, a tag, a date or a delete. Its button takes the same step back as Cmd+Z, as the
+  message after a delete does today. Without it, a phone could never take back a mistaken group
+  move, since undo there is otherwise only the message after a delete (step one, "Undo").
 
 ## Not in this design
 
