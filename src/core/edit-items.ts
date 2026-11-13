@@ -4,26 +4,20 @@ import { isDoneStatus, isRepeating, parseItemLine, tickLine, untickLine } from '
 import { dominantEol, spliceLines, type Line } from './lines';
 import { columnOf, isBlank, type ItemBlock, type ListModel, type Section } from './parse';
 import { range, reorderChecked } from './reorder';
+import { RepeatingItemError } from './repeat-line';
 import { setTitleKeepingStar } from './star';
 
 // Callers of the item edits import it from here.
-export { UnsafeEditError };
+export { RepeatingItemError, UnsafeEditError };
 
 export type MoveTarget = { after: ItemBlock } | { firstIn: Section };
-
-export class RepeatingItemError extends Error {
-	constructor() {
-		super('A repeating item cannot be ticked');
-		this.name = 'RepeatingItemError';
-	}
-}
 
 export function toggleItem(lines: readonly Line[], item: ItemBlock, now: Date): Line[] {
 	const { text } = lines[item.titleLine] as Line;
 	const parts = parseItemLine(text);
 	if (parts && isDoneStatus(parts.status)) return replaceLine(lines, item.titleLine, untickLine(text));
 	// Ticking without creating the next occurrence would quietly end the repeat.
-	if (isRepeating(text)) throw new RepeatingItemError();
+	if (isRepeating(text)) throw new RepeatingItemError('rule');
 	return replaceLine(lines, item.titleLine, tickLine(text, now));
 }
 

@@ -112,7 +112,7 @@ export function planGroupTick(text: string, contentStart: number, rows: readonly
 		}
 		return tickLine(line, now);
 	});
-	if (!plan && skipped > 0) throw new RepeatingItemError();
+	if (!plan && skipped > 0) throw new RepeatingItemError('rule');
 	return plan && { ...plan, skipped };
 }
 

@@ -43,7 +43,7 @@ export function setWhen(line: string, day: string | null): string {
 	}
 	changed += fields.slice(copied);
 	if (day !== null && !replaced) {
-		const isFirst = (parts.title + parts.marks + changed).length === 0;
+		const isFirst = (parts.title + parts.end + parts.marks + changed).length === 0;
 		changed += `${isFirst ? '' : ' '}${WHEN} ${day}`;
 	}
 	return joinItemLine({ ...parts, tail: changed + end });

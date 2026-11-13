@@ -13,6 +13,7 @@ import {
 	tickLine,
 	untickLine,
 } from '../../src/core/item-line';
+import { isStarred } from '../../src/core/star';
 
 const now = new Date(2026, 9, 20, 23, 55);
 const STAMP = '✔ 2026-10-20 23:55';
@@ -171,6 +172,7 @@ describe('parseItemLine', () => {
 			status: 'x',
 			afterStatus: '] ',
 			title: 't',
+			end: '',
 			marks: ' ✔ 2026-10-20 09:00',
 			tail: ' 📅 2026-10-30 ^id',
 		});
@@ -291,5 +293,59 @@ describe('tailFields', () => {
 
 	test('splits a tag glued to a field that follows it', () => {
 		expect(slices('#frozen⏳ 2026-11-08')).toEqual(['#frozen', '⏳ 2026-11-08']);
+	});
+});
+
+describe('the end in parseItemLine', () => {
+	const full = '- [x] Physio ⭐ 🔚 5x ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14 ^id';
+
+	test('is its own part between the title and the marks, and the title is still starred', () => {
+		const parts = parseItemLine(full);
+
+		expect(parts).toMatchObject({
+			title: 'Physio ⭐',
+			end: ' 🔚 5x',
+			marks: ' ✔ 2026-11-14 18:05',
+			tail: ' 🔁 every day ⏳ 2026-11-14 ^id',
+		});
+		expect(isStarred(full)).toBe(true);
+	});
+
+	test('stays in the title of a line that does not repeat', () => {
+		expect(parseItemLine('- [ ] Countdown 🔚 5x')).toMatchObject({ title: 'Countdown 🔚 5x', end: '' });
+	});
+
+	test('is kept by setTitle, tickLine and untickLine', () => {
+		const open = '- [ ] Physio 🔚 5x 🔁 every day ⏳ 2026-11-14';
+
+		expect(setTitle(open, 'Run')).toBe('- [ ] Run 🔚 5x 🔁 every day ⏳ 2026-11-14');
+		expect(tickLine(open, new Date(2026, 10, 13, 9, 0))).toBe('- [x] Physio 🔚 5x ✔ 2026-11-13 09:00 🔁 every day ⏳ 2026-11-14');
+		expect(untickLine(tickLine(open, new Date(2026, 10, 13, 9, 0)))).toBe(open);
+	});
+
+	test('does not count a 🔚 with no space before it', () => {
+		expect(parseItemLine('- [ ] Physio🔚 5x 🔁 every day')).toMatchObject({ title: 'Physio🔚 5x', end: '' });
+	});
+
+	// Assumes a linear scan finishes in milliseconds and a quadratic one takes over several seconds here.
+	test('reads a line with a long run of spaces before the 🔚 in well under a second', () => {
+		const line = `- [ ] a${' '.repeat(100_000)}🔚 x y 🔁 every day`;
+		const started = performance.now();
+
+		const parts = parseItemLine(line);
+
+		expect(performance.now() - started).toBeLessThan(1000);
+		expect(parts?.end).toBe('');
+	});
+
+	// Assumes a linear scan finishes in milliseconds and a quadratic one takes seconds at this size.
+	test('reads a line with a long run of 🔚 marks in well under a second', () => {
+		const line = `- [ ] a ${'🔚'.repeat(60_000)} x y 🔁 every day`;
+		const started = performance.now();
+
+		const parts = parseItemLine(line);
+
+		expect(performance.now() - started).toBeLessThan(1000);
+		expect(parts?.end).toBe('');
 	});
 });
