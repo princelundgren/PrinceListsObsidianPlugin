@@ -1,4 +1,4 @@
-import { debounce, ItemView, type Menu, Notice, Platform, Scope, setIcon, setTooltip, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
+import { debounce, getLanguage, ItemView, type Menu, Notice, Platform, Scope, setIcon, setTooltip, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
@@ -9,12 +9,13 @@ import { serialQueue } from '../core/queue';
 import { datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { litForStrip, NO_LIT_TAGS, type LitTags } from '../core/tags';
-import { dayOf } from '../core/when';
+import { dayOf, nextDayMessage } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
+import { showUndoNotice } from './delete';
 import { targetOf } from './dom';
 import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, NO_MATCH_CLASS, NO_MATCH_HINT, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { FIND_KEY_NAME } from './keys';
@@ -244,7 +245,19 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		if (!toggled) return;
 		const next = joinLines(toggled.lines);
 		// Taken at once, so the next tick in this list builds on it before the metadata cache catches up.
-		if ((await editListFile(this.app, file, list.text, next)) === 'written') this.listRead(file, next);
+		if ((await editListFile(this.app, file, list.text, next)) !== 'written') return;
+		this.listRead(file, next);
+		if (toggled.next !== null) this.offerUndo(file, nextDayMessage(toggled.next, getLanguage()), list.text, next);
+	}
+
+	// Writes the text from before the tick back while the file still holds what the tick left; any
+	// other change says so in editListFile's notice.
+	private offerUndo(file: TFile, message: string, before: string, after: string): void {
+		showUndoNotice(message, () =>
+			void this.enqueue(async () => {
+				if ((await editListFile(this.app, file, after, before)) === 'written') this.listRead(file, before);
+			}),
+		);
 	}
 
 	// In a tab that already shows the list, else a new one.

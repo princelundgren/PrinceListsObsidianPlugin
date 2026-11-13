@@ -1,10 +1,12 @@
-import { Notice, Platform } from 'obsidian';
+import { getLanguage, Notice, Platform } from 'obsidian';
 import { toggleItem } from '../core/edit-items';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
+import { nextDayMessage } from '../core/when';
 import { contentStartLine } from '../obsidian/marker';
 import { pressCanLift } from './block-drag';
 import { addBlockItem, addBlockItemBelow, BLOCK_FIELD_CLASS, BLOCK_TRASH_CLASS, closeBlockField, deleteBlockItem, openBlockField, showBlockItemMenu } from './block-fields';
+import { showUndoNotice } from './delete';
 import { targetOf } from './dom';
 import type { ListBlock } from './list-block';
 import { handleLinkClick, handleLinkMenu } from './notes';
@@ -12,6 +14,7 @@ import { ITEM_CLASS, lineOf, TICK_SELECTOR } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 export const NEW_ITEM_CLASS = 'princelists-block-new-item';
+const LATE_UNDO_NOTICE = "This list changed since the tick, so it can't be undone.";
 
 /**
  * Registers the block's delegated listeners on `rootEl`, the block's own element, and a mouseup on its
@@ -137,10 +140,29 @@ function queueTick(block: ListBlock, line: number): void {
 			const now = new Date();
 			const toggled = tryEdit(() => toggleItem(lines, item, now));
 			if (!toggled) return;
-			await block.write(joinLines(toggled.lines), text, { start: titleLine, delta: 0, kind: 'change', retitle: toggled.retitle });
+			const after = joinLines(toggled.lines);
+			const result = await block.write(after, text, { start: titleLine, delta: 0, kind: 'change', retitle: toggled.retitle });
 			if (!block.field) block.draw();
+			if (result === 'written' && toggled.next !== null) offerBlockUndo(block, nextDayMessage(toggled.next, getLanguage()), titleLine, text, after);
 		} finally {
 			block.editing.untrack(pending);
 		}
 	});
+}
+
+// Shows `message` with an Undo button that writes the text from before the tick back, only while the
+// block still holds what the tick left. A block keeps no history of its own, so the write says it is
+// an undo.
+function offerBlockUndo(block: ListBlock, message: string, titleLine: number, before: string, after: string): void {
+	const file = block.file;
+	showUndoNotice(message, () =>
+		void block.enqueue(async () => {
+			if (block.file !== file || block.editing.text !== after) {
+				new Notice(LATE_UNDO_NOTICE);
+				return;
+			}
+			const result = await block.write(before, after, { start: titleLine, delta: 0, kind: 'change', history: 'undo' });
+			if (result === 'written' && !block.field) block.draw();
+		}),
+	);
 }

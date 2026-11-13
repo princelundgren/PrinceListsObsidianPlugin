@@ -11,7 +11,7 @@ import { CHANGED_ELSEWHERE_NOTICE, writePlanned } from './write';
 // back `before`. It does nothing once the list holds `before` again, as after Cmd+Z, and on any other
 // change, a later edit that left the same text included, says it can't be undone. The check and the
 // undo run in one slot of the view's write queue, so a write queued before the click lands first.
-function offerGroupUndo(view: PrinceListView, message: string, before: string, after: string): void {
+export function offerGroupUndo(view: PrinceListView, message: string, before: string, after: string): void {
 	const file = view.file;
 	showUndoNotice(message, () =>
 		void view.enqueue(async () => {
