@@ -1137,7 +1137,8 @@ button.princelists-strip-tag.is-lit {
 	gap: var(--size-4-1);
 }
 
-.princelists-card-tag {
+.princelists-card-tag,
+.princelists-selection-tag {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--size-2-1);
@@ -1145,7 +1146,8 @@ button.princelists-strip-tag.is-lit {
 }
 
 /* The × takes the chip's own color, on the chip's background. */
-button.princelists-card-tag-remove {
+button.princelists-card-tag-remove,
+button.princelists-selection-tag-remove {
 	--icon-size: var(--icon-xs);
 	flex: none;
 	justify-content: center;
@@ -1157,20 +1159,18 @@ button.princelists-card-tag-remove {
 }
 
 @media (hover: hover) {
-	button.princelists-card-tag-remove:hover {
+	button.princelists-card-tag-remove:hover,
+	button.princelists-selection-tag-remove:hover {
 		background-color: var(--background-modifier-hover);
 	}
 }
 
-/* The tag popover hangs under the card's head, its end at the tools' end, over the card's content,
-   so opening it moves nothing. Obsidian's suggestions for its field draw above it. */
-.princelists-tag-popover {
-	position: absolute;
-	top: calc(100% + var(--size-2-2));
-	inset-inline-end: 0;
+/* The card's tag popover and the selection's look alike. Obsidian's suggestions for their fields draw
+   above them. */
+.princelists-tag-popover,
+.princelists-selection-tag-popover {
 	z-index: var(--layer-popover);
 	width: 16em;
-	max-width: 100%;
 	padding: var(--size-4-2);
 	border: var(--border-width) solid var(--background-modifier-border);
 	border-radius: var(--radius-m);
@@ -1178,8 +1178,42 @@ button.princelists-card-tag-remove {
 	box-shadow: var(--shadow-s);
 }
 
-.theme-dark .princelists-tag-popover {
+.theme-dark .princelists-tag-popover,
+.theme-dark .princelists-selection-tag-popover {
 	background-color: var(--background-secondary);
+}
+
+/* The card's hangs under its head, its end at the tools' end, over the card's content, so opening it
+   moves nothing. */
+.princelists-tag-popover {
+	position: absolute;
+	top: calc(100% + var(--size-2-2));
+	inset-inline-end: 0;
+	max-width: 100%;
+}
+
+/* The selection's sits above the bar's Tag button, its end at the button's, and stays inside the view
+   with --size-4-2 to spare each side and above; selection-tag-popover.ts sets where the button is. The
+   chips wrap above the field, which takes the full width, and scroll once they would reach the view's
+   top, so the field stays in view. */
+.princelists-selection-tag-popover {
+	position: absolute;
+	bottom: calc(var(--princelists-tag-popover-bottom) + var(--size-4-1));
+	right: clamp(var(--size-4-2), var(--princelists-tag-popover-end), 100% - var(--size-4-2) - min(16em, 100% - 2 * var(--size-4-2)));
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-1);
+	box-sizing: border-box;
+	max-width: calc(100% - 2 * var(--size-4-2));
+	max-height: calc(100% - var(--princelists-tag-popover-bottom) - var(--size-4-1) - var(--size-4-2));
+}
+
+.princelists-selection-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-1);
+	min-height: 0;
+	overflow-y: auto;
 }
 
 input.princelists-tag-input {

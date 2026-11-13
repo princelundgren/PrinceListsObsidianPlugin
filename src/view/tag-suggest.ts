@@ -12,6 +12,13 @@ export interface TagTarget {
 	choose(tag: string): void;
 }
 
+/** The list's tags as its strip shows them with no tag lit, the order the tag type-ahead and popovers follow. */
+export function stripTagOrder(view: PrinceListView): string[] {
+	const { lines, model } = view.parse();
+	const shown = { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms };
+	return listStripTags(lines, model, new Date(), shown, []);
+}
+
 /**
  * A tag type-ahead: the list's tags, as its strip shows them with no tag lit, and the typed tag as
  * new, less the target's tags to leave out. Choosing one calls the target's `choose`.
@@ -29,10 +36,7 @@ export class TagSuggest extends AbstractInputSuggest<TagChoice> {
 	}
 
 	protected override getSuggestions(query: string): TagChoice[] {
-		const view = this.listView;
-		const { lines, model } = view.parse();
-		const shown = { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms };
-		return tagChoices(listStripTags(lines, model, new Date(), shown, []), this.target.tagsToLeaveOut(), query);
+		return tagChoices(stripTagOrder(this.listView), this.target.tagsToLeaveOut(), query);
 	}
 
 	override renderSuggestion(choice: TagChoice, el: HTMLElement): void {
