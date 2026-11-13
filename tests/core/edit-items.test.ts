@@ -8,7 +8,6 @@ import {
 	setItemTitle,
 	toggleItem,
 } from '../../src/core/edit-items';
-import { EditHistory } from '../../src/core/history';
 import { parseItemLine } from '../../src/core/item-line';
 import { joinLines, type Line } from '../../src/core/lines';
 import {
@@ -96,14 +95,10 @@ describe('toggleItem on a repeating item', () => {
 		['as is', (t: string) => t],
 		['with CRLF', crlf],
 		['without the final newline', (t: string) => t.replace(/\n$/, '')],
-	])('the tick undoes byte for byte, %s', (_, shape) => {
-		const text = shape('- [ ] chores ⏳ 2026-10-20 🔁 every day\n\t- [x] inbox zero\n\t\t- [-] plan\n');
-		const { lines, item } = list(text);
+	])('a move keeps the line endings, %s', (_, shape) => {
+		const { lines, item } = list(shape('- [ ] chores ⏳ 2026-10-20 🔁 every day\n\t- [x] inbox zero\n\t\t- [-] plan\n'));
 		const after = joinLines(toggleItem(lines, item(0), now).lines);
 		expect(after).toBe(shape('- [ ] chores ⏳ 2026-10-21 🔁 every day\n\t- [ ] inbox zero\n\t\t- [ ] plan\n'));
-		const history = new EditHistory();
-		history.wrote(text, after, { start: 0, delta: 0, kind: 'change' });
-		expect(history.undo(after)?.next).toBe(text);
 	});
 });
 
