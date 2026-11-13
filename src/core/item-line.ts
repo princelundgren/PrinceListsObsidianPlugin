@@ -82,23 +82,25 @@ export function parseItemLine(text: string): ItemLineParts | null {
 	return { before, status, afterStatus, title: title.slice(0, title.length - end.length), end, marks, tail };
 }
 
-// The `🔚` field at the end of `title` with the spaces before it, or '' when no space precedes it:
-// ` +🔚️? *\S+$`. The field is either a `🔚` run and spaces before the title's last run of
-// non-whitespace, or that last run starting with `🔚`. Walking back from the end, rather than
-// searching with a pattern, keeps a long run of spaces or of `🔚` linear.
+// The `🔚` field at the end of `title`, with the spaces before it, or '' when there is none. The
+// field is the title's last run of non-spaces, either starting with `🔚` itself or after a `🔚` run
+// of its own and spaces; at least one space must come before the `🔚`. Walking back from the end,
+// not a pattern, keeps a long run of spaces or of `🔚` linear.
 function endOf(title: string): string {
 	const lastRun = findRunStart(title, title.length, (char) => !/\s/.test(char));
 	if (lastRun === title.length) return '';
-	const markBefore = endMarkBefore(title, lastRun);
+	const separateMark = separateMarkBefore(title, lastRun);
+	const separateField = separateMark === null ? '' : withSpacesBefore(title, separateMark);
+	if (separateField !== '') return separateField;
 	const startsWithMark = title.startsWith(END_MARK, lastRun) && title.length - lastRun > END_MARK.length;
-	return (markBefore === null ? '' : withSpacesBefore(title, markBefore)) || (startsWithMark ? withSpacesBefore(title, lastRun) : '');
+	return startsWithMark ? withSpacesBefore(title, lastRun) : '';
 }
 
-// Where a `🔚`, with or without U+FE0F, makes a run of its own right before the spaces that come before `runStart`.
-function endMarkBefore(title: string, runStart: number): number | null {
+// Where a run made of just `🔚`, with or without U+FE0F, ends at the spaces before `runStart`; null if none.
+function separateMarkBefore(title: string, runStart: number): number | null {
 	const gapStart = findRunStart(title, runStart, isSpace);
 	if (gapStart === runStart) return null;
-	for (const mark of [`${END_MARK}️`, END_MARK]) {
+	for (const mark of [`${END_MARK}\uFE0F`, END_MARK]) {
 		if (gapStart >= mark.length && title.startsWith(mark, gapStart - mark.length)) return gapStart - mark.length;
 	}
 	return null;
