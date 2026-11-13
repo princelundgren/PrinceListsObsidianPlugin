@@ -116,7 +116,7 @@ export function tryEdit<T>(edit: () => T): T | null {
 		return edit();
 	} catch (error) {
 		if (error instanceof RepeatingItemError) {
-			new Notice("Repeating items can't be ticked here yet.");
+			new Notice(error.message);
 		} else if (error instanceof UnsafeEditError) {
 			new Notice(UNSAFE_EDIT_NOTICE);
 		} else {

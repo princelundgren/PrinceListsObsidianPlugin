@@ -240,9 +240,9 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 			new Notice(CHANGED_ELSEWHERE_NOTICE);
 			return;
 		}
-		const edited = tryEdit(() => toggleItem(lines, block, new Date()));
-		if (!edited) return;
-		const next = joinLines(edited);
+		const toggled = tryEdit(() => toggleItem(lines, block, new Date()));
+		if (!toggled) return;
+		const next = joinLines(toggled.lines);
 		// Taken at once, so the next tick in this list builds on it before the metadata cache catches up.
 		if ((await editListFile(this.app, file, list.text, next)) === 'written') this.listRead(file, next);
 	}

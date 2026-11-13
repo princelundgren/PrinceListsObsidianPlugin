@@ -52,7 +52,7 @@ describe('planRemoval', () => {
 		const text = `${FRONTMATTER}- [ ] a\n- [ ] b\n`;
 		const { titleLine, inserted } = insertEmpty(text, null);
 		const { lines, item } = list(inserted.textAfter);
-		const ticked = joinLines(toggleItem(lines, item(2), new Date(2026, 9, 21, 9, 0)));
+		const ticked = joinLines(toggleItem(lines, item(2), new Date(2026, 9, 21, 9, 0)).lines);
 		const removal = plan(ticked, titleLine, inserted);
 		expect(removal?.next).toBe(`${FRONTMATTER}- [ ] a\n- [x] b ✔ 2026-10-21 09:00\n`);
 		expect(removal?.expected).toBe(ticked);

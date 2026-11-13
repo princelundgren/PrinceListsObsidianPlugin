@@ -1,6 +1,5 @@
 import { Notice, Platform } from 'obsidian';
 import { toggleItem } from '../core/edit-items';
-import { toggleLine } from '../core/item-line';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
@@ -136,9 +135,9 @@ function queueTick(block: ListBlock, line: number): void {
 			const item = titleLine === null ? null : itemAt(parseList(lines, contentStartLine(text)), titleLine);
 			if (titleLine === null || !item) return;
 			const now = new Date();
-			const edited = tryEdit(() => toggleItem(lines, item, now));
-			if (!edited) return;
-			await block.write(joinLines(edited), text, { start: titleLine, delta: 0, kind: 'change', retitle: (title) => toggleLine(title, now) });
+			const toggled = tryEdit(() => toggleItem(lines, item, now));
+			if (!toggled) return;
+			await block.write(joinLines(toggled.lines), text, { start: titleLine, delta: 0, kind: 'change', retitle: toggled.retitle });
 			if (!block.field) block.draw();
 		} finally {
 			block.editing.untrack(pending);

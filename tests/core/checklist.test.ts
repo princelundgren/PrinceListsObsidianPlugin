@@ -1,5 +1,7 @@
 import { expect, test } from 'vitest';
-import { checklistStatusAt, planNotesLineTick, toggleChecklistLine } from '../../src/core/checklist';
+import { joinLines } from '../../src/core/lines';
+import { list } from './edit-helpers';
+import { checklistStatusAt, planNotesLineTick, toggleChecklistLine, untickChecklist } from '../../src/core/checklist';
 
 const TRIP = '- [ ] trip\n\n\tPack:\n\t- [ ] passport\n\t- [x] charger\n\t\t- [ ] cable\n\t1. [?] tickets\n';
 
@@ -51,4 +53,21 @@ test('checklistStatusAt gives the column of a checklist line\'s status, and null
 	expect(checklistStatusAt('\t1. [x] b')).toBe(5);
 	expect(checklistStatusAt('> - [ ] quoted')).toBeNull();
 	expect(checklistStatusAt('Pack:')).toBeNull();
+});
+
+test('untickChecklist unticks every status in the item notes and only there', () => {
+	const { lines, item } = list('- [ ] a\n\tNotes\n\t- [x] one\n\t\t- [-] two\n\t- [ ] three\n- [x] other\n');
+	expect(joinLines(untickChecklist(lines, item(0)))).toBe('- [ ] a\n\tNotes\n\t- [ ] one\n\t\t- [ ] two\n\t- [ ] three\n- [x] other\n');
+});
+
+test('untickChecklist keeps the line endings and a missing final newline', () => {
+	const { lines, item } = list('- [ ] a\r\n\t- [x] one\r\n\t- [x] two');
+	expect(joinLines(untickChecklist(lines, item(0)))).toBe('- [ ] a\r\n\t- [ ] one\r\n\t- [ ] two');
+});
+
+test('untickChecklist leaves a line in a code fence, a callout, a $$ block or a %% comment', () => {
+	const kept = ['```', '- [x] code', '```', '> [!note]', '> - [x] callout', '%%', '- [x] comment', '%%', '$$', '- [x] math', '$$'];
+	const text = (step: string) => `- [ ] a\n${[...kept, step].map((line) => `\t${line}\n`).join('')}`;
+	const { lines, item } = list(text('- [x] real'));
+	expect(joinLines(untickChecklist(lines, item(0)))).toBe(text('- [ ] real'));
 });

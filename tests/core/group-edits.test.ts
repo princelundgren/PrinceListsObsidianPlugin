@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import { ListEditing } from '../../src/core/editing';
-import { RepeatingItemError } from '../../src/core/edit-items';
 import { followLine } from '../../src/core/follow';
 import { countPhrase, groupState, headingChoices, planGroupDelete, planGroupLineEdit, planGroupTick } from '../../src/core/group-edits';
 import { EditHistory } from '../../src/core/history';
@@ -29,14 +28,29 @@ describe('planGroupTick', () => {
 		expect(plan).toMatchObject({ changed: 2, skipped: 0, edit: { start: 3, delta: 0, kind: 'change' } });
 	});
 
-	test('skips a repeating item and counts it', () => {
-		const text = TEXT.replace('- [ ] c', '- [ ] c 🔁 every day');
+	test('moves a repeating item with its checklist and counts it as changed', () => {
+		const text = TEXT.replace('- [ ] c', '- [ ] c ⏳ 2026-11-07 🔁 every day\n\t- [x] step');
+		const plan = planGroupTick(text, 3, [3, 7], true, NOW);
+		const expected = linesOf(text);
+		expected[3] = tickLine('- [ ] a', NOW);
+		expected[7] = '- [ ] c ⏳ 2026-11-08 🔁 every day';
+		expected[8] = '\t- [ ] step';
+		expect(linesOf(plan?.next ?? '')).toEqual(expected);
+		expect(plan).toMatchObject({ changed: 2, skipped: 0, edit: { start: 3, delta: 0, kind: 'change' } });
+	});
+
+	test("skips a line that can't repeat and counts it", () => {
+		const text = TEXT.replace('- [ ] c', '- [ ] c 🔁 every weekday');
 		const plan = planGroupTick(text, 3, [3, 7], true, NOW);
 		const expected = linesOf(text);
 		expected[3] = tickLine('- [ ] a', NOW);
 		expect(linesOf(plan?.next ?? '')).toEqual(expected);
 		expect(plan).toMatchObject({ changed: 1, skipped: 1 });
-		expect(() => planGroupTick(text, 3, [7], true, NOW)).toThrow(RepeatingItemError);
+	});
+
+	test("throws the first skipped line's error when every item it would change was skipped", () => {
+		const text = TEXT.replace('- [ ] a', '- [ ] a 🔚 soon 🔁 every day').replace('- [ ] c', '- [ ] c 🔁 every weekday');
+		expect(() => planGroupTick(text, 3, [3, 7], true, NOW)).toThrow(expect.objectContaining({ problem: 'end' }));
 	});
 
 	test('returns null when nothing changes', () => {

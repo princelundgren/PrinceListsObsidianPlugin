@@ -93,9 +93,9 @@ describe('changeMessage', () => {
 		expect(changeMessage('removeStar', { changed: 1, skipped: 0 })).toBe('Star removed from 1 item.');
 	});
 
-	test('adds the repeating items a tick skipped', () => {
-		expect(changeMessage('tick', { changed: 3, skipped: 1 })).toBe('3 items ticked. 1 repeating item skipped.');
-		expect(changeMessage('tick', { changed: 3, skipped: 2 })).toBe('3 items ticked. 2 repeating items skipped.');
+	test("adds the items a tick skipped because they can't repeat", () => {
+		expect(changeMessage('tick', { changed: 3, skipped: 1 })).toBe("3 items ticked. 1 item that can't repeat skipped.");
+		expect(changeMessage('tick', { changed: 3, skipped: 2 })).toBe("3 items ticked. 2 items that can't repeat skipped.");
 	});
 });
 

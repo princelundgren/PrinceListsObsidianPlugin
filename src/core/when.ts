@@ -85,6 +85,12 @@ export function dayLabel(day: string, today: string, language: string): string {
 	return new Intl.DateTimeFormat(language, { ...LABEL_FORMATS[kind], timeZone: 'UTC' }).format(utcOf(day));
 }
 
+/** The notice after a repeating item moved to `day`, such as "Next: Tue 17 Nov.", in `language`. */
+export function nextDayMessage(day: string, language: string): string {
+	const label = new Intl.DateTimeFormat(language, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }).format(utcOf(day));
+	return `Next: ${label}.`;
+}
+
 export function utcOf(day: string): number {
 	const [, year, month, date] = DAY_PATTERN.exec(day) ?? [];
 	return Date.UTC(Number(year), Number(month) - 1, Number(date));

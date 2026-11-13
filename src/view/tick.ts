@@ -2,7 +2,6 @@ import { Notice } from 'obsidian';
 import { itemRow, timelessItemRow } from '../core/display';
 import { toggleItem } from '../core/edit-items';
 import type { OwnEdit } from '../core/follow';
-import { toggleLine } from '../core/item-line';
 import { joinLines, type Line } from '../core/lines';
 import { itemAt } from '../core/parse';
 import type { PrinceListView } from './list-view';
@@ -50,10 +49,11 @@ async function tick(view: PrinceListView, row: HTMLElement | null, pending: { li
 		const item = itemAt(model, titleLine);
 		const now = new Date();
 		if (!item || done === timelessItemRow((lines[titleLine] as Line).text, titleLine).done) return;
-		const edited = tryEdit(() => toggleItem(lines, item, now));
-		if (!edited) return;
+		const toggled = tryEdit(() => toggleItem(lines, item, now));
+		if (!toggled) return;
+		const edited = toggled.lines;
 		// A title field with focus makes the same tick to the line it saved (syncTitleField).
-		const edit: OwnEdit = { start: titleLine, delta: 0, kind: 'change', retitle: (line) => toggleLine(line, now) };
+		const edit: OwnEdit = { start: titleLine, delta: 0, kind: 'change', retitle: toggled.retitle };
 		const result = await writeAction(view, joinLines(edited), text, undefined, edit);
 		if (result === 'written') {
 			// Obsidian's echo of this write returns early in setViewData, so the row is updated here. A
