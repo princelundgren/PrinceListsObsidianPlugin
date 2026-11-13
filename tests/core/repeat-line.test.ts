@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { tickLine, untickLine } from '../../src/core/item-line';
 import {
 	anchorOf,
+	canWrite,
 	draftOf,
 	hasDate,
 	removeRepeat,
@@ -12,6 +13,7 @@ import {
 	tickRepeating,
 	type RepeatProblem,
 } from '../../src/core/repeat-line';
+import type { RepeatDraft } from '../../src/core/repeat-line';
 import type { RepeatRule } from '../../src/core/repeat';
 
 const now = new Date(2026, 10, 13, 9, 0);
@@ -211,6 +213,32 @@ describe('draftOf', () => {
 
 	test('leaves a title 🔚 that is no end out of the draft', () => {
 		expect(draftOf('- [ ] Trip 🔚 soon')).toEqual({ rule: every(1, 'day'), end: null });
+	});
+});
+
+describe('canWrite', () => {
+	const draft = (rule: Partial<RepeatRule>, end: RepeatDraft['end'] = null): RepeatDraft => ({ rule: { ...every(1, 'day'), ...rule }, end });
+
+	test.each([
+		draft({}),
+		draft({ every: 9999, unit: 'month', onLast: true }, { kind: 'times', left: 1 }),
+		draft({}, { kind: 'date', day: '2026-12-31' }),
+	])('accepts %j', (candidate) => {
+		expect(canWrite(candidate)).toBe(true);
+	});
+
+	test.each([
+		draft({ every: 0 }),
+		draft({ every: 1.5 }),
+		draft({ every: Number.NaN }),
+		draft({ every: 10_000 }),
+		draft({ unit: 'week', onLast: true }),
+		draft({}, { kind: 'times', left: 0 }),
+		draft({}, { kind: 'times', left: 2.5 }),
+		draft({}, { kind: 'date', day: '' }),
+		draft({}, { kind: 'date', day: '2026-02-30' }),
+	])('refuses %j', (candidate) => {
+		expect(canWrite(candidate)).toBe(false);
 	});
 });
 

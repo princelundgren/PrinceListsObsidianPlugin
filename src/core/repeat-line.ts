@@ -114,6 +114,11 @@ export function tickRepeating(line: string, now: Date): RepeatTick {
 	return { kind: 'moved', line: joinItemLine({ ...counted, tail: moved + afterFields }), next };
 }
 
+/** Whether `draft` can be written to a line and read back, which a rule of `every 0` or an end with no date can't. */
+export function canWrite(draft: RepeatDraft): boolean {
+	return readRule(writeRule(draft.rule)) !== null && (draft.end === null || readEnd(writeEnd(draft.end).slice(END_MARK.length)) !== null);
+}
+
 /**
  * What the repeat popover shows for `line`: its rule and end, or every day for a line that doesn't
  * repeat, with its end taken from a `🔚` the title ends in that reads as one. 'read-only' for a rule
