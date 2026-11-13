@@ -25,7 +25,7 @@ import { openItem } from './open-item';
 import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
 import { buildScheduleRow } from './schedule-row';
 import { buildTagStrip, showsTagStrip, stripClick } from './tag-strip';
-import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
+import { CHANGED_ELSEWHERE_NOTICE, LATE_UNDO_NOTICE, tryEdit } from './write';
 
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	today: 'Today',
@@ -251,11 +251,11 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	}
 
 	// Writes the text from before the tick back while the file still holds what the tick left; any
-	// other change says so in editListFile's notice.
+	// other change says it can't be undone.
 	private offerUndo(file: TFile, message: string, before: string, after: string): void {
 		showUndoNotice(message, () =>
 			void this.enqueue(async () => {
-				if ((await editListFile(this.app, file, after, before)) === 'written') this.listRead(file, before);
+				if ((await editListFile(this.app, file, after, before, LATE_UNDO_NOTICE)) === 'written') this.listRead(file, before);
 			}),
 		);
 	}

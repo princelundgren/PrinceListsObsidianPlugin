@@ -11,10 +11,9 @@ import { targetOf } from './dom';
 import type { ListBlock } from './list-block';
 import { handleLinkClick, handleLinkMenu } from './notes';
 import { ITEM_CLASS, lineOf, TICK_SELECTOR } from './render-list';
-import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
+import { CHANGED_ELSEWHERE_NOTICE, LATE_UNDO_NOTICE, tryEdit } from './write';
 
 export const NEW_ITEM_CLASS = 'princelists-block-new-item';
-const LATE_UNDO_NOTICE = "This list changed since the tick, so it can't be undone.";
 
 /**
  * Registers the block's delegated listeners on `rootEl`, the block's own element, and a mouseup on its

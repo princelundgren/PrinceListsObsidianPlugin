@@ -4,8 +4,9 @@ import { guardedApply } from '../core/guard';
 import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE } from '../view/write';
 
 // A one-off action's write to a list from outside its list view, such as a tick in the Schedule view.
-// It lands only while the file still holds `expected`, the text the action was worked out on.
-export async function editListFile(app: App, file: TFile, expected: string, next: string): Promise<WriteResult> {
+// It lands only while the file still holds `expected`, the text the action was worked out on, and
+// otherwise shows `refused`.
+export async function editListFile(app: App, file: TFile, expected: string, next: string, refused = CHANGED_ELSEWHERE_NOTICE): Promise<WriteResult> {
 	let written = false;
 	try {
 		await app.vault.process(file, (current) => {
@@ -18,6 +19,6 @@ export async function editListFile(app: App, file: TFile, expected: string, next
 		new Notice(SAVE_FAILED_NOTICE);
 		return 'failed';
 	}
-	if (!written) new Notice(CHANGED_ELSEWHERE_NOTICE);
+	if (!written) new Notice(refused);
 	return written ? 'written' : 'refused';
 }
