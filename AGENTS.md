@@ -20,15 +20,16 @@ this project.
     replaced step two's block-at-a-time notes. [Filtering by tag](docs/superpowers/specs/2026-11-07-tag-filter-design.md)
     shows items' tags on rows and cards, and filters a list and the Schedule by them. [Selecting several rows](docs/superpowers/specs/2026-11-07-select-several-design.md)
     acts on many items and headings at once, and [tagging a selection](docs/superpowers/specs/2026-11-12-select-tags-design.md)
-    adds and removes a tag on all of them.
+    adds and removes a tag on all of them. [Repeating items](docs/superpowers/specs/2026-11-13-repeating-items-design.md)
+    move to their next date when they're ticked.
     - Decisions marked **(owner)** are the maintainer's. Don't change one without an issue the
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
   - The plans in `docs/superpowers/plans/` give the tasks, with exact interfaces and tests. The
     latest ones for the plugin are
-    [one way of selecting](docs/superpowers/plans/2026-11-11-one-way-of-selecting.md),
-    [the card's tag popover](docs/superpowers/plans/2026-11-12-card-tag-popover.md) and
-    [tagging a selection](docs/superpowers/plans/2026-11-12-select-tags.md), and
+    [the card's tag popover](docs/superpowers/plans/2026-11-12-card-tag-popover.md),
+    [tagging a selection](docs/superpowers/plans/2026-11-12-select-tags.md) and
+    [repeating items](docs/superpowers/plans/2026-11-13-repeating-items.md), and
     [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
     README's and the listing's pictures. Implement a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.
