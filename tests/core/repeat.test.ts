@@ -97,6 +97,31 @@ describe('stepDay', () => {
 	});
 });
 
+describe('the end of the date range', () => {
+	test.each([
+		['9999-12-31', rule(1, 'day')],
+		['2026-01-01', rule(9999, 'year')],
+		['9999-12-25', rule(1, 'week')],
+		['9999-06-15', rule(1, 'year')],
+		['9999-12-31', rule(1, 'month', { onLast: true })],
+	])('stepDay from %s by %j gives null', (day, repeat) => {
+		expect(stepDay(day, repeat)).toBeNull();
+	});
+
+	test('stepDay keeps the last day itself', () => {
+		expect(stepDay('9999-12-30', rule(1, 'day'))).toBe('9999-12-31');
+	});
+
+	test('nextDay gives null when the step leaves the range', () => {
+		expect(nextDay('9999-12-31', rule(1, 'day'), '2026-11-13')).toBeNull();
+		expect(nextDay('9999-12-01', rule(1, 'month', { whenDone: true }), '9999-12-31')).toBeNull();
+	});
+
+	test('upcomingDays gives only the dates before the end', () => {
+		expect(upcomingDays('9999-12-30', rule(1, 'day'), null, '9999-12-29', 3)).toEqual(['9999-12-31']);
+	});
+});
+
 describe('nextDay', () => {
 	const today = '2026-11-13';
 

@@ -52,13 +52,16 @@ export function writeEnd(end: RepeatEnd): string {
 	return `${END_MARK} ${end.kind === 'date' ? end.day : `${end.left}x`}`;
 }
 
-/** `day`, a real `YYYY-MM-DD`, moved by `days` calendar days, counted in UTC so a clock change can't shift it. */
-export function addDays(day: string, days: number): string {
-	return new Date(utcOf(day) + days * DAY_MS).toISOString().slice(0, 10);
+/** `day`, a real `YYYY-MM-DD`, moved by `days` calendar days, counted in UTC so a clock change can't shift it; null past 9999-12-31. */
+export function addDays(day: string, days: number): string | null {
+	return formatUtc(utcOf(day) + days * DAY_MS);
 }
 
-/** One step of `rule` from `day`, a real `YYYY-MM-DD`; a month shorter than the day takes its own last day. */
-export function stepDay(day: string, rule: RepeatRule): string {
+/**
+ * One step of `rule` from `day`, a real `YYYY-MM-DD`; a month shorter than the day takes its own
+ * last day. Null when the result is past 9999-12-31.
+ */
+export function stepDay(day: string, rule: RepeatRule): string | null {
 	if (rule.unit === 'day') return addDays(day, rule.every);
 	if (rule.unit === 'week') return addDays(day, 7 * rule.every);
 	const months = rule.unit === 'year' ? 12 * rule.every : rule.every;
@@ -67,28 +70,30 @@ export function stepDay(day: string, rule: RepeatRule): string {
 	const monthIndex = parsed.getUTCMonth();
 	const date = parsed.getUTCDate();
 	const lastOfOwnMonth = lastDayOfMonth(year, monthIndex);
-	if (rule.onLast && date < lastOfOwnMonth) return formatDay(year, monthIndex, lastOfOwnMonth);
+	if (rule.onLast && date < lastOfOwnMonth) return formatUtc(Date.UTC(year, monthIndex, lastOfOwnMonth));
 	const target = year * 12 + monthIndex + months;
 	const targetYear = Math.floor(target / 12);
 	const targetMonth = target % 12;
 	const lastOfTarget = lastDayOfMonth(targetYear, targetMonth);
-	return formatDay(targetYear, targetMonth, rule.onLast ? lastOfTarget : Math.min(date, lastOfTarget));
+	return formatUtc(Date.UTC(targetYear, targetMonth, rule.onLast ? lastOfTarget : Math.min(date, lastOfTarget)));
 }
 
 /**
- * The date a tick gives; `anchor` and `today` are real `YYYY-MM-DD` days. `when done` steps once from `today`. Otherwise it steps from `anchor`, and
+ * The date a tick gives, or null when it is past 9999-12-31; `anchor` and `today` are real
+ * `YYYY-MM-DD` days. `when done` steps once from `today`. Otherwise it steps from `anchor`, and
  * again while the result is today or earlier, so a missed item lands on its first date after today.
  */
-export function nextDay(anchor: string, rule: RepeatRule, today: string): string {
+export function nextDay(anchor: string, rule: RepeatRule, today: string): string | null {
 	if (rule.whenDone) return stepDay(today, rule);
 	let next = stepDay(anchor, rule);
-	while (daysFrom(today, next) <= 0) next = stepDay(next, rule);
+	while (next !== null && daysFrom(today, next) <= 0) next = stepDay(next, rule);
 	return next;
 }
 
 /**
  * The dates the next `count` ticks give (`anchor` and `today` real `YYYY-MM-DD` days), from `today`
- * when there is no anchor, and stopping at the end. A `times` end counts the current time, so `Nx` leaves N - 1 dates.
+ * when there is no anchor, and stopping at the end or at 9999-12-31. A `times` end counts the
+ * current time, so `Nx` leaves N - 1 dates.
  */
 export function upcomingDays(
 	anchor: string | null,
@@ -100,7 +105,7 @@ export function upcomingDays(
 	const limit = end?.kind === 'times' ? Math.min(count, end.left - 1) : count;
 	const days: string[] = [];
 	let next = anchor === null ? stepDay(today, rule) : nextDay(anchor, rule, today);
-	while (days.length < limit && !(end?.kind === 'date' && next > end.day)) {
+	while (next !== null && days.length < limit && !(end?.kind === 'date' && next > end.day)) {
 		days.push(next);
 		next = stepDay(next, rule);
 	}
@@ -111,6 +116,9 @@ function lastDayOfMonth(year: number, monthIndex: number): number {
 	return new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
 }
 
-function formatDay(year: number, monthIndex: number, date: number): string {
-	return new Date(Date.UTC(year, monthIndex, date)).toISOString().slice(0, 10);
+/** A UTC time as `YYYY-MM-DD`, or null when it isn't a date with a four-digit year. */
+function formatUtc(time: number): string | null {
+	const date = new Date(time);
+	if (Number.isNaN(date.getTime()) || date.getUTCFullYear() > 9999) return null;
+	return date.toISOString().slice(0, 10);
 }
