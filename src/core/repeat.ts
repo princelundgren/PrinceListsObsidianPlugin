@@ -18,14 +18,16 @@ const RULE_PATTERN = /^every(?: (\d+))? (day|week|month|year)s?( on the last)?( 
 const END_COUNT_PATTERN = /^(\d+)x$/;
 const END_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const END_MARK = '🔚';
+// Far beyond a real repeat, and keeps every step inside the range a Date can hold.
+const MAX_EVERY = 9999;
 
-/** The rule in the text after `🔁`, or null when the plugin can't repeat it. */
+/** The rule in the text after `🔁`, or null when the plugin can't repeat it, such as an N above 9999. */
 export function readRule(text: string): RepeatRule | null {
 	const found = RULE_PATTERN.exec(text.trim().toLowerCase());
 	if (!found) return null;
 	const [, count, unit, onLast, whenDone] = found;
 	const every = count === undefined ? 1 : Number(count);
-	if (every < 1 || (onLast && unit !== 'month')) return null;
+	if (every < 1 || every > MAX_EVERY || (onLast && unit !== 'month')) return null;
 	return { every, unit: unit as RepeatUnit, onLast: Boolean(onLast), whenDone: Boolean(whenDone) };
 }
 
@@ -50,12 +52,12 @@ export function writeEnd(end: RepeatEnd): string {
 	return `${END_MARK} ${end.kind === 'date' ? end.day : `${end.left}x`}`;
 }
 
-/** `day` moved by `days` calendar days, counted in UTC so a clock change can't shift it. */
+/** `day`, a real `YYYY-MM-DD`, moved by `days` calendar days, counted in UTC so a clock change can't shift it. */
 export function addDays(day: string, days: number): string {
 	return new Date(utcOf(day) + days * DAY_MS).toISOString().slice(0, 10);
 }
 
-/** One step of `rule` from `day`; a month shorter than the day takes its own last day. */
+/** One step of `rule` from `day`, a real `YYYY-MM-DD`; a month shorter than the day takes its own last day. */
 export function stepDay(day: string, rule: RepeatRule): string {
 	if (rule.unit === 'day') return addDays(day, rule.every);
 	if (rule.unit === 'week') return addDays(day, 7 * rule.every);
@@ -74,7 +76,7 @@ export function stepDay(day: string, rule: RepeatRule): string {
 }
 
 /**
- * The date a tick gives. `when done` steps once from `today`. Otherwise it steps from `anchor`, and
+ * The date a tick gives; `anchor` and `today` are real `YYYY-MM-DD` days. `when done` steps once from `today`. Otherwise it steps from `anchor`, and
  * again while the result is today or earlier, so a missed item lands on its first date after today.
  */
 export function nextDay(anchor: string, rule: RepeatRule, today: string): string {
@@ -85,8 +87,8 @@ export function nextDay(anchor: string, rule: RepeatRule, today: string): string
 }
 
 /**
- * The dates the next `count` ticks give, from `today` when there is no anchor, and stopping at the
- * end. A `times` end counts the current time, so `Nx` leaves N - 1 dates.
+ * The dates the next `count` ticks give (`anchor` and `today` real `YYYY-MM-DD` days), from `today`
+ * when there is no anchor, and stopping at the end. A `times` end counts the current time, so `Nx` leaves N - 1 dates.
  */
 export function upcomingDays(
 	anchor: string | null,

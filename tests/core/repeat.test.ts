@@ -27,6 +27,14 @@ describe('readRule', () => {
 		expect(readRule(text)).toEqual(expected);
 	});
 
+	test('reads the largest N it can step', () => {
+		expect(readRule('every 9999 days')).toEqual(rule(9999, 'day'));
+	});
+
+	test.each(['every 10000 days', 'every 99999999999 days'])('refuses %s, which would overflow the date range', (text) => {
+		expect(readRule(text)).toBeNull();
+	});
+
 	test.each(['every weekday', 'every week on Tuesday', 'every 0 days', 'every day on the last', 'every month on the 31st'])(
 		'refuses %s',
 		(text) => {
