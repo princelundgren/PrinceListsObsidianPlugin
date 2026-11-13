@@ -1,7 +1,7 @@
 import { countPhrase, type GroupState, type PlannedGroupChange } from './group-edits';
 
 /** An entry of the selection's menu. */
-export type GroupEntry = 'move' | 'tick' | 'untick' | 'addStar' | 'removeStar' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'delete';
+export type GroupEntry = 'move' | 'tick' | 'untick' | 'addStar' | 'removeStar' | 'tag' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'delete';
 
 /** The entries the bar shows one group of at a time. */
 export type EntryGroup = 'tick' | 'star' | 'date';
@@ -27,6 +27,7 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 		untick: state.anyTicked,
 		addStar: state.anyUnstarred,
 		removeStar: state.anyStarred,
+		tag: state.items > 0,
 		today: state.items > 0,
 		tomorrow: state.items > 0,
 		pickDate: state.items > 0,
@@ -43,7 +44,7 @@ export type BarButton = 'move' | EntryGroup | 'tag' | 'delete';
 /**
  * Whether each of the bar's buttons has something to act on for a selection that holds `state`: Move
  * to while Move to heading… shows, Tick, Star and Date while any entry of their group does, Tag while
- * any item is selected, and Delete while anything is selected.
+ * its entry shows, and Delete while anything is selected.
  */
 export function barButtons(state: GroupState, listHasHeadings: boolean): Record<BarButton, boolean> {
 	const entries = groupEntries(state, listHasHeadings);
@@ -52,7 +53,7 @@ export function barButtons(state: GroupState, listHasHeadings: boolean): Record<
 		move: entries.includes('move'),
 		tick: showsAny('tick'),
 		star: showsAny('star'),
-		tag: state.items > 0,
+		tag: entries.includes('tag'),
 		date: showsAny('date'),
 		delete: entries.includes('delete'),
 	};

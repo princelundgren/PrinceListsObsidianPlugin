@@ -196,7 +196,9 @@ only documented Obsidian APIs are used.
 ## The actions
 
 - **The selection's menu** opens with a right-click on a selected row ("While selecting"), and the
-  bar's Tick, Star and Date open parts of it ("The bar").
+  bar's Tick, Star and Date open parts of it ("The bar"). Its Tag…, after the star entries, opens
+  the selection's tag popover over the bar's Tag button
+  ([tagging a selection](2026-11-12-select-tags-design.md)).
 - **Move to heading… (owner)** opens a picker, Obsidian's `SuggestModal`, that lists "Top of the
   list" and then the list's headings in order, and narrows as you type **(call)**. A pick sends the
   selected items to the end of that section, after its last item, as the background menu's New item

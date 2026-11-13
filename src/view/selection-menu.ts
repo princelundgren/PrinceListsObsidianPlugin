@@ -11,6 +11,7 @@ import { HeadingPickerModal } from './heading-picker';
 import type { PrinceListView } from './list-view';
 import { queueGroupMove } from './move';
 import { clearSelection } from './select';
+import { openSelectionTags } from './selection-bar';
 
 type GroupPlan = (text: string, contentStart: number, rows: readonly number[]) => PlannedGroupChange | null;
 
@@ -38,7 +39,13 @@ export function addGroupEntries(view: PrinceListView, menu: Menu, only?: EntryGr
 			);
 		} else {
 			const { title, icon } = ENTRY_LOOKS[entry];
-			menu.addItem((item) => item.setTitle(title).setIcon(icon).onClick(() => act(view, entry)));
+			menu.addItem((item) =>
+				item.setTitle(title).setIcon(icon).onClick(() => {
+					// After the menu hides, so the focus it gives back doesn't leave the popover's field.
+					if (entry === 'tag') menu.onHide(() => openSelectionTags(view));
+					else act(view, entry);
+				}),
+			);
 		}
 	}
 }
@@ -75,6 +82,7 @@ const PARTS: Record<GroupEntry, string> = {
 	untick: 'mark',
 	addStar: 'mark',
 	removeStar: 'mark',
+	tag: 'mark',
 	today: 'date',
 	tomorrow: 'date',
 	pickDate: 'date',
@@ -88,13 +96,14 @@ const ENTRY_LOOKS: Record<Exclude<GroupEntry, 'delete'>, { title: string; icon: 
 	untick: { title: 'Untick', icon: 'square' },
 	addStar: { title: 'Add star', icon: 'star' },
 	removeStar: { title: 'Remove star', icon: 'star-off' },
+	tag: { title: 'Tag…', icon: 'tag' },
 	today: { title: 'Set date to today', icon: 'calendar-check' },
 	tomorrow: { title: 'Set date to tomorrow', icon: 'calendar-plus' },
 	pickDate: { title: 'Set date…', icon: 'calendar' },
 	removeDate: { title: 'Remove date', icon: 'calendar-x' },
 };
 
-function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete'>): void {
+function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag'>): void {
 	switch (entry) {
 		case 'move':
 			return moveToHeading(view);

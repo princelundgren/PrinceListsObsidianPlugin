@@ -6,7 +6,7 @@ import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { clearSelection, focusList } from './select';
 import { addGroupEntries, deleteSelection, listHasHeadings, moveToHeading } from './selection-menu';
-import { closeSelectionTagPopover, isInSelectionTagPopover, syncSelectionTagPopover, toggleSelectionTagPopover } from './selection-tag-popover';
+import { closeSelectionTagPopover, isInSelectionTagPopover, openSelectionTagPopover, syncSelectionTagPopover, toggleSelectionTagPopover } from './selection-tag-popover';
 
 /** The class on the view's content while selecting. */
 const SELECTING_CLASS = 'princelists-selecting';
@@ -97,6 +97,12 @@ export function syncSelectionBar(view: PrinceListView): void {
 	syncSelectionTagPopover(view);
 	if (!view.selecting && bar.el.contains(bar.el.doc.activeElement)) focusList(view);
 	bar.el.toggle(view.selecting);
+}
+
+/** Opens the selection's tag popover over the bar's Tag button, as the selection's menu's Tag… does; nothing while the button is missing or disabled. */
+export function openSelectionTags(view: PrinceListView): void {
+	const button = bars.get(view)?.buttons.get('tag');
+	if (button && !button.disabled) openSelectionTagPopover(view, button);
 }
 
 // Move to and Delete act as the selection menu's entries do; Tick, Star and Date open a menu of their
