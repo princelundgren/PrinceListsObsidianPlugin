@@ -8,6 +8,7 @@ import { parseItemLine } from '../core/item-line';
 import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
+import { buildRepeatButton, closeRepeatPopover, showRepeatButton } from './card-repeat';
 import { buildCardTags, buildTagButton, CARD_HEAD_CLASS, closeTagPopover, showCardTags } from './card-tags';
 import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
@@ -120,6 +121,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 		showDone(card.el, row);
 		showWhen(card, row.when);
 		showStar(card.el, row.starred);
+		showRepeatButton(card.el, row.repeats);
 		showCardTags(card.el, row.tailTags);
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
@@ -176,6 +178,7 @@ function sayFieldLost(view: PrinceListView, typed: string, field: 'title' | 'not
 function endCard(view: PrinceListView, card: Card): void {
 	view.card = null;
 	closeTagPopover(view);
+	closeRepeatPopover(view);
 	view.editing.close();
 	card.editor?.destroy();
 	card.editor = null;
@@ -195,6 +198,7 @@ function createCardElement(): HTMLElement {
 	buildTagButton(tools);
 	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
 	buildWhenPicker(tools);
+	buildRepeatButton(tools);
 	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
 	return el;

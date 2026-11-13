@@ -128,7 +128,7 @@ These are wanted later, roughly in this order. The file format already leaves ro
 - **Deadlines on items.** [Filtering by tag](2026-11-07-tag-filter-design.md) adds tags and tag
   filters.
 - **Smaller item features:**
-  - repeating items, a trash, IDs on single items, and sorting modes
+  - a trash, IDs on single items, and sorting modes
 - **Quick capture from outside Obsidian.** A plugin can't hear a global hotkey. The documented
   route is an `obsidian://` handler (`registerObsidianProtocolHandler`) that Raycast, Shortcuts
   or a phone's shortcut can call.
@@ -746,20 +746,25 @@ back only what was typed and leaves the empty line, which can be deleted like an
   Markdown.
 - **A row's right-click menu also does what the item's card does (owner, 2026-10-29),** so an item
   needn't be opened for it: Tick or Untick, Add star or Remove star, then Set date to today, Set
-  date to tomorrow, Set date…, and Remove date when it has one. Each entry says what the item holds
+  date to tomorrow, Set date…, and Remove date when it has one, then Repeat…, which opens the card
+  with its repeat popover ([repeating items](2026-11-13-repeating-items-design.md), "Setting a
+  repeat"). Each entry says what the item holds
   when the menu opens, and does just that: Tick on an item ticked meanwhile does nothing. This
   replaces keeping the star on the card alone **(owner, 2026-10-27)**.
   - **Set date… opens the card with the platform's date picker** **(call)**. The picker needs a
     recent user action, and with Native menus on a menu's click may not count as one; then the
     card opens without it, and its date button opens the picker.
   - **The card's ⋯ menu, and a right-click on the open card, stay without them (owner,
-    2026-10-29),** since the card shows the box, the star and the date beside them.
+    2026-10-29),** since the card shows the box, the star and the date beside them. Only Repeat… is
+    there, in a group of its own after Select, while the item doesn't repeat; a repeating item's
+    card has a repeat button instead.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star button's "Add star" and "Remove star";
     and "Remove", as in Remove image.
 - **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
   of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick and the
-  star; the date entries; New item below and New heading below; Edit in Markdown; Delete item. The
+  star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
+  Delete item. The
   card's ⋯ has the same without the card's own entries. The heading menu groups Select; New item,
   New heading below and Rename heading; Edit in Markdown; Collapse or Expand all headings
   **(call)**; Delete heading. That is more groups than the three or so in Apple's [Context
