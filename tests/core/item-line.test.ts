@@ -327,14 +327,14 @@ describe('the end in parseItemLine', () => {
 		expect(parseItemLine('- [ ] Physio🔚 5x 🔁 every day')).toMatchObject({ title: 'Physio🔚 5x', end: '' });
 	});
 
-	// Assumes a linear scan finishes in milliseconds and a quadratic one takes over a second here.
+	// Assumes a linear scan finishes in milliseconds and a quadratic one takes over several seconds here.
 	test('reads a line with a long run of spaces before the 🔚 in well under a second', () => {
-		const line = `- [ ] a${' '.repeat(30_000)}🔚 x y 🔁 every day`;
+		const line = `- [ ] a${' '.repeat(100_000)}🔚 x y 🔁 every day`;
 		const started = performance.now();
 
 		const parts = parseItemLine(line);
 
-		expect(performance.now() - started).toBeLessThan(500);
+		expect(performance.now() - started).toBeLessThan(1000);
 		expect(parts?.end).toBe('');
 	});
 });
