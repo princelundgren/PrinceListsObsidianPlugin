@@ -1204,9 +1204,10 @@ button.princelists-selection-tag-remove {
 	}
 }
 
-/* The card's tag popover and the selection's look alike. Obsidian's suggestions for their fields draw
-   above them. */
+/* The card's tag popover, the card's repeat popover and the selection's tag popover look alike.
+   Obsidian's suggestions for their fields draw above them. */
 .princelists-tag-popover,
+.princelists-repeat-popover,
 .princelists-selection-tag-popover {
 	z-index: var(--layer-popover);
 	width: 16em;
@@ -1218,17 +1219,53 @@ button.princelists-selection-tag-remove {
 }
 
 .theme-dark .princelists-tag-popover,
+.theme-dark .princelists-repeat-popover,
 .theme-dark .princelists-selection-tag-popover {
 	background-color: var(--background-secondary);
 }
 
-/* The card's hangs under its head, its end at the tools' end, over the card's content, so opening it
-   moves nothing. */
-.princelists-tag-popover {
+/* The card's hang under its head, their end at the tools' end, over the card's content, so opening
+   one moves nothing. The repeat popover's rows are wider than a tag's field, but never wider than the
+   card. */
+.princelists-tag-popover,
+.princelists-repeat-popover {
 	position: absolute;
 	top: calc(100% + var(--size-2-2));
 	inset-inline-end: 0;
 	max-width: 100%;
+}
+
+.princelists-repeat-popover {
+	box-sizing: border-box;
+	width: 20em;
+}
+
+.princelists-repeat-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2);
+}
+
+.princelists-repeat-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-1) var(--size-4-2);
+}
+
+.princelists-repeat-row > :first-child:not(select, input) {
+	min-width: 6.5em;
+}
+
+input.princelists-repeat-count {
+	width: 5em;
+}
+
+.princelists-repeat-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: var(--size-4-2);
 }
 
 /* The selection's sits above the bar's Tag button, its end at the button's, and stays inside the view
