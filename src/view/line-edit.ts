@@ -26,7 +26,9 @@ export interface DraftBase {
 }
 
 // queueLineEdit for a change made from a draft of the line. If the line no longer reads as the draft's
-// `base` did, or an outside change came since, nothing is written: the notice says so and `refused` runs.
+// `base` did, or an outside change came since, nothing is written: the notice says so and `refused`
+// runs. It also runs when the write was refused for another reason (a change landing mid-write, or
+// the core refusing the line), which had its own notice, so the draft isn't lost to it.
 export function queueDraftEdit(
 	view: PrinceListView,
 	titleLine: number,
@@ -34,22 +36,24 @@ export function queueDraftEdit(
 	change: (line: string) => string,
 	then: { written?: () => void; refused?: (line: number) => void },
 ): void {
+	const file = view.file;
 	enqueueAt(view, titleLine, async (pending) => {
 		let stale = false;
-		let staleAt = 0;
+		let planned = null as number | null;
 		const written = await writePlanned(view, (text) => {
 			if (pending?.line == null) return null;
-			staleAt = pending.line;
+			planned = pending.line;
 			stale = view.outsideChanges !== base.seen || splitLines(text)[pending.line]?.text !== base.text;
 			return stale ? null : planItemLineEdit(text, contentStartLine(text), pending.line, change);
 		});
-		if (stale) {
-			new Notice(CHANGED_ELSEWHERE_NOTICE);
-			then.refused?.(staleAt);
-		} else if (written) {
+		if (written) {
 			view.render();
 			then.written?.();
+			return;
 		}
+		if (stale) new Notice(CHANGED_ELSEWHERE_NOTICE);
+		// Another file in the view has no item at that line to reopen on.
+		if (planned !== null && view.file === file) then.refused?.(planned);
 	});
 }
 
