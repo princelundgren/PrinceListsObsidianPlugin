@@ -172,6 +172,7 @@ test('maskBlocks turns a top-level %% or $$ region into a fence longer than any 
 	expect(maskBlocks(splitLines(text), 0)).toEqual({
 		text: '`````\n````js\n- [ ] y\n````\n`````\n- [ ] a\n',
 		unclosedStart: null,
+		runs: [[0, 4]],
 	});
 	expect(parse(text).sections[0]?.items).toEqual([item(5, 6)]);
 	expect(maskBlocks(splitLines('---\n---\na\r\n$$\r\nx\r\n$$'), 2).text).toBe('a\r\n```\r\nx\r\n```');
@@ -179,7 +180,7 @@ test('maskBlocks turns a top-level %% or $$ region into a fence longer than any 
 
 test('maskBlocks leaves %% and $$ alone inside a fence, in notes and within one line', () => {
 	for (const text of ['```\n%%\n- [ ] x\n```\n', '- [ ] a\n\n\t%%\n\tx\n\t%%\n', '%% inline %%\n', '$$x$$\n']) {
-		expect(maskBlocks(splitLines(text), 0)).toEqual({ text, unclosedStart: null });
+		expect(maskBlocks(splitLines(text), 0)).toEqual({ text, unclosedStart: null, runs: [] });
 	}
 });
 
@@ -198,7 +199,7 @@ test('masking skips what a fence or an HTML block of types 1 to 5 holds', () => 
 
 test('masking skips what a top-level fence indented 1 to 3 spaces holds', () => {
 	for (const text of [' ```\n%%\n ```\n', '   ~~~\n$$\n   ~~~\n']) {
-		expect(maskBlocks(splitLines(text), 0)).toEqual({ text, unclosedStart: null });
+		expect(maskBlocks(splitLines(text), 0)).toEqual({ text, unclosedStart: null, runs: [] });
 	}
 	expect(parse(' ```\n%%\n ```\n\n- [ ] after\n').sections[0]?.items).toEqual([item(4, 5)]);
 	expect(parse('  ```\n$$\n  ```\n%%\n- [ ] hidden\n%%\n- [ ] b\n').sections[0]?.items).toEqual([item(6, 7)]);
@@ -218,7 +219,7 @@ test('a fence in notes ends with its item, so a %% region after it is masked', (
 
 test('a %% or $$ region indented 1 to 3 spaces is not masked', () => {
 	for (const text of [' %%\n- [ ] y\n %%\n', '   $$\n- [ ] y\n   $$\n']) {
-		expect(maskBlocks(splitLines(text), 0)).toEqual({ text, unclosedStart: null });
+		expect(maskBlocks(splitLines(text), 0)).toEqual({ text, unclosedStart: null, runs: [] });
 	}
 	expect(parse(' %%\n- [ ] y\n %%\n').sections[0]?.items).toEqual([item(1, 3)]);
 	expect(parse('   $$\n- [ ] y\n   $$\n').sections[0]?.items).toEqual([item(1, 3, '   ')]);

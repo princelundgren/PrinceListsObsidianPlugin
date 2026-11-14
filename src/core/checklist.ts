@@ -57,7 +57,7 @@ export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[]
 	for (const { lines: block } of drawnBlocks(joinLines(notes))) {
 		for (let i = block.start; i < block.end; i++) kept.add(i);
 	}
-	for (const [from, to] of maskedRuns(notes)) {
+	for (const [from, to] of maskBlocks(notes, 0).runs) {
 		for (let i = from; i <= to; i++) kept.add(i);
 	}
 	const result = lines.slice();
@@ -67,14 +67,4 @@ export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[]
 		if (parts && parts.status !== ' ') result[first + i] = { text: joinItemLine({ ...parts, status: ' ' }), eol: line.eol };
 	});
 	return result;
-}
-
-// The runs of lines `maskBlocks` masks, each from its opening line to its closing one, which an
-// unclosed run lacks. It rewrites only a run's two delimiter lines.
-function maskedRuns(notes: readonly Line[]): [from: number, to: number][] {
-	const masked = splitLines(maskBlocks(notes, 0).text);
-	const delimiters = notes.flatMap((line, i) => (masked[i]?.text === line.text ? [] : [i]));
-	const runs: [number, number][] = [];
-	for (let i = 0; i < delimiters.length; i += 2) runs.push([delimiters[i] as number, delimiters[i + 1] ?? notes.length - 1]);
-	return runs;
 }

@@ -57,13 +57,21 @@ const HTML_BLOCK_ENDS: [start: RegExp, end: RegExp][] = [
 	[/^<!\[CDATA\[/, /\]\]>/],
 ];
 
+/**
+ * `runs` are the `%%` and `$$` regions, each from its opening line to its closing one, or to the
+ * last line when unclosed, both inclusive.
+ */
 export function maskBlocks(
 	lines: readonly Line[],
 	contentStart: number,
-): { text: string; unclosedStart: number | null } {
-	const masked = maskLines(lines, contentStart);
+): { text: string; unclosedStart: number | null; runs: [from: number, to: number][] } {
+	const { lines: masked, runs } = maskLines(lines, contentStart);
 	const text = joinLines(masked);
-	return { text, unclosedStart: unclosedStart(new Parser().parse(text), masked, contentStart) };
+	return {
+		text,
+		unclosedStart: unclosedStart(new Parser().parse(text), masked, contentStart),
+		runs: runs.map(([from, to]) => [contentStart + from, contentStart + to]),
+	};
 }
 
 // The item whose title is on `titleLine`, if one is.
@@ -85,7 +93,7 @@ export function documentBlocks(lines: readonly Line[], contentStart: number): Bl
 }
 
 function blocksOf(lines: readonly Line[], contentStart: number, partsOf: (doc: Node) => Iterable<Node>): Block[] {
-	const doc = new Parser().parse(joinLines(maskLines(lines, contentStart)));
+	const doc = new Parser().parse(joinLines(maskLines(lines, contentStart).lines));
 	return [...partsOf(doc)].map((node) => {
 		const start = contentStart + node.sourcepos[0][0] - 1;
 		const end = trimBlankEnd(lines, start + 1, Math.min(lines.length, contentStart + node.sourcepos[1][0]));
@@ -136,14 +144,14 @@ export function parseList(lines: readonly Line[], contentStart: number): ListMod
 // and HTML blocks, whose content isn't masked, are tracked at column 0 for the same reason: an
 // indented one may sit in notes, and then the end of the item closes it. A top-level fence indented
 // 1 to 3 spaces is tracked too, once commonmark finds it in a masked copy.
-function maskLines(lines: readonly Line[], contentStart: number): Line[] {
+function maskLines(lines: readonly Line[], contentStart: number): MaskedLines {
 	const content = lines.slice(contentStart);
 	let trackedFenceStarts = new Set<number>();
 	let masked = maskRegions(content, trackedFenceStarts);
 	// Masking runs top-down, and only the lines above a fence decide whether it's top-level, so each pass
 	// gets right at least the first fence the last one got wrong: one pass per line is more than enough.
 	for (let pass = 0; pass < content.length; pass++) {
-		const found = indentedFenceStarts(content, masked);
+		const found = indentedFenceStarts(content, masked.lines);
 		if (found.size === trackedFenceStarts.size && [...found].every((n) => trackedFenceStarts.has(n))) break;
 		trackedFenceStarts = found;
 		masked = maskRegions(content, trackedFenceStarts);
@@ -151,8 +159,14 @@ function maskLines(lines: readonly Line[], contentStart: number): Line[] {
 	return masked;
 }
 
-function maskRegions(content: readonly Line[], trackedFenceStarts: ReadonlySet<number>): Line[] {
+interface MaskedLines {
+	lines: Line[];
+	runs: [from: number, to: number][];
+}
+
+function maskRegions(content: readonly Line[], trackedFenceStarts: ReadonlySet<number>): MaskedLines {
 	const masked = content.slice();
+	const runs: [number, number][] = [];
 	let closesOpenBlock: ((text: string) => boolean) | null = null;
 	for (let i = 0; i < masked.length; i++) {
 		const { text } = masked[i] as Line;
@@ -182,9 +196,10 @@ function maskRegions(content: readonly Line[], trackedFenceStarts: ReadonlySet<n
 			const line = masked[at];
 			if (line) masked[at] = { text: mask, eol: line.eol };
 		}
+		runs.push([i, Math.min(close, masked.length - 1)]);
 		i = close;
 	}
-	return masked;
+	return { lines: masked, runs };
 }
 
 // The lines that open a top-level fence indented 1 to 3 spaces in `masked`. Only a parse tells one from
