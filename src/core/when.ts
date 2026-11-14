@@ -93,7 +93,14 @@ export function backDayMessage(day: string, language: string): string {
 
 export function utcOf(day: string): number {
 	const [, year, month, date] = DAY_PATTERN.exec(day) ?? [];
-	return Date.UTC(Number(year), Number(month) - 1, Number(date));
+	return utcTime(Number(year), Number(month) - 1, Number(date));
+}
+
+/** Midnight UTC of a day; unlike `Date.UTC`, reads a year from 0 to 99 as that year, not 1900 to 1999. */
+export function utcTime(year: number, monthIndex: number, date: number): number {
+	const time = new Date(0);
+	time.setUTCFullYear(year, monthIndex, date);
+	return time.getTime();
 }
 
 export function isRealDay(day: string): boolean {
