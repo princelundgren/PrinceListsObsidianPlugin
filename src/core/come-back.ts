@@ -5,22 +5,20 @@ import { comeBack } from './repeat-line';
 
 /**
  * `text` with every done repeating item due by `now` written back open and its notes' checklist
- * unticked, for each item whose title line `gathers` takes; null when none is. Hidden items count.
+ * unticked; null when none is. Every due item counts, hidden ones included.
  * No line is added or removed, so the parsed items stay valid.
  */
 export function planComeBacks(
 	text: string,
 	contentStart: number,
 	now: Date,
-	gathers: (line: string) => boolean,
 ): { next: string; count: number } | null {
 	let lines = splitLines(text);
 	let count = 0;
 	for (const item of parseList(lines, contentStart).sections.flatMap((section) => section.items)) {
 		const title = lines[item.titleLine];
-		// comeBack first: it skips a line that doesn't repeat without parsing it, which `gathers` may not.
 		const back = title ? comeBack(title.text, now) : null;
-		if (!title || back === null || !gathers(title.text)) continue;
+		if (!title || back === null) continue;
 		lines = untickChecklist(lines, item);
 		lines[item.titleLine] = { text: back, eol: title.eol };
 		count++;

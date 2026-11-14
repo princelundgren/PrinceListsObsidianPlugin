@@ -25,6 +25,7 @@ import { openItem } from './open-item';
 import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
 import { buildScheduleRow } from './schedule-row';
 import { buildTagStrip, showsTagStrip, stripClick } from './tag-strip';
+import { onWindowReturn } from './window-return';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
@@ -119,6 +120,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) void this.refresh();
 		}));
+		onWindowReturn(this, this.containerEl, () => this.bringBack());
 		this.registerEvent(metadataCache.on('changed', (file, data, cache) => this.listChanged(file, data, cache)));
 		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
@@ -167,9 +169,9 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.bringBack();
 	}
 
-	// Writes the due repeating items it gathers back open (spec, "Coming back"): only when the Schedule
-	// opens or gets focus, never when a list changes, and never while it is out of sight. A list that
-	// changed since it was read refuses it with no notice.
+	// Writes every due repeating item in the lists it read back open, hidden ones included (spec, "Coming
+	// back"): only when the Schedule opens or gets focus or Obsidian returns to the screen, never when a list
+	// changes, and never while it is out of sight. A list that changed since it was read refuses it with no notice.
 	bringBack(): void {
 		if (!this.containerEl.isShown()) return;
 		void this.enqueue(async () => {
@@ -177,11 +179,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 				const list = this.lists.get(path);
 				const file = this.app.vault.getFileByPath(path);
 				if (!list || !file) continue;
-				const now = new Date();
-				// The done items the Schedule shows of the list, which leaves archived ones out.
-				const gathered = new Set(unarchived(list.items, now, this.archiveDelay.ms).filter((item) => item.done).map((item) => item.line));
-				if (gathered.size === 0) continue;
-				const planned = planComeBacks(list.text, contentStartLine(list.text), now, (line) => gathered.has(line));
+				const planned = planComeBacks(list.text, contentStartLine(list.text), new Date());
 				if (planned && (await editListFile(this.app, file, list.text, planned.next, null)) === 'written') this.listRead(file, planned.next);
 			}
 		});
