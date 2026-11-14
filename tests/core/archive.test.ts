@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { archiveDelayHoursOf, archiveDelayMs, doneAt, isArchived, type ArchiveDelayHours } from '../../src/core/archive';
 
 const now = new Date(2026, 9, 20, 12, 0);
-const VS16 = '️';
+const VS16 = '\uFE0F';
 
 function at(...args: [number, number, number, number?, number?, number?, number?]): {
 	kind: 'at';

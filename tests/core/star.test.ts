@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { parseItemLine } from '../../src/core/item-line';
 import { isStarred, setStar, setTitleKeepingStar, splitStar } from '../../src/core/star';
 
-const F = '️';
+const F = '\uFE0F';
 
 test('splitStar takes the trailing space and star off a title, with any U+FE0F', () => {
 	expect(splitStar('Buy milk ⭐')).toEqual({ plain: 'Buy milk', star: ' ⭐' });

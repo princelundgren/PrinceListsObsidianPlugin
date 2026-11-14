@@ -16,7 +16,7 @@ import { isStarred } from '../../src/core/star';
 
 const now = new Date(2026, 9, 20, 23, 55);
 const STAMP = '✔ 2026-10-20 23:55';
-const VS16 = '️';
+const VS16 = '\uFE0F';
 
 describe('tickLine', () => {
 	test.each([
