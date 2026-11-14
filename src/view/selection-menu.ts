@@ -131,7 +131,6 @@ function lineEdit(change: (line: string) => string): GroupPlan {
 	return (text, start, rows) => planGroupLineEdit(text, start, rows, change);
 }
 
-// A tick that every selected item repeats writes nothing, and the write's tryEdit says why.
 function changeSelection(view: PrinceListView, change: GroupChange, plan: GroupPlan): void {
 	const rows = view.selection.lines();
 	if (rows.length > 0) queueGroupAction(view, rows, plan, (written) => changeMessage(change, written));

@@ -352,7 +352,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - The plugin keeps the marker and the character exactly as written.
   - Ticking writes `x`, and unticking writes a space.
 - **The item's first line is its title.**
-- **Ticking a repeating item (🔁) moves it to its next date** instead of marking it done
+- **A repeating item (🔁) is ticked like any other,** and comes back open on its next date
   ([repeating items](2026-11-13-repeating-items-design.md), "Ticking a repeating item"). A line the
   plugin can't repeat is refused with a message, since ticking it would quietly end the repeat.
 
@@ -452,13 +452,13 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - 🔁 repeat
 - **Written the Tasks way:** at the end of the title line, as `YYYY-MM-DD`.
 - **Step one sets none of them.** It keeps any that are already there and never breaks them.
-- **Ticking a repeating item moves its 📅, ⏳ and 🛫 dates** by the same number of days; the
-  other dates stay as written (repeating items design, "The next date").
+- **A repeating item's 📅, ⏳ and 🛫 dates move when it comes back,** by the same number of days;
+  the other dates stay as written (repeating items design, "The next date").
 
 ### Completion (owner)
 
 - **Ticking an item writes `- [x]`** plus our own field, `✔ YYYY-MM-DD HH:mm`, in local time on a
-  24-hour clock. A repeating item moves to its next date instead (Items).
+  24-hour clock. A repeating item is ticked the same way (Items).
 - **One field, not two.** The owner wanted the date and time together.
 - **Why not Tasks' ✅:** its field takes only a date. The pattern `✅\uFE0F? *(\d{4}-\d{2}-\d{2})$`
   in Tasks' `DefaultTaskSerializer.ts` accepts nothing else.
@@ -758,8 +758,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
     card opens without it, and its date button opens the picker.
   - **The card's ⋯ menu, and a right-click on the open card, stay without them (owner,
     2026-10-29),** since the card shows the box, the star and the date beside them. Only Repeat… is
-    there, in a group of its own after Select, while the item doesn't repeat; a repeating item's
-    card has a repeat button instead.
+    there, in a group of its own after Select, while the card shows no repeat button; a repeating
+    item's card, and a ticked one's that comes back, has the button instead.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star button's "Add star" and "Remove star";
     and "Remove", as in Remove image.

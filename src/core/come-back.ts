@@ -18,8 +18,9 @@ export function planComeBacks(
 	let count = 0;
 	for (const item of parseList(lines, contentStart).sections.flatMap((section) => section.items)) {
 		const title = lines[item.titleLine];
-		const back = title && gathers(title.text) ? comeBack(title.text, now) : null;
-		if (!title || back === null) continue;
+		// comeBack first: it skips a line that doesn't repeat without parsing it, which `gathers` may not.
+		const back = title ? comeBack(title.text, now) : null;
+		if (!title || back === null || !gathers(title.text)) continue;
 		lines = untickChecklist(lines, item);
 		lines[item.titleLine] = { text: back, eol: title.eol };
 		count++;

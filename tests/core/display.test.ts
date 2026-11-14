@@ -136,10 +136,12 @@ describe('itemRow', () => {
 	test.each([
 		['an open repeating line', '- [ ] water ⏳ 2026-11-13 🔁 every day', true],
 		['an open line whose repeat it cannot follow', '- [ ] fix the 🔁 every day bug', true],
-		['a done repeating line', '- [x] water ⏳ 2026-11-13 🔁 every day ✅ 2026-11-13', false],
+		['a ticked daily line', '- [x] Water ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14', true],
+		['the last time, ticked', '- [x] Water 🔚 1x ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14', false],
+		['a Tasks history line', '- [x] water ⏳ 2026-11-13 🔁 every day ✅ 2026-11-13', false],
 		['a 🔁 in the title that is no field', "- [ ] fix the 🔁 icon's color", false],
 	])('shows the repeat of %s: %s', (_, text, repeats) => {
-		expect(itemRow(text, 0, new Date(2026, 10, 14), DAY).repeats).toBe(repeats);
+		expect(itemRow(text, 0, new Date(2026, 10, 14, 20, 0), DAY).repeats).toBe(repeats);
 	});
 
 	test('marks a done item archived 24 hours after its tick', () => {

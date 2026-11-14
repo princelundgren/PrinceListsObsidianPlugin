@@ -5,7 +5,6 @@ import {
 	tailFields,
 	formatStamp,
 	isDoneStatus,
-	isRepeating,
 	joinItemLine,
 	markTime,
 	parseItemLine,
@@ -147,16 +146,6 @@ describe('setTitle', () => {
 		expect(setTitle('- [x] a ✔ 2026-10-20 09:00 ⏳ 2026-10-21 #t ^id', 'b')).toBe(
 			'- [x] b ✔ 2026-10-20 09:00 ⏳ 2026-10-21 #t ^id',
 		);
-	});
-});
-
-describe('isRepeating', () => {
-	test('true for a 🔁 field', () => {
-		expect(isRepeating('- [ ] a 🔁 every week 📅 2026-10-30')).toBe(true);
-	});
-	test('false without one, or for a non-task line', () => {
-		expect(isRepeating('- [ ] a 📅 2026-10-30')).toBe(false);
-		expect(isRepeating('- bullet')).toBe(false);
 	});
 });
 

@@ -31,10 +31,20 @@ export function doneAt(text: string, now: Date): DoneAt | null {
 	const parts = parseItemLine(text);
 	if (!parts || !isDoneStatus(parts.status)) return null;
 
-	const marks = [...parts.marks.matchAll(EVERY_MARK), ...parts.tail.matchAll(EVERY_DONE_DATE)].map((m) => m[0]);
+	return earliestCounting([...parts.marks.matchAll(EVERY_MARK), ...parts.tail.matchAll(EVERY_DONE_DATE)], now);
+}
+
+/** As `doneAt`, but from the line's `✔` marks only, so a `✅` left from an earlier completion isn't the tick. */
+export function tickedAt(text: string, now: Date): DoneAt | null {
+	const parts = parseItemLine(text);
+	if (!parts || !isDoneStatus(parts.status)) return null;
+	return earliestCounting(parts.marks.matchAll(EVERY_MARK), now);
+}
+
+function earliestCounting(found: Iterable<RegExpMatchArray>, now: Date): DoneAt {
 	const latestReadable = now.getTime() + LATEST_MARK_AHEAD_MS;
 	let earliest: Date | null = null;
-	for (const mark of marks) {
+	for (const [mark] of found) {
 		const time = markTime(mark);
 		if (!time || time.getTime() > latestReadable) continue;
 		if (!earliest || time < earliest) earliest = time;

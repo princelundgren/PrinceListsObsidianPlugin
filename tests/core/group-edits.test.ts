@@ -28,24 +28,24 @@ describe('planGroupTick', () => {
 		expect(plan).toMatchObject({ changed: 2, skipped: 0, edit: { start: 3, delta: 0, kind: 'change' } });
 	});
 
-	test('moves a repeating item with its checklist and counts it as changed', () => {
-		const text = TEXT.replace('- [ ] c', '- [ ] c ⏳ 2026-11-07 🔁 every day\n\t- [x] step');
-		const plan = planGroupTick(text, 3, [3, 7], true, NOW);
+	test('ticks repeating items like any other, keeping their checklists', () => {
+		const text = TEXT.replace('- [ ] a', '- [ ] a 🔁 every day ⏳ 2026-11-07\n\t- [x] step').replace('- [ ] c', '- [ ] c 🔁 every week');
+		const plan = planGroupTick(text, 3, [3, 8], true, NOW);
 		const expected = linesOf(text);
-		expected[3] = tickLine('- [ ] a', NOW);
-		expected[7] = '- [ ] c ⏳ 2026-11-08 🔁 every day';
-		expected[8] = '\t- [ ] step';
+		expected[3] = tickLine('- [ ] a 🔁 every day ⏳ 2026-11-07', NOW);
+		expected[8] = tickLine('- [ ] c 🔁 every week', NOW);
 		expect(linesOf(plan?.next ?? '')).toEqual(expected);
 		expect(plan).toMatchObject({ changed: 2, skipped: 0, edit: { start: 3, delta: 0, kind: 'change' } });
 	});
 
-	test("skips a line that can't repeat and counts it", () => {
-		const text = TEXT.replace('- [ ] c', '- [ ] c 🔁 every weekday');
-		const plan = planGroupTick(text, 3, [3, 7], true, NOW);
+	test("skips a line that can't repeat among repeating items and counts it", () => {
+		const text = TEXT.replace('- [ ] a', '- [ ] a 🔁 every day').replace('- [ ] b', '- [ ] b 🔁 every weekday').replace('- [ ] c', '- [ ] c 🔁 every week');
+		const plan = planGroupTick(text, 3, [3, 5, 7], true, NOW);
 		const expected = linesOf(text);
-		expected[3] = tickLine('- [ ] a', NOW);
+		expected[3] = tickLine('- [ ] a 🔁 every day', NOW);
+		expected[7] = tickLine('- [ ] c 🔁 every week', NOW);
 		expect(linesOf(plan?.next ?? '')).toEqual(expected);
-		expect(plan).toMatchObject({ changed: 1, skipped: 1 });
+		expect(plan).toMatchObject({ changed: 2, skipped: 1 });
 	});
 
 	test("throws the first skipped line's error when every item it would change was skipped", () => {

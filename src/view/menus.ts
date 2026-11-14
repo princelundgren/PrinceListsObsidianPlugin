@@ -1,7 +1,7 @@
 import { Menu, Notice } from 'obsidian';
 import { SCHEDULE_ICON } from '../constants';
 import { collapseChoices } from '../core/collapsed';
-import { timelessItemRow } from '../core/display';
+import { itemRow } from '../core/display';
 import type { TrackedLine } from '../core/editing';
 import { endOfSection, sectionLastLine } from '../core/list-actions';
 import { itemAt, type ListModel, type Section } from '../core/parse';
@@ -157,12 +157,12 @@ function addSelectEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu): 
 	menu.addSeparator();
 }
 
-// Repeat…, in a group of its own after Select, in the open card's menus when its item doesn't repeat: a
-// repeating item's card has the repeat button for it.
+// Repeat…, in a group of its own after Select, in the open card's menus when the card shows no repeat
+// button, read as the card reads it, so a done item that comes back has the button instead.
 function addRepeatEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 	const line = anchor.line;
 	const text = line === null ? undefined : view.lines()[line]?.text;
-	if (line === null || text === undefined || timelessItemRow(text, line).repeats) return;
+	if (line === null || text === undefined || itemRow(text, line, new Date(), view.archiveDelay.ms).repeats) return;
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Repeat…')

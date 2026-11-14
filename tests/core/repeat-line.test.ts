@@ -13,7 +13,6 @@ import {
 	repeatOf,
 	RepeatingItemError,
 	setRepeat,
-	tickRepeating,
 	type RepeatProblem,
 } from '../../src/core/repeat-line';
 import type { RepeatDraft } from '../../src/core/repeat-line';
@@ -80,74 +79,6 @@ describe('hasDate', () => {
 		['- [ ] a ➕ 2026-11-01', false],
 	])('%s', (line, expected) => {
 		expect(hasDate(line)).toBe(expected);
-	});
-});
-
-describe('tickRepeating', () => {
-	test.each([
-		['- [ ] Water ⏳ 2026-11-10 🔁 every 3 days', '- [ ] Water ⏳ 2026-11-16 🔁 every 3 days', '2026-11-16'],
-		[
-			'- [ ] Rent ➕ 2026-11-01 🛫 2026-11-25 ⏳ 2026-11-28 📅 2026-12-01 🔁 every month',
-			'- [ ] Rent ➕ 2026-11-01 🛫 2026-12-26 ⏳ 2026-12-29 📅 2027-01-01 🔁 every month',
-			'2027-01-01',
-		],
-		[
-			`- [ ] a ✅ 2026-11-05 ⏳${VS16} 2026-11-13 🔁${VS16} every week`,
-			`- [ ] a ✅ 2026-11-05 ⏳${VS16} 2026-11-20 🔁${VS16} every week`,
-			'2026-11-20',
-		],
-		['- [ ] Stretch 🔁 every day', '- [ ] Stretch 🔁 every day ⏳ 2026-11-14', '2026-11-14'],
-		['- [ ] a ⏳ 2026-11-13 🔁 every day #x ^id', '- [ ] a ⏳ 2026-11-14 🔁 every day #x ^id', '2026-11-14'],
-	])('moves %s', (line, expected, next) => {
-		expect(tickRepeating(line, now)).toEqual({ kind: 'moved', line: expected, next });
-	});
-
-	test.each([
-		['- [ ] a 🔚 3x ⏳ 2026-11-13 🔁 every day', '- [ ] a 🔚 2x ⏳ 2026-11-14 🔁 every day'],
-		['- [ ] a ⭐ 🔚 3x ⏳ 2026-11-01 🔁 every day', '- [ ] a ⭐ 🔚 2x ⏳ 2026-11-14 🔁 every day'],
-		['- [ ] a 🔚 2026-12-31 ⏳ 2026-11-13 🔁 every day', '- [ ] a 🔚 2026-12-31 ⏳ 2026-11-14 🔁 every day'],
-		['- [ ] a 🔚 2026-11-14 ⏳ 2026-11-13 🔁 every day', '- [ ] a 🔚 2026-11-14 ⏳ 2026-11-14 🔁 every day'],
-	])('keeps the end of %s counting or fixed', (line, expected) => {
-		expect(tickRepeating(line, now)).toMatchObject({ kind: 'moved', line: expected });
-	});
-
-	test.each([
-		[
-			'- [ ] Physio 🔚 1x ⏳ 2026-11-13 🔁 every day',
-			'- [x] Physio 🔚 1x ✔ 2026-11-13 09:00 ⏳ 2026-11-13 🔁 every day',
-		],
-		[
-			'- [ ] a 🔚 2026-11-15 ⏳ 2026-11-13 🔁 every 3 days',
-			'- [x] a 🔚 2026-11-15 ✔ 2026-11-13 09:00 ⏳ 2026-11-13 🔁 every 3 days',
-		],
-	])('ticks the last time of %s as an ordinary tick', (line, expected) => {
-		expect(tickRepeating(line, now)).toEqual({ kind: 'ended', line: expected });
-	});
-
-	test('counts a missed item by the local day of the tick', () => {
-		const line = '- [ ] Walk ⏳ 2026-11-12 🔁 every day';
-
-		expect(tickRepeating(line, new Date(2026, 10, 13, 23, 59))).toMatchObject({ next: '2026-11-14' });
-		expect(tickRepeating(line, new Date(2026, 10, 14, 0, 1))).toMatchObject({ next: '2026-11-15' });
-	});
-
-	test.each<[string, RepeatProblem]>([
-		['- [ ] a ⏳ 2026-11-13 🔁 every weekday', 'rule'],
-		['- [ ] a 🔚 soon ⏳ 2026-11-13 🔁 every day', 'end'],
-		['- [ ] a ⏳ 2026-02-30 🔁 every day', 'date'],
-		['- [ ] a ⏳ 9999-12-31 🔁 every day', 'date'],
-		['- [ ] a 🔚 0x ⏳ 2026-11-13 🔁 every day', 'end'],
-		['- [ ] Trip 🔚 next spring ⏳ 2026-11-13 🔁 every day', 'end'],
-		['- [ ] a 📅 2026-11-20 ⏳ 2026-02-30 🔁 every day', 'date'],
-	])('refuses %s with the problem %s', (line, problem) => {
-		expect(() => tickRepeating(line, now)).toThrow(RepeatingItemError);
-		expect(() => tickRepeating(line, now)).toThrow(expect.objectContaining({ problem }));
-	});
-
-	test('refuses a move that would take another date past 9999-12-31', () => {
-		const line = '- [ ] a 🛫 9999-12-31 ⏳ 2026-11-13 🔁 every day';
-
-		expect(() => tickRepeating(line, now)).toThrow(expect.objectContaining({ problem: 'date' }));
 	});
 });
 
@@ -238,9 +169,7 @@ describe('ensureTickable', () => {
 	});
 
 	test('keeps the tick\'s message for a tick', () => {
-		expect(() => tickRepeating('- [ ] a 🔚 soon ⏳ 2026-11-13 🔁 every day', now)).toThrow(
-			"This item's 🔚 end can't be read, so it isn't ticked.",
-		);
+		expect(new RepeatingItemError('end').message).toBe("This item's 🔚 end can't be read, so it isn't ticked.");
 	});
 
 	test('passes a plain line, and one with a readable end, unchanged', () => {
@@ -340,6 +269,14 @@ describe('backDay', () => {
 	it('mark ahead: the anchor stands in', () => expect(backDay('- [x] Water ✔ 2026-11-20 18:05 🔁 every day ⏳ 2026-11-10', at(14))).toBe('2026-11-11'));
 	it('no anchor and no mark that counts', () => expect(backDay('- [x] Water ✔ 2026-11-20 18:05 🔁 every day', at(14))).toBe('2026-11-14'));
 	it('two marks: the earliest', () => expect(backDay('- [x] Water ✔ 2026-11-12 08:00 ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-12', at(14))).toBe('2026-11-13'));
+	it('a leftover ✅ is not the tick', () => {
+		const tick = new Date(2026, 10, 14, 18, 5);
+		const ticked = tickLine('- [ ] a ✅ 2026-10-01 ⏳ 2026-10-01 🔁 every day', tick);
+		expect(ticked).toBe('- [x] a ✔ 2026-11-14 18:05 ✅ 2026-10-01 ⏳ 2026-10-01 🔁 every day');
+		expect(backDay(ticked, tick)).toBe('2026-11-15');
+		expect(comeBack(ticked, tick)).toBeNull();
+		expect(backDay(tickLine('- [ ] a ✅ 2026-10-01 ⏳ 2026-10-01 🔁 every 3 days when done', tick), tick)).toBe('2026-11-17');
+	});
 	it('open, unreadable or past 9999', () => {
 		expect(backDay('- [ ] Water 🔁 every day ⏳ 2026-11-14', at(14))).toBeNull();
 		expect(backDay('- [x] Water ✔ 2026-11-14 18:05 🔁 every weekday ⏳ 2026-11-14', at(14))).toBeNull();

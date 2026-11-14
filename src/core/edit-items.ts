@@ -1,11 +1,10 @@
-import { untickChecklist } from './checklist';
 import { blockKey, replaceRun, UnsafeEditError } from './edit-check';
 import { gapEnd, hasLineBreak, isBlankAt } from './edit-lines';
-import { isDoneStatus, isRepeating, parseItemLine, tickLine, toggleLine, untickLine } from './item-line';
+import { isDoneStatus, parseItemLine, tickLine, toggleLine, untickLine } from './item-line';
 import { dominantEol, spliceLines, type Line } from './lines';
 import { columnOf, isBlank, stripIndent, type ItemBlock, type ListModel, type Section } from './parse';
 import { range, reorderChecked } from './reorder';
-import { RepeatingItemError, tickRepeating } from './repeat-line';
+import { backDay, RepeatingItemError, repeatOf } from './repeat-line';
 import { setTitleKeepingStar } from './star';
 
 // Callers of the item edits import it from here.
@@ -16,39 +15,29 @@ export type MoveTarget = { after: ItemBlock } | { firstIn: Section };
 /** What ticking or unticking an item gives. */
 export interface ToggledItem {
 	lines: Line[];
-	/** The date a repeating item moved to, else null. */
-	next: string | null;
+	/** The date a repeating item ticked now comes back on, else null. */
+	back: string | null;
 	/** The same toggle as a function of the title line, for a title field that saved it (see syncTitleField). */
 	retitle: (line: string) => string;
 }
 
 /**
- * Ticks an open item, or unticks a done one. A repeating item moves to its next date instead, with
- * its checklist unticked, unless that tick is its last; throws RepeatingItemError when it can't.
+ * Ticks an open item, or unticks a done one. A repeating item ticks like any other; throws
+ * RepeatingItemError when it can't repeat, so its repeat is never lost.
  */
 export function toggleItem(lines: readonly Line[], item: ItemBlock, now: Date): ToggledItem {
 	const { text } = lines[item.titleLine] as Line;
 	const parts = parseItemLine(text);
-	const plain = (toggled: string): ToggledItem => ({
-		lines: replaceLine(lines, item.titleLine, toggled),
-		next: null,
-		retitle: (line) => toggleLine(line, now),
+	const toggled = (line: string, back: string | null): ToggledItem => ({
+		lines: replaceLine(lines, item.titleLine, line),
+		back,
+		retitle: (saved) => toggleLine(saved, now),
 	});
-	if (parts && isDoneStatus(parts.status)) return plain(untickLine(text));
-	if (!isRepeating(text)) return plain(tickLine(text, now));
-	const ticked = tickRepeating(text, now);
-	const titled = replaceLine(lines, item.titleLine, ticked.line);
-	// A line a title field saved is moved the same way; one that can't repeat stays as it was.
-	const retitle = (line: string) => {
-		try {
-			return tickRepeating(line, now).line;
-		} catch (error) {
-			if (error instanceof RepeatingItemError) return line;
-			throw error;
-		}
-	};
-	if (ticked.kind === 'ended') return { lines: titled, next: null, retitle };
-	return { lines: untickChecklist(titled, item), next: ticked.next, retitle };
+	if (parts && isDoneStatus(parts.status)) return toggled(untickLine(text), null);
+	const problem = repeatOf(text)?.problem;
+	if (problem) throw new RepeatingItemError(problem);
+	const ticked = tickLine(text, now);
+	return toggled(ticked, backDay(ticked, now));
 }
 
 /** The lines with the item's title set to `title`, keeping the item's star; throws on a line break. */
