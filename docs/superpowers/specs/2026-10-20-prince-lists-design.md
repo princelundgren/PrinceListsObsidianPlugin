@@ -116,7 +116,9 @@ it met on 2026-10-30 **(owner)**.
   byte for byte.
 - **Background writes.** The plugin writes a file only in response to a user action: in the view,
   or a command, ribbon icon or menu item such as New list. Nothing is written on a timer, and
-  nothing is written just because a list was opened or closed.
+  nothing is written just because a list was opened or closed. The one exception is a repeating
+  item coming back on its next date ([repeating items](2026-11-13-repeating-items-design.md),
+  "Coming back").
 
 ## Not in step one
 
@@ -971,8 +973,9 @@ needs no code.
 - **Saving (call):**
   - Typing saves through `requestSave`, which waits 2 seconds.
   - One-off actions write at once with `vault.process`: tick, drag, delete, new item, new heading,
-    rename heading, undo and redo. Obsidian's docs recommend `vault.process` "to avoid
-    unintentional loss of data".
+    rename heading, undo and redo, and a repeating item coming back, which nobody makes
+    ([repeating items](2026-11-13-repeating-items-design.md), "Coming back"). Obsidian's docs
+    recommend `vault.process` "to avoid unintentional loss of data".
   - Before a one-off action writes, the view first saves pending typing (`TextFileView.save`), so
     the file already holds the typing and the guard doesn't refuse the write.
   - Typing that lands while an action waits to write makes it write nothing, since it was worked
@@ -1028,7 +1031,7 @@ needs no code.
     "The actions"). A card's notes have no Undo or Redo button either **(owner, 2026-11-05)** (step
     two, "Formatting in a card").
   - The history is cleared when the file changes from outside, so undo never throws away someone
-    else's change.
+    else's change, and when a repeating item comes back, which is no step of its own.
   - Typing in a field makes one step for each time the field has focus, and so does each visit to
     a card's notes or the list note ([notes in one
     editor](2026-10-29-notes-in-one-editor-design.md), "Undo (call)"). A write of the view's own or an undo between keystrokes starts a new step, and

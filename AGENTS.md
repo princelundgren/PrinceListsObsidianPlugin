@@ -54,7 +54,8 @@ this project.
   - Never call `String.prototype.normalize` in `src/`. Tests may, to build NFD input.
   - Never re-serialize the frontmatter: no `fileManager.processFrontMatter`.
 - **No background writes.** Write a file only in response to a user action: in the view, or a
-  command, ribbon icon or menu item such as New list. Never write on open, close or a timer.
+  command, ribbon icon or menu item such as New list. Never write on open, close or a timer, except
+  that a repeating item comes back on its next date (the repeating items design, "Coming back").
 - **No telemetry of any kind, and no network requests** unless one is agreed on in an issue first
   (the design's privacy rule). Obsidian's developer policies require any network use to be
   disclosed in the README. A picture linked from the web in a rendered note loads through
