@@ -140,7 +140,7 @@ export function comeBack(line: string, now: Date): string | null {
 
 /** Whether `draft` can be written to a line and read back, which a rule of `every 0` or an end with no date can't. */
 export function canWrite(draft: RepeatDraft): boolean {
-	return readRule(writeRule(draft.rule)) !== null && (draft.end === null || readEnd(writeEnd(draft.end).slice(END_MARK.length)) !== null);
+	return readRule(writeRule(draft.rule)) !== null && (draft.end === null || readEnd(` ${writeEnd(draft.end)}`.replace(END_PREFIX, '')) !== null);
 }
 
 /**
