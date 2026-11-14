@@ -100,6 +100,8 @@ export function hasDate(line: string): boolean {
  * without passing 9999-12-31.
  */
 export function backDay(line: string, now: Date): string | null {
+	// Most lines don't repeat, and a list checks every line on each redraw: skip them before parsing.
+	if (!line.includes(REPEAT_MARK)) return null;
 	const parts = parseItemLine(line);
 	const repeat = repeatOf(line);
 	const done = tickedAt(line, now);
