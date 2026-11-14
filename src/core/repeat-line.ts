@@ -1,5 +1,5 @@
 import { tickedAt } from './archive';
-import { endOf, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, untickLine, TASKS_SIGNIFIERS } from './item-line';
+import { END_MARK, endOf, FIELD_END, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, untickLine, type ItemLineParts } from './item-line';
 import { addDays, nextDay, readEnd, readRule, stepDay, writeEnd, writeRule, type RepeatEnd, type RepeatRule } from './repeat';
 import { dayOf, daysFrom, isRealDay, setWhen } from './when';
 
@@ -41,20 +41,13 @@ export class RepeatingItemError extends Error {
 }
 
 export const REPEAT_MARK = '🔁';
-const END_MARK = '🔚';
 const EVERY_DAY: RepeatRule = { every: 1, unit: 'day', onLast: false, whenDone: false };
-const REPEAT_PREFIX = /^🔁️?/;
-const END_PREFIX = /^ +🔚️? */;
+const REPEAT_PREFIX = /^🔁\uFE0F?/;
+const END_PREFIX = /^ +🔚\uFE0F? */;
 const DAY_LENGTH = '2026-11-13'.length;
 // Due, scheduled, then start: Tasks' order. Each kind reads as one, as `whenOf` reads ⏳ and ⌛.
 const ANCHOR_KINDS = [['📅', '📆', '🗓'], ['⏳', '⌛'], ['🛫']];
-// A date field ends where `when.ts`'s ends one: at whitespace, the end of the fields or the next field's emoji.
-const DATE_FIELD = new RegExp(
-	`(📅|📆|🗓|⏳|⌛|🛫)️? *(\\d{4}-\\d{2}-\\d{2})(?=(?:\\s|$|${TASKS_SIGNIFIERS.join('|')}))`,
-	'g',
-);
-
-type ItemParts = NonNullable<ReturnType<typeof parseItemLine>>;
+const DATE_FIELD = new RegExp(`(📅|📆|🗓|⏳|⌛|🛫)\uFE0F? *(\\d{4}-\\d{2}-\\d{2})${FIELD_END}`, 'g');
 
 interface DateField {
 	mark: string;
@@ -63,29 +56,25 @@ interface DateField {
 	digitsAt: number;
 }
 
+/** How a done repeating line comes back. */
+interface Comeback {
+	rule: RepeatRule;
+	end: RepeatEnd | null;
+	anchor: string | null;
+	/** The day it comes back on. */
+	day: string;
+}
+
 /** What the line's `🔁` and `🔚` say, or null when the line doesn't repeat. */
 export function repeatOf(line: string): LineRepeat | null {
 	const parts = parseItemLine(line);
-	if (!parts) return null;
-	const { fields } = splitTail(parts.tail);
-	const span = repeatSpan(fields);
-	if (!span) return null;
-	const ruleText = fields.slice(span.from, span.to).replace(REPEAT_PREFIX, '').trim();
-	const rule = readRule(ruleText);
-	const end = parts.end === '' ? null : readEnd(parts.end.replace(END_PREFIX, ''));
-	return { ruleText, rule, end, problem: problemOf(parts.title, parts.end, rule, end, fields) };
+	return parts && repeatIn(parts, splitTail(parts.tail).fields);
 }
 
 /** The day a repeat counts from: the earliest due date, else the earliest scheduled, else the earliest start; null when none is a real day. */
 export function anchorOf(line: string): string | null {
 	const parts = parseItemLine(line);
-	if (!parts) return null;
-	const real = dateFieldsIn(splitTail(parts.tail).fields).filter((field) => isRealDay(field.day));
-	for (const marks of ANCHOR_KINDS) {
-		const days = real.filter((field) => marks.includes(field.mark)).map((field) => field.day).sort();
-		if (days[0] !== undefined) return days[0];
-	}
-	return null;
+	return parts && anchorIn(splitTail(parts.tail).fields);
 }
 
 /** Whether the line has a start, scheduled or due field with a date, real or not. */
@@ -100,24 +89,7 @@ export function hasDate(line: string): boolean {
  * without passing 9999-12-31.
  */
 export function backDay(line: string, now: Date): string | null {
-	// Most lines don't repeat, and a list checks every line on each redraw: skip them before parsing.
-	if (!line.includes(REPEAT_MARK)) return null;
-	const parts = parseItemLine(line);
-	const repeat = repeatOf(line);
-	const done = tickedAt(line, now);
-	if (!parts || !repeat || !done || repeat.problem !== null || repeat.rule === null) return null;
-	// A done 🔁 line with no ✔ is a Tasks history line.
-	if (!parts.marks.includes('✔')) return null;
-	const { rule, end } = repeat;
-	const anchor = anchorOf(line);
-	const tickDay = done.kind === 'at' ? dayOf(done.time) : anchor;
-	let next: string | null;
-	if (tickDay === null) next = dayOf(now);
-	else if (anchor === null || rule.whenDone) next = stepDay(tickDay, rule);
-	else next = nextDay(anchor, rule, tickDay);
-	if (next === null || isLastTime(end, next)) return null;
-	if (anchor !== null && moveDates(splitTail(parts.tail).fields, daysFrom(anchor, next)) === null) return null;
-	return next;
+	return comebackOf(line, now)?.day ?? null;
 }
 
 /**
@@ -125,16 +97,18 @@ export function backDay(line: string, now: Date): string | null {
  * come due by and its count down by one. Null when it isn't due by today or its dates can't move there.
  */
 export function comeBack(line: string, now: Date): string | null {
-	const back = backDay(line, now);
-	const repeat = repeatOf(line);
+	const comeback = comebackOf(line, now);
 	const today = dayOf(now);
-	if (back === null || back > today || !repeat || repeat.rule === null) return null;
-	const { rule, end } = repeat;
-	const anchor = anchorOf(line);
-	let due = back;
+	if (comeback === null || comeback.day > today) return null;
+	const { rule, end, anchor } = comeback;
+	let due = comeback.day;
 	if (anchor !== null && !rule.whenDone) {
 		const withinEnd = (day: string) => !(end?.kind === 'date' && day > end.day);
-		for (let next = stepDay(due, rule); next !== null && next <= today && withinEnd(next); next = stepDay(due, rule)) due = next;
+		let next = stepDay(due, rule);
+		while (next !== null && next <= today && withinEnd(next)) {
+			due = next;
+			next = stepDay(due, rule);
+		}
 	}
 	const open = parseItemLine(untickLine(line));
 	if (!open) return null;
@@ -147,7 +121,7 @@ export function comeBack(line: string, now: Date): string | null {
 
 /** Whether `draft` can be written to a line and read back, which a rule of `every 0` or an end with no date can't. */
 export function canWrite(draft: RepeatDraft): boolean {
-	return readRule(writeRule(draft.rule)) !== null && (draft.end === null || readEnd(writeEnd(draft.end).slice(END_MARK.length)) !== null);
+	return readRule(writeRule(draft.rule)) !== null && (draft.end === null || readEnd(` ${writeEnd(draft.end)}`.replace(END_PREFIX, '')) !== null);
 }
 
 /**
@@ -184,7 +158,7 @@ export function draftAfterRefusal(draft: RepeatDraft | 'read-only', openedText: 
 export function setRepeat(line: string, rule: RepeatRule, end: RepeatEnd | null, today: string): string {
 	if (!parseItemLine(line)) return line;
 	const dated = hasDate(line) ? line : setWhen(line, today);
-	const parts = parseItemLine(dated) as ItemParts;
+	const parts = parseItemLine(dated) as ItemLineParts;
 	const { fields, end: afterFields } = splitTail(parts.tail);
 	const field = `${REPEAT_MARK} ${writeRule(rule)}`;
 	const span = repeatSpan(fields);
@@ -193,7 +167,7 @@ export function setRepeat(line: string, rule: RepeatRule, end: RepeatEnd | null,
 		? fields.slice(0, span.from) + field + fields.slice(span.to)
 		: `${fields} ${field}`;
 	// Reading again lets a `🔚` that sat in the title count as the end now that the line repeats.
-	const repeating = parseItemLine(joinItemLine({ ...parts, tail: changed + afterFields })) as ItemParts;
+	const repeating = parseItemLine(joinItemLine({ ...parts, tail: changed + afterFields })) as ItemLineParts;
 	// A title `🔚` that is no end was title text before the line repeated, and stays so.
 	const kept = !repeatedBefore && repeating.end !== '' && readEnd(repeating.end.replace(END_PREFIX, '')) === null ? repeating.end : '';
 	const newEnd = kept + (end === null ? '' : ` ${writeEnd(end)}`);
@@ -234,6 +208,48 @@ export function removeWhen(line: string): { line: string; repeatRemoved: boolean
 	const withoutWhen = setWhen(line, null);
 	if (repeatOf(withoutWhen) === null || hasDate(withoutWhen)) return { line: withoutWhen, repeatRemoved: false };
 	return { line: removeRepeat(withoutWhen), repeatRemoved: true };
+}
+
+function repeatIn(parts: ItemLineParts, fields: string): LineRepeat | null {
+	const span = repeatSpan(fields);
+	if (!span) return null;
+	const ruleText = fields.slice(span.from, span.to).replace(REPEAT_PREFIX, '').trim();
+	const rule = readRule(ruleText);
+	const end = parts.end === '' ? null : readEnd(parts.end.replace(END_PREFIX, ''));
+	return { ruleText, rule, end, problem: problemOf(parts.title, parts.end, rule, end, fields) };
+}
+
+function anchorIn(fields: string): string | null {
+	const real = dateFieldsIn(fields).filter((field) => isRealDay(field.day));
+	for (const marks of ANCHOR_KINDS) {
+		const days = real.filter((field) => marks.includes(field.mark)).map((field) => field.day).sort();
+		if (days[0] !== undefined) return days[0];
+	}
+	return null;
+}
+
+// Reads the line's fields once for both `backDay` and `comeBack`.
+function comebackOf(line: string, now: Date): Comeback | null {
+	// Most lines don't repeat, and a list checks every line on each redraw: skip them before parsing.
+	if (!line.includes(REPEAT_MARK)) return null;
+	const parts = parseItemLine(line);
+	const done = tickedAt(line, now);
+	if (!parts || !done) return null;
+	// A done 🔁 line with no ✔ is a Tasks history line.
+	if (!parts.marks.includes('✔')) return null;
+	const { fields } = splitTail(parts.tail);
+	const repeat = repeatIn(parts, fields);
+	if (!repeat || repeat.problem !== null || repeat.rule === null) return null;
+	const { rule, end } = repeat;
+	const anchor = anchorIn(fields);
+	const tickDay = done.kind === 'at' ? dayOf(done.time) : anchor;
+	let next: string | null;
+	if (tickDay === null) next = dayOf(now);
+	else if (anchor === null || rule.whenDone) next = stepDay(tickDay, rule);
+	else next = nextDay(anchor, rule, tickDay);
+	if (next === null || isLastTime(end, next)) return null;
+	if (anchor !== null && moveDates(fields, daysFrom(anchor, next)) === null) return null;
+	return { rule, end, anchor, day: next };
 }
 
 function repeatSpan(fields: string): { from: number; to: number } | undefined {

@@ -27,6 +27,10 @@ describe('readRule', () => {
 		expect(readRule(text)).toEqual(expected);
 	});
 
+	test('reads a rule with spaces around it', () => {
+		expect(readRule('  every day  ')).toEqual(rule(1, 'day'));
+	});
+
 	test('reads the largest N it can step', () => {
 		expect(readRule('every 9999 days')).toEqual(rule(9999, 'day'));
 	});
@@ -181,5 +185,10 @@ describe('upcomingDays', () => {
 
 	test('without an anchor, steps from today', () => {
 		expect(upcomingDays(null, rule(1, 'day'), null, today, 3)).toEqual(['2026-11-14', '2026-11-15', '2026-11-16']);
+	});
+
+	test('a when done rule steps on from each projected date, not from today again', () => {
+		const monthly = rule(1, 'month', { whenDone: true });
+		expect(upcomingDays('2026-10-01', monthly, null, today, 3)).toEqual(['2026-12-13', '2027-01-13', '2027-02-13']);
 	});
 });

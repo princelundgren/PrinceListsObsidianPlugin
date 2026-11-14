@@ -1,3 +1,4 @@
+import { END_MARK } from './item-line';
 import { daysFrom, isRealDay, utcOf, utcTime } from './when';
 
 export type RepeatUnit = 'day' | 'week' | 'month' | 'year';
@@ -17,7 +18,6 @@ const DAY_MS = 86_400_000;
 const RULE_PATTERN = /^every(?: (\d+))? (day|week|month|year)s?( on the last)?( when done)?$/;
 const END_COUNT_PATTERN = /^(\d+)x$/;
 const END_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const END_MARK = '🔚';
 // Far beyond a real repeat, and keeps every step inside the range a Date can hold.
 const MAX_EVERY = 9999;
 
