@@ -58,6 +58,9 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	// null while no refresh is reading.
 	private updatedPaths: Set<string> | null = null;
 	private refreshes = 0;
+	// Each list's text its last comeback failed to write on: a failed write isn't tried again (step one's
+	// design, "Saving").
+	private readonly comeBackFailedOn = new Map<string, string>();
 	private blocks: Component[] = [];
 	// Today, the groups and the tag strip as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
 	private drawn: string | null = null;
@@ -143,6 +146,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.litTags = NO_LIT_TAGS;
 		removeFilterField(this);
 		this.lists.clear();
+		this.comeBackFailedOn.clear();
 		this.collapsed.clear();
 		this.removeBlocks();
 	}
@@ -178,9 +182,12 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 			for (const path of [...this.lists.keys()]) {
 				const list = this.lists.get(path);
 				const file = this.app.vault.getFileByPath(path);
-				if (!list || !file) continue;
+				if (!list || !file || this.comeBackFailedOn.get(path) === list.text) continue;
 				const planned = planComeBacks(list.text, contentStartLine(list.text), new Date());
-				if (planned && (await editListFile(this.app, file, list.text, planned.next, null)) === 'written') this.listRead(file, planned.next);
+				if (!planned) continue;
+				const result = await editListFile(this.app, file, list.text, planned.next, null);
+				if (result === 'failed') this.comeBackFailedOn.set(path, list.text);
+				if (result === 'written') this.listRead(file, planned.next);
 			}
 		});
 	}
@@ -209,6 +216,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 
 	private listDeleted(path: string): void {
 		this.updatedPaths?.add(path);
+		this.comeBackFailedOn.delete(path);
 		if (this.lists.delete(path)) this.draw();
 	}
 

@@ -46,6 +46,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private drawnRows: string | null = null;
 	// The archive delay changed under an open field or a drag, so the rows are drawn when that ends.
 	private delayChangedSinceDraw = false;
+	// The text the last comeback failed to write on: a failed write isn't tried again (step one's design,
+	// "Saving").
+	private comeBackFailedOn: string | null = null;
 
 	constructor(
 		readonly app: App,
@@ -127,8 +130,12 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		void this.enqueue(async () => {
 			if (this.file !== file || this.field || this.dragging || this.message() !== null) return;
 			const text = this.editing.text;
+			if (text === this.comeBackFailedOn) return;
 			const planned = planComeBacks(text, contentStartLine(text), new Date());
-			if (planned && (await this.write(planned.next, text, NO_LINES_MOVED, null)) === 'written' && !this.field) this.draw();
+			if (!planned) return;
+			const result = await this.write(planned.next, text, NO_LINES_MOVED, null);
+			if (result === 'failed') this.comeBackFailedOn = text;
+			if (result === 'written' && !this.field) this.draw();
 		});
 	}
 
@@ -222,6 +229,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		if (this.field) noticeLostField(this.field);
 		this.field = null;
 		this.echoes = new WriteEchoes();
+		this.comeBackFailedOn = null;
 		this.editing.reset();
 		this.outsideChanges++;
 		const text = file && file.extension === 'md' && file.path !== this.notePath ? await this.app.vault.cachedRead(file) : '';
