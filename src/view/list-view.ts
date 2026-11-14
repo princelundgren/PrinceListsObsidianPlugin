@@ -23,6 +23,7 @@ import { buildNewItemButton, hasNoItems, newItem } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
 import { closeRepeatPopover } from './card-repeat';
 import { closeTagPopover } from './card-tags';
+import { bringBackInList } from './come-back';
 import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
@@ -200,6 +201,9 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
+		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
+			if (leaf === this.leaf) bringBackInList(this);
+		}));
 		registerFieldEvents(this);
 		focusListWhenActive(this);
 		registerFileRedraws(this);
@@ -321,11 +325,13 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	}
 
 	// Draws everything from the text, moving what didn't change into place (redraw.ts); a field holding
-	// focus, or about to (`focusing`), stays in place and updates after blur.
+	// focus, or about to (`focusing`), stays in place and updates after blur. Then brings back any
+	// repeating item that came due, as a redraw is when the view sees the day change.
 	render(focusing: Element | null = null): void {
 		this.redrawFiltered.cancel();
 		redraw(this, focusing);
 		this.syncButtons();
+		bringBackInList(this);
 	}
 
 	/** The toggle is part of the field, so archived items hide again with it. */

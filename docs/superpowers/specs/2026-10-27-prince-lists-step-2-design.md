@@ -219,6 +219,10 @@ this met on 2026-10-30 **(owner)**.
   content the plugin leaves alone don't show **(call)**, and there are no cards.
   - Done items stay gray until archived. Archived items are hidden, with no "Show archived items"
     **(call)**.
+- **Repeating items that came due come back** when the note opens or gets focus while the block
+  is shown and no field or drag is open, never when the list changes. Only the items it shows
+  count, so archived ones stay done ([repeating items](2026-11-13-repeating-items-design.md),
+  "Coming back").
 - **Ticking** works as in the list view.
 - **Titles are edited in place (call).** A click on a row, not on its checkbox, the zone beside it
   or a link, turns its title into a field, so a row with no title can be edited too: Enter or
@@ -395,6 +399,9 @@ this met on 2026-10-30 **(owner)**.
   has read current, so focus reads only lists it doesn't hold yet, and it draws again only when
   today or its rows change. Like a list, it runs no timer, so a view left open over midnight moves
   its items when it next gets focus.
+- **Repeating items that came due come back** when it opens or gets focus while shown, never when
+  a list changes. Only the items it shows count, so archived and undated ones stay done
+  ([repeating items](2026-11-13-repeating-items-design.md), "Coming back").
 - **Lists are found** by the marker in the metadata cache's frontmatter, and read with
   `vault.cachedRead`. Notes outside the vault aren't included.
 
