@@ -1,6 +1,5 @@
 import { getLinkpath, MarkdownRenderChild, Notice, Platform, setIcon, type App, type Component, type TFile } from 'obsidian';
 import { guardedWrite, type WriteResult } from '../core/action-write';
-import { isArchived } from '../core/archive';
 import { blockLink } from '../core/block-source';
 import { planComeBacks } from '../core/come-back';
 import { visibleSections, type SectionRows } from '../core/display';
@@ -20,6 +19,7 @@ import { noticeLostField, type BlockField } from './block-fields';
 import type { RowDragHost } from './drag-host';
 import { LIST_BLOCK_CLASS } from './own-rows';
 import { buildHeading, buildRow, ITEMS_CLASS, type RowHost } from './render-list';
+import { onWindowReturn } from './window-return';
 import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE } from './write';
 
 // A list drawn inside another note by a `princelists` code block (spec, "A list inside another note").
@@ -67,6 +67,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
 			if (leaf?.view.containerEl.contains(this.rootEl)) this.bringBack();
 		}));
+		onWindowReturn(this, this.rootEl, () => this.bringBack());
 		this.registerEvent(vault.on('create', () => void this.resolve()));
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
@@ -117,17 +118,16 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		return outcome === 'written' ? outcome : 'refused';
 	}
 
-	// Writes the due repeating items the block shows back open, archived ones left out (spec, "Coming
-	// back"): only when its note opens or gets focus, never when the list changes, and not while it is
-	// out of sight or a field or a drag is open. A list another view wrote first refuses it with no notice.
+	// Writes every due repeating item in the block's list back open, hidden ones included (spec, "Coming
+	// back"): only when its note opens or gets focus or Obsidian returns to the screen, never when the
+	// list changes, and not while it is out of sight or a field or a drag is open. A list another view wrote first refuses it with no notice.
 	bringBack(): void {
 		const { file } = this;
 		if (!file || !this.rootEl.isShown() || this.field || this.dragging || this.message() !== null) return;
 		void this.enqueue(async () => {
 			if (this.file !== file || this.field || this.dragging || this.message() !== null) return;
 			const text = this.editing.text;
-			const now = new Date();
-			const planned = planComeBacks(text, contentStartLine(text), now, (line) => !isArchived(line, now, this.archiveDelay.ms));
+			const planned = planComeBacks(text, contentStartLine(text), new Date());
 			if (planned && (await this.write(planned.next, text, NO_LINES_MOVED, null)) === 'written' && !this.field) this.draw();
 		});
 	}

@@ -28,5 +28,5 @@ export function bringBackInList(view: PrinceListView): void {
 
 function comeBacks(view: PrinceListView, text: string): { next: string } | null {
 	if (!isListText(text) || failedOn.get(view) === text) return null;
-	return planComeBacks(text, contentStartLine(text), new Date(), () => true);
+	return planComeBacks(text, contentStartLine(text), new Date());
 }
