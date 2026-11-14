@@ -1,4 +1,4 @@
-import { drawnBlocks } from './drawn-blocks';
+import { commentBlocks, drawnBlocks } from './drawn-blocks';
 import { joinItemLine, parseItemLine } from './item-line';
 import type { PlannedLineEdit } from './list-actions';
 import { joinLines, spliceLines, splitLines, type Line } from './lines';
@@ -54,7 +54,8 @@ export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[]
 	// As the notes editor reads them, at the left margin.
 	const notes = lines.slice(first, item.endLine).map((line) => ({ text: stripIndent(line.text, width), eol: line.eol }));
 	const kept = new Set<number>();
-	for (const { lines: block } of drawnBlocks(joinLines(notes))) {
+	const text = joinLines(notes);
+	for (const block of [...drawnBlocks(text).map((b) => b.lines), ...commentBlocks(text)]) {
 		for (let i = block.start; i < block.end; i++) kept.add(i);
 	}
 	for (const [from, to] of maskBlocks(notes, 0).runs) {

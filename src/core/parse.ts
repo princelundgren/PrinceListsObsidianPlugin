@@ -58,8 +58,8 @@ const HTML_BLOCK_ENDS: [start: RegExp, end: RegExp][] = [
 ];
 
 /**
- * `runs` are the `%%` and `$$` regions and the HTML comments, each from its opening line to its
- * closing one, or to the last line when unclosed, both inclusive.
+ * `runs` are the `%%` and `$$` regions, each from its opening line to its closing one, or to the
+ * last line when unclosed, both inclusive.
  */
 export function maskBlocks(
 	lines: readonly Line[],
@@ -168,15 +168,10 @@ function maskRegions(content: readonly Line[], trackedFenceStarts: ReadonlySet<n
 	const masked = content.slice();
 	const runs: [number, number][] = [];
 	let closesOpenBlock: ((text: string) => boolean) | null = null;
-	let commentFrom: number | null = null;
 	for (let i = 0; i < masked.length; i++) {
 		const { text } = masked[i] as Line;
 		if (closesOpenBlock) {
-			if (closesOpenBlock(text)) {
-				closesOpenBlock = null;
-				if (commentFrom !== null) runs.push([commentFrom, i]);
-				commentFrom = null;
-			}
+			if (closesOpenBlock(text)) closesOpenBlock = null;
 			continue;
 		}
 		const fence = COLUMN_ZERO_FENCE.exec(text)?.[0] ?? (trackedFenceStarts.has(i) ? fenceRun(text) : undefined);
@@ -186,13 +181,7 @@ function maskRegions(content: readonly Line[], trackedFenceStarts: ReadonlySet<n
 		}
 		const htmlEnd = HTML_BLOCK_ENDS.find(([start]) => start.test(text))?.[1];
 		if (htmlEnd) {
-			const isComment = text.startsWith('<!--');
-			if (!htmlEnd.test(text)) {
-				closesOpenBlock = (line) => htmlEnd.test(line);
-				if (isComment) commentFrom = i;
-			} else if (isComment) {
-				runs.push([i, i]);
-			}
+			if (!htmlEnd.test(text)) closesOpenBlock = (line) => htmlEnd.test(line);
 			continue;
 		}
 		const delimiter = OBSIDIAN_DELIMITERS.find((d) => text.startsWith(d) && !text.includes(d, d.length));
@@ -210,8 +199,6 @@ function maskRegions(content: readonly Line[], trackedFenceStarts: ReadonlySet<n
 		runs.push([i, Math.min(close, masked.length - 1)]);
 		i = close;
 	}
-	// A comment still open runs to the end.
-	if (commentFrom !== null) runs.push([commentFrom, masked.length - 1]);
 	return { lines: masked, runs };
 }
 

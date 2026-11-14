@@ -86,7 +86,16 @@ test('untickChecklist leaves every step after an unclosed %% or HTML comment', (
 	}
 });
 
-test('maskBlocks gives each masked region or HTML comment as a run, an unclosed one to the last line', () => {
-	const { lines } = list('a\n%%\nb\n%%\n$$x$$ y\n<!-- c -->\n<!--\nd\n-->\n$$\ne\n');
-	expect(maskBlocks(lines, 0).runs).toEqual([[1, 3], [5, 5], [6, 8], [9, 10]]);
+test('untickChecklist leaves a step in an HTML comment under a nested step or opened indented', () => {
+	for (const notes of ['\t- [x] one\n\t\t<!--\n\t\t- [x] hidden\n\t\t-->\n', '\tnote\n\t <!--\n\t- [x] hidden\n\t-->\n']) {
+		const { lines, item } = list(`- [ ] a\n${notes}`);
+		const next = joinLines(untickChecklist(lines, item(0)));
+		expect(next).toContain('[x] hidden');
+		expect(next).toBe(`- [ ] a\n${notes.replace('[x] one', '[ ] one')}`);
+	}
+});
+
+test('maskBlocks gives each %% or $$ region as a run, an unclosed one to the last line', () => {
+	const { lines } = list('a\n%%\nb\n%%\n$$x$$ y\n$$\ne\n');
+	expect(maskBlocks(lines, 0).runs).toEqual([[1, 3], [5, 6]]);
 });

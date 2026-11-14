@@ -35,6 +35,24 @@ export function drawnBlocks(markdown: string): DrawnBlock[] {
 	return [...blocksIn(new Parser().parse(maskBlocks(lines, 0).text), lines.map((line) => line.text))];
 }
 
+/**
+ * The HTML comments of `markdown`, the notes, at any depth: CommonMark's HTML blocks that open with
+ * `<!--`, which `drawnBlocks` leaves out because the renderer draws them as nothing.
+ */
+export function commentBlocks(markdown: string): LineRange[] {
+	const lines = splitLines(markdown);
+	const texts = lines.map((line) => line.text);
+	const found: LineRange[] = [];
+	const walker = new Parser().parse(maskBlocks(lines, 0).text).walker();
+	for (let step = walker.next(); step; step = walker.next()) {
+		const { node, entering } = step;
+		if (!entering || node.type !== 'html_block') continue;
+		const [[startLine], [endLine]] = node.sourcepos;
+		if (HTML_COMMENT.test(texts[startLine - 1] ?? '')) found.push({ start: startLine - 1, end: endOfBlock(texts, startLine - 1, endLine) });
+	}
+	return found;
+}
+
 function* blocksIn(parent: Node, texts: readonly string[]): Generator<DrawnBlock> {
 	for (let node = parent.firstChild; node; node = node.next) {
 		if (node.type === 'list' || node.type === 'item') {
