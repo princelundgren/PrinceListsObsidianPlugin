@@ -174,8 +174,9 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	}
 
 	// Writes every due repeating item in the lists it read back open, hidden ones included (spec, "Coming
-	// back"): only when the Schedule opens or gets focus or Obsidian returns to the screen, never when a list
-	// changes, and never while it is out of sight. A list that changed since it was read refuses it with no notice.
+	// back"): only when the Schedule opens or gets focus or Obsidian returns to the screen, never when a
+	// list changes, and never while it is out of sight. A list that changed since it was read refuses it
+	// with no notice.
 	bringBack(): void {
 		if (!this.containerEl.isShown()) return;
 		void this.enqueue(async () => {

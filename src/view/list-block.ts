@@ -123,7 +123,8 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 
 	// Writes every due repeating item in the block's list back open, hidden ones included (spec, "Coming
 	// back"): only when its note opens or gets focus or Obsidian returns to the screen, never when the
-	// list changes, and not while it is out of sight or a field or a drag is open. A list another view wrote first refuses it with no notice.
+	// list changes, and not while it is out of sight or a field or a drag is open. A list another view
+	// wrote first refuses it with no notice.
 	bringBack(): void {
 		const { file } = this;
 		if (!file || !this.rootEl.isShown() || this.field || this.dragging || this.message() !== null) return;
