@@ -502,11 +502,11 @@ this met on 2026-10-30 **(owner)**.
     inside a margin, runs from the baseline to the capitals' top. Each keeps the room its full size
     takes, so the text doesn't move and a tap anywhere the full-size box was still ticks. An open
     card's tag button, star, day, a repeating item's repeat button and ⋯ are buttons the ⋯'s
-    height, centered on one line; on
-    desktop its tag, its star, its repeat button, and its calendar while it has no day, are drawn
-    as small as the row's star. On a phone, where each is a finger-sized box, they are as large as the ⋯, so no
-    icon leaves a wide margin in its box, and a day's text gets the room on each side
-    that an icon has, so the tools read as one evenly spaced group **(owner, 2026-11-07, #339)**.
+    height, centered on one line; on desktop its tag, its star, its repeat button, and its calendar
+    while it has no day, are drawn as small as the row's star. On a phone, where each is a
+    finger-sized box, they are as large as the ⋯, so no icon leaves a wide margin in its box, and a
+    day's text gets the room on each side that an icon has, so the tools read as one evenly spaced
+    group **(owner, 2026-11-07, #339)**.
     Where the app's web view lacks CSS's `cap` unit (before Chrome 118 and Safari 17.2) they keep
     their full size.
   - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
