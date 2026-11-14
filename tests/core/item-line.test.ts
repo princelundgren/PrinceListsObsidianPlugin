@@ -88,6 +88,21 @@ describe('tickLine', () => {
 	});
 });
 
+describe('a tick and an untick of an item with a leftover ✅', () => {
+	test.each([
+		['- [ ] ✅ 2026-10-01 📅 2026-10-30', '- [ ] 📅 2026-10-30'],
+		['- [ ] ✅ 2026-10-01 #t', '- [ ] #t'],
+		['- [ ] a ✅ 2026-10-01 📅 2026-10-30', '- [ ] a 📅 2026-10-30'],
+	])('%s', (line, expected) => {
+		expect(untickLine(tickLine(line, now))).toBe(expected);
+	});
+
+	test('leaves a ✅ glued inside a tag alone', () => {
+		expect(tickLine('- [ ] a #x✅2026-10-01y', now)).toBe(`- [x] a ${STAMP} #x✅2026-10-01y`);
+		expect(untickLine('- [x] a #x✅2026-10-01y')).toBe('- [ ] a #x✅2026-10-01y');
+	});
+});
+
 describe('untickLine', () => {
 	test.each([
 		[`- [x] a ${STAMP} ✅ 2026-10-20 📅 2026-10-30`, '- [ ] a 📅 2026-10-30'],

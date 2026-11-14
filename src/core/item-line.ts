@@ -53,7 +53,8 @@ const MARK_TIME_PATTERN = new RegExp(
 	`^(?:✔${VS16} +(\\d{4})-(\\d{2})-(\\d{2})(?: (\\d{2}):(\\d{2}))?|✅${VS16} *(\\d{4})-(\\d{2})-(\\d{2}))$`,
 );
 export const DONE_DATE_PATTERN = new RegExp(`✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
-const DONE_DATE_FIELD = new RegExp(DONE_DATE_PATTERN, 'g');
+// Only a ✅ that stands as a field, not one glued inside a tag.
+const DONE_DATE_FIELD = new RegExp(`(?<!\\S)${DONE_DATE_PATTERN.source}`, 'g');
 const REPEAT_FIELD = new RegExp(`🔁${VS16} *[a-zA-Z0-9, !]+`);
 const END_MARK = '🔚';
 
@@ -170,7 +171,7 @@ export function tickLine(text: string, now: Date): string {
 	const marks = ` ${formatStamp(now)}`;
 	const tail = withoutDoneDates(parts.tail);
 	// With no title, the tail gets the space untick takes back even when it has one of its own.
-	const gap = parts.title + parts.end === '' && /^\s/.test(tail) ? ' ' : '';
+	const gap = parts.title + parts.end === '' && /^\s/.test(parts.tail) ? ' ' : '';
 	return joinItemLine({ ...parts, status: 'x', marks, tail: gap + spaced(parts.title + parts.end + marks, tail) });
 }
 
