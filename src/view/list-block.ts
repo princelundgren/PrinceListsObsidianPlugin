@@ -19,6 +19,7 @@ import { noticeLostField, type BlockField } from './block-fields';
 import type { RowDragHost } from './drag-host';
 import { LIST_BLOCK_CLASS } from './own-rows';
 import { buildHeading, buildRow, ITEMS_CLASS, type RowHost } from './render-list';
+import { onWindowReturn } from './window-return';
 import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE } from './write';
 
 // A list drawn inside another note by a `princelists` code block (spec, "A list inside another note").
@@ -66,6 +67,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
 			if (leaf?.view.containerEl.contains(this.rootEl)) this.bringBack();
 		}));
+		onWindowReturn(this, this.rootEl, () => this.bringBack());
 		this.registerEvent(vault.on('create', () => void this.resolve()));
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
@@ -117,8 +119,8 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 
 	// Writes every due repeating item in the block's list back open, hidden ones included (spec, "Coming
-	// back"): only when its note opens or gets focus, never when the list changes, and not while it is
-	// out of sight or a field or a drag is open. A list another view wrote first refuses it with no notice.
+	// back"): only when its note opens or gets focus or Obsidian returns to the screen, never when the
+	// list changes, and not while it is out of sight or a field or a drag is open. A list another view wrote first refuses it with no notice.
 	bringBack(): void {
 		const { file } = this;
 		if (!file || !this.rootEl.isShown() || this.field || this.dragging || this.message() !== null) return;

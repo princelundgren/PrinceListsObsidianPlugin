@@ -22,7 +22,8 @@ date.
   like any done item, so a daily item ticked today shows done today **(owner, 2026-11-14)**.
 - **On its next date it comes back on the same line:** open, with that date, its count down by one
   and its checklist fresh. PrinceLists writes this itself when the list opens, redraws or gets
-  focus, the one thing it writes on its own. No new line, no history of past ticks.
+  focus, or Obsidian's window comes back, the one thing it writes on its own. No new line, no
+  history of past ticks.
 - **An item nobody brought back on time comes back on its latest date in its rhythm,** so a daily
   one isn't days overdue.
 - **Set from the card or the row's menu,** with the next three dates shown while choosing.
@@ -177,6 +178,9 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   - **The day change is seen when the list redraws or gets focus (call),** as the Schedule sees it
     on focus: no timer, as everywhere in the plugin, so a list left untouched over midnight brings
     its items back when it's next used.
+  - **The window or the app coming back (owner, 2026-11-14):** when Obsidian's window gets focus,
+    or the app comes back to the screen, each list, Schedule and list inside another note that is
+    shown brings its items back, as when it gets focus itself. It's an event, not a timer.
   - **The Schedule and a list inside another note (owner, 2026-11-14):** when the user opens one
     or it gets focus, for every item in the lists it reads, hidden ones included, as a list does.
     The Schedule reads every list in the vault. Not when a list changes, as when Sync brings a
@@ -301,8 +305,9 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   history line never.
 - Coming back changes only the title line and the checklist lines, with no card open and with the
   card's notes editor open, keeping a change typed there.
-- It comes back when a list opens, redraws and gets focus, never while nothing shows the list, and
-  for hidden items: archived, under a collapsed heading, outside a tag filter.
+- It comes back when a list opens, redraws and gets focus, and when the window gets focus or the
+  app comes back to the screen, never while nothing shows the list, and for hidden items:
+  archived, under a collapsed heading, outside a tag filter.
 - Two views of one list bringing the same item back: one writes, the other writes nothing and
   shows nothing; the list's undo history is cleared.
 - The Schedule and a list inside another note bring items back when opened and on focus, archived

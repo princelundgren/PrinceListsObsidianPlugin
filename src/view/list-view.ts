@@ -43,6 +43,7 @@ import { focusListWhenActive } from './select';
 import { buildSelectionBar, syncSelectionBar } from './selection-bar';
 import { buildSelectionTagPopover, closeSelectionTagPopover, placeSelectionTagPopover } from './selection-tag-popover';
 import type { TagSuggest } from './tag-suggest';
+import { onWindowReturn } from './window-return';
 import { UNSAFE_EDIT_NOTICE } from './write';
 
 // canAcceptExtension stays at its default of false: true would open every note clicked from a
@@ -204,6 +205,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) bringBackInList(this);
 		}));
+		onWindowReturn(this, this.containerEl, () => bringBackInList(this));
 		registerFieldEvents(this);
 		focusListWhenActive(this);
 		registerFileRedraws(this);
