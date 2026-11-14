@@ -57,6 +57,10 @@ describe('repeatOf', () => {
 	test('reads a rule after 🔁 with U+FE0F', () => {
 		expect(repeatOf(`- [ ] a ⏳ 2026-11-13 🔁${VS16} Every Day`)?.rule).toEqual(every(1, 'day'));
 	});
+
+	test('keeps the text of a rule it cannot read, with no rule', () => {
+		expect(repeatOf('- [ ] a ⏳ 2026-11-13 🔁 every weekday')).toEqual({ ruleText: 'every weekday', rule: null, end: null, problem: 'rule' });
+	});
 });
 
 describe('anchorOf', () => {
@@ -68,6 +72,8 @@ describe('anchorOf', () => {
 		['- [ ] a 📆 2026-11-09', '2026-11-09'],
 		['- [ ] a ⏳ 2026-11-08 ⏳ 2026-11-05', '2026-11-05'],
 		['- [ ] a 📅 2026-11-20 📅 2026-11-09', '2026-11-09'],
+		[`- [ ] a ⏳ 2026-11-05 🗓${VS16} 2026-11-09`, '2026-11-09'],
+		[`- [ ] a ⏳ 2026-11-05 📅${VS16} 2026-11-09`, '2026-11-09'],
 		['- [ ] a ➕ 2026-11-01', null],
 	])('%s', (line, anchor) => {
 		expect(anchorOf(line)).toBe(anchor);
@@ -78,6 +84,7 @@ describe('hasDate', () => {
 	test.each([
 		['- [ ] a 📅 2026-11-20', true],
 		['- [ ] a ➕ 2026-11-01', false],
+		['- [ ] a ⏳ 2026-02-30', true],
 	])('%s', (line, expected) => {
 		expect(hasDate(line)).toBe(expected);
 	});
@@ -326,4 +333,11 @@ describe('comeBack', () => {
 		expect(comeBack('- [x] Water ✔ 2026-11-20 18:05 🔁 every day', at(14))).toBe('- [ ] Water 🔁 every day ⏳ 2026-11-14'));
 	test('a date that would pass 9999 on a later step never', () =>
 		expect(comeBack('- [x] Water ✔ 2026-11-14 18:05 🔁 every day 🛫 9999-12-30 📅 2026-11-14', at(18))).toBeNull());
+	test('a done item given a repeat, on its next date', () => {
+		const given = setRepeat('- [x] Water ✔ 2026-11-14 18:05', every(1, 'day'), null, '2026-11-14');
+		expect(comeBack(given, at(14, 23))).toBeNull();
+		expect(comeBack(given, at(15, 8))).toBe('- [ ] Water ⏳ 2026-11-15 🔁 every day');
+	});
+	test('a done item with no ✔ given a repeat never', () =>
+		expect(comeBack(setRepeat('- [x] Water', every(1, 'day'), null, '2026-11-14'), at(20))).toBeNull());
 });
