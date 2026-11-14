@@ -1,4 +1,4 @@
-import { daysFrom, isRealDay, utcOf } from './when';
+import { daysFrom, isRealDay, utcOf, utcTime } from './when';
 
 export type RepeatUnit = 'day' | 'week' | 'month' | 'year';
 
@@ -70,12 +70,12 @@ export function stepDay(day: string, rule: RepeatRule): string | null {
 	const monthIndex = parsed.getUTCMonth();
 	const date = parsed.getUTCDate();
 	const lastOfOwnMonth = lastDayOfMonth(year, monthIndex);
-	if (rule.onLast && date < lastOfOwnMonth) return formatUtc(Date.UTC(year, monthIndex, lastOfOwnMonth));
+	if (rule.onLast && date < lastOfOwnMonth) return formatUtc(utcTime(year, monthIndex, lastOfOwnMonth));
 	const target = year * 12 + monthIndex + months;
 	const targetYear = Math.floor(target / 12);
 	const targetMonth = target % 12;
 	const lastOfTarget = lastDayOfMonth(targetYear, targetMonth);
-	return formatUtc(Date.UTC(targetYear, targetMonth, rule.onLast ? lastOfTarget : Math.min(date, lastOfTarget)));
+	return formatUtc(utcTime(targetYear, targetMonth, rule.onLast ? lastOfTarget : Math.min(date, lastOfTarget)));
 }
 
 /**
@@ -113,7 +113,7 @@ export function upcomingDays(
 }
 
 function lastDayOfMonth(year: number, monthIndex: number): number {
-	return new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+	return new Date(utcTime(year, monthIndex + 1, 0)).getUTCDate();
 }
 
 /** A UTC time as `YYYY-MM-DD`, or null when it isn't a date with a four-digit year. */

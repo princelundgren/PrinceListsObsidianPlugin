@@ -1,5 +1,8 @@
 import { expect, test } from 'vitest';
-import { planComeBacks } from '../../src/core/come-back';
+import { comeBackEdit, planComeBacks } from '../../src/core/come-back';
+import { ListEditing } from '../../src/core/editing';
+import { NO_LINES_MOVED } from '../../src/core/follow';
+import { splitLines } from '../../src/core/lines';
 
 const now = new Date(2026, 10, 15, 8, 0);
 const HEAD = '---\nprincelists: true\n---\n';
@@ -28,4 +31,21 @@ test('brings back a hidden item: archived since its tick, under a heading', () =
 		count: 1,
 		next: HEAD + OPEN + '## Weekly\n- [ ] Review 🔁 every week ⏳ 2026-11-14\n',
 	});
+});
+
+test('a card open on the item: a tag typed in its title stays typed once', () => {
+	const state = new ListEditing(() => 3);
+	state.text = TEXT;
+	state.open(3);
+	state.focusTitle();
+	state.typeTitle('Water #gar');
+	const planned = planComeBacks(state.text, 3, now);
+	if (!planned) throw new Error('nothing came back');
+	state.applyOwn(planned.next, comeBackEdit(state.selected, now));
+	state.typeTitle('Water #garden');
+	expect(splitLines(state.text)[3]?.text).toBe('- [ ] Water #garden 🔁 every day ⏳ 2026-11-15');
+});
+
+test('no card open: the edit moves no line', () => {
+	expect(comeBackEdit(null, now)).toBe(NO_LINES_MOVED);
 });

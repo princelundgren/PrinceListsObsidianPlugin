@@ -1,4 +1,4 @@
-import { planComeBacks } from '../core/come-back';
+import { comeBackEdit, planComeBacks } from '../core/come-back';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import type { PrinceListView } from './list-view';
 import { enqueueAt, writeAction } from './write';
@@ -12,12 +12,13 @@ const failedOn = new WeakMap<PrinceListView, string>();
 // view out of sight, such as a background tab. Another view of the list that wrote first refuses it
 // with no notice: the next redraw tries again.
 export function bringBackInList(view: PrinceListView): void {
-	if (!view.containerEl.isShown() || !comeBacks(view, view.text)) return;
+	if (!view.containerEl.isShown() || !comeBacks(view, view.text, new Date())) return;
 	enqueueAt(view, null, async () => {
 		const text = view.text;
-		const planned = comeBacks(view, text);
+		const now = new Date();
+		const planned = comeBacks(view, text, now);
 		if (!planned) return;
-		const result = await writeAction(view, planned.next, text, null);
+		const result = await writeAction(view, planned.next, text, null, comeBackEdit(view.editing.selected, now));
 		if (result === 'failed') failedOn.set(view, text);
 		if (result !== 'written') return;
 		// Nobody typed it, and a step recorded before it may no longer apply.
@@ -26,7 +27,7 @@ export function bringBackInList(view: PrinceListView): void {
 	});
 }
 
-function comeBacks(view: PrinceListView, text: string): { next: string } | null {
+function comeBacks(view: PrinceListView, text: string, now: Date): { next: string } | null {
 	if (!isListText(text) || failedOn.get(view) === text) return null;
-	return planComeBacks(text, contentStartLine(text), new Date());
+	return planComeBacks(text, contentStartLine(text), now);
 }

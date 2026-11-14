@@ -1,4 +1,4 @@
-import { drawnBlocks } from './drawn-blocks';
+import { commentBlocks, drawnBlocks } from './drawn-blocks';
 import { joinItemLine, parseItemLine } from './item-line';
 import type { PlannedLineEdit } from './list-actions';
 import { joinLines, spliceLines, splitLines, type Line } from './lines';
@@ -46,7 +46,7 @@ function tickLine(lines: readonly Line[], at: number, lineText: string): Planned
 /**
  * The lines with every checklist line in the item's notes unticked, so each repeat starts its
  * checklist fresh. A line in a block the notes editor draws whole, such as a code fence or a
- * callout, or one that `%%` or `$$` masks, stays as it is.
+ * callout, or one inside a `%%` or `$$` region or an HTML comment, stays as it is.
  */
 export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[] {
 	const first = item.titleLine + 1;
@@ -54,10 +54,11 @@ export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[]
 	// As the notes editor reads them, at the left margin.
 	const notes = lines.slice(first, item.endLine).map((line) => ({ text: stripIndent(line.text, width), eol: line.eol }));
 	const kept = new Set<number>();
-	for (const { lines: block } of drawnBlocks(joinLines(notes))) {
+	const text = joinLines(notes);
+	for (const block of [...drawnBlocks(text).map((b) => b.lines), ...commentBlocks(text)]) {
 		for (let i = block.start; i < block.end; i++) kept.add(i);
 	}
-	for (const [from, to] of maskedRuns(notes)) {
+	for (const [from, to] of maskBlocks(notes, 0).runs) {
 		for (let i = from; i <= to; i++) kept.add(i);
 	}
 	const result = lines.slice();
@@ -67,14 +68,4 @@ export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[]
 		if (parts && parts.status !== ' ') result[first + i] = { text: joinItemLine({ ...parts, status: ' ' }), eol: line.eol };
 	});
 	return result;
-}
-
-// The runs of lines `maskBlocks` masks, each from its opening line to its closing one, which an
-// unclosed run lacks. It rewrites only a run's two delimiter lines.
-function maskedRuns(notes: readonly Line[]): [from: number, to: number][] {
-	const masked = splitLines(maskBlocks(notes, 0).text);
-	const delimiters = notes.flatMap((line, i) => (masked[i]?.text === line.text ? [] : [i]));
-	const runs: [number, number][] = [];
-	for (let i = 0; i < delimiters.length; i += 2) runs.push([delimiters[i] as number, delimiters[i + 1] ?? notes.length - 1]);
-	return runs;
 }

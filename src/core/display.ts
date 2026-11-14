@@ -170,7 +170,9 @@ export function withoutRange(sections: SectionRows[], range: { start: number; en
 
 export function itemRow(text: string, titleLine: number, now: Date, archiveDelayMs: number): ItemRow {
 	const row = timelessItemRow(text, titleLine);
-	return { ...row, archived: row.done && isArchived(text, now, archiveDelayMs), repeats: row.done ? backDay(text, now) !== null : row.repeats };
+	// A done item keeps its repeat icon only while it will come back.
+	const repeats = row.done ? backDay(text, now) !== null : row.repeats;
+	return { ...row, archived: row.done && isArchived(text, now, archiveDelayMs), repeats };
 }
 
 /** The fields of an item's row that don't depend on the time: all but `archived`. */

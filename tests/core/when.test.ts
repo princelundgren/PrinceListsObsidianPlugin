@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { itemRow } from '../../src/core/display';
 import { parseItemLine } from '../../src/core/item-line';
-import { backDayMessage, dayAfter, dayLabel, dayLabelKind, dayOf, daysFrom, setWhen, whenOf } from '../../src/core/when';
+import { backDayMessage, dayAfter, dayLabel, dayLabelKind, dayOf, daysFrom, isRealDay, setWhen, whenOf } from '../../src/core/when';
 
 describe('whenOf', () => {
 	test.each(['- [ ] a ⏳ 2026-10-30', '- [ ] a ⌛ 2026-10-30', '- [ ] a ⏳️ 2026-10-30'])('reads %s', (line) => {
@@ -89,4 +89,18 @@ describe('days', () => {
 
 test('backDayMessage names the weekday, day and month an item comes back on in the language', () => {
 	expect(backDayMessage('2026-11-17', 'en-GB')).toBe('Back Tue 17 Nov.');
+});
+
+describe('years 0 to 99', () => {
+	test('isRealDay reads them as those years', () => {
+		expect(isRealDay('0099-01-31')).toBe(true);
+		expect(isRealDay('0001-01-01')).toBe(true);
+		expect(isRealDay('0000-02-29')).toBe(true);
+		expect(isRealDay('0099-02-29')).toBe(false);
+	});
+
+	test('daysFrom counts days across them', () => {
+		expect(daysFrom('0099-12-31', '0100-01-01')).toBe(1);
+		expect(daysFrom('0001-01-01', '0001-01-31')).toBe(30);
+	});
 });
