@@ -46,7 +46,7 @@ function tickLine(lines: readonly Line[], at: number, lineText: string): Planned
 /**
  * The lines with every checklist line in the item's notes unticked, so each repeat starts its
  * checklist fresh. A line in a block the notes editor draws whole, such as a code fence or a
- * callout, or one that `%%` or `$$` masks, stays as it is.
+ * callout, or one inside a `%%` or `$$` region or an HTML comment, stays as it is.
  */
 export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[] {
 	const first = item.titleLine + 1;
