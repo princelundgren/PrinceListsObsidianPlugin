@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import { checklistStatusAt, planNotesLineTick, toggleChecklistLine, untickChecklist } from '../../src/core/checklist';
 import { joinLines } from '../../src/core/lines';
+import { maskBlocks } from '../../src/core/parse';
 import { list } from './edit-helpers';
 
 const TRIP = '- [ ] trip\n\n\tPack:\n\t- [ ] passport\n\t- [x] charger\n\t\t- [ ] cable\n\t1. [?] tickets\n';
@@ -70,4 +71,37 @@ test('untickChecklist leaves a line in a code fence, a callout, a $$ block or a 
 	const text = (step: string) => `- [ ] a\n${[...kept, step].map((line) => `\t${line}\n`).join('')}`;
 	const { lines, item } = list(text('- [x] real'));
 	expect(joinLines(untickChecklist(lines, item(0)))).toBe(text('- [ ] real'));
+});
+
+test('untickChecklist leaves a step inside an HTML comment, one line or several', () => {
+	const text = (step: string) => `- [ ] a\n\t<!--\n\t- [x] hidden\n\t-->\n\t<!-- - [x] inline -->\n\t${step}\n`;
+	const { lines, item } = list(text('- [x] real'));
+	expect(joinLines(untickChecklist(lines, item(0)))).toBe(text('- [ ] real'));
+});
+
+test('untickChecklist leaves every step after an unclosed %% or HTML comment', () => {
+	for (const open of ['%%', '<!--']) {
+		const { lines, item } = list(`- [ ] a\n\t- [x] one\n\t${open}\n\t- [x] two\n`);
+		expect(joinLines(untickChecklist(lines, item(0)))).toBe(`- [ ] a\n\t- [ ] one\n\t${open}\n\t- [x] two\n`);
+	}
+});
+
+test('untickChecklist leaves a step in an HTML comment under a nested step or opened indented', () => {
+	for (const notes of ['\t- [x] one\n\t\t<!--\n\t\t- [x] hidden\n\t\t-->\n', '\tnote\n\t <!--\n\t- [x] hidden\n\t-->\n']) {
+		const { lines, item } = list(`- [ ] a\n${notes}`);
+		const next = joinLines(untickChecklist(lines, item(0)));
+		expect(next).toContain('[x] hidden');
+		expect(next).toBe(`- [ ] a\n${notes.replace('[x] one', '[ ] one')}`);
+	}
+});
+
+test('untickChecklist leaves a step in an HTML comment that starts on a nested item line', () => {
+	const notes = '\t- <!--\n\t  - [x] hidden\n\t  -->\n';
+	const { lines, item } = list(`- [ ] a\n${notes}`);
+	expect(joinLines(untickChecklist(lines, item(0)))).toBe(`- [ ] a\n${notes}`);
+});
+
+test('maskBlocks gives each %% or $$ region as a run, an unclosed one to the last line', () => {
+	const { lines } = list('a\n%%\nb\n%%\n$$x$$ y\n$$\ne\n');
+	expect(maskBlocks(lines, 0).runs).toEqual([[1, 3], [5, 6]]);
 });

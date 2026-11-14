@@ -164,8 +164,9 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
 - **One edit:** `[ ]`, the `✔` marks and any `✅` removed as unticking removes them, the anchor on
   the date it came due and the other dates moved with it, the count down by one, and every
   checklist line in the item's notes unticked, so each repeat starts its checklist fresh
-  **(owner, 2026-11-13)**. Nothing else in the line or the notes changes (the design, "Editing
-  never rebuilds the file").
+  **(owner, 2026-11-13)**. A step inside a code fence, a callout or a `%%` or `$$` region stays as
+  it is. So does one inside an HTML comment (`<!-- ... -->`) **(owner, 2026-11-14)**. Nothing else
+  in the line or the notes changes (the design, "Editing never rebuilds the file").
 - **The date it came due:** the latest date in its rhythm that is today or earlier, so a daily item
   comes back today, not days overdue, and a weekly one on its latest weekday. `when done`, and a
   `🔁` line with no date, have no rhythm: they come back on their next date however late, the line
