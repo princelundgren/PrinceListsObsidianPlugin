@@ -40,6 +40,18 @@ describe('datedItems and unarchived', () => {
 	});
 });
 
+describe('unarchived, repeats', () => {
+	test.each([
+		['a ticked daily line', '- [x] Water ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14', true],
+		['the last time, ticked', '- [x] Water 🔚 1x ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14', false],
+		['a Tasks history line', '- [x] Water ⏳ 2026-11-14 🔁 every day ✅ 2026-11-14', false],
+		['an open repeating line', '- [ ] Water ⏳ 2026-11-14 🔁 every day', true],
+	])('reads %s as itemRow does', (_, line, repeats) => {
+		const text = ['---', 'princelists: true', '---', line, ''].join('\n');
+		expect(unarchived(datedItems(text, 3, list), new Date(2026, 10, 14, 20, 0), DAY)[0]?.repeats).toBe(repeats);
+	});
+});
+
 describe('datedItems, repeats', () => {
 	test.each([
 		['an open repeating line', '- [ ] water ⏳ 2026-11-13 🔁 every day', true],

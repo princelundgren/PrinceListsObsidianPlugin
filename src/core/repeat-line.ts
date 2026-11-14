@@ -1,5 +1,5 @@
 import { doneAt } from './archive';
-import { endOf, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, tickLine, untickLine, TASKS_SIGNIFIERS } from './item-line';
+import { endOf, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, untickLine, TASKS_SIGNIFIERS } from './item-line';
 import { addDays, nextDay, readEnd, readRule, stepDay, writeEnd, writeRule, type RepeatEnd, type RepeatRule } from './repeat';
 import { dayOf, daysFrom, isRealDay, setWhen } from './when';
 
@@ -19,8 +19,6 @@ export interface RepeatDraft {
 	rule: RepeatRule;
 	end: RepeatEnd | null;
 }
-
-export type RepeatTick = { kind: 'moved'; line: string; next: string } | { kind: 'ended'; line: string };
 
 const MESSAGES: Record<RepeatProblem, string> = {
 	rule: "This item repeats in a way PrinceLists can't follow, so it isn't ticked.",
@@ -78,7 +76,7 @@ export function repeatOf(line: string): LineRepeat | null {
 	return { ruleText, rule, end, problem: problemOf(parts.title, parts.end, rule, end, fields) };
 }
 
-/** The day a tick moves from: the earliest due date, else the earliest scheduled, else the earliest start; null when none is a real day. */
+/** The day a repeat counts from: the earliest due date, else the earliest scheduled, else the earliest start; null when none is a real day. */
 export function anchorOf(line: string): string | null {
 	const parts = parseItemLine(line);
 	if (!parts) return null;
@@ -94,32 +92,6 @@ export function anchorOf(line: string): string | null {
 export function hasDate(line: string): boolean {
 	const parts = parseItemLine(line);
 	return parts !== null && dateFieldsIn(splitTail(parts.tail).fields).length > 0;
-}
-
-/**
- * The line a tick of a repeating, open item gives: its dates moved to the next one and a count
- * down by one, or, when that was the last, an ordinary tick. Throws RepeatingItemError when the
- * line can't repeat or its next date is past 9999-12-31.
- */
-export function tickRepeating(line: string, now: Date): RepeatTick {
-	const parts = parseItemLine(line);
-	const repeat = repeatOf(line);
-	if (!parts || !repeat) throw new Error(`Not a repeating item: ${line}`);
-	const { rule, end } = repeat;
-	if (repeat.problem !== null || rule === null) throw new RepeatingItemError(repeat.problem ?? 'rule');
-
-	const today = dayOf(now);
-	const anchor = anchorOf(line);
-	const next = anchor === null ? stepDay(today, rule) : nextDay(anchor, rule, today);
-	if (next === null) throw new RepeatingItemError('date');
-	if (isLastTime(end, next)) return { kind: 'ended', line: tickLine(line, now) };
-
-	const counted = { ...parts, end: countDown(parts.end, end) };
-	if (anchor === null) return { kind: 'moved', line: setWhen(joinItemLine(counted), next), next };
-	const { fields, end: afterFields } = splitTail(parts.tail);
-	const moved = moveDates(fields, daysFrom(anchor, next));
-	if (moved === null) throw new RepeatingItemError('date');
-	return { kind: 'moved', line: joinItemLine({ ...counted, tail: moved + afterFields }), next };
 }
 
 /**

@@ -96,8 +96,8 @@ export function planGroupLineEdit(
 }
 
 /**
- * Ticks (`done`) or unticks the items on `rows` in one write; a repeating item moves to its next
- * date, as `toggleItem` does. An item that can't repeat is left as it is and counted in `skipped`;
+ * Ticks (`done`) or unticks the items on `rows` in one write; a repeating item ticks like any other,
+ * as `toggleItem` does. An item that can't repeat is left as it is and counted in `skipped`;
  * throws the first one's RepeatingItemError when every item the tick would change was skipped. No
  * line count changes, so the rows keep their lines. Returns null when nothing changes.
  */

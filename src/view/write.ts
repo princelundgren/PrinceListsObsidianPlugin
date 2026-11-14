@@ -7,7 +7,6 @@ import type { PrinceListView } from './list-view';
 
 export const UNSAFE_EDIT_NOTICE = "This list's layout can't take that change. Make it in Markdown instead.";
 export const CHANGED_ELSEWHERE_NOTICE = 'This list changed elsewhere. Try again.';
-export const LATE_UNDO_NOTICE = "This list changed since the tick, so it can't be undone.";
 export const SAVE_FAILED_NOTICE = "Couldn't save the change to this list.";
 export const LOST_TYPING_NOTICE = 'This list changed elsewhere, and what you typed may not be in it.';
 
