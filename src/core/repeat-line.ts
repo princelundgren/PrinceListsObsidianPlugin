@@ -169,7 +169,9 @@ export function draftOf(line: string): RepeatDraft | 'read-only' {
 /**
  * The draft a popover reopens with after its Save was refused: the user's own while the line still
  * reads as it did when the popover opened (a refusal they didn't cause shouldn't lose what they
- * set), else one read from the line as it reads now.
+ * set), else one read from the line as it reads now. That happens when the view's own edit changed
+ * the line while the popover was open, as a comeback does for a ticked item whose date came due.
+ * An outside change to the line closes the popover instead.
  */
 export function draftAfterRefusal(draft: RepeatDraft | 'read-only', openedText: string, lineText: string): RepeatDraft | 'read-only' {
 	return lineText === openedText ? draft : draftOf(lineText);
