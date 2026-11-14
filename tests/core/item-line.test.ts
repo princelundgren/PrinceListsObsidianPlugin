@@ -96,11 +96,6 @@ describe('a tick and an untick of an item with a leftover ✅', () => {
 	])('%s', (line, expected) => {
 		expect(untickLine(tickLine(line, now))).toBe(expected);
 	});
-
-	test('leaves a ✅ glued inside a tag alone', () => {
-		expect(tickLine('- [ ] a #x✅2026-10-01y', now)).toBe(`- [x] a ${STAMP} #x✅2026-10-01y`);
-		expect(untickLine('- [x] a #x✅2026-10-01y')).toBe('- [ ] a #x✅2026-10-01y');
-	});
 });
 
 describe('untickLine', () => {

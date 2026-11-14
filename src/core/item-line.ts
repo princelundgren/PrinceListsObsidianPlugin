@@ -53,8 +53,7 @@ const MARK_TIME_PATTERN = new RegExp(
 	`^(?:✔${VS16} +(\\d{4})-(\\d{2})-(\\d{2})(?: (\\d{2}):(\\d{2}))?|✅${VS16} *(\\d{4})-(\\d{2})-(\\d{2}))$`,
 );
 export const DONE_DATE_PATTERN = new RegExp(`✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
-// Only a ✅ that stands as a field, not one glued inside a tag.
-const DONE_DATE_FIELD = new RegExp(`(?<!\\S)${DONE_DATE_PATTERN.source}`, 'g');
+const DONE_DATE_FIELD = new RegExp(DONE_DATE_PATTERN, 'g');
 const REPEAT_FIELD = new RegExp(`🔁${VS16} *[a-zA-Z0-9, !]+`);
 const END_MARK = '🔚';
 
