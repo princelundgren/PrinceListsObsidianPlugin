@@ -261,32 +261,6 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
 - **Cmd+F's match on a date as written** sees the line's new date.
 - **A time with the date (#322)** would move with the date unchanged.
 
-## What the build changes in the other docs
-
-Main and the popover's pull request (#400) say a tick moves a repeating item. The same pull
-request as the code that makes each of these false changes it:
-
-- **AGENTS.md:** the summary says repeating items are done until their next date, then come back;
-  "No background writes" names coming back as its one exception; the plans' line points to the
-  plan that builds coming back.
-- **README.md:** the feature list says ticking a repeating item marks it done until its next date;
-  "Other Tasks fields, such as 📅, stay as they are" says a repeating item's 📅 and 🛫 move when it
-  comes back.
-- **Step one's design:**
-  - "Anti-goals" names coming back as the one exception to "Background writes".
-  - "Items", "Dates" and "Completion" say a repeating item is ticked like any other and its dates
-    move when it comes back.
-  - "Saving, outside changes, sync conflicts, undo" lists coming back with the one-off actions, and
-    its undo history is cleared when an item comes back too.
-- **Step two's design:** "Ticking works in place" in the Schedule ticks a repeating item like any
-  other; the Schedule's "It updates" and "A list inside another note" say when they bring items
-  back.
-- **Selecting several rows:** a repeating item is ticked like any other.
-- **The other designs' "nothing is written in the background"** (step two, notes in one editor,
-  selecting several rows, filtering by tag) stay as written: each defers to step one's rules,
-  which now name the exception.
-- **The plan of 2026-11-13** stays as the record of what was built; a new plan builds coming back.
-
 ## Accepted costs
 
 - **Ticked from Tasks' own views,** Tasks adds a new line its own way and ignores the end, which it
