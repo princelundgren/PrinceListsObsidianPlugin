@@ -2,7 +2,7 @@ import { joinItemLine, parseItemLine, setTitle, type ItemLineParts } from './ite
 
 const STAR = ' ⭐';
 // A star counts only after a space, so `5⭐` is a title, not a starred `5`.
-const TRAILING_STAR = / ⭐️?$/;
+const TRAILING_STAR = / ⭐\uFE0F?$/;
 const TAG_FIRST = /^\s*#/;
 
 export function splitStar(title: string): { plain: string; star: string } {

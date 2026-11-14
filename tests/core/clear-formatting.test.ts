@@ -139,6 +139,6 @@ describe('formatSelection: clear formatting', () => {
 	});
 
 	test('keeps an emoji tag whole', () => {
-		expect(clear('‸*a* #❄️-_x_‸')).toBe('‸a #❄️-_x_‸');
+		expect(clear('‸*a* #❄\uFE0F-_x_‸')).toBe('‸a #❄\uFE0F-_x_‸');
 	});
 });

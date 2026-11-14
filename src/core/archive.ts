@@ -1,4 +1,4 @@
-import { DONE_DATE_PATTERN, MARK_PATTERN, isDoneStatus, markTime, parseItemLine } from './item-line';
+import { DONE_DATE_PATTERN, MARK_PATTERN, isDoneStatus, markTime, parseItemLine, type ItemLineParts } from './item-line';
 
 const HOUR_MS = 3_600_000;
 
@@ -35,9 +35,8 @@ export function doneAt(text: string, now: Date): DoneAt | null {
 }
 
 /** As `doneAt`, but from the line's `✔` marks only, so a `✅` left from an earlier completion isn't the tick. */
-export function tickedAt(text: string, now: Date): DoneAt | null {
-	const parts = parseItemLine(text);
-	if (!parts || !isDoneStatus(parts.status)) return null;
+export function tickedAt(parts: ItemLineParts, now: Date): DoneAt | null {
+	if (!isDoneStatus(parts.status)) return null;
 	return earliestCounting(parts.marks.matchAll(EVERY_MARK), now);
 }
 

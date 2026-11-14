@@ -20,7 +20,7 @@ import {
 import type { RepeatRule } from '../../src/core/repeat';
 
 const now = new Date(2026, 10, 13, 9, 0);
-const VS16 = '️';
+const VS16 = '\uFE0F';
 const every = (n: number, unit: RepeatRule['unit']): RepeatRule => ({ every: n, unit, onLast: false, whenDone: false });
 
 describe('repeatOf', () => {

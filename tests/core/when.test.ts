@@ -4,7 +4,7 @@ import { parseItemLine } from '../../src/core/item-line';
 import { backDayMessage, dayAfter, dayLabel, dayLabelKind, dayOf, daysFrom, isRealDay, setWhen, whenOf } from '../../src/core/when';
 
 describe('whenOf', () => {
-	test.each(['- [ ] a ⏳ 2026-10-30', '- [ ] a ⌛ 2026-10-30', '- [ ] a ⏳️ 2026-10-30'])('reads %s', (line) => {
+	test.each(['- [ ] a ⏳ 2026-10-30', '- [ ] a ⌛ 2026-10-30', '- [ ] a ⏳\uFE0F 2026-10-30'])('reads %s', (line) => {
 		expect(whenOf(line)).toBe('2026-10-30');
 	});
 	// Tasks needs no space before a field's emoji.
