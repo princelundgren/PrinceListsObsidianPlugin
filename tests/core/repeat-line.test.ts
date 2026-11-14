@@ -1,7 +1,9 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { tickLine, untickLine } from '../../src/core/item-line';
 import {
 	anchorOf,
+	backDay,
+	comeBack,
 	canWrite,
 	draftOf,
 	ensureTickable,
@@ -320,4 +322,52 @@ describe('removeWhen', () => {
 	test('leaves a line that does not repeat as setWhen does', () => {
 		expect(removeWhen('- [ ] a ⏳ 2026-11-13')).toEqual({ line: '- [ ] a', repeatRemoved: false });
 	});
+});
+
+const at = (d: number, h = 20) => new Date(2026, 10, d, h, 0);
+
+describe('backDay', () => {
+	const daily = '- [x] Water ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14';
+	it('daily, ticked on the day', () => expect(backDay(daily, at(14))).toBe('2026-11-15'));
+	it('weekly', () => expect(backDay('- [x] Review ✔ 2026-11-16 09:00 🔁 every week ⏳ 2026-11-16', at(16))).toBe('2026-11-23'));
+	it('ticked early', () => expect(backDay('- [x] Water ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-20', at(14))).toBe('2026-11-21'));
+	it('ticked late keeps the rhythm', () => expect(backDay('- [x] Review ✔ 2026-11-14 18:05 🔁 every week ⏳ 2026-11-02', at(14))).toBe('2026-11-16'));
+	it('when done', () => expect(backDay('- [x] Water ✔ 2026-11-14 18:05 🔁 every 3 days when done ⏳ 2026-11-01', at(14))).toBe('2026-11-17'));
+	it('no date', () => expect(backDay('- [x] Water ✔ 2026-11-14 18:05 🔁 every day', at(14))).toBe('2026-11-15'));
+	it('last time', () => expect(backDay('- [x] Physio 🔚 1x ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14', at(14))).toBeNull());
+	it('past the end date', () => expect(backDay('- [x] Physio 🔚 2026-11-14 ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14', at(14))).toBeNull());
+	it('Tasks history line', () => expect(backDay('- [x] Water 🔁 every day ⏳ 2026-11-14 ✅ 2026-11-14', at(14))).toBeNull());
+	it('mark ahead: the anchor stands in', () => expect(backDay('- [x] Water ✔ 2026-11-20 18:05 🔁 every day ⏳ 2026-11-10', at(14))).toBe('2026-11-11'));
+	it('no anchor and no mark that counts', () => expect(backDay('- [x] Water ✔ 2026-11-20 18:05 🔁 every day', at(14))).toBe('2026-11-14'));
+	it('two marks: the earliest', () => expect(backDay('- [x] Water ✔ 2026-11-12 08:00 ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-12', at(14))).toBe('2026-11-13'));
+	it('open, unreadable or past 9999', () => {
+		expect(backDay('- [ ] Water 🔁 every day ⏳ 2026-11-14', at(14))).toBeNull();
+		expect(backDay('- [x] Water ✔ 2026-11-14 18:05 🔁 every weekday ⏳ 2026-11-14', at(14))).toBeNull();
+		expect(backDay('- [x] Water ✔ 2026-11-14 18:05 🔁 every year ⏳ 9999-12-31', at(14))).toBeNull();
+		expect(backDay('- [x] Water ✔ 2026-11-14 18:05 🔁 every day 🛫 9999-12-31 📅 2026-11-14', at(14))).toBeNull();
+	});
+});
+
+describe('comeBack', () => {
+	const daily = '- [x] Water ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14';
+	it('not before its date', () => expect(comeBack(daily, at(14, 23))).toBeNull());
+	it('on its date', () => expect(comeBack(daily, at(15, 8))).toBe('- [ ] Water 🔁 every day ⏳ 2026-11-15'));
+	it('days later, on today', () => expect(comeBack(daily, at(18))).toBe('- [ ] Water 🔁 every day ⏳ 2026-11-18'));
+	it('weekly, on its latest weekday', () =>
+		expect(comeBack('- [x] Review ✔ 2026-11-16 09:00 🔁 every week ⏳ 2026-11-16', new Date(2026, 11, 2, 9))).toBe('- [ ] Review 🔁 every week ⏳ 2026-11-30'));
+	it('when done, late', () =>
+		expect(comeBack('- [x] Water ✔ 2026-11-14 18:05 🔁 every 3 days when done ⏳ 2026-11-14', at(25))).toBe('- [ ] Water 🔁 every 3 days when done ⏳ 2026-11-17'));
+	it('counts down', () =>
+		expect(comeBack('- [x] Physio 🔚 3x ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14', at(15))).toBe('- [ ] Physio 🔚 2x 🔁 every day ⏳ 2026-11-15'));
+	it('late past its end date, on the last date before it', () =>
+		expect(comeBack('- [x] Physio 🔚 2026-11-20 ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-14', at(25))).toBe('- [ ] Physio 🔚 2026-11-20 🔁 every day ⏳ 2026-11-20'));
+	it('moves due and start, keeps ➕, drops ✅', () =>
+		expect(comeBack('- [x] Rent ✔ 2026-11-14 18:05 🔁 every day ➕ 2026-11-01 🛫 2026-11-12 📅 2026-11-14 ✅ 2026-11-14', at(15)))
+			.toBe('- [ ] Rent 🔁 every day ➕ 2026-11-01 🛫 2026-11-13 📅 2026-11-15'));
+	it('no date gains ⏳', () =>
+		expect(comeBack('- [x] Water ✔ 2026-11-14 18:05 🔁 every day', at(17))).toBe('- [ ] Water 🔁 every day ⏳ 2026-11-15'));
+	it('no date and no mark that counts: today', () =>
+		expect(comeBack('- [x] Water ✔ 2026-11-20 18:05 🔁 every day', at(14))).toBe('- [ ] Water 🔁 every day ⏳ 2026-11-14'));
+	it('a date that would pass 9999 on a later step never', () =>
+		expect(comeBack('- [x] Water ✔ 2026-11-14 18:05 🔁 every day 🛫 9999-12-30 📅 2026-11-14', at(18))).toBeNull());
 });

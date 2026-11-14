@@ -1,4 +1,5 @@
-import { endOf, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, tickLine, TASKS_SIGNIFIERS } from './item-line';
+import { doneAt } from './archive';
+import { endOf, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, tickLine, untickLine, TASKS_SIGNIFIERS } from './item-line';
 import { addDays, nextDay, readEnd, readRule, stepDay, writeEnd, writeRule, type RepeatEnd, type RepeatRule } from './repeat';
 import { dayOf, daysFrom, isRealDay, setWhen } from './when';
 
@@ -119,6 +120,55 @@ export function tickRepeating(line: string, now: Date): RepeatTick {
 	const moved = moveDates(fields, daysFrom(anchor, next));
 	if (moved === null) throw new RepeatingItemError('date');
 	return { kind: 'moved', line: joinItemLine({ ...counted, tail: moved + afterFields }), next };
+}
+
+/**
+ * The day a done repeating line comes back on, or null when it never does: it isn't a line this
+ * plugin ticked, its rule can't be followed, it was the last time, or its dates can't move there
+ * without passing 9999-12-31.
+ */
+export function backDay(line: string, now: Date): string | null {
+	const parts = parseItemLine(line);
+	const repeat = repeatOf(line);
+	const done = doneAt(line, now);
+	if (!parts || !repeat || !done || repeat.problem !== null || repeat.rule === null) return null;
+	// A done 🔁 line with no ✔ is a Tasks history line.
+	if (!parts.marks.includes('✔')) return null;
+	const { rule, end } = repeat;
+	const anchor = anchorOf(line);
+	const tickDay = done.kind === 'at' ? dayOf(done.time) : anchor;
+	let next: string | null;
+	if (tickDay === null) next = dayOf(now);
+	else if (anchor === null || rule.whenDone) next = stepDay(tickDay, rule);
+	else next = nextDay(anchor, rule, tickDay);
+	if (next === null || isLastTime(end, next)) return null;
+	if (anchor !== null && moveDates(splitTail(parts.tail).fields, daysFrom(anchor, next)) === null) return null;
+	return next;
+}
+
+/**
+ * What the done repeating `line` becomes at `now`: open, with its dates on the latest date it has
+ * come due by and its count down by one. Null when it isn't due by today or its dates can't move there.
+ */
+export function comeBack(line: string, now: Date): string | null {
+	const back = backDay(line, now);
+	const repeat = repeatOf(line);
+	const today = dayOf(now);
+	if (back === null || back > today || !repeat || repeat.rule === null) return null;
+	const { rule, end } = repeat;
+	const anchor = anchorOf(line);
+	let due = back;
+	if (anchor !== null && !rule.whenDone) {
+		const withinEnd = (day: string) => !(end?.kind === 'date' && day > end.day);
+		for (let next = stepDay(due, rule); next !== null && next <= today && withinEnd(next); next = stepDay(due, rule)) due = next;
+	}
+	const open = parseItemLine(untickLine(line));
+	if (!open) return null;
+	const counted = { ...open, end: countDown(open.end, end) };
+	if (anchor === null) return setWhen(joinItemLine(counted), due);
+	const { fields, end: afterFields } = splitTail(open.tail);
+	const moved = moveDates(fields, daysFrom(anchor, due));
+	return moved === null ? null : joinItemLine({ ...counted, tail: moved + afterFields });
 }
 
 /** Whether `draft` can be written to a line and read back, which a rule of `every 0` or an end with no date can't. */
