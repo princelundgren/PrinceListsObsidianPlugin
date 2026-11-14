@@ -27,8 +27,9 @@ export interface DraftBase {
 
 // queueLineEdit for a change made from a draft of the line. If the line no longer reads as the draft's
 // `base` did, or an outside change came since, nothing is written: the notice says so and `refused`
-// runs. It also runs when the write was refused for another reason (a change landing mid-write, or
-// the core refusing the line), which had its own notice, so the draft isn't lost to it.
+// runs. It also runs when the write was refused for another reason (a change landing mid-write, the
+// core refusing the line, a failed write, or typing refusing it twice), whether or not that said so,
+// so the draft isn't lost to it.
 export function queueDraftEdit(
 	view: PrinceListView,
 	titleLine: number,
@@ -53,7 +54,7 @@ export function queueDraftEdit(
 		}
 		if (stale) new Notice(CHANGED_ELSEWHERE_NOTICE);
 		// Another file in the view has no item at that line to reopen on.
-		if (planned !== null && view.file === file) then.refused?.(planned);
+		if (planned !== null && !view.viewClosed && view.file === file) then.refused?.(planned);
 	});
 }
 

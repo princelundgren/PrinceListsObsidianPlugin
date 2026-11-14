@@ -1,14 +1,12 @@
-import { ButtonComponent, DropdownComponent, getLanguage, Notice, setIcon, TextComponent } from 'obsidian';
+import { ButtonComponent, DropdownComponent, getLanguage, setIcon, TextComponent } from 'obsidian';
 import type { RepeatEnd, RepeatRule, RepeatUnit } from '../core/repeat';
 import { stepDay, upcomingDays } from '../core/repeat';
 import { anchorOf, canWrite, draftAfterRefusal, draftOf, ensureTickable, removeRepeat, repeatOf, setRepeat, type RepeatDraft } from '../core/repeat-line';
 import { dayLabel, dayOf } from '../core/when';
-import { dismissCard } from './card';
 import { WHEN_INPUT_CLASS } from './card-when';
 import { addHiddenLabel, addHiddenLabelInside } from './dom';
 import { queueDraftEdit } from './line-edit';
 import type { PrinceListView } from './list-view';
-import { CHANGED_ELSEWHERE_NOTICE } from './write';
 
 const REPEAT_BUTTON_CLASS = 'princelists-card-repeat';
 const POPOVER_CLASS = 'princelists-repeat-popover';
@@ -154,22 +152,14 @@ function removeRepeatFromLine(view: PrinceListView): void {
 function writeToLine(view: PrinceListView, change: (line: string) => string): void {
 	const open = view.repeatPopover;
 	const line = view.selected;
-	if (!open) return;
-	// An outside change took the item's own line, and with it the card's item: nothing to write to.
-	if (line === null || view.card?.lostAt != null) {
-		closeRepeatPopover(view);
-		// A lost card has said so already, and has nothing left to show.
-		if (view.card?.lostAt != null) dismissCard(view);
-		else new Notice(CHANGED_ELSEWHERE_NOTICE);
-		return;
-	}
+	// An outside change takes the card's item and closes the popover with it (`cardLost`).
+	if (!open || line === null) return;
 	closeRepeatPopover(view);
 	queueDraftEdit(view, line, open.opened, change, {
 		// The write is async: focus comes back to the card only if the user hasn't gone elsewhere.
 		written: () => {
-			const body = view.card?.el.doc.body;
-			const focused = view.card?.el.doc.activeElement;
-			if (focused === body || focused === null) focusRepeatEntry(view);
+			const { body, activeElement } = view.contentEl.doc;
+			if (activeElement === body || activeElement === null) focusRepeatEntry(view);
 		},
 		refused: (tracked) => {
 			const now = view.lines()[tracked]?.text;
