@@ -224,6 +224,12 @@ describe('markTime', () => {
 	])('%s', (mark, expected) => {
 		expect(markTime(mark)?.getTime()).toBe(expected.getTime());
 	});
+	test.each([
+		['✔ 0099-10-20 09:07', 99],
+		['✔ 0001-10-20', 1],
+	])('%s keeps its year', (mark, year) => {
+		expect(markTime(mark)?.getFullYear()).toBe(year);
+	});
 	test.each(['✔ 2026-13-01', '✔ 2026-02-30', '✔ 2026-10-20 25:99', '✔ 2026-10-20 24:00', '✅ 2026-00-10', 'nope'])(
 		'null for %s',
 		(mark) => {
