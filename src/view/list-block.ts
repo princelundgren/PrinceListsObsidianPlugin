@@ -125,7 +125,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		void this.enqueue(async () => {
 			if (this.file !== file || this.field || this.dragging || this.message() !== null) return;
 			const text = this.editing.text;
-			const planned = planComeBacks(text, contentStartLine(text), new Date(), () => true);
+			const planned = planComeBacks(text, contentStartLine(text), new Date());
 			if (planned && (await this.write(planned.next, text, NO_LINES_MOVED, null)) === 'written' && !this.field) this.draw();
 		});
 	}

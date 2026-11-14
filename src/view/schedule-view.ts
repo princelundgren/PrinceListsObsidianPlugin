@@ -177,7 +177,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 				const list = this.lists.get(path);
 				const file = this.app.vault.getFileByPath(path);
 				if (!list || !file) continue;
-				const planned = planComeBacks(list.text, contentStartLine(list.text), new Date(), () => true);
+				const planned = planComeBacks(list.text, contentStartLine(list.text), new Date());
 				if (planned && (await editListFile(this.app, file, list.text, planned.next, null)) === 'written') this.listRead(file, planned.next);
 			}
 		});
