@@ -49,8 +49,9 @@ async function tick(view: PrinceListView, row: HTMLElement | null, pending: { li
 		const { lines, model } = view.parse();
 		const item = itemAt(model, titleLine);
 		const now = new Date();
+		if (!item) return;
 		const was = itemRow((lines[titleLine] as Line).text, titleLine, now, view.archiveDelay.ms);
-		if (!item || done === was.done) return;
+		if (done === was.done) return;
 		const toggled = tryEdit(() => toggleItem(lines, item, now));
 		if (!toggled) return;
 		const edited = toggled.lines;
