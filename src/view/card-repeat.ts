@@ -1,11 +1,11 @@
 import { ButtonComponent, DropdownComponent, getLanguage, Notice, setIcon, TextComponent } from 'obsidian';
-import type { RepeatEnd, RepeatUnit } from '../core/repeat';
+import type { RepeatEnd, RepeatRule, RepeatUnit } from '../core/repeat';
 import { stepDay, upcomingDays } from '../core/repeat';
 import { anchorOf, canWrite, draftAfterRefusal, draftOf, ensureTickable, removeRepeat, repeatOf, setRepeat, type RepeatDraft } from '../core/repeat-line';
 import { dayLabel, dayOf } from '../core/when';
 import { dismissCard } from './card';
 import { WHEN_INPUT_CLASS } from './card-when';
-import { addHiddenLabel } from './dom';
+import { addHiddenLabel, addHiddenLabelInside } from './dom';
 import { queueDraftEdit } from './line-edit';
 import type { PrinceListView } from './list-view';
 import { CHANGED_ELSEWHERE_NOTICE } from './write';
@@ -17,6 +17,8 @@ const SAVE_CLASS = 'princelists-repeat-save';
 const REMOVE_CLASS = 'princelists-repeat-remove';
 const NEXT_COUNT = 3;
 const DEFAULT_TIMES = 5;
+// What an end date starts from: a year on.
+const EVERY_YEAR: RepeatRule = { every: 1, unit: 'year', onLast: false, whenDone: false };
 
 const UNITS: RepeatUnit[] = ['day', 'week', 'month', 'year'];
 
@@ -75,8 +77,7 @@ export function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 're
 	const el = tools.createDiv({ cls: POPOVER_CLASS, attr: { role: 'dialog', tabindex: -1 } });
 	view.repeatPopover = { el, opened: { text, seen: view.outsideChanges }, draft };
 	const body = el.createDiv({ cls: 'princelists-repeat-body' });
-	addHiddenLabel(body, 'Repeat');
-	el.setAttr('aria-labelledby', body.getAttr('aria-labelledby') ?? '');
+	addHiddenLabelInside(el, 'Repeat');
 	const actions = draft === 'read-only' ? buildReadOnly(body, text) : buildControls(el, body, draft, anchorOf(text));
 	if (repeatOf(text) !== null) new ButtonComponent(actions).setButtonText('Remove repeat').buttonEl.addClass(REMOVE_CLASS);
 	repeatButtonOf(view)?.setAttr('aria-expanded', 'true');
@@ -130,7 +131,8 @@ export function repeatInput(view: PrinceListView, evt: Event): void {
 	// The event is a plain Event, without Obsidian's targetNode, so the control is found among the popover's own.
 	const isOwn = open && Array.from(open.el.querySelectorAll('input, select')).some((control) => control === evt.target);
 	if (!open || !controls || open.draft === 'read-only' || !isOwn) return;
-	open.draft = readDraft(controls, open.draft);
+	if (evt.target === controls.ends.selectEl) prefillEnd(controls);
+	open.draft = readDraft(controls);
 	showDraft(controls, open.draft, anchorOf(open.opened.text));
 }
 
@@ -248,14 +250,16 @@ function fillUnits(controls: Controls, isOne: boolean, unit: RepeatUnit): void {
 	controls.unit.setValue(unit);
 }
 
-function readDraft(controls: Controls, before: RepeatDraft): RepeatDraft {
+// A new kind of end starts from a value that is already good to save.
+function prefillEnd(controls: Controls): void {
+	const kind = controls.ends.getValue();
+	if (kind === 'date' && controls.endDate.getValue() === '') controls.endDate.setValue(stepDay(dayOf(new Date()), EVERY_YEAR) ?? '');
+	if (kind === 'times' && controls.endCount.getValue() === '') controls.endCount.setValue(String(DEFAULT_TIMES));
+}
+
+function readDraft(controls: Controls): RepeatDraft {
 	const unit = controls.unit.getValue() as RepeatUnit;
 	const kind = controls.ends.getValue();
-	// A new kind of end starts from a value that is already good to save.
-	if (kind !== (before.end?.kind ?? 'never')) {
-		if (kind === 'date' && controls.endDate.getValue() === '') controls.endDate.setValue(stepDay(dayOf(new Date()), { every: 1, unit: 'year', onLast: false, whenDone: false }) ?? '');
-		if (kind === 'times' && controls.endCount.getValue() === '') controls.endCount.setValue(String(DEFAULT_TIMES));
-	}
 	let end: RepeatEnd | null = null;
 	if (kind === 'date') end = { kind: 'date', day: controls.endDate.getValue() };
 	else if (kind === 'times') end = { kind: 'times', left: Number(controls.endCount.getValue()) };

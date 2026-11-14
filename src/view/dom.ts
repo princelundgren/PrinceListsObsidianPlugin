@@ -38,9 +38,18 @@ let hiddenLabels = 0;
 // Names `control` for screen readers from a hidden element just after it. Not aria-label: Obsidian
 // shows every aria-label as a hover tooltip.
 export function addHiddenLabel(control: HTMLElement, text: string): void {
+	control.after(hiddenLabelFor(control, text));
+}
+
+// The same, for a container that holds its own label.
+export function addHiddenLabelInside(container: HTMLElement, text: string): void {
+	container.append(hiddenLabelFor(container, text));
+}
+
+function hiddenLabelFor(control: HTMLElement, text: string): HTMLElement {
 	const id = `${HIDDEN_LABEL_CLASS}-${++hiddenLabels}`;
-	control.after(createSpan({ cls: HIDDEN_LABEL_CLASS, text, attr: { id, hidden: '' } }));
 	control.setAttr('aria-labelledby', id);
+	return createSpan({ cls: HIDDEN_LABEL_CLASS, text, attr: { id, hidden: '' } });
 }
 
 // Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of

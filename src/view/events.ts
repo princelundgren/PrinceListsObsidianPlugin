@@ -14,8 +14,8 @@ import {
 	focusCardTitleEnd,
 	openCard,
 } from './card';
-import { toggleCardStar } from './card-star';
 import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, isOpenRepeatButton, repeatClick, repeatInput, saveRepeat } from './card-repeat';
+import { toggleCardStar } from './card-star';
 import { cardTagsClick, closeTagPopover, escapeTagPopover, isOpenTagButton } from './card-tags';
 import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
