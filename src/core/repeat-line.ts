@@ -1,4 +1,4 @@
-import { doneAt } from './archive';
+import { tickedAt } from './archive';
 import { endOf, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, untickLine, TASKS_SIGNIFIERS } from './item-line';
 import { addDays, nextDay, readEnd, readRule, stepDay, writeEnd, writeRule, type RepeatEnd, type RepeatRule } from './repeat';
 import { dayOf, daysFrom, isRealDay, setWhen } from './when';
@@ -102,7 +102,7 @@ export function hasDate(line: string): boolean {
 export function backDay(line: string, now: Date): string | null {
 	const parts = parseItemLine(line);
 	const repeat = repeatOf(line);
-	const done = doneAt(line, now);
+	const done = tickedAt(line, now);
 	if (!parts || !repeat || !done || repeat.problem !== null || repeat.rule === null) return null;
 	// A done 🔁 line with no ✔ is a Tasks history line.
 	if (!parts.marks.includes('✔')) return null;

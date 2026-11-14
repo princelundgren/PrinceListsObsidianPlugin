@@ -269,6 +269,14 @@ describe('backDay', () => {
 	it('mark ahead: the anchor stands in', () => expect(backDay('- [x] Water ✔ 2026-11-20 18:05 🔁 every day ⏳ 2026-11-10', at(14))).toBe('2026-11-11'));
 	it('no anchor and no mark that counts', () => expect(backDay('- [x] Water ✔ 2026-11-20 18:05 🔁 every day', at(14))).toBe('2026-11-14'));
 	it('two marks: the earliest', () => expect(backDay('- [x] Water ✔ 2026-11-12 08:00 ✔ 2026-11-14 18:05 🔁 every day ⏳ 2026-11-12', at(14))).toBe('2026-11-13'));
+	it('a leftover ✅ is not the tick', () => {
+		const tick = new Date(2026, 10, 14, 18, 5);
+		const ticked = tickLine('- [ ] a ✅ 2026-10-01 ⏳ 2026-10-01 🔁 every day', tick);
+		expect(ticked).toBe('- [x] a ✔ 2026-11-14 18:05 ✅ 2026-10-01 ⏳ 2026-10-01 🔁 every day');
+		expect(backDay(ticked, tick)).toBe('2026-11-15');
+		expect(comeBack(ticked, tick)).toBeNull();
+		expect(backDay(tickLine('- [ ] a ✅ 2026-10-01 ⏳ 2026-10-01 🔁 every 3 days when done', tick), tick)).toBe('2026-11-17');
+	});
 	it('open, unreadable or past 9999', () => {
 		expect(backDay('- [ ] Water 🔁 every day ⏳ 2026-11-14', at(14))).toBeNull();
 		expect(backDay('- [x] Water ✔ 2026-11-14 18:05 🔁 every weekday ⏳ 2026-11-14', at(14))).toBeNull();
