@@ -1,4 +1,5 @@
 import { untickChecklist } from './checklist';
+import { NO_LINES_MOVED, type OwnEdit } from './follow';
 import { joinLines, splitLines } from './lines';
 import { parseList } from './parse';
 import { comeBack } from './repeat-line';
@@ -24,4 +25,13 @@ export function planComeBacks(
 		count++;
 	}
 	return count === 0 ? null : { next: joinLines(lines), count };
+}
+
+/**
+ * The edit planComeBacks at `now` makes, for a view whose card is open on `selected`: the card's title
+ * field makes the same change to the line it saved, as for a tick (see syncTitleField). No line moves.
+ */
+export function comeBackEdit(selected: number | null, now: Date): OwnEdit {
+	if (selected === null) return NO_LINES_MOVED;
+	return { start: selected, delta: 0, kind: 'change', retitle: (line) => comeBack(line, now) ?? line };
 }
