@@ -148,9 +148,9 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   steps once, even into the past: catching up is a deliberate difference.
 - **`when done`, and a line with no date:** one step from the tick's day.
 - **The tick's day is the date of the `✔` mark that counts** for archiving (the design, "When an
-  item is archived"), so a line with two marks after a Sync merge uses the earliest. When no mark
-  counts, the anchor stands in for it, and a line with no anchor either comes back at once with
-  today's `⏳` **(call)**. Today is the device's local date.
+  item is archived"); only `✔` marks count, never a leftover `✅`. A line with two marks after a
+  Sync merge uses the earliest. When no mark counts, the anchor stands in for it, and a line with no
+  anchor either comes back at once with today's `⏳` **(call)**. Today is the device's local date.
 - **Dates are counted as calendar dates, never as times,** so daylight-saving changes can't shift
   a day (Tasks needs a workaround for that).
 
