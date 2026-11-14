@@ -95,6 +95,12 @@ test('untickChecklist leaves a step in an HTML comment under a nested step or op
 	}
 });
 
+test('untickChecklist leaves a step in an HTML comment that starts on a nested item line', () => {
+	const notes = '\t- <!--\n\t  - [x] hidden\n\t  -->\n';
+	const { lines, item } = list(`- [ ] a\n${notes}`);
+	expect(joinLines(untickChecklist(lines, item(0)))).toBe(`- [ ] a\n${notes}`);
+});
+
 test('maskBlocks gives each %% or $$ region as a run, an unclosed one to the last line', () => {
 	const { lines } = list('a\n%%\nb\n%%\n$$x$$ y\n$$\ne\n');
 	expect(maskBlocks(lines, 0).runs).toEqual([[1, 3], [5, 6]]);

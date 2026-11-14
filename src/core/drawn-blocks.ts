@@ -48,7 +48,7 @@ export function commentBlocks(markdown: string): LineRange[] {
 		const { node, entering } = step;
 		if (!entering || node.type !== 'html_block') continue;
 		const [[startLine], [endLine]] = node.sourcepos;
-		if (HTML_COMMENT.test(texts[startLine - 1] ?? '')) found.push({ start: startLine - 1, end: endOfBlock(texts, startLine - 1, endLine) });
+		if (HTML_COMMENT.test(node.literal ?? '')) found.push({ start: startLine - 1, end: endOfBlock(texts, startLine - 1, endLine) });
 	}
 	return found;
 }
