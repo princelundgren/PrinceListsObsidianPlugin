@@ -224,14 +224,17 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   times); the next three dates, updated as it changes; and Remove repeat.
 - **Nothing is written until Save:** #320 asks to check the next dates "before it's saved". The
   popover holds a draft; Save makes one write and one Undo step, and Escape or a click outside
-  drops the draft. If the line changes from outside while it's open, Save is refused with a notice.
-  The popover reopens on the item's line when the change left that line as it was, and closes with
-  the notice when the change rewrote the item's own line, which takes the card's item as it does for
-  the card's fields. Save and Remove repeat then write nothing.
+  drops the draft. If the list changes while it's open, Save is refused with a notice and the
+  popover reopens: with the user's draft, since a refusal the user didn't cause shouldn't lose what
+  they set, or on the line as it reads now when the view's own edit, such as the item coming back,
+  changed that line. An outside change to the item's own line takes the card's item as it does
+  for the card's fields: the popover closes at once with the notice, and the card with it while
+  focus is in the popover. Save and Remove repeat then write nothing.
 - **Save never writes a line it then couldn't repeat.** A title `🔚` that is no end stays in the
   title as written, so a line that keeps one, or has a date that doesn't exist, isn't saved. The
   notice says so: "This item's 🔚 end can't be read, so the repeat isn't saved." or "This item has a
-  date that doesn't exist, so the repeat isn't saved."
+  date that doesn't exist, so the repeat isn't saved." That refusal, like a failed write, reopens
+  the popover with the draft.
 - **A line whose rule or end the popover can't write** (`every weekday`, written with Tasks) shows
   that rule read-only, with only Remove repeat, so a richer rule is never overwritten without the
   user removing it first.

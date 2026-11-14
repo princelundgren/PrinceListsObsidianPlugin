@@ -6,6 +6,7 @@ import {
 	comeBack,
 	canWrite,
 	draftOf,
+	draftAfterRefusal,
 	ensureTickable,
 	hasDate,
 	removeRepeat,
@@ -118,6 +119,24 @@ describe('setRepeat on a line that does not repeat yet', () => {
 		expect(setRepeat('- [ ] Trip 🔚 soon', every(1, 'day'), { kind: 'times', left: 3 }, today)).toBe(
 			'- [ ] Trip 🔚 soon 🔚 3x ⏳ 2026-11-13 🔁 every day',
 		);
+	});
+});
+
+describe('draftAfterRefusal', () => {
+	const opened = '- [ ] Water plants ⏳ 2026-11-13';
+	const draft: RepeatDraft = { rule: every(3, 'week'), end: null };
+
+	test('keeps the draft while the line still reads as it did', () => {
+		expect(draftAfterRefusal(draft, opened, opened)).toBe(draft);
+	});
+
+	test('reads a new draft from the line once it changed', () => {
+		const changed = '- [ ] Water plants ⏳ 2026-11-14 🔁 every 2 days';
+		expect(draftAfterRefusal(draft, opened, changed)).toEqual(draftOf(changed));
+	});
+
+	test('keeps a read-only popover as it was', () => {
+		expect(draftAfterRefusal('read-only', opened, opened)).toBe('read-only');
 	});
 });
 
