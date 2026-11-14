@@ -3,6 +3,7 @@ import { isFiltered, timelessItemRow, whenMatches, type Find } from './display';
 import { getItemNotes } from './edit-items';
 import { splitLines } from './lines';
 import { parseList } from './parse';
+import { backDay } from './repeat-line';
 import { meetsLitTags, stripTags, type LitTags } from './tags';
 import { daysFrom } from './when';
 
@@ -18,7 +19,7 @@ export interface ScheduledItem {
 	tags: string[];
 	/** The tail's tags. */
 	tailTags: string[];
-	/** The item is open and has a `🔁` field. */
+	/** The item has a `🔁` field: open, or, once `unarchived` reads it, done and coming back. */
 	repeats: boolean;
 	done: boolean;
 	day: string;
@@ -47,9 +48,11 @@ export function datedItems(text: string, contentStart: number, list: { path: str
 	return scheduled;
 }
 
-/** The items that are open, or done and not yet archived at `now` with `archiveDelayMs`. */
+/** The items that are open, or done and not yet archived at `now` with `archiveDelayMs`, a done one repeating when it comes back. */
 export function unarchived(items: readonly ScheduledItem[], now: Date, archiveDelayMs: number): ScheduledItem[] {
-	return items.filter((item) => !(item.done && isArchived(item.line, now, archiveDelayMs)));
+	return items
+		.filter((item) => !(item.done && isArchived(item.line, now, archiveDelayMs)))
+		.map((item) => (item.done ? { ...item, repeats: backDay(item.line, now) !== null } : item));
 }
 
 /** Whether `find` finds the item: its title, its notes or its list's name fuzzily, or its day as exact text. */

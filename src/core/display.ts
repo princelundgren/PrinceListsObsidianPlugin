@@ -5,7 +5,7 @@ import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
 import { itemTags } from './item-tags';
 import type { Line } from './lines';
 import type { ItemBlock, ListModel } from './parse';
-import { repeatOf } from './repeat-line';
+import { backDay, repeatOf } from './repeat-line';
 import { splitStar } from './star';
 import { isAnyLit, meetsLitTags, stripTags, type LitTags } from './tags';
 import { whenOf } from './when';
@@ -26,7 +26,11 @@ export interface ItemRow {
 	tags: string[];
 	/** The tail's tags, which the card shows apart from the title. */
 	tailTags: string[];
-	/** The item is open and has a `🔁` field, whether or not PrinceLists can follow it. */
+	/**
+	 * The item has a `🔁` field: open, whether or not PrinceLists can follow it, or done and coming
+	 * back. `timelessItemRow` counts only an open one, since whether a done one comes back depends on
+	 * the day.
+	 */
 	repeats: boolean;
 }
 
@@ -166,7 +170,7 @@ export function withoutRange(sections: SectionRows[], range: { start: number; en
 
 export function itemRow(text: string, titleLine: number, now: Date, archiveDelayMs: number): ItemRow {
 	const row = timelessItemRow(text, titleLine);
-	return { ...row, archived: row.done && isArchived(text, now, archiveDelayMs) };
+	return { ...row, archived: row.done && isArchived(text, now, archiveDelayMs), repeats: row.done ? backDay(text, now) !== null : row.repeats };
 }
 
 /** The fields of an item's row that don't depend on the time: all but `archived`. */

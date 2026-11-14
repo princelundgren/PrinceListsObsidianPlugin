@@ -31,3 +31,11 @@ test('leaves a due item whose line gathers refuses', () => {
 		next: HEAD + DUE + '- [ ] Tea 🔁 every day ⏳ 2026-11-15\n',
 	});
 });
+
+test('brings back a hidden item: archived since its tick, under a heading', () => {
+	const weekly = '## Weekly\n- [x] Review ✔ 2026-11-07 09:00 🔁 every week ⏳ 2026-11-07\n';
+	expect(planComeBacks(HEAD + OPEN + weekly, 3, now, all)).toEqual({
+		count: 1,
+		next: HEAD + OPEN + '## Weekly\n- [ ] Review 🔁 every week ⏳ 2026-11-14\n',
+	});
+});

@@ -59,7 +59,7 @@ You can embed lists in normal notes.
 
 - **Add** with the floating **+**, and **drag** to reorder. The settings can put a **+** in the list's header instead, or as well, on desktop, mobile or both.
 - **Star** an item and give it a date.
-- **Repeat** an item: set every 3 days, each month on the last day or another rule, with an end if you like, from its card or its menu.
+- **Repeat** an item: set every 3 days, each month on the last day or another rule, with an end if you like, from its card or its menu, and a ticked item is done until its next date, then comes back open when you next open its list or return to it. Until then, Tasks queries and other apps show it done.
 - **Tags:** write a tag on an item, or add it from the tag button in its card, with suggestions. Items show their tags as labels.
 - **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, ticks, stars, tags, dates or deletes them all at once, with Undo, and dragging one drags them all. A selected heading brings its section.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
@@ -125,9 +125,9 @@ Stuff for the new apartment.
 
 - **`princelists: true`** makes a note a list.
 - **Headings** are sections, **checkboxes** are items, and lines indented under an item are its notes.
-- **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are, except that ticking a repeating item moves its 📅 and 🛫 with its ⏳.
+- **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are, except that a repeating item's 📅 and 🛫 move with its ⏳ when it comes back.
 - **`✔` with a time** marks when you ticked an item. Tasks still sees it as done.
-- **Only the lines you edit change.** The rest of the note stays as you wrote it.
+- **Only the lines you edit change.** The rest of the note stays as you wrote it. The one exception is a repeating item coming back, which changes its own line and unticks the checklist in its notes.
 
 The full format is in the [design](docs/superpowers/specs/2026-10-20-prince-lists-design.md#file-format).
 

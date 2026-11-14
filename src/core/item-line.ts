@@ -204,11 +204,6 @@ function withoutDoneDates(tail: string): string {
 	return kept + tail.slice(copied);
 }
 
-export function isRepeating(text: string): boolean {
-	const parts = parseItemLine(text);
-	return parts !== null && REPEAT_FIELD.test(parts.tail);
-}
-
 // The run of ✔ marks at the end of `head`, each with the spaces before it, read from the end.
 function trailingMarks(head: string): string {
 	let start = head.length;
