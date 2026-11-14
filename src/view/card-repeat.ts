@@ -3,6 +3,7 @@ import type { RepeatEnd, RepeatUnit } from '../core/repeat';
 import { stepDay, upcomingDays } from '../core/repeat';
 import { anchorOf, canWrite, draftAfterRefusal, draftOf, ensureTickable, removeRepeat, repeatOf, setRepeat, type RepeatDraft } from '../core/repeat-line';
 import { dayLabel, dayOf } from '../core/when';
+import { dismissCard } from './card';
 import { WHEN_INPUT_CLASS } from './card-when';
 import { addHiddenLabel } from './dom';
 import { queueDraftEdit } from './line-edit';
@@ -151,7 +152,9 @@ function writeToLine(view: PrinceListView, change: (line: string) => string): vo
 	// An outside change took the item's own line, and with it the card's item: nothing to write to.
 	if (line === null || view.card?.lostAt != null) {
 		closeRepeatPopover(view);
-		new Notice(CHANGED_ELSEWHERE_NOTICE);
+		// A lost card has said so already, and has nothing left to show.
+		if (view.card?.lostAt != null) dismissCard(view);
+		else new Notice(CHANGED_ELSEWHERE_NOTICE);
 		return;
 	}
 	closeRepeatPopover(view);

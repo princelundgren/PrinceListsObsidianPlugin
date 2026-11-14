@@ -8,7 +8,7 @@ import { parseItemLine } from '../core/item-line';
 import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
-import { buildRepeatButton, closeRepeatPopover, showRepeatButton } from './card-repeat';
+import { buildRepeatButton, closeRepeatPopover, isInRepeatPopover, showRepeatButton } from './card-repeat';
 import { buildCardTags, buildTagButton, CARD_HEAD_CLASS, closeTagPopover, showCardTags } from './card-tags';
 import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
@@ -153,6 +153,15 @@ export function cardTitleBlur(view: PrinceListView, field: HTMLTextAreaElement):
 // fields take no more typing. Typing that the change dropped from the file can be copied.
 export function cardLost(view: PrinceListView, card: Card, line: number): void {
 	const focused = card.el.doc.activeElement;
+	// The repeat popover has nothing left to write to. Closing it with focus inside takes the focus
+	// with it, so no focusout would end the card: it closes with the popover.
+	if (isInRepeatPopover(view, focused)) {
+		closeRepeatPopover(view);
+		new Notice(CHANGED_ELSEWHERE_NOTICE);
+		dismissCard(view);
+		return;
+	}
+	closeRepeatPopover(view);
 	if (card.el.contains(focused)) {
 		card.lostAt = line;
 		setLine(card.el, null);
