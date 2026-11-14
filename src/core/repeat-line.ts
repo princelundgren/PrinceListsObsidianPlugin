@@ -40,7 +40,7 @@ export class RepeatingItemError extends Error {
 	}
 }
 
-const REPEAT_MARK = '🔁';
+export const REPEAT_MARK = '🔁';
 const END_MARK = '🔚';
 const EVERY_DAY: RepeatRule = { every: 1, unit: 'day', onLast: false, whenDone: false };
 const REPEAT_PREFIX = /^🔁️?/;
