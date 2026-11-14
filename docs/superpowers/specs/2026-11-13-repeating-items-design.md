@@ -186,6 +186,8 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
     or it gets focus, for every item in the lists it reads, hidden ones included, as a list does.
     The Schedule reads every list in the vault. Not when a list changes, as when Sync brings a
     change in, and not for a tab Obsidian restored at startup that hasn't been shown yet.
+  - **A hover preview (owner, 2026-11-14)** of a note that holds a list counts as opening that
+    list: the list is shown, so its items come back, though the note isn't open in a tab.
   - **A list nobody opens,** while no Schedule is open either, keeps its items done in the file
     until someone does.
 - **Worked out on the file's current text,** with the guarded write of a one-off action (the
