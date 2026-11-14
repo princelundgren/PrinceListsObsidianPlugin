@@ -162,9 +162,13 @@ function writeToLine(view: PrinceListView, change: (line: string) => string): vo
 		return;
 	}
 	closeRepeatPopover(view);
-	focusRepeatEntry(view);
 	queueDraftEdit(view, line, open.opened, change, {
-		written: () => focusRepeatEntry(view),
+		// The write is async: focus comes back to the card only if the user hasn't gone elsewhere.
+		written: () => {
+			const body = view.card?.el.doc.body;
+			const focused = view.card?.el.doc.activeElement;
+			if (focused === body || focused === null) focusRepeatEntry(view);
+		},
 		refused: (tracked) => {
 			const now = view.lines()[tracked]?.text;
 			if (view.selected !== tracked || now === undefined) return;
