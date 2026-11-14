@@ -10,7 +10,7 @@ import { openSchedule } from '../obsidian/open-schedule';
 import { editInMarkdown } from '../obsidian/switch';
 import { addItem, followPlace } from './add-button';
 import { CARD_CLASS, focusCardTitle, isNewEmptyItem } from './card';
-import { toggleRepeatPopover } from './card-repeat';
+import { openRepeatPopover } from './card-repeat';
 import { deleteHeadingAt, deleteItemAt } from './delete';
 import { NOTE_CLASS } from './fields';
 import { addStarredOnlyItem, toggleStarredOnly } from './filter';
@@ -167,7 +167,7 @@ function addRepeatEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu): 
 		entry
 			.setTitle('Repeat…')
 			.setIcon('repeat')
-			.onClick(atLine(anchor, () => toggleRepeatPopover(view))),
+			.onClick(atLine(anchor, () => openRepeatPopover(view))),
 	);
 	menu.addSeparator();
 }

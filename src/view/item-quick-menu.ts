@@ -6,7 +6,7 @@ import type { ItemBlock } from '../core/parse';
 import { setStar } from '../core/star';
 import { dayAfter, dayOf, setWhen } from '../core/when';
 import { openCard } from './card';
-import { toggleRepeatPopover } from './card-repeat';
+import { openRepeatPopover } from './card-repeat';
 import { whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { queueLineEdit, queueRemoveWhen } from './line-edit';
 import type { PrinceListView } from './list-view';
@@ -42,7 +42,7 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 // The item's card opens with its repeat popover open.
 function repeatPopover(view: PrinceListView, line: number): void {
 	openCard(view, line);
-	toggleRepeatPopover(view);
+	openRepeatPopover(view);
 }
 
 // The item's card opens with the platform's date picker, which sets the date as the card's own

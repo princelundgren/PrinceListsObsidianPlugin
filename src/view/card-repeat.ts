@@ -52,7 +52,7 @@ export function showRepeatButton(cardEl: HTMLElement, repeats: boolean): void {
 }
 
 /** Opens the repeat popover under the open card's tools, with the draft its item's line gives; closes it if it's open. */
-export function toggleRepeatPopover(view: PrinceListView): void {
+function toggleRepeatPopover(view: PrinceListView): void {
 	if (view.repeatPopover) {
 		escapeRepeatPopover(view);
 		return;
@@ -60,8 +60,12 @@ export function toggleRepeatPopover(view: PrinceListView): void {
 	openRepeatPopover(view);
 }
 
-// `kept` is the draft to show instead of the line's own.
-function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 'read-only'): void {
+/**
+ * Opens the repeat popover, and leaves it as it is when it's open, which a menu entry has no
+ * reason to close. `kept` is the draft to show instead of the line's own.
+ */
+export function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 'read-only'): void {
+	if (view.repeatPopover) return;
 	const line = view.selected;
 	const tools = view.card?.el.querySelector<HTMLElement>('.princelists-card-tools');
 	const text = line === null ? undefined : view.lines()[line]?.text;
