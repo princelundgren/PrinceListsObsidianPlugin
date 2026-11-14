@@ -1,6 +1,7 @@
 import { Menu, Notice } from 'obsidian';
 import { SCHEDULE_ICON } from '../constants';
 import { collapseChoices } from '../core/collapsed';
+import { timelessItemRow } from '../core/display';
 import type { TrackedLine } from '../core/editing';
 import { endOfSection, sectionLastLine } from '../core/list-actions';
 import { itemAt, type ListModel, type Section } from '../core/parse';
@@ -9,6 +10,7 @@ import { openSchedule } from '../obsidian/open-schedule';
 import { editInMarkdown } from '../obsidian/switch';
 import { addItem, followPlace } from './add-button';
 import { CARD_CLASS, focusCardTitle, isNewEmptyItem } from './card';
+import { toggleRepeatPopover } from './card-repeat';
 import { deleteHeadingAt, deleteItemAt } from './delete';
 import { NOTE_CLASS } from './fields';
 import { addStarredOnlyItem, toggleStarredOnly } from './filter';
@@ -155,6 +157,21 @@ function addSelectEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu): 
 	menu.addSeparator();
 }
 
+// Repeat…, in a group of its own after Select, in the open card's menus when its item doesn't repeat: a
+// repeating item's card has the repeat button for it.
+function addRepeatEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
+	const line = anchor.line;
+	const text = line === null ? undefined : view.lines()[line]?.text;
+	if (line === null || text === undefined || timelessItemRow(text, line).repeats) return;
+	menu.addItem((entry) =>
+		entry
+			.setTitle('Repeat…')
+			.setIcon('repeat')
+			.onClick(atLine(anchor, () => toggleRepeatPopover(view))),
+	);
+	menu.addSeparator();
+}
+
 function addCollapseAllEntries(view: PrinceListView, model: ListModel, menu: Menu): void {
 	const { canCollapse, canExpand } = collapseChoices(headingLinesOf(model), view.collapsed.lines());
 	if (!canCollapse && !canExpand) return;
@@ -225,6 +242,7 @@ export function showCardMenu(view: PrinceListView, button: HTMLElement): void {
 	const menu = new Menu();
 	const anchor = trackWhileShown(view, item.titleLine, menu);
 	addSelectEntry(view, anchor, menu);
+	addRepeatEntry(view, anchor, menu);
 	itemMenu(view, anchor, menu);
 	const { left, bottom, width } = button.getBoundingClientRect();
 	menu.showAtPosition({ x: left, y: bottom, width, overlap: true, left: true }, button.doc);
@@ -249,7 +267,8 @@ function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
 		const anchor = trackWhileShown(view, item.titleLine, menu);
 		addSelectEntry(view, anchor, menu);
 		// The open card shows its box, star and date already, so it gets what its ⋯ has.
-		if (!row.classList.contains(CARD_CLASS)) itemQuickMenu(view, item, row, anchor, menu);
+		if (row.classList.contains(CARD_CLASS)) addRepeatEntry(view, anchor, menu);
+		else itemQuickMenu(view, item, row, anchor, menu);
 		itemMenu(view, anchor, menu);
 	} else if (section) {
 		headingMenu(view, model, section, menu);

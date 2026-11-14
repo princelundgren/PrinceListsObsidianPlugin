@@ -15,6 +15,7 @@ import {
 	openCard,
 } from './card';
 import { toggleCardStar } from './card-star';
+import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, isOpenRepeatButton, repeatClick, repeatInput, saveRepeat } from './card-repeat';
 import { cardTagsClick, closeTagPopover, escapeTagPopover, isOpenTagButton } from './card-tags';
 import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
@@ -70,6 +71,7 @@ export function swallowClickAfterHold(view: PrinceListView, el: HTMLElement): vo
 }
 
 function onChange(view: PrinceListView, evt: Event): void {
+	repeatInput(view, evt);
 	const input = view.card?.el.querySelector<HTMLInputElement>(`.${WHEN_INPUT_CLASS}`);
 	if (input && evt.target === input) whenChange(view, input);
 }
@@ -142,7 +144,7 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 			focusCardTitleEnd(view);
 			return;
 		}
-		if (cardTagsClick(view, target)) return;
+		if (cardTagsClick(view, target) || repeatClick(view, target)) return;
 		if (target.closest(`.${CARD_STAR_CLASS}`)) {
 			toggleCardStar(view);
 			return;
@@ -183,6 +185,12 @@ function keepTagFieldFocused(view: PrinceListView, evt: MouseEvent): void {
 	if (target && isOpenTagButton(view, target)) evt.preventDefault();
 }
 
+// So the click that follows closes the repeat popover, as for the tag popover's button.
+function keepRepeatFocused(view: PrinceListView, evt: MouseEvent): void {
+	const target = targetOf(evt);
+	if (target && isOpenRepeatButton(view, target)) evt.preventDefault();
+}
+
 // The title is only as wide as its text, so a press beside it lands on its line: the click that
 // follows puts the caret in the title, and the field that has focus keeps it until then.
 function keepFocusBesideTitle(evt: MouseEvent): void {
@@ -193,6 +201,7 @@ function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
 	keepFieldFocused(evt);
 	keepFocusBesideTitle(evt);
 	keepTagFieldFocused(view, evt);
+	keepRepeatFocused(view, evt);
 	keepTextUnselected(view, evt);
 }
 
@@ -235,6 +244,7 @@ function onBeforeInput(view: PrinceListView, evt: InputEvent): void {
 // The `input` event is typed as a plain Event, without Obsidian's targetNode, so the field is found
 // among the view's own few textareas.
 function onInput(view: PrinceListView, evt: Event): void {
+	repeatInput(view, evt);
 	const target = Array.from(view.contentEl.querySelectorAll('textarea')).find((field) => field === evt.target);
 	if (!target) return;
 	if (target.hasClass(CARD_TITLE_CLASS)) cardTitleInput(view, target);
@@ -253,6 +263,9 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 		} else if (target === view.tagPopover?.input) {
 			evt.preventDefault();
 			escapeTagPopover(view);
+		} else if (isInRepeatPopover(view, target)) {
+			evt.preventDefault();
+			escapeRepeatPopover(view);
 		} else if (view.card?.el.contains(target)) {
 			evt.preventDefault();
 			closeCard(view);
@@ -268,7 +281,10 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 		// Cmd+Enter is the view's own key, which adds an item, so it doesn't also close a card.
 		if (Keymap.isModifier(evt, 'Mod')) return;
 		// A title or heading is one line, so Enter writes no line break.
-		if (target.hasClass(CARD_TITLE_CLASS)) {
+		if (target.instanceOf(HTMLInputElement) && isInRepeatPopover(view, target)) {
+			evt.preventDefault();
+			saveRepeat(view);
+		} else if (target.hasClass(CARD_TITLE_CLASS)) {
 			evt.preventDefault();
 			if (evt.shiftKey) addItemBelowCard(view);
 			else closeCard(view);
@@ -317,6 +333,8 @@ function onFocusOut(view: PrinceListView, evt: FocusEvent): void {
 	}
 	// Switching to another app leaves the popover open, as it leaves the list's title field.
 	if (target === view.tagPopover?.input && !view.tagPopover.el.contains(focusing) && target.doc.hasFocus()) closeTagPopover(view);
+	// The same for the repeat popover, which holds several controls.
+	if (isInRepeatPopover(view, target) && !isInRepeatPopover(view, focusing) && target.doc.hasFocus()) closeRepeatPopover(view);
 	// A card whose item an outside change took closes once focus leaves it.
 	if (card && inCard && card.lostAt !== null && !card.el.contains(focusing)) dismissCard(view);
 }

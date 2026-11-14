@@ -59,6 +59,7 @@ You can embed lists in normal notes.
 
 - **Add** with the floating **+**, and **drag** to reorder. The settings can put a **+** in the list's header instead, or as well, on desktop, mobile or both.
 - **Star** an item and give it a date.
+- **Repeat** an item: set every 3 days, each month on the last day or another rule, with an end if you like, from its card or its menu.
 - **Tags:** write a tag on an item, or add it from the tag button in its card, with suggestions. Items show their tags as labels.
 - **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, ticks, stars, tags, dates or deletes them all at once, with Undo, and dragging one drags them all. A selected heading brings its section.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.

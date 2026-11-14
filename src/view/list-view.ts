@@ -9,6 +9,7 @@ import { labelWithKey } from '../core/key-name';
 import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
 import { parseList, type ListModel } from '../core/parse';
+import type { RepeatDraft } from '../core/repeat-line';
 import { serialQueue } from '../core/queue';
 import { RowSelection } from '../core/selection';
 import type { TagStripMode } from '../core/tag-strip-mode';
@@ -20,6 +21,7 @@ import type { PrinceListsSettings } from '../obsidian/settings';
 import { openAsMarkdown } from '../obsidian/switch';
 import { buildNewItemButton, hasNoItems, newItem } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
+import { closeRepeatPopover } from './card-repeat';
 import { closeTagPopover } from './card-tags';
 import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
@@ -31,6 +33,7 @@ import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
+import type { DraftBase } from './line-edit';
 import { enableMouseHold } from './hold-mouse';
 import { ownElements } from './own-rows';
 import { redraw } from './redraw';
@@ -57,6 +60,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	card: Card | null = null;
 	/** The open card's tag popover, its field and the field's type-ahead, or null while it is closed. */
 	tagPopover: { el: HTMLElement; input: HTMLInputElement; suggest: TagSuggest } | null = null;
+	/** The open card's repeat popover, the item's line as it read and the outside changes when it opened, and its draft; null while it is closed. */
+	repeatPopover: { el: HTMLElement; opened: DraftBase; draft: RepeatDraft | 'read-only' } | null = null;
 	listTitle: ListTitleSession | null = null;
 	listNote: ListNoteSession | null = null;
 	// Not `titleEl`: ItemView has an undocumented `titleEl`, the pane header's title, which Obsidian
@@ -220,6 +225,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	protected async onClose(): Promise<void> {
 		this.viewClosed = true;
 		closeTagPopover(this);
+		closeRepeatPopover(this);
 		closeSelectionTagPopover(this);
 		this.redrawFiltered.cancel();
 		this.endListNote();

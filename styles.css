@@ -891,6 +891,7 @@ button.princelists-new-item {
 button.princelists-card-actions,
 button.princelists-card-star,
 button.princelists-card-tag-button,
+button.princelists-card-repeat,
 .princelists-format-bar button,
 .princelists-when-button,
 button.princelists-archived-toggle,
@@ -909,6 +910,7 @@ button.princelists-find-button {
 button.princelists-card-actions:not(:focus-visible),
 button.princelists-card-star:not(:focus-visible),
 button.princelists-card-tag-button:not(:focus-visible),
+button.princelists-card-repeat:not(:focus-visible),
 button.princelists-card-tag-remove:not(:focus-visible),
 .princelists-format-bar button:not(:focus-visible),
 button.princelists-archived-toggle:not(:focus-visible),
@@ -925,6 +927,7 @@ button.princelists-collapse:not(:focus-visible) {
 	button.princelists-card-actions:hover,
 	button.princelists-card-star:hover,
 	button.princelists-card-tag-button:hover,
+	button.princelists-card-repeat:hover,
 	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button,
 	button.princelists-archived-toggle:hover,
@@ -960,6 +963,7 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 .princelists-is-mobile button.princelists-card-actions,
 .princelists-is-mobile button.princelists-card-star,
 .princelists-is-mobile button.princelists-card-tag-button,
+.princelists-is-mobile button.princelists-card-repeat,
 .princelists-is-mobile .princelists-format-bar button,
 .princelists-is-mobile .princelists-when-button,
 .princelists-is-mobile button.princelists-archived-toggle,
@@ -1098,6 +1102,7 @@ button.princelists-strip-tag,
 button.princelists-strip-no-tag,
 button.princelists-clear-tags,
 button.princelists-card-tag-button,
+button.princelists-card-repeat,
 button.princelists-card-tag-remove {
 	min-width: 24px;
 	min-height: 24px;
@@ -1204,9 +1209,10 @@ button.princelists-selection-tag-remove {
 	}
 }
 
-/* The card's tag popover and the selection's look alike. Obsidian's suggestions for their fields draw
-   above them. */
+/* The card's tag popover, the card's repeat popover and the selection's tag popover look alike.
+   Obsidian's suggestions for their fields draw above them. */
 .princelists-tag-popover,
+.princelists-repeat-popover,
 .princelists-selection-tag-popover {
 	z-index: var(--layer-popover);
 	width: 16em;
@@ -1218,17 +1224,53 @@ button.princelists-selection-tag-remove {
 }
 
 .theme-dark .princelists-tag-popover,
+.theme-dark .princelists-repeat-popover,
 .theme-dark .princelists-selection-tag-popover {
 	background-color: var(--background-secondary);
 }
 
-/* The card's hangs under its head, its end at the tools' end, over the card's content, so opening it
-   moves nothing. */
-.princelists-tag-popover {
+/* The card's hang under its head, their end at the tools' end, over the card's content, so opening
+   one moves nothing. The repeat popover's rows are wider than a tag's field, but never wider than the
+   card. */
+.princelists-tag-popover,
+.princelists-repeat-popover {
 	position: absolute;
 	top: calc(100% + var(--size-2-2));
 	inset-inline-end: 0;
 	max-width: 100%;
+}
+
+.princelists-repeat-popover {
+	box-sizing: border-box;
+	width: 20em;
+}
+
+.princelists-repeat-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2);
+}
+
+.princelists-repeat-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-1) var(--size-4-2);
+}
+
+.princelists-repeat-row > :first-child:not(select, input) {
+	min-width: 6.5em;
+}
+
+input.princelists-repeat-count {
+	width: 5em;
+}
+
+.princelists-repeat-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: var(--size-4-2);
 }
 
 /* The selection's sits above the bar's Tag button, its end at the button's, and stays inside the view
@@ -1344,17 +1386,19 @@ button.princelists-card-star.is-starred svg {
 		top: calc((1em - 1cap) / 2);
 	}
 
-	/* The open card's tag, star, day and ⋯ are buttons of one size, centered on one line. Except on
-	   a phone, the tag, the star, and the calendar when there is no day, are as small as the row's
-	   star, centered in that box. */
+	/* The open card's tag, star, day, repeat and ⋯ are buttons of one size, centered on one line.
+	   Except on a phone, the tag, the star, the repeat and the calendar when there is no day, are as
+	   small as the row's star, centered in that box. */
 	button.princelists-card-tag-button,
 	button.princelists-card-star,
+	button.princelists-card-repeat,
 	.princelists-when-button {
 		--princelists-icon-slot: var(--icon-size);
 	}
 
 	button.princelists-card-tag-button > svg,
 	button.princelists-card-star > svg,
+	button.princelists-card-repeat > svg,
 	.princelists-when-button > svg {
 		--icon-size: var(--princelists-mark-size);
 		margin: calc((var(--princelists-icon-slot) - var(--icon-size)) / 2);
@@ -1362,6 +1406,7 @@ button.princelists-card-star.is-starred svg {
 
 	.princelists-is-mobile button.princelists-card-tag-button > svg,
 	.princelists-is-mobile button.princelists-card-star > svg,
+	.princelists-is-mobile button.princelists-card-repeat > svg,
 	.princelists-is-mobile .princelists-when-button > svg {
 		--icon-size: var(--princelists-icon-slot);
 	}

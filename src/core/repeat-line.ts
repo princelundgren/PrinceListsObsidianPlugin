@@ -1,4 +1,4 @@
-import { findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, tickLine, TASKS_SIGNIFIERS } from './item-line';
+import { endOf, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, tickLine, TASKS_SIGNIFIERS } from './item-line';
 import { addDays, nextDay, readEnd, readRule, stepDay, writeEnd, writeRule, type RepeatEnd, type RepeatRule } from './repeat';
 import { dayOf, daysFrom, isRealDay, setWhen } from './when';
 
@@ -13,6 +13,12 @@ export interface LineRepeat {
 	problem: RepeatProblem | null;
 }
 
+/** What the repeat popover starts from: the rule and end a line reads as. */
+export interface RepeatDraft {
+	rule: RepeatRule;
+	end: RepeatEnd | null;
+}
+
 export type RepeatTick = { kind: 'moved'; line: string; next: string } | { kind: 'ended'; line: string };
 
 const MESSAGES: Record<RepeatProblem, string> = {
@@ -21,15 +27,23 @@ const MESSAGES: Record<RepeatProblem, string> = {
 	date: "This item has a date that doesn't exist, so it isn't ticked.",
 };
 
+// What a save says instead of the tick's message. A draft can't give a line whose rule can't be read, so
+// that problem keeps the tick's.
+const SAVE_MESSAGES: Partial<Record<RepeatProblem, string>> = {
+	end: "This item's 🔚 end can't be read, so the repeat isn't saved.",
+	date: "This item has a date that doesn't exist, so the repeat isn't saved.",
+};
+
 export class RepeatingItemError extends Error {
-	constructor(readonly problem: RepeatProblem) {
-		super(MESSAGES[problem]);
+	constructor(readonly problem: RepeatProblem, message: string = MESSAGES[problem]) {
+		super(message);
 		this.name = 'RepeatingItemError';
 	}
 }
 
 const REPEAT_MARK = '🔁';
 const END_MARK = '🔚';
+const EVERY_DAY: RepeatRule = { every: 1, unit: 'day', onLast: false, whenDone: false };
 const REPEAT_PREFIX = /^🔁️?/;
 const END_PREFIX = /^ +🔚️? */;
 const DAY_LENGTH = '2026-11-13'.length;
@@ -107,6 +121,27 @@ export function tickRepeating(line: string, now: Date): RepeatTick {
 	return { kind: 'moved', line: joinItemLine({ ...counted, tail: moved + afterFields }), next };
 }
 
+/** Whether `draft` can be written to a line and read back, which a rule of `every 0` or an end with no date can't. */
+export function canWrite(draft: RepeatDraft): boolean {
+	return readRule(writeRule(draft.rule)) !== null && (draft.end === null || readEnd(writeEnd(draft.end).slice(END_MARK.length)) !== null);
+}
+
+/**
+ * What the repeat popover shows for `line`: its rule and end, or every day for a line that doesn't
+ * repeat, with its end taken from a `🔚` the title ends in that reads as one. 'read-only' for a rule
+ * or end the plugin can't read, which the popover only shows and can remove.
+ */
+export function draftOf(line: string): RepeatDraft | 'read-only' {
+	const repeat = repeatOf(line);
+	if (repeat) {
+		if (repeat.problem === 'rule' || repeat.problem === 'end' || repeat.rule === null) return 'read-only';
+		return { rule: repeat.rule, end: repeat.end };
+	}
+	const parts = parseItemLine(line);
+	const endText = parts ? endOf(parts.title) : '';
+	return { rule: EVERY_DAY, end: endText === '' ? null : readEnd(endText.replace(END_PREFIX, '')) };
+}
+
 /**
  * The line repeating by `rule` and ending as `end` says, or never for null. A line with no date gets
  * a `⏳` on `today`; an existing `🔁` and `🔚` are replaced in place.
@@ -118,15 +153,28 @@ export function setRepeat(line: string, rule: RepeatRule, end: RepeatEnd | null,
 	const { fields, end: afterFields } = splitTail(parts.tail);
 	const field = `${REPEAT_MARK} ${writeRule(rule)}`;
 	const span = repeatSpan(fields);
+	const repeatedBefore = span !== undefined;
 	const changed = span
 		? fields.slice(0, span.from) + field + fields.slice(span.to)
 		: `${fields} ${field}`;
 	// Reading again lets a `🔚` that sat in the title count as the end now that the line repeats.
 	const repeating = parseItemLine(joinItemLine({ ...parts, tail: changed + afterFields })) as ItemParts;
-	const newEnd = end === null ? '' : ` ${writeEnd(end)}`;
+	// A title `🔚` that is no end was title text before the line repeated, and stays so.
+	const kept = !repeatedBefore && repeating.end !== '' && readEnd(repeating.end.replace(END_PREFIX, '')) === null ? repeating.end : '';
+	const newEnd = kept + (end === null ? '' : ` ${writeEnd(end)}`);
 	// An end after an empty title leaves the tail's first field touching it.
 	const needsSpace = repeating.title + newEnd + repeating.marks !== '' && !/^\s/.test(repeating.tail);
 	return joinItemLine({ ...repeating, end: newEnd, tail: needsSpace ? ` ${repeating.tail}` : repeating.tail });
+}
+
+/**
+ * `line` if it repeats in a way a tick can follow. Throws RepeatingItemError, with a message that says
+ * the repeat isn't saved, when it doesn't, so a save never writes a line the plugin then refuses to tick.
+ */
+export function ensureTickable(line: string): string {
+	const problem = repeatOf(line)?.problem;
+	if (problem) throw new RepeatingItemError(problem, SAVE_MESSAGES[problem]);
+	return line;
 }
 
 /** The line without its `🔁` and `🔚`, each with the spaces before it. */

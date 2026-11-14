@@ -6,13 +6,14 @@ import type { ItemBlock } from '../core/parse';
 import { setStar } from '../core/star';
 import { dayAfter, dayOf, setWhen } from '../core/when';
 import { openCard } from './card';
+import { toggleRepeatPopover } from './card-repeat';
 import { whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { queueLineEdit, queueRemoveWhen } from './line-edit';
 import type { PrinceListView } from './list-view';
 import { atLine } from './menu-anchor';
 import { queueTickAt } from './tick';
 
-// What the item's card does, from its row's right-click menu: tick, star and the date. Each entry
+// What the item's card does, from its row's right-click menu: tick, star, the date and the repeat. Each entry
 // says what the item holds when the menu opens, and does just that.
 export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLElement, anchor: TrackedLine, menu: Menu): void {
 	const { done, starred, when } = timelessItemRow((view.lines()[item.titleLine] as Line).text, item.titleLine);
@@ -34,7 +35,14 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 	menu.addItem((entry) => entry.setTitle('Set date to tomorrow').setIcon('calendar-plus').onClick(setDay(() => dayAfter(new Date()))));
 	menu.addItem((entry) => entry.setTitle('Set date…').setIcon('calendar').onClick(atLine(anchor, (line) => pickDate(view, line))));
 	if (when !== null) menu.addItem((entry) => entry.setTitle('Remove date').setIcon('calendar-x').onClick(atLine(anchor, (line) => queueRemoveWhen(view, line))));
+	menu.addItem((entry) => entry.setTitle('Repeat…').setIcon('repeat').onClick(atLine(anchor, (line) => repeatPopover(view, line))));
 	menu.addSeparator();
+}
+
+// The item's card opens with its repeat popover open.
+function repeatPopover(view: PrinceListView, line: number): void {
+	openCard(view, line);
+	toggleRepeatPopover(view);
 }
 
 // The item's card opens with the platform's date picker, which sets the date as the card's own
