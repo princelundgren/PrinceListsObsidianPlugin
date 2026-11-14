@@ -1523,13 +1523,13 @@ Checked 2026-10-20.
   - `TextFileView` reloading and merging on outside changes
   - `MarkdownRenderer` needing a Component
   - `file.parent` being `null` for a note outside the vault
-- **Seen in Obsidian 1.15.1, not documented:** a list opened in a tab showing a Markdown note
-  firing `active-leaf-change` and `file-open` before `setViewState` replaces the Markdown view
   - the `--view-bottom-spacing` CSS variable, set on an iPhone and unset on macOS
   - iOS (1.14.5) showing a drag's types only as `Files` until the drop
   - iOS 18.7 (1.14.5) delivering a drop from Photos with `types` `['Files']` and no files or items
   - Obsidian's own `dragover` listener making a drop a move unless the view sets `dropEffect`
   - the browser not counting the plugin's `setRangeText` insert as typing for its undo
+- **Seen in Obsidian 1.15.1, not documented:** a list opened in a tab showing a Markdown note
+  firing `active-leaf-change` and `file-open` before `setViewState` replaces the Markdown view
 - **Not yet measured on a device:** the 800 ms of the iOS `contextmenu` hold; 1a confirmed the
   event itself. 1a also confirmed a folder long-press on an iPhone reaching `file-menu`, and, on
   macOS, how a note from outside the vault behaves (opening, rendering, writing, renaming, and
