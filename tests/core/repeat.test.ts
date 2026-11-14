@@ -97,6 +97,21 @@ describe('stepDay', () => {
 	});
 });
 
+describe('years 0 to 99', () => {
+	test.each([
+		['0099-01-31', rule(1, 'month'), '0099-02-28'],
+		['0001-01-31', rule(1, 'month'), '0001-02-28'],
+		['0000-01-31', rule(1, 'month'), '0000-02-29'],
+		['0004-01-31', rule(1, 'month', { onLast: true }), '0004-02-29'],
+		['0099-06-15', rule(1, 'year'), '0100-06-15'],
+		['0099-06-15', rule(1, 'month', { onLast: true }), '0099-06-30'],
+		['0099-06-30', rule(1, 'month', { onLast: true }), '0099-07-31'],
+		['0099-12-31', rule(1, 'day'), '0100-01-01'],
+	])('stepDay from %s by %j gives %s', (day, repeat, expected) => {
+		expect(stepDay(day, repeat)).toBe(expected);
+	});
+});
+
 describe('the end of the date range', () => {
 	test.each([
 		['9999-12-31', rule(1, 'day')],

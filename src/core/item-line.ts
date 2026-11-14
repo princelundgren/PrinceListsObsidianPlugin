@@ -248,10 +248,11 @@ export function markTime(mark: string): Date | null {
 	const [y, mo, d, h, mi] = (m[1] ? [m[1], m[2], m[3], m[4], m[5]] : [m[6], m[7], m[8]]).map(
 		(n) => (n === undefined ? undefined : Number(n)),
 	) as [number, number, number, number | undefined, number | undefined];
-	const date =
-		h === undefined || mi === undefined
-			? new Date(y, mo - 1, d, 23, 59, 59, 999)
-			: new Date(y, mo - 1, d, h, mi);
+	// `new Date(y, …)` reads a year from 0 to 99 as 1900 to 1999, so set the year on its own.
+	const date = new Date(0);
+	date.setFullYear(y, mo - 1, d);
+	if (h === undefined || mi === undefined) date.setHours(23, 59, 59, 999);
+	else date.setHours(h, mi, 0, 0);
 	const exists =
 		date.getFullYear() === y &&
 		date.getMonth() === mo - 1 &&
