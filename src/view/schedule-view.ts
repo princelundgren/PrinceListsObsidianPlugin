@@ -1,5 +1,6 @@
 import { debounce, getLanguage, ItemView, type Menu, Notice, Platform, Scope, setIcon, setTooltip, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
+import { planComeBacks } from '../core/come-back';
 import { toggleItem } from '../core/edit-items';
 import { isMarkerValue } from '../core/frontmatter';
 import { labelWithKey } from '../core/key-name';
@@ -164,6 +165,27 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		}
 		this.lists = lists;
 		this.draw();
+		this.bringBack();
+	}
+
+	// Writes the due repeating items it gathers back open (spec, "Coming back"): only when the Schedule
+	// opens or gets focus, never when a list changes, and never while it is out of sight. A list that
+	// changed since it was read refuses it with no notice.
+	bringBack(): void {
+		if (!this.containerEl.isShown()) return;
+		void this.enqueue(async () => {
+			for (const path of [...this.lists.keys()]) {
+				const list = this.lists.get(path);
+				const file = this.app.vault.getFileByPath(path);
+				if (!list || !file) continue;
+				const now = new Date();
+				// The done items the Schedule shows of the list, which leaves archived ones out.
+				const gathered = new Set(unarchived(list.items, now, this.archiveDelay.ms).filter((item) => item.done).map((item) => item.line));
+				if (gathered.size === 0) continue;
+				const planned = planComeBacks(list.text, contentStartLine(list.text), now, (line) => gathered.has(line));
+				if (planned && (await editListFile(this.app, file, list.text, planned.next, null)) === 'written') this.listRead(file, planned.next);
+			}
+		});
 	}
 
 	private listChanged(file: TFile, text: string, cache: CachedMetadata): void {

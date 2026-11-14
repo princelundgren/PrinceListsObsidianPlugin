@@ -1,9 +1,11 @@
 import { getLinkpath, MarkdownRenderChild, Notice, Platform, setIcon, type App, type Component, type TFile } from 'obsidian';
 import { guardedWrite, type WriteResult } from '../core/action-write';
+import { isArchived } from '../core/archive';
 import { blockLink } from '../core/block-source';
+import { planComeBacks } from '../core/come-back';
 import { visibleSections, type SectionRows } from '../core/display';
 import { ListEditing } from '../core/editing';
-import type { OwnEdit } from '../core/follow';
+import { NO_LINES_MOVED, type OwnEdit } from '../core/follow';
 import { splitLines } from '../core/lines';
 import { parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
@@ -60,8 +62,11 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 
 	onload(): void {
-		const { metadataCache, vault } = this.app;
+		const { metadataCache, vault, workspace } = this.app;
 		this.registerEvent(metadataCache.on('changed', (file, data) => this.fileChanged(file, data)));
+		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
+			if (leaf?.view.containerEl.contains(this.rootEl)) this.bringBack();
+		}));
 		this.registerEvent(vault.on('create', () => void this.resolve()));
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
@@ -71,7 +76,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		}));
 		registerBlockEvents(this, this.rootEl, this.notePath);
 		enableBlockDrag(this);
-		void this.resolve();
+		void this.resolve().then(() => this.bringBack());
 	}
 
 	onunload(): void {
@@ -79,8 +84,8 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 
 	// guardedWrite with nothing of its own to save: the block's text changes only by its own writes and
-	// the file's.
-	async write(next: string, expected: string, edit: OwnEdit): Promise<WriteResult> {
+	// the file's. A refusal shows `refusedNotice`, or nothing when it is null.
+	async write(next: string, expected: string, edit: OwnEdit, refusedNotice: string | null = CHANGED_ELSEWHERE_NOTICE): Promise<WriteResult> {
 		const { file, editing } = this;
 		if (!file) return 'refused';
 		const outcome = await guardedWrite(
@@ -108,8 +113,23 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 			return 'failed' as const;
 		});
 		if (outcome === 'failed') return outcome;
-		if (outcome !== 'written') new Notice(CHANGED_ELSEWHERE_NOTICE);
+		if (outcome !== 'written' && refusedNotice !== null) new Notice(refusedNotice);
 		return outcome === 'written' ? outcome : 'refused';
+	}
+
+	// Writes the due repeating items the block shows back open, archived ones left out (spec, "Coming
+	// back"): only when its note opens or gets focus, never when the list changes, and not while it is
+	// out of sight or a field or a drag is open. A list another view wrote first refuses it with no notice.
+	bringBack(): void {
+		const { file } = this;
+		if (!file || !this.rootEl.isShown() || this.field || this.dragging || this.message() !== null) return;
+		void this.enqueue(async () => {
+			if (this.file !== file || this.field || this.dragging || this.message() !== null) return;
+			const text = this.editing.text;
+			const now = new Date();
+			const planned = planComeBacks(text, contentStartLine(text), now, (line) => !isArchived(line, now, this.archiveDelay.ms));
+			if (planned && (await this.write(planned.next, text, NO_LINES_MOVED, null)) === 'written' && !this.field) this.draw();
+		});
 	}
 
 	dragHost(): RowDragHost {
