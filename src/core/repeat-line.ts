@@ -233,8 +233,9 @@ function comebackOf(line: string, now: Date): Comeback | null {
 	// Most lines don't repeat, and a list checks every line on each redraw: skip them before parsing.
 	if (!line.includes(REPEAT_MARK)) return null;
 	const parts = parseItemLine(line);
-	const done = tickedAt(line, now);
-	if (!parts || !done) return null;
+	if (!parts) return null;
+	const done = tickedAt(parts, now);
+	if (!done) return null;
 	// A done 🔁 line with no ✔ is a Tasks history line.
 	if (!parts.marks.includes('✔')) return null;
 	const { fields } = splitTail(parts.tail);
