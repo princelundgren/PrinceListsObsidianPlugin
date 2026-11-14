@@ -37,6 +37,9 @@ describe('tickLine', () => {
 		['- [ ] a 🔁 every week 📅 2026-10-30', `- [x] a ${STAMP} 🔁 every week 📅 2026-10-30`],
 		['- [ ] a ✔ nonsense', `- [x] a ✔ nonsense ${STAMP}`],
 		['- [ ] a ^id', `- [x] a ${STAMP} ^id`],
+		['- [ ] a ✅ 2026-10-01', `- [x] a ${STAMP}`],
+		['- [ ] a ✅ 2026-10-01 📅 2026-10-30', `- [x] a ${STAMP} 📅 2026-10-30`],
+		['- [ ] a 🔁 every week ✅ 2026-10-01 📅 2026-10-30', `- [x] a ${STAMP} 🔁 every week 📅 2026-10-30`],
 	])('%s', (input, expected) => {
 		expect(tickLine(input, now)).toBe(expected);
 	});
@@ -54,7 +57,6 @@ describe('tickLine', () => {
 		['📅 2026-10-01'],
 		['📆 2026-10-01'],
 		['🗓 2026-10-01'],
-		['✅ 2026-10-01'],
 		['❌ 2026-10-01'],
 		['🔁 every week'],
 		['🔁 every 2 weeks on Monday!'],

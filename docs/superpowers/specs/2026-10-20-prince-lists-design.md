@@ -459,6 +459,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 - **Ticking an item writes `- [x]`** plus our own field, `✔ YYYY-MM-DD HH:mm`, in local time on a
   24-hour clock. A repeating item is ticked the same way (Items).
+- **A tick drops a leftover `✅ …`,** as it drops a leftover `✔ …`, so an old completion date
+  can't archive the item at once (owner, 2026-11-14).
 - **One field, not two.** The owner wanted the date and time together.
 - **Why not Tasks' ✅:** its field takes only a date. The pattern `✅\uFE0F? *(\d{4}-\d{2}-\d{2})$`
   in Tasks' `DefaultTaskSerializer.ts` accepts nothing else.
