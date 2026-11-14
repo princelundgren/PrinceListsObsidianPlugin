@@ -224,9 +224,11 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
 - **Nothing is written until Save:** #320 asks to check the next dates "before it's saved". The
   popover holds a draft; Save makes one write and one Undo step, and Escape or a click outside
   drops the draft. If the line changes from outside while it's open, Save is refused with a notice.
-  The popover reopens on the item's line when the change left that line as it was, and closes with
-  the notice when the change rewrote the item's own line, which takes the card's item as it does for
-  the card's fields. Save and Remove repeat then write nothing.
+  The popover then reopens with the user's draft when the item's line still reads as it did when
+  the popover opened, since a refusal the user didn't cause shouldn't lose what they set, and on
+  the line as it reads now when the change touched it. It closes with the notice when the change
+  rewrote the item's own line, which takes the card's item as it does for the card's fields. Save
+  and Remove repeat then write nothing.
 - **Save never writes a line it then couldn't repeat.** A title `🔚` that is no end stays in the
   title as written, so a line that keeps one, or has a date that doesn't exist, isn't saved. The
   notice says so: "This item's 🔚 end can't be read, so the repeat isn't saved." or "This item has a

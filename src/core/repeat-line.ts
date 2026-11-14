@@ -167,6 +167,15 @@ export function draftOf(line: string): RepeatDraft | 'read-only' {
 }
 
 /**
+ * The draft a popover reopens with after its Save was refused: the user's own while the line still
+ * reads as it did when the popover opened (a refusal they didn't cause shouldn't lose what they
+ * set), else one read from the line as it reads now.
+ */
+export function draftAfterRefusal(draft: RepeatDraft | 'read-only', openedText: string, lineText: string): RepeatDraft | 'read-only' {
+	return lineText === openedText ? draft : draftOf(lineText);
+}
+
+/**
  * The line repeating by `rule` and ending as `end` says, or never for null. A line with no date gets
  * a `⏳` on `today`; an existing `🔁` and `🔚` are replaced in place.
  */

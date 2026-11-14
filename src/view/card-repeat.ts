@@ -1,7 +1,7 @@
 import { ButtonComponent, DropdownComponent, getLanguage, Notice, setIcon, TextComponent } from 'obsidian';
 import type { RepeatEnd, RepeatUnit } from '../core/repeat';
 import { stepDay, upcomingDays } from '../core/repeat';
-import { anchorOf, canWrite, draftOf, ensureTickable, removeRepeat, repeatOf, setRepeat, type RepeatDraft } from '../core/repeat-line';
+import { anchorOf, canWrite, draftAfterRefusal, draftOf, ensureTickable, removeRepeat, repeatOf, setRepeat, type RepeatDraft } from '../core/repeat-line';
 import { dayLabel, dayOf } from '../core/when';
 import { WHEN_INPUT_CLASS } from './card-when';
 import { addHiddenLabel } from './dom';
@@ -56,11 +56,16 @@ export function toggleRepeatPopover(view: PrinceListView): void {
 		escapeRepeatPopover(view);
 		return;
 	}
+	openRepeatPopover(view);
+}
+
+// `kept` is the draft to show instead of the line's own.
+function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 'read-only'): void {
 	const line = view.selected;
 	const tools = view.card?.el.querySelector<HTMLElement>('.princelists-card-tools');
 	const text = line === null ? undefined : view.lines()[line]?.text;
 	if (!tools || text === undefined) return;
-	const draft = draftOf(text);
+	const draft = kept ?? draftOf(text);
 	// Focusable itself, so a press on its labels or gaps keeps focus inside it.
 	const el = tools.createDiv({ cls: POPOVER_CLASS, attr: { role: 'dialog', tabindex: -1 } });
 	view.repeatPopover = { el, opened: { text, seen: view.outsideChanges }, draft };
@@ -137,7 +142,8 @@ function removeRepeatFromLine(view: PrinceListView): void {
 	writeToLine(view, removeRepeat);
 }
 
-// One write from the draft's base. The popover closes first; if the line moved on, it opens again on it.
+// One write from the draft's base. The popover closes first; if the write is refused, it opens again
+// with the draft while the line still reads as it did, else on the line as it reads now.
 function writeToLine(view: PrinceListView, change: (line: string) => string): void {
 	const open = view.repeatPopover;
 	const line = view.selected;
@@ -153,7 +159,9 @@ function writeToLine(view: PrinceListView, change: (line: string) => string): vo
 	queueDraftEdit(view, line, open.opened, change, {
 		written: () => focusRepeatEntry(view),
 		refused: (tracked) => {
-			if (view.selected === tracked) toggleRepeatPopover(view);
+			const now = view.lines()[tracked]?.text;
+			if (view.selected !== tracked || now === undefined) return;
+			openRepeatPopover(view, draftAfterRefusal(open.draft, open.opened.text, now));
 		},
 	});
 }
