@@ -1137,6 +1137,8 @@ From here on the document is for the builder.
     - The choice survives a rename or move because it's keyed by the file object, not its path:
       the vault's `rename` event (0.9.7) passes that same file with its new path.
   - Wait until the view's text has loaded: `TextFileView.data` is unset until then (observed).
+  - Skip the note if a switch to it is already under way in this pane: both events can find the
+    Markdown view before `setViewState` replaces it (see "Why both events").
   - Detect the marker from the editor's text, `getViewData()`, with `getFrontMatterInfo` and
     `parseYaml`.
     - Not from `data`: it waits for the save, up to 2 seconds after an edit, so it would still hold
@@ -1153,6 +1155,11 @@ From here on the document is for the builder.
     fires `active-leaf-change` once before its text loads and once after. So the first event that
     finds the text loaded switches. Reading the file instead, with `vault.cachedRead`, doesn't
     help, because the switch would still run during the load.
+  - **Observed in 1.15.1:** a list opening in a tab that already shows a Markdown note fires
+    `active-leaf-change` and then `file-open`, both with its text loaded. The first starts the
+    switch, and the second still finds the Markdown view, since `setViewState` hasn't replaced it
+    yet. So a note with a switch under way in its pane is skipped, and the switch runs once. The
+    skip is keyed by the note as well as the pane, so it never holds back a different note.
 - **`active-leaf-change` fires on every file load in the active leaf (observed).** Without that
   record, it would push a pane straight back after "Open as Markdown". After the pane switches
   to Markdown by itself because the marker was removed, the marker is gone, so nothing switches it
@@ -1521,6 +1528,8 @@ Checked 2026-10-20.
   - iOS 18.7 (1.14.5) delivering a drop from Photos with `types` `['Files']` and no files or items
   - Obsidian's own `dragover` listener making a drop a move unless the view sets `dropEffect`
   - the browser not counting the plugin's `setRangeText` insert as typing for its undo
+- **Seen in Obsidian 1.15.1, not documented:** a list opened in a tab showing a Markdown note
+  firing `active-leaf-change` and `file-open` before `setViewState` replaces the Markdown view
 - **Not yet measured on a device:** the 800 ms of the iOS `contextmenu` hold; 1a confirmed the
   event itself. 1a also confirmed a folder long-press on an iPhone reaching `file-menu`, and, on
   macOS, how a note from outside the vault behaves (opening, rendering, writing, renaming, and

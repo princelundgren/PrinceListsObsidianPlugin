@@ -12,6 +12,10 @@ function choseMarkdown(leaf: WorkspaceLeaf, file: TFile): boolean {
 	return markdownChosen.get(leaf)?.has(file) ?? false;
 }
 
+// The note each pane is switching to. Both events can find the Markdown view before setViewState
+// replaces it (observed in 1.15.1).
+const switchingTo = new WeakMap<WorkspaceLeaf, TFile>();
+
 // The same check runs on `file-open` and `active-leaf-change`, and the first event that finds the
 // view's text loaded switches: a switch made while the leaf is still loading is ignored. A note
 // opened in the same tab is loaded by `file-open`. A new tab fires `active-leaf-change` once before
@@ -37,8 +41,17 @@ function switchActiveIfList(workspace: Workspace): void {
 	// `data` is unset until the text loads (observed), and a later event decides then. It only
 	// gates: the marker is read from getViewData, the editor's text, because `data` waits for the
 	// 2-second save and would still hold a marker the user just deleted.
-	if (!view?.file || !view.data || choseMarkdown(view.leaf, view.file)) return;
-	if (isListText(view.getViewData())) void openAsList(view.leaf, view.file);
+	if (!view?.file || !view.data || switchingTo.get(view.leaf) === view.file || choseMarkdown(view.leaf, view.file)) return;
+	if (isListText(view.getViewData())) void switchToList(view.leaf, view.file);
+}
+
+async function switchToList(leaf: WorkspaceLeaf, file: TFile): Promise<void> {
+	switchingTo.set(leaf, file);
+	try {
+		await openAsList(leaf, file);
+	} finally {
+		if (switchingTo.get(leaf) === file) switchingTo.delete(leaf);
+	}
 }
 
 // Through setViewState, never openFile: Markdown is the view `.md` files open in.
