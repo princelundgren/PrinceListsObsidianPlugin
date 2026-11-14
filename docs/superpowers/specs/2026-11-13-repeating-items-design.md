@@ -178,10 +178,11 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
     on focus: no timer, as everywhere in the plugin, so a list left untouched over midnight brings
     its items back when it's next used.
   - **The Schedule and a list inside another note (owner, 2026-11-14):** when the user opens one
-    or it gets focus, for the items it gathers, which leaves out archived ones. Not when a list
-    changes, as when Sync brings a change in, and not for a tab Obsidian restored at startup that
-    hasn't been shown yet.
-  - **A list nobody opens** keeps its items done in the file until someone does.
+    or it gets focus, for every item in the lists it reads, hidden ones included, as a list does.
+    The Schedule reads every list in the vault. Not when a list changes, as when Sync brings a
+    change in, and not for a tab Obsidian restored at startup that hasn't been shown yet.
+  - **A list nobody opens,** while no Schedule is open either, keeps its items done in the file
+    until someone does.
 - **Worked out on the file's current text,** with the guarded write of a one-off action (the
   design, "Saving, outside changes, sync conflicts, undo"). When the guard refuses it, because
   another view of the same list wrote first, it writes nothing, shows nothing, and is tried again
@@ -304,8 +305,8 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   for hidden items: archived, under a collapsed heading, outside a tag filter.
 - Two views of one list bringing the same item back: one writes, the other writes nothing and
   shows nothing; the list's undo history is cleared.
-- The Schedule and a list inside another note bring items back when opened and on focus, skip
-  archived items, and write nothing when a list changes or for a restored tab not yet shown.
+- The Schedule and a list inside another note bring items back when opened and on focus, archived
+  items included, and write nothing when a list changes or for a restored tab not yet shown.
 - The "Back …" notice, and none for a line that won't come back; the repeat icon on a done row
   that will come back, and none on an ended or history row; a done item given a repeat.
 - Ticking several: repeating items tick, unrepeatable ones are skipped and counted.

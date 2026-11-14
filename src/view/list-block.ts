@@ -1,6 +1,5 @@
 import { getLinkpath, MarkdownRenderChild, Notice, Platform, setIcon, type App, type Component, type TFile } from 'obsidian';
 import { guardedWrite, type WriteResult } from '../core/action-write';
-import { isArchived } from '../core/archive';
 import { blockLink } from '../core/block-source';
 import { planComeBacks } from '../core/come-back';
 import { visibleSections, type SectionRows } from '../core/display';
@@ -117,7 +116,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		return outcome === 'written' ? outcome : 'refused';
 	}
 
-	// Writes the due repeating items the block shows back open, archived ones left out (spec, "Coming
+	// Writes every due repeating item in the block's list back open, hidden ones included (spec, "Coming
 	// back"): only when its note opens or gets focus, never when the list changes, and not while it is
 	// out of sight or a field or a drag is open. A list another view wrote first refuses it with no notice.
 	bringBack(): void {
@@ -126,8 +125,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		void this.enqueue(async () => {
 			if (this.file !== file || this.field || this.dragging || this.message() !== null) return;
 			const text = this.editing.text;
-			const now = new Date();
-			const planned = planComeBacks(text, contentStartLine(text), now, (line) => !isArchived(line, now, this.archiveDelay.ms));
+			const planned = planComeBacks(text, contentStartLine(text), new Date(), () => true);
 			if (planned && (await this.write(planned.next, text, NO_LINES_MOVED, null)) === 'written' && !this.field) this.draw();
 		});
 	}

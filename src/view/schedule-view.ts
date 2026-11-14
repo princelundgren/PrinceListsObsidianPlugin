@@ -167,9 +167,9 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.bringBack();
 	}
 
-	// Writes the due repeating items it gathers back open (spec, "Coming back"): only when the Schedule
-	// opens or gets focus, never when a list changes, and never while it is out of sight. A list that
-	// changed since it was read refuses it with no notice.
+	// Writes every due repeating item in the lists it read back open, hidden ones included (spec, "Coming
+	// back"): only when the Schedule opens or gets focus, never when a list changes, and never while it is
+	// out of sight. A list that changed since it was read refuses it with no notice.
 	bringBack(): void {
 		if (!this.containerEl.isShown()) return;
 		void this.enqueue(async () => {
@@ -177,11 +177,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 				const list = this.lists.get(path);
 				const file = this.app.vault.getFileByPath(path);
 				if (!list || !file) continue;
-				const now = new Date();
-				// The done items the Schedule shows of the list, which leaves archived ones out.
-				const gathered = new Set(unarchived(list.items, now, this.archiveDelay.ms).filter((item) => item.done).map((item) => item.line));
-				if (gathered.size === 0) continue;
-				const planned = planComeBacks(list.text, contentStartLine(list.text), now, (line) => gathered.has(line));
+				const planned = planComeBacks(list.text, contentStartLine(list.text), new Date(), () => true);
 				if (planned && (await editListFile(this.app, file, list.text, planned.next, null)) === 'written') this.listRead(file, planned.next);
 			}
 		});

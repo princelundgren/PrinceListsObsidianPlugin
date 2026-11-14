@@ -220,8 +220,8 @@ this met on 2026-10-30 **(owner)**.
   - Done items stay gray until archived. Archived items are hidden, with no "Show archived items"
     **(call)**.
 - **Repeating items that came due come back** when the note opens or gets focus while the block
-  is shown and no field or drag is open, never when the list changes. Only the items it shows
-  count, so archived ones stay done ([repeating items](2026-11-13-repeating-items-design.md),
+  is shown and no field or drag is open, never when the list changes. Every item in its list
+  counts, hidden ones included ([repeating items](2026-11-13-repeating-items-design.md),
   "Coming back").
 - **Ticking** works as in the list view.
 - **Titles are edited in place (call).** A click on a row, not on its checkbox, the zone beside it
@@ -399,7 +399,7 @@ this met on 2026-10-30 **(owner)**.
   today or its rows change. Like a list, it runs no timer, so a view left open over midnight moves
   its items when it next gets focus.
 - **Repeating items that came due come back** when it opens or gets focus while shown, never when
-  a list changes. Only the items it shows count, so archived and undated ones stay done
+  a list changes. Every item in the lists it reads counts, archived and undated ones included
   ([repeating items](2026-11-13-repeating-items-design.md), "Coming back").
 - **Lists are found** by the marker in the metadata cache's frontmatter, and read with
   `vault.cachedRead`. Notes outside the vault aren't included.
