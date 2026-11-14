@@ -216,7 +216,7 @@ describe('a line with no title', () => {
 		expect(setRepeat('- [ ] ', every(1, 'day'), end, today)).toBe(expected);
 	});
 
-	test.each(['- [ ]  🔚 5x 🔁 every day', '- [ ]  🔚 5x ⏳ 2026-11-13 🔁 every day', '- [ ] ⏳ 2026-11-13 🔁 every day'])(
+	test.each(['- [ ]  🔚 5x 🔁 every day', '- [ ]  🔚 5x ⏳ 2026-11-13 🔁 every day', '- [ ] ⏳ 2026-11-13 🔁 every day', '- [ ]  🔁 every day ⏳ 2026-11-13'])(
 		'%s comes back from a tick and an untick byte for byte',
 		(line) => {
 			expect(untickLine(tickLine(line, now))).toBe(line);
