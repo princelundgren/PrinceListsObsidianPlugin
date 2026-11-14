@@ -166,8 +166,12 @@ export function tickLine(text: string, now: Date): string {
 	if (!parts) return text;
 	// A hand-typed ✔ after the Tasks fields reads as a mark and leaves the fields in the title;
 	// that heals on untick.
+	// A leftover ✅ goes too, as a leftover ✔ does, or archiving would count it as this tick.
 	const marks = ` ${formatStamp(now)}`;
-	return joinItemLine({ ...parts, status: 'x', marks, tail: spaced(parts.title + parts.end + marks, parts.tail) });
+	const tail = withoutDoneDates(parts.tail);
+	// With no title, the tail gets the space untick takes back even when it has one of its own.
+	const gap = parts.title + parts.end === '' && /^\s/.test(parts.tail) ? ' ' : '';
+	return joinItemLine({ ...parts, status: 'x', marks, tail: gap + spaced(parts.title + parts.end + marks, tail) });
 }
 
 export function untickLine(text: string): string {

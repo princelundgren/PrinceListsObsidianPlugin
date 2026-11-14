@@ -37,6 +37,9 @@ describe('tickLine', () => {
 		['- [ ] a 🔁 every week 📅 2026-10-30', `- [x] a ${STAMP} 🔁 every week 📅 2026-10-30`],
 		['- [ ] a ✔ nonsense', `- [x] a ✔ nonsense ${STAMP}`],
 		['- [ ] a ^id', `- [x] a ${STAMP} ^id`],
+		['- [ ] a ✅ 2026-10-01', `- [x] a ${STAMP}`],
+		['- [ ] a ✅ 2026-10-01 📅 2026-10-30', `- [x] a ${STAMP} 📅 2026-10-30`],
+		['- [ ] a 🔁 every week ✅ 2026-10-01 📅 2026-10-30', `- [x] a ${STAMP} 🔁 every week 📅 2026-10-30`],
 	])('%s', (input, expected) => {
 		expect(tickLine(input, now)).toBe(expected);
 	});
@@ -54,7 +57,6 @@ describe('tickLine', () => {
 		['📅 2026-10-01'],
 		['📆 2026-10-01'],
 		['🗓 2026-10-01'],
-		['✅ 2026-10-01'],
 		['❌ 2026-10-01'],
 		['🔁 every week'],
 		['🔁 every 2 weeks on Monday!'],
@@ -75,12 +77,24 @@ describe('tickLine', () => {
 		['- [ ] a 🔼 ', `- [x] a ${STAMP} 🔼 `],
 		['- [ ] #milk', `- [x] ${STAMP.padStart(STAMP.length + 1)} #milk`],
 		['- [ ] 📅 2026-10-30', `- [x] ${STAMP.padStart(STAMP.length + 1)} 📅 2026-10-30`],
+		// The tail's own leading space stays, so an untick can tell it from the one tick adds.
+		['- [ ]  📅 2026-10-30', `- [x] ${STAMP.padStart(STAMP.length + 1)}  📅 2026-10-30`],
 	])('trailing whitespace and empty titles: %s', (input, expected) => {
 		expect(tickLine(input, now)).toBe(expected);
 	});
 
 	test('leaves a line that is not a task line alone', () => {
 		expect(tickLine('- bullet', now)).toBe('- bullet');
+	});
+});
+
+describe('a tick and an untick of an item with a leftover ✅', () => {
+	test.each([
+		['- [ ] ✅ 2026-10-01 📅 2026-10-30', '- [ ] 📅 2026-10-30'],
+		['- [ ] ✅ 2026-10-01 #t', '- [ ] #t'],
+		['- [ ] a ✅ 2026-10-01 📅 2026-10-30', '- [ ] a 📅 2026-10-30'],
+	])('%s', (line, expected) => {
+		expect(untickLine(tickLine(line, now))).toBe(expected);
 	});
 });
 
@@ -96,7 +110,7 @@ describe('untickLine', () => {
 	])('%s', (input, expected) => {
 		expect(untickLine(input)).toBe(expected);
 	});
-	test.each(['- [ ] ⏳ 2026-10-30', '- [ ] 📅 2026-11-01', '- [ ] '])('a tick and an untick of %s give it back', (line) => {
+	test.each(['- [ ] ⏳ 2026-10-30', '- [ ] 📅 2026-11-01', '- [ ] ', '- [ ]  📅 2026-11-14', '- [ ]  '])('a tick and an untick of %s give it back', (line) => {
 		expect(untickLine(tickLine(line, new Date(2026, 9, 28, 10, 0)))).toBe(line);
 	});
 });
