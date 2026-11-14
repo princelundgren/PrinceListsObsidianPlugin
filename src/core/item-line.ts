@@ -20,6 +20,11 @@ export const TASKS_SIGNIFIERS = [
 	...['🔁', '🏁', '🆔', '⛔'],
 ] as const;
 
+// The end of a field, for a pattern to end with: whitespace, the end of the fields, or the next
+// field's emoji, which Tasks needs no space before. Its capture group holds what ended the field,
+// which `setWhen` reads.
+export const FIELD_END = `(?=(\\s|$|${TASKS_SIGNIFIERS.join('|')}))`;
+
 // Ported from obsidian-tasks (MIT license), src/TaskSerializer/DefaultTaskSerializer.ts at tag
 // 8.6.0 (d37646b, identical to main at fa04fc1): the value format of each signifier, and the
 // optional U+FE0F that Tasks accepts after every one of them. Like Tasks, each pattern is
@@ -55,7 +60,7 @@ const MARK_TIME_PATTERN = new RegExp(
 export const DONE_DATE_PATTERN = new RegExp(`✅${VS16} *\\d{4}-\\d{2}-\\d{2}`);
 const DONE_DATE_FIELD = new RegExp(DONE_DATE_PATTERN, 'g');
 const REPEAT_FIELD = new RegExp(`🔁${VS16} *[a-zA-Z0-9, !]+`);
-const END_MARK = '🔚';
+export const END_MARK = '🔚';
 
 export function parseItemLine(text: string): ItemLineParts | null {
 	const match = ITEM_PATTERN.exec(text);

@@ -1,12 +1,10 @@
-import { findRunStart, joinItemLine, parseItemLine, splitTail, TASKS_SIGNIFIERS } from './item-line';
+import { FIELD_END, findRunStart, joinItemLine, parseItemLine, splitTail } from './item-line';
 
 export type DayLabelKind = 'today' | 'tomorrow' | 'weekday' | 'date-this-year' | 'date';
 
 const WHEN = '⏳';
-// Tasks reads both ⏳ and ⌛ as the scheduled date. A field ends at whitespace, the end of the
-// fields, or the next field's emoji, which Tasks needs no space before.
-const NEXT_FIELD = TASKS_SIGNIFIERS.join('|');
-const SCHEDULED_FIELD = new RegExp(`(?:⏳|⌛)\uFE0F? *(\\d{4})-(\\d{2})-(\\d{2})(?=(\\s|$|${NEXT_FIELD}))`, 'g');
+// Tasks reads both ⏳ and ⌛ as the scheduled date.
+const SCHEDULED_FIELD = new RegExp(`(?:⏳|⌛)\uFE0F? *(\\d{4})-(\\d{2})-(\\d{2})${FIELD_END}`, 'g');
 const DAY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DAY_MS = 86_400_000;
 

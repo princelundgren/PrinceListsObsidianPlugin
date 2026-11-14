@@ -1,5 +1,5 @@
 import { tickedAt } from './archive';
-import { endOf, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, untickLine, TASKS_SIGNIFIERS } from './item-line';
+import { END_MARK, endOf, FIELD_END, findRunStart, joinItemLine, parseItemLine, splitTail, tailFields, untickLine, type ItemLineParts } from './item-line';
 import { addDays, nextDay, readEnd, readRule, stepDay, writeEnd, writeRule, type RepeatEnd, type RepeatRule } from './repeat';
 import { dayOf, daysFrom, isRealDay, setWhen } from './when';
 
@@ -41,20 +41,13 @@ export class RepeatingItemError extends Error {
 }
 
 export const REPEAT_MARK = '🔁';
-const END_MARK = '🔚';
 const EVERY_DAY: RepeatRule = { every: 1, unit: 'day', onLast: false, whenDone: false };
-const REPEAT_PREFIX = /^🔁️?/;
-const END_PREFIX = /^ +🔚️? */;
+const REPEAT_PREFIX = /^🔁\uFE0F?/;
+const END_PREFIX = /^ +🔚\uFE0F? */;
 const DAY_LENGTH = '2026-11-13'.length;
 // Due, scheduled, then start: Tasks' order. Each kind reads as one, as `whenOf` reads ⏳ and ⌛.
 const ANCHOR_KINDS = [['📅', '📆', '🗓'], ['⏳', '⌛'], ['🛫']];
-// A date field ends where `when.ts`'s ends one: at whitespace, the end of the fields or the next field's emoji.
-const DATE_FIELD = new RegExp(
-	`(📅|📆|🗓|⏳|⌛|🛫)️? *(\\d{4}-\\d{2}-\\d{2})(?=(?:\\s|$|${TASKS_SIGNIFIERS.join('|')}))`,
-	'g',
-);
-
-type ItemParts = NonNullable<ReturnType<typeof parseItemLine>>;
+const DATE_FIELD = new RegExp(`(📅|📆|🗓|⏳|⌛|🛫)\uFE0F? *(\\d{4}-\\d{2}-\\d{2})${FIELD_END}`, 'g');
 
 interface DateField {
 	mark: string;
@@ -184,7 +177,7 @@ export function draftAfterRefusal(draft: RepeatDraft | 'read-only', openedText: 
 export function setRepeat(line: string, rule: RepeatRule, end: RepeatEnd | null, today: string): string {
 	if (!parseItemLine(line)) return line;
 	const dated = hasDate(line) ? line : setWhen(line, today);
-	const parts = parseItemLine(dated) as ItemParts;
+	const parts = parseItemLine(dated) as ItemLineParts;
 	const { fields, end: afterFields } = splitTail(parts.tail);
 	const field = `${REPEAT_MARK} ${writeRule(rule)}`;
 	const span = repeatSpan(fields);
@@ -193,7 +186,7 @@ export function setRepeat(line: string, rule: RepeatRule, end: RepeatEnd | null,
 		? fields.slice(0, span.from) + field + fields.slice(span.to)
 		: `${fields} ${field}`;
 	// Reading again lets a `🔚` that sat in the title count as the end now that the line repeats.
-	const repeating = parseItemLine(joinItemLine({ ...parts, tail: changed + afterFields })) as ItemParts;
+	const repeating = parseItemLine(joinItemLine({ ...parts, tail: changed + afterFields })) as ItemLineParts;
 	// A title `🔚` that is no end was title text before the line repeated, and stays so.
 	const kept = !repeatedBefore && repeating.end !== '' && readEnd(repeating.end.replace(END_PREFIX, '')) === null ? repeating.end : '';
 	const newEnd = kept + (end === null ? '' : ` ${writeEnd(end)}`);
