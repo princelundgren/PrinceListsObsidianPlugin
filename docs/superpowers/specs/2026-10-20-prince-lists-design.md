@@ -1323,7 +1323,7 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 3. Strip trailing Tasks fields and `#tags`, using Tasks' full set of signifiers:
    🔺⏫🔼🔽⏬🛫➕⏳⌛📅📆🗓✅❌🔁🏁🆔⛔.
    Like Tasks, accept an optional U+FE0F after each signifier.
-4. Insert ` ✔ YYYY-MM-DD HH:mm` there, then put back what was stripped.
+4. Insert ` ✔ YYYY-MM-DD HH:mm` there, then put back what was stripped, except a `✅` field (Completion).
 
 - **Obsidian's own block-ID writer** puts ` ^id` after an item's last block. For an item with
   notes, that's the last notes line, so the notes editor keeps a trailing `^id` on that line.
