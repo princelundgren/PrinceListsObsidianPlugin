@@ -379,7 +379,9 @@ this met on 2026-10-30 **(owner)**.
   - **A row under a subheading drops the list's name and folder,** since the subheading says them.
   - **A click on a subheading opens its list (owner),** in the tab a click on a row would use, with
     no card open: a card already open there closes, as Escape closes it **(owner, 2026-11-15)**. A
-    subheading doesn't collapse, so that click has one meaning **(owner, 2026-11-15)**.
+    subheading doesn't collapse, so that click has one meaning **(owner, 2026-11-15)**. Its name
+    and folder are a button, so Tab reaches it, with Obsidian's focus ring, and Enter opens the
+    list too **(owner, 2026-11-15)**; the button is styled as the subheading's text.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray unless grouped by
   list, and the day. The list's name is smaller, so it doesn't read as part of the title **(owner,
   2026-10-28)**, and at the row's right edge, since at the title's start it read as part of the
