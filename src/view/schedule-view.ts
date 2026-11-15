@@ -39,7 +39,7 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 const SCHEDULE_ABOUT = 'Dated items from all your lists, by day.';
 const GROUP_BUTTON_CLASS = 'princelists-group-button';
 
-/** "Group by list", which the plugin keeps for every Schedule. */
+/** Whether the Schedule groups by list, which the plugin keeps for every Schedule. */
 export interface ScheduleGrouping {
 	byList(): boolean;
 	setByList(on: boolean): void;

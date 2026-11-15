@@ -92,7 +92,7 @@ export interface ListGroup {
 }
 
 /**
- * `items`, in the Schedule's order, split by list for "Group by list": the lists by name, and each
+ * `items`, in the Schedule's order, split by list: the lists by name, and each
  * list's items in the order `items` has them.
  */
 export function byList(items: readonly ScheduledItem[]): ListGroup[] {

@@ -9,7 +9,7 @@ import { addRepeat, addStar, addTags, addWhen } from './row-marks';
 export const LIST_HEADING_CLASS = 'princelists-schedule-list-heading';
 
 /**
- * A Schedule row for `item`, with its list's name under the title when `showsList`, and the Component its
+ * A Schedule row for `item`, with its list's name when `showsList`, and the Component its
  * rendered title needs, which `host` must remove once the row goes.
  */
 export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today: string, { showsList }: { showsList: boolean }): { rowEl: HTMLLIElement; block: Component | null } {
