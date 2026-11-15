@@ -57,7 +57,7 @@ You can embed lists in normal notes.
 
 **Items**
 
-- **Add** with the floating **+**, and **drag** to reorder. The settings can put a **+** in the list's header instead, or as well, on desktop, mobile or both.
+- **Add** with the floating **+**, and **drag** to reorder. The settings can keep the **+** to desktop or mobile, or turn it off.
 - **Star** an item and give it a date.
 - **Repeat** an item: set every 3 days, each month on the last day or another rule, with an end if you like, from its card or its menu, and a ticked item is done until its next date, then comes back open when you next open or return to its list, or return to Obsidian while a list view, the Schedule or a note showing that list is on screen. Until then, Tasks queries and other apps show it done.
 - **Tags:** write a tag on an item, or add it from the tag button in its card, with suggestions. Items show their tags as labels.

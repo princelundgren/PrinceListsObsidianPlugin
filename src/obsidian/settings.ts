@@ -14,8 +14,6 @@ export interface PrinceListsSettings {
 	showScheduleButton: boolean;
 	/** Where a list shows the round "+" at its bottom right. */
 	floatingAddButton: ButtonPlatforms;
-	/** Where a list's header shows its "+". */
-	headerAddButton: ButtonPlatforms;
 	/** Whether a list and the Schedule show their tag strip always, or only while the filter field is open. */
 	tagStrip: TagStripMode;
 	/** Whether the Schedule splits each day by list, as its title row's button last left it. */
@@ -27,7 +25,6 @@ export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	archiveDelayHours: DEFAULT_ARCHIVE_DELAY_HOURS,
 	showScheduleButton: false,
 	floatingAddButton: 'both',
-	headerAddButton: 'off',
 	tagStrip: DEFAULT_TAG_STRIP_MODE,
 	groupScheduleByList: DEFAULT_GROUP_BY_LIST,
 };
@@ -107,16 +104,6 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 					type: 'dropdown',
 					key: 'floatingAddButton',
 					defaultValue: DEFAULT_SETTINGS.floatingAddButton,
-					options: BUTTON_PLATFORM_NAMES,
-				},
-			},
-			{
-				name: 'Header add button',
-				desc: 'Where a list\'s header shows a "+" that adds an item.',
-				control: {
-					type: 'dropdown',
-					key: 'headerAddButton',
-					defaultValue: DEFAULT_SETTINGS.headerAddButton,
 					options: BUTTON_PLATFORM_NAMES,
 				},
 			},

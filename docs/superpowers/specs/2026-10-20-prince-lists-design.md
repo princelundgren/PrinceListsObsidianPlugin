@@ -703,15 +703,12 @@ back only what was typed and leaves the empty line, which can be deleted like an
     rows](2026-11-07-select-several-design.md), "Risks to check during the build"). Back closes a
     menu in the card; with only the card open it shows Obsidian's "Press back again to exit.", and a
     tap outside the card closes it.
-- **A "+" in the pane's header (owner, 2026-10-27)** adds an item, beside the filter icon.
-  It's a view action (`addAction`) named "New item" **(call)**, with its key: "New item
-  (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux. Mobile, which usually
-  has no keyboard, shows "New item" alone **(owner, 2026-11-03)**. It shows only where the "Header
-  add button" setting puts it, by default nowhere **(owner, 2026-11-05)**, and hides while
-  selecting ([selecting several rows](2026-11-07-select-several-design.md), "While selecting").
+- **No "+" in the pane's header (owner, 2026-11-15, #423):** the floating "+" below and Cmd+Enter
+  add an item, so a second "+" in the header was removed with its setting.
 - **The floating "+" button (owner)** sits at the bottom right of the list pane, under the thumb.
-  It stays put while the list scrolls. Its name and tooltip are the header's: "New item" with its
-  key on desktop, "New item" alone on mobile **(owner, 2026-11-05)**. It shows on
+  It stays put while the list scrolls. Its name and tooltip are "New item" with its key on
+  desktop: "New item (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux, and
+  "New item" alone on mobile, which usually has no keyboard **(owner, 2026-11-05)**. It shows on
   desktop and mobile by default, and the "Floating add button" setting can keep it to one of them
   or turn it off **(owner, 2026-11-05)**. While selecting, the selection's bar takes its place
   ([selecting several rows](2026-11-07-select-several-design.md), "The bar").

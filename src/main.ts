@@ -163,10 +163,10 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onExternalSettingsChange() {
 		const before = this.archiveDelay.ms;
-		const { floatingAddButton, headerAddButton, tagStrip, groupScheduleByList } = this.settings;
+		const { floatingAddButton, tagStrip, groupScheduleByList } = this.settings;
 		await this.loadSettings();
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
-		if (this.settings.floatingAddButton !== floatingAddButton || this.settings.headerAddButton !== headerAddButton) this.syncAddButtons();
+		if (this.settings.floatingAddButton !== floatingAddButton) this.syncAddButtons();
 		else this.syncListButtons();
 		if (this.settings.tagStrip !== tagStrip) this.followTagStripModeInViews();
 		if (this.settings.groupScheduleByList !== groupScheduleByList) this.renderSchedules();
@@ -176,7 +176,7 @@ export default class PrinceListsPlugin extends Plugin {
 	settingChanged(key: keyof PrinceListsSettings): void {
 		if (key === 'archiveDelayHours') this.archiveDelay.changed();
 		if (key === 'showScheduleButton') this.syncListButtons();
-		if (key === 'floatingAddButton' || key === 'headerAddButton') this.syncAddButtons();
+		if (key === 'floatingAddButton') this.syncAddButtons();
 		if (key === 'tagStrip') this.followTagStripModeInViews();
 	}
 
@@ -218,7 +218,6 @@ export default class PrinceListsPlugin extends Plugin {
 			...stored,
 			archiveDelayHours: archiveDelayHoursOf(stored?.archiveDelayHours),
 			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
-			headerAddButton: buttonPlatformsOf(stored?.headerAddButton, DEFAULT_SETTINGS.headerAddButton),
 			tagStrip: tagStripModeOf(stored?.tagStrip),
 			groupScheduleByList: groupByListOf(stored?.groupScheduleByList),
 		};
