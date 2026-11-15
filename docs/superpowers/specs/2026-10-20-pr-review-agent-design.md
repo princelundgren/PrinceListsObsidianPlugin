@@ -119,7 +119,7 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     own isolation step does. That step only runs with `allowed_non_write_users`. A failed install
     fails the job.
 - **No approvals.** No tool can approve, and the repository doesn't let the job's token approve
-  pull requests. The owner merges.
+  pull requests. The owner merges, or an agent the owner asks to.
 - **Configuration and rules.** The action restores a fixed list of paths at the repository's root,
   such as `.claude/`, `.mcp.json` and `CLAUDE.md`, from the base branch. `AGENTS.md` and a
   `CLAUDE.md` in a subfolder aren't on that list, so a pull request that edits or adds one is
