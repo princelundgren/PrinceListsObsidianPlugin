@@ -28,7 +28,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	if (kept && kept === view.listTitleEl) slot = fresh.createDiv();
 	else view.listTitleEl = buildListTitle(view, fresh);
 	if (isListText(view.text)) {
-		const { lines, model } = view.parse();
+		const { lines, model, inherited } = view.parse();
 		if (kept && kept === view.listNoteEl) {
 			slot = fresh.createDiv();
 		} else if (view.listNoteEl) {
@@ -50,7 +50,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		}
 		if (showsTagStrip(view)) {
 			const shown = { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms };
-			const strip = listStripTags(lines, model, new Date(), shown, view.litTags.tags);
+			const strip = listStripTags(lines, model, new Date(), shown, view.litTags.tags, inherited);
 			view.litTags = litForStrip(view.litTags, strip);
 			buildTagStrip(fresh, strip, view.litTags);
 		}

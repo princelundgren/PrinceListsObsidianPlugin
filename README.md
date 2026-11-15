@@ -16,7 +16,7 @@ Ticked items hide after a day, or the time you choose in the settings. The filte
 
 ![In a todo list, an item is ticked and grays out, then the filter icon in the pane's header opens a field, its toggle brings back three items ticked days ago with blue checkboxes, and typing book leaves four items, three that mention it and one whose note has its letters in order, until the filter icon closes the field again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/filter.gif)
 
-Tag items to group them across sections. The list's tags sit above its items, and a click shows only the items that have one.
+Tag items to group them across sections. The list's tags sit above its items, and a click shows only the items that have one. A tag on a heading, or in the list's `tags` property, counts for the items under it.
 
 ![In a grocery list, lemons is opened and gets the curry tag from the tag button, picked from the suggestions, then #curry in the strip of tags above the list leaves the five items for the curry, under their headings](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tags.gif)
 
@@ -60,11 +60,11 @@ You can embed lists in normal notes.
 - **Add** with the floating **+**, and **drag** to reorder. The settings can keep the **+** to desktop or mobile, or turn it off.
 - **Star** an item and give it a date.
 - **Repeat** an item: set every 3 days, each month on the last day or another rule, with an end if you like, from its card or its menu, and a ticked item is done until its next date, then comes back open when you next open or return to its list, or return to Obsidian while a list view, the Schedule or a note showing that list is on screen. Until then, Tasks queries and other apps show it done.
-- **Tags:** write a tag on an item, or add it from the tag button in its card, with suggestions. Items show their tags as labels.
+- **Tags:** write a tag on an item, or add it from the tag button in its card, with suggestions. Items show their own tags as labels. A tag in a heading, as in `## Office #work`, counts for every item in its section, and the `tags` property counts for every item in the list, though neither shows on the rows.
 - **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, ticks, stars, tags, dates or deletes them all at once, with Undo, and dragging one drags them all. A selected heading brings its section.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
 - **Find:** the filter icon in a list's header opens a field that filters it by title and notes, matching the letters you type in order, so "mlk" finds "oat milk", and by date as written, such as "2026-11". Toggles beside it show only starred items, or archived items too. Headings stay, a message says when nothing matches, and a button clears the field. The field stays open until the icon or Escape closes it. The Schedule has one beside its title, with the starred toggle.
-- **Filter by tag:** a strip of the list's tags sits above its items. Click a tag to show only the items that have it, or two to show those that have both. **No tag** shows the items without a tag, alone or added to a tag's. A setting shows the strip always or only while the filter is open. The Schedule has one too. Nested tags count under their parent, and case doesn't matter.
+- **Filter by tag:** a strip of the list's tags sits above its items. Click a tag to show only the items that have it, or two to show those that have both. The strip leaves out the list's own `tags`, which every item has. **No tag** shows the items without a tag, their heading's and the list's included, alone or added to a tag's. A setting shows the strip always or only while the filter is open. The Schedule has one too. Nested tags count under their parent, and case doesn't matter.
 - **Delete** with Undo.
 
 **Notes on an item**
@@ -124,6 +124,7 @@ Stuff for the new apartment.
 ```
 
 - **`princelists: true`** makes a note a list.
+- **`tags`** is the list's tags, as in `tags: [home, errands]`, set with Obsidian's properties or **Edit in Markdown**. Write the tags without a `#`, or quote it: an unquoted `tags: #home` is a YAML comment and gives the list no tag. Every item counts them.
 - **Headings** are sections, **checkboxes** are items, and lines indented under an item are its notes.
 - **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are, except that a repeating item's 📅 and 🛫 move with its ⏳ when it comes back.
 - **`✔` with a time** marks when you ticked an item. Tasks still sees it as done.

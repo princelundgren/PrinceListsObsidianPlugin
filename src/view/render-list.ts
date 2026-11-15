@@ -123,7 +123,7 @@ export function renderList(
 	const sourcePath = view.sourcePath;
 	const today = dayOf(new Date());
 	const filter = rowFilter(view, view.selected);
-	const sections = visibleSections(lines, model, new Date(), filter);
+	const sections = visibleSections(lines, model, new Date(), filter, view.parse().inherited);
 	const shown = withoutRange(sections, skip);
 	for (const section of shown) {
 		if (section.heading) {

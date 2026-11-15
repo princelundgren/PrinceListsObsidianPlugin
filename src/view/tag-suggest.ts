@@ -14,9 +14,9 @@ export interface TagTarget {
 
 /** The list's tags as its strip shows them with nothing lit, the order the tag type-ahead and popovers follow. */
 export function stripTagOrder(view: PrinceListView): string[] {
-	const { lines, model } = view.parse();
+	const { lines, model, inherited } = view.parse();
 	const shown = { showArchived: view.showArchived, archiveDelayMs: view.archiveDelay.ms };
-	return listStripTags(lines, model, new Date(), shown, []);
+	return listStripTags(lines, model, new Date(), shown, [], inherited);
 }
 
 /**

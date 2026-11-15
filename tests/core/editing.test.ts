@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { visibleSections, withoutRange } from '../../src/core/display';
+import { NO_INHERITED_TAGS } from '../../src/core/inherited-tags';
 import { ListEditing, type Typed } from '../../src/core/editing';
 import { getItemNotes } from '../../src/core/edit-items';
 import { NO_LINES_MOVED, ownEdit } from '../../src/core/follow';
@@ -164,7 +165,7 @@ describe('a visit to the list note across a typing session', () => {
 		notesEditor(state, 'listNote').type('Old\n# Typed\n- [ ] y\nmore');
 		const { lines, model } = list(state.text);
 		const drawn = (range: { start: number; end: number } | null) =>
-			withoutRange(visibleSections(lines, model, new Date(2026, 9, 21), { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() }), range).flatMap((section) => [
+			withoutRange(visibleSections(lines, model, new Date(2026, 9, 21), { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() }, NO_INHERITED_TAGS), range).flatMap((section) => [
 				section.heading?.text ?? null,
 				...section.rows.map((row) => (row.kind === 'item' ? row.title : row.text)),
 			]);

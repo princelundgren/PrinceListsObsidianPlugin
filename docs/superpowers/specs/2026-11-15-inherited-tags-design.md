@@ -1,5 +1,7 @@
 ---
-status: draft
+status: building
+governs: [src/**]
+verified: 2026-11-16
 tracking: ["#428"]
 ---
 
@@ -162,4 +164,6 @@ concerns, nothing is written in the background, and only documented Obsidian API
 
 ## Left to the builder
 
-- Where the inherited tags are computed: once per parse beside each item, or when the filter runs.
+- **Where the inherited tags are computed (call):** once per parse, in the list view's `parsedText`
+  memo (`PrinceListView.parse()`), and in the Schedule's `datedItems` for each list, not once per
+  item or per filter run.

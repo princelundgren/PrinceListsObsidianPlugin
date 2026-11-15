@@ -3,6 +3,7 @@ import { guardedWrite, type WriteResult } from '../core/action-write';
 import { blockLink } from '../core/block-source';
 import { planComeBacks } from '../core/come-back';
 import { visibleSections, type SectionRows } from '../core/display';
+import { NO_INHERITED_TAGS } from '../core/inherited-tags';
 import { ListEditing } from '../core/editing';
 import { NO_LINES_MOVED, type OwnEdit } from '../core/follow';
 import { splitLines } from '../core/lines';
@@ -198,7 +199,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private shownSections(): SectionRows[] {
 		const lines = splitLines(this.editing.text);
 		const model = parseList(lines, contentStartLine(this.editing.text));
-		return visibleSections(lines, model, new Date(), { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: this.archiveDelay.ms, find: null, keepLine: null, collapsed: new Set() });
+		return visibleSections(lines, model, new Date(), { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: this.archiveDelay.ms, find: null, keepLine: null, collapsed: new Set() }, NO_INHERITED_TAGS);
 	}
 
 	// A change from outside often leaves every row as drawn, such as a list view's save of an item's notes.
