@@ -1,6 +1,7 @@
 import { isArchived } from './archive';
-import { isFiltered, timelessItemRow, whenMatches, type Find } from './display';
+import { isFiltered, listInheritedTags, timelessItemRow, whenMatches, type Find } from './display';
 import { getItemNotes } from './edit-items';
+import { carriedTags, inheritedFor } from './inherited-tags';
 import { splitLines } from './lines';
 import { parseList } from './parse';
 import { backDay } from './repeat-line';
@@ -19,6 +20,8 @@ export interface ScheduledItem {
 	tags: string[];
 	/** The tail's tags. */
 	tailTags: string[];
+	/** The tags the item counts in the tag filter: its own, then its section's inherited ones. */
+	carried: string[];
 	/** The item has a `🔁` field: open, or, once `unarchived` reads it, done and coming back. */
 	repeats: boolean;
 	done: boolean;
@@ -33,9 +36,11 @@ export type ScheduleGroup = 'today' | 'tomorrow' | 'week' | 'later';
 const GROUP_ORDER: readonly ScheduleGroup[] = ['today', 'tomorrow', 'week', 'later'];
 
 // Items with a When, done ones included: whether one is archived depends on when it's drawn.
-export function datedItems(text: string, contentStart: number, list: { path: string; name: string }): ScheduledItem[] {
+export function datedItems(text: string, contentStart: number, list: { path: string; name: string; tags?: readonly string[] }): ScheduledItem[] {
 	const lines = splitLines(text);
-	const items = parseList(lines, contentStart).sections.flatMap((section) => section.items);
+	const model = parseList(lines, contentStart);
+	const inherited = listInheritedTags(lines, model, list.tags ?? []);
+	const items = model.sections.flatMap((section) => section.items);
 	const scheduled: ScheduledItem[] = [];
 	items.forEach((item, order) => {
 		const { titleLine } = item;
@@ -43,7 +48,7 @@ export function datedItems(text: string, contentStart: number, list: { path: str
 		const row = timelessItemRow(line, titleLine);
 		if (row.when === null) return;
 		const { title, starred, done, when: day, tags, tailTags, repeats } = row;
-		scheduled.push({ listPath: list.path, listName: list.name, titleLine, line, title, starred, tags, tailTags, repeats, done, day, order, notes: getItemNotes(lines, item) });
+		scheduled.push({ listPath: list.path, listName: list.name, titleLine, line, title, starred, tags, carried: carriedTags(tags, inheritedFor(model, inherited, titleLine)), tailTags, repeats, done, day, order, notes: getItemNotes(lines, item) });
 	});
 	return scheduled;
 }
@@ -143,7 +148,7 @@ export function shownSchedule(items: readonly ScheduledItem[], today: string, fi
 	const { find, starredOnly, lit } = filter;
 	const filtering = isFiltered(filter);
 	return groupSchedule(
-		items.filter((item) => (!starredOnly || item.starred) && meetsLitTags(item.tags, lit) && (find === null || matchesSchedule(item, find))),
+		items.filter((item) => (!starredOnly || item.starred) && meetsLitTags(item.carried, lit) && (find === null || matchesSchedule(item, find))),
 		today,
 	).map(({ group, items: matches }) => {
 		const isCollapsed = collapsed.has(group);
@@ -153,5 +158,5 @@ export function shownSchedule(items: readonly ScheduledItem[], today: string, fi
 
 /** The tags the strip offers for the Schedule: those of `items` in the Schedule's order, and the lit ones. */
 export function scheduleStripTags(items: readonly ScheduledItem[], lit: readonly string[]): string[] {
-	return stripTags(inScheduleOrder(items).map((item) => item.tags), lit);
+	return stripTags(inScheduleOrder(items).map((item) => item.carried), lit);
 }

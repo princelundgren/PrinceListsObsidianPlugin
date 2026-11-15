@@ -125,6 +125,7 @@ describe('groupSchedule', () => {
 		title: `${listName} ${order}`,
 		starred: false,
 		tags: [],
+		carried: [],
 		tailTags: [],
 		repeats: false,
 		done: false,
@@ -152,6 +153,7 @@ describe('byList', () => {
 		title,
 		starred: false,
 		tags: [],
+		carried: [],
 		tailTags: [],
 		repeats: false,
 		done: false,
@@ -214,6 +216,7 @@ describe('matchesSchedule', () => {
 		title: 'Buy **milk**',
 		starred: false,
 		tags: [],
+		carried: [],
 		tailTags: [],
 		repeats: false,
 		done: false,
@@ -249,6 +252,7 @@ describe('shownSchedule', () => {
 		title,
 		starred,
 		tags: [],
+		carried: [],
 		tailTags: [],
 		repeats: false,
 		done: false,
@@ -300,6 +304,35 @@ describe('shownSchedule', () => {
 	});
 });
 
+describe("a list's and a heading's tags in the Schedule", () => {
+	const text = ['---', 'princelists: true', '---', '- [ ] before ⏳ 2026-10-28', '## Office #work', '- [ ] under ⏳ 2026-10-28 #own', ''].join('\n');
+	const items = datedItems(text, 3, { ...list, tags: ['home'] });
+	const titles = (lit: { tags: string[]; untagged: boolean }) =>
+		shownSchedule(items, '2026-10-27', { find: null, starredOnly: false, lit }, new Set()).flatMap((g) => g.items.map((i) => i.title));
+
+	test("carried is the own tags then the section's inherited ones, and tags and tailTags stay the own", () => {
+		expect(items.map((item) => item.carried)).toEqual([['home'], ['own', 'home', 'work']]);
+		expect(items.map((item) => item.tags)).toEqual([[], ['own']]);
+		expect(items.map((item) => item.tailTags)).toEqual([[], ['own']]);
+	});
+
+	test('shownSchedule counts them: a list tag lights both, a heading tag its section, No tag neither', () => {
+		expect(titles({ tags: ['home'], untagged: false })).toEqual(['before', 'under']);
+		expect(titles({ tags: ['work'], untagged: false })).toEqual(['under']);
+		expect(titles({ tags: [], untagged: true })).toEqual([]);
+	});
+
+	test("scheduleStripTags keeps the list's own tags", () => {
+		expect(scheduleStripTags(items, [])).toEqual(['home', 'own', 'work']);
+	});
+
+	test('a nested list tag lights under its parent', () => {
+		const nested = datedItems(text, 3, { ...list, tags: ['work/acme'] });
+		const filter = { find: null, starredOnly: false, lit: { tags: ['work'], untagged: false } };
+		expect(shownSchedule(nested, '2026-10-27', filter, new Set()).flatMap((g) => g.items)).toHaveLength(2);
+	});
+});
+
 describe('tags in the Schedule', () => {
 	const item = (title: string, day: string, tags: string[], listName = 'Home', order = 0): ScheduledItem => ({
 		listPath: `${listName}.md`,
@@ -309,6 +342,7 @@ describe('tags in the Schedule', () => {
 		title,
 		starred: false,
 		tags,
+		carried: tags,
 		tailTags: [],
 		repeats: false,
 		done: false,
