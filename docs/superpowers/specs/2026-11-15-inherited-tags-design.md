@@ -68,8 +68,9 @@ concerns, nothing is written in the background, and only documented Obsidian API
 - **A change shows at once,** since the list view rereads its file on an outside change and the
   Schedule on the metadata cache's `changed` event, which Sync's changes reach too.
 - **Where it's set:** a list opens in the list view, which doesn't show properties. "Edit in
-  Markdown" opens the note as Markdown, where Obsidian shows them at the top. Whether the
-  Properties view sidebar edits them with the list view open is checked in the build (Risks).
+  Markdown" opens the note as Markdown, where Obsidian shows them at the top. The Properties view
+  sidebar ("Properties view: Show file properties") shows and edits them with the list view open,
+  and the strip and filters follow at once (checked in Obsidian 1.15.1).
 - **The README says** to write the tag without `#` or quote it: unquoted, `tags: #work` is a YAML
   comment, and the note has no tag.
 
@@ -155,10 +156,7 @@ concerns, nothing is written in the background, and only documented Obsidian API
 
 ## Risks to check during the build
 
-1. **Properties while the list view is open:** whether Obsidian's Properties view sidebar shows and
-   edits the list's `tags` with the list view active. If not, the README says to use "Edit in
-   Markdown".
-2. **A heading's text with a tag in a link or code,** such as `` ## Use `#tag` ``, which isn't a
+1. **A heading's text with a tag in a link or code,** such as `` ## Use `#tag` ``, which isn't a
    tag: the heading's tags come from the same tag rule as a title's, so it should agree; a test
    checks it.
 

@@ -124,7 +124,7 @@ Stuff for the new apartment.
 ```
 
 - **`princelists: true`** makes a note a list.
-- **`tags`** is the list's tags, as in `tags: [home, errands]`, set with Obsidian's properties or **Edit in Markdown**. Write the tags without a `#`, or quote it: an unquoted `tags: #home` is a YAML comment and gives the list no tag. Every item counts them.
+- **`tags`** is the list's tags, as in `tags: [home, errands]`, set in Obsidian's file properties sidebar (**Show file properties**) while the list is open, or with **Edit in Markdown**. Write the tags without a `#`, or quote it: an unquoted `tags: #home` is a YAML comment and gives the list no tag. Every item counts them.
 - **Headings** are sections, **checkboxes** are items, and lines indented under an item are its notes.
 - **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are, except that a repeating item's 📅 and 🛫 move with its ⏳ when it comes back.
 - **`✔` with a time** marks when you ticked an item. Tasks still sees it as done.
