@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-13
+verified: 2026-11-16
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -280,8 +280,8 @@ Stuff for the new apartment. Check second-hand first.
 - [ ] balcony chair
 ```
 
-The list's `tags` property and the tags in a heading's text count for every item under them in the
-tag filters ([inherited tags](2026-11-15-inherited-tags-design.md)). Nothing is written to the items.
+The list's `tags` property counts for every item, and the tags in a heading's text for every item
+in its section, in the tag filters ([inherited tags](2026-11-15-inherited-tags-design.md)). Nothing is written to the items.
 
 ### The list note (owner)
 

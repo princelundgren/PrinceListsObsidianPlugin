@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-13
+verified: 2026-11-16
 governs: [src/**, styles.css]
 tracking: ["#325", "#340", "#383"]
 ---
@@ -245,9 +245,10 @@ every tagged part of a list is done, such as what is left to buy.
 ## The Schedule
 
 - **The Schedule has the same strip (owner),** under its description, or under its filter field
-  while that's open, with the same setting.
+  while that's open, with the same setting. Unlike a list's strip, it keeps the lists' own tags.
 - **Its tags are those of the items the Schedule gathers (call),** from every list, not every tag
-  in those lists: a tag on no dated item would find nothing there.
+  in those lists: a tag on no dated item would find nothing there. They include the tags its
+  items inherit from their list and heading.
 - **Lit tags combine and clear as in a list.**
 
 ## What the build changes in the other designs

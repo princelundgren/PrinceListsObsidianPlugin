@@ -1,7 +1,7 @@
 import { inlineTags, itemTags } from './item-tags';
 import type { Line } from './lines';
 import { itemAt, type ListModel } from './parse';
-import { isTagBody, sameTag } from './tags';
+import { carriesTags, isTagBody, sameTag } from './tags';
 
 /** The tags an item counts as carrying besides its own: the list's, and its heading's. */
 export interface InheritedTags {
@@ -29,7 +29,7 @@ export function carriedTags(own: readonly string[], inherited: readonly string[]
 
 /** `tags` without each tag that is one of `listTags` or a parent of one (`work` for `work/acme`). */
 export function withoutListTags(tags: readonly string[], listTags: readonly string[]): string[] {
-	return tags.filter((tag) => !listTags.some((listTag) => sameTag(tag, listTag) || listTag.toLowerCase().startsWith(`${tag.toLowerCase()}/`)));
+	return tags.filter((tag) => !carriesTags(listTags, [tag]));
 }
 
 /** The tags inherited by the item on `line`: those of the section holding it, or the list's. */
@@ -40,7 +40,7 @@ export function inheritedFor(model: ListModel, inherited: InheritedTags, line: n
 
 /**
  * The tags every item on `rows` carries, its own or inherited, as the first item spells them;
- * headings and other rows count for nothing, and no item gives none.
+ * headings and other rows count for nothing, and `[]` when no row is an item.
  */
 export function sharedCarried(lines: readonly Line[], model: ListModel, inherited: InheritedTags, rows: readonly number[]): string[] {
 	const perItem = [...new Set(rows)]
