@@ -278,12 +278,17 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		if (toggled.back !== null) new Notice(backDayMessage(toggled.back, getLanguage()));
 	}
 
-	// In a tab that already shows the list, else a new one.
 	private async openItem(item: ScheduledItem): Promise<void> {
-		const file = this.app.vault.getFileByPath(item.listPath);
+		const view = await this.showList(item.listPath);
+		if (view) openItem(view, item.titleLine, item.line);
+	}
+
+	// In a tab that already shows the list, else a new one. Null when the list is gone, or its view didn't load.
+	private async showList(path: string): Promise<PrinceListView | null> {
+		const file = this.app.vault.getFileByPath(path);
 		if (!file) {
 			new Notice(CHANGED_ELSEWHERE_NOTICE);
-			return;
+			return null;
 		}
 		const { workspace } = this.app;
 		// By its state, which a tab restored in the background keeps while its view waits to load.
@@ -291,7 +296,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const leaf = shown ?? workspace.getLeaf('tab');
 		if (!(leaf.view instanceof PrinceListView && leaf.view.file === file)) await openAsList(leaf, file);
 		workspace.setActiveLeaf(leaf, { focus: true });
-		if (leaf.view instanceof PrinceListView && leaf.view.file === file) openItem(leaf.view, item.titleLine, item.line);
+		return leaf.view instanceof PrinceListView && leaf.view.file === file ? leaf.view : null;
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {
