@@ -356,8 +356,10 @@ this met on 2026-10-30 **(owner)**.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
 - **Group by list (owner, 2026-11-15, #239)** splits each group into a subheading per list, so a busy
   Today can be read list by list.
-  - **The toggle** is a `list-tree` button left of the filter icon beside the title, lit while on,
-    rather than a view action: the right sidebar, where the Schedule lives, hides the view's header.
+  - **The toggle** is a `list-tree` button left of the filter icon beside the title, rather than a
+    view action: the right sidebar, where the Schedule lives, hides the view's header. Grouped is
+    the default, so the button is named "Ungroup by list" and is lit while the Schedule isn't
+    grouped, as the filter icon is lit while filtering **(owner, 2026-11-15)**.
   - **It's remembered (owner):** it's kept in the plugin's data, so it stays as it was left after
     Obsidian restarts and in a Schedule opened later. A list's "Show archived" isn't restored, but
     grouping is a layout preference. The settings' "Group the Schedule by list" is the same value

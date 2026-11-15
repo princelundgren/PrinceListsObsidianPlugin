@@ -957,9 +957,9 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 }
 
 /* A filter icon while its field is open, in the header or beside the Schedule's title, and the Schedule's
-   group icon while it groups by list. Their own icon colors, so a hover keeps them too. */
+   group icon while it doesn't group by list. Their own icon colors, so a hover keeps them too. */
 .princelists-filter-open,
-.princelists-grouped {
+.princelists-ungrouped {
 	--icon-color: var(--icon-color-active);
 	--icon-color-hover: var(--icon-color-active);
 }

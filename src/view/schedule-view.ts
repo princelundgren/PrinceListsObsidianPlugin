@@ -101,7 +101,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		// Here rather than in the view's header, which a sidebar hides.
 		this.groupButton = titleRow.createEl('button', { cls: GROUP_BUTTON_CLASS });
 		setIcon(this.groupButton, 'list-tree');
-		setTooltip(this.groupButton, 'Group by list');
+		setTooltip(this.groupButton, 'Ungroup by list');
 		this.syncGroupButton();
 		this.findButton = titleRow.createEl('button', { cls: FIND_BUTTON_CLASS });
 		setIcon(this.findButton, FILTER_ICON);
@@ -394,10 +394,11 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		}
 	}
 
+	// Lit while not grouped, away from the default, as the filter icon is lit while filtering.
 	private syncGroupButton(): void {
-		const grouped = this.grouping.byList();
-		this.groupButton.toggleClass('princelists-grouped', grouped);
-		this.groupButton.setAttribute('aria-pressed', String(grouped));
+		const ungrouped = !this.grouping.byList();
+		this.groupButton.toggleClass('princelists-ungrouped', ungrouped);
+		this.groupButton.setAttribute('aria-pressed', String(ungrouped));
 	}
 
 	private removeBlocks(): void {
