@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { byList, datedItems, groupSchedule, listFolder, matchesSchedule, scheduleFindsNothing, scheduleGroup, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../../src/core/schedule';
+import { byList, datedItems, groupByListOf, groupSchedule, listFolder, matchesSchedule, scheduleFindsNothing, scheduleGroup, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../../src/core/schedule';
 import type { Find } from '../../src/core/display';
 import { NO_LIT_TAGS } from '../../src/core/tags';
 import { containing } from './edit-helpers';
@@ -192,6 +192,16 @@ describe('listFolder', () => {
 		['Projects/Q4/Work.md', 'Projects/Q4'],
 	])('%s is in %j', (path, folder) => {
 		expect(listFolder(path)).toBe(folder);
+	});
+});
+
+describe('groupByListOf', () => {
+	test.each([true, false])('keeps a stored %s', (stored) => {
+		expect(groupByListOf(stored)).toBe(stored);
+	});
+
+	test.each([undefined, null, 'false', 0])('reads %j as grouped', (stored) => {
+		expect(groupByListOf(stored)).toBe(true);
 	});
 });
 

@@ -3,6 +3,7 @@ import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '
 import { archiveDelayHoursOf, archiveDelayMs } from './core/archive';
 import { buttonPlatformsOf } from './core/button-platforms';
 import { serialQueue } from './core/queue';
+import { groupByListOf } from './core/schedule';
 import { tagStripModeOf } from './core/tag-strip-mode';
 import { ArchiveDelay } from './obsidian/archive-delay';
 import { createList, openNewList } from './obsidian/create-list';
@@ -219,7 +220,7 @@ export default class PrinceListsPlugin extends Plugin {
 			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
 			headerAddButton: buttonPlatformsOf(stored?.headerAddButton, DEFAULT_SETTINGS.headerAddButton),
 			tagStrip: tagStripModeOf(stored?.tagStrip),
-			groupScheduleByList: typeof stored?.groupScheduleByList === 'boolean' ? stored.groupScheduleByList : DEFAULT_SETTINGS.groupScheduleByList,
+			groupScheduleByList: groupByListOf(stored?.groupScheduleByList),
 		};
 	}
 
