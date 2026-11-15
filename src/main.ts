@@ -31,7 +31,12 @@ export default class PrinceListsPlugin extends Plugin {
 		await this.loadSettings();
 		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, this.archiveDelay, () => this.settings));
-		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) => new ScheduleView(leaf, this.archiveDelay, () => this.settings.tagStrip));
+		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) =>
+			new ScheduleView(leaf, this.archiveDelay, () => this.settings.tagStrip, {
+				byList: () => this.settings.groupScheduleByList,
+				setByList: (on) => void this.groupScheduleByList(on),
+			}),
+		);
 		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) =>
 			ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath, this.archiveDelay)),
 		);
@@ -157,12 +162,13 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onExternalSettingsChange() {
 		const before = this.archiveDelay.ms;
-		const { floatingAddButton, headerAddButton, tagStrip } = this.settings;
+		const { floatingAddButton, headerAddButton, tagStrip, groupScheduleByList } = this.settings;
 		await this.loadSettings();
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
 		if (this.settings.floatingAddButton !== floatingAddButton || this.settings.headerAddButton !== headerAddButton) this.syncAddButtons();
 		else this.syncListButtons();
 		if (this.settings.tagStrip !== tagStrip) this.followTagStripModeInViews();
+		if (this.settings.groupScheduleByList !== groupScheduleByList) this.renderSchedules();
 	}
 
 	/** Called by the settings tab after it saves `key`. */
@@ -185,9 +191,23 @@ export default class PrinceListsPlugin extends Plugin {
 		for (const view of this.listViews()) view.syncAddButtons();
 	}
 
+	private scheduleViews(): ScheduleView[] {
+		return this.app.workspace.getLeavesOfType(VIEW_TYPE_SCHEDULE).flatMap((leaf) => (leaf.view instanceof ScheduleView ? [leaf.view] : []));
+	}
+
 	private followTagStripModeInViews(): void {
 		for (const view of this.listViews()) followTagStripMode(view);
-		for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_SCHEDULE)) if (leaf.view instanceof ScheduleView) followTagStripMode(leaf.view);
+		for (const view of this.scheduleViews()) followTagStripMode(view);
+	}
+
+	private renderSchedules(): void {
+		for (const view of this.scheduleViews()) view.render();
+	}
+
+	private async groupScheduleByList(on: boolean): Promise<void> {
+		this.settings.groupScheduleByList = on;
+		this.renderSchedules();
+		await this.saveData(this.settings);
 	}
 
 	private async loadSettings(): Promise<void> {
@@ -199,6 +219,7 @@ export default class PrinceListsPlugin extends Plugin {
 			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
 			headerAddButton: buttonPlatformsOf(stored?.headerAddButton, DEFAULT_SETTINGS.headerAddButton),
 			tagStrip: tagStripModeOf(stored?.tagStrip),
+			groupScheduleByList: typeof stored?.groupScheduleByList === 'boolean' ? stored.groupScheduleByList : DEFAULT_SETTINGS.groupScheduleByList,
 		};
 	}
 

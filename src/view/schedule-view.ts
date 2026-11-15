@@ -7,7 +7,7 @@ import { labelWithKey } from '../core/key-name';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
-import { datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
+import { byList, datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { litForStrip, NO_LIT_TAGS, type LitTags } from '../core/tags';
 import { backDayMessage, dayOf } from '../core/when';
@@ -15,6 +15,7 @@ import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
+import { closeCard } from './card';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, NO_MATCH_CLASS, NO_MATCH_HINT, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
@@ -23,7 +24,7 @@ import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
 import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
-import { buildScheduleRow } from './schedule-row';
+import { buildListHeading, buildScheduleRow, LIST_HEADING_CLASS } from './schedule-row';
 import { buildTagStrip, showsTagStrip, stripClick } from './tag-strip';
 import { onWindowReturn } from './window-return';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
@@ -36,6 +37,13 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 };
 
 const SCHEDULE_ABOUT = 'Dated items from all your lists, by day.';
+const GROUP_BUTTON_CLASS = 'princelists-group-button';
+
+/** Whether the Schedule groups by list, which the plugin keeps for every Schedule. */
+export interface ScheduleGrouping {
+	byList(): boolean;
+	setByList(on: boolean): void;
+}
 
 // A list as the view last read it: a tick is worked out on that text.
 interface ReadList {
@@ -50,6 +58,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	private lists = new Map<string, ReadList>();
 	private readonly rows = new WeakMap<Element, ScheduledItem>();
 	private readonly headings = new WeakMap<Element, ScheduleGroup>();
+	private readonly listHeadings = new WeakMap<Element, string>();
 	// Only while the view is open, as a list's collapsed headings.
 	private readonly collapsed = new Set<ScheduleGroup>();
 	// Ticks run in turn, so each is worked out on the text the one before it wrote.
@@ -73,6 +82,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
 	// Its own scrolling element, as a list's, so the page takes the list's margins.
 	private readonly scrollEl = this.contentEl.createDiv({ cls: 'princelists-scroll' });
+	private readonly groupButton: HTMLElement;
 	private readonly findButton: HTMLElement;
 	private readonly filterSlotEl: HTMLElement;
 	// Drawn again on each change, apart from the title and the find field above it, which keeps focus.
@@ -82,12 +92,17 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		leaf: WorkspaceLeaf,
 		private readonly archiveDelay: ArchiveDelay,
 		readonly tagStripMode: () => TagStripMode,
+		private readonly grouping: ScheduleGrouping,
 	) {
 		super(leaf);
 		const sizer = this.scrollEl.createDiv({ cls: 'princelists-sizer' });
 		const titleRow = sizer.createDiv({ cls: 'princelists-schedule-title-row' });
 		titleRow.createDiv({ cls: 'princelists-schedule-title', text: 'Schedule', attr: { role: 'heading', 'aria-level': 1 } });
 		// Here rather than in the view's header, which a sidebar hides.
+		this.groupButton = titleRow.createEl('button', { cls: GROUP_BUTTON_CLASS });
+		setIcon(this.groupButton, 'calendar-arrow-down');
+		setTooltip(this.groupButton, 'Sort by date');
+		this.syncGroupButton();
 		this.findButton = titleRow.createEl('button', { cls: FIND_BUTTON_CLASS });
 		setIcon(this.findButton, FILTER_ICON);
 		setTooltip(this.findButton, labelWithKey('Filter schedule', FIND_KEY_NAME));
@@ -224,6 +239,10 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	private onClick(evt: MouseEvent): void {
 		const target = targetOf(evt);
 		if (target && stripClick(this, target)) return;
+		if (target?.closest(`.${GROUP_BUTTON_CLASS}`)) {
+			this.grouping.setByList(!this.grouping.byList());
+			return;
+		}
 		if (target?.closest(`.${FIND_BUTTON_CLASS}`)) {
 			toggleFilter(this);
 			return;
@@ -236,6 +255,12 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const group = heading && this.headings.get(heading);
 		if (group) {
 			this.toggleGroup(group);
+			return;
+		}
+		const listHeading = target?.closest(`.${LIST_HEADING_CLASS}`);
+		const listPath = listHeading && this.listHeadings.get(listHeading);
+		if (listPath) {
+			void this.openList(listPath);
 			return;
 		}
 		const rowEl = target?.closest(`.${ITEM_CLASS}`);
@@ -278,12 +303,22 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		if (toggled.back !== null) new Notice(backDayMessage(toggled.back, getLanguage()));
 	}
 
-	// In a tab that already shows the list, else a new one.
+	private async openList(path: string): Promise<void> {
+		const view = await this.showList(path);
+		if (view) closeCard(view);
+	}
+
 	private async openItem(item: ScheduledItem): Promise<void> {
-		const file = this.app.vault.getFileByPath(item.listPath);
+		const view = await this.showList(item.listPath);
+		if (view) openItem(view, item.titleLine, item.line);
+	}
+
+	// In a tab that already shows the list, else a new one. Null when the list is gone, or its view didn't load.
+	private async showList(path: string): Promise<PrinceListView | null> {
+		const file = this.app.vault.getFileByPath(path);
 		if (!file) {
 			new Notice(CHANGED_ELSEWHERE_NOTICE);
-			return;
+			return null;
 		}
 		const { workspace } = this.app;
 		// By its state, which a tab restored in the background keeps while its view waits to load.
@@ -291,7 +326,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const leaf = shown ?? workspace.getLeaf('tab');
 		if (!(leaf.view instanceof PrinceListView && leaf.view.file === file)) await openAsList(leaf, file);
 		workspace.setActiveLeaf(leaf, { focus: true });
-		if (leaf.view instanceof PrinceListView && leaf.view.file === file) openItem(leaf.view, item.titleLine, item.line);
+		return leaf.view instanceof PrinceListView && leaf.view.file === file ? leaf.view : null;
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {
@@ -306,6 +341,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 			this.filterField = buildFilterField(this, this.filterSlotEl);
 			addStarredToggle(this.filterField);
 		}
+		this.syncGroupButton();
 		syncFilterButton(this.findButton, this);
 		syncStarredToggle(this.filterField, this.starredOnly);
 		this.draw();
@@ -321,7 +357,8 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const groups = shownSchedule(dated, today, filter, this.collapsed);
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
-		const drawn = JSON.stringify([today, dated.length === 0, shown, strip, this.litTags]);
+		const grouped = this.grouping.byList();
+		const drawn = JSON.stringify([today, dated.length === 0, shown, strip, this.litTags, grouped]);
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;
@@ -334,16 +371,34 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 			const heading = this.groupsEl.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
 			this.headings.set(heading, group);
 			addCollapseArrow(heading, collapsed);
-			if (items.length === 0) continue;
-			const list = this.groupsEl.createEl('ul', { cls: ITEMS_CLASS });
-			for (const item of items) {
-				const { rowEl, block } = buildScheduleRow(this, item, today);
-				if (block) this.blocks.push(block);
-				this.rows.set(rowEl, item);
-				list.append(rowEl);
+			if (!grouped) this.drawRows(items, today, { showsList: true });
+			else {
+				for (const list of byList(items)) {
+					const listHeading = this.groupsEl.appendChild(buildListHeading(list));
+					this.listHeadings.set(listHeading, list.listPath);
+					this.drawRows(list.items, today, { showsList: false });
+				}
 			}
 		}
 		this.scrollEl.scrollTop = scroll;
+	}
+
+	private drawRows(items: readonly ScheduledItem[], today: string, options: { showsList: boolean }): void {
+		if (items.length === 0) return;
+		const list = this.groupsEl.createEl('ul', { cls: ITEMS_CLASS });
+		for (const item of items) {
+			const { rowEl, block } = buildScheduleRow(this, item, today, options);
+			if (block) this.blocks.push(block);
+			this.rows.set(rowEl, item);
+			list.append(rowEl);
+		}
+	}
+
+	// Lit while sorted by date, away from the default, as the filter icon is lit while filtering.
+	private syncGroupButton(): void {
+		const ungrouped = !this.grouping.byList();
+		this.groupButton.toggleClass('princelists-ungrouped', ungrouped);
+		this.groupButton.setAttribute('aria-pressed', String(ungrouped));
 	}
 
 	private removeBlocks(): void {

@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-14
+verified: 2026-11-15
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -354,11 +354,42 @@ this met on 2026-10-30 **(owner)**.
   - The ranges **(call)**: Next 7 days is two to seven days ahead, and Later anything after that.
     An empty group is hidden.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
-- **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day. The
-  list's name is smaller, on a line under the title, so it doesn't read as part of it **(owner,
-  2026-10-28)**. The star and the day stay right after the title, however long the list's name,
-  and go to the row's right edge in a narrow pane, as in every row ("Where the star and the day
-  sit").
+- **Group by list (owner, 2026-11-15, #239)** splits each group into a subheading per list, so a busy
+  Today can be read list by list.
+  - **The toggle** is a `calendar-arrow-down` button left of the filter icon beside the title,
+    rather than a view action: the right sidebar, where the Schedule lives, hides the view's
+    header. Grouped is the default, so the button names the other view, "Sort by date", where each
+    group's items are in date order across every list, and is lit while that view shows, as the
+    filter icon is lit while filtering **(owner, 2026-11-15)**.
+  - **It's remembered (owner):** it's kept in the plugin's data, so it stays as it was left after
+    Obsidian restarts and in a Schedule opened later. A list's "Show archived" isn't restored, but
+    grouping is a layout preference. Open Schedules follow at once, and again when Sync brings a
+    change. Grouped is the default, since it's how the owner wants the Schedule to read, and a
+    stored value that isn't true or false is read as the default.
+  - **No setting (owner, 2026-11-15):** the button is the one place to switch it; a toggle on the
+    settings page for the same value was dropped as a second way to do one thing.
+  - **Subheadings go by list name,** then by path, so two lists of one name in different folders get
+    one each **(call)**. Within one, items go by day, then by their order in the list. A list with no
+    item shown gets no subheading, as an empty group gets no heading.
+  - **A subheading shows (owner, 2026-11-15)** the plugin's `list-checks` icon in the checkboxes'
+    column, so it doesn't read as an item, the list's name in the text's color, and its folder path
+    smaller and gray after it. A list at the vault's root has no folder to show. The folder always
+    shows, so two lists of one name read apart. A name or folder that wraps stays beside the icon,
+    and on hover the name takes the accent color, since a click opens the list **(call)**.
+  - **A row under a subheading drops the list's name and folder,** since the subheading says them.
+  - **A click on a subheading opens its list (owner),** in the tab a click on a row would use, with
+    no card open: a card already open there closes, as Escape closes it **(owner, 2026-11-15)**. A
+    subheading doesn't collapse, so that click has one meaning **(owner, 2026-11-15)**.
+- **Each row shows** a checkbox, the title, the star, the list's name in gray unless grouped by
+  list, and the day. The list's name is smaller, so it doesn't read as part of the title **(owner,
+  2026-10-28)**, and at the row's right edge, since at the title's start it read as part of the
+  item **(owner, 2026-11-15)**. In a pane wider than 480 px it ends the title's line, and takes a
+  line of its own at the right when that line is full; in a narrower one it goes under the day,
+  which already ends the line there **(owner, 2026-11-15)**. It shows the name only, and the list's
+  path in a tooltip on hover, for a list in a folder **(owner, 2026-11-15)**: the folder on every
+  row made the Schedule busy. The star and the day stay right after the title, however long the
+  list's name, and go to the row's right edge in a narrow pane, as in every row ("Where the star
+  and the day sit").
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
     Today with no day read as an item with no date beside the overdue ones that show theirs.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as

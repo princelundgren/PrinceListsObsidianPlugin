@@ -17,6 +17,8 @@ export interface PrinceListsSettings {
 	headerAddButton: ButtonPlatforms;
 	/** Whether a list and the Schedule show their tag strip always, or only while the filter field is open. */
 	tagStrip: TagStripMode;
+	/** Whether the Schedule splits each day by list, as its title row's button last left it. */
+	groupScheduleByList: boolean;
 }
 
 export const DEFAULT_SETTINGS: PrinceListsSettings = {
@@ -26,6 +28,7 @@ export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	floatingAddButton: 'both',
 	headerAddButton: 'off',
 	tagStrip: DEFAULT_TAG_STRIP_MODE,
+	groupScheduleByList: true,
 };
 
 const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {

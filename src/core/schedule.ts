@@ -78,6 +78,33 @@ export function groupSchedule(items: readonly ScheduledItem[], today: string): {
 	);
 }
 
+/** The folder path of the list at `listPath`, empty at the vault's root. */
+export function listFolder(listPath: string): string {
+	return listPath.slice(0, Math.max(listPath.lastIndexOf('/'), 0));
+}
+
+export interface ListGroup {
+	listPath: string;
+	listName: string;
+	/** The list's folder path, empty at the vault's root. */
+	folder: string;
+	items: ScheduledItem[];
+}
+
+/**
+ * `items`, in the Schedule's order, split by list: the lists by name, and each
+ * list's items in the order `items` has them.
+ */
+export function byList(items: readonly ScheduledItem[]): ListGroup[] {
+	const lists = new Map<string, ListGroup>();
+	for (const item of items) {
+		const list = lists.get(item.listPath);
+		if (list) list.items.push(item);
+		else lists.set(item.listPath, { listPath: item.listPath, listName: item.listName, folder: listFolder(item.listPath), items: [item] });
+	}
+	return [...lists.values()].sort((a, b) => a.listName.localeCompare(b.listName) || a.listPath.localeCompare(b.listPath));
+}
+
 export interface ScheduleFilter {
 	/** What Cmd+F's field finds, or null while it holds nothing. */
 	find: Find | null;
