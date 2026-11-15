@@ -177,7 +177,6 @@ export default class PrinceListsPlugin extends Plugin {
 		if (key === 'showScheduleButton') this.syncListButtons();
 		if (key === 'floatingAddButton' || key === 'headerAddButton') this.syncAddButtons();
 		if (key === 'tagStrip') this.followTagStripModeInViews();
-		if (key === 'groupScheduleByList') this.renderSchedules();
 	}
 
 	private listViews(): PrinceListView[] {

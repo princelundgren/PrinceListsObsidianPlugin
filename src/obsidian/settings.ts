@@ -17,7 +17,7 @@ export interface PrinceListsSettings {
 	headerAddButton: ButtonPlatforms;
 	/** Whether a list and the Schedule show their tag strip always, or only while the filter field is open. */
 	tagStrip: TagStripMode;
-	/** Whether the Schedule splits each day by list, which its title row's button also switches. */
+	/** Whether the Schedule splits each day by list, as its title row's button last left it. */
 	groupScheduleByList: boolean;
 }
 
@@ -126,15 +126,6 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 					type: 'toggle',
 					key: 'showScheduleButton',
 					defaultValue: DEFAULT_SETTINGS.showScheduleButton,
-				},
-			},
-			{
-				name: 'Group the Schedule by list',
-				desc: "Splits each day in the Schedule by list. The button beside the Schedule's title switches it too.",
-				control: {
-					type: 'toggle',
-					key: 'groupScheduleByList',
-					defaultValue: DEFAULT_SETTINGS.groupScheduleByList,
 				},
 			},
 			{

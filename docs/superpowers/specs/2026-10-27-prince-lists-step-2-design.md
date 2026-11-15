@@ -363,9 +363,11 @@ this met on 2026-10-30 **(owner)**.
     filter icon is lit while filtering **(owner, 2026-11-15)**.
   - **It's remembered (owner):** it's kept in the plugin's data, so it stays as it was left after
     Obsidian restarts and in a Schedule opened later. A list's "Show archived" isn't restored, but
-    grouping is a layout preference. The settings' "Group the Schedule by list" is the same value
-    **(owner, 2026-11-15)**, so the button and the toggle always agree. Open Schedules follow at
-    once, and again when Sync brings a change.
+    grouping is a layout preference. Open Schedules follow at once, and again when Sync brings a
+    change. Grouped is the default, since it's how the owner wants the Schedule to read, and a
+    stored value that isn't true or false is read as the default.
+  - **No setting (owner, 2026-11-15):** the button is the one place to switch it; a toggle on the
+    settings page for the same value was dropped as a second way to do one thing.
   - **Subheadings go by list name,** then by path, so two lists of one name in different folders get
     one each **(call)**. Within one, items go by day, then by their order in the list. A list with no
     item shown gets no subheading, as an empty group gets no heading.
@@ -639,9 +641,8 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the two "+" buttons', below, "Tag
-strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting") and "Group the
-Schedule by list"'s.
+the plugin as it was before the page existed, except the two "+" buttons', below, and "Tag
+strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
@@ -671,10 +672,6 @@ Schedule by list"'s.
   schedule" button. It's off by default, so the header stays short and the ribbon icon and the
   command open the Schedule. Open lists show or hide the button at once, and again when Sync brings
   a change.
-- **Group the Schedule by list (owner, 2026-11-15):** a toggle for the value the Schedule's own
-  button switches ("When and the Schedule view", "Group by list"). It's on by default, since
-  grouped is how the owner wants the Schedule to read. The two always agree, and the Schedule draws
-  again when either changes. A stored value that isn't true or false is read as the default.
 - **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
   closed tab is easy to get back. A button saves nothing.
 
