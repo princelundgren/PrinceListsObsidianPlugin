@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { datedItems, groupSchedule, matchesSchedule, scheduleFindsNothing, scheduleGroup, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../../src/core/schedule';
+import { byList, datedItems, groupSchedule, matchesSchedule, scheduleFindsNothing, scheduleGroup, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../../src/core/schedule';
 import type { Find } from '../../src/core/display';
 import { NO_LIT_TAGS } from '../../src/core/tags';
 import { containing } from './edit-helpers';
@@ -140,6 +140,48 @@ describe('groupSchedule', () => {
 			['today', ['Home 0', 'Groceries 9', 'Home 1', 'Home 2']],
 			['week', ['Groceries 5']],
 		]);
+	});
+});
+
+describe('byList', () => {
+	const item = (listPath: string, title: string, day: string): ScheduledItem => ({
+		listPath,
+		listName: listPath.replace(/^.*\//, '').replace(/\.md$/, ''),
+		titleLine: 0,
+		line: `- [ ] ${title}`,
+		title,
+		starred: false,
+		tags: [],
+		tailTags: [],
+		repeats: false,
+		done: false,
+		day,
+		order: 0,
+		notes: '',
+	});
+	const lists = (items: ScheduledItem[]) => byList(items).map(({ listPath, listName, items }) => [listPath, listName, items.map((i) => i.title)]);
+
+	test('splits by list, the lists by name, each keeping its items in the order given', () => {
+		const items = groupSchedule(
+			[item('Work.md', 'Book the room', '2026-10-27'), item('Groceries.md', 'Milk', '2026-10-27'), item('Work.md', 'Send the report', '2026-10-26')],
+			'2026-10-27',
+		)[0]!.items;
+		expect(lists(items)).toEqual([
+			['Groceries.md', 'Groceries', ['Milk']],
+			['Work.md', 'Work', ['Send the report', 'Book the room']],
+		]);
+	});
+
+	test('gives two lists of one name a subheading each, by path', () => {
+		const items = [item('Work/Inbox.md', 'Call Bo', '2026-10-27'), item('Home/Inbox.md', 'Water plants', '2026-10-27'), item('Work/Inbox.md', 'Reply', '2026-10-27')];
+		expect(lists(items)).toEqual([
+			['Home/Inbox.md', 'Inbox', ['Water plants']],
+			['Work/Inbox.md', 'Inbox', ['Call Bo', 'Reply']],
+		]);
+	});
+
+	test('has no list for no items', () => {
+		expect(byList([])).toEqual([]);
 	});
 });
 

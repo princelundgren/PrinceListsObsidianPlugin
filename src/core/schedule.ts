@@ -78,6 +78,26 @@ export function groupSchedule(items: readonly ScheduledItem[], today: string): {
 	);
 }
 
+export interface ListGroup {
+	listPath: string;
+	listName: string;
+	items: ScheduledItem[];
+}
+
+/**
+ * `items`, in the Schedule's order, split by list for "Group by list": the lists by name, and each
+ * list's items in the order `items` has them.
+ */
+export function byList(items: readonly ScheduledItem[]): ListGroup[] {
+	const lists = new Map<string, ListGroup>();
+	for (const item of items) {
+		const list = lists.get(item.listPath);
+		if (list) list.items.push(item);
+		else lists.set(item.listPath, { listPath: item.listPath, listName: item.listName, items: [item] });
+	}
+	return [...lists.values()].sort((a, b) => a.listName.localeCompare(b.listName) || a.listPath.localeCompare(b.listPath));
+}
+
 export interface ScheduleFilter {
 	/** What Cmd+F's field finds, or null while it holds nothing. */
 	find: Find | null;
