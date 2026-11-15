@@ -466,10 +466,10 @@ describe('inherited tags', () => {
 		expect(listInheritedTags(lines, model, []).bySection).toEqual([[], ['work']]);
 	});
 
-	test('a list without its headings tags has an empty strip, so it shows none', () => {
+	test("a list with tags of its own and none on its headings has an empty strip, so it shows none", () => {
 		const plain = '---\nprincelists: true\n---\n- [ ] top\n## Office\n- [ ] call\n';
 		const { lines, model } = list(plain);
-		const inherited = listInheritedTags(lines, model, []);
+		const inherited = listInheritedTags(lines, model, ['home']);
 		expect(listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: DAY }, [], inherited)).toEqual([]);
 	});
 });
