@@ -83,6 +83,14 @@ export function listFolder(listPath: string): string {
 	return listPath.slice(0, Math.max(listPath.lastIndexOf('/'), 0));
 }
 
+/** Whether the Schedule groups by list before anyone switches it. */
+export const DEFAULT_GROUP_BY_LIST = true;
+
+/** A stored "groups by list" as true or false: the default when it is neither. */
+export function groupByListOf(stored: unknown): boolean {
+	return typeof stored === 'boolean' ? stored : DEFAULT_GROUP_BY_LIST;
+}
+
 export interface ListGroup {
 	listPath: string;
 	listName: string;

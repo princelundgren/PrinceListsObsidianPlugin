@@ -921,7 +921,8 @@ button.princelists-strip-tag:not(:focus-visible),
 button.princelists-strip-no-tag:not(:focus-visible),
 button.princelists-group-button:not(:focus-visible),
 button.princelists-find-button:not(:focus-visible),
-button.princelists-collapse:not(:focus-visible) {
+button.princelists-collapse:not(:focus-visible),
+button.princelists-schedule-list-label:not(:focus-visible) {
 	box-shadow: none;
 }
 
@@ -1635,14 +1636,24 @@ button.princelists-collapse {
 	color: var(--text-muted);
 }
 
-/* The name and folder wrap beside the icon, lined up with the titles. */
-.princelists-schedule-list-label {
+/* The name and folder wrap beside the icon, lined up with the titles. A button, so the keyboard
+   reaches it, that reads as the subheading's text. */
+button.princelists-schedule-list-label {
 	flex: 1 1 0;
 	min-width: 0;
+	height: auto;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: baseline;
+	justify-content: flex-start;
 	column-gap: var(--size-4-2);
+	padding: 0;
+	border: none;
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-align: start;
+	white-space: normal;
 }
 
 .princelists-schedule-list-name,
@@ -1660,6 +1671,10 @@ button.princelists-collapse {
 @media (hover: hover) {
 	.princelists-schedule-list-heading:hover .princelists-schedule-list-name {
 		color: var(--text-accent);
+	}
+
+	button.princelists-schedule-list-label:hover {
+		background: none;
 	}
 }
 

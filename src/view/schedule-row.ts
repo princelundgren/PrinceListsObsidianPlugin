@@ -31,11 +31,11 @@ export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today:
 	return { rowEl, block };
 }
 
-/** A list's subheading while the Schedule groups by list: the list icon in the checkboxes' column, the name, and its folder. */
+/** A list's subheading while the Schedule groups by list: the list icon in the checkboxes' column, and a button of the name and its folder. */
 export function buildListHeading({ listName, folder }: ListGroup): HTMLDivElement {
 	const heading = createDiv({ cls: LIST_HEADING_CLASS, attr: { role: 'heading', 'aria-level': 3 } });
 	setIcon(heading.createSpan({ cls: 'princelists-schedule-list-icon', attr: { 'aria-hidden': 'true' } }), RIBBON_ICON);
-	const label = heading.createSpan({ cls: 'princelists-schedule-list-label' });
+	const label = heading.createEl('button', { cls: 'princelists-schedule-list-label' });
 	label.createSpan({ cls: 'princelists-schedule-list-name', text: listName });
 	if (folder) label.createSpan({ cls: 'princelists-schedule-list-folder', text: folder });
 	return heading;
