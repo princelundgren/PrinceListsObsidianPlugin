@@ -220,7 +220,7 @@ export default class PrinceListsPlugin extends Plugin {
 			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
 			headerAddButton: buttonPlatformsOf(stored?.headerAddButton, DEFAULT_SETTINGS.headerAddButton),
 			tagStrip: tagStripModeOf(stored?.tagStrip),
-			groupScheduleByList: stored?.groupScheduleByList === true,
+			groupScheduleByList: typeof stored?.groupScheduleByList === 'boolean' ? stored.groupScheduleByList : DEFAULT_SETTINGS.groupScheduleByList,
 		};
 	}
 

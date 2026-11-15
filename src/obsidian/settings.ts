@@ -28,7 +28,7 @@ export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	floatingAddButton: 'both',
 	headerAddButton: 'off',
 	tagStrip: DEFAULT_TAG_STRIP_MODE,
-	groupScheduleByList: false,
+	groupScheduleByList: true,
 };
 
 const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {

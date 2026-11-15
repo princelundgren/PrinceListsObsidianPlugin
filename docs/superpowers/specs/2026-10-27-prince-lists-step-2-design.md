@@ -375,11 +375,12 @@ this met on 2026-10-30 **(owner)**.
   - **A click on a subheading opens its list (owner),** in the tab a click on a row would use, with
     no card open: a card already open there closes, as Escape closes it **(owner, 2026-11-15)**. A
     subheading doesn't collapse, so that click has one meaning **(owner, 2026-11-15)**.
-- **Each row shows** a checkbox, the title, the star, the list's name and folder in gray unless
-  grouped by list, and the day. The list's name is smaller, on a line under the title, so it doesn't
-  read as part of it **(owner, 2026-10-28)**, and at the row's right edge, under the day in a
-  sidebar, with its folder fainter after it **(owner, 2026-11-15)**: at the title's start it read as
-  part of the item. The star and the day stay right after the title, however long the list's name,
+- **Each row shows** a checkbox, the title, the star, the list's name in gray unless grouped by
+  list, and the day. The list's name is smaller, on a line under the title, so it doesn't read as
+  part of it **(owner, 2026-10-28)**, and at the row's right edge, under the day in a sidebar
+  **(owner, 2026-11-15)**: at the title's start it read as part of the item. It shows the name
+  only, and the list's path in a tooltip on hover, for a list in a folder **(owner, 2026-11-15)**:
+  the folder on every row made the Schedule busy. The star and the day stay right after the title, however long the list's name,
   and go to the row's right edge in a narrow pane, as in every row ("Where the star and the day
   sit").
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
@@ -633,8 +634,9 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the two "+" buttons', below, and "Tag
-strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
+the plugin as it was before the page existed, except the two "+" buttons', below, "Tag
+strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting") and "Group the
+Schedule by list"'s.
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
@@ -664,9 +666,10 @@ strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
   schedule" button. It's off by default, so the header stays short and the ribbon icon and the
   command open the Schedule. Open lists show or hide the button at once, and again when Sync brings
   a change.
-- **Group the Schedule by list (owner, 2026-11-15):** a toggle, off by default, for the value the
-  Schedule's own button switches ("When and the Schedule view", "Group by list"). The two always
-  agree, and the Schedule draws again when either changes.
+- **Group the Schedule by list (owner, 2026-11-15):** a toggle for the value the Schedule's own
+  button switches ("When and the Schedule view", "Group by list"). It's on by default, since
+  grouped is how the owner wants the Schedule to read. The two always agree, and the Schedule draws
+  again when either changes. A stored value that isn't true or false is read as the default.
 - **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
   closed tab is easy to get back. A button saves nothing.
 
