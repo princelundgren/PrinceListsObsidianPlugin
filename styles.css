@@ -1573,13 +1573,24 @@ button.princelists-collapse {
 	}
 }
 
-/* The list's name goes under the title, so it doesn't read as part of it. The text takes the row's
-   width, so the name can sit at its right edge. */
+/* The list's name ends the title's line, apart from it, and wraps to a line of its own at the right
+   when the line is full. The text takes the row's width, so the name can sit at its right edge. */
 .princelists-schedule-text {
 	flex: 1 1 auto;
 	display: flex;
-	flex-direction: column;
+	flex-wrap: wrap;
+	align-items: baseline;
+	column-gap: var(--size-4-4);
 	min-width: 0;
+}
+
+/* In a pane about as narrow as a sidebar, where the day already ends the title's line, the name goes
+   under the day. */
+@container (max-width: 480px) {
+	.princelists-schedule-text {
+		flex-direction: column;
+		align-items: stretch;
+	}
 }
 
 /* The star and day follow the title, so a list name wider than the title doesn't push them away. */
@@ -1589,10 +1600,10 @@ button.princelists-collapse {
 	gap: var(--size-4-2);
 }
 
-/* The list's name at the row's right edge, under the day in a sidebar, so the title's start reads as
-   the item's alone. As wide as its text, so only the name shows its path's tooltip. */
+/* The list's name at the row's right edge, so the title's start reads as the item's alone. As wide as
+   its text, so only the name shows its path's tooltip. */
 .princelists-schedule-list {
-	align-self: flex-end;
+	margin-inline-start: auto;
 	max-width: 100%;
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);

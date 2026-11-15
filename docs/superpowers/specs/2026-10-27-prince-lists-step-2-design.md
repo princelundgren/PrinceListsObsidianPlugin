@@ -378,13 +378,15 @@ this met on 2026-10-30 **(owner)**.
     no card open: a card already open there closes, as Escape closes it **(owner, 2026-11-15)**. A
     subheading doesn't collapse, so that click has one meaning **(owner, 2026-11-15)**.
 - **Each row shows** a checkbox, the title, the star, the list's name in gray unless grouped by
-  list, and the day. The list's name is smaller, on a line under the title, so it doesn't read as
-  part of it **(owner, 2026-10-28)**, and at the row's right edge, under the day in a sidebar
-  **(owner, 2026-11-15)**: at the title's start it read as part of the item. It shows the name
-  only, and the list's path in a tooltip on hover, for a list in a folder **(owner, 2026-11-15)**:
-  the folder on every row made the Schedule busy. The star and the day stay right after the title, however long the list's name,
-  and go to the row's right edge in a narrow pane, as in every row ("Where the star and the day
-  sit").
+  list, and the day. The list's name is smaller, so it doesn't read as part of the title **(owner,
+  2026-10-28)**, and at the row's right edge, since at the title's start it read as part of the
+  item **(owner, 2026-11-15)**. In a pane wider than 480 px it ends the title's line, and takes a
+  line of its own at the right when that line is full; in a narrower one it goes under the day,
+  which already ends the line there **(owner, 2026-11-15)**. It shows the name only, and the list's
+  path in a tooltip on hover, for a list in a folder **(owner, 2026-11-15)**: the folder on every
+  row made the Schedule busy. The star and the day stay right after the title, however long the
+  list's name, and go to the row's right edge in a narrow pane, as in every row ("Where the star
+  and the day sit").
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
     Today with no day read as an item with no date beside the overdue ones that show theirs.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
