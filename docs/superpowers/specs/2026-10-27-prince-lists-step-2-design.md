@@ -38,8 +38,8 @@ only documented Obsidian APIs are used.
 - **Right-click menus:** a heading's menu gains "Edit in Markdown" and collapsing or expanding
   every heading, and the list's background has a menu of its own on desktop.
 - **A settings page:** a folder for new lists, how long ticked items stay before they're archived,
-  where each "+" that adds an item shows, whether a list's header shows the Schedule button, and a
-  button that brings back the Schedule's tab.
+  where the floating "+" that adds an item shows, whether a list's header shows the Schedule
+  button, and a button that brings back the Schedule's tab.
 - **Not in step two:** a Favorites view, and a New list button on Obsidian's New tab screen (see
   "Still later").
 
@@ -444,7 +444,7 @@ this met on 2026-10-30 **(owner)**.
 - **The text:** "Press Cmd+Enter or + to add an item" on macOS, with Ctrl+Enter on Windows and
   Linux, and "Tap + to add an item" on mobile, which usually has no keyboard. Where the settings
   show no "+" on that device, it leaves the "+" out: "Press Cmd+Enter to add an item", and "Press
-  Enter in the title to add an item" on mobile **(owner, 2026-11-05)**. Changing either "+"
+  Enter in the title to add an item" on mobile **(owner, 2026-11-05)**. Changing the "+"'s
   setting draws open empty lists again, so the hint follows at once; a list with items only shows
   or hides its buttons.
 - **Cmd+Enter adds an item (owner),** the same as "+": below the selected item, or as the list's
@@ -641,7 +641,7 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the two "+" buttons', below, and "Tag
+the plugin as it was before the page existed, except the floating "+"'s, below, and "Tag
 strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
@@ -660,14 +660,16 @@ strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
     `registerEvent`. A list block with an open field or a drag draws it when the field closes or
     the drag ends.
   - **It writes nothing to any list,** since archived is worked out, never written down.
-- **Floating add button and Header add button (owner, 2026-11-05):** a `dropdown` control each,
-  with desktop and mobile, desktop only, mobile only and off, saved as `"both"`, `"desktop"`,
-  `"mobile"` and `"off"`. Mobile is `Platform.isMobile`, a tablet included, as for keys' names.
-  The floating "+" shows everywhere by default and the header's "+" nowhere, so desktop gains the
-  floating one and both lose the header's after the update: the owner chose that over the rule
+- **Floating add button (owner, 2026-11-05):** a `dropdown` control with desktop and mobile,
+  desktop only, mobile only and off, saved as `"both"`, `"desktop"`, `"mobile"` and `"off"`.
+  Mobile is `Platform.isMobile`, a tablet included, as for keys' names. The floating "+" shows
+  everywhere by default, so desktop gains it after the update: the owner chose that over the rule
   that opens this section. A stored value that is none of them is read as the default, as the
-  delay's is. Open lists show or hide the buttons at once, and again when Sync brings a change.
-  Cmd+Enter adds an item whatever the two say.
+  delay's is. Open lists show or hide the button at once, and again when Sync brings a change.
+  Cmd+Enter adds an item whatever it says.
+- **No Header add button (owner, 2026-11-15, #423):** the header's "+" and its setting are gone,
+  since the floating "+" and Cmd+Enter already add an item. A `headerAddButton` value an earlier
+  version stored is no longer read.
 - **Show Schedule button (owner, 2026-11-05):** a toggle that shows or hides the header's "Open
   schedule" button. It's off by default, so the header stays short and the ribbon icon and the
   command open the Schedule. Open lists show or hide the button at once, and again when Sync brings

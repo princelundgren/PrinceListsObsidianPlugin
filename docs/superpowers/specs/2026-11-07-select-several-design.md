@@ -129,7 +129,7 @@ only documented Obsidian APIs are used.
   checkbox or beside it selects, so nothing is ticked by mistake.
 - **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
   to, Tick, Star, Tag, Date and Delete. On desktop it takes the same place whether or not the
-  floating "+" shows there, and the "+" in the pane's header hides **(call)**.
+  floating "+" shows there **(call)**.
 - **While the tag popover is open,** a click or a tap on a row, a heading, the tag strip or the
   list's title only closes it: it selects nothing and opens nothing
   ([tagging a selection](2026-11-12-select-tags-design.md), "What closes it").

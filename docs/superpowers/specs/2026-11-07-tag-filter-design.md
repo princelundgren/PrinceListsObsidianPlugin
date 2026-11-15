@@ -139,7 +139,7 @@ every tagged part of a list is done, such as what is left to buy.
 - **"Tag strip" (owner),** on PrinceLists' settings page (step two, "Settings"): a dropdown with
   "Always" and "While filtering". The default is "Always" **(owner)**, which shows the strip on
   every list with tags. Step two's settings keep the plugin as it was before the page existed; this
-  default is an exception the owner chose, as the two "+" buttons' are.
+  default is an exception the owner chose, as the floating "+"'s is.
 - **"While filtering"** shows the strip only while the filter field is open, under the field. The
   list then looks as it does today until the filter icon, Cmd+F or "Filter list" opens it.
 - **A change shows at once** in open lists and the Schedule, and a stored value that isn't one of

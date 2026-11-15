@@ -19,7 +19,7 @@ import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import type { PrinceListsSettings } from '../obsidian/settings';
 import { openAsMarkdown } from '../obsidian/switch';
-import { buildNewItemButton, hasNoItems, newItem } from './add-button';
+import { buildNewItemButton, hasNoItems } from './add-button';
 import { cardLost, dismissCard, type Card } from './card';
 import { closeRepeatPopover } from './card-repeat';
 import { closeTagPopover } from './card-tags';
@@ -84,7 +84,6 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	readonly dragsHeadings = true;
 	filterField: FilterField | null = null;
 	private newItemButton: HTMLButtonElement | null = null;
-	private newItemAction: HTMLElement | null = null;
 	private findAction: HTMLElement | null = null;
 	private scheduleAction: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
@@ -216,12 +215,10 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		enableMouseDrag(dragHost);
 		if (Platform.isMobile) enableTouchDrag(dragHost);
 		if (Platform.isDesktop) enableMouseHold(this);
-		const newItemLabel = labelWithKey('New item', ADD_KEY_NAME);
-		this.newItemButton = buildNewItemButton(this, newItemLabel);
+		this.newItemButton = buildNewItemButton(this, labelWithKey('New item', ADD_KEY_NAME));
 		const selectionBar = buildSelectionBar(this);
 		swallowClickAfterHold(this, selectionBar);
 		buildSelectionTagPopover(this);
-		this.newItemAction = this.addAction('plus', newItemLabel, () => newItem(this));
 		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
 		// Each action goes left of the ones before, so this one sits leftmost.
 		this.scheduleAction = this.addAction(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
@@ -359,32 +356,23 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** Shows or hides the view's buttons, and the selection bar, to match the text, the settings and selecting. */
 	syncButtons(): void {
 		const isList = isListText(this.text);
-		const showsFloating = isList && !this.selecting && this.showsFloatingAdd();
+		const showsFloating = isList && !this.selecting && this.showsAddButton();
 		this.newItemButton?.toggle(showsFloating);
 		this.contentEl.toggleClass('princelists-has-floating-add', showsFloating);
-		this.newItemAction?.toggle(isList && !this.selecting && this.showsHeaderAdd());
 		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
 		this.syncFindButtons();
 		syncSelectionBar(this);
 	}
 
-	/** Follows a change to where the "+" buttons show: an empty list is drawn again, since its hint names them. */
+	/** Follows a change to where the floating "+" shows: an empty list is drawn again, since its hint names it. */
 	syncAddButtons(): void {
 		if (hasNoItems(this)) this.render();
 		else this.syncButtons();
 	}
 
-	/** Whether the settings show a "+" that adds an item on this device. */
+	/** Whether the settings show the floating "+" that adds an item on this device. */
 	showsAddButton(): boolean {
-		return this.showsFloatingAdd() || this.showsHeaderAdd();
-	}
-
-	private showsFloatingAdd(): boolean {
 		return showsOn(this.settings().floatingAddButton, Platform.isMobile);
-	}
-
-	private showsHeaderAdd(): boolean {
-		return showsOn(this.settings().headerAddButton, Platform.isMobile);
 	}
 
 	// The header's filter icon shows only on a list, pressed while the field is open. The toggles in
