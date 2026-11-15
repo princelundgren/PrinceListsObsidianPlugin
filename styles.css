@@ -897,6 +897,7 @@ button.princelists-card-repeat,
 button.princelists-archived-toggle,
 button.princelists-starred-toggle,
 button.princelists-clear-tags,
+button.princelists-group-button,
 button.princelists-find-button {
 	flex: none;
 	height: auto;
@@ -918,6 +919,7 @@ button.princelists-starred-toggle:not(:focus-visible),
 button.princelists-clear-tags:not(:focus-visible),
 button.princelists-strip-tag:not(:focus-visible),
 button.princelists-strip-no-tag:not(:focus-visible),
+button.princelists-group-button:not(:focus-visible),
 button.princelists-find-button:not(:focus-visible),
 button.princelists-collapse:not(:focus-visible) {
 	box-shadow: none;
@@ -933,6 +935,7 @@ button.princelists-collapse:not(:focus-visible) {
 	button.princelists-archived-toggle:hover,
 	button.princelists-starred-toggle:hover,
 	button.princelists-clear-tags:hover,
+	button.princelists-group-button:hover,
 	button.princelists-find-button:hover {
 		background-color: var(--background-modifier-hover);
 		color: var(--icon-color-hover);
@@ -953,8 +956,10 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 	fill: currentColor;
 }
 
-/* A filter icon while its field is open, in the header or beside the Schedule's title. Its own icon colors, so a hover keeps it too. */
-.princelists-filter-open {
+/* A filter icon while its field is open, in the header or beside the Schedule's title, and the Schedule's
+   group icon while it groups by list. Their own icon colors, so a hover keeps them too. */
+.princelists-filter-open,
+.princelists-grouped {
 	--icon-color: var(--icon-color-active);
 	--icon-color-hover: var(--icon-color-active);
 }
@@ -968,6 +973,7 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 .princelists-is-mobile .princelists-when-button,
 .princelists-is-mobile button.princelists-archived-toggle,
 .princelists-is-mobile button.princelists-starred-toggle,
+.princelists-is-mobile button.princelists-group-button,
 .princelists-is-mobile button.princelists-find-button,
 .princelists-is-mobile button.princelists-block-trash {
 	justify-content: center;
@@ -1503,7 +1509,7 @@ button.princelists-collapse {
 	padding-bottom: calc(var(--size-4-8) + var(--view-bottom-spacing, 0px));
 }
 
-/* The filter icon sits at the title's end, centered on it. */
+/* The icons sit at the title's end, centered on it. */
 .princelists-schedule-title-row {
 	display: flex;
 	align-items: center;
@@ -1586,6 +1592,23 @@ button.princelists-collapse {
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
 	overflow-wrap: break-word;
+}
+
+/* A list's name under a day while grouped by list, lined up with the titles, as the gray name under a row
+   is when not grouped. A click opens the list. */
+.princelists-schedule-list-heading {
+	margin-top: var(--size-4-2);
+	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-semibold);
+	overflow-wrap: break-word;
+}
+
+@media (hover: hover) {
+	.princelists-schedule-list-heading:hover {
+		color: var(--text-normal);
+	}
 }
 
 /* In the rows' own flow, so the rows above it don't move as it comes and goes. */

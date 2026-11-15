@@ -5,8 +5,11 @@ import { renderInline, type MarkdownHost } from './notes';
 import { addTickZone, CHECKBOX_CLASS, ITEM_CLASS } from './render-list';
 import { addRepeat, addStar, addTags, addWhen } from './row-marks';
 
-/** A Schedule row for `item`, and the Component its rendered title needs, which `host` must remove once the row goes. */
-export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today: string): { rowEl: HTMLLIElement; block: Component | null } {
+/**
+ * A Schedule row for `item`, with its list's name under the title when `showsList`, and the Component its
+ * rendered title needs, which `host` must remove once the row goes.
+ */
+export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today: string, { showsList }: { showsList: boolean }): { rowEl: HTMLLIElement; block: Component | null } {
 	const rowEl = createEl('li', { cls: ITEM_CLASS });
 	rowEl.toggleClass('is-done', item.done);
 	addTickZone(rowEl);
@@ -21,6 +24,6 @@ export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today:
 	if (item.starred) addStar(titleLine);
 	addWhen(titleLine, item.day, today);
 	if (item.repeats) addRepeat(titleLine);
-	text.createDiv({ cls: 'princelists-schedule-list', text: item.listName });
+	if (showsList) text.createDiv({ cls: 'princelists-schedule-list', text: item.listName });
 	return { rowEl, block };
 }

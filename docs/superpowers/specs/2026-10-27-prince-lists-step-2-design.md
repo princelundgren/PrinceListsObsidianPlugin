@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-14
+verified: 2026-11-15
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -354,8 +354,24 @@ this met on 2026-10-30 **(owner)**.
   - The ranges **(call)**: Next 7 days is two to seven days ahead, and Later anything after that.
     An empty group is hidden.
   - Within a group, items go by day, then by list name, then by their order in the list **(call)**.
-- **Each row shows** a checkbox, the title, the star, the list's name in gray, and the day. The
-  list's name is smaller, on a line under the title, so it doesn't read as part of it **(owner,
+- **Group by list (owner, 2026-11-15, #239)** splits each group into a subheading per list, so a busy
+  Today can be read list by list.
+  - **The toggle** is a `list-tree` button left of the filter icon beside the title, lit while on,
+    rather than a view action: the right sidebar, where the Schedule lives, hides the view's header.
+  - **It's remembered (owner):** it's kept in the plugin's data, so it stays as it was left after
+    Obsidian restarts and in a Schedule opened later. A list's "Show archived" isn't restored, but
+    grouping is a layout preference. It has no control in the settings, since the button is it.
+    Open Schedules follow at once, and again when Sync brings a change.
+  - **Subheadings go by list name,** then by path, so two lists of one name in different folders get
+    one each **(call)**. Within one, items go by day, then by their order in the list. A list with no
+    item shown gets no subheading, as an empty group gets no heading.
+  - **A row under a subheading drops the list's name** under its title, since the subheading says it.
+  - **A click on a subheading opens its list (owner),** in the tab a click on a row would use, with
+    no card open: a card already open there closes, as Escape closes it **(owner, 2026-11-15)**. A
+    subheading doesn't collapse, so that click has one meaning **(owner, 2026-11-15)**.
+- **Each row shows** a checkbox, the title, the star, the list's name in gray unless grouped by
+  list, and the day. The list's name is smaller, on a line under the title, so it doesn't read as
+  part of it **(owner,
   2026-10-28)**. The star and the day stay right after the title, however long the list's name,
   and go to the row's right edge in a narrow pane, as in every row ("Where the star and the day
   sit").
