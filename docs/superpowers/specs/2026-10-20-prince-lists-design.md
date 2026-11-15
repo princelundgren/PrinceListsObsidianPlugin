@@ -211,7 +211,8 @@ These are wanted later, roughly in this order. The file format already leaves ro
   - An agent gives every pull request from a branch in this repository a first pass, as the
     [pull request review design](2026-10-20-pr-review-agent-design.md) describes. A fork's pull
     request gets the owner's review instead **(owner, 2026-10-20)**. Issues get a first pass
-    later, under a design not yet written. The owner always merges and makes releases.
+    later, under a design not yet written. The owner makes releases and decides what merges: an
+    agent merges a pull request only when the owner asks **(owner, 2026-11-15)**.
 - **Privacy (owner, 2026-10-20).** No telemetry of any kind. The plugin makes no network requests
   unless one is agreed on in an issue first, and any network use is disclosed in the README, as
   Obsidian's developer policies require. Rendered notes show a picture linked from the web, because
