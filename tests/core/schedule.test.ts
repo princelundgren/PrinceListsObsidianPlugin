@@ -180,7 +180,6 @@ describe('byList', () => {
 		]);
 	});
 
-
 	test('has no list for no items', () => {
 		expect(byList([])).toEqual([]);
 	});
