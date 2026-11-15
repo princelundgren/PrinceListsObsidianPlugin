@@ -1,5 +1,6 @@
-import { inlineTags } from './item-tags';
-import type { ListModel } from './parse';
+import { inlineTags, itemTags } from './item-tags';
+import type { Line } from './lines';
+import { itemAt, type ListModel } from './parse';
 import { isTagBody, sameTag } from './tags';
 
 /** The tags an item counts as carrying besides its own: the list's, and its heading's. */
@@ -35,6 +36,18 @@ export function withoutListTags(tags: readonly string[], listTags: readonly stri
 export function inheritedFor(model: ListModel, inherited: InheritedTags, line: number): readonly string[] {
 	const section = model.sections.findIndex(({ items }) => items.some((item) => item.titleLine === line));
 	return inherited.bySection[section] ?? inherited.list;
+}
+
+/**
+ * The tags every item on `rows` carries, its own or inherited, as the first item spells them;
+ * headings and other rows count for nothing, and no item gives none.
+ */
+export function sharedCarried(lines: readonly Line[], model: ListModel, inherited: InheritedTags, rows: readonly number[]): string[] {
+	const perItem = [...new Set(rows)]
+		.sort((a, b) => a - b)
+		.filter((row) => itemAt(model, row))
+		.map((row) => carriedTags(itemTags(lines[row]?.text ?? '').tags, inheritedFor(model, inherited, row)));
+	return (perItem[0] ?? []).filter((tag) => perItem.every((tags) => tags.some((other) => sameTag(other, tag))));
 }
 
 /** The tags of a list's `tags` property as Obsidian reads them (`#work`): without the `#`, only those that are tags, each once. */

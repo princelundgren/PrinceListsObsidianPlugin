@@ -1,5 +1,5 @@
 ---
-status: building
+status: live
 governs: [src/**]
 verified: 2026-11-16
 tracking: ["#428"]
@@ -133,7 +133,7 @@ concerns, nothing is written in the background, and only documented Obsidian API
   **(call)**.
 - **Tagging a selection** adds and removes tags on the items' own lines. Its chips come only from
   the items' tails, so an inherited tag is never offered for removal; its field leaves out a tag
-  every selected item inherits, as the card's popover does **(call)**.
+  every selected item carries, its own or inherited, as the card's popover does **(call)**.
 - **A list inside another note** shows no strip and no cards, so nothing changes there.
 - **Nothing is written:** inheriting a tag never adds it to an item's line.
 
