@@ -1544,7 +1544,6 @@ button.princelists-collapse {
    tags take that room instead of the title, so they follow the title as in a wider pane. */
 @container (max-width: 480px) {
 	.princelists-item > .princelists-item-title,
-	.princelists-item > .princelists-schedule-text,
 	.princelists-schedule-title-line > .princelists-item-title {
 		flex: 1 1 auto;
 	}
@@ -1574,8 +1573,10 @@ button.princelists-collapse {
 	}
 }
 
-/* The list's name goes under the title, so it doesn't read as part of it. */
+/* The list's name goes under the title, so it doesn't read as part of it. The text takes the row's
+   width, so the name can sit at its right edge. */
 .princelists-schedule-text {
+	flex: 1 1 auto;
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
@@ -1588,26 +1589,71 @@ button.princelists-collapse {
 	gap: var(--size-4-2);
 }
 
+/* The list's name and folder at the row's right edge, under the day in a sidebar, so the title's
+   start reads as the item's alone. */
 .princelists-schedule-list {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	column-gap: var(--size-4-2);
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
-	overflow-wrap: break-word;
+	text-align: end;
 }
 
-/* A list's name under a day while grouped by list, lined up with the titles, as the gray name under a row
-   is when not grouped. A click opens the list. */
+.princelists-schedule-list .princelists-schedule-list-folder {
+	color: var(--text-faint);
+}
+
+/* A list's subheading under a day while grouped by list: the list icon where a row has its checkbox, so it
+   doesn't read as an item, then the name and its folder. A click opens the list. */
 .princelists-schedule-list-heading {
-	margin-top: var(--size-4-2);
-	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
+	display: flex;
+	align-items: baseline;
+	column-gap: var(--size-4-2);
+	margin-top: var(--size-4-3);
+	padding-block: var(--size-4-1);
+	font-weight: var(--font-semibold);
+	line-height: var(--line-height-normal);
+}
+
+/* Centered on the first line, so a name that wraps leaves it beside its start. */
+.princelists-schedule-list-icon {
+	flex: none;
+	display: flex;
+	align-self: flex-start;
+	align-items: center;
+	justify-content: center;
+	width: var(--checkbox-size);
+	height: calc(var(--line-height-normal) * 1em);
+	color: var(--text-muted);
+}
+
+/* The name and folder wrap beside the icon, lined up with the titles. */
+.princelists-schedule-list-label {
+	flex: 1 1 0;
+	min-width: 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	column-gap: var(--size-4-2);
+}
+
+.princelists-schedule-list-name,
+.princelists-schedule-list-folder {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.princelists-schedule-list-folder {
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
-	font-weight: var(--font-semibold);
-	overflow-wrap: break-word;
+	font-weight: var(--font-normal);
 }
 
 @media (hover: hover) {
-	.princelists-schedule-list-heading:hover {
-		color: var(--text-normal);
+	.princelists-schedule-list-heading:hover .princelists-schedule-list-name {
+		color: var(--text-accent);
 	}
 }
 

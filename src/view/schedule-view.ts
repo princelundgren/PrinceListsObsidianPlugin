@@ -24,7 +24,7 @@ import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
 import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
-import { buildScheduleRow } from './schedule-row';
+import { buildListHeading, buildScheduleRow, LIST_HEADING_CLASS } from './schedule-row';
 import { buildTagStrip, showsTagStrip, stripClick } from './tag-strip';
 import { onWindowReturn } from './window-return';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
@@ -38,7 +38,6 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 
 const SCHEDULE_ABOUT = 'Dated items from all your lists, by day.';
 const GROUP_BUTTON_CLASS = 'princelists-group-button';
-const LIST_HEADING_CLASS = 'princelists-schedule-list-heading';
 
 /** "Group by list", which the plugin keeps for every Schedule. */
 export interface ScheduleGrouping {
@@ -374,10 +373,10 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 			addCollapseArrow(heading, collapsed);
 			if (!grouped) this.drawRows(items, today, { showsList: true });
 			else {
-				for (const { listPath, listName, items: listItems } of byList(items)) {
-					const listHeading = this.groupsEl.createDiv({ cls: LIST_HEADING_CLASS, text: listName, attr: { role: 'heading', 'aria-level': 3 } });
-					this.listHeadings.set(listHeading, listPath);
-					this.drawRows(listItems, today, { showsList: false });
+				for (const list of byList(items)) {
+					const listHeading = this.groupsEl.appendChild(buildListHeading(list));
+					this.listHeadings.set(listHeading, list.listPath);
+					this.drawRows(list.items, today, { showsList: false });
 				}
 			}
 		}

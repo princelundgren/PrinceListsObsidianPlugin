@@ -78,9 +78,16 @@ export function groupSchedule(items: readonly ScheduledItem[], today: string): {
 	);
 }
 
+/** The folder path of the list at `listPath`, empty at the vault's root. */
+export function listFolder(listPath: string): string {
+	return listPath.slice(0, Math.max(listPath.lastIndexOf('/'), 0));
+}
+
 export interface ListGroup {
 	listPath: string;
 	listName: string;
+	/** The list's folder path, empty at the vault's root. */
+	folder: string;
 	items: ScheduledItem[];
 }
 
@@ -93,7 +100,7 @@ export function byList(items: readonly ScheduledItem[]): ListGroup[] {
 	for (const item of items) {
 		const list = lists.get(item.listPath);
 		if (list) list.items.push(item);
-		else lists.set(item.listPath, { listPath: item.listPath, listName: item.listName, items: [item] });
+		else lists.set(item.listPath, { listPath: item.listPath, listName: item.listName, folder: listFolder(item.listPath), items: [item] });
 	}
 	return [...lists.values()].sort((a, b) => a.listName.localeCompare(b.listName) || a.listPath.localeCompare(b.listPath));
 }

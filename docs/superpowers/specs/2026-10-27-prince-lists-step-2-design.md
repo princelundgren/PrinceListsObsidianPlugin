@@ -360,19 +360,26 @@ this met on 2026-10-30 **(owner)**.
     rather than a view action: the right sidebar, where the Schedule lives, hides the view's header.
   - **It's remembered (owner):** it's kept in the plugin's data, so it stays as it was left after
     Obsidian restarts and in a Schedule opened later. A list's "Show archived" isn't restored, but
-    grouping is a layout preference. It has no control in the settings, since the button is it.
-    Open Schedules follow at once, and again when Sync brings a change.
+    grouping is a layout preference. The settings' "Group the Schedule by list" is the same value
+    **(owner, 2026-11-15)**, so the button and the toggle always agree. Open Schedules follow at
+    once, and again when Sync brings a change.
   - **Subheadings go by list name,** then by path, so two lists of one name in different folders get
     one each **(call)**. Within one, items go by day, then by their order in the list. A list with no
     item shown gets no subheading, as an empty group gets no heading.
-  - **A row under a subheading drops the list's name** under its title, since the subheading says it.
+  - **A subheading shows (owner, 2026-11-15)** the plugin's `list-checks` icon in the checkboxes'
+    column, so it doesn't read as an item, the list's name in the text's color, and its folder path
+    smaller and gray after it. A list at the vault's root has no folder to show. The folder always
+    shows, so two lists of one name read apart. A name or folder that wraps stays beside the icon,
+    and on hover the name takes the accent color, since a click opens the list **(call)**.
+  - **A row under a subheading drops the list's name and folder,** since the subheading says them.
   - **A click on a subheading opens its list (owner),** in the tab a click on a row would use, with
     no card open: a card already open there closes, as Escape closes it **(owner, 2026-11-15)**. A
     subheading doesn't collapse, so that click has one meaning **(owner, 2026-11-15)**.
-- **Each row shows** a checkbox, the title, the star, the list's name in gray unless grouped by
-  list, and the day. The list's name is smaller, on a line under the title, so it doesn't read as
-  part of it **(owner,
-  2026-10-28)**. The star and the day stay right after the title, however long the list's name,
+- **Each row shows** a checkbox, the title, the star, the list's name and folder in gray unless
+  grouped by list, and the day. The list's name is smaller, on a line under the title, so it doesn't
+  read as part of it **(owner, 2026-10-28)**, and at the row's right edge, under the day in a
+  sidebar, with its folder fainter after it **(owner, 2026-11-15)**: at the title's start it read as
+  part of the item. The star and the day stay right after the title, however long the list's name,
   and go to the row's right edge in a narrow pane, as in every row ("Where the star and the day
   sit").
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
@@ -657,6 +664,9 @@ strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
   schedule" button. It's off by default, so the header stays short and the ribbon icon and the
   command open the Schedule. Open lists show or hide the button at once, and again when Sync brings
   a change.
+- **Group the Schedule by list (owner, 2026-11-15):** a toggle, off by default, for the value the
+  Schedule's own button switches ("When and the Schedule view", "Group by list"). The two always
+  agree, and the Schedule draws again when either changes.
 - **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
   closed tab is easy to get back. A button saves nothing.
 
