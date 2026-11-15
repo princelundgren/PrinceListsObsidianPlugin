@@ -222,7 +222,8 @@ Only the maintainer releases.
    release, from step 1, and a warning where it can be. A recommendation the README's "Good to
    know" already discloses stays.
 
-Agents never push to `main`, merge pull requests, push tags or publish releases.
+Agents never push to `main`, push tags or publish releases. An agent merges a pull request only
+when the maintainer asks it to, once its checks pass and the Claude review is read.
 
 ### Release notes
 
