@@ -1,6 +1,7 @@
 import { type App, PluginSettingTab, type Plugin, type SettingDefinitionItem } from 'obsidian';
 import { type ArchiveDelayHours, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import type { ButtonPlatforms } from '../core/button-platforms';
+import { DEFAULT_GROUP_BY_LIST } from '../core/schedule';
 import { DEFAULT_TAG_STRIP_MODE, type TagStripMode } from '../core/tag-strip-mode';
 import { openSchedule } from './open-schedule';
 
@@ -28,7 +29,7 @@ export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	floatingAddButton: 'both',
 	headerAddButton: 'off',
 	tagStrip: DEFAULT_TAG_STRIP_MODE,
-	groupScheduleByList: true,
+	groupScheduleByList: DEFAULT_GROUP_BY_LIST,
 };
 
 const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {
