@@ -95,8 +95,9 @@ A heading has one way: its tags are in its text, so the tag goes in the text.
 - **A pick adds ` #tag` at the end of the heading's text (owner)** with `setHeadingText`
   (`src/core/edit-headings.ts`), so the level and an ATX heading's closing `##` stay. A setext
   heading over several lines becomes one line, as a rename makes it **(call)**.
-- **A × removes the tag and the space before it (call),** every spelling of it at the end of the
-  text, as `removeTag` does for a tail. The heading keeps its other words. `removeTag` reads only
+- **A × removes the tag and the whitespace right before it (call),** every spelling of it at the
+  end of the text, as `removeTag` does for a tail. The rest of the heading's text stays byte for
+  byte. `removeTag` reads only
   item lines, so a heading needs its own function, finding its tags with the same parse as
   inherited tags do (`inlineTags`, `src/core/item-tags.ts`).
 - **A result that wouldn't come back as this heading isn't written,** with Rename heading's

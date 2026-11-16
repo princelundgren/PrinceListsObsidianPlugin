@@ -10,36 +10,39 @@ import { isTagBody, sameTag } from './tags';
 
 interface EndTag {
 	tag: string;
-	/** The spelling in the text, with its `#`. */
-	word: string;
+	/** Where the whitespace before it starts in the text. */
+	from: number;
+	/** Where its word ends in the text. */
+	to: number;
 }
 
-// The tags closing `text`, last first, and where the text before them ends. A word counts only when
-// the renderer draws it as a tag, so one in code or a link doesn't.
-function closingTags(text: string): { tags: EndTag[]; before: string } {
+// The tags closing `text`, last first. A word counts only when the renderer draws it as a tag, so one
+// in code or a link doesn't.
+function closingTags(text: string): EndTag[] {
 	const drawn = inlineTags(text);
 	const tags: EndTag[] = [];
 	let before = text.trimEnd();
 	for (;;) {
-		const match = /(?:^|\s)(#\S+)$/.exec(before);
-		const word = match?.[1];
-		if (!match || !word || !isTagBody(word.slice(1)) || !drawn.some((tag) => sameTag(tag, word.slice(1)))) break;
-		tags.push({ tag: word.slice(1), word });
-		before = before.slice(0, match.index).trimEnd();
+		const word = /(?:^|\s)#(\S+)$/.exec(before)?.[1];
+		if (!word || !isTagBody(word) || !drawn.some((tag) => sameTag(tag, word))) break;
+		const to = before.length;
+		before = before.slice(0, to - word.length - 1).trimEnd();
+		tags.push({ tag: word, from: before.length, to });
 	}
-	return { tags, before };
+	return tags;
 }
 
 /** The tags at the end of a heading's text, after its last word that isn't a tag, once each by sameTag. */
 export function headingEndTags(text: string): string[] {
-	const tags = closingTags(text).tags.map(({ tag }) => tag).reverse();
+	const tags = closingTags(text).map(({ tag }) => tag).reverse();
 	return tags.filter((tag, i) => tags.findIndex((other) => sameTag(other, tag)) === i);
 }
 
 /**
- * Adds `#tag` at the end of the heading on `line`, or removes every spelling of it from the end. `none`:
- * nothing to change. `lost`: no heading on `line`. `refused`: the result wouldn't come back as this
- * heading, or would leave it with no text.
+ * Adds `#tag` at the end of the heading on `line`, or removes every spelling of it from the end with
+ * the whitespace before each, keeping the rest of the text as it was. `none`: nothing to change.
+ * `lost`: no heading on `line`. `refused`: the result wouldn't come back as this heading, or would
+ * leave it with no text.
  */
 export function planHeadingTag(text: string, contentStart: number, line: number, change: TagChange, tag: string): HeadingSave {
 	const lines = splitLines(text);
@@ -60,9 +63,10 @@ function withTag(text: string, tag: string): string | null {
 	return text === '' ? `#${tag}` : `${text} #${tag}`;
 }
 
+// Takes each spelling with the whitespace before it, last first so earlier positions hold. A tag that
+// opened the text leaves the space after it at the start, which the heading's text never has.
 function withoutTag(text: string, tag: string): string | null {
-	const { tags, before } = closingTags(text);
-	const kept = tags.filter((end) => !sameTag(end.tag, tag)).reverse();
-	if (kept.length === tags.length) return null;
-	return [before, ...kept.map(({ word }) => word)].filter((part) => part !== '').join(' ');
+	const gone = closingTags(text).filter((end) => sameTag(end.tag, tag));
+	if (gone.length === 0) return null;
+	return gone.reduce((kept, { from, to }) => kept.slice(0, from) + kept.slice(to), text).trimStart();
 }
