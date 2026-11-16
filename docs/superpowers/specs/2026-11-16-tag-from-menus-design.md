@@ -66,9 +66,9 @@ A heading has one way: its tags are in its text, so the tag goes in the text.
 - **The selection's popover, given a target (call):** the plugin's own element on the view's
   container, with its focus, Escape and outside-press handling and its look. The selection, a
   heading and the list each give it their chips, suggestions and writes, rather than a third copy
-  of the popover. Today it closes whenever the view isn't selecting, and its chips, its button and
-  where focus returns are the selection's (`src/view/selection-tag-popover.ts`), so it needs a
-  lifecycle that doesn't depend on selecting.
+  of the popover. It lives in `src/view/tags-popover.ts`, and each target says when it is stale
+  (`isStale`), which closes it: the selection's, once the view isn't selecting or its rows or their
+  text changed. Chips, button and where focus returns are the target's too.
 - **Where it opens (call):** against the heading for Tag…, and against the list's title for Tag
   list…, scrolled into view if needed, inside the view and right-aligned with it as far as the
   view's width allows. A heading's popover opens above it when there is more room there than
