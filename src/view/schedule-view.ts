@@ -13,7 +13,7 @@ import { litForStrip, NO_LIT_TAGS, type LitTags } from '../core/tags';
 import { backDayMessage, dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import { editListFile } from '../obsidian/file-edit';
-import { contentStartLine } from '../obsidian/marker';
+import { contentStartLine, listTags } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
 import { closeCard } from './card';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
@@ -412,5 +412,5 @@ function isList(cache: CachedMetadata | null): boolean {
 }
 
 function readList(file: TFile, text: string): ReadList {
-	return { text, items: datedItems(text, contentStartLine(text), { path: file.path, name: file.basename }) };
+	return { text, items: datedItems(text, contentStartLine(text), { path: file.path, name: file.basename, tags: listTags(text) }) };
 }
