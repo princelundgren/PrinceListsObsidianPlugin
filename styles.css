@@ -33,17 +33,13 @@ textarea.princelists-field:focus {
 .princelists-title-row {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: baseline;
+	align-items: center;
 	column-gap: var(--size-4-3);
 	row-gap: var(--size-4-1);
 	margin: 0 0 var(--size-4-2);
 }
 
 /* A list with no tags: the tag button shows only while the title is being edited, or holds focus itself. */
-button.princelists-list-tag-button {
-	align-self: center;
-}
-
 .princelists-title-row:not(:focus-within) .princelists-list-tag-button {
 	display: none;
 }
