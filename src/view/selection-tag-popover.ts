@@ -1,6 +1,7 @@
 import { setIcon } from 'obsidian';
 import { planGroupLineEdit } from '../core/group-edits';
 import { tagChangeMessage, type TagChange } from '../core/group-menu';
+import { sharedCarried } from '../core/inherited-tags';
 import { rowTexts, sameRowTexts, type RowText } from '../core/row-texts';
 import { selectionTags } from '../core/selection-tags';
 import { addTag, removeTag } from '../core/tag-edit';
@@ -136,7 +137,10 @@ export function isInSelectionTagPopover(view: PrinceListView, target: Node | nul
 // The selection when asked, which is the one it opened with: any change closes the popover.
 function selectionTagTarget(view: PrinceListView): TagTarget {
 	return {
-		tagsToLeaveOut: () => selectionTags(view.text, contentStartLine(view.text), view.selection.lines(), []).shared,
+		tagsToLeaveOut: () => {
+			const { lines, model, inherited } = view.parse();
+			return sharedCarried(lines, model, inherited, view.selection.lines());
+		},
 		choose: (tag) => changeTag(view, 'addTag', tag),
 	};
 }

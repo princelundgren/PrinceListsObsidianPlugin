@@ -1,7 +1,7 @@
 ---
 status: live
 governs: [src/**, styles.css]
-verified: 2026-11-13
+verified: 2026-11-16
 tracking: ["#361"]
 ---
 
@@ -64,8 +64,8 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   `removeTag` does; with no tag among them, no chips show.
 - **Then the field (owner),** the card's `AbstractInputSuggest`. The rest is **(call)**: it is
   focused on open, so a phone's keyboard comes up; it suggests the list's tags in the strip's
-  order, as the card's does, less those every selected item already has by `addTag`'s rule (in its
-  title or its tail), then `New tag: #<tag>` for a typed tag the list lacks. A tag only some items
+  order, as the card's does, less those every selected item already carries, on its line (in its
+  title or its tail) or inherited from its list or heading, then `New tag: #<tag>` for a typed tag the list lacks. A tag only some items
   have stays, since picking it gives it to the rest.
 - **Obsidian's suggestions** open in the page's body at z-index 60, above the popover, and may
   cover the bar while they show **(call)**: the bar is not in use then. On Android with the
@@ -114,7 +114,8 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 ## Not in this design
 
 - **A No tag choice in the tag strip:** #383 **(owner)**, in [filtering by tag](2026-11-07-tag-filter-design.md), "No tag".
-- **Renaming a tag across the list,** and tags on headings.
+- **Renaming a tag across the list.** A heading's tags count for its items
+  ([inherited tags](2026-11-15-inherited-tags-design.md)) but are not edited here.
 - **The Schedule and lists inside other notes:** selecting is only in the list view (owner).
 
 ## What it changes elsewhere
