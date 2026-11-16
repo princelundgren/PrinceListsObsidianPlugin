@@ -5,7 +5,7 @@ import { sameTag } from './tags';
 
 export type ListTagsRefusal = { refused: 'not-a-mapping' | 'unreadable' };
 
-// The key in any letter case, plain or quoted, with spaces before the colon, as marker-edit reads its key.
+// The key in any letter case, plain or quoted, with spaces before the colon.
 const TAGS_KEY_LINE = /^((?:tags|"tags"|'tags')[ \t]*:)(.*)$/i;
 const BLOCK_ITEM = /^([ \t]*)-[ \t]+(.+)$/;
 const QUOTED = /"[^"]*"|'[^']*'/g;
@@ -22,7 +22,7 @@ interface Entry {
 type TagsProperty =
 	| { form: 'single'; keyLine: number; prefix: string; entries: Entry[] }
 	| { form: 'flow'; keyLine: number; prefix: string; entries: Entry[] }
-	| { form: 'block'; keyLine: number; itemLines: number[]; indents: string[]; entries: Entry[] };
+	| { form: 'block'; keyLine: number; itemLines: number[]; indents: string[]; texts: string[]; entries: Entry[] };
 
 /**
  * Plans adding `tag` to the list's `tags` property, or removing every spelling of it, line by line.
@@ -75,18 +75,14 @@ function planRemove(property: TagsProperty, tag: string): MarkerEdit {
 }
 
 function planRemoveBlock(property: Extract<TagsProperty, { form: 'block' }>, tag: string, isEmptied: boolean): MarkerEdit {
-	const { itemLines, entries } = property;
+	const { itemLines, entries, texts } = property;
 	if (isEmptied) return { start: property.keyLine, deleteCount: (itemLines[itemLines.length - 1] as number) - property.keyLine + 1, insert: [] };
 	const matches = entries.flatMap((entry, i) => (sameTag(entry.tag, tag) ? [i] : []));
 	const first = matches[0] as number;
 	const last = matches[matches.length - 1] as number;
 	// The lines between the first and last match come back as they were, in the same single edit.
-	const between = entries.slice(first, last + 1).flatMap((entry, i) => (sameTag(entry.tag, tag) ? [] : [lineOfItem(property, first + i)]));
+	const between = entries.slice(first, last + 1).flatMap((entry, i) => (sameTag(entry.tag, tag) ? [] : [texts[first + i] as string]));
 	return { start: itemLines[first] as number, deleteCount: (itemLines[last] as number) - (itemLines[first] as number) + 1, insert: between };
-}
-
-function lineOfItem(property: Extract<TagsProperty, { form: 'block' }>, index: number): string {
-	return `${property.indents[index]}- ${property.entries[index]?.raw}`;
 }
 
 // null: no `tags` key.
@@ -114,6 +110,7 @@ function readTagsProperty(lines: string[], closingLine: number): TagsProperty | 
 function readBlock(lines: string[], keyLine: number, closingLine: number): TagsProperty | 'unreadable' {
 	const itemLines: number[] = [];
 	const indents: string[] = [];
+	const texts: string[] = [];
 	const entries: Entry[] = [];
 	for (let i = keyLine + 1; i < closingLine; i++) {
 		const text = lines[i] as string;
@@ -121,12 +118,13 @@ function readBlock(lines: string[], keyLine: number, closingLine: number): TagsP
 		const item = BLOCK_ITEM.exec(text);
 		if (!item || COMMENT.test(text.replace(QUOTED, ''))) return 'unreadable';
 		const entry = readEntry(item[2] as string);
-		if (!entry) return 'unreadable';
+		if (!entry || item[1] !== (indents[0] ?? item[1])) return 'unreadable';
 		itemLines.push(i);
+		texts.push(text);
 		indents.push(item[1] as string);
 		entries.push(entry);
 	}
-	return { form: 'block', keyLine, itemLines, indents, entries };
+	return { form: 'block', keyLine, itemLines, indents, texts, entries };
 }
 
 // One scalar: plain, "double" or 'single' quoted. null when it is anything else, or can't be one tag.

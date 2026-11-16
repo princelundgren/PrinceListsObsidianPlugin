@@ -33,6 +33,7 @@ test.each([
 	['tags: ["#work"]\n', 'removeTag', 'work', '', 'delete'],
 	['tags:\n  - work\n', 'removeTag', 'work', '', 'delete'],
 	['tags:\n  - work\n  - home\n  - Work\n', 'removeTag', 'WORK', 'tags:\n  - home\n', 'delete'],
+	['tags:\n  - work\n  -  x \n  - Work\n', 'removeTag', 'work', 'tags:\n  -  x \n', 'delete'],
 ] as const)('%j with %s %s becomes %j', (lines, change, tag, after, kind) => {
 	expect(applied(fm(lines), change, tag)).toEqual({ text: fm(after), kind });
 });
@@ -79,6 +80,8 @@ test.each([
 	'tags: [a, [b]]\n',
 	'tags: ["a,b"]\n',
 	'tags: work, home\n',
+	'tags:\n  - work\n    - x\n',
+	'tags:\n- a\n  - b\n',
 ])('a tags property written as %j is unreadable', (lines) => {
 	expect(plan(fm(lines), 'addTag', 'home')).toEqual({ refused: 'unreadable' });
 	expect(plan(fm(lines), 'removeTag', 'a')).toEqual({ refused: 'unreadable' });
