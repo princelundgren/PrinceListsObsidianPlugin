@@ -1,5 +1,7 @@
 ---
-status: draft
+status: building
+governs: [src/**, styles.css]
+verified: 2026-11-16
 tracking: ["#434"]
 ---
 
@@ -67,9 +69,11 @@ A heading has one way: its tags are in its text, so the tag goes in the text.
   of the popover. Today it closes whenever the view isn't selecting, and its chips, its button and
   where focus returns are the selection's (`src/view/selection-tag-popover.ts`), so it needs a
   lifecycle that doesn't depend on selecting.
-- **Where it opens (call):** under the heading for Tag…, and under the list's title for Tag
+- **Where it opens (call):** against the heading for Tag…, and against the list's title for Tag
   list…, scrolled into view if needed, inside the view and right-aligned with it as far as the
-  view's width allows.
+  view's width allows. A heading's popover opens above it when there is more room there than
+  below, a decided change from "under the heading", so the field never opens off the view's
+  bottom; it follows its anchor as the list scrolls.
 - **The chips (owner)** are the target's own tags, each with a × named "Remove #work":
   - **A heading's chips are the tags at the end of its text (call),** after its last word that
     isn't a tag, as a row's chips are the tags in its tail. A tag earlier in the text, as in

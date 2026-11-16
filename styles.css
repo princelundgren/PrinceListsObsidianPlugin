@@ -1280,8 +1280,8 @@ input.princelists-repeat-count {
 	gap: var(--size-4-2);
 }
 
-/* The selection's sits above the bar's Tag button, its end at the button's, and stays inside the view
-   with --size-4-2 to spare each side and above; selection-tag-popover.ts sets where the button is. The
+/* It sits above its anchor (the bar's Tag button), its end at the anchor's, and stays inside the view
+   with --size-4-2 to spare each side and above; tags-popover.ts sets where the anchor is. The
    chips wrap above the field, which takes the full width, and scroll once they would reach the view's
    top, so the field stays in view. */
 .princelists-selection-tag-popover {
@@ -1294,6 +1294,13 @@ input.princelists-repeat-count {
 	box-sizing: border-box;
 	max-width: calc(100% - 2 * var(--size-4-2));
 	max-height: calc(100% - var(--princelists-tag-popover-bottom) - var(--size-4-1) - var(--size-4-2));
+}
+
+/* Below its anchor instead, with --size-4-2 to spare under it. */
+.princelists-selection-tag-popover.princelists-tags-popover-below {
+	top: calc(var(--princelists-tag-popover-top) + var(--size-4-1));
+	bottom: auto;
+	max-height: calc(100% - var(--princelists-tag-popover-top) - var(--size-4-1) - var(--size-4-2));
 }
 
 .princelists-selection-tags {
