@@ -8,6 +8,8 @@ import { showNotesEditor } from './notes-editor';
 import { listNoteSource } from './notes-source';
 
 export const TITLE_CLASS = 'princelists-title';
+// The title and, after it, the list's tags.
+export const TITLE_ROW_CLASS = 'princelists-title-row';
 export const NOTE_CLASS = 'princelists-list-note';
 // Every textarea in the view, which styles.css makes read as the text it edits.
 export const FIELD_CLASS = 'princelists-field';
@@ -39,6 +41,14 @@ export function buildListTitle(view: PrinceListView, parent: HTMLElement): HTMLT
 export function beginListTitle(view: PrinceListView, field: HTMLTextAreaElement): void {
 	if (view.listTitle) return;
 	view.listTitle = view.file ? { file: view.file, before: field.value } : null;
+}
+
+/** Puts the caret at the end of the list's title, where a press beside its text would. */
+export function focusListTitleEnd(view: PrinceListView): void {
+	const title = view.listTitleEl;
+	if (!title) return;
+	title.focus();
+	title.setSelectionRange(title.value.length, title.value.length);
 }
 
 // A file name is one line, as a title is.

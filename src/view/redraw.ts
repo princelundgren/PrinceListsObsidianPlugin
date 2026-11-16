@@ -5,12 +5,13 @@ import { isListText } from '../obsidian/marker';
 import { hasNoItems } from './add-button';
 import { dismissCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
-import { buildListNote, buildListTitle, refreshListNote } from './fields';
+import { buildListNote, buildListTitle, refreshListNote, TITLE_ROW_CLASS } from './fields';
 import { addArchivedToggle, addStarredToggle, buildFilterField, NO_MATCH_CLASS, NO_MATCH_HINT } from './filter';
 import { ADD_KEY_NAME } from './keys';
+import { buildListTagChips, LIST_TAGS_CLASS } from './list-tags';
 import type { PrinceListView } from './list-view';
 import { drawnRows, END_CLASS, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
-import { drawSelection } from './select';
+import { drawSelection, focusList } from './select';
 import { buildTagStrip, showsTagStrip } from './tag-strip';
 
 // Draws everything again from the view's text, except the title, list note, card or heading field that
@@ -25,9 +26,11 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	const drawn = drawnRows(listSizerEl);
 	const fresh = createDiv();
 	let slot: HTMLElement | null = null;
-	if (kept && kept === view.listTitleEl) slot = fresh.createDiv();
-	else view.listTitleEl = buildListTitle(view, fresh);
+	const titleRow = fresh.createDiv({ cls: TITLE_ROW_CLASS });
+	if (kept && kept === view.listTitleEl) slot = titleRow.createDiv();
+	else view.listTitleEl = buildListTitle(view, titleRow);
 	if (isListText(view.text)) {
+		buildListTagChips(view, titleRow);
 		const { lines, model, inherited } = view.parse();
 		if (kept && kept === view.listNoteEl) {
 			slot = fresh.createDiv();
@@ -78,7 +81,15 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		fresh.createEl('p', { text: "This note isn't a list" });
 		fresh.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
 	}
+	// The chips beside the title are drawn again, so focus they held moves to the new ones.
+	const active = contentEl.doc.activeElement;
+	const chipsHadFocus = active !== null && listSizerEl.contains(active) && active.hasClass(LIST_TAGS_CLASS);
 	replaceKeeping(listSizerEl, fresh, kept, slot);
+	if (chipsHadFocus) {
+		const chips = listSizerEl.querySelector<HTMLElement>(`.${LIST_TAGS_CLASS}`);
+		if (chips) chips.focus();
+		else focusList(view);
+	}
 	for (const el of Array.from(view.blocks.keys())) if (!listSizerEl.contains(el)) view.dropBlock(el);
 	listSizerEl.toggleClass('princelists-is-empty', isEmpty);
 	if (view.card && kept === view.card.el) refreshCard(view, view.card);

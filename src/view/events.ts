@@ -20,8 +20,9 @@ import { cardTagsClick, closeTagPopover, escapeTagPopover, isOpenTagButton } fro
 import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
-import { beginListTitle, commitListTitle, keepOneLine, TITLE_CLASS } from './fields';
+import { beginListTitle, commitListTitle, focusListTitleEnd, keepOneLine, TITLE_CLASS, TITLE_ROW_CLASS } from './fields';
 import { notesText } from './editable-text';
+import { LIST_TAGS_CLASS, openListTags } from './list-tags';
 import { ARCHIVED_TOGGLE_CLASS, FILTER_TOGGLE_SELECTOR, filterKeyDown, STARRED_TOGGLE_CLASS, toggleStarredOnly } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { barActionAt, FORMAT_BAR_CLASS } from './format';
@@ -99,6 +100,15 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	}
 	if (target.closest(`.${STARRED_TOGGLE_CLASS}`)) {
 		toggleStarredOnly(view);
+		return;
+	}
+	const listTags = target.closest<HTMLElement>(`.${LIST_TAGS_CLASS}`);
+	if (listTags) {
+		openListTags(view, listTags);
+		return;
+	}
+	if (target.hasClass(TITLE_ROW_CLASS)) {
+		focusListTitleEnd(view);
 		return;
 	}
 	if (stripClick(view, target)) return;
@@ -194,7 +204,8 @@ function keepRepeatFocused(view: PrinceListView, evt: MouseEvent): void {
 // The title is only as wide as its text, so a press beside it lands on its line: the click that
 // follows puts the caret in the title, and the field that has focus keeps it until then.
 function keepFocusBesideTitle(evt: MouseEvent): void {
-	if (targetOf(evt)?.hasClass(CARD_TITLE_LINE_CLASS)) evt.preventDefault();
+	const target = targetOf(evt);
+	if (target?.hasClass(CARD_TITLE_LINE_CLASS) || target?.hasClass(TITLE_ROW_CLASS)) evt.preventDefault();
 }
 
 function onMouseDown(view: PrinceListView, evt: MouseEvent): void {

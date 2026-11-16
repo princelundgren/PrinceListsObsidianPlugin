@@ -27,8 +27,50 @@ textarea.princelists-field:focus {
 	box-shadow: none;
 }
 
-textarea.princelists-title {
+/* The title and, after its text, the list's tags, which wrap under it when they don't fit. Sized to
+   its text, the title leaves room beside it; without field-sizing it keeps the row's width. */
+.princelists-title-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	column-gap: var(--size-4-3);
+	row-gap: var(--size-4-1);
 	margin: 0 0 var(--size-4-2);
+}
+
+@supports (field-sizing: content) {
+	textarea.princelists-title {
+		field-sizing: content;
+		width: auto;
+		max-width: 100%;
+	}
+}
+
+button.princelists-list-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-1);
+	height: auto;
+	padding: 0;
+	white-space: normal;
+	background-color: transparent;
+}
+
+button.princelists-list-tags:not(:focus-visible) {
+	box-shadow: none;
+}
+
+@media (hover: hover) {
+	button.princelists-list-tags:hover {
+		background-color: transparent;
+	}
+
+	button.princelists-list-tags:hover:not(:focus-visible) {
+		box-shadow: none;
+	}
+}
+
+textarea.princelists-title {
 	font-family: var(--inline-title-font);
 	font-size: var(--inline-title-size);
 	font-weight: var(--inline-title-weight);
@@ -1110,7 +1152,8 @@ button.princelists-strip-no-tag,
 button.princelists-clear-tags,
 button.princelists-card-tag-button,
 button.princelists-card-repeat,
-button.princelists-card-tag-remove {
+button.princelists-card-tag-remove,
+button.princelists-list-tags {
 	min-width: 24px;
 	min-height: 24px;
 }
