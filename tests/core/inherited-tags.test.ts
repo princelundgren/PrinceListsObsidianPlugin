@@ -20,7 +20,7 @@ test('listTagsOf cleans what Obsidian returns', () => {
 });
 
 test('sharedCarried lists the tags every selected item carries, own or inherited', () => {
-	const lines = splitLines('---\nprincelists: true\n---\n## Office #work\n- [ ] call\n- [ ] mail #urgent\n## Home\n- [ ] sweep #work\n');
+	const lines = splitLines('---\nprincelists: true\n---\n## Office #work\n- [ ] call\n- [ ] mail #urgent\n## Home\n- [ ] sweep #Work\n');
 	const model = parseList(lines, 3);
 	const inherited = listInheritedTags(lines, model, ['home']);
 	expect(sharedCarried(lines, model, inherited, [4, 5])).toEqual(['home', 'work']);
