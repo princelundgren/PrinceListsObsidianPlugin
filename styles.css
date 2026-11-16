@@ -27,8 +27,9 @@ textarea.princelists-field:focus {
 	box-shadow: none;
 }
 
-/* The title and, after its text, the list's tags, which wrap under it when they don't fit. Sized to
-   its text, the title leaves room beside it; without field-sizing it keeps the row's width. */
+/* The title and, after its text, the list's tags or tag button, which wrap under it when they
+   don't fit. Sized to its text, the title leaves room beside it; without field-sizing it keeps the
+   row's width. */
 .princelists-title-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -36,6 +37,15 @@ textarea.princelists-field:focus {
 	column-gap: var(--size-4-3);
 	row-gap: var(--size-4-1);
 	margin: 0 0 var(--size-4-2);
+}
+
+/* A list with no tags: the tag button shows only while the title is being edited, or holds focus itself. */
+button.princelists-list-tag-button {
+	align-self: center;
+}
+
+.princelists-title-row:not(:focus-within) .princelists-list-tag-button {
+	display: none;
 }
 
 @supports (field-sizing: content) {
@@ -929,10 +939,11 @@ button.princelists-new-item {
 	gap: var(--size-2-1);
 }
 
-/* Icon buttons on the view's own background: the card's, the find row's, the tag strip's and the Schedule's title's. */
+/* Icon buttons on the view's own background: the card's, the list title's, the find row's, the tag strip's and the Schedule's title's. */
 button.princelists-card-actions,
 button.princelists-card-star,
 button.princelists-card-tag-button,
+button.princelists-list-tag-button,
 button.princelists-card-repeat,
 .princelists-format-bar button,
 .princelists-when-button,
@@ -953,6 +964,7 @@ button.princelists-find-button {
 button.princelists-card-actions:not(:focus-visible),
 button.princelists-card-star:not(:focus-visible),
 button.princelists-card-tag-button:not(:focus-visible),
+button.princelists-list-tag-button:not(:focus-visible),
 button.princelists-card-repeat:not(:focus-visible),
 button.princelists-card-tag-remove:not(:focus-visible),
 .princelists-format-bar button:not(:focus-visible),
@@ -972,6 +984,7 @@ button.princelists-schedule-list-label:not(:focus-visible) {
 	button.princelists-card-actions:hover,
 	button.princelists-card-star:hover,
 	button.princelists-card-tag-button:hover,
+	button.princelists-list-tag-button:hover,
 	button.princelists-card-repeat:hover,
 	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button,
@@ -1153,7 +1166,8 @@ button.princelists-clear-tags,
 button.princelists-card-tag-button,
 button.princelists-card-repeat,
 button.princelists-card-tag-remove,
-button.princelists-list-tags {
+button.princelists-list-tags,
+button.princelists-list-tag-button {
 	min-width: 24px;
 	min-height: 24px;
 }

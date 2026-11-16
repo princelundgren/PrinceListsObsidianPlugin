@@ -2,7 +2,7 @@
 status: live
 governs: [src/**, styles.css]
 verified: 2026-11-16
-tracking: ["#434", "#442"]
+tracking: ["#434", "#442", "#446"]
 ---
 
 # PrinceLists for Obsidian: tagging a heading or the list from its menus
@@ -154,6 +154,12 @@ had failed **(owner, 2026-11-16, #442)**.
 - **Chips right of the title (owner, 2026-11-16):** each of the list's tags as `#tag`, in the
   `tags` property's order, read as **Tag list…** reads them. They show only when the list has tags
   **(call)**.
+- **A list with no tags shows a tag button while its title is edited (owner, 2026-11-16),** where
+  the chips would sit, so it can be tagged without a menu. It is the card's tag icon, named "Tag
+  list", and opens the same popover; the title keeps focus until the press's click, so the button
+  stays to take it **(call)**. It hides once focus leaves the title, so after a pick or Escape focus
+  goes to the list, as from the menus. Where the title keeps the row's width (no `field-sizing`), it
+  takes a line under the title while shown. With tags, the chips are the way in, so it doesn't show.
 - **The rows' tag look (call):** the same `--tag-*` variables the rows' own tags use, so a theme's
   tag style reaches them.
 - **They follow the title's text (call)** and wrap onto a line of their own under it when the title

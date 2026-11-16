@@ -22,7 +22,7 @@ import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, focusListTitleEnd, keepOneLine, TITLE_CLASS, TITLE_ROW_CLASS } from './fields';
 import { notesText } from './editable-text';
-import { LIST_TAGS_CLASS, openListTags } from './list-tags';
+import { LIST_TAG_BUTTON_CLASS, LIST_TAGS_CLASS, openListTags } from './list-tags';
 import { ARCHIVED_TOGGLE_CLASS, FILTER_TOGGLE_SELECTOR, filterKeyDown, STARRED_TOGGLE_CLASS, toggleStarredOnly } from './filter';
 import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, stepField } from './field-undo';
 import { barActionAt, FORMAT_BAR_CLASS } from './format';
@@ -105,6 +105,11 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const listTags = target.closest<HTMLElement>(`.${LIST_TAGS_CLASS}`);
 	if (listTags) {
 		openListTags(view, listTags);
+		return;
+	}
+	// No button: it hides once focus leaves the title row, so focus returns to the list.
+	if (target.closest(`.${LIST_TAG_BUTTON_CLASS}`)) {
+		openListTags(view);
 		return;
 	}
 	if (target.hasClass(TITLE_ROW_CLASS)) {
@@ -206,6 +211,8 @@ function keepRepeatFocused(view: PrinceListView, evt: MouseEvent): void {
 function keepFocusBesideTitle(evt: MouseEvent): void {
 	const target = targetOf(evt);
 	if (target?.hasClass(CARD_TITLE_LINE_CLASS) || target?.hasClass(TITLE_ROW_CLASS)) evt.preventDefault();
+	// The title keeps focus until the click, so the button it shows stays to take it.
+	if (target?.closest(`.${LIST_TAG_BUTTON_CLASS}`)) evt.preventDefault();
 }
 
 function onMouseDown(view: PrinceListView, evt: MouseEvent): void {

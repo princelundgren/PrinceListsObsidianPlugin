@@ -1,4 +1,4 @@
-import { Notice } from 'obsidian';
+import { Notice, setIcon } from 'obsidian';
 import type { TagChange } from '../core/group-menu';
 import { ownEdit } from '../core/follow';
 import { expectedListTags, listTagsEditKind, planListTags } from '../core/list-tags-edit';
@@ -10,6 +10,7 @@ import { openTagsPopover } from './tags-popover';
 import { enqueueAt, writePlanned } from './write';
 
 export const LIST_TAGS_CLASS = 'princelists-list-tags';
+export const LIST_TAG_BUTTON_CLASS = 'princelists-list-tag-button';
 
 export const LIST_TAGS_REFUSED_NOTICE = "The list's tags can't be changed here. Use Show file properties.";
 
@@ -38,17 +39,25 @@ export function openListTags(view: PrinceListView, button: HTMLElement | null = 
 
 /**
  * Draws the list's tags at the end of `row`, after its title, as one button whose press opens Tag
- * list…'s popover. Draws nothing when the list has no tags.
+ * list…'s popover. A list with no tags gets a tag icon button there instead, which styles.css shows
+ * only while the row holds focus, as when the title is being edited. Returns the slot for the tag
+ * button when it is `kept`, the focused element the redraw keeps, and the list still has no tags.
  */
-export function buildListTagChips(view: PrinceListView, row: HTMLElement): void {
+export function buildListTags(view: PrinceListView, row: HTMLElement, kept: HTMLElement | null): HTMLElement | null {
 	const tags = listTags(view.text);
-	if (tags.length === 0) return;
+	if (tags.length === 0) {
+		if (kept?.hasClass(LIST_TAG_BUTTON_CLASS)) return row.createDiv();
+		const button = row.createEl('button', { cls: LIST_TAG_BUTTON_CLASS, attr: { 'aria-label': 'Tag list', 'aria-haspopup': 'dialog' } });
+		setIcon(button, 'tag');
+		return null;
+	}
 	const names = tags.map((tag) => `#${tag}`);
 	const button = row.createEl('button', {
 		cls: LIST_TAGS_CLASS,
 		attr: { 'aria-label': `Tag list: ${names.join(', ')}`, 'aria-haspopup': 'dialog', 'aria-expanded': 'false' },
 	});
 	for (const name of names) button.createSpan({ cls: 'princelists-tag', text: name });
+	return null;
 }
 
 function changeTag(view: PrinceListView, change: TagChange, tag: string): void {
