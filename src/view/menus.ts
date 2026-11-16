@@ -15,6 +15,7 @@ import { deleteHeadingAt, deleteItemAt } from './delete';
 import { NOTE_CLASS } from './fields';
 import { addStarredOnlyItem, toggleStarredOnly } from './filter';
 import { addHeading, openHeadingField } from './heading-field';
+import { openHeadingTags } from './heading-tags';
 import { itemQuickMenu } from './item-quick-menu';
 import type { PrinceListView } from './list-view';
 import { atLine, trackWhileShown } from './menu-anchor';
@@ -79,6 +80,12 @@ export function headingMenu(view: PrinceListView, model: ListModel, section: Sec
 			.setTitle('Rename heading')
 			.setIcon('pencil')
 			.onClick(atLine(anchor, (line) => openHeadingField(view, line))),
+	);
+	menu.addItem((entry) =>
+		entry
+			.setTitle('Tag…')
+			.setIcon('tag')
+			.onClick(atLine(anchor, (line) => openHeadingTags(view, line))),
 	);
 	menu.addSeparator();
 	menu.addItem((entry) =>

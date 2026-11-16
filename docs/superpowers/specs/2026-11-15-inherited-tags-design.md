@@ -89,7 +89,7 @@ concerns, nothing is written in the background, and only documented Obsidian API
     nothing in the file showing why.
 - **Items before the first heading** inherit only the list's tags.
 - **The heading shows its tags inside its text,** drawn by Obsidian's renderer as today, and they
-  are added or removed by editing that text **(call)**.
+  are added or removed by editing that text, or with Tag… in the heading's menu **(call)**.
 
 ## What an item carries
 
