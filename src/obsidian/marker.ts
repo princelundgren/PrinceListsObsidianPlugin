@@ -49,3 +49,26 @@ export function readFrontmatter(text: string): FrontmatterShape | null {
 		return { closingLine, isMapping: false };
 	}
 }
+
+/** Whether every frontmatter property but `tags` (in any case) parses the same in both texts. */
+export function sameButTags(before: string, after: string): boolean {
+	const was = propertiesButTags(before);
+	const now = propertiesButTags(after);
+	if (!was || !now) return false;
+	const keys = new Set([...Object.keys(was), ...Object.keys(now)]);
+	return [...keys].every((key) => JSON.stringify(was[key]) === JSON.stringify(now[key]));
+}
+
+// null: no frontmatter, not YAML, or not a mapping.
+function propertiesButTags(text: string): Record<string, unknown> | null {
+	const info = leadingFrontmatter(text);
+	if (!info) return null;
+	try {
+		const yaml: unknown = parseYaml(info.frontmatter);
+		if (yaml === null) return {};
+		if (!isYamlMapping(yaml)) return null;
+		return Object.fromEntries(Object.entries(yaml as Record<string, unknown>).filter(([key]) => !/^tags$/i.test(key)));
+	} catch {
+		return null;
+	}
+}
