@@ -42,12 +42,11 @@ concerns, nothing is written in the background, and only documented Obsidian API
    properties.
 2. **A tag in the list note,** the text under the list's title. It can be typed in the list view,
    but tags already in that text, such as `#idea`, would then cover the whole list unasked.
-3. **The plugin also writes the `tags` property** from the list view. Not now **(owner)**, and
-   reversed in #434 ([tag from menus](2026-11-16-tag-from-menus-design.md)): the
+3. **The plugin also writes the `tags` property** from the list view. Not now **(owner)**: the
    plugin edits frontmatter only line by line and never re-serializes it (AGENTS.md; step one,
    "Frontmatter"), as Turn into list adds its marker (`src/core/marker-edit.ts`). `tags` is harder
    to edit that way, since it can be a single value, a flow list or a block list over several
-   lines. It can be its own issue later.
+   lines. Reversed in #434 ([tag from menus](2026-11-16-tag-from-menus-design.md)).
 
 ## A list's tags
 
@@ -71,9 +70,10 @@ concerns, nothing is written in the background, and only documented Obsidian API
 - **A change shows at once,** since the list view rereads its file on an outside change and the
   Schedule on the metadata cache's `changed` event, which Sync's changes reach too.
 - **Where it's set:** Tag list… in the list view's menus. A list opens in the list view, which
-  doesn't show properties. "Edit in Markdown" opens the note as Markdown, where Obsidian shows them at the top. The Properties view
-  sidebar ("Properties view: Show file properties") shows and edits them with the list view open,
-  and the strip and filters follow at once (checked in Obsidian 1.15.1).
+  doesn't show properties. "Edit in Markdown" opens the note as Markdown, where Obsidian shows them
+  at the top. The Properties view sidebar ("Properties view: Show file properties") shows and edits
+  them with the list view open, and the strip and filters follow at once (checked in Obsidian
+  1.15.1).
 - **The README says** to write the tag without `#` or quote it: unquoted, `tags: #work` is a YAML
   comment, and the note has no tag.
 

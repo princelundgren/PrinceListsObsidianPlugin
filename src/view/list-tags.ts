@@ -14,7 +14,7 @@ export const LIST_TAGS_REFUSED_NOTICE = "The list's tags can't be changed here. 
 /**
  * Opens the tag popover under the list's title: the tags of its `tags` property as chips, each
  * with a × that takes it off, and a field whose pick adds a tag. It closes once the Markdown
- * differs from what it opened with. Nothing opens when the title isn't on screen.
+ * differs from what it opened with. Nothing opens when the view has no title element.
  */
 export function openListTags(view: PrinceListView): void {
 	const anchor = view.listTitleEl;
