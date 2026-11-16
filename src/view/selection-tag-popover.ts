@@ -29,7 +29,7 @@ export function openSelectionTagPopover(view: PrinceListView, button: HTMLElemen
 	const opened = rowTexts(view.text, lines);
 	openTagsPopover(view, {
 		label: 'Tag the selection',
-		anchor: button,
+		anchor: () => button,
 		side: 'above',
 		button,
 		chips: chips.map(({ tag, count }) => ({ tag, text: count === items ? `#${tag}` : `#${tag} ${count} of ${items}` })),

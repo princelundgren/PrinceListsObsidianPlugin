@@ -21,8 +21,8 @@ export interface TagChip {
 export interface TagsPopoverTarget {
 	/** The dialog's accessible name, such as "Tag the selection". */
 	label: string;
-	/** The element it opens against. */
-	anchor: HTMLElement;
+	/** The element it sits against, found again each time it is placed; null keeps it closed. */
+	anchor(): HTMLElement | null;
 	/** 'above' always opens above the anchor; 'below' opens below it, or above when there is more room above. */
 	side: 'above' | 'below';
 	/** The button it opens from, whose aria-expanded follows it and which takes focus back; null for a menu's targets. */
@@ -73,10 +73,12 @@ export function buildTagsPopover(view: PrinceListView): void {
 /**
  * Opens the popover on `target` with its tags as chips, each with a × that takes it off, then a field
  * whose pick gives a tag to it, and focuses the field. A target with no button has its anchor scrolled into view.
+ * Nothing opens while the target's anchor is null.
  */
 export function openTagsPopover(view: PrinceListView, target: TagsPopoverTarget): void {
 	const popover = popovers.get(view);
-	if (!popover) return;
+	const anchor = target.anchor();
+	if (!popover || !anchor) return;
 	closeTagsPopover(view);
 	popover.labelEl.setText(target.label);
 	if (target.chips.length > 0) {
@@ -94,7 +96,7 @@ export function openTagsPopover(view: PrinceListView, target: TagsPopoverTarget)
 	popover.open = { target, input, suggest };
 	target.button?.setAttr('aria-expanded', 'true');
 	popover.el.show();
-	if (!target.button) target.anchor.scrollIntoView({ block: 'nearest' });
+	if (!target.button) anchor.scrollIntoView({ block: 'nearest' });
 	placeTagsPopover(view);
 	input.focus();
 }
@@ -118,9 +120,10 @@ export function closeTagsPopover(view: PrinceListView): void {
 export function placeTagsPopover(view: PrinceListView): void {
 	const popover = popovers.get(view);
 	const open = popover?.open;
-	if (!popover || !open) return;
+	const anchorEl = open?.target.anchor();
+	if (!popover || !open || !anchorEl) return;
 	const container = view.containerEl.getBoundingClientRect();
-	const anchor = open.target.anchor.getBoundingClientRect();
+	const anchor = anchorEl.getBoundingClientRect();
 	const below = open.target.side === 'below' && container.bottom - anchor.bottom >= anchor.top - container.top;
 	popover.el.toggleClass(BELOW_CLASS, below);
 	popover.el.setCssProps({
@@ -130,13 +133,18 @@ export function placeTagsPopover(view: PrinceListView): void {
 }
 
 /**
- * Closes the open popover once its target is stale. Focus it held goes to the target's button when
- * the button takes it, or to the list.
+ * Places the open popover against its anchor again after a render, which can rebuild or move it, or
+ * closes it once its target is stale or its anchor is null. Focus it held goes to the target's button
+ * when the button takes it, or to the list.
  */
 export function syncTagsPopover(view: PrinceListView): void {
 	const popover = popovers.get(view);
 	const open = popover?.open;
-	if (!popover || !open || !open.target.isStale()) return;
+	if (!popover || !open) return;
+	if (!open.target.isStale() && open.target.anchor()) {
+		placeTagsPopover(view);
+		return;
+	}
 	const heldFocus = popover.el.contains(popover.el.doc.activeElement);
 	closeTagsPopover(view);
 	if (heldFocus) returnFocus(view, open.target);
