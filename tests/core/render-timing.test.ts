@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { listStripTags, visibleSections } from '../../src/core/display';
+import { listInheritedTags, listStripTags, visibleSections } from '../../src/core/display';
 import { ListEditing } from '../../src/core/editing';
 import { needsMarkdown } from '../../src/core/inline';
 import { splitLines } from '../../src/core/lines';
@@ -41,8 +41,9 @@ test("the core's part of a redraw of 500 items takes under 50 ms, and 50 of the 
 		const lines = splitLines(text);
 		const model = parseList(lines, 3);
 		const now = new Date(2026, 9, 21);
-		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() });
-		strip = listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: 86_400_000 }, []);
+		const inherited = listInheritedTags(lines, model, []);
+		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: 86_400_000, find: null, keepLine: null, collapsed: new Set() }, inherited);
+		strip = listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: 86_400_000 }, [], inherited);
 		rendered = sections.flatMap((s) => [s.heading?.text ?? '', ...s.rows.map((r) => (r.kind === 'item' ? r.title : ''))]).filter(needsMarkdown).length;
 	});
 	expect(rendered).toBe(50);

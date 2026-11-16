@@ -2,6 +2,7 @@ import { isArchived } from './archive';
 import { splitAtx } from './edit-headings';
 import { getItemNotes } from './edit-items';
 import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
+import { carriedTags, inheritedTags, withoutListTags, type InheritedTags } from './inherited-tags';
 import { itemTags } from './item-tags';
 import type { Line } from './lines';
 import type { ItemBlock, ListModel } from './parse';
@@ -81,7 +82,7 @@ const SETEXT_UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/;
 // that match show under the headings. A collapsed section shows only its heading, unless the list
 // is filtered.
 // Archived is worked out from `now` on each redraw, never written down (spec, "Done and archived").
-export function visibleSections(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter): SectionRows[] {
+export function visibleSections(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter, inherited: InheritedTags): SectionRows[] {
 	const filtering = isFiltered(filter);
 	return model.sections.map(({ headingLine, items }, i) => {
 		const start = headingLine ?? model.contentStart;
@@ -91,7 +92,7 @@ export function visibleSections(lines: readonly Line[], model: ListModel, now: D
 			const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, filter.archiveDelayMs);
 			if (!isShown(row, filter.showArchived)) return [];
 			if (item.titleLine === filter.keepLine) return [row];
-			if (filtering) return (!filter.starredOnly || row.starred) && meetsLitTags(row.tags, filter.lit) && itemMatches(lines, item, row, filter.find) ? [row] : [];
+			if (filtering) return (!filter.starredOnly || row.starred) && meetsLitTags(carriedTags(row.tags, inherited.bySection[i] ?? inherited.list), filter.lit) && itemMatches(lines, item, row, filter.find) ? [row] : [];
 			return collapsed ? [] : [row];
 		});
 		const heading = headingLine === null ? null : { line: headingLine, text: headingText(lines, headingLine) };
@@ -118,8 +119,17 @@ export function isFiltered(filter: { find: Find | null; starredOnly: boolean; li
 }
 
 /**
+ * What each section of the list inherits: the list's tags, and the tags of its heading, which a
+ * lower heading doesn't inherit.
+ */
+export function listInheritedTags(lines: readonly Line[], model: ListModel, listTags: readonly string[]): InheritedTags {
+	return inheritedTags(listTags, model.sections.map(({ headingLine }) => (headingLine === null ? null : headingText(lines, headingLine))));
+}
+
+/**
  * The tags the strip offers for a list: those of every item shown (archived ones only while
- * `shown.showArchived`), in file order, and the lit ones, whether or not an item carries them.
+ * `shown.showArchived`), in file order, and the lit ones, whether or not an item carries them. An
+ * item counts its heading's tags too, but not the list's own, which every item carries.
  */
 export function listStripTags(
 	lines: readonly Line[],
@@ -127,17 +137,18 @@ export function listStripTags(
 	now: Date,
 	shown: { showArchived: boolean; archiveDelayMs: number },
 	lit: readonly string[],
+	inherited: InheritedTags,
 ): string[] {
-	const carried = model.sections.flatMap(({ items }) => items).flatMap((item) => {
+	const carried = model.sections.flatMap(({ items }, i) => items.map((item) => ({ item, section: i }))).flatMap(({ item, section }) => {
 		const row = itemRow((lines[item.titleLine] as Line).text, item.titleLine, now, shown.archiveDelayMs);
-		return isShown(row, shown.showArchived) ? [row.tags] : [];
+		return isShown(row, shown.showArchived) ? [withoutListTags(carriedTags(row.tags, inherited.bySection[section] ?? inherited.list), inherited.list)] : [];
 	});
 	return stripTags(carried, lit);
 }
 
 /** Whether visibleSections draws the item on `titleLine` as a row. */
-export function isItemVisible(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter, titleLine: number): boolean {
-	return visibleSections(lines, model, now, filter).some(({ rows }) => rows.some((row) => row.kind === 'item' && row.titleLine === titleLine));
+export function isItemVisible(lines: readonly Line[], model: ListModel, now: Date, filter: RowFilter, titleLine: number, inherited: InheritedTags): boolean {
+	return visibleSections(lines, model, now, filter, inherited).some(({ rows }) => rows.some((row) => row.kind === 'item' && row.titleLine === titleLine));
 }
 
 function itemMatches(lines: readonly Line[], item: ItemBlock, row: ItemRow, find: Find | null): boolean {

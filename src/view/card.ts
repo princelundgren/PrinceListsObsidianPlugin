@@ -225,8 +225,8 @@ function rowAt(view: PrinceListView, line: number | null): ItemRow | null {
 }
 
 function isRowVisible(view: PrinceListView, row: ItemRow): boolean {
-	const { lines, model } = view.parse();
-	return isItemVisible(lines, model, new Date(), rowFilter(view, null), row.titleLine);
+	const { lines, model, inherited } = view.parse();
+	return isItemVisible(lines, model, new Date(), rowFilter(view, null), row.titleLine, inherited);
 }
 
 function isEmptyAt(view: PrinceListView, line: number): boolean {

@@ -18,7 +18,9 @@ this project.
     and why, and [step two's design](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md)
     adds what step two builds. [Notes in one editor](docs/superpowers/specs/2026-10-29-notes-in-one-editor-design.md)
     replaced step two's block-at-a-time notes. [Filtering by tag](docs/superpowers/specs/2026-11-07-tag-filter-design.md)
-    shows items' tags on rows and cards, and filters a list and the Schedule by them. [Selecting several rows](docs/superpowers/specs/2026-11-07-select-several-design.md)
+    shows items' tags on rows and cards, and filters a list and the Schedule by them, and
+    [inherited tags](docs/superpowers/specs/2026-11-15-inherited-tags-design.md) makes a list's and a
+    heading's tags count for their items ([the plan](docs/superpowers/plans/2026-11-16-inherited-tags.md)). [Selecting several rows](docs/superpowers/specs/2026-11-07-select-several-design.md)
     acts on many items and headings at once, and [tagging a selection](docs/superpowers/specs/2026-11-12-select-tags-design.md)
     adds and removes a tag on all of them. [Repeating items](docs/superpowers/specs/2026-11-13-repeating-items-design.md)
     are done until their next date, then come back.

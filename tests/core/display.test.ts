@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { findsNothing, headingText, isItemVisible, itemRow, listStripTags, visibleSections, type RowFilter } from '../../src/core/display';
+import { findsNothing, headingText, isItemVisible, itemRow, listInheritedTags, listStripTags, visibleSections, type RowFilter } from '../../src/core/display';
+import { NO_INHERITED_TAGS } from '../../src/core/inherited-tags';
 import { tickLine } from '../../src/core/item-line';
 import { NO_LIT_TAGS } from '../../src/core/tags';
 import { containing, list, readFixture } from './edit-helpers';
@@ -16,7 +17,7 @@ const sectionsOf = (
 	archiveDelayMs = DAY,
 ) => {
 	const { lines, model } = list(text);
-	return visibleSections(lines, model, now, { showArchived, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs, find: containing(query), keepLine, collapsed });
+	return visibleSections(lines, model, now, { showArchived, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs, find: containing(query), keepLine, collapsed }, NO_INHERITED_TAGS);
 };
 
 const row = (titleLine: number, title: string, done = false, label = title, archived = false, starred = false, when: string | null = null, tags: string[] = [], tailTags: string[] = tags, repeats = false) => ({
@@ -231,7 +232,7 @@ describe('visibleSections, starred only', () => {
 	const starred = (filter: { query?: string; showArchived?: boolean; keepLine?: number | null; collapsed?: ReadonlySet<number> } = {}) => {
 		const { lines, model } = list(text);
 		const { query = '', showArchived = false, keepLine = null, collapsed = new Set<number>() } = filter;
-		return visibleSections(lines, model, now, { showArchived, starredOnly: true, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: containing(query), keepLine, collapsed });
+		return visibleSections(lines, model, now, { showArchived, starredOnly: true, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: containing(query), keepLine, collapsed }, NO_INHERITED_TAGS);
 	};
 
 	test('shows only starred items, and every heading', () => {
@@ -275,7 +276,7 @@ describe('visibleSections, matching the date', () => {
 	test('matches the When as exact text, never fuzzily', () => {
 		const anyDay = { text: '2026-11', fuzzyMatches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) };
 		const { lines, model } = list(text);
-		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: anyDay, keepLine: null, collapsed: new Set() });
+		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: anyDay, keepLine: null, collapsed: new Set() }, NO_INHERITED_TAGS);
 		expect(sections[0]?.rows.map((shown) => shown.kind === 'item' && shown.title)).toEqual(['Renew']);
 	});
 });
@@ -308,7 +309,7 @@ describe('findsNothing', () => {
 	const filter = (query: string, starredOnly = false): RowFilter => ({ showArchived: false, starredOnly, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: containing(query), keepLine: null, collapsed: new Set() });
 	const nothing = (listText: string, rowFilter: RowFilter) => {
 		const { lines, model } = list(listText);
-		return findsNothing(model, rowFilter, visibleSections(lines, model, now, rowFilter));
+		return findsNothing(model, rowFilter, visibleSections(lines, model, now, rowFilter, NO_INHERITED_TAGS));
 	};
 
 	test('is true while a query matches no item', () => {
@@ -334,7 +335,7 @@ describe('isItemVisible', () => {
 	const text = '---\nprincelists: true\n---\n- [ ] a\n## B\n- [ ] b\n## C\n- [ ] c\n- [x] old ✔ 2026-10-01 10:00\n';
 	const visible = (titleLine: number, query = '', collapsed: ReadonlySet<number> = new Set()) => {
 		const { lines, model } = list(text);
-		return isItemVisible(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: containing(query), keepLine: null, collapsed }, titleLine);
+		return isItemVisible(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: containing(query), keepLine: null, collapsed }, titleLine, NO_INHERITED_TAGS);
 	};
 
 	test('an item in an open section, with no filter, is visible', () => {
@@ -360,22 +361,22 @@ describe('lit tags', () => {
 	const filter = (tags: string[], extra: Partial<RowFilter> = {}): RowFilter => ({ showArchived: false, starredOnly: false, lit: { tags, untagged: false }, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set(), ...extra });
 	const titles = (rowFilter: RowFilter) => {
 		const { lines, model } = list(text);
-		return visibleSections(lines, model, now, rowFilter).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
+		return visibleSections(lines, model, now, rowFilter, NO_INHERITED_TAGS).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
 	};
 
 	test('shows only the items carrying every lit tag, a parent tag included, under every heading', () => {
 		const { lines, model } = list(text);
 		expect(titles(filter(['frozen']))).toEqual(['Fries', 'Peas #Frozen/green']);
 		expect(titles(filter(['frozen', 'tools']))).toEqual([]);
-		expect(visibleSections(lines, model, now, filter(['tools'])).map(({ heading }) => heading?.text ?? null)).toEqual([null, 'Garden']);
+		expect(visibleSections(lines, model, now, filter(['tools']), NO_INHERITED_TAGS).map(({ heading }) => heading?.text ?? null)).toEqual([null, 'Garden']);
 	});
 
 	test('findsNothing is true when no item carries the tags', () => {
 		const { lines, model } = list(text);
 		const none = filter(['nothing']);
-		expect(findsNothing(model, none, visibleSections(lines, model, now, none))).toBe(true);
+		expect(findsNothing(model, none, visibleSections(lines, model, now, none, NO_INHERITED_TAGS))).toBe(true);
 		const some = filter(['tools']);
-		expect(findsNothing(model, some, visibleSections(lines, model, now, some))).toBe(false);
+		expect(findsNothing(model, some, visibleSections(lines, model, now, some, NO_INHERITED_TAGS))).toBe(false);
 	});
 
 	test('combines with a query and with "Show starred only" by AND', () => {
@@ -389,7 +390,7 @@ describe('lit tags', () => {
 
 	test('the strip leaves out an archived item\'s tags until archived items show, keeps a lit tag no item carries, and ignores the notes', () => {
 		const { lines, model } = list(text);
-		const strip = (showArchived: boolean, lit: string[] = []) => listStripTags(lines, model, now, { showArchived, archiveDelayMs: DAY }, lit);
+		const strip = (showArchived: boolean, lit: string[] = []) => listStripTags(lines, model, now, { showArchived, archiveDelayMs: DAY }, lit, NO_INHERITED_TAGS);
 		expect(strip(false)).toEqual(['frozen', 'Frozen/green', 'tools']);
 		expect(strip(true)).toEqual(['frozen', 'Frozen/green', 'gone', 'tools']);
 		expect(strip(false, ['zzz'])).toEqual(['frozen', 'Frozen/green', 'tools', 'zzz']);
@@ -397,7 +398,7 @@ describe('lit tags', () => {
 
 	test('the strip keeps the casing met first in file order, across headings', () => {
 		const { lines, model } = list('## Freezer\n- [ ] Fries #Frozen\n## Later\n- [ ] Peas #frozen\n');
-		expect(listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: DAY }, [])).toEqual(['Frozen']);
+		expect(listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: DAY }, [], NO_INHERITED_TAGS)).toEqual(['Frozen']);
 	});
 });
 
@@ -407,16 +408,16 @@ describe('No tag', () => {
 	const filter = (tags: string[], extra: Partial<RowFilter> = {}): RowFilter => ({ showArchived: false, starredOnly: false, lit: { tags, untagged: true }, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set(), ...extra });
 	const titles = (rowFilter: RowFilter) => {
 		const { lines, model } = list(text);
-		return visibleSections(lines, model, now, rowFilter).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
+		return visibleSections(lines, model, now, rowFilter, listInheritedTags(lines, model, [])).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
 	};
 
-	test("alone shows the items with no tag on their own line, whatever their notes or heading carry", () => {
-		expect(titles(filter([]))).toEqual(['Bread', 'Rice', 'Year']);
+	test("alone shows the items that carry no tag, their heading's included, whatever their notes carry", () => {
+		expect(titles(filter([]))).toEqual(['Bread']);
 	});
 
 	test('adds the items with no tag to those carrying every lit tag', () => {
-		expect(titles(filter(['frozen']))).toEqual(['Fries', 'Bread', 'Rice', 'Year']);
-		expect(titles(filter(['frozen', 'pantry']))).toEqual(['Bread', 'Rice', 'Year']);
+		expect(titles(filter(['frozen']))).toEqual(['Fries', 'Bread']);
+		expect(titles(filter(['frozen', 'pantry']))).toEqual(['Bread']);
 	});
 
 	test('combines with a query by AND', () => {
@@ -426,6 +427,49 @@ describe('No tag', () => {
 	test('findsNothing is true when every item has a tag', () => {
 		const { lines, model } = list('- [ ] Fries #frozen\n');
 		const noTag = filter([]);
-		expect(findsNothing(model, noTag, visibleSections(lines, model, now, noTag))).toBe(true);
+		expect(findsNothing(model, noTag, visibleSections(lines, model, now, noTag, listInheritedTags(lines, model, [])))).toBe(true);
+	});
+});
+
+describe('inherited tags', () => {
+	const now = new Date(2026, 9, 21, 12, 0);
+	const text = '---\nprincelists: true\n---\n- [ ] top\n## Office #work\n- [ ] call\n### Calls\n- [ ] ring\n\nUse `#code`\n---\n- [ ] x\n';
+	const filter = (tags: string[], untagged = false): RowFilter => ({ showArchived: false, starredOnly: false, lit: { tags, untagged }, archiveDelayMs: DAY, find: null, keepLine: null, collapsed: new Set() });
+	const shown = (source: string, listTags: string[], rowFilter: RowFilter) => {
+		const { lines, model } = list(source);
+		const inherited = listInheritedTags(lines, model, listTags);
+		return visibleSections(lines, model, now, rowFilter, inherited).flatMap(({ rows }) => rows.map((r) => (r.kind === 'item' ? r.title : r.text)));
+	};
+
+	test("a section counts the list's tags then its own heading's, not a parent heading's, and a code span is no tag", () => {
+		const { lines, model } = list(text);
+		expect(listInheritedTags(lines, model, ['home']).bySection).toEqual([['home'], ['home', 'work'], ['home'], ['home']]);
+	});
+
+	test("a lit tag shows the items under a heading that carries it", () => {
+		expect(shown(text, ['home'], filter(['work']))).toEqual(['call']);
+	});
+
+	test('No tag shows no item when every item carries the list tag', () => {
+		expect(shown(text, ['home'], filter([], true))).toEqual([]);
+	});
+
+	test("the strip offers the headings' tags and not the list's", () => {
+		const { lines, model } = list(text);
+		const inherited = listInheritedTags(lines, model, ['home']);
+		expect(listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: DAY }, [], inherited)).toEqual(['work']);
+	});
+
+	test("a setext heading's second line gives its section the tag", () => {
+		const setext = '---\nprincelists: true\n---\n- [ ] top\n\nOffice\n#work\n======\n- [ ] call\n';
+		const { lines, model } = list(setext);
+		expect(listInheritedTags(lines, model, []).bySection).toEqual([[], ['work']]);
+	});
+
+	test("a list with tags of its own and none on its headings has an empty strip, so it shows none", () => {
+		const plain = '---\nprincelists: true\n---\n- [ ] top\n## Office\n- [ ] call\n';
+		const { lines, model } = list(plain);
+		const inherited = listInheritedTags(lines, model, ['home']);
+		expect(listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: DAY }, [], inherited)).toEqual([]);
 	});
 });

@@ -1,5 +1,6 @@
-import { type FrontMatterInfo, getFrontMatterInfo, parseYaml } from 'obsidian';
+import { type FrontMatterInfo, getFrontMatterInfo, parseFrontMatterTags, parseYaml } from 'obsidian';
 import { isMarkerValue, isYamlMapping, lineAfterFrontmatter, opensWithFrontmatter } from '../core/frontmatter';
+import { listTagsOf } from '../core/inherited-tags';
 import type { FrontmatterShape } from '../core/marker-edit';
 
 // Read from the text, not the metadata cache: getFileCache returns null for a file that isn't
@@ -17,6 +18,19 @@ export function isListText(text: string): boolean {
 	} catch {
 		// Frontmatter that isn't valid YAML has no marker.
 		return false;
+	}
+}
+
+/** The tags of the list's `tags` property, without their `#`: none when there is no property or the frontmatter isn't YAML. */
+export function listTags(text: string): string[] {
+	const info = leadingFrontmatter(text);
+	if (!info) return [];
+	try {
+		const yaml: unknown = parseYaml(info.frontmatter);
+		return isYamlMapping(yaml) ? listTagsOf(parseFrontMatterTags(yaml)) : [];
+	} catch {
+		// Frontmatter that isn't valid YAML has no tags.
+		return [];
 	}
 }
 

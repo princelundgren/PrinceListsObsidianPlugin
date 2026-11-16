@@ -33,15 +33,17 @@ are used.
   **(owner)**.
 - **Rows show their tags as labels,** and the open card adds and removes them **(owner)**.
 - **The Schedule has the strip too (owner).**
-- **Not in this design (call):** a tag strip in a list inside another note; tags on a heading
-  covering its section; tags in an item's notes.
+- **Not in this design (call):** a tag strip in a list inside another note; tags in an item's
+  notes. Tags on a list or a heading, which its items inherit, are
+  [their own design](2026-11-15-inherited-tags-design.md).
 
 ## An item's tags
 
 - **An item's tags are the tags on its own line (call):** in its title, as in `- [ ] #frozen
   Fries`, and in the hidden part after it, as in `- [ ] Fries #frozen`, which the parser reads as
-  the line's tail, with Tasks' fields (`src/core/item-line.ts`). Tags in its notes don't count,
-  and neither does a tag on the heading above it.
+  the line's tail, with Tasks' fields (`src/core/item-line.ts`). Tags in its notes don't count.
+  An item also counts the tags of its list and its heading as its own in every filter, though its
+  row and card show only its own ([inherited tags](2026-11-15-inherited-tags-design.md)).
 - **A tag is what Obsidian reads as one** (Obsidian Help, "Tags"): letters, numbers, `_`, `-`,
   `/` and other Unicode characters, emoji included, with at least one that isn't a number, so
   `#1984` isn't a tag.
@@ -56,7 +58,8 @@ are used.
   though Obsidian reads `#frozen` in it: the tail's fields are Tasks' and are read whole.
 - **Obsidian's metadata cache isn't used for this (call),** although it indexes tags
   (`CachedMetadata.tags`, `getAllTags`): core has no Obsidian imports, the cache catches up only
-  after the view's own writes, and it also counts tags in the notes, headings and frontmatter.
+  after the view's own writes, and it also counts tags in the notes, headings and frontmatter, which
+  are not all an item's.
 - **Case doesn't matter (call),** as in Obsidian, where `#Frozen` and `#frozen` are one tag
   (Obsidian Help, "Tags"). The strip shows the casing that comes first in the file, or, in the
   Schedule, first in its order.
@@ -67,7 +70,8 @@ are used.
 
 - **Where it sits (owner):** between the list note and the rows. With the filter field open, the
   strip is below the field **(call)**, so it is always directly above the rows.
-- **What's in it:** each tag the list's items carry, once **(owner)**, sorted alphabetically,
+- **What's in it:** each tag the list's items carry, once **(owner)**, their heading's included but
+  not the list's own ([inherited tags](2026-11-15-inherited-tags-design.md)), sorted alphabetically,
   ignoring case **(call)**. Archived items' tags are in it only while "Show archived items" is on
   **(call)**, since their items show only then. A list with no tags shows no strip **(owner)**.
 - **It wraps onto more lines** when the tags don't fit across the pane **(call)**.
@@ -119,8 +123,8 @@ every tagged part of a list is done, such as what is left to buy.
   as a tag named `#notag` **(call)**; lit, it takes the accent color as a lit tag does.
 - **It is in every strip,** a list's and the Schedule's, so a list with no tags, which has no
   strip, has no No tag. It stays when every item has a tag; lit, it then finds nothing.
-- **An item has no tag** when its own line carries none, by the rule in "An item's tags": a tag in
-  its notes or on the heading above doesn't count.
+- **An item has no tag** when neither its own line nor its list or heading carries one, by the
+  rule in "An item's tags": a tag in its notes doesn't count.
 - **Alone, it shows only the items with no tag.** With tags lit, it adds them to the items carrying
   every lit tag: `#frozen` and No tag show the `#frozen` items and the untagged ones, and hide the
   `#pantry` ones.
@@ -193,9 +197,9 @@ every tagged part of a list is done, such as what is left to buy.
 - **The tag button opens a small popover under it (owner, #340),** over the card's content, so
   opening it moves nothing. It holds one field with Obsidian's `AbstractInputSuggest` (`@since`
   1.4.10, older than `minAppVersion` 1.13.4). It suggests this list's tags **(call)**, the same set
-  the strip shows with no tag lit, less the item's own, and `New tag: #<tag>` for anything else.
-  Other lists' tags aren't offered: the metadata cache would hold them, but with their notes',
-  headings' and frontmatter's tags, which this design doesn't count. A leading `#` is optional, and
+  the strip shows with no tag lit, less the item's own and those it inherits, and `New tag: #<tag>`
+  for anything else. Other lists' tags aren't offered: the metadata cache would hold them, but with
+  their notes' tags, which this design doesn't count. A leading `#` is optional, and
   text that isn't a tag (a space, only numbers) isn't offered **(call)**.
   - **The popover is the plugin's own element in the card (call),** under the tag button with its
     end edge at the end of the card's top row of buttons, so it stays inside the card, and no wider

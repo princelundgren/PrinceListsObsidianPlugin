@@ -1,4 +1,5 @@
 import { setIcon } from 'obsidian';
+import { carriedTags, inheritedFor } from '../core/inherited-tags';
 import { itemTags } from '../core/item-tags';
 import { addTag, removeTag } from '../core/tag-edit';
 import { addHiddenLabel } from './dom';
@@ -76,7 +77,11 @@ export function toggleTagPopover(view: PrinceListView): void {
 // The open card's item when asked, which may have moved since the popover opened.
 function cardTagTarget(view: PrinceListView): TagTarget {
 	return {
-		tagsToLeaveOut: () => itemTags(view.selected === null ? '' : (view.parse().lines[view.selected]?.text ?? '')).tags,
+		tagsToLeaveOut: () => {
+			if (view.selected === null) return [];
+			const { lines, model, inherited } = view.parse();
+			return carriedTags(itemTags(lines[view.selected]?.text ?? '').tags, inheritedFor(model, inherited, view.selected));
+		},
 		choose: (tag) => {
 			if (view.selected !== null) queueLineEdit(view, view.selected, (text) => addTag(text, tag));
 			escapeTagPopover(view);

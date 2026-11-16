@@ -8,6 +8,8 @@ import { followLine, type OwnEdit } from '../core/follow';
 import { labelWithKey } from '../core/key-name';
 import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
+import { listInheritedTags } from '../core/display';
+import type { InheritedTags } from '../core/inherited-tags';
 import { parseList, type ListModel } from '../core/parse';
 import type { RepeatDraft } from '../core/repeat-line';
 import { serialQueue } from '../core/queue';
@@ -15,7 +17,7 @@ import { RowSelection } from '../core/selection';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { NO_LIT_TAGS, type LitTags } from '../core/tags';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
-import { contentStartLine, isListText } from '../obsidian/marker';
+import { contentStartLine, isListText, listTags } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import type { PrinceListsSettings } from '../obsidian/settings';
 import { openAsMarkdown } from '../obsidian/switch';
@@ -95,7 +97,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	readonly redrawFiltered = debounce(() => this.render(), FILTER_PAUSE_MS, true);
 	private readonly parsedText = rememberLast((text) => {
 		const lines = splitLines(text);
-		return { lines, model: parseList(lines, contentStartLine(text)) };
+		const model = parseList(lines, contentStartLine(text));
+		return { lines, model, inherited: listInheritedTags(lines, model, listTags(text)) };
 	});
 	/** How many outside changes the view has taken, so a queued tap can tell one landed. */
 	outsideChanges = 0;
@@ -293,8 +296,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		return splitLines(this.text);
 	}
 
-	/** The text's lines and model, parsed once per text. Shared by every caller: never change them. */
-	parse(): { lines: readonly Line[]; model: Readonly<ListModel> } {
+	/** The text's lines, model and inherited tags, parsed once per text. Shared by every caller: never change them. */
+	parse(): { lines: readonly Line[]; model: Readonly<ListModel>; inherited: InheritedTags } {
 		return this.parsedText(this.text);
 	}
 
