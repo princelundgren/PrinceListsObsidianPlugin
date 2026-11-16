@@ -131,6 +131,8 @@ A heading has one way: its tags are in its text, so the tag goes in the text.
   - a flow list over several lines, a block scalar (`|`, `>`), an anchor, alias or YAML tag
     (`&`, `*`, `!`), or a comment on the `tags` lines;
   - a `tags` key twice;
+  - an unquoted entry YAML reads as null, `true`, `false` or a number (`~`, `null`, `123`): Obsidian
+    drops it on both sides of the edit, so the parse check below can't catch it;
   - anything else the edit can't place exactly.
 - **Checked by parsing (call):** before writing, the plugin parses the old and new frontmatter with
   `parseYaml` and writes only if every other property parses the same and the tags are exactly the
