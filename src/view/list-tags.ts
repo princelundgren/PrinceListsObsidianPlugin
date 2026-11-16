@@ -36,7 +36,7 @@ export function openListTags(view: PrinceListView): void {
 function changeTag(view: PrinceListView, change: TagChange, tag: string): void {
 	enqueueAt(view, null, async () => {
 		let refused = false;
-		await writePlanned(view, (text) => {
+		const written = await writePlanned(view, (text) => {
 			const plan = planListTags(text, readFrontmatter(text), change, tag);
 			if (plan === null) return null;
 			if ('refused' in plan) {
@@ -50,6 +50,7 @@ function changeTag(view: PrinceListView, change: TagChange, tag: string): void {
 			}
 			return { next, edit: ownEdit(plan.start, text, next, listTagsEditKind(plan)) };
 		});
+		if (written) view.render();
 		if (refused) new Notice(LIST_TAGS_REFUSED_NOTICE);
 	});
 }
