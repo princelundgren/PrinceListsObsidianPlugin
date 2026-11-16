@@ -13,6 +13,9 @@ describe('headingEndTags', () => {
 		['#work', ['work']],
 		['Use `#tag`', []],
 		['Office', []],
+		['Office #work.', []],
+		['Office [a](#work)', []],
+		['Office [[#work]]', []],
 	])('%s', (text, tags) => expect(headingEndTags(text)).toEqual(tags));
 });
 

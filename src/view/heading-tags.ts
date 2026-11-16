@@ -14,9 +14,9 @@ import { openTagsPopover } from './tags-popover';
 import { CHANGED_ELSEWHERE_NOTICE, enqueueAt, writePlanned } from './write';
 
 /**
- * Opens the tag popover below the heading on `line`: the tags at the end of its text as chips, each
- * with a × that takes it off, and a field whose pick adds a tag there. It closes once the Markdown
- * differs from what it opened with. Nothing opens when the heading isn't on screen.
+ * Opens the tag popover under the heading on `line`, or above it when there's more room
+ * above: the tags at the end of its text as chips, each with a × that takes it off, and a field
+ * whose pick adds a tag there. It closes once the Markdown differs from what it opened with. Nothing opens when the heading isn't on screen.
  */
 export function openHeadingTags(view: PrinceListView, line: number): void {
 	const anchor = ownElement(view.contentEl, `.${HEADING_CLASS}[${LINE_ATTR}="${line}"]`);
