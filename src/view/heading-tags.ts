@@ -38,10 +38,11 @@ export function openHeadingTags(view: PrinceListView, line: number): void {
 function changeTag(view: PrinceListView, line: number, change: TagChange, tag: string): void {
 	enqueueAt(view, line, async (pending) => {
 		let save: HeadingSave = { kind: 'none' };
-		await writePlanned(view, (text) => {
+		const written = await writePlanned(view, (text) => {
 			save = pending?.line == null ? { kind: 'lost' } : planHeadingTag(text, contentStartLine(text), pending.line, change, tag);
 			return save.kind === 'write' ? save : null;
 		});
+		if (written) view.render();
 		tell(save);
 	});
 }
