@@ -136,9 +136,14 @@ function readEntry(scalar: string): Entry | null {
 	if (quote === '"' || quote === "'") {
 		body = raw.slice(1, -1);
 		if (raw.length < 2 || !raw.endsWith(quote) || body.includes(quote) || body.includes('\\')) return null;
-	} else if (/:(\s|$)/.test(raw)) {
+	} else if (/:(\s|$)/.test(raw) || isYamlNonString(raw)) {
 		return null;
 	}
 	const tag = body.startsWith('#') ? body.slice(1) : body;
 	return tag.includes(',') || tag === '' ? null : { raw, tag };
+}
+
+// What YAML's core schema reads, unquoted, as a null, a boolean or a number, not as a string.
+function isYamlNonString(plain: string): boolean {
+	return /^(~|null|true|false|[-+]?(\d[\d_]*\.?\d*|\.\d+)([eE][-+]?\d+)?|0x[\da-f]+|0o[0-7]+|[-+]?\.(inf|nan))$/i.test(plain);
 }
