@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-13
+verified: 2026-11-16
 governs: [src/**, styles.css]
 tracking: ["#79"]
 ---
@@ -223,8 +223,9 @@ only documented Obsidian APIs are used.
 - **Delete (call)** names what goes, such as "Delete 5 items" or "Delete 4 items and 1 heading", in
   red as today. A selected heading goes and keeps its items unless they're selected too, as Delete
   heading does.
-- **Actions apply to items only (call):** a selected heading ticks, stars and dates nothing, and an
-  entry with nothing to act on hides.
+- **Tick, Star and Date apply to items only (call):** a selected heading ticks, stars and dates
+  nothing, and an entry with nothing to act on hides. Tag and Delete act on headings too
+  ([tagging a selection](2026-11-12-select-tags-design.md)).
 - **One-row entries drop out (call):** New item below, New heading below, Rename heading and Edit
   in Markdown.
 - **Each action is one write and one Cmd+Z step (call),** and follows step one's "Saving" as a

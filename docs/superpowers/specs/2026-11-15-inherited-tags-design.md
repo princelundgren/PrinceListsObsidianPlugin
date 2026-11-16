@@ -134,9 +134,10 @@ concerns, nothing is written in the background, and only documented Obsidian API
   out of its suggestions, and passes them with the item's own as the tags to leave out
   (`src/core/tag-choices.ts`), so typing one offers nothing: adding it would change nothing
   **(call)**.
-- **Tagging a selection** adds and removes tags on the items' own lines. Its chips come only from
-  the items' tails, so an inherited tag is never offered for removal; its field leaves out a tag
-  every selected item carries, its own or inherited, as the card's popover does **(call)**.
+- **Tagging a selection** adds and removes tags on the selected items' and headings' own lines. Its
+  chips come only from the items' tails and the headings' end tags, so an inherited tag is never
+  offered for removal; its field leaves out a tag every selected row carries, its own or inherited,
+  as the card's popover does **(call)**.
 - **A list inside another note** shows no strip and no cards, so nothing changes there.
 - **Nothing is written:** inheriting a tag never adds it to an item's line.
 

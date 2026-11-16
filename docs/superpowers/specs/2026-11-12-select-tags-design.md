@@ -2,7 +2,7 @@
 status: live
 governs: [src/**, styles.css]
 verified: 2026-11-16
-tracking: ["#361"]
+tracking: ["#361", "#443"]
 ---
 
 # PrinceLists for Obsidian: tagging a selection
@@ -25,18 +25,20 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 - **A Tag button in the selection bar (owner),** beside Star and Date.
 - **One press opens a tag popover (owner),** as the open card's tag button does, not a menu first.
-  It shows the tags the selected items carry, each with a × that takes it off them all, and a field
-  that suggests the list's tags and `New tag: #<tag>`.
-- **A pick gives the tag to every selected item that lacks it (owner),** in one write with an Undo
-  message **(owner)**. The popover closes and the selection stays **(owner)**.
+  It shows the tags the selected items and headings carry, each with a × that takes it off them all,
+  and a field that suggests the list's tags and `New tag: #<tag>`.
+- **A pick gives the tag to every selected item that lacks it (owner),** and heading **(owner,
+  2026-11-16)**, in one write with an Undo message **(owner)**. The popover closes and the selection
+  stays **(owner)**.
 - **On desktop, the selection's menu gets Tag… (call),** which opens the same popover.
 
 ## The bar's Tag button
 
 - **Its place (call):** Move to, Tick, Star, Tag, Date, then Delete past the divider. It has the
   `tag` icon, as the card's tag button does, and the label "Tag".
-- **Enabled while any item is selected (call),** as Date is; a selection of headings alone
-  disables it ("Actions apply to items only").
+- **Enabled while any item or heading is selected (owner, 2026-11-16),** since a heading's tag
+  counts for its items ([inherited tags](2026-11-15-inherited-tags-design.md)). Move to, Tick, Star
+  and Date stay as they are.
 - **Icons only below 390 px, not 360 (owner):** six buttons 48 px wide and 8 px apart need a view
   about 387 px wide, so the labeled layout holds them only down to there. A narrower phone, such
   as one 360 or 375 px wide, gets the icons-only layout, whose buttons may narrow below 48 px, as
@@ -56,26 +58,30 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   outside the content element that the card's popover listens on, so this one needs focus, Escape
   and outside-press handling of its own. A heading's and the list's popovers share it
   ([tag from menus](2026-11-16-tag-from-menus-design.md)).
-- **First, the selection's tags (owner):** a chip per tag in the selected items' tails, each with a
-  ×. A tag only some carry shows how many, as `#pantry 2 of 5` **(owner)**; one all carry shows as
-  `#pantry` **(call)**. The rest is **(call)**: chips in the strip's order, which holds every
-  shown item's tags; the count is of selected items, headings left out; the × is named
-  "Remove #pantry", since the card's "Remove tag" has its item beside it; tags that differ only in
-  letter case are one chip, spelled as the strip spells it, and its × removes every spelling, as
+- **First, the selection's tags (owner):** a chip per tag in the selected items' tails and at the
+  end of the selected headings' text, as a heading's Tag… shows them **(call)**, each with a ×. A
+  tag only some carry shows how many, as `#pantry 2 of 5` **(owner)**; one all carry shows as
+  `#pantry` **(call)**. The rest is **(call)**: chips in the strip's order, which holds every shown
+  item's tags; the count is of selected items and headings together; the × is named "Remove
+  #pantry", since the card's "Remove tag" has its item beside it; tags that differ only in letter
+  case are one chip, spelled as the strip spells it, and its × removes every spelling, as
   `removeTag` does; with no tag among them, no chips show.
 - **Then the field (owner),** the card's `AbstractInputSuggest`. The rest is **(call)**: it is
   focused on open, so a phone's keyboard comes up; it suggests the list's tags in the strip's
-  order, as the card's does, less those every selected item already carries, on its line (in its
-  title or its tail) or inherited from its list or heading, then `New tag: #<tag>` for a typed tag the list lacks. A tag only some items
+  order, as the card's does, less those every selected row already carries: an item on its line
+  (in its title or its tail) or inherited from its list or heading, a heading in its text or from
+  the list, then `New tag: #<tag>` for a typed tag the list lacks. A tag only some items
   have stays, since picking it gives it to the rest.
 - **Obsidian's suggestions** open in the page's body at z-index 60, above the popover, and may
   cover the bar while they show **(call)**: the bar is not in use then. On Android with the
   keyboard up they open under the field, above the keyboard, and a tap on one adds the tag
   (checked on Android).
 - **A pick (owner)** adds the tag with `addTag` to each selected item, which leaves an item that has
-  it, in its title or its tail, as it is. The popover closes **(owner)** and focus goes to the
-  bar's Tag button, as the card's popover returns it to its tag button **(call)**.
-- **A × (owner)** takes the tag off each selected item's tail with `removeTag`. The popover closes,
+  it, in its title or its tail, as it is, and to each selected heading as its Tag… does **(call)**.
+  The popover closes **(owner)** and focus goes to the bar's Tag button, as the card's popover
+  returns it to its tag button **(call)**.
+- **A × (owner)** takes the tag off each selected item's tail with `removeTag`, and off the end of
+  each selected heading's text as its Tag… does **(call)**. The popover closes,
   as after a pick **(call)**: one action, one message, and the chips never show a count from before
   the write.
 - **The selection stays (owner),** as after the bar's other actions, so a star or a date can follow.
@@ -96,8 +102,9 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 ## The selection's menu
 
 - **Tag… (call),** after the star entries, opens the popover over the bar's Tag button, so desktop
-  has one way to tag a selection whether it starts from the menu or the bar. It shows while any
-  item is selected. The selection's menu is desktop only, as today; the bar opens no menu for Tag.
+  has one way to tag a selection whether it starts from the menu or the bar. It shows while any item
+  or heading is selected. The selection's menu is desktop only, as today; the bar opens no menu for
+  Tag.
 
 ## The write and the message
 
@@ -105,18 +112,24 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   ("Each action is one write"). Lines are read when the write runs, so an edit from outside since
   the popover opened is respected: an item that gained the tag is left as it is.
 - **The Undo message (owner)** says what changed, as the other group actions do: `#pantry added
-  to 3 items.` and `#pantry removed from 5 items.` **(call: the wording)**, counting only the items
-  the write changed. A write that would change nothing writes nothing and says nothing **(call)**.
+  to 3 items.`, `#pantry removed from 5 items.`, `#work added to 2 items and 1 heading.` and
+  `#work removed from 2 headings.` **(call: the wording)**, counting only the rows the write
+  changed. A write that would change nothing writes nothing and says nothing **(call)**.
 - **A tag in a title (call)** isn't a chip, as on the card, and × leaves it. An item with the tag
   only in its title counts as having it when adding, as `addTag` does, so a pick can change fewer
   items than the chip's count suggests; the message says how many it did.
-- **Headings (call)** get no tag and aren't counted, as they get no star or date.
+- **Headings (owner, 2026-11-16)** get the tag in their text, with Tag…'s edit
+  ([tag from menus](2026-11-16-tag-from-menus-design.md)). A heading that Tag… would refuse (a ×
+  leaving it with no text, or a result that wouldn't read back as the heading) is left as it is,
+  and the rest still change **(call)**. A heading and its items both selected each get the tag in
+  their own text, as selected **(call)**.
 
 ## Not in this design
 
 - **A No tag choice in the tag strip:** #383 **(owner)**, in [filtering by tag](2026-11-07-tag-filter-design.md), "No tag".
-- **Renaming a tag across the list.** A heading's tags count for its items
-  ([inherited tags](2026-11-15-inherited-tags-design.md)) but are not edited here.
+- **Renaming a tag across the list.**
+- **The list's own tags:** Tag list… in the list's menu
+  ([tag from menus](2026-11-16-tag-from-menus-design.md)).
 - **The Schedule and lists inside other notes:** selecting is only in the list view (owner).
 
 ## What it changes elsewhere
