@@ -1,5 +1,5 @@
 ---
-status: building
+status: live
 governs: [src/**, styles.css]
 verified: 2026-11-16
 tracking: ["#434"]
