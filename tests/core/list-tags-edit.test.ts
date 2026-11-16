@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { expectedListTags, type ListTagsRefusal, listTagsEditKind, planListTags } from '../../src/core/list-tags-edit';
+import { expectedListTags, type ListTagsRefusal, listTagsEditKind, onlyTagsDiffer, planListTags } from '../../src/core/list-tags-edit';
 import { applyMarkerEdit, type FrontmatterShape, type MarkerEdit } from '../../src/core/marker-edit';
 
 const fm = (lines: string) => `---\nprincelists: true\n${lines}---\n- [ ] a\n`;
@@ -96,3 +96,13 @@ test('expectedListTags adds the tag, or removes every spelling of it', () => {
 	expect(expectedListTags(['work', 'Work', 'home'], 'removeTag', 'WORK')).toEqual(['home']);
 	expect(expectedListTags(['work'], 'addTag', 'home')).toEqual(['work', 'home']);
 });
+
+test.each<[string, unknown, unknown, boolean]>([
+	['refuses a changed other key', { princelists: true, a: 1 }, { princelists: true, a: 2 }, false],
+	['refuses an added key', { princelists: true }, { princelists: true, a: 1 }, false],
+	['refuses a removed key', { princelists: true, a: 1 }, { princelists: true }, false],
+	['allows a reordered mapping', { princelists: true, a: 1 }, { a: 1, princelists: true }, true],
+	['allows a change only under Tags', { princelists: true, Tags: ['a'] }, { princelists: true, Tags: ['a', 'b'] }, true],
+	['allows a change only under TAGS', { princelists: true, TAGS: 'a' }, { princelists: true }, true],
+	['refuses a non-mapping', ['princelists'], ['princelists'], false],
+])('onlyTagsDiffer %s', (_, was, now, allowed) => expect(onlyTagsDiffer(was, now)).toBe(allowed));

@@ -1,6 +1,7 @@
 import { type FrontMatterInfo, getFrontMatterInfo, parseFrontMatterTags, parseYaml } from 'obsidian';
 import { isMarkerValue, isYamlMapping, lineAfterFrontmatter, opensWithFrontmatter } from '../core/frontmatter';
 import { listTagsOf } from '../core/inherited-tags';
+import { onlyTagsDiffer } from '../core/list-tags-edit';
 import type { FrontmatterShape } from '../core/marker-edit';
 
 // Read from the text, not the metadata cache: getFileCache returns null for a file that isn't
@@ -52,22 +53,17 @@ export function readFrontmatter(text: string): FrontmatterShape | null {
 
 /** Whether every frontmatter property but `tags` (in any case) parses the same in both texts. */
 export function sameButTags(before: string, after: string): boolean {
-	const was = propertiesButTags(before);
-	const now = propertiesButTags(after);
-	if (!was || !now) return false;
-	const keys = new Set([...Object.keys(was), ...Object.keys(now)]);
-	return [...keys].every((key) => JSON.stringify(was[key]) === JSON.stringify(now[key]));
+	const was = parsedFrontmatter(before);
+	const now = parsedFrontmatter(after);
+	return was !== null && now !== null && onlyTagsDiffer(was.yaml, now.yaml);
 }
 
-// null: no frontmatter, not YAML, or not a mapping.
-function propertiesButTags(text: string): Record<string, unknown> | null {
+// null: no frontmatter, or not YAML.
+function parsedFrontmatter(text: string): { yaml: unknown } | null {
 	const info = leadingFrontmatter(text);
 	if (!info) return null;
 	try {
-		const yaml: unknown = parseYaml(info.frontmatter);
-		if (yaml === null) return {};
-		if (!isYamlMapping(yaml)) return null;
-		return Object.fromEntries(Object.entries(yaml as Record<string, unknown>).filter(([key]) => !/^tags$/i.test(key)));
+		return { yaml: parseYaml(info.frontmatter) as unknown };
 	} catch {
 		return null;
 	}

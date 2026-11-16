@@ -1,3 +1,4 @@
+import { isYamlMapping } from './frontmatter';
 import type { TagChange } from './group-menu';
 import { splitLines } from './lines';
 import type { FrontmatterShape, MarkerEdit } from './marker-edit';
@@ -7,6 +8,7 @@ export type ListTagsRefusal = { refused: 'not-a-mapping' | 'unreadable' };
 
 // The key in any letter case, plain or quoted, with spaces before the colon.
 const TAGS_KEY_LINE = /^((?:tags|"tags"|'tags')[ \t]*:)(.*)$/i;
+const TAGS_KEY = /^tags$/i;
 const BLOCK_ITEM = /^([ \t]*)-[ \t]+(.+)$/;
 const QUOTED = /"[^"]*"|'[^']*'/g;
 // A `#` that opens a comment: at the start or after a space, outside quotes.
@@ -19,9 +21,9 @@ interface Entry {
 	tag: string;
 }
 
+// 'inline': the value on the key's line, one tag or a flow list.
 type TagsProperty =
-	| { form: 'single'; keyLine: number; prefix: string; entries: Entry[] }
-	| { form: 'flow'; keyLine: number; prefix: string; entries: Entry[] }
+	| { form: 'inline'; keyLine: number; prefix: string; entries: Entry[] }
 	| { form: 'block'; keyLine: number; itemLines: number[]; indents: string[]; texts: string[]; entries: Entry[] };
 
 /**
@@ -44,6 +46,24 @@ export function planListTags(text: string, frontmatter: FrontmatterShape | null,
 export function expectedListTags(before: readonly string[], change: TagChange, tag: string): string[] {
 	if (change === 'removeTag') return before.filter((have) => !sameTag(have, tag));
 	return before.some((have) => sameTag(have, tag)) ? [...before] : [...before, tag];
+}
+
+/**
+ * Whether two parsed frontmatter values hold the same properties but `tags` in any letter case, each
+ * parsing the same, in any order. A value that isn't a mapping is refused; null, as empty frontmatter
+ * parses, holds none.
+ */
+export function onlyTagsDiffer(was: unknown, now: unknown): boolean {
+	const before = propertiesButTags(was);
+	const after = propertiesButTags(now);
+	if (!before || !after) return false;
+	const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
+	return [...keys].every((key) => JSON.stringify(before[key]) === JSON.stringify(after[key]));
+}
+
+function propertiesButTags(yaml: unknown): Record<string, unknown> | null {
+	if (!isYamlMapping(yaml)) return null;
+	return Object.fromEntries(Object.entries((yaml ?? {}) as Record<string, unknown>).filter(([key]) => !TAGS_KEY.test(key)));
 }
 
 /**
@@ -99,12 +119,12 @@ function readTagsProperty(lines: string[], closingLine: number): TagsProperty | 
 	const trimmed = value.trim();
 	if (!trimmed.startsWith('[')) {
 		const entry = readEntry(trimmed);
-		return entry ? { form: 'single', keyLine, prefix, entries: [entry] } : 'unreadable';
+		return entry ? { form: 'inline', keyLine, prefix, entries: [entry] } : 'unreadable';
 	}
 	if (!trimmed.endsWith(']')) return 'unreadable';
 	const inside = trimmed.slice(1, -1);
 	const entries = inside.trim() === '' ? [] : inside.split(',').map(readEntry);
-	return entries.every((entry) => entry !== null) ? { form: 'flow', keyLine, prefix, entries } : 'unreadable';
+	return entries.every((entry) => entry !== null) ? { form: 'inline', keyLine, prefix, entries } : 'unreadable';
 }
 
 function readBlock(lines: string[], keyLine: number, closingLine: number): TagsProperty | 'unreadable' {
