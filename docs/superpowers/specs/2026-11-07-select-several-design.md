@@ -171,8 +171,9 @@ only documented Obsidian APIs are used.
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
   48 by 48 dp with 8 between
   ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
-  More sits apart at the far end, past a divider, after Delete **(owner, 2026-11-17)**. The bar is
-  the same on desktop.
+  More sits apart at the far end, past a divider, after Delete **(owner, 2026-11-17)**. This
+  replaces Delete apart past a divider, so a near miss on Date didn't reach it **(call)**. The bar
+  is the same on desktop.
 - **One row (owner, 2026-11-17):** Done, an ✕ named "Done", comes first, then the actions spread
   across the bar. The bar shows no count: its accessible name says how many rows are selected
   **(call)**. This replaces the count beside Done, and their own row above the actions on a phone
@@ -255,10 +256,14 @@ only documented Obsidian APIs are used.
 - **Duplicate (owner, 2026-11-17)** copies each selected item, with its notes, right below itself,
   in one write. A copy is unticked and drops its done marks **(owner, 2026-11-17)**, and its
   checklist is unticked as a repeat's is **(owner, 2026-11-17)**. It leaves out block ids and Tasks
-  `🆔` ids, a sub-task's in its notes too, since each names one block or task **(call)**; the rest
-  of its text is the item's, and a block the notes editor draws whole, such as a code block, is
-  copied as it is. It shows only while no heading is selected **(owner,
-  2026-11-17)**, since a heading's copy right below it would take its items. The selection stays on
+  `🆔` ids, a sub-task's in its notes too, since each names one block or task **(call)**. In the
+  notes a block id goes only where Obsidian reads one, at the end of a paragraph or heading, after
+  a space as on an item line. Its `⛔` fields lose exactly the ids its own `🆔` fields lost, and a
+  `⛔` left empty goes, so a copied sub-task isn't blocked by the original's; a `⛔` naming a task
+  outside the item stays **(call)**. The rest of its text is the item's, and a block the notes
+  editor draws whole, such as a code block, is copied as it is, inside a quote too. It shows only
+  while no heading is selected **(owner, 2026-11-17)**, since a heading's copy right below it would
+  take its items. The selection stays on
   the items, as other actions keep it **(call)**.
 - **Each action is one write and one Cmd+Z step (call),** and follows step one's "Saving" as a
   one-off action: typing that lands while it waits makes it run once more on the new text.
