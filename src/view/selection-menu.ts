@@ -44,7 +44,7 @@ export function addGroupEntries(view: PrinceListView, menu: Menu, only?: EntryGr
 			const { title, icon } = ENTRY_LOOKS[entry];
 			menu.addItem((item) =>
 				item.setTitle(title).setIcon(icon).onClick(() => {
-					// After the menu hides, so the focus it gives back doesn't leave the popover's field.
+					// After the menu hides, so the focus it gives back doesn't leave the popover or menu it opens.
 					if (entry === 'tag') onMenuHide(menu, () => openSelectionTags(view));
 					else if (entry === 'move') onMenuHide(menu, () => openMoveMenu(view));
 					else act(view, entry);

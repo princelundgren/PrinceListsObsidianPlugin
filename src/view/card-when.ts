@@ -10,8 +10,8 @@ const WHEN_BUTTON_CLASS = 'princelists-when-button';
 
 // The date input lies over the button at its size, invisible, so a click or tap lands on the input
 // and opens the platform's own date picker.
-export function buildWhenPicker(tools: HTMLElement): void {
-	const row = tools.createDiv({ cls: 'princelists-card-when' });
+export function buildWhenPicker(buttons: HTMLElement): void {
+	const row = buttons.createDiv({ cls: 'princelists-card-when' });
 	const picker = row.createDiv({ cls: 'princelists-when-picker' });
 	picker.createDiv({ cls: WHEN_BUTTON_CLASS });
 	picker.createEl('input', { cls: WHEN_INPUT_CLASS, type: 'date', attr: { 'aria-label': 'Date' } });
