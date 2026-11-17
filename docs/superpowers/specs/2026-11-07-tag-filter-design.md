@@ -174,7 +174,8 @@ every tagged part of a list is done, such as what is left to buy.
     between the title and them.
 - **The reading order is title, tags, star, day at every width (call),** so a screen reader reads
   a row the same way on a phone and a desktop.
-- **A done item's chips are gray,** as its title is **(call)**.
+- **A done item's chips on its row are gray,** as its title is **(call)**; its open card's keep
+  Obsidian's tag colors.
 - **Rows in the Schedule and in a list inside another note show their tags too (call),** as they
   show the star.
 

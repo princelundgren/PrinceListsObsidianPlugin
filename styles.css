@@ -1134,7 +1134,7 @@ button.princelists-card-repeat.is-repeating {
 	--tag-border-color-hover: transparent;
 }
 
-.princelists-item.is-done .princelists-tag {
+.princelists-item.is-done .princelists-tags .princelists-tag {
 	color: var(--checklist-done-color);
 }
 
