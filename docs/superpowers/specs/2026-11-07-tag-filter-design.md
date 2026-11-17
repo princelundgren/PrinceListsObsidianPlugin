@@ -78,8 +78,8 @@ are used.
 - **Each tag is a toggle button,** with `aria-pressed` as the field's toggles have, at least 24 by
   24 CSS pixels, the minimum in WCAG 2.2's "Target Size (Minimum)" **(call)**. It has a tag's
   shape and size from Obsidian's tag CSS variables, but is gray, normal text on a gray pill, and a
-  lit tag takes the accent color **(owner, 2026-11-17)**. This replaces Obsidian's tag colors
-  **(call)**, which made a list with many tags purple all over.
+  lit tag takes the accent color **(owner, 2026-11-17)**. This replaces Obsidian's tag colors,
+  which made a list with many tags purple all over.
 - **A press keeps focus where it was (call),** as a press on the field's toggles does, so a phone's
   keyboard stays up while the field is open.
 - **The strip keeps every tag while filtering (owner),** not only those of the items still shown,

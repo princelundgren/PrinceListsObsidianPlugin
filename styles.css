@@ -1182,7 +1182,7 @@ button.princelists-list-tag-button {
 	}
 }
 
-/* No tag has a strip tag's shape without the tag colors, so it doesn't read as a tag. */
+/* No tag has a strip tag's shape without its gray pill, so it doesn't read as a tag. */
 button.princelists-strip-no-tag {
 	height: auto;
 	font-size: var(--tag-size);
