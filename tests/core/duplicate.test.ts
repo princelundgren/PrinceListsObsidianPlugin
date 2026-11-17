@@ -40,6 +40,18 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(FRONT + table, 3, [3])?.next)).toBe(table + '- [ ] a\n\t| x |\n\t|---|\n');
 	});
 
+	test('drops a block id on a line of its own with one of the blank lines around it', () => {
+		const table = '- [ ] a\n  | x |\n  |---|\n\n  ^tbl\n\n  more\n';
+		expect(body(planGroupDuplicate(FRONT + table, 3, [3])?.next)).toBe(table + '- [ ] a\n  | x |\n  |---|\n\n  more\n');
+		const list = '- [ ] a\n  note\n\n  ^n1\n  - [ ] sub\n';
+		expect(body(planGroupDuplicate(FRONT + list, 3, [3])?.next)).toBe(list + '- [ ] a\n  note\n\n  - [ ] sub\n');
+	});
+
+	test('drops a block id on a quote line of its own, and the empty quote line above it', () => {
+		const quote = '- [ ] a\n  > quote\n  >\n  > ^q1\n';
+		expect(body(planGroupDuplicate(FRONT + quote, 3, [3])?.next)).toBe(quote + '- [ ] a\n  > quote\n');
+	});
+
 	test('keeps an item whose title is only an id an item', () => {
 		expect(body(planGroupDuplicate(FRONT + '- [ ] ^abc\n', 3, [3])?.next)).toBe('- [ ] ^abc\n- [ ] \n');
 		expect(body(planGroupDuplicate(FRONT + '- [ ] 🆔 abc\n', 3, [3])?.next)).toBe('- [ ] 🆔 abc\n- [ ] \n');

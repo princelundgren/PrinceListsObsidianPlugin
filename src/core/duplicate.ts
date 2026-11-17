@@ -62,7 +62,11 @@ function copyOf(original: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'):
 			const text = withoutTasksIds(line.text, dropped);
 			copy.push({ text: ends.has(at) ? withoutItemBlockId(text) : text, eol: line.eol });
 		} else if (!ends.has(at)) copy.push(line);
-		else if (!BARE_BLOCK_ID.test(line.text.trim())) copy.push({ text: withoutParagraphBlockId(line.text), eol: line.eol });
+		else if (!BARE_BLOCK_ID.test(insideQuotes(line.text, Infinity).trim())) copy.push({ text: withoutParagraphBlockId(line.text), eol: line.eol });
+		else if (at > item.titleLine + 1 && isSeparator(lines, at - 1) && (at + 1 === item.endLine || isSeparator(lines, at + 1))) {
+			// The id's line had a separator on each side: one of them is enough.
+			copy.pop();
+		}
 	}
 	while (copy.length > 1 && isBlank((copy[copy.length - 1] as Line).text)) copy.pop();
 	return copy.map((line) => ({ text: line.text, eol: line.eol || eol }));
@@ -91,6 +95,11 @@ function blockEnds(lines: readonly Line[], item: ItemBlock): Set<number> {
 		else if (table > 0) ends.add(item.titleLine + startLine - 1 + table);
 	}
 	return ends;
+}
+
+// A blank line, or one with only quote markers.
+function isSeparator(lines: readonly Line[], at: number): boolean {
+	return insideQuotes((lines[at] as Line).text, Infinity).trim() === '';
 }
 
 function quoteDepth(node: Node): number {
