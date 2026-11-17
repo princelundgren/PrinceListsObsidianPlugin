@@ -326,9 +326,11 @@ this met on 2026-10-30 **(owner)**.
   - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width, at the
     row's end, with the item's tags just before them, each with its ×. The buttons keep their
     places whatever tags it has: the tag button, the star, the repeat button, the When and ⋯, in
-    the order a row shows its tags, star, repeat and day **(owner, 2026-11-17)**. Many tags wrap
-    within their own box, beside the buttons **(call)**. The title has its line to
-    itself, at the card's whole width. The format bar sits between the notes and the buttons, shown
+    the order a row shows its tags, star, repeat and day **(owner, 2026-11-17)**. Tags that don't
+    fit beside the buttons take their own line above them, the buttons still at the end, and a tag
+    wider than the card breaks within its text **(call)**, since on a phone the buttons leave
+    little room beside them. The title has its line to itself, at the card's whole width. The format
+    bar sits between the notes and the buttons, shown
     while the notes have focus and keeping its room while hidden, on a phone too, so the card never
     changes height and no button moves when the notes take or lose focus **(owner, 2026-11-17)**.
     While hidden, its room reads as part of the notes: it shows the text cursor, and a click or tap
@@ -554,8 +556,8 @@ this met on 2026-10-30 **(owner)**.
     card's tag button, star, repeat button, day and ⋯ are buttons the ⋯'s height,
     centered on one line, with icons the format bar's size, since they stand with it under the
     notes **(owner, 2026-11-17)**. This replaces drawing them as small as the row's star on
-    desktop, beside the title **(owner, 2026-11-07, #339)**. On desktop these buttons and the
-    format bar's are 28 by 28 CSS pixels, Apple's default macOS control size
+    desktop, beside the title **(owner, 2026-11-07, #339)**. On desktop these buttons and every
+    format bar's, the list note's too, are 28 by 28 CSS pixels, Apple's default macOS control size
     ([Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)),
     with 4 between them on desktop and on a phone **(owner, 2026-11-17)**. This replaces 24 by 24
     with 2 between, WCAG 2.2's minimum target size, which put them close enough to misclick. On a
@@ -586,28 +588,32 @@ Obsidian documents no way to put its editor in a plugin's view.
   on the view's own `scope`, as Cmd+Z is, and the notes' are in their editor's keymap; anywhere
   else the key stays Obsidian's.
 - **A format bar under the notes** while their editor has focus, and in a card between its notes and
-  its buttons ("When and the Schedule view"), in two groups: Bold, Italic, Strikethrough and
-  Underline; then Task list, Bullet list, Numbered list, Add link, Add external link, Code and Code
-  block, in one group so the bar stays short **(owner, 2026-11-05)**. It has no Undo or Redo
-  **(owner, 2026-11-05)**; Cmd+Z and Cmd+Shift+Z still undo and redo. A press keeps focus in the
-  notes, so the phone's keyboard stays up, but for Add link, whose search box takes it. The list
-  note has it too. It has no Table button until a table can be edited well, #213 **(owner,
-  2026-10-30)**. - The buttons take the names and icons of Obsidian's own editor menu, where it has
-  them **(owner, 2026-11-04)**, but for Code block's icon: Lucide's `square-code`, a boxed `<>`, so
-  it doesn't look like Code's `</>` **(owner, 2026-11-05)**. - Its first icon lines up with the
-  notes' text **(owner, 2026-11-05)**. - Add link asks for a note or list in Obsidian's search box,
-  then links to it as the vault's link settings say, with selected text as the link's text. Add
-  external link wraps the selection in `[` and `]()`, as Cmd+K does. - On a narrow desktop card,
-  whole groups wrap to a second row, so every button stays in sight, with no menu to open
-  **(call)**. On mobile it's one row that scrolls sideways ([notes in one
-  editor](2026-10-29-notes-in-one-editor-design.md), "The format bar"). - The list buttons turn each
-  selected line that isn't blank into an item of that kind, or back into a plain line when every one
-  already is one **(call)**. A caret on a blank line gets the marker, to type after. - A selection
-  that takes in its markers, as a drag does, counts as the text inside them, so Bold, Italic or Code
-  again takes them off. - Strikethrough wraps the selection in `~~`, as Obsidian writes it. Markdown
-  has no underline, so Underline wraps it in HTML's `<u>` and `</u>` **(owner, 2026-10-28)**. Both
-  take their marks off again, as Bold does. No key is added for them **(call)**. - The buttons can't
-  be reached with Tab, which would leave the notes **(call)**.
+  its buttons ("When and the Schedule view"), in two groups: Bold, Italic,
+  Strikethrough and Underline; then Task list, Bullet list, Numbered list, Add link, Add external
+  link, Code and Code block, in one group so the bar stays short **(owner, 2026-11-05)**. It has
+  no Undo or Redo **(owner, 2026-11-05)**; Cmd+Z and Cmd+Shift+Z still undo and redo. A press
+  keeps focus in the notes, so the phone's keyboard stays up, but for Add link, whose search box
+  takes it. The list note has it too. It has no Table button until a table can be edited well,
+  #213 **(owner, 2026-10-30)**.
+  - The buttons take the names and icons of Obsidian's own editor menu, where it has them
+    **(owner, 2026-11-04)**, but for Code block's icon: Lucide's `square-code`, a boxed `<>`, so
+    it doesn't look like Code's `</>` **(owner, 2026-11-05)**.
+  - Its first icon lines up with the notes' text **(owner, 2026-11-05)**.
+  - Add link asks for a note or list in Obsidian's search box, then links to it as the vault's link
+    settings say, with selected text as the link's text. Add external link wraps the selection in
+    `[` and `]()`, as Cmd+K does.
+  - On a narrow desktop card, whole groups wrap to a second row, so every button stays in sight,
+    with no menu to open **(call)**. On mobile it's one row that scrolls sideways ([notes in one
+    editor](2026-10-29-notes-in-one-editor-design.md), "The format bar").
+  - The list buttons turn each selected line that isn't blank into an item of that kind, or back
+    into a plain line when every one already is one **(call)**. A caret on a blank line gets the
+    marker, to type after.
+  - A selection that takes in its markers, as a drag does, counts as the text inside them, so
+    Bold, Italic or Code again takes them off.
+  - Strikethrough wraps the selection in `~~`, as Obsidian writes it. Markdown has no underline,
+    so Underline wraps it in HTML's `<u>` and `</u>` **(owner, 2026-10-28)**. Both take their
+    marks off again, as Bold does. No key is added for them **(call)**.
+  - The buttons can't be reached with Tab, which would leave the notes **(call)**.
 - **A table and code in a card's notes are drawn as in a note,** with Obsidian's documented table
   and code variables: Obsidian's own style for them applies only inside its views.
 

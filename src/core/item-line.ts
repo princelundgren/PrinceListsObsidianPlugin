@@ -49,7 +49,10 @@ const TRAILING_FIELDS = [
 
 // The `s` flag lets the rest take U+2028 and U+2029, which `.` stops at but CommonMark doesn't.
 const ITEM_PATTERN = /^(\s*(?:[-*+]|\d+[.)])[ \t]+\[)([^\]])(\] )(.*)$/s;
-export const BLOCK_ID_PATTERN = / \^[A-Za-z0-9-]+$/;
+const BLOCK_ID = '\\^[A-Za-z0-9-]+';
+export const BLOCK_ID_PATTERN = new RegExp(` ${BLOCK_ID}$`);
+/** A text that is only a block ID. */
+export const BARE_BLOCK_ID = new RegExp(`^${BLOCK_ID}$`);
 const MARK_SOURCE = `✔${VS16} +\\d{4}-\\d{2}-\\d{2}(?: \\d{2}:\\d{2})?`;
 export const MARK_PATTERN = new RegExp(MARK_SOURCE);
 const MARK_AT = new RegExp(MARK_SOURCE, 'y');
