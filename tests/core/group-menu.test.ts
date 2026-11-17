@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import type { ShownRow } from '../../src/core/drop';
 import type { GroupState } from '../../src/core/group-edits';
 import { barButtons, changeMessage, groupEntries, placesBelow, tagChangeMessage } from '../../src/core/group-menu';
 
@@ -63,12 +64,27 @@ describe('groupEntries', () => {
 });
 
 describe('placesBelow', () => {
+	const shown: ShownRow[] = [
+		{ kind: 'item', line: 3 },
+		{ kind: 'heading', line: 4 },
+		{ kind: 'untouched', line: 5 },
+		{ kind: 'item', line: 7 },
+	];
+
 	test('puts a new item right after a selected item, and a new heading after it', () => {
-		expect(placesBelow({ kind: 'item', line: 7 })).toEqual({ item: { after: 7 }, heading: { afterItem: 7 } });
+		expect(placesBelow(shown, [7, 3])).toEqual({ item: { after: 7 }, heading: { afterItem: 7 } });
 	});
 
 	test('puts a new item first under a selected heading, and a new heading after its section', () => {
-		expect(placesBelow({ kind: 'heading', line: 4 })).toEqual({ item: { firstUnder: 4 }, heading: { afterSection: 4 } });
+		expect(placesBelow(shown, [4])).toEqual({ item: { firstUnder: 4 }, heading: { afterSection: 4 } });
+	});
+
+	test('goes by the last selected row in list order, a heading after an item too', () => {
+		expect(placesBelow(shown, [4, 3])).toEqual({ item: { firstUnder: 4 }, heading: { afterSection: 4 } });
+	});
+
+	test('finds no place when no selected row is shown', () => {
+		expect(placesBelow(shown, [5, 9])).toBeNull();
 	});
 });
 

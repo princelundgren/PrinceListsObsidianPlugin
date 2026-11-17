@@ -40,6 +40,18 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(FRONT + table, 3, [3])?.next)).toBe(table + '- [ ] a\n\t| x |\n\t|---|\n');
 	});
 
+	test('drops a block id on a line of its own with one of the blank lines around it', () => {
+		const table = '- [ ] a\n  | x |\n  |---|\n\n  ^tbl\n\n  more\n';
+		expect(body(planGroupDuplicate(FRONT + table, 3, [3])?.next)).toBe(table + '- [ ] a\n  | x |\n  |---|\n\n  more\n');
+		const list = '- [ ] a\n  note\n\n  ^n1\n  - [ ] sub\n';
+		expect(body(planGroupDuplicate(FRONT + list, 3, [3])?.next)).toBe(list + '- [ ] a\n  note\n\n  - [ ] sub\n');
+	});
+
+	test('drops a block id on a quote line of its own, and the empty quote line above it', () => {
+		const quote = '- [ ] a\n  > quote\n  >\n  > ^q1\n';
+		expect(body(planGroupDuplicate(FRONT + quote, 3, [3])?.next)).toBe(quote + '- [ ] a\n  > quote\n');
+	});
+
 	test('keeps an item whose title is only an id an item', () => {
 		expect(body(planGroupDuplicate(FRONT + '- [ ] ^abc\n', 3, [3])?.next)).toBe('- [ ] ^abc\n- [ ] \n');
 		expect(body(planGroupDuplicate(FRONT + '- [ ] 🆔 abc\n', 3, [3])?.next)).toBe('- [ ] 🆔 abc\n- [ ] \n');
@@ -93,11 +105,28 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  > intro\n' + table);
 	});
 
+	test("keeps a block id in a quoted table's last row, where it is a cell's text", () => {
+		for (const row of ['  > | 1 | 2 | ^t1\n', '  > | 1 | 2 ^t1\n']) {
+			const table = '  > | x | y |\n  > |---|---|\n' + row;
+			const text = FRONT + '- [ ] a\n' + table;
+			expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length).repeat(2));
+			const withIntro = FRONT + '- [ ] a\n  > intro ^p1\n' + table;
+			expect(body(planGroupDuplicate(withIntro, 3, [3])?.next)).toBe(withIntro.slice(FRONT.length) + '- [ ] a\n  > intro\n' + table);
+		}
+	});
+
 	test('takes the block id off the text line of an underlined heading, as off a # heading', () => {
 		const underlined = FRONT + '- [ ] a\n  Title ^h1\n  ---\n';
 		expect(body(planGroupDuplicate(underlined, 3, [3])?.next)).toBe(underlined.slice(FRONT.length) + '- [ ] a\n  Title\n  ---\n');
 		const marked = FRONT + '- [ ] a\n  ## Title ^h1\n';
 		expect(body(planGroupDuplicate(marked, 3, [3])?.next)).toBe(marked.slice(FRONT.length) + '- [ ] a\n  ## Title\n');
+	});
+
+	test('keeps a block id whose removal would turn its line into an underline or a rule', () => {
+		for (const notes of ['  Title\n  --- ^h1\n', '  Title\n  === ^h1\n', '  *** ^x\n', '  > Title\n  > - - - ^q\n']) {
+			const text = FRONT + '- [ ] a\n' + notes;
+			expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length).repeat(2));
+		}
 	});
 
 	test('takes the Tasks id off a sub-task in the notes, but leaves a code block as it is', () => {
