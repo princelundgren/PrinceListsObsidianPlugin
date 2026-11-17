@@ -113,7 +113,8 @@ textarea.princelists-title {
 
 .princelists-heading {
 	margin: var(--size-4-4) calc(-1 * var(--princelists-reach, 0px)) var(--size-4-1);
-	padding-bottom: var(--size-4-1);
+	/* Room under a tag pill in the heading, as much as a row leaves around its pills. */
+	padding-bottom: var(--size-2-3);
 	padding-inline-end: var(--princelists-reach, 0px);
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-size: inherit;
@@ -1024,7 +1025,7 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 /* Rename heading's field reads as the heading it edits. */
 textarea.princelists-heading-field {
 	margin: var(--size-4-4) 0 var(--size-4-1);
-	padding-bottom: var(--size-4-1);
+	padding-bottom: var(--size-2-3);
 	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-weight: var(--font-bold);
@@ -1511,7 +1512,7 @@ button.princelists-collapse {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding-block: var(--size-4-4) var(--size-4-1);
+	padding-block: var(--size-4-4) var(--size-2-3);
 	padding-inline: 0 var(--size-4-2);
 	font-size: inherit;
 	background: none;
