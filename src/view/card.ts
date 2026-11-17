@@ -41,10 +41,10 @@ export interface Card {
 	lostAt: number | null;
 }
 
-// Opens the item at `titleLine` in place of its row, closing any open card first. The cursor goes in
-// the title only when `focusTitle` is set, so a tap on a row doesn't open the on-screen keyboard; the
-// card itself takes focus otherwise, so Escape reaches it. A card opened on an item its own insert
-// created passes `inserted`.
+// Opens the item at `titleLine` in place of its row, closing any open card first. The cursor goes at
+// the end of the title only when `focusTitle` is set, so a tap on a row doesn't open the on-screen
+// keyboard; the card itself takes focus otherwise, so Escape reaches it. A card opened on an item its
+// own insert created passes `inserted`.
 export function openCard(view: PrinceListView, titleLine: number, focusTitle = false, inserted?: InsertedItem): void {
 	closeCard(view);
 	view.editing.open(titleLine);
@@ -61,7 +61,7 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	if (title) fitHeight(title);
-	if (focusTitle) title?.focus();
+	if (focusTitle) focusCardTitleEnd(view);
 	else card.el.focus({ preventScroll: true });
 }
 

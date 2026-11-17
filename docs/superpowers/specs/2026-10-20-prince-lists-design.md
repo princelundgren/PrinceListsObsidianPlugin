@@ -695,6 +695,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   opening its card, and on desktop a plain click ends selecting and opens it; a click or a tap on
   empty space keeps the selection ([selecting several rows](2026-11-07-select-several-design.md), "While
   selecting").
+  - **On desktop the card opens with the caret at the end of its title (owner, 2026-11-17),** so
+    typing edits the title straight away, from a click on the row or from the Schedule. On a phone
+    a tap opens it with no caret, so the on-screen keyboard stays down.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A
