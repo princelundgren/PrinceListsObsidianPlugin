@@ -85,6 +85,13 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  intro\n' + table);
 	});
 
+	test('takes the block id off the text line of an underlined heading, as off a # heading', () => {
+		const underlined = FRONT + '- [ ] a\n  Title ^h1\n  ---\n';
+		expect(body(planGroupDuplicate(underlined, 3, [3])?.next)).toBe(underlined.slice(FRONT.length) + '- [ ] a\n  Title\n  ---\n');
+		const marked = FRONT + '- [ ] a\n  ## Title ^h1\n';
+		expect(body(planGroupDuplicate(marked, 3, [3])?.next)).toBe(marked.slice(FRONT.length) + '- [ ] a\n  ## Title\n');
+	});
+
 	test('takes the Tasks id off a sub-task in the notes, but leaves a code block as it is', () => {
 		const text = FRONT + '- [ ] a\n  - [ ] sub 🆔 x1\n  ```\n  code ^x\n  ```\n';
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(

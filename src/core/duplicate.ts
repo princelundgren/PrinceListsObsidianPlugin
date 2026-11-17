@@ -71,8 +71,10 @@ function blockEnds(lines: readonly Line[], item: ItemBlock): Set<number> {
 	for (let step = walker.next(); step; step = walker.next()) {
 		const { node, entering } = step;
 		if (!entering || (node.type !== 'paragraph' && node.type !== 'heading')) continue;
-		ends.add(item.titleLine + node.sourcepos[1][0]);
-		if (node.type === 'paragraph') paragraphStarts.add(node.sourcepos[0][0] - 1);
+		const [[startLine], [endLine]] = node.sourcepos;
+		// An underlined heading ends on its last line of text, above the underline.
+		ends.add(item.titleLine + (node.type === 'heading' && startLine < endLine ? endLine - 1 : endLine));
+		if (node.type === 'paragraph') paragraphStarts.add(startLine - 1);
 	}
 	// A table that starts on a later line of a paragraph ends a paragraph on the line above it.
 	for (const block of drawnBlocks(joinLines(notes))) {
