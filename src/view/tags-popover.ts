@@ -156,9 +156,9 @@ export function isInTagsPopover(view: PrinceListView, target: Node | null): bool
 	return popover !== undefined && popover.open !== null && popover.el.contains(target);
 }
 
-/** Whether it is open, for whichever target: the selection's Tag button toggles it. */
-export function isTagsPopoverOpen(view: PrinceListView): boolean {
-	return popovers.get(view)?.open != null;
+/** Whether it is open from `button`, so that button's press closes it rather than opening it again. */
+export function isTagsPopoverOpenFrom(view: PrinceListView, button: HTMLElement): boolean {
+	return popovers.get(view)?.open?.target.button === button;
 }
 
 function returnFocus(view: PrinceListView, target: TagsPopoverTarget): void {

@@ -1,7 +1,7 @@
 ---
 status: live
 governs: [src/**]
-verified: 2026-11-16
+verified: 2026-11-17
 tracking: ["#428"]
 ---
 
@@ -69,7 +69,7 @@ concerns, nothing is written in the background, and only documented Obsidian API
   as it passes the content start **(call)**.
 - **A change shows at once,** since the list view rereads its file on an outside change and the
   Schedule on the metadata cache's `changed` event, which Sync's changes reach too.
-- **Where it's set:** Tag list… in the list view's menus. A list opens in the list view, which
+- **Where it's set:** Tag list… in the list view's menus, or the tags beside the list's title. A list opens in the list view, which
   doesn't show properties. "Edit in Markdown" opens the note as Markdown, where Obsidian shows them
   at the top. The Properties view sidebar ("Properties view: Show file properties") shows and edits
   them with the list view open, and the strip and filters follow at once (checked in Obsidian

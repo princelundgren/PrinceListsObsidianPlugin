@@ -8,16 +8,16 @@ import { fitHeight, replaceKeeping } from './dom';
 import { buildListNote, buildListTitle, refreshListNote, TITLE_ROW_CLASS } from './fields';
 import { addArchivedToggle, addStarredToggle, buildFilterField, NO_MATCH_CLASS, NO_MATCH_HINT } from './filter';
 import { ADD_KEY_NAME } from './keys';
-import { buildListTagChips, LIST_TAGS_CLASS } from './list-tags';
+import { buildListTags, LIST_TAG_BUTTON_CLASS, LIST_TAGS_CLASS } from './list-tags';
 import type { PrinceListView } from './list-view';
 import { drawnRows, END_CLASS, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
 import { drawSelection, focusList } from './select';
 import { buildTagStrip, showsTagStrip } from './tag-strip';
 
-// Draws everything again from the view's text, except the title, list note, card or heading field that
-// holds focus, or is about to (`focusing`): those stay in place and update after blur. The list note,
-// the card, and rows and headings that show the same move into the new drawing, so what they render
-// isn't loaded again.
+// Draws everything again from the view's text, except the title, list note, card, heading field or
+// title's tag button that holds focus, or is about to (`focusing`): those stay in place and update
+// after blur. The list note, the card, and rows and headings that show the same move into the new
+// drawing, so what they render isn't loaded again.
 export function redraw(view: PrinceListView, focusing: Element | null): void {
 	const { contentEl, listScrollEl, listSizerEl } = view;
 	const { scrollTop } = listScrollEl;
@@ -30,7 +30,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	if (kept && kept === view.listTitleEl) slot = titleRow.createDiv();
 	else view.listTitleEl = buildListTitle(view, titleRow);
 	if (isListText(view.text)) {
-		buildListTagChips(view, titleRow);
+		slot = buildListTags(view, titleRow, kept) ?? slot;
 		const { lines, model, inherited } = view.parse();
 		if (kept && kept === view.listNoteEl) {
 			slot = fresh.createDiv();
@@ -81,13 +81,15 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		fresh.createEl('p', { text: "This note isn't a list" });
 		fresh.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
 	}
-	// The chips beside the title are drawn again, so focus they held moves to the new ones.
+	// The chips beside the title are drawn again, and so is a focused tag button once the list has
+	// tags, so focus they held moves to what is drawn there now.
+	const titleTags = `.${LIST_TAGS_CLASS}, .${LIST_TAG_BUTTON_CLASS}`;
 	const active = contentEl.doc.activeElement;
-	const chipsHadFocus = active !== null && listSizerEl.contains(active) && active.hasClass(LIST_TAGS_CLASS);
+	const titleTagsHadFocus = active !== null && listSizerEl.contains(active) && active.matches(titleTags);
 	replaceKeeping(listSizerEl, fresh, kept, slot);
-	if (chipsHadFocus) {
-		const chips = listSizerEl.querySelector<HTMLElement>(`.${LIST_TAGS_CLASS}`);
-		if (chips) chips.focus();
+	if (titleTagsHadFocus && !listSizerEl.contains(active)) {
+		const drawn = listSizerEl.querySelector<HTMLElement>(titleTags);
+		if (drawn) drawn.focus();
 		else focusList(view);
 	}
 	for (const el of Array.from(view.blocks.keys())) if (!listSizerEl.contains(el)) view.dropBlock(el);
@@ -127,5 +129,7 @@ function keptElement(view: PrinceListView, focusing: Element | null): HTMLElemen
 	if (!focused || !view.contentEl.contains(focused)) return null;
 	// A link in the rendered note can hold focus too; only a field in the note keeps it.
 	const note = view.listNote ? view.listNoteEl : null;
-	return [view.listTitleEl, note, view.filterField?.rowEl, view.card?.el, view.headingField?.el].find((el) => el?.contains(focused)) ?? null;
+	// The tag button shows only while the title row holds focus, so a new one couldn't take it.
+	const tagButton = view.listSizerEl.querySelector<HTMLElement>(`.${LIST_TAG_BUTTON_CLASS}`);
+	return [view.listTitleEl, note, view.filterField?.rowEl, view.card?.el, view.headingField?.el, tagButton].find((el) => el?.contains(focused)) ?? null;
 }
