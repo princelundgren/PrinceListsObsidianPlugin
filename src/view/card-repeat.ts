@@ -46,9 +46,11 @@ export function buildRepeatButton(buttons: HTMLElement): void {
 	setIcon(button, 'repeat');
 }
 
-/** Marks the card's `Repeat` button while its item repeats. */
+/** Marks the card's `Repeat` button, and names it `Edit repeat`, while its item repeats. */
 export function showRepeatButton(cardEl: HTMLElement, repeats: boolean): void {
-	cardEl.querySelector<HTMLElement>(`.${REPEAT_BUTTON_CLASS}`)?.toggleClass('is-repeating', repeats);
+	const button = cardEl.querySelector<HTMLElement>(`.${REPEAT_BUTTON_CLASS}`);
+	button?.toggleClass('is-repeating', repeats);
+	button?.setAttribute('aria-label', repeats ? 'Edit repeat' : 'Repeat');
 }
 
 /** Opens the repeat popover from the open card's buttons, with the draft its item's line gives; closes it if it's open. */
