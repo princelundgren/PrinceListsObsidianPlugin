@@ -8,6 +8,8 @@ updates:
       actions:
         patterns: ['*']
         update-types: [minor, patch]
+    cooldown:
+      default-days: 7
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -24,3 +26,6 @@ updates:
       development:
         dependency-type: development
         update-types: [minor, patch]
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
