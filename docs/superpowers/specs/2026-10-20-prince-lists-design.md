@@ -695,11 +695,6 @@ back only what was typed and leaves the empty line, which can be deleted like an
   opening its card, and on desktop a plain click ends selecting and opens it; a click or a tap on
   empty space keeps the selection ([selecting several rows](2026-11-07-select-several-design.md), "While
   selecting").
-  - **On desktop the card opens with the caret at the end of its title (owner, 2026-11-17),** so
-    typing edits the title straight away, from a click on the row or from the Schedule. On mobile,
-    phones and tablets, a tap opens it with no caret, so the on-screen keyboard stays down. With the
-    caret in the title, Shift+Up/Down select its text and Cmd+Z steps only through the title's own
-    history; Escape first closes the card, and the keys then reach the list.
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A
@@ -714,6 +709,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
     acts as before. A list inside another note keeps its own menus as they are.
   - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
     the card, one press closes the menu and the card together (#301).
+  - **On desktop the card opens with the caret at the end of its title (owner, 2026-11-17),** so
+    typing edits the title straight away, from a click on the row or from the Schedule. On mobile,
+    phones and tablets, a tap opens it with no caret, so the on-screen keyboard stays down. With the
+    caret in the title, Shift+Up/Down select its text and Cmd+Z steps only through the title's own
+    history; Escape first closes the card, and the keys then reach the list.
   - **Android's Back doesn't close the card (owner, 2026-11-14):** Obsidian documents no way for a
     plugin to hear Back, as for ending a selection ([selecting several
     rows](2026-11-07-select-several-design.md), "Risks to check during the build"). Back closes a
