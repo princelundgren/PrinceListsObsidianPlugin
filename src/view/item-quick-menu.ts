@@ -8,6 +8,7 @@ import { dayAfter, dayOf, setWhen } from '../core/when';
 import { openCard } from './card';
 import { openRepeatPopover } from './card-repeat';
 import { openTagPopover } from './card-tags';
+import { revealCardTools } from './card-tools';
 import { whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { queueLineEdit, queueRemoveWhen } from './line-edit';
 import type { PrinceListView } from './list-view';
@@ -63,6 +64,9 @@ function repeatPopover(view: PrinceListView, line: number): void {
 // without one the card's date button opens it.
 function pickDate(view: PrinceListView, line: number): void {
 	openCard(view, line);
-	const input = view.card?.el.querySelector<HTMLInputElement>(`.${WHEN_INPUT_CLASS}`);
-	if (input?.win.navigator.userActivation.isActive) whenClick(input);
+	// The picker opens at the date button, so the button is in view first.
+	revealCardTools(view, () => {
+		const input = view.card?.el.querySelector<HTMLInputElement>(`.${WHEN_INPUT_CLASS}`);
+		if (input?.win.navigator.userActivation.isActive) whenClick(input);
+	});
 }

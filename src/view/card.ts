@@ -9,7 +9,8 @@ import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
 import { buildRepeatButton, closeRepeatPopover, isInRepeatPopover, showRepeatButton } from './card-repeat';
-import { buildCardTags, buildTagButton, CARD_HEAD_CLASS, closeTagPopover, showCardTags } from './card-tags';
+import { buildCardTags, buildTagButton, closeTagPopover, showCardTags } from './card-tags';
+import { CARD_TOOLS_CLASS } from './card-tools';
 import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
@@ -128,7 +129,9 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes);
+	// The format bar goes under the buttons, so hiding it never moves a button mid-press.
+	const tools = card.el.querySelector<HTMLElement>(`.${CARD_TOOLS_CLASS}`) ?? undefined;
+	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, tools);
 }
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {
@@ -198,14 +201,13 @@ function createCardElement(): HTMLElement {
 	addTickZone(el);
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
-	const head = body.createDiv({ cls: CARD_HEAD_CLASS });
-	const titleLine = head.createDiv({ cls: CARD_TITLE_LINE_CLASS });
+	const titleLine = body.createDiv({ cls: CARD_TITLE_LINE_CLASS });
 	titleLine.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	buildCardTags(titleLine);
 	addStar(titleLine);
 	showStarMark(el, false);
 	body.createDiv({ cls: CARD_NOTES_CLASS });
-	const tools = head.createDiv({ cls: 'princelists-card-tools' });
+	const tools = body.createDiv({ cls: CARD_TOOLS_CLASS });
 	buildTagButton(tools);
 	buildWhenPicker(tools);
 	buildRepeatButton(tools);

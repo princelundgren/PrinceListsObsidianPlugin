@@ -15,6 +15,7 @@ import {
 } from './card';
 import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, isOpenRepeatButton, repeatClick, repeatInput, saveRepeat } from './card-repeat';
 import { cardTagsClick, closeTagPopover, escapeTagPopover, isOpenTagButton } from './card-tags';
+import { CARD_TOOLS_CLASS } from './card-tools';
 import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
@@ -210,8 +211,17 @@ function keepFocusBesideTitle(evt: MouseEvent): void {
 	if (target?.closest(`.${LIST_TAG_BUTTON_CLASS}`)) evt.preventDefault();
 }
 
+// Leaving the notes draws the caret's line as it reads, a link as its label, so a press on the card's
+// buttons that took focus could pull them from under the pointer before the click. The notes keep
+// focus until what the click opens takes it. A phone's tap lowers the keyboard for the date picker.
+function keepNotesFocused(view: PrinceListView, evt: MouseEvent): void {
+	if (Platform.isMobile || !view.card?.editor?.hasFocus) return;
+	if (targetOf(evt)?.closest(`.${CARD_TOOLS_CLASS}`)) evt.preventDefault();
+}
+
 function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
 	keepFieldFocused(evt);
+	keepNotesFocused(view, evt);
 	keepFocusBesideTitle(evt);
 	keepTagFieldFocused(view, evt);
 	keepRepeatFocused(view, evt);
