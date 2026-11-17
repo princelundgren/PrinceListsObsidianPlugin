@@ -157,8 +157,9 @@ every tagged part of a list is done, such as what is left to buy.
 - **A row shows its tags as labels (owner),** like its star and day: tapping one does what tapping
   the row does, which opens its card. Only the strip filters **(owner)**.
 - **A row's tags are gray (owner, 2026-11-17),** normal text on a gray pill, as the strip's are,
-  so a list with many tags reads calmly. The open card's chips and the tag popover keep Obsidian's
-  tag colors, and a tag in the title keeps the look Obsidian's renderer gives it.
+  so a list with many tags reads calmly. A tag typed in a row's title or in a heading is gray too
+  **(owner, 2026-11-17)**: the view sets Obsidian's documented `--tag-*` variables there, so the
+  renderer draws it that way. The open card's chips and the tag popover keep Obsidian's tag colors.
 - **The row's chips are the tags in its tail,** read with the rule above **(call)**. A tag in the
   title already shows inside the title, which Obsidian's renderer draws, so it gets no second chip.
   A tap on it does what a tap on a link in a row does (step one, "Layout"), which is Obsidian's,
