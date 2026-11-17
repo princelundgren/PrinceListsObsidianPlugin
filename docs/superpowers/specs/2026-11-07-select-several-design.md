@@ -68,12 +68,16 @@ only documented Obsidian APIs are used.
   theme may set to that same text color, leaving a selected row's text unreadable **(call)**. A run
   of selected rows reads as one block, rounded only at its ends **(call)**. The highlight reaches
   into the view's side margin, so it doesn't touch the checkbox **(owner, 2026-11-12)**, by the open
-  card's side padding **(call)**; a heading's or an
-  untouched block's margin still shows as a gap within a run. Checked on the Android emulator in
-  Obsidian's default dark theme: selected rows are the accent at 33%. Assistive technology hears
-  which rows are selected and how many: rows hold a checkbox and headings have `role="heading"`, so
-  `aria-selected` alone isn't valid on them, and the builder names the pattern used in the pull
-  request **(call)**.
+  card's side padding **(call)**. A selected heading's highlight also reaches up into the space
+  above it, so it is as tall as a one-line row's, without moving the heading or its collapse arrow
+  **(owner, 2026-11-17)**. It is drawn there rather than padded into the heading's margin, which
+  collapses with the margin before it and would move the heading **(call)**. The rest of a
+  heading's margin, and an untouched block's, still shows as a gap within a run. Checked on the
+  Android emulator in Obsidian's default dark theme: selected rows and headings are the accent at
+  33%, a selected heading's highlight is 39.9 px tall to a row's 40 px, and the heading and its
+  collapse arrow don't move. Assistive technology hears which rows are selected and how many: rows
+  hold a checkbox and headings have `role="heading"`, so `aria-selected` alone isn't valid on them,
+  and the builder names the pattern used in the pull request **(call)**.
 - **It follows its rows through the view's own edits,** as a collapsed heading follows its line
   (step two, "Collapsing a heading"). A change from outside keeps the rows the view can still find
   and drops the rest **(call)**.
