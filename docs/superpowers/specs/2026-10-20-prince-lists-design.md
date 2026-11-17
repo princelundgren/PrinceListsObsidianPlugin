@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-16
+verified: 2026-11-17
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -755,37 +755,36 @@ back only what was typed and leaves the empty line, which can be deleted like an
   and its notes, and its name says what goes **(owner, 2026-10-29)**. Step two adds Edit in
   Markdown.
 - **A row's right-click menu also does what the item's card does (owner, 2026-10-29),** so an item
-  needn't be opened for it: Tick or Untick, Add star or Remove star, then Set date to today, Set
-  date to tomorrow, Set date…, and Remove date when it has one, then Repeat…, which opens the card
-  with its repeat popover ([repeating items](2026-11-13-repeating-items-design.md), "Setting a
-  repeat"). Each entry says what the item holds
-  when the menu opens, and does just that: Tick on an item ticked meanwhile does nothing. This
-  replaces keeping the star on the card alone **(owner, 2026-10-27)**.
+  needn't be opened for it: Tick or Untick, Tag…, which opens the card with its tag popover
+  **(owner, #448)**, Add star or Remove star, then Set date to today, Set date to tomorrow, Set
+  date…, and Remove date when it has one, then Repeat…, which opens the card with its repeat popover
+  ([repeating items](2026-11-13-repeating-items-design.md), "Setting a repeat"). Each entry says
+  what the item holds when the menu opens, and does just that: Tick on an item ticked meanwhile does
+  nothing. This replaces keeping the star on the card alone **(owner, 2026-10-27)**.
   - **Set date… opens the card with the platform's date picker** **(call)**. The picker needs a
     recent user action, and with Native menus on a menu's click may not count as one; then the
     card opens without it, and its date button opens the picker.
   - **The card's ⋯ menu, and a right-click on the open card, stay without them (owner,
-    2026-10-29),** since the card shows the box, the star and the date beside them. Only Repeat… is
-    there, in a group of its own after Select, while the card shows no repeat button; a repeating
-    item's card, and a ticked one's that comes back, has the button instead.
+    2026-10-29),** since the card shows the box, the star, the date and the tag button beside them.
+    Only Repeat… is there, in a group of its own after Select, while the card shows no repeat
+    button; a repeating item's card, and a ticked one's that comes back, has the button instead.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star button's "Add star" and "Remove star";
     and "Remove", as in Remove image.
 - **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
-  of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick and the
-  star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
-  Delete item. The
-  card's ⋯ has the same without the card's own entries. The heading menu groups Select; New item,
-  New heading below, Rename heading and Tag…; Edit in Markdown; Collapse or Expand all headings
-  **(call)**; Delete heading. That is more groups than the three or so in Apple's [Context
-  menus](https://developer.apple.com/design/human-interface-guidelines/context-menus), which also
-  puts the most-used entries first and destructive ones last.
-- **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected
-  row included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Add star and
-  Remove star, the four date entries, and Delete in red, naming what goes. Each acts on every
+  of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick, Tag… and
+  the star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
+  Delete item. The card's ⋯ has the same without the card's own entries. The heading menu groups
+  Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse or Expand
+  all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
+  [Context menus](https://developer.apple.com/design/human-interface-guidelines/context-menus),
+  which also puts the most-used entries first and destructive ones last.
+- **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected row
+  included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Add star and Remove
+  star, Tag…, the four date entries, and Delete in red, naming what goes. Each acts on every
   selected item at once and shows an Undo message, and a right-click on a row outside the selection
-  opens that row's own menu
-  ([selecting several rows](2026-11-07-select-several-design.md), "The actions").
+  opens that row's own menu ([selecting several rows](2026-11-07-select-several-design.md), "The
+  actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading, Tag… and Delete heading, and Select **(owner, 2026-11-11)**. Step two adds Edit in Markdown,
   Collapse all headings and Expand all headings, and a menu on the list's background (step two's
@@ -802,9 +801,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
-- **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On
-  mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move
-  to, Tick, Star, Date and Delete for them through the selection's bar ([selecting several
+- **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On mobile
+  this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move to, Tick,
+  Star, Tag, Date and Delete for them through the selection's bar ([selecting several
   rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename

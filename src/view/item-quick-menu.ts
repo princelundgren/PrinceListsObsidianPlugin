@@ -7,13 +7,14 @@ import { setStar } from '../core/star';
 import { dayAfter, dayOf, setWhen } from '../core/when';
 import { openCard } from './card';
 import { openRepeatPopover } from './card-repeat';
+import { openTagPopover } from './card-tags';
 import { whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { queueLineEdit, queueRemoveWhen } from './line-edit';
 import type { PrinceListView } from './list-view';
 import { atLine } from './menu-anchor';
 import { queueTickAt } from './tick';
 
-// What the item's card does, from its row's right-click menu: tick, star, the date and the repeat. Each entry
+// What the item's card does, from its row's right-click menu: tick, tags, star, the date and the repeat. Each entry
 // says what the item holds when the menu opens, and does just that.
 export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLElement, anchor: TrackedLine, menu: Menu): void {
 	const { done, starred, when } = timelessItemRow((view.lines()[item.titleLine] as Line).text, item.titleLine);
@@ -24,6 +25,7 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 			.setIcon(done ? 'square' : 'check')
 			.onClick(atLine(anchor, (line) => queueTickAt(view, line, row, !done))),
 	);
+	menu.addItem((entry) => entry.setTitle('Tag…').setIcon('tag').onClick(atLine(anchor, (line) => tagPopover(view, line))));
 	menu.addItem((entry) =>
 		entry
 			.setTitle(starred ? 'Remove star' : 'Add star')
@@ -37,6 +39,12 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 	if (when !== null) menu.addItem((entry) => entry.setTitle('Remove date').setIcon('calendar-x').onClick(atLine(anchor, (line) => queueRemoveWhen(view, line))));
 	menu.addItem((entry) => entry.setTitle('Repeat…').setIcon('repeat').onClick(atLine(anchor, (line) => repeatPopover(view, line))));
 	menu.addSeparator();
+}
+
+// The item's card opens with its tag popover open.
+function tagPopover(view: PrinceListView, line: number): void {
+	openCard(view, line);
+	openTagPopover(view);
 }
 
 // The item's card opens with its repeat popover open.
