@@ -930,8 +930,8 @@ button.princelists-find-button {
 	color: var(--icon-color);
 }
 
-/* The card's buttons and its format bar's are Apple's default macOS control size, 28 px, which a
-   phone's finger-sized box already exceeds. */
+/* The card's buttons and every format bar's, the list note's too, are Apple's default macOS control
+   size, 28 px, which a phone's finger-sized box already exceeds. */
 .princelists-card-buttons button,
 .princelists-card-buttons .princelists-when-button,
 .princelists-format-bar button {
