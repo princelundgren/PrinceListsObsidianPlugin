@@ -408,7 +408,7 @@ textarea.princelists-title {
 }
 
 /* A notes editor reads as the text around it, as Obsidian's own small editors do: its font, Obsidian's
-   caret, and no focus ring. A card's is at least three lines tall, empty or not, so it is easy to tap. */
+   caret, and no focus ring. A card's is at least two lines tall, empty or not, so it is easy to tap. */
 .princelists-card-notes .cm-scroller,
 .princelists-list-note .cm-scroller {
 	font-family: inherit;
@@ -843,14 +843,15 @@ button.princelists-new-item {
 }
 
 /* The card's row under its notes, at its end: the item's tags, then its buttons, which keep their
-   places whatever tags it has, while many tags wrap within their own box. The tag and repeat popovers
-   hang from it. */
+   places whatever tags it has. Tags that don't fit beside the buttons take their own line above
+   them. The tag and repeat popovers hang from it. */
 .princelists-card-tools {
 	position: relative;
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: flex-end;
 	align-items: center;
-	gap: var(--size-2-1);
+	gap: var(--size-4-1) var(--size-2-1);
 	/* Brought into view clear of mobile's navigation bar and desktop's status bar. */
 	scroll-margin-bottom: calc(var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
@@ -932,8 +933,8 @@ button.princelists-find-button {
 	color: var(--icon-color);
 }
 
-/* The card's buttons and its format bar's are Apple's default macOS control size, 28 px, which a
-   phone's finger-sized box already exceeds. */
+/* The card's buttons and every format bar's, the list note's too, are Apple's default macOS control
+   size, 28 px, which a phone's finger-sized box already exceeds. */
 .princelists-card-buttons button,
 .princelists-card-buttons .princelists-when-button,
 .princelists-format-bar button {
@@ -1144,7 +1145,7 @@ button.princelists-card-repeat.is-repeating {
 	--tag-border-color-hover: transparent;
 }
 
-.princelists-item.is-done .princelists-tag {
+.princelists-item.is-done .princelists-tags .princelists-tag {
 	color: var(--checklist-done-color);
 }
 
@@ -1192,7 +1193,7 @@ button.princelists-list-tag-button {
 	}
 }
 
-/* No tag has a strip tag's shape without the tag colors, so it doesn't read as a tag. */
+/* No tag has a strip tag's shape without its gray pill, so it doesn't read as a tag. */
 button.princelists-strip-no-tag {
 	height: auto;
 	font-size: var(--tag-size);
@@ -1228,17 +1229,7 @@ button.princelists-strip-no-tag.is-lit {
 	}
 }
 
-/* The card's title has its line to itself, at the card's full width. */
-.princelists-card-title-line {
-	display: flex;
-}
-
-.princelists-card-title-line > textarea.princelists-card-title {
-	flex: 1 1 100%;
-}
-
 .princelists-card-tags {
-	min-width: 0;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: flex-end;
@@ -1252,6 +1243,11 @@ button.princelists-strip-no-tag.is-lit {
 	align-items: center;
 	gap: var(--size-2-1);
 	padding-inline-end: var(--size-2-1);
+}
+
+/* A tag wider than the card breaks within its text. */
+.princelists-card-tag {
+	overflow-wrap: anywhere;
 }
 
 /* The × takes the chip's own color, on the chip's background. */
