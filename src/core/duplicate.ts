@@ -17,6 +17,8 @@ const TASKS_ID = /^🆔\ufe0f? */;
 const DEPENDS_ON = /^⛔\ufe0f? */;
 
 const QUOTE_MARKER = /^[ \t]*>/;
+// What may stand before a block that starts its line: indent and quote markers, but no list marker.
+const QUOTES_ONLY = /^[ \t>]*$/;
 
 /**
  * Copies each item on `rows`, with its notes, right below itself, in one write. A copy is unticked,
@@ -72,15 +74,19 @@ function blockEnds(lines: readonly Line[], item: ItemBlock): Set<number> {
 	for (let step = walker.next(); step; step = walker.next()) {
 		const { node, entering } = step;
 		if (!entering || (node.type !== 'paragraph' && node.type !== 'heading')) continue;
-		const [[startLine], [endLine]] = node.sourcepos;
-		// An underlined heading ends on its last line of text, above the underline.
-		ends.add(item.titleLine + (node.type === 'heading' && startLine < endLine ? endLine - 1 : endLine));
-		if (node.type !== 'paragraph') continue;
-		// A table that starts on a later line of a paragraph ends a paragraph on the line above it.
+		const [[startLine, startColumn], [endLine]] = node.sourcepos;
+		if (node.type === 'heading') {
+			// An underlined heading ends on its last line of text, above the underline.
+			ends.add(item.titleLine + (startLine < endLine ? endLine - 1 : endLine));
+			continue;
+		}
+		// A table in the paragraph, which a quote leaves plain text, ends it on the line above the table.
 		const depth = quoteDepth(node);
 		const paragraph = notes.slice(startLine - 1, endLine).map((line) => insideQuotes(line.text, depth));
-		const table = tableStart(paragraph, 1);
-		if (table !== undefined) ends.add(item.titleLine + startLine - 1 + table);
+		const startsItsLine = QUOTES_ONLY.test((notes[startLine - 1] as Line).text.slice(0, startColumn - 1));
+		const table = tableStart(paragraph, startsItsLine ? 0 : 1);
+		if (table === undefined) ends.add(item.titleLine + endLine);
+		else if (table > 0) ends.add(item.titleLine + startLine - 1 + table);
 	}
 	return ends;
 }

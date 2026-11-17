@@ -93,6 +93,16 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  > intro\n' + table);
 	});
 
+	test("keeps a block id in a quoted table's last row, where it is a cell's text", () => {
+		for (const row of ['  > | 1 | 2 | ^t1\n', '  > | 1 | 2 ^t1\n']) {
+			const table = '  > | x | y |\n  > |---|---|\n' + row;
+			const text = FRONT + '- [ ] a\n' + table;
+			expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length).repeat(2));
+			const withIntro = FRONT + '- [ ] a\n  > intro ^p1\n' + table;
+			expect(body(planGroupDuplicate(withIntro, 3, [3])?.next)).toBe(withIntro.slice(FRONT.length) + '- [ ] a\n  > intro\n' + table);
+		}
+	});
+
 	test('takes the block id off the text line of an underlined heading, as off a # heading', () => {
 		const underlined = FRONT + '- [ ] a\n  Title ^h1\n  ---\n';
 		expect(body(planGroupDuplicate(underlined, 3, [3])?.next)).toBe(underlined.slice(FRONT.length) + '- [ ] a\n  Title\n  ---\n');
