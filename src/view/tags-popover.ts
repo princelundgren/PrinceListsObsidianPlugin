@@ -27,7 +27,7 @@ export interface TagsPopoverTarget {
 	side: 'above' | 'below';
 	/** The button it opens from, whose aria-expanded follows it and which takes focus back; null for a menu's targets. */
 	button: HTMLElement | null;
-	/** Where Escape or a stale close sends focus when it has no button, such as the button a menu opened from. */
+	/** Where Escape or a stale close sends focus when there is no button, such as the bar's More. */
 	returnFocusTo?: () => HTMLElement | null;
 	chips: readonly TagChip[];
 	tagsToLeaveOut(): readonly string[];
@@ -136,8 +136,8 @@ export function placeTagsPopover(view: PrinceListView): void {
 
 /**
  * Places the open popover against its anchor again after a render, which can rebuild or move it, or
- * closes it once its target is stale or its anchor is null. Focus it held goes to the target's button,
- * or else where the target returns focus, when that takes it, or to the list.
+ * closes it once its target is stale or its anchor is null. Focus it held goes to the target's
+ * button, or else where the target returns focus, when that takes it, or to the list.
  */
 export function syncTagsPopover(view: PrinceListView): void {
 	const popover = popovers.get(view);

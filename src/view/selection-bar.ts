@@ -70,10 +70,10 @@ export function shownSelectionBar(view: PrinceListView): HTMLElement | null {
 }
 
 /**
- * Shows the bar while the view is selecting, named for how many rows are selected, with each button enabled
- * only while it has something to act on, and marks the view's content as selecting. Hides both
- * otherwise, first moving focus to the list if the bar holds it. Closes the tag popover once the
- * selection it opened for changes.
+ * Shows the bar while the view is selecting, named for how many rows are selected, with each button
+ * enabled only while it has something to act on, and marks the view's content as selecting. Hides
+ * both otherwise, first moving focus to the list if the bar holds it. Closes the tag popover once
+ * the selection it opened for changes.
  */
 export function syncSelectionBar(view: PrinceListView): void {
 	view.contentEl.toggleClass(SELECTING_CLASS, view.selecting);
@@ -90,7 +90,10 @@ export function syncSelectionBar(view: PrinceListView): void {
 	bar.el.toggle(view.selecting);
 }
 
-/** Opens the selection's tag popover over the bar's More button, for a menu's Tag…; nothing while the button is missing or disabled. */
+/**
+ * Opens the selection's tag popover over the bar's More button, for a menu's Tag…; nothing while the
+ * button is missing or disabled.
+ */
 export function openSelectionTags(view: PrinceListView): void {
 	const button = bars.get(view)?.buttons.get('more');
 	if (button && !button.disabled) openSelectionTagPopover(view, button);

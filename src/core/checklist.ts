@@ -76,7 +76,10 @@ export function plainNotesLines(lines: readonly Line[], item: ItemBlock): number
 	return notes.flatMap((_, i) => (kept.has(i) ? [] : [first + i]));
 }
 
-/** The item's notes lines as the notes editor reads them, at the left margin; the first is the line after the title. */
+/**
+ * The item's notes lines, from the line after its title, at the left margin as the notes editor
+ * reads them.
+ */
 export function notesAtMargin(lines: readonly Line[], item: ItemBlock): Line[] {
 	const width = columnOf(item.notesIndent);
 	return lines.slice(item.titleLine + 1, item.endLine).map((line) => ({ text: stripIndent(line.text, width), eol: line.eol }));

@@ -28,7 +28,8 @@ import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
 const MENU_TARGET_CLASS = 'princelists-menu-target';
 
-// A row's New item below, New heading below and Duplicate, after its own entries (spec, "Item actions").
+// A row's New item below, New heading below and Duplicate, after its own entries (spec, "Item
+// actions").
 function addInsertEntries(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 	menu.addItem((entry) =>
 		entry

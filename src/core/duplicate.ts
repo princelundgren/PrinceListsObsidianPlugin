@@ -59,7 +59,7 @@ function copyOf(original: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'):
 	return copy.map((line) => ({ text: line.text, eol: line.eol || eol }));
 }
 
-// The notes lines that end a paragraph or heading, the only lines Obsidian reads a block id at the end of.
+// The notes lines that end a paragraph or heading, where Obsidian reads a block id at the end.
 function blockEnds(lines: readonly Line[], item: ItemBlock): Set<number> {
 	const ends = new Set<number>();
 	const walker = new Parser().parse(maskBlocks(notesAtMargin(lines, item), 0).text).walker();
