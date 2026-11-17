@@ -110,6 +110,13 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(marked, 3, [3])?.next)).toBe(marked.slice(FRONT.length) + '- [ ] a\n  ## Title\n');
 	});
 
+	test('keeps a block id whose removal would turn its line into an underline or a rule', () => {
+		for (const notes of ['  Title\n  --- ^h1\n', '  Title\n  === ^h1\n', '  *** ^x\n', '  > Title\n  > - - - ^q\n']) {
+			const text = FRONT + '- [ ] a\n' + notes;
+			expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length).repeat(2));
+		}
+	});
+
 	test('takes the Tasks id off a sub-task in the notes, but leaves a code block as it is', () => {
 		const text = FRONT + '- [ ] a\n  - [ ] sub 🆔 x1\n  ```\n  code ^x\n  ```\n';
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(

@@ -19,6 +19,8 @@ const DEPENDS_ON = /^⛔\ufe0f? */;
 const QUOTE_MARKER = /^[ \t]*>/;
 // What may stand before a block that starts its line: indent and quote markers, but no list marker.
 const QUOTES_ONLY = /^[ \t>]*$/;
+// A setext underline or a thematic break, which a paragraph's last line becomes without its block id.
+const UNDERLINE_OR_RULE = /^\s*(?:=+|-+|(?:-\s*){3,}|(?:\*\s*){3,}|(?:_\s*){3,})\s*$/;
 
 /**
  * Copies each item on `rows`, with its notes, right below itself, in one write. A copy is unticked,
@@ -60,7 +62,7 @@ function copyOf(original: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'):
 			const text = withoutTasksIds(line.text, dropped);
 			copy.push({ text: ends.has(at) ? withoutItemBlockId(text) : text, eol: line.eol });
 		} else if (!ends.has(at)) copy.push(line);
-		else if (!BARE_BLOCK_ID.test(line.text.trim())) copy.push({ text: withoutBlockId(line.text), eol: line.eol });
+		else if (!BARE_BLOCK_ID.test(line.text.trim())) copy.push({ text: withoutParagraphBlockId(line.text), eol: line.eol });
 	}
 	while (copy.length > 1 && isBlank((copy[copy.length - 1] as Line).text)) copy.pop();
 	return copy.map((line) => ({ text: line.text, eol: line.eol || eol }));
@@ -102,6 +104,12 @@ function insideQuotes(text: string, depth: number): string {
 	let inside = text;
 	for (let quote = 0; quote < depth && QUOTE_MARKER.test(inside); quote++) inside = inside.replace(QUOTE_MARKER, '');
 	return inside;
+}
+
+// A paragraph's last line without its block id, unless that would make it an underline or a rule.
+function withoutParagraphBlockId(text: string): string {
+	const without = withoutBlockId(text);
+	return UNDERLINE_OR_RULE.test(insideQuotes(without, Infinity)) ? text : without;
 }
 
 function withoutBlockId(text: string): string {
