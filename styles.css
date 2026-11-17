@@ -404,7 +404,7 @@ textarea.princelists-title {
 }
 
 /* A notes editor reads as the text around it, as Obsidian's own small editors do: its font, Obsidian's
-   caret, and no focus ring. A card's is at least three lines tall, empty or not, so it is easy to tap. */
+   caret, and no focus ring. A card's is at least two lines tall, empty or not, so it is easy to tap. */
 .princelists-card-notes .cm-scroller,
 .princelists-list-note .cm-scroller {
 	font-family: inherit;
