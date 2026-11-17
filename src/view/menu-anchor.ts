@@ -1,5 +1,6 @@
 import { Notice, type Menu } from 'obsidian';
 import type { TrackedLine } from '../core/editing';
+import { whenHidden } from '../core/hide-actions';
 import type { PrinceListView } from './list-view';
 import { CHANGED_ELSEWHERE_NOTICE } from './write';
 
@@ -9,8 +10,13 @@ import { CHANGED_ELSEWHERE_NOTICE } from './write';
  */
 export function trackWhileShown(view: PrinceListView, line: number, menu: Menu): TrackedLine {
 	const anchor = view.editing.track(line);
-	menu.onHide(() => view.editing.untrack(anchor));
+	onMenuHide(menu, () => view.editing.untrack(anchor));
 	return anchor;
+}
+
+/** Runs `action` when `menu` hides, beside the menu's other hide actions: `Menu.onHide` keeps only one. */
+export function onMenuHide(menu: Menu, action: () => void): void {
+	whenHidden(menu, (callback) => menu.onHide(callback), action);
 }
 
 /** A menu entry's action on the anchor's line, or a notice when an outside change took the line. */

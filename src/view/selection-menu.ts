@@ -10,6 +10,7 @@ import { DateModal } from './date-modal';
 import { queueGroupAction } from './group-write';
 import { HeadingPickerModal } from './heading-picker';
 import type { PrinceListView } from './list-view';
+import { onMenuHide } from './menu-anchor';
 import { queueGroupMove } from './move';
 import { clearSelection } from './select';
 import { openSelectionTags } from './selection-bar';
@@ -43,7 +44,7 @@ export function addGroupEntries(view: PrinceListView, menu: Menu, only?: EntryGr
 			menu.addItem((item) =>
 				item.setTitle(title).setIcon(icon).onClick(() => {
 					// After the menu hides, so the focus it gives back doesn't leave the popover's field.
-					if (entry === 'tag') menu.onHide(() => openSelectionTags(view));
+					if (entry === 'tag') onMenuHide(menu, () => openSelectionTags(view));
 					else act(view, entry);
 				}),
 			);
