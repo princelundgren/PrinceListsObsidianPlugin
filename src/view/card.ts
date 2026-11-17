@@ -61,8 +61,10 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	if (title) fitHeight(title);
-	if (focusTitle) focusCardTitleEnd(view);
-	else card.el.focus({ preventScroll: true });
+	if (focusTitle) {
+		title?.focus();
+		title?.setSelectionRange(title.value.length, title.value.length);
+	} else card.el.focus({ preventScroll: true });
 }
 
 // The user closed the card in the view, in one of the ways the spec lists ("Selecting and adding"). An
