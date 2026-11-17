@@ -78,8 +78,8 @@ are used.
 - **Each tag is a toggle button,** with `aria-pressed` as the field's toggles have, at least 24 by
   24 CSS pixels, the minimum in WCAG 2.2's "Target Size (Minimum)" **(call)**. It has a tag's
   shape and size from Obsidian's tag CSS variables, but is gray, normal text on a gray pill, and a
-  lit tag takes the accent color **(owner, 2026-11-17)**. This replaces Obsidian's tag colors
-  **(call)**, which made a list with many tags purple all over.
+  lit tag takes the accent color **(owner, 2026-11-17)**. This replaces Obsidian's tag colors,
+  which made a list with many tags purple all over.
 - **A press keeps focus where it was (call),** as a press on the field's toggles does, so a phone's
   keyboard stays up while the field is open.
 - **The strip keeps every tag while filtering (owner),** not only those of the items still shown,
@@ -174,7 +174,8 @@ every tagged part of a list is done, such as what is left to buy.
     between the title and them.
 - **The reading order is title, tags, star, day at every width (call),** so a screen reader reads
   a row the same way on a phone and a desktop.
-- **A done item's chips are gray,** as its title is **(call)**.
+- **A done item's chips on its row are gray,** as its title is **(call)**; its open card's keep
+  Obsidian's tag colors.
 - **Rows in the Schedule and in a list inside another note show their tags too (call),** as they
   show the star.
 
@@ -182,16 +183,15 @@ every tagged part of a list is done, such as what is left to buy.
 
 - **A tag button first in the card's buttons, under the notes (owner, 2026-11-17),** so they read
   tag, star, repeat, day, ⋯ (step two, "When"). This replaces a tag button left of the star in the
-  card's head (owner). Its icon is Lucide's `plus` **(owner, 2026-11-17)**, which beside the chips
-  says it adds one, and its tooltip is "Add tag". Lucide's `tag-plus` would say both, but Obsidian
-  doesn't ship it yet; this replaces a tag icon **(call)**.
+  card's head (owner). Its icon is a tag from Obsidian's built-in Lucide set **(owner,
+  2026-11-17)**, and its tooltip is "Add tag".
 - **The item's tags sit in the row under the notes, just before its buttons (owner, 2026-11-17),**
   each with an × that takes it off, so the title has its line to itself and the chips sit by the
-  button that adds them. This replaces the tags starting the row at its other end. This replaces the tags
-  following the title, as on a closed row **(owner, #340)**, with the title field as wide as its
-  text. These are the tags in its tail; a tag in the title stays in the title field, where it's
-  edited as text **(call)**. Today the card hides the tail while you edit (step one, "Editing"), so
-  a tag typed there can't be seen again in the view; showing them fixes that.
+  button that adds them. This replaces the tags following the title, as on a closed row **(owner,
+  #340)**, with the title field as wide as its text. These are the tags in its tail; a tag in the
+  title stays in the title field, where it's edited as text **(call)**. Today the card hides the
+  tail while you edit (step one, "Editing"), so a tag typed there can't be seen again in the view;
+  showing them fixes that.
 - **The tag button opens a small popover (owner, #340),** over the card's content, so opening it
   moves nothing. Where it hangs is under "The popover is the plugin's own element" below; this
   replaces a popover under the button in the card's head. It holds one field with Obsidian's

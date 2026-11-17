@@ -64,9 +64,7 @@ export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[]
  */
 export function plainNotesLines(lines: readonly Line[], item: ItemBlock): number[] {
 	const first = item.titleLine + 1;
-	const width = columnOf(item.notesIndent);
-	// As the notes editor reads them, at the left margin.
-	const notes = lines.slice(first, item.endLine).map((line) => ({ text: stripIndent(line.text, width), eol: line.eol }));
+	const notes = notesAtMargin(lines, item);
 	const kept = new Set<number>();
 	const text = joinLines(notes);
 	for (const block of [...drawnBlocks(text).map((b) => b.lines), ...commentBlocks(text)]) {
@@ -76,4 +74,13 @@ export function plainNotesLines(lines: readonly Line[], item: ItemBlock): number
 		for (let i = from; i <= to; i++) kept.add(i);
 	}
 	return notes.flatMap((_, i) => (kept.has(i) ? [] : [first + i]));
+}
+
+/**
+ * The item's notes lines, from the line after its title, at the left margin as the notes editor
+ * reads them.
+ */
+export function notesAtMargin(lines: readonly Line[], item: ItemBlock): Line[] {
+	const width = columnOf(item.notesIndent);
+	return lines.slice(item.titleLine + 1, item.endLine).map((line) => ({ text: stripIndent(line.text, width), eol: line.eol }));
 }

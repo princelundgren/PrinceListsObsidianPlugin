@@ -7,7 +7,7 @@ import type { PrinceListView } from './list-view';
 import { onMenuHide } from './menu-anchor';
 import { showViewMenu } from './menu-press';
 import { clearSelection, focusList } from './select';
-import { addHeadingEntries } from './heading-menu';
+import { addMoveChoices } from './move-menu';
 import { addGroupEntries, deleteSelection, listHasHeadings, moveSelectionTo } from './selection-menu';
 import { openSelectionTagPopover } from './selection-tag-popover';
 import { closeTagsPopover, isInTagsPopover, syncTagsPopover } from './tags-popover';
@@ -15,12 +15,13 @@ import { closeTagsPopover, isInTagsPopover, syncTagsPopover } from './tags-popov
 /** The class on the view's content while selecting. */
 const SELECTING_CLASS = 'princelists-selecting';
 
-// `menuFrom`: the button whose menu shows, or null. `closing`: the button a press found its own
-// menu open on, so that press only closes the menu, which Obsidian does on mousedown.
+// `shown`: the button whose menu shows, with that menu, or null. `closing`: the button a primary
+// press found its own menu open on, so that press only closes the menu, which Obsidian does on
+// mousedown.
 interface SelectionBar {
 	el: HTMLElement;
 	buttons: Map<BarButton, HTMLButtonElement>;
-	menuFrom: HTMLElement | null;
+	shown: { button: HTMLElement; menu: Menu } | null;
 	closing: HTMLElement | null;
 }
 
@@ -60,16 +61,24 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 		buttons.set(button, buttonEl);
 		actions.set(buttonEl, () => act(view, button, buttonEl));
 	}
-	const bar: SelectionBar = { el, buttons, menuFrom: null, closing: null };
+	const bar: SelectionBar = { el, buttons, shown: null, closing: null };
 	view.registerDomEvent(el, 'pointerdown', (evt) => {
 		const buttonEl = targetOf(evt)?.closest('button') ?? null;
-		bar.closing = buttonEl !== null && buttonEl === bar.menuFrom ? buttonEl : null;
+		bar.closing = evt.button === 0 && buttonEl !== null && buttonEl === bar.shown?.button ? buttonEl : null;
+	});
+	view.registerDomEvent(el, 'pointercancel', () => {
+		bar.closing = null;
 	});
 	view.registerDomEvent(el, 'click', (evt) => {
 		const buttonEl = targetOf(evt)?.closest('button');
 		const closing = bar.closing;
 		bar.closing = null;
 		if (!buttonEl || buttonEl.disabled || buttonEl === closing) return;
+		// A click from the keyboard, which no mousedown came before to close the menu.
+		if (buttonEl === bar.shown?.button) {
+			bar.shown.menu.hide();
+			return;
+		}
 		leaveTagPopover(view, buttonEl);
 		actions.get(buttonEl)?.();
 	});
@@ -83,10 +92,10 @@ export function shownSelectionBar(view: PrinceListView): HTMLElement | null {
 }
 
 /**
- * Shows the bar while the view is selecting, named for how many rows are selected, with each button enabled
- * only while it has something to act on, and marks the view's content as selecting. Hides both
- * otherwise, first moving focus to the list if the bar holds it. Closes the tag popover once the
- * selection it opened for changes.
+ * Shows the bar while the view is selecting, named for how many rows are selected, with each button
+ * enabled only while it has something to act on, and marks the view's content as selecting. Hides
+ * both otherwise, first moving focus to the list if the bar holds it. Closes the tag popover once
+ * the selection it opened for changes.
  */
 export function syncSelectionBar(view: PrinceListView): void {
 	view.contentEl.toggleClass(SELECTING_CLASS, view.selecting);
@@ -103,7 +112,10 @@ export function syncSelectionBar(view: PrinceListView): void {
 	bar.el.toggle(view.selecting);
 }
 
-/** Opens the selection's tag popover over the bar's More button, for a menu's Tag…; nothing while the button is missing or disabled. */
+/**
+ * Opens the selection's tag popover over the bar's More button, for a menu's Tag…; nothing while the
+ * button is missing or disabled.
+ */
 export function openSelectionTags(view: PrinceListView): void {
 	const button = bars.get(view)?.buttons.get('more');
 	if (button && !button.disabled) openSelectionTagPopover(view, button);
@@ -124,7 +136,7 @@ function act(view: PrinceListView, button: BarButton, buttonEl: HTMLElement): vo
 }
 
 function popupAttrs(button: BarButton): Record<string, string> {
-	return button === 'delete' ? {} : { 'aria-haspopup': 'menu' };
+	return button === 'delete' ? {} : { 'aria-haspopup': 'menu', 'aria-expanded': 'false' };
 }
 
 // Safari doesn't focus a clicked button, so the popover's field can keep focus while another button acts.
@@ -134,7 +146,7 @@ function leaveTagPopover(view: PrinceListView, buttonEl: HTMLElement): void {
 }
 
 function showMoveMenu(view: PrinceListView, buttonEl: HTMLElement): void {
-	showMenu(view, buttonEl, (menu) => addHeadingEntries(view, menu, (headingLine) => moveSelectionTo(view, headingLine)));
+	showMenu(view, buttonEl, (menu) => addMoveChoices(view, menu, (headingLine) => moveSelectionTo(view, headingLine)));
 }
 
 // A press on the button while its menu shows closes the menu instead of opening it again.
@@ -143,9 +155,11 @@ function showMenu(view: PrinceListView, buttonEl: HTMLElement, fill: (menu: Menu
 	fill(menu);
 	const bar = bars.get(view);
 	if (bar) {
-		bar.menuFrom = buttonEl;
+		bar.shown = { button: buttonEl, menu };
+		buttonEl.setAttr('aria-expanded', 'true');
 		onMenuHide(menu, () => {
-			if (bar.menuFrom === buttonEl) bar.menuFrom = null;
+			if (bar.shown?.menu === menu) bar.shown = null;
+			if (bar.shown?.button !== buttonEl) buttonEl.setAttr('aria-expanded', 'false');
 		});
 	}
 	const { left, top, width } = buttonEl.getBoundingClientRect();
