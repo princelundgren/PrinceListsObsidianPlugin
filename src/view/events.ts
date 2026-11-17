@@ -4,7 +4,6 @@ import { openAsMarkdown } from '../obsidian/switch';
 import { addItem, addItemBelowCard, hasNoItems } from './add-button';
 import {
 	CARD_ACTIONS_CLASS,
-	CARD_STAR_CLASS,
 	CARD_TITLE_CLASS,
 	CARD_TITLE_LINE_CLASS,
 	cardTitleBlur,
@@ -15,7 +14,6 @@ import {
 	openCard,
 } from './card';
 import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, isOpenRepeatButton, repeatClick, repeatInput, saveRepeat } from './card-repeat';
-import { toggleCardStar } from './card-star';
 import { cardTagsClick, closeTagPopover, escapeTagPopover, isOpenTagButton } from './card-tags';
 import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
@@ -161,10 +159,6 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 			return;
 		}
 		if (cardTagsClick(view, target) || repeatClick(view, target)) return;
-		if (target.closest(`.${CARD_STAR_CLASS}`)) {
-			toggleCardStar(view);
-			return;
-		}
 		const actions = target.closest<HTMLElement>(`.${CARD_ACTIONS_CLASS}`);
 		if (actions) showCardMenu(view, actions);
 		return;

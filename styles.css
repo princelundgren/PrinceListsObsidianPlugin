@@ -879,7 +879,7 @@ button.princelists-new-item {
 	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The title and its tags, with the card's tag button, star, When and ⋯ on its first line. They sit
+/* The title and its tags, with the card's tag button, When and ⋯ on its first line. They sit
    in the title's row only, so the notes and the format bar under it span the card. In a pane too
    narrow for both they move to a line of their own under the title, still on the right. */
 .princelists-card-head {
@@ -945,7 +945,6 @@ button.princelists-new-item {
 
 /* Icon buttons on the view's own background: the card's, the list title's, the find row's, the tag strip's and the Schedule's title's. */
 button.princelists-card-actions,
-button.princelists-card-star,
 button.princelists-card-tag-button,
 button.princelists-list-tag-button,
 button.princelists-card-repeat,
@@ -966,7 +965,6 @@ button.princelists-find-button {
 
 /* No button shadow on the icon buttons and strip tags, but Obsidian's ring when the keyboard focuses one. */
 button.princelists-card-actions:not(:focus-visible),
-button.princelists-card-star:not(:focus-visible),
 button.princelists-card-tag-button:not(:focus-visible),
 button.princelists-list-tag-button:not(:focus-visible),
 button.princelists-card-repeat:not(:focus-visible),
@@ -986,7 +984,6 @@ button.princelists-schedule-list-label:not(:focus-visible) {
 
 @media (hover: hover) {
 	button.princelists-card-actions:hover,
-	button.princelists-card-star:hover,
 	button.princelists-card-tag-button:hover,
 	button.princelists-list-tag-button:hover,
 	button.princelists-card-repeat:hover,
@@ -1026,7 +1023,6 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 
 /* On mobile, each takes a finger-sized box, as Obsidian's own buttons there do, with its icon its usual size. */
 .princelists-is-mobile button.princelists-card-actions,
-.princelists-is-mobile button.princelists-card-star,
 .princelists-is-mobile button.princelists-card-tag-button,
 .princelists-is-mobile button.princelists-card-repeat,
 .princelists-is-mobile .princelists-format-bar button,
@@ -1090,6 +1086,11 @@ button.princelists-undo:hover {
 
 .princelists-star svg {
 	fill: currentColor;
+}
+
+/* In the open card, a press on the mark lands on the title's line, which puts the caret in the title. */
+.princelists-card .princelists-star {
+	pointer-events: none;
 }
 
 .princelists-when {
@@ -1384,7 +1385,7 @@ input.princelists-tag-input {
 
 /* The date input lies over the button, invisible, so a click or tap opens its picker. Safari on iOS
    keeps a date input at least its native width, so the picker clips it to the button's box and it
-   can't catch taps meant for the star beside it. */
+   can't catch taps meant for the button beside it. */
 .princelists-when-picker {
 	position: relative;
 	overflow: hidden;
@@ -1394,15 +1395,6 @@ input.princelists-tag-input {
 	display: flex;
 	align-items: center;
 	font-size: var(--font-ui-small);
-}
-
-/* Filled, as the row's star. */
-button.princelists-card-star.is-starred {
-	color: var(--color-yellow);
-}
-
-button.princelists-card-star.is-starred svg {
-	fill: currentColor;
 }
 
 /* Two classes, to outrank Obsidian's own `input[type="date"]` rule. */
@@ -1461,18 +1453,16 @@ button.princelists-card-star.is-starred svg {
 		top: calc((1em - 1cap) / 2);
 	}
 
-	/* The open card's tag, star, day, repeat and ⋯ are buttons of one size, centered on one line.
-	   Except on a phone, the tag, the star, the repeat and the calendar when there is no day, are as
+	/* The open card's tag, day, repeat and ⋯ are buttons of one size, centered on one line.
+	   Except on a phone, the tag, the repeat and the calendar when there is no day, are as
 	   small as the row's star, centered in that box. */
 	button.princelists-card-tag-button,
-	button.princelists-card-star,
 	button.princelists-card-repeat,
 	.princelists-when-button {
 		--princelists-icon-slot: var(--icon-size);
 	}
 
 	button.princelists-card-tag-button > svg,
-	button.princelists-card-star > svg,
 	button.princelists-card-repeat > svg,
 	.princelists-when-button > svg {
 		--icon-size: var(--princelists-mark-size);
@@ -1480,7 +1470,6 @@ button.princelists-card-star.is-starred svg {
 	}
 
 	.princelists-is-mobile button.princelists-card-tag-button > svg,
-	.princelists-is-mobile button.princelists-card-star > svg,
 	.princelists-is-mobile button.princelists-card-repeat > svg,
 	.princelists-is-mobile .princelists-when-button > svg {
 		--icon-size: var(--princelists-icon-slot);

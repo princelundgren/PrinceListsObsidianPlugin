@@ -26,12 +26,7 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 			.onClick(atLine(anchor, (line) => queueTickAt(view, line, row, !done))),
 	);
 	menu.addItem((entry) => entry.setTitle('Tag…').setIcon('tag').onClick(atLine(anchor, (line) => tagPopover(view, line))));
-	menu.addItem((entry) =>
-		entry
-			.setTitle(starred ? 'Remove star' : 'Add star')
-			.setIcon(starred ? 'star-off' : 'star')
-			.onClick(atLine(anchor, (line) => queueLineEdit(view, line, (text) => setStar(text, !starred)))),
-	);
+	addStarEntry(view, anchor, menu, starred);
 	menu.addSeparator();
 	menu.addItem((entry) => entry.setTitle('Set date to today').setIcon('calendar-check').onClick(setDay(() => dayOf(new Date()))));
 	menu.addItem((entry) => entry.setTitle('Set date to tomorrow').setIcon('calendar-plus').onClick(setDay(() => dayAfter(new Date()))));
@@ -39,6 +34,16 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 	if (when !== null) menu.addItem((entry) => entry.setTitle('Remove date').setIcon('calendar-x').onClick(atLine(anchor, (line) => queueRemoveWhen(view, line))));
 	menu.addItem((entry) => entry.setTitle('Repeat…').setIcon('repeat').onClick(atLine(anchor, (line) => repeatPopover(view, line))));
 	menu.addSeparator();
+}
+
+/** Add star or Remove star, as the item holds `starred` when the menu opens. */
+export function addStarEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu, starred: boolean): void {
+	menu.addItem((entry) =>
+		entry
+			.setTitle(starred ? 'Remove star' : 'Add star')
+			.setIcon(starred ? 'star-off' : 'star')
+			.onClick(atLine(anchor, (line) => queueLineEdit(view, line, (text) => setStar(text, !starred)))),
+	);
 }
 
 // The item's card opens with its tag popover open.

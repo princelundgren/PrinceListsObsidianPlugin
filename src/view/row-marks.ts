@@ -1,8 +1,10 @@
 import { getLanguage, setIcon } from 'obsidian';
 import { dayLabel } from '../core/when';
 
+export const STAR_CLASS = 'princelists-star';
+
 export function addStar(rowEl: HTMLElement): void {
-	setIcon(rowEl.createSpan({ cls: 'princelists-star' }), 'star');
+	setIcon(rowEl.createSpan({ cls: STAR_CLASS }), 'star');
 }
 
 /** The `Repeats` icon, just before the row's day, or at the row's end when it shows none. */
