@@ -151,8 +151,8 @@ only documented Obsidian APIs are used.
 - **With a card open,** such as one a row's own menu opened, a click or a tap outside it only closes
   it, as step one's "while a card is open, a click outside it only closes it" says **(owner,
   2026-10-27)**; Cmd+click and Shift+click still select, as in "Starting to select" **(call)**.
-- **Cmd+Enter adds the new item below the last selected item** in list order **(call)**, and
-  selecting ends as its card opens. With only headings selected it adds one as "+" does.
+- **Cmd+Enter adds the new item where New item below does** ("The actions"), so below the selection
+  means one place **(call)**, and selecting ends as its card opens.
 - **Cmd+click on a link** in a title still opens it in a new tab, as Obsidian does: the link wins
   over selecting **(call)**.
 
@@ -268,9 +268,11 @@ only documented Obsidian APIs are used.
   quote or callout isn't a sub-task the plugin reads ([notes in one
   editor](2026-10-29-notes-in-one-editor-design.md), "A box in a quote"), so its `🆔` is copied as
   written **(call)**. In the notes a block id goes only where Obsidian reads one, at the end of a
-  paragraph or heading, after a space as on an item line. Its `⛔` fields lose exactly the ids its
-  own `🆔` fields lost, and a `⛔` left empty goes, so a copied sub-task isn't blocked by the
-  original's; a `⛔` naming a task outside the item stays **(call)**. The ids a `⛔` keeps are written
+  paragraph or heading, after a space as on an item line. A paragraph's last line keeps its id
+  when the line without it would read as a heading's underline or a rule, so the copy reads as the
+  item does **(call)**. Its `⛔` fields lose exactly the ids its own `🆔` fields lost, and a `⛔`
+  left empty goes, so a copied sub-task isn't blocked by the original's; a `⛔` naming a task
+  outside the item stays **(call)**. The ids a `⛔` keeps are written
   as Tasks writes them, joined with `,` **(call)**. The rest of its text is the item's, and a block
   the notes editor draws whole, such as a code block, is copied as it is, inside a quote too. It
   shows only while no heading is selected **(owner, 2026-11-17)**, since a heading's copy right

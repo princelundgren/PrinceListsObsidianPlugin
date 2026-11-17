@@ -1,3 +1,4 @@
+import type { ShownRow } from './drop';
 import { countPhrase, type GroupState, type PlannedGroupChange } from './group-edits';
 import type { HeadingPlace, ItemPlace } from './list-actions';
 
@@ -60,12 +61,22 @@ export function barButtons(state: GroupState, listHasHeadings: boolean): Record<
 	};
 }
 
+/** Where a new item and a new heading go below the selection. */
+export interface PlacesBelow {
+	item: ItemPlace;
+	heading: HeadingPlace;
+}
+
 /**
- * Where New item below and New heading below add, under the selection's last row: an item right
- * after a selected item and a heading after it, or an item first under a selected heading and a
- * heading after its section.
+ * Where New item below, Cmd+Enter and New heading below add, under the last of the `selected` lines
+ * among the `shown` rows, in list order: an item right after a selected item and a heading after it,
+ * or an item first under a selected heading and a heading after its section. Null when no selected
+ * row is shown.
  */
-export function placesBelow(row: { kind: 'item' | 'heading'; line: number }): { item: ItemPlace; heading: HeadingPlace } {
+export function placesBelow(shown: readonly ShownRow[], selected: readonly number[]): PlacesBelow | null {
+	const lines = new Set(selected);
+	const row = shown.filter((row) => row.kind !== 'untouched' && lines.has(row.line)).pop();
+	if (!row) return null;
 	if (row.kind === 'item') return { item: { after: row.line }, heading: { afterItem: row.line } };
 	return { item: { firstUnder: row.line }, heading: { afterSection: row.line } };
 }
