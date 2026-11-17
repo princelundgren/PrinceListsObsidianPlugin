@@ -11,9 +11,10 @@ import { stripTagOrder } from './tag-suggest';
 import { openTagsPopover } from './tags-popover';
 
 /**
- * Opens the tag popover over `anchor`, as a menu's target, for the selected items and headings: their tags as chips, each
- * with a × that takes it off them all, and a field whose pick gives a tag to them all. It closes once the view stops
- * selecting, or the selected rows or their text differ from those it opened with.
+ * Opens the tag popover over `anchor`, as a menu's target, for the selected items and headings:
+ * their tags as chips, each with a × that takes it off them all, and a field whose pick gives a tag
+ * to them all. It closes once the view stops selecting, or the selected rows or their text differ
+ * from those it opened with. Escape sends focus back to `anchor`, and a pick to the list.
  */
 export function openSelectionTagPopover(view: PrinceListView, anchor: HTMLElement): void {
 	const lines = view.selection.lines();
@@ -24,6 +25,7 @@ export function openSelectionTagPopover(view: PrinceListView, anchor: HTMLElemen
 		anchor: () => anchor,
 		side: 'above',
 		button: null,
+		returnFocusTo: () => anchor,
 		chips: chips.map(({ tag, count }) => ({ tag, text: count === total ? `#${tag}` : `#${tag} ${count} of ${total}` })),
 		// The selection when asked, which is the one it opened with: any change closes the popover.
 		tagsToLeaveOut: () => {

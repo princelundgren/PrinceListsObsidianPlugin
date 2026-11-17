@@ -262,7 +262,9 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   shows none **(call)**.
 - **Every card shows the same icon as a button before its date, as a row does (owner, 2026-11-17),** in the
   card's buttons and their spacing. It opens the popover, and it takes `--text-accent` while the
-  item repeats **(call)**, as the star button takes yellow while the item has one. This replaces
+  item repeats **(call)**, as the star button takes yellow while the item has one. Its tooltip,
+  and so its accessible name, says Repeat, or Edit repeat while the item repeats, as the star's says
+  Add star or Remove star, so the state isn't shown by color alone **(call)**. This replaces
   the button on a repeating item's card alone, with Repeat… in the ⋯ menu of the others. The ⋯
   leaves out what the card already shows (the design, "Item actions", owner, 2026-10-29 and
   2026-11-11).

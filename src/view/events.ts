@@ -6,13 +6,11 @@ import {
 	CARD_ACTIONS_CLASS,
 	CARD_STAR_CLASS,
 	CARD_TITLE_CLASS,
-	CARD_TITLE_LINE_CLASS,
 	cardTitleBlur,
 	cardTitleInput,
 	closeCard,
 	dismissCard,
 	focusCardNotesEnd,
-	focusCardTitleEnd,
 	openCard,
 } from './card';
 import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, isOpenRepeatButton, repeatClick, repeatInput, saveRepeat } from './card-repeat';
@@ -163,10 +161,6 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (view.card?.el.contains(target)) {
-		if (target.hasClass(CARD_TITLE_LINE_CLASS)) {
-			focusCardTitleEnd(view);
-			return;
-		}
 		if (cardTagsClick(view, target) || repeatClick(view, target)) return;
 		if (target.closest(`.${CARD_STAR_CLASS}`)) {
 			toggleCardStar(view);
@@ -214,11 +208,11 @@ function keepRepeatFocused(view: PrinceListView, evt: MouseEvent): void {
 	if (target && isOpenRepeatButton(view, target)) evt.preventDefault();
 }
 
-// The title is only as wide as its text, so a press beside it lands on its line: the click that
-// follows puts the caret in the title, and the field that has focus keeps it until then.
+// The list's title is only as wide as its text, so a press beside it lands on its line: the click
+// that follows puts the caret in the title, and the field that has focus keeps it until then.
 function keepFocusBesideTitle(evt: MouseEvent): void {
 	const target = targetOf(evt);
-	if (target?.hasClass(CARD_TITLE_LINE_CLASS) || target?.hasClass(TITLE_ROW_CLASS)) evt.preventDefault();
+	if (target?.hasClass(TITLE_ROW_CLASS)) evt.preventDefault();
 	// The title keeps focus until the click, so the button it shows stays to take it.
 	if (target?.closest(`.${LIST_TAG_BUTTON_CLASS}`)) evt.preventDefault();
 }
