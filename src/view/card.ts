@@ -62,7 +62,8 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	if (title) fitHeight(title);
 	if (focusTitle) {
-		title?.focus();
+		// A new item's card scrolls into view; any other is scrolled by whoever opened it, if at all.
+		title?.focus({ preventScroll: !inserted });
 		title?.setSelectionRange(title.value.length, title.value.length);
 	} else card.el.focus({ preventScroll: true });
 }
