@@ -57,6 +57,13 @@ describe('planGroupDuplicate', () => {
 		);
 	});
 
+	test("unticks the copy's checklist, as a repeat does, but not a box in a code block", () => {
+		const text = FRONT + '- [x] a\n  - [x] flour\n  - [ ] eggs\n  ```\n  - [x] code\n  ```\n';
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(
+			'- [x] a\n  - [x] flour\n  - [ ] eggs\n  ```\n  - [x] code\n  ```\n- [ ] a\n  - [ ] flour\n  - [ ] eggs\n  ```\n  - [x] code\n  ```\n',
+		);
+	});
+
 	test('copies a loose item without the blank line after it', () => {
 		const text = FRONT + '- [ ] a\n\n  note\n\n- [ ] b\n';
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe('- [ ] a\n\n  note\n- [ ] a\n\n  note\n\n- [ ] b\n');

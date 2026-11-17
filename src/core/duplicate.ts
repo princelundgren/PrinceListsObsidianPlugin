@@ -1,4 +1,4 @@
-import { plainNotesLines } from './checklist';
+import { plainNotesLines, untickChecklist } from './checklist';
 import { moveEdit } from './follow';
 import type { PlannedGroupEdit } from './group-actions';
 import { isHeading } from './group-edits';
@@ -18,10 +18,10 @@ const BLOCK_ID_END = /[ \t]+\^[A-Za-z0-9-]+[ \t]*$/;
 const TASKS_ID = /^🆔/;
 
 /**
- * Copies each item on `rows`, with its notes, right below itself, in one write. A copy is unticked
- * and loses its block ids and Tasks ids, also a sub-task's in its notes; the rest of its text is the
- * item's, and a code block or other block the notes editor draws whole is copied as it is. The edit
- * maps every line to where it went, so history inverts it. Returns null when a row is a heading or
+ * Copies each item on `rows`, with its notes, right below itself, in one write. A copy is unticked,
+ * as is its checklist, and loses its block ids and Tasks ids, also a sub-task's in its notes; the
+ * rest of its text is the item's, and a code block or other block the notes editor draws whole is
+ * copied as it is. The edit maps every line to where it went, so history inverts it. Returns null when a row is a heading or
  * not an item.
  */
 export function planGroupDuplicate(text: string, contentStart: number, rows: readonly number[]): PlannedDuplicate | null {
@@ -46,7 +46,8 @@ export function planGroupDuplicate(text: string, contentStart: number, rows: rea
 	};
 }
 
-function copyOf(lines: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'): Line[] {
+function copyOf(original: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'): Line[] {
+	const lines = untickChecklist(original, item);
 	const plain = new Set(plainNotesLines(lines, item));
 	const title = lines[item.titleLine] as Line;
 	const copy: Line[] = [{ text: withoutIds(untickLine(title.text)), eol: title.eol }];

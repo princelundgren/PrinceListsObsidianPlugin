@@ -246,10 +246,11 @@ only documented Obsidian APIs are used.
   after a selected item, or after a selected heading's section. Selecting ends as the new row opens
   for typing. This replaces their dropping out as one-row entries **(call)**.
 - **Duplicate (owner, 2026-11-17)** copies each selected item, with its notes, right below itself,
-  in one write. A copy is unticked and drops its done marks **(owner, 2026-11-17)**. It leaves out
-  block ids and Tasks `🆔` ids, a sub-task's in its notes too, since each names one block or task
-  **(call)**; the rest of its text is the item's, and a block the notes editor draws whole, such as
-  a code block, is copied as it is. It shows only while no heading is selected **(owner,
+  in one write. A copy is unticked and drops its done marks **(owner, 2026-11-17)**, and its
+  checklist is unticked as a repeat's is **(owner, 2026-11-17)**. It leaves out block ids and Tasks
+  `🆔` ids, a sub-task's in its notes too, since each names one block or task **(call)**; the rest
+  of its text is the item's, and a block the notes editor draws whole, such as a code block, is
+  copied as it is. It shows only while no heading is selected **(owner,
   2026-11-17)**, since a heading's copy right below it would take its items. The selection stays on
   the items, as other actions keep it **(call)**.
 - **Each action is one write and one Cmd+Z step (call),** and follows step one's "Saving" as a
