@@ -269,6 +269,14 @@ async function removeEmptyItem(view: PrinceListView, file: TFile, pending: Track
 }
 
 /** Puts the caret at the end of the open card's title, where a click past its text would. */
+/** Puts the caret at the end of the open card's notes; does nothing without a card. */
+export function focusCardNotesEnd(view: PrinceListView): void {
+	const editor = view.card?.editor;
+	if (!editor) return;
+	editor.focus();
+	editor.dispatch({ selection: { anchor: editor.state.doc.length }, scrollIntoView: true });
+}
+
 export function focusCardTitleEnd(view: PrinceListView): void {
 	const title = view.card?.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	if (!title) return;

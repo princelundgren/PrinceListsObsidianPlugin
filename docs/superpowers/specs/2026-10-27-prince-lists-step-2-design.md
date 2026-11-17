@@ -327,18 +327,20 @@ this met on 2026-10-30 **(owner)**.
     the notes' text starts, as the format bar's first icon does, and the title has the card's whole
     width. The format bar sits between the notes and the buttons, shown while the notes have focus
     and keeping its room while hidden, on a phone too, so the card never changes height and no
-    button moves when the notes take or lose focus **(owner, 2026-11-17)**. This replaces the bar
-    under the buttons, which made the card a row taller while the notes had focus. A mouse press on
-    a button leaves focus in the notes through the click, since leaving them draws a link on the
-    caret's line as its label and could pull the row up mid-press **(call)**; a phone's tap goes to
-    what it touched, and lowers the keyboard for the date picker. Brought into view for a popover or
-    a row's Tag…, Set date… or Repeat…, the row stays clear of mobile's navigation bar and desktop's
-    status bar **(call)**; opening an item from the Schedule scrolls only as far as the card. On a
-    desktop card the buttons and the bar's room take two rows more than the title's line did, three
-    on a card narrow enough that the bar wraps; with long notes on a phone, the row can be below the
-    screen. This replaces the buttons at the title's right, and their line of their own under it in
-    a view 480 px wide or narrower **(owner, 2026-11-05)** or too narrow for the title, which left
-    half a phone's line empty.
+    button moves when the notes take or lose focus **(owner, 2026-11-17)**. While hidden, its room
+    reads as part of the notes: it shows the text cursor, and a click or tap there puts the caret at
+    the notes' end **(owner, 2026-11-17)**. This replaces the bar under the buttons, which made the
+    card a row taller while the notes had focus. A mouse press on a button leaves focus in the notes
+    through the click, since leaving them draws a link on the caret's line as its label and could
+    pull the row up mid-press **(call)**; a phone's tap goes to what it touched, and lowers the
+    keyboard for the date picker. Brought into view for a popover or a row's Tag…, Set date… or
+    Repeat…, the row stays clear of mobile's navigation bar and desktop's status bar **(call)**;
+    opening an item from the Schedule scrolls only as far as the card. On a desktop card the buttons
+    and the bar's room take two rows more than the title's line did, three on a card narrow enough
+    that the bar wraps; with long notes on a phone, the row can be below the screen. This replaces
+    the buttons at the title's right, and their line of their own under it in a view 480 px wide or
+    narrower **(owner, 2026-11-05)** or too narrow for the title, which left half a phone's line
+    empty.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's buttons, and every platform's picker can already
     clear the day.
