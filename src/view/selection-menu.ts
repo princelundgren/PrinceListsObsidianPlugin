@@ -2,7 +2,7 @@ import type { Menu } from 'obsidian';
 import { groupCount } from '../core/group-actions';
 import { planGroupDuplicate } from '../core/duplicate';
 import { countPhrase, groupState, planGroupDelete, planGroupLineEdit, planGroupTick, type PlannedGroupChange } from '../core/group-edits';
-import { changeMessage, groupEntries, placesBelow, type EntryGroup, type GroupChange, type GroupEntry } from '../core/group-menu';
+import { changeMessage, groupEntries, placesBelow, type EntryGroup, type GroupChange, type GroupEntry, type PlacesBelow } from '../core/group-menu';
 import { removeWhen } from '../core/repeat-line';
 import { setStar } from '../core/star';
 import { dayAfter, dayOf, setWhen } from '../core/when';
@@ -148,13 +148,10 @@ function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag'>)
 }
 
 // Ends the selection, then adds under its last row in list order (core's placesBelow).
-function addBelowSelection(view: PrinceListView, add: (places: ReturnType<typeof placesBelow>) => void): void {
-	const selected = new Set(view.selection.lines());
-	const last = shownRows(view.listScrollEl)
-		.filter((row): row is { kind: 'item' | 'heading'; line: number } => row.kind !== 'untouched' && selected.has(row.line))
-		.pop();
+function addBelowSelection(view: PrinceListView, add: (places: PlacesBelow) => void): void {
+	const places = placesBelow(shownRows(view.listScrollEl), view.selection.lines());
 	clearSelection(view);
-	if (last) add(placesBelow(last));
+	if (places) add(places);
 }
 
 function lineEdit(change: (line: string) => string): GroupPlan {
