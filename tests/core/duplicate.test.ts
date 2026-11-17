@@ -11,14 +11,14 @@ describe('planGroupDuplicate', () => {
 		const text = FRONT + '- [ ] a\n  note\n- [ ] b\n';
 		const plan = planGroupDuplicate(text, 3, [3]);
 		expect(body(plan?.next)).toBe('- [ ] a\n  note\n- [ ] a\n  note\n- [ ] b\n');
-		expect(plan?.copies).toEqual([5]);
+		expect(plan?.copied).toBe(1);
 	});
 
 	test('puts each copy below its own item, and maps every line to where it went', () => {
 		const text = FRONT + '- [ ] a\n- [ ] b\n- [ ] c\n';
 		const plan = planGroupDuplicate(text, 3, [5, 3]);
 		expect(body(plan?.next)).toBe('- [ ] a\n- [ ] a\n- [ ] b\n- [ ] c\n- [ ] c\n');
-		expect(plan?.copies).toEqual([4, 7]);
+		expect(plan?.copied).toBe(2);
 		expect([3, 4, 5].map((line) => followLine(line, plan!.edit))).toEqual([3, 5, 6]);
 	});
 
@@ -48,6 +48,24 @@ describe('planGroupDuplicate', () => {
 	test('takes off only the Tasks id field, wherever it sits among the fields', () => {
 		expect(body(planGroupDuplicate(FRONT + '- [ ] see 🆔 abc docs\n', 3, [3])?.next)).toBe('- [ ] see 🆔 abc docs\n- [ ] see 🆔 abc docs\n');
 		expect(body(planGroupDuplicate(FRONT + '- [ ] a 🆔 abc⛔ xyz\n', 3, [3])?.next)).toBe('- [ ] a 🆔 abc⛔ xyz\n- [ ] a ⛔ xyz\n');
+		expect(body(planGroupDuplicate(FRONT + '- [ ] 🆔 abc #home\n', 3, [3])?.next)).toBe('- [ ] 🆔 abc #home\n- [ ] #home\n');
+	});
+
+	test("drops from the copy's ⛔ fields the ids its own 🆔 fields lost, and a ⛔ left empty", () => {
+		const text = FRONT + '- [ ] a ⛔ x2,out\n  - [ ] s1 🆔 x1\n  - [ ] s2 🆔 x2 ⛔ x1\n  - [ ] s3 ⛔ out\n';
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(
+			text.slice(FRONT.length) + '- [ ] a ⛔ out\n  - [ ] s1\n  - [ ] s2\n  - [ ] s3 ⛔ out\n',
+		);
+	});
+
+	test('keeps a block id the same way on item lines and notes lines', () => {
+		const text = FRONT + '- [ ] a\t^b1\n  note\t^n1\n  - [ ] s\t^s1\n';
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length).repeat(2));
+	});
+
+	test('takes a block id off only the end of a block, where Obsidian reads one', () => {
+		const text = FRONT + '- [ ] a\n  raise 2 ^10\n  and more ^p1\n';
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  raise 2 ^10\n  and more\n');
 	});
 
 	test('takes the Tasks id off a sub-task in the notes, but leaves a code block as it is', () => {
@@ -55,6 +73,8 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(
 			'- [ ] a\n  - [ ] sub 🆔 x1\n  ```\n  code ^x\n  ```\n- [ ] a\n  - [ ] sub\n  ```\n  code ^x\n  ```\n',
 		);
+		const quoted = FRONT + '- [ ] a\n  > ```\n  > code ^x\n  > ```\n';
+		expect(body(planGroupDuplicate(quoted, 3, [3])?.next)).toBe(quoted.slice(FRONT.length).repeat(2));
 	});
 
 	test("unticks the copy's checklist, as a repeat does, but not a box in a code block", () => {
