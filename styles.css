@@ -204,18 +204,22 @@ textarea.princelists-title {
 }
 
 /* A ticked item's checkbox is the accent at half strength, so a list with many done items reads
-   calmly. Where color-mix is missing it keeps the full accent. */
+   calmly, and its tick the text color, which keeps its contrast against the paler fill. Where
+   color-mix is missing it keeps the full accent and Obsidian's tick. */
 @supports (color: color-mix(in srgb, red 50%, transparent)) {
 	.princelists-item.is-done .princelists-checkbox {
 		--checkbox-color: color-mix(in srgb, var(--interactive-accent) 50%, transparent);
 		--checkbox-color-hover: color-mix(in srgb, var(--interactive-accent-hover) 50%, transparent);
+		--checkbox-marker-color: var(--text-normal);
 	}
 }
 
-/* An archived item's checkbox is blue, to tell it from a ticked item not yet archived. */
+/* An archived item's checkbox is blue, to tell it from a ticked item not yet archived. It is done
+   too, so its tick goes back to Obsidian's, against the full blue. */
 .princelists-item.is-archived .princelists-checkbox {
 	--checkbox-color: var(--color-blue);
 	--checkbox-color-hover: var(--color-blue);
+	--checkbox-marker-color: var(--background-primary);
 }
 
 /* Gray in place, with no strikethrough (spec, "Ticking"). */

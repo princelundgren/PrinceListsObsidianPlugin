@@ -942,7 +942,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     it stands apart from a ticked item not yet archived.
   - **A ticked item's checkbox is the accent color at half strength (owner, 2026-11-17),** set
     through Obsidian's documented `--checkbox-color`, so a list with many done items reads calmly.
-    This replaces the full accent color. A web view without CSS `color-mix` keeps the full accent.
+    This replaces the full accent color. Its tick is the text color, through
+    `--checkbox-marker-color`, since Obsidian's tick, the background color, has too little
+    contrast against the paler fill **(call)**. An archived item keeps Obsidian's tick against its
+    blue. A web view without CSS `color-mix` keeps the full accent and Obsidian's tick.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.
