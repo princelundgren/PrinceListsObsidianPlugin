@@ -45,9 +45,9 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 export type BarButton = 'move' | EntryGroup | 'delete';
 
 /**
- * Whether each of the bar's buttons has something to act on for a selection that holds `state`: Move
- * to while Move to heading… shows, Date and More while any entry of their menu does, and Delete while
- * anything is selected.
+ * Whether each of the bar's buttons has something to act on for a selection that holds `state`:
+ * Move to while Move to heading… shows, Date and More while any entry of their menu does, and
+ * Delete while anything is selected.
  */
 export function barButtons(state: GroupState, listHasHeadings: boolean): Record<BarButton, boolean> {
 	const entries = groupEntries(state, listHasHeadings);
