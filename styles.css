@@ -203,6 +203,15 @@ textarea.princelists-title {
 	font-family: inherit;
 }
 
+/* A ticked item's checkbox is the accent at half strength, so a list with many done items reads
+   calmly. Where color-mix is missing it keeps the full accent. */
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+	.princelists-item.is-done .princelists-checkbox {
+		--checkbox-color: color-mix(in srgb, var(--interactive-accent) 50%, transparent);
+		--checkbox-color-hover: color-mix(in srgb, var(--interactive-accent-hover) 50%, transparent);
+	}
+}
+
 /* An archived item's checkbox is blue, to tell it from a ticked item not yet archived. */
 .princelists-item.is-archived .princelists-checkbox {
 	--checkbox-color: var(--color-blue);

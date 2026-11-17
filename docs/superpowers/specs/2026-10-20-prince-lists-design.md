@@ -939,7 +939,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     with Ctrl on Windows and Linux. Mobile, which usually has no keyboard, shows no key **(owner,
     2026-11-03)**.
   - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
-    it stands apart from a ticked item not yet archived, whose checkbox keeps the accent color.
+    it stands apart from a ticked item not yet archived.
+  - **A ticked item's checkbox is the accent color at half strength (owner, 2026-11-17),** set
+    through Obsidian's documented `--checkbox-color`, so a list with many done items reads calmly.
+    This replaces the full accent color. A web view without CSS `color-mix` keeps the full accent.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.
