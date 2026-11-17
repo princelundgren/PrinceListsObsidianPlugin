@@ -27,7 +27,7 @@ const GROUPS: readonly (readonly { action: BarAction; icon: string; label: strin
 ];
 const ACTIONS = GROUPS.flat().map((button) => button.action);
 
-// Shown right under `after`, a notes editor.
+// Shown right under `after`: a notes editor, or the open card's buttons under its notes.
 export function buildFormatBar(after: HTMLElement): void {
 	const bar = createDiv({ cls: FORMAT_BAR_CLASS });
 	after.after(bar);

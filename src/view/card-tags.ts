@@ -2,6 +2,7 @@ import { setIcon } from 'obsidian';
 import { carriedTags, inheritedFor } from '../core/inherited-tags';
 import { itemTags } from '../core/item-tags';
 import { addTag, removeTag } from '../core/tag-edit';
+import { CARD_TOOLS_CLASS, placeCardPopover } from './card-tools';
 import { addHiddenLabel } from './dom';
 import { queueLineEdit } from './line-edit';
 import type { PrinceListView } from './list-view';
@@ -12,12 +13,11 @@ const CARD_TAG_CLASS = 'princelists-card-tag';
 const TAG_BUTTON_CLASS = 'princelists-card-tag-button';
 const TAG_REMOVE_CLASS = 'princelists-card-tag-remove';
 const TAG_POPOVER_CLASS = 'princelists-tag-popover';
-export const CARD_HEAD_CLASS = 'princelists-card-head';
 export const TAG_INPUT_CLASS = 'princelists-tag-input';
 
 const tagOfRemove = new WeakMap<HTMLElement, string>();
 
-/** Adds the "Add tag" button first in the card's `tools`, so the head reads tag, star, day, ⋯. */
+/** Adds the "Add tag" button first in the card's `tools`, so they read tag, day, ⋯. */
 export function buildTagButton(tools: HTMLElement): void {
 	setIcon(tools.createEl('button', { cls: TAG_BUTTON_CLASS, attr: { 'aria-label': 'Add tag', 'aria-expanded': 'false' }, prepend: true }), 'tag');
 }
@@ -60,21 +60,21 @@ export function toggleTagPopover(view: PrinceListView): void {
 }
 
 /**
- * Opens the tag popover under the open card's tag button, with its type-ahead, and focuses its field;
+ * Opens the tag popover over the open card's buttons, with its type-ahead, and focuses its field;
  * leaves it as it is when it's open.
  */
 export function openTagPopover(view: PrinceListView): void {
 	if (view.tagPopover) return;
 	const button = tagButtonOf(view);
-	const head = button?.closest<HTMLElement>(`.${CARD_HEAD_CLASS}`);
-	if (!button || !head) return;
-	const el = head.createDiv({ cls: TAG_POPOVER_CLASS });
+	const tools = button?.closest<HTMLElement>(`.${CARD_TOOLS_CLASS}`);
+	if (!button || !tools) return;
+	const el = tools.createDiv({ cls: TAG_POPOVER_CLASS });
 	const input = el.createEl('input', { cls: TAG_INPUT_CLASS, type: 'text', attr: { placeholder: 'Tag' } });
 	addHiddenLabel(input, 'Add tag');
 	view.tagPopover = { el, input, suggest: new TagSuggest(view, input, cardTagTarget(view)) };
 	button.setAttr('aria-expanded', 'true');
 	input.focus();
-	el.scrollIntoView({ block: 'nearest' });
+	placeCardPopover(view, el);
 }
 
 // The open card's item when asked, which may have moved since the popover opened.

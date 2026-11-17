@@ -32,11 +32,12 @@ const unitSlot = new Compartment();
 const resyncs = new WeakMap<EditorView, (source: NotesSource) => void>();
 
 /**
- * Creates the notes editor in `area`, showing the notes as parsed, with the format bar under it; or,
+ * Creates the notes editor in `area`, showing the notes as parsed, with the format bar under it, or under
+ * `barAfter` when given; or,
  * for the editor already there, syncs it to `source`. Each change the editor makes is saved through
  * `source`, and one the list's layout can't take never lands.
  */
-export function showNotesEditor(view: PrinceListView, source: NotesSource, area: HTMLElement): EditorView {
+export function showNotesEditor(view: PrinceListView, source: NotesSource, area: HTMLElement, barAfter?: HTMLElement): EditorView {
 	const dom = area.querySelector<HTMLElement>(`.${NOTES_CODEMIRROR_CLASS}`);
 	const existing = dom ? EditorView.findFromDOM(dom) : null;
 	if (existing) {
@@ -187,7 +188,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 		current = next;
 		sync(editor);
 	});
-	buildFormatBar(editor.dom);
+	buildFormatBar(barAfter ?? editor.dom);
 	return editor;
 }
 

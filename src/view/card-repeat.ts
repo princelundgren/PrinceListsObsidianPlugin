@@ -3,6 +3,7 @@ import type { RepeatEnd, RepeatRule, RepeatUnit } from '../core/repeat';
 import { stepDay, upcomingDays } from '../core/repeat';
 import { anchorOf, canWrite, draftAfterRefusal, draftOf, ensureTickable, removeRepeat, repeatOf, setRepeat, type RepeatDraft } from '../core/repeat-line';
 import { dayLabel, dayOf } from '../core/when';
+import { CARD_TOOLS_CLASS, placeCardPopover } from './card-tools';
 import { WHEN_INPUT_CLASS } from './card-when';
 import { addHiddenLabel, addHiddenLabelInside } from './dom';
 import { queueDraftEdit } from './line-edit';
@@ -51,7 +52,7 @@ export function showRepeatButton(cardEl: HTMLElement, repeats: boolean): void {
 	cardEl.querySelector<HTMLElement>(`.${REPEAT_BUTTON_CLASS}`)?.toggle(repeats);
 }
 
-/** Opens the repeat popover under the open card's tools, with the draft its item's line gives; closes it if it's open. */
+/** Opens the repeat popover from the open card's buttons, with the draft its item's line gives; closes it if it's open. */
 function toggleRepeatPopover(view: PrinceListView): void {
 	if (view.repeatPopover) {
 		escapeRepeatPopover(view);
@@ -67,7 +68,7 @@ function toggleRepeatPopover(view: PrinceListView): void {
 export function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 'read-only'): void {
 	if (view.repeatPopover) return;
 	const line = view.selected;
-	const tools = view.card?.el.querySelector<HTMLElement>('.princelists-card-tools');
+	const tools = view.card?.el.querySelector<HTMLElement>(`.${CARD_TOOLS_CLASS}`);
 	const text = line === null ? undefined : view.lines()[line]?.text;
 	if (!tools || text === undefined) return;
 	const draft = kept ?? draftOf(text);
@@ -80,7 +81,7 @@ export function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 're
 	if (repeatOf(text) !== null) new ButtonComponent(actions).setButtonText('Remove repeat').buttonEl.addClass(REMOVE_CLASS);
 	repeatButtonOf(view)?.setAttr('aria-expanded', 'true');
 	(el.querySelector<HTMLElement>('input, button') ?? el).focus();
-	el.scrollIntoView({ block: 'nearest' });
+	placeCardPopover(view, el);
 }
 
 /** Closes the repeat popover. */

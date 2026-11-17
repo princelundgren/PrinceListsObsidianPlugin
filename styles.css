@@ -879,36 +879,24 @@ button.princelists-new-item {
 	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The title and its tags, with the card's tag button, star, When and ⋯ on its first line. They sit
-   in the title's row only, so the notes and the format bar under it span the card. In a pane too
-   narrow for both they move to a line of their own under the title, still on the right. */
-.princelists-card-head {
-	position: relative;
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-start;
-	gap: var(--size-4-2);
-}
-
-.princelists-card-head > .princelists-card-title-line {
-	flex: 1;
-	min-width: 8em;
-}
-
+/* The card's buttons, a row under its notes, with ⋯ at its end. Its first icon lines up with the
+   notes' text, as the format bar's does. The tag and repeat popovers hang from it. */
 .princelists-card-tools {
-	flex: none;
-	margin-inline-start: auto;
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: var(--size-2-1);
+	margin-inline-start: calc(-1 * var(--size-2-2));
+	/* Brought into view clear of mobile's navigation bar and desktop's status bar. */
+	scroll-margin-bottom: calc(var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* In a view about as narrow as a sidebar or a phone, they always have that line, so the title keeps
-   the width. */
-@container (max-width: 480px) {
-	.princelists-card-head > .princelists-card-title-line {
-		flex-basis: 100%;
-	}
+.princelists-is-mobile .princelists-card-tools {
+	margin-inline-start: calc((var(--icon-size) - var(--input-height)) / 2);
+}
+
+.princelists-card-tools > button.princelists-card-actions {
+	margin-inline-start: auto;
 }
 
 /* Under the notes editor while it has focus, its first icon lined up with the notes' text. On a
@@ -924,6 +912,15 @@ button.princelists-new-item {
 
 .princelists-notes-codemirror:not(.cm-focused) + .princelists-format-bar {
 	display: none;
+}
+
+/* The card's sits under its buttons, while its notes have focus. */
+.princelists-card-notes:not(:focus-within) ~ .princelists-format-bar {
+	display: none;
+}
+
+.princelists-card-body > .princelists-format-bar {
+	margin-top: 0;
 }
 
 .princelists-is-mobile .princelists-format-bar {
@@ -945,7 +942,6 @@ button.princelists-new-item {
 
 /* Icon buttons on the view's own background: the card's, the list title's, the find row's, the tag strip's and the Schedule's title's. */
 button.princelists-card-actions,
-button.princelists-card-star,
 button.princelists-card-tag-button,
 button.princelists-list-tag-button,
 button.princelists-card-repeat,
@@ -966,7 +962,6 @@ button.princelists-find-button {
 
 /* No button shadow on the icon buttons and strip tags, but Obsidian's ring when the keyboard focuses one. */
 button.princelists-card-actions:not(:focus-visible),
-button.princelists-card-star:not(:focus-visible),
 button.princelists-card-tag-button:not(:focus-visible),
 button.princelists-list-tag-button:not(:focus-visible),
 button.princelists-card-repeat:not(:focus-visible),
@@ -986,7 +981,6 @@ button.princelists-schedule-list-label:not(:focus-visible) {
 
 @media (hover: hover) {
 	button.princelists-card-actions:hover,
-	button.princelists-card-star:hover,
 	button.princelists-card-tag-button:hover,
 	button.princelists-list-tag-button:hover,
 	button.princelists-card-repeat:hover,
@@ -1026,7 +1020,6 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 
 /* On mobile, each takes a finger-sized box, as Obsidian's own buttons there do, with its icon its usual size. */
 .princelists-is-mobile button.princelists-card-actions,
-.princelists-is-mobile button.princelists-card-star,
 .princelists-is-mobile button.princelists-card-tag-button,
 .princelists-is-mobile button.princelists-card-repeat,
 .princelists-is-mobile .princelists-format-bar button,
@@ -1039,12 +1032,6 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 	justify-content: center;
 	min-width: var(--input-height);
 	min-height: var(--input-height);
-}
-
-/* The taller buttons take only a line of text's height: centered on the title's first line beside
-   it, or on a line of their own under it. */
-.princelists-is-mobile .princelists-card-tools {
-	margin-block: calc((var(--line-height-normal) * 1em - var(--input-height)) / 2);
 }
 
 /* A day's text gets the room on each side that an icon has in its box, so the gaps between the
@@ -1090,6 +1077,11 @@ button.princelists-undo:hover {
 
 .princelists-star svg {
 	fill: currentColor;
+}
+
+/* In the open card, a press on the mark lands on the title's line, which puts the caret in the title. */
+.princelists-card .princelists-star {
+	pointer-events: none;
 }
 
 .princelists-when {
@@ -1297,15 +1289,22 @@ button.princelists-selection-tag-remove {
 	background-color: var(--background-secondary);
 }
 
-/* The card's hang under its head, their end at the tools' end, over the card's content, so opening
-   one moves nothing. The repeat popover's rows are wider than a tag's field, but never wider than the
-   card. */
+/* The card's hang over its notes from its buttons, their end at the buttons' end, so opening one
+   moves nothing. Below the buttons instead where above would pass the top of the list. The repeat
+   popover's rows are wider than a tag's field, but never wider than the card. */
 .princelists-tag-popover,
 .princelists-repeat-popover {
 	position: absolute;
-	top: calc(100% + var(--size-2-2));
+	bottom: calc(100% + var(--size-2-2));
 	inset-inline-end: 0;
 	max-width: 100%;
+}
+
+.princelists-tag-popover.princelists-card-popover-below,
+.princelists-repeat-popover.princelists-card-popover-below {
+	top: calc(100% + var(--size-2-2));
+	bottom: auto;
+	scroll-margin-bottom: calc(var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
 .princelists-repeat-popover {
@@ -1384,7 +1383,7 @@ input.princelists-tag-input {
 
 /* The date input lies over the button, invisible, so a click or tap opens its picker. Safari on iOS
    keeps a date input at least its native width, so the picker clips it to the button's box and it
-   can't catch taps meant for the star beside it. */
+   can't catch taps meant for the button beside it. */
 .princelists-when-picker {
 	position: relative;
 	overflow: hidden;
@@ -1394,15 +1393,6 @@ input.princelists-tag-input {
 	display: flex;
 	align-items: center;
 	font-size: var(--font-ui-small);
-}
-
-/* Filled, as the row's star. */
-button.princelists-card-star.is-starred {
-	color: var(--color-yellow);
-}
-
-button.princelists-card-star.is-starred svg {
-	fill: currentColor;
 }
 
 /* Two classes, to outrank Obsidian's own `input[type="date"]` rule. */
@@ -1461,34 +1451,9 @@ button.princelists-card-star.is-starred svg {
 		top: calc((1em - 1cap) / 2);
 	}
 
-	/* The open card's tag, star, day, repeat and ⋯ are buttons of one size, centered on one line.
-	   Except on a phone, the tag, the star, the repeat and the calendar when there is no day, are as
-	   small as the row's star, centered in that box. */
-	button.princelists-card-tag-button,
-	button.princelists-card-star,
-	button.princelists-card-repeat,
-	.princelists-when-button {
-		--princelists-icon-slot: var(--icon-size);
-	}
-
-	button.princelists-card-tag-button > svg,
-	button.princelists-card-star > svg,
-	button.princelists-card-repeat > svg,
-	.princelists-when-button > svg {
-		--icon-size: var(--princelists-mark-size);
-		margin: calc((var(--princelists-icon-slot) - var(--icon-size)) / 2);
-	}
-
-	.princelists-is-mobile button.princelists-card-tag-button > svg,
-	.princelists-is-mobile button.princelists-card-star > svg,
-	.princelists-is-mobile button.princelists-card-repeat > svg,
-	.princelists-is-mobile .princelists-when-button > svg {
-		--icon-size: var(--princelists-icon-slot);
-	}
-
 	/* A day's button holds only its text, and is as tall as the ⋯. */
 	.princelists-when-button.is-dated {
-		padding-block: calc((var(--princelists-icon-slot) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
+		padding-block: calc((var(--icon-size) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
 	}
 }
 

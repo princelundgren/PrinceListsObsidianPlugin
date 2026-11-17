@@ -9,7 +9,8 @@ import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
 import { buildRepeatButton, closeRepeatPopover, isInRepeatPopover, showRepeatButton } from './card-repeat';
-import { buildCardTags, buildTagButton, CARD_HEAD_CLASS, closeTagPopover, showCardTags } from './card-tags';
+import { buildCardTags, buildTagButton, closeTagPopover, showCardTags } from './card-tags';
+import { CARD_TOOLS_CLASS } from './card-tools';
 import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
@@ -17,6 +18,7 @@ import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
 import { cardNotesSource } from './notes-source';
 import { ownElement } from './own-rows';
+import { addStar, STAR_CLASS } from './row-marks';
 import { addTickZone, buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
@@ -25,7 +27,6 @@ export const CARD_TITLE_CLASS = 'princelists-card-title';
 export const CARD_TITLE_LINE_CLASS = 'princelists-card-title-line';
 export const CARD_NOTES_CLASS = 'princelists-card-notes';
 export const CARD_ACTIONS_CLASS = 'princelists-card-actions';
-export const CARD_STAR_CLASS = 'princelists-card-star';
 
 export interface Card {
 	el: HTMLElement;
@@ -120,7 +121,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 		card.el.querySelector(`.${HIDDEN_LABEL_CLASS}`)?.setText(row.label);
 		showDone(card.el, row);
 		showWhen(card, row.when);
-		showStar(card.el, row.starred);
+		showStarMark(card.el, row.starred);
 		showRepeatButton(card.el, row.repeats);
 		showCardTags(card.el, row.tailTags);
 	}
@@ -128,7 +129,9 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes);
+	// The format bar goes under the buttons, so hiding it never moves a button mid-press.
+	const tools = card.el.querySelector<HTMLElement>(`.${CARD_TOOLS_CLASS}`) ?? undefined;
+	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, tools);
 }
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {
@@ -198,14 +201,14 @@ function createCardElement(): HTMLElement {
 	addTickZone(el);
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
-	const head = body.createDiv({ cls: CARD_HEAD_CLASS });
-	const titleLine = head.createDiv({ cls: CARD_TITLE_LINE_CLASS });
+	const titleLine = body.createDiv({ cls: CARD_TITLE_LINE_CLASS });
 	titleLine.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	buildCardTags(titleLine);
+	addStar(titleLine);
+	showStarMark(el, false);
 	body.createDiv({ cls: CARD_NOTES_CLASS });
-	const tools = head.createDiv({ cls: 'princelists-card-tools' });
+	const tools = body.createDiv({ cls: CARD_TOOLS_CLASS });
 	buildTagButton(tools);
-	setIcon(tools.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
 	buildWhenPicker(tools);
 	buildRepeatButton(tools);
 	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
@@ -213,10 +216,9 @@ function createCardElement(): HTMLElement {
 	return el;
 }
 
-function showStar(cardEl: HTMLElement, starred: boolean): void {
-	const star = cardEl.querySelector(`.${CARD_STAR_CLASS}`);
-	star?.toggleClass('is-starred', starred);
-	star?.setAttribute('aria-label', starred ? 'Remove star' : 'Add star');
+// The row's star mark, after the title and its tags, shown while the item has a star.
+function showStarMark(cardEl: HTMLElement, starred: boolean): void {
+	cardEl.querySelector<HTMLElement>(`.${CARD_TITLE_LINE_CLASS} > .${STAR_CLASS}`)?.toggle(starred);
 }
 
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {

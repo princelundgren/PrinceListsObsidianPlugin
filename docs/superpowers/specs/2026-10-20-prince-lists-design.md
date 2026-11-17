@@ -623,8 +623,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   dropped (see Completion). Step two hides an item's star too, and saving puts it back once. The
   card shows the tail's tags after the title, as a closed row does, each with an × that takes it
   off ([filtering by tag](2026-11-07-tag-filter-design.md), "The card").
-- **An item's When (step two):** the calendar icon at the card's top right, or the day in its
-  place, sets it, and the picker's own Clear or Reset removes it.
+- **An item's When (step two):** the calendar icon in the card's buttons under its notes, or the
+  day in its place, sets it, and the picker's own Clear or Reset removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
   not on every keystroke. Switching to another window or app doesn't leave the field. The rename
   uses `fileManager.renameFile`, which updates links according to the user's link settings. Escape
@@ -777,13 +777,15 @@ back only what was typed and leaves the empty line, which can be deleted like an
   nothing. This replaces keeping the star on the card alone **(owner, 2026-10-27)**.
   - **Set date… opens the card with the platform's date picker** **(call)**. The picker needs a
     recent user action, and with Native menus on a menu's click may not count as one; then the
-    card opens without it, and its date button opens the picker.
-  - **The card's ⋯ menu, and a right-click on the open card, stay without them (owner,
-    2026-10-29),** since the card shows the box, the star, the date and the tag button beside them.
-    Only Repeat… is there, in a group of its own after Select, while the card shows no repeat
-    button; a repeating item's card, and a ticked one's that comes back, has the button instead.
+    card opens without it, and its date button opens the picker. Either way the card's buttons
+    are scrolled into view first, since long notes can push them off-screen **(owner, 2026-11-17)**.
+  - **The card's ⋯ menu, and a right-click on the open card, stay without the rest (owner,
+    2026-10-29),** since the card shows the box, the date and the tag button. Add star or Remove
+    star is there, in a group of its own after Select, since the card has no star button **(owner,
+    2026-11-17)**. Repeat… follows, in a group of its own, while the card shows no repeat button;
+    a repeating item's card, and a ticked one's that comes back, has the button instead.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
-    Tasks' "done" or Obsidian's "checkbox status"; the star button's "Add star" and "Remove star";
+    Tasks' "done" or Obsidian's "checkbox status"; the star entries' "Add star" and "Remove star";
     and "Remove", as in Remove image.
 - **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
   of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick, Tag… and
