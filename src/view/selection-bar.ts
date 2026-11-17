@@ -73,7 +73,8 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 		const buttonEl = targetOf(evt)?.closest('button');
 		const closing = bar.closing;
 		bar.closing = null;
-		if (!buttonEl || buttonEl.disabled || buttonEl === closing) return;
+		// A keyboard click has detail 0, so a press released off the bar can't swallow the next one.
+		if (!buttonEl || buttonEl.disabled || (evt.detail !== 0 && buttonEl === closing)) return;
 		// A click from the keyboard, which no mousedown came before to close the menu.
 		if (buttonEl === bar.shown?.button) {
 			bar.shown.menu.hide();
