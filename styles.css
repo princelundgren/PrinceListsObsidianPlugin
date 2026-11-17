@@ -879,23 +879,23 @@ button.princelists-new-item {
 	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The card's buttons, a row under its notes, with ⋯ at its end. Its first icon lines up with the
-   notes' text, as the format bar's does. The tag and repeat popovers hang from it. */
+/* The card's row under its notes: the item's tags, then its buttons together at the row's end, which
+   keep their places whatever tags it has and wrap to a line of their own under many. The tag and
+   repeat popovers hang from it. */
 .princelists-card-tools {
 	position: relative;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--size-2-1);
-	margin-inline-start: calc(-1 * var(--size-2-2));
 	/* Brought into view clear of mobile's navigation bar and desktop's status bar. */
 	scroll-margin-bottom: calc(var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-.princelists-is-mobile .princelists-card-tools {
-	margin-inline-start: calc((var(--icon-size) - var(--input-height)) / 2);
-}
-
-.princelists-card-tools > button.princelists-card-actions {
+.princelists-card-buttons {
+	display: flex;
+	align-items: center;
+	gap: var(--size-2-1);
 	margin-inline-start: auto;
 }
 
@@ -953,6 +953,7 @@ button.princelists-card-actions,
 button.princelists-card-tag-button,
 button.princelists-list-tag-button,
 button.princelists-card-repeat,
+button.princelists-card-star,
 .princelists-format-bar button,
 .princelists-when-button,
 button.princelists-archived-toggle,
@@ -973,6 +974,7 @@ button.princelists-card-actions:not(:focus-visible),
 button.princelists-card-tag-button:not(:focus-visible),
 button.princelists-list-tag-button:not(:focus-visible),
 button.princelists-card-repeat:not(:focus-visible),
+button.princelists-card-star:not(:focus-visible),
 button.princelists-card-tag-remove:not(:focus-visible),
 .princelists-format-bar button:not(:focus-visible),
 button.princelists-archived-toggle:not(:focus-visible),
@@ -992,6 +994,7 @@ button.princelists-schedule-list-label:not(:focus-visible) {
 	button.princelists-card-tag-button:hover,
 	button.princelists-list-tag-button:hover,
 	button.princelists-card-repeat:hover,
+	button.princelists-card-star:hover,
 	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button,
 	button.princelists-archived-toggle:hover,
@@ -1030,6 +1033,7 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 .princelists-is-mobile button.princelists-card-actions,
 .princelists-is-mobile button.princelists-card-tag-button,
 .princelists-is-mobile button.princelists-card-repeat,
+.princelists-is-mobile button.princelists-card-star,
 .princelists-is-mobile .princelists-format-bar button,
 .princelists-is-mobile .princelists-when-button,
 .princelists-is-mobile button.princelists-archived-toggle,
@@ -1087,9 +1091,18 @@ button.princelists-undo:hover {
 	fill: currentColor;
 }
 
-/* In the open card, a press on the mark lands on the title's line, which puts the caret in the title. */
-.princelists-card .princelists-star {
-	pointer-events: none;
+/* Filled, as the row's star. */
+button.princelists-card-star.is-starred {
+	color: var(--color-yellow);
+}
+
+button.princelists-card-star.is-starred svg {
+	fill: currentColor;
+}
+
+/* The accent color says the item repeats; on its row, the repeat icon says it. */
+button.princelists-card-repeat.is-repeating {
+	color: var(--text-accent);
 }
 
 .princelists-when {
@@ -1169,6 +1182,7 @@ button.princelists-strip-no-tag,
 button.princelists-clear-tags,
 button.princelists-card-tag-button,
 button.princelists-card-repeat,
+button.princelists-card-star,
 button.princelists-card-tag-remove,
 button.princelists-list-tags,
 button.princelists-list-tag-button {
@@ -1220,26 +1234,13 @@ button.princelists-strip-no-tag.is-lit {
 	}
 }
 
-/* The card's tags follow its title, as on a closed row: where field-sizing works the title is as
-   wide as its text, and elsewhere it keeps the full width, with the tags on the line under it. */
+/* The card's title has its line to itself, at the card's full width. */
 .princelists-card-title-line {
 	display: flex;
-	flex-wrap: wrap;
-	align-items: baseline;
-	gap: var(--size-4-1);
 }
 
 .princelists-card-title-line > textarea.princelists-card-title {
 	flex: 1 1 100%;
-}
-
-@supports (field-sizing: content) {
-	.princelists-card-title-line > textarea.princelists-card-title {
-		field-sizing: content;
-		flex: 0 1 auto;
-		width: auto;
-		max-width: 100%;
-	}
 }
 
 .princelists-card-tags {

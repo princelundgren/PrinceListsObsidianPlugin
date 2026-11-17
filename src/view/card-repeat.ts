@@ -40,16 +40,15 @@ interface Controls {
 
 const controlsOf = new WeakMap<HTMLElement, Controls>();
 
-/** Adds the card's `Repeat` button last in `tools`, so call it right after the date picker; hidden until the item repeats. */
-export function buildRepeatButton(tools: HTMLElement): void {
-	const button = tools.createEl('button', { cls: REPEAT_BUTTON_CLASS, attr: { 'aria-label': 'Repeat', 'aria-expanded': 'false' } });
+/** Adds the card's `Repeat` button last in `buttons`, so call it right after the date picker. */
+export function buildRepeatButton(buttons: HTMLElement): void {
+	const button = buttons.createEl('button', { cls: REPEAT_BUTTON_CLASS, attr: { 'aria-label': 'Repeat', 'aria-expanded': 'false' } });
 	setIcon(button, 'repeat');
-	button.hide();
 }
 
-/** Shows the card's `Repeat` button while its item repeats. */
+/** Marks the card's `Repeat` button while its item repeats. */
 export function showRepeatButton(cardEl: HTMLElement, repeats: boolean): void {
-	cardEl.querySelector<HTMLElement>(`.${REPEAT_BUTTON_CLASS}`)?.toggle(repeats);
+	cardEl.querySelector<HTMLElement>(`.${REPEAT_BUTTON_CLASS}`)?.toggleClass('is-repeating', repeats);
 }
 
 /** Opens the repeat popover from the open card's buttons, with the draft its item's line gives; closes it if it's open. */

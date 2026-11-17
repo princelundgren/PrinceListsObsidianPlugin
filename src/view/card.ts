@@ -18,7 +18,6 @@ import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
 import { cardNotesSource } from './notes-source';
 import { ownElement } from './own-rows';
-import { addStar, STAR_CLASS } from './row-marks';
 import { addTickZone, buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
@@ -27,6 +26,7 @@ export const CARD_TITLE_CLASS = 'princelists-card-title';
 export const CARD_TITLE_LINE_CLASS = 'princelists-card-title-line';
 export const CARD_NOTES_CLASS = 'princelists-card-notes';
 export const CARD_ACTIONS_CLASS = 'princelists-card-actions';
+export const CARD_STAR_CLASS = 'princelists-card-star';
 
 export interface Card {
 	el: HTMLElement;
@@ -121,7 +121,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 		card.el.querySelector(`.${HIDDEN_LABEL_CLASS}`)?.setText(row.label);
 		showDone(card.el, row);
 		showWhen(card, row.when);
-		showStarMark(card.el, row.starred);
+		showStar(card.el, row.starred);
 		showRepeatButton(card.el, row.repeats);
 		showCardTags(card.el, row.tailTags);
 	}
@@ -202,22 +202,25 @@ function createCardElement(): HTMLElement {
 	const body = el.createDiv({ cls: 'princelists-card-body' });
 	const titleLine = body.createDiv({ cls: CARD_TITLE_LINE_CLASS });
 	titleLine.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
-	buildCardTags(titleLine);
-	addStar(titleLine);
-	showStarMark(el, false);
 	body.createDiv({ cls: CARD_NOTES_CLASS });
+	// The item's tags, then its buttons together at the row's end, so they keep their places.
 	const tools = body.createDiv({ cls: CARD_TOOLS_CLASS });
-	buildTagButton(tools);
-	buildWhenPicker(tools);
-	buildRepeatButton(tools);
-	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
+	buildCardTags(tools);
+	const buttons = tools.createDiv({ cls: 'princelists-card-buttons' });
+	buildTagButton(buttons);
+	buildWhenPicker(buttons);
+	buildRepeatButton(buttons);
+	setIcon(buttons.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
+	const actions = buttons.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
 	return el;
 }
 
-// The row's star mark, after the title and its tags, shown while the item has a star.
-function showStarMark(cardEl: HTMLElement, starred: boolean): void {
-	cardEl.querySelector<HTMLElement>(`.${CARD_TITLE_LINE_CLASS} > .${STAR_CLASS}`)?.toggle(starred);
+// Filled, as the row's star, while the item has one.
+function showStar(cardEl: HTMLElement, starred: boolean): void {
+	const star = cardEl.querySelector(`.${CARD_STAR_CLASS}`);
+	star?.toggleClass('is-starred', starred);
+	star?.setAttribute('aria-label', starred ? 'Remove star' : 'Add star');
 }
 
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {

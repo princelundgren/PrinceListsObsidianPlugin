@@ -782,10 +782,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
     card opens without it, and its date button opens the picker. Either way the card's buttons
     are scrolled into view first, since long notes can push them off-screen **(owner, 2026-11-17)**.
   - **The card's ⋯ menu, and a right-click on the open card, stay without the rest (owner,
-    2026-10-29),** since the card shows the box, the date and the tag button. Add star or Remove
-    star is there, in a group of its own after Select, since the card has no star button **(owner,
-    2026-11-17)**. Repeat… follows, in a group of its own, while the card shows no repeat button;
-    a repeating item's card, and a ticked one's that comes back, has the button instead.
+    2026-10-29),** since the card shows the box and buttons for its tags, date, repeat and star
+    (step two's design, "When and the Schedule view"). This replaces Add star or Remove star and
+    Repeat… there, which the card had while it had no buttons for them **(owner, 2026-11-17)**.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star entries' "Add star" and "Remove star";
     and "Remove", as in Remove image.
