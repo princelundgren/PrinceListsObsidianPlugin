@@ -6,7 +6,8 @@ import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { clearSelection, focusList } from './select';
 import { addGroupEntries, deleteSelection, listHasHeadings, moveToHeading } from './selection-menu';
-import { closeSelectionTagPopover, isInSelectionTagPopover, openSelectionTagPopover, syncSelectionTagPopover, toggleSelectionTagPopover } from './selection-tag-popover';
+import { openSelectionTagPopover, toggleSelectionTagPopover } from './selection-tag-popover';
+import { closeTagsPopover, isInTagsPopover, syncTagsPopover } from './tags-popover';
 
 /** The class on the view's content while selecting. */
 const SELECTING_CLASS = 'princelists-selecting';
@@ -94,7 +95,7 @@ export function syncSelectionBar(view: PrinceListView): void {
 		for (const [button, buttonEl] of bar.buttons) buttonEl.disabled = !enabled[button];
 	}
 	// After the buttons, so the focus the popover held goes to the Tag button only while it's enabled.
-	syncSelectionTagPopover(view);
+	syncTagsPopover(view);
 	if (!view.selecting && bar.el.contains(bar.el.doc.activeElement)) focusList(view);
 	bar.el.toggle(view.selecting);
 }
@@ -125,8 +126,8 @@ function popupAttrs(button: BarButton): Record<string, string> {
 
 // Safari doesn't focus a clicked button, so the popover's field can keep focus while another button acts.
 function leaveTagPopover(view: PrinceListView, buttonEl: HTMLElement): void {
-	if (isInSelectionTagPopover(view, buttonEl.doc.activeElement)) buttonEl.focus();
-	closeSelectionTagPopover(view);
+	if (isInTagsPopover(view, buttonEl.doc.activeElement)) buttonEl.focus();
+	closeTagsPopover(view);
 }
 
 function showGroupMenu(view: PrinceListView, group: EntryGroup, buttonEl: HTMLElement): void {
