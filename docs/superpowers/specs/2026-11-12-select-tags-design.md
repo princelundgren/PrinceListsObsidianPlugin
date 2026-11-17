@@ -23,8 +23,10 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## At a glance
 
-- **A Tag button in the selection bar (owner),** beside Star and Date.
-- **One press opens a tag popover (owner),** as the open card's tag button does, not a menu first.
+- **Tag… in the selection bar's More menu (owner, 2026-11-17).** This replaces a Tag button in the
+  bar beside Star and Date **(owner)** ("The bar's Tag button").
+- **Tag… opens a tag popover,** as the open card's tag button does. This replaces one press of the
+  bar's own Tag button opening it, with no menu first **(owner)**.
   It shows the tags the selected items and headings carry, each with a × that takes it off them all,
   and a field that suggests the list's tags and `New tag: #<tag>`.
 - **A pick gives the tag to every selected item that lacks it (owner),** and heading **(owner,
@@ -34,27 +36,23 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## The bar's Tag button
 
-- **Its place (owner, #450):** Move to, Tick, Tag, Star, Date, then Delete past the divider. It has
-  the `tag` icon, as the card's tag button does, and the label "Tag".
-- **Enabled while any item or heading is selected (owner, 2026-11-16),** since a heading's tag
-  counts for its items ([inherited tags](2026-11-15-inherited-tags-design.md)). Move to, Tick, Star
-  and Date stay as they are.
-- **Icons only below 390 px, not 360 (owner):** six buttons 48 px wide and 8 px apart need a view
-  about 387 px wide, so the labeled layout holds them only down to there. A narrower phone, such
-  as one 360 or 375 px wide, gets the icons-only layout, whose buttons may narrow below 48 px, as
-  in a sidebar today **(owner, 2026-11-12, in selecting several rows)**.
-- **The one-row layout moves up too (call: the width):** at 520 px Done and the count leave about
-  320 px, short of the 337 six buttons need, so it starts where every button keeps 48 px: 542 px,
-  measured in Obsidian 1.15.1's default theme.
-- **A screen reader (call):** the button has `aria-expanded`, as the card's tag button has, and
-  `aria-haspopup="dialog"`; the popover has `role="dialog"`, named "Tag the selection".
+- **Gone from the bar (owner, 2026-11-17):** Tag… is an entry of the bar's More menu, after Tick and
+  Untick, and More is the bar's third button ([selecting several
+  rows](2026-11-07-select-several-design.md), "The bar"). This replaces a Tag button between Tick
+  and Star **(owner, #450)**, with the `tag` icon and the label "Tag".
+- **Tag… shows while any item or heading is selected (owner, 2026-11-16),** since a heading's tag
+  counts for its items ([inherited tags](2026-11-15-inherited-tags-design.md)).
+- **The bar's widths** are in selecting several rows, "The bar", for its four buttons. This
+  replaces labels down to a 390 px view **(owner)** and one row from 542 px **(call)**, for six.
+- **A screen reader (call):** the popover has `role="dialog"`, named "Tag the selection". More has
+  `aria-haspopup="menu"`, as Date has.
 
 ## The popover
 
 - **The plugin's own element, as the card's is (call),** for the same reasons
   ([filtering by tag](2026-11-07-tag-filter-design.md), "The tag button opens a small popover"):
   the card's border, radius and shadow variables, at `--layer-popover`. It sits above the bar's
-  Tag button, right-aligned with it, and stays inside the view. The bar is on the view's container,
+  More button, right-aligned with it, and stays inside the view. The bar is on the view's container,
   outside the content element that the card's popover listens on, so this one needs focus, Escape
   and outside-press handling of its own. A heading's and the list's popovers share it
   ([tag from menus](2026-11-16-tag-from-menus-design.md)).
@@ -78,8 +76,8 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   (checked on Android).
 - **A pick (owner)** adds the tag with `addTag` to each selected item, which leaves an item that has
   it, in its title or its tail, as it is, and to each selected heading as its Tag… does **(call)**.
-  The popover closes **(owner)** and focus goes to the bar's Tag button, as the card's popover
-  returns it to its tag button **(call)**.
+  The popover closes **(owner)** and focus goes to the list, as after a popover a row's menu opened
+  **(call)**.
 - **A × (owner)** takes the tag off each selected item's tail with `removeTag`, and off the end of
   each selected heading's text as its Tag… does **(call)**. The popover closes,
   as after a pick **(call)**: one action, one message, and the chips never show a count from before
@@ -87,13 +85,12 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 - **The selection stays (owner),** as after the bar's other actions, so a star or a date can follow.
 - **What closes it (call):**
   - Escape, once Obsidian's suggestions have taken the first one while they show, as on the card.
-  - A second press of Tag.
   - A press anywhere else in the view, on a row, the tag strip or the list's title, which does
     nothing else: it neither selects nor unselects a row, nor opens a card nor lights a tag, so a
     near miss doesn't change what the next pick reaches. Focus leaves the field before the press's
     click arrives, so that click must be held back.
-  - A press on another bar button, which then does what it does: Done ends selecting, Star opens
-    its menu.
+  - A press on a bar button, which then does what it does: Done ends selecting, More opens its
+    menu.
   - Any change to the selection, such as an outside change dropping a row or a ticked row hiding,
     so the chips and the next pick never describe rows that left. A change to a selected row's
     text closes it too, such as Cmd+Z in the empty field undoing the list's last edit, or an outside
@@ -101,10 +98,10 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## The selection's menu
 
-- **Tag… (owner, #450),** before the star entries, opens the popover over the bar's Tag button, so
+- **Tag… (owner, #450),** before the star entries, opens the popover over the bar's More button, so
   desktop has one way to tag a selection whether it starts from the menu or the bar. It shows while
-  any item or heading is selected. The selection's menu is desktop only, as today; the bar opens no
-  menu for Tag.
+  any item or heading is selected. The selection's menu is desktop only, as today; the bar's More
+  menu has the same Tag….
 
 ## The write and the message
 

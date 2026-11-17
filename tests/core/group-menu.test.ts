@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { GroupState } from '../../src/core/group-edits';
-import { barButtons, changeMessage, groupEntries, tagChangeMessage } from '../../src/core/group-menu';
+import { barButtons, changeMessage, groupEntries, placesBelow, tagChangeMessage } from '../../src/core/group-menu';
 
 const NONE: GroupState = {
 	items: 0,
@@ -26,13 +26,15 @@ describe('groupEntries', () => {
 			'tomorrow',
 			'pickDate',
 			'removeDate',
+			'newItem',
+			'newHeading',
 			'delete',
 		]);
 	});
 
 	test('shows only the entries that change something', () => {
 		const state = { ...NONE, items: 2, anyUnticked: true, anyStarred: true };
-		expect(groupEntries(state, true)).toEqual(['move', 'tick', 'tag', 'removeStar', 'today', 'tomorrow', 'pickDate', 'delete']);
+		expect(groupEntries(state, true)).toEqual(['move', 'tick', 'tag', 'removeStar', 'today', 'tomorrow', 'pickDate', 'newItem', 'newHeading', 'delete']);
 	});
 
 	test('hides Move to heading while a heading is selected', () => {
@@ -43,25 +45,35 @@ describe('groupEntries', () => {
 		expect(groupEntries(MIXED, false)).not.toContain('move');
 	});
 
-	test('offers only Tag… and Delete for a selection of headings', () => {
-		expect(groupEntries({ ...NONE, headings: 2 }, true)).toEqual(['tag', 'delete']);
+	test('offers only Tag…, the new entries and Delete for a selection of headings', () => {
+		expect(groupEntries({ ...NONE, headings: 2 }, true)).toEqual(['tag', 'newItem', 'newHeading', 'delete']);
 	});
 
 	test('keeps to one group of entries when asked', () => {
-		expect(groupEntries(MIXED, true, 'tick')).toEqual(['tick', 'untick']);
-		expect(groupEntries(MIXED, true, 'star')).toEqual(['addStar', 'removeStar']);
 		expect(groupEntries(MIXED, true, 'date')).toEqual(['today', 'tomorrow', 'pickDate', 'removeDate']);
-		expect(groupEntries({ ...NONE, headings: 2 }, true, 'tick')).toEqual([]);
+		expect(groupEntries(MIXED, true, 'more')).toEqual(['tick', 'untick', 'tag', 'addStar', 'removeStar', 'newItem', 'newHeading']);
+		expect(groupEntries({ ...NONE, headings: 2 }, true, 'more')).toEqual(['tag', 'newItem', 'newHeading']);
+		expect(groupEntries({ ...NONE, headings: 2 }, true, 'date')).toEqual([]);
+	});
+});
+
+describe('placesBelow', () => {
+	test('puts a new item right after a selected item, and a new heading after it', () => {
+		expect(placesBelow({ kind: 'item', line: 7 })).toEqual({ item: { after: 7 }, heading: { afterItem: 7 } });
+	});
+
+	test('puts a new item first under a selected heading, and a new heading after its section', () => {
+		expect(placesBelow({ kind: 'heading', line: 4 })).toEqual({ item: { firstUnder: 4 }, heading: { afterSection: 4 } });
 	});
 });
 
 describe('barButtons', () => {
 	test('enables every button for a mixed selection of items in a list with headings', () => {
-		expect(barButtons(MIXED, true)).toEqual({ move: true, tick: true, star: true, tag: true, date: true, delete: true });
+		expect(barButtons(MIXED, true)).toEqual({ move: true, date: true, more: true, delete: true });
 	});
 
-	test('enables only Tag and Delete for a selection of headings', () => {
-		expect(barButtons({ ...NONE, headings: 2 }, true)).toEqual({ move: false, tick: false, star: false, tag: true, date: false, delete: true });
+	test('enables only More and Delete for a selection of headings', () => {
+		expect(barButtons({ ...NONE, headings: 2 }, true)).toEqual({ move: false, date: false, more: true, delete: true });
 	});
 
 	test('disables Move to while a heading is selected', () => {
@@ -72,9 +84,9 @@ describe('barButtons', () => {
 		expect(barButtons(MIXED, false).move).toBe(false);
 	});
 
-	test('enables Tick and Star for one item, whatever it holds', () => {
+	test('enables Date and More for one item, whatever it holds', () => {
 		const ticked = { ...NONE, items: 1, anyTicked: true, anyUnstarred: true };
-		expect(barButtons(ticked, true)).toEqual({ move: true, tick: true, star: true, tag: true, date: true, delete: true });
+		expect(barButtons(ticked, true)).toEqual({ move: true, date: true, more: true, delete: true });
 	});
 });
 

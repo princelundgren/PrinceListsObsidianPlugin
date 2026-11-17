@@ -7,7 +7,7 @@ import type { PrinceListView } from './list-view';
 import { showViewMenu } from './menu-press';
 import { clearSelection, focusList } from './select';
 import { addGroupEntries, deleteSelection, listHasHeadings, moveToHeading } from './selection-menu';
-import { openSelectionTagPopover, toggleSelectionTagPopover } from './selection-tag-popover';
+import { openSelectionTagPopover } from './selection-tag-popover';
 import { closeTagsPopover, isInTagsPopover, syncTagsPopover } from './tags-popover';
 
 /** The class on the view's content while selecting. */
@@ -23,16 +23,14 @@ const bars = new WeakMap<PrinceListView, SelectionBar>();
 
 const BUTTONS: readonly { button: BarButton; label: string; icon: string }[] = [
 	{ button: 'move', label: 'Move to', icon: 'list-end' },
-	{ button: 'tick', label: 'Tick', icon: 'check' },
-	{ button: 'tag', label: 'Tag', icon: 'tag' },
-	{ button: 'star', label: 'Star', icon: 'star' },
 	{ button: 'date', label: 'Date', icon: 'calendar' },
+	{ button: 'more', label: 'More', icon: 'more-horizontal' },
 	{ button: 'delete', label: 'Delete', icon: 'trash-2' },
 ];
 
 /**
  * Builds the bar for acting on the selection (selecting several rows, "The bar"): Done and how many
- * rows are selected, then Move to, Tick, Tag, Star and Date, and Delete apart past a divider. It goes
+ * rows are selected, then Move to, Date and More, and Delete apart past a divider. It goes
  * on the view's container where the floating "+" goes, hidden until syncSelectionBar shows it.
  */
 export function buildSelectionBar(view: PrinceListView): HTMLElement {
@@ -59,15 +57,10 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 		buttons.set(button, buttonEl);
 		actions.set(buttonEl, () => act(view, button, buttonEl));
 	}
-	const tagButton = buttons.get('tag');
-	// So the click that follows closes the popover: a focusout first would close it, and the click reopen it.
-	view.registerDomEvent(el, 'mousedown', (evt) => {
-		if (tagButton && targetOf(evt)?.closest('button') === tagButton && tagButton.getAttr('aria-expanded') === 'true') evt.preventDefault();
-	});
 	view.registerDomEvent(el, 'click', (evt) => {
 		const buttonEl = targetOf(evt)?.closest('button');
 		if (!buttonEl || buttonEl.disabled) return;
-		if (buttonEl !== tagButton) leaveTagPopover(view, buttonEl);
+		leaveTagPopover(view, buttonEl);
 		actions.get(buttonEl)?.();
 	});
 	bars.set(view, { el, countEl, buttons });
@@ -95,33 +88,30 @@ export function syncSelectionBar(view: PrinceListView): void {
 		const enabled = barButtons(groupState(view.text, contentStartLine(view.text), rows), listHasHeadings(view));
 		for (const [button, buttonEl] of bar.buttons) buttonEl.disabled = !enabled[button];
 	}
-	// After the buttons, so the focus the popover held goes to the Tag button only while it's enabled.
 	syncTagsPopover(view);
 	if (!view.selecting && bar.el.contains(bar.el.doc.activeElement)) focusList(view);
 	bar.el.toggle(view.selecting);
 }
 
-/** Opens the selection's tag popover over the bar's Tag button, as the selection's menu's Tag… does; nothing while the button is missing or disabled. */
+/** Opens the selection's tag popover over the bar's More button, for a menu's Tag…; nothing while the button is missing or disabled. */
 export function openSelectionTags(view: PrinceListView): void {
-	const button = bars.get(view)?.buttons.get('tag');
+	const button = bars.get(view)?.buttons.get('more');
 	if (button && !button.disabled) openSelectionTagPopover(view, button);
 }
 
-// Move to and Delete act as the selection menu's entries do; Tick, Star and Date open a menu of their
-// group's entries above the button, and Tag the selection's tag popover.
+// Move to and Delete act as the selection menu's entries do; Date and More open a menu of their
+// group's entries above the button.
 function act(view: PrinceListView, button: BarButton, buttonEl: HTMLElement): void {
 	if (opensMenu(button)) showGroupMenu(view, button, buttonEl);
 	else if (button === 'move') moveToHeading(view);
-	else if (button === 'tag') toggleSelectionTagPopover(view, buttonEl);
 	else deleteSelection(view);
 }
 
 function opensMenu(button: BarButton): button is EntryGroup {
-	return button !== 'move' && button !== 'tag' && button !== 'delete';
+	return button !== 'move' && button !== 'delete';
 }
 
 function popupAttrs(button: BarButton): Record<string, string> {
-	if (button === 'tag') return { 'aria-haspopup': 'dialog', 'aria-expanded': 'false' };
 	return opensMenu(button) ? { 'aria-haspopup': 'menu' } : {};
 }
 

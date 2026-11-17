@@ -820,10 +820,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
 - **On both desktop and mobile,** the open card has a ⋯ button with Edit in Markdown and Delete item
-  ("Item actions"). On mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move to, Tick,
-  Tag, Star, Date and Delete for them through the selection's bar ([selecting several
-  rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
-  actions" **(call)**.
+  ("Item actions"). On mobile this is the only way to reach them **(owner)**. Selecting rows with a
+  hold reaches the selection's actions through its bar: Move to, Date and Delete, and the rest in
+  its More menu ([selecting several rows](2026-11-07-select-several-design.md), "The bar"). The
+  button's accessible name is "Item actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading, Tag… and Delete heading **(owner, 2026-10-20)**, and Select, as on desktop **(call)**. Step two
   adds Edit in Markdown, Collapse all headings and Expand all headings. It's a tap, not a

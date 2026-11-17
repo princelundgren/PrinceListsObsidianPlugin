@@ -1,17 +1,19 @@
 import type { Menu } from 'obsidian';
 import { groupCount } from '../core/group-actions';
 import { countPhrase, groupState, planGroupDelete, planGroupLineEdit, planGroupTick, type PlannedGroupChange } from '../core/group-edits';
-import { changeMessage, groupEntries, type EntryGroup, type GroupChange, type GroupEntry } from '../core/group-menu';
+import { changeMessage, groupEntries, placesBelow, type EntryGroup, type GroupChange, type GroupEntry } from '../core/group-menu';
 import { removeWhen } from '../core/repeat-line';
 import { setStar } from '../core/star';
 import { dayAfter, dayOf, setWhen } from '../core/when';
 import { contentStartLine } from '../obsidian/marker';
+import { addItem } from './add-button';
 import { DateModal } from './date-modal';
 import { queueGroupAction } from './group-write';
+import { addHeading } from './heading-field';
 import { HeadingPickerModal } from './heading-picker';
 import type { PrinceListView } from './list-view';
 import { onMenuHide } from './menu-anchor';
-import { queueGroupMove } from './move';
+import { queueGroupMove, shownRows } from './move';
 import { clearSelection } from './select';
 import { openSelectionTags } from './selection-bar';
 
@@ -89,6 +91,8 @@ const PARTS: Record<GroupEntry, string> = {
 	tomorrow: 'date',
 	pickDate: 'date',
 	removeDate: 'date',
+	newItem: 'new',
+	newHeading: 'new',
 	delete: 'delete',
 };
 
@@ -103,6 +107,8 @@ const ENTRY_LOOKS: Record<Exclude<GroupEntry, 'delete'>, { title: string; icon: 
 	tomorrow: { title: 'Set date to tomorrow', icon: 'calendar-plus' },
 	pickDate: { title: 'Set date…', icon: 'calendar' },
 	removeDate: { title: 'Remove date', icon: 'calendar-x' },
+	newItem: { title: 'New item below', icon: 'list-plus' },
+	newHeading: { title: 'New heading below', icon: 'heading' },
 };
 
 function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag'>): void {
@@ -125,7 +131,21 @@ function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag'>)
 			return new DateModal(view.app, (day) => changeSelection(view, 'setDate', lineEdit((line) => setWhen(line, day)))).open();
 		case 'removeDate':
 			return changeSelection(view, 'removeDate', lineEdit((line) => removeWhen(line).line));
+		case 'newItem':
+			return addBelowSelection(view, (places) => addItem(view, places.item));
+		case 'newHeading':
+			return addBelowSelection(view, (places) => addHeading(view, places.heading));
 	}
+}
+
+// Ends the selection, then adds under its last row in list order (core's placesBelow).
+function addBelowSelection(view: PrinceListView, add: (places: ReturnType<typeof placesBelow>) => void): void {
+	const selected = new Set(view.selection.lines());
+	const last = shownRows(view.listScrollEl)
+		.filter((row): row is { kind: 'item' | 'heading'; line: number } => row.kind !== 'untouched' && selected.has(row.line))
+		.pop();
+	clearSelection(view);
+	if (last) add(placesBelow(last));
 }
 
 function lineEdit(change: (line: string) => string): GroupPlan {

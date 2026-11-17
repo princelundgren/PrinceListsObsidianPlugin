@@ -137,7 +137,7 @@ only documented Obsidian APIs are used.
   click there ends selecting and ticks that item, as a plain click on the row opens it **(owner,
   2026-11-17)**.
 - **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
-  to, Tick, Tag, Star, Date and Delete. On desktop it takes the same place whether or not the
+  to, Date, More and Delete. On desktop it takes the same place whether or not the
   floating "+" shows there **(call)**.
 - **While the tag popover is open,** a click or a tap on a row, a heading, the tag strip or the
   list's title only closes it: it selects nothing and opens nothing
@@ -157,29 +157,32 @@ only documented Obsidian APIs are used.
 
 ## The bar
 
-- **Its buttons (call):** Move to opens the heading picker and Delete deletes, as the menu's
-  entries do. Tick, Star and Date each open a small menu of the selection menu's entries for them,
-  so a mixed selection gets both Tick and Untick. Tag opens the selection's tag popover
-  ([tagging a selection](2026-11-12-select-tags-design.md)). A button whose entries all hide, such
-  as Tick with only headings selected, is disabled; Move to is disabled while a heading is
-  selected.
+- **Its buttons (owner, 2026-11-17):** Move to opens the heading picker and Delete deletes, as the
+  menu's entries do. Date opens a small menu of the selection menu's date entries, and More one of
+  the rest: Tick and Untick, Tag…, the star entries, New item below and New heading below, so a
+  mixed selection gets both Tick and Untick. Tag… opens the selection's tag popover
+  over More ([tagging a selection](2026-11-12-select-tags-design.md)). A button whose entries all
+  hide, such as Date with only headings selected, is disabled; Move to is disabled while a heading
+  is selected. This replaces Tick, Tag and Star as buttons of their own **(owner, #450)**: with New
+  as well, seven labeled buttons need a view 443 px wide, more than most phones have.
 - **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
   CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
   48 by 48 dp with 8 between
   ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
-  Delete sits apart at the far end, past a divider, so a near miss on Date doesn't reach it
+  Delete sits apart at the far end, past a divider, so a near miss on More doesn't reach it
   **(call)**. The bar is the same on desktop.
 - **One row where it fits (owner, 2026-11-12):** Done, an ✕ named "Done", and the count come
   first, then the actions spread across the bar, every button an icon. A narrower view, such as
   a phone's, puts Done and the count on a row above the actions.
 - **Icons only where even that doesn't fit (owner, 2026-11-12):** in a narrower view still, such
-  as a sidebar or a small phone, the actions lose their labels, keeping them as tooltips and
+  as a narrow sidebar, the actions lose their labels, keeping them as tooltips and
   names, the gaps tighten, and the buttons narrow below 48 px rather than spill out of the bar.
-- **The widths** of both layouts are in [tagging a selection](2026-11-12-select-tags-design.md),
-  "The bar's Tag button".
-- **Done ends selecting,** and so does Delete or removing the last selected row **(call)**. Other
-  actions keep the selection, so several can follow each other.
+- **The widths (call),** measured in Obsidian 1.15.1's default theme: the four labeled buttons fit
+  from a view 275 px wide, and one row from 430 px. This replaces 390 and 542 px for six buttons
+  ([tagging a selection](2026-11-12-select-tags-design.md), "The bar's Tag button").
+- **Done ends selecting,** and so does Delete, New item below, New heading below or removing the
+  last selected row **(call)**. Other actions keep the selection, so several can follow each other.
 
 ## Dragging the selection
 
@@ -207,8 +210,8 @@ only documented Obsidian APIs are used.
 ## The actions
 
 - **The selection's menu** opens with a right-click on a selected row ("While selecting"), and the
-  bar's Tick, Star and Date open parts of it ("The bar"). Its Tag…, before the star entries, opens
-  the selection's tag popover over the bar's Tag button
+  bar's Date and More open parts of it ("The bar"). Its Tag…, before the star entries, opens
+  the selection's tag popover over the bar's More button
   ([tagging a selection](2026-11-12-select-tags-design.md)).
 - **Move to heading… (owner)** opens a picker, Obsidian's `SuggestModal`, that lists "Top of the
   list" and then the list's headings in order, and narrows as you type **(call)**. A pick sends the
@@ -237,8 +240,11 @@ only documented Obsidian APIs are used.
 - **Tick, Star and Date apply to items only (call):** a selected heading ticks, stars and dates
   nothing, and an entry with nothing to act on hides. Tag and Delete act on headings too
   ([tagging a selection](2026-11-12-select-tags-design.md)).
-- **One-row entries drop out (call):** New item below, New heading below, Rename heading and Edit
-  in Markdown.
+- **One-row entries drop out (call):** Rename heading and Edit in Markdown.
+- **New item below and New heading below (owner, 2026-11-17)** add under the selection's last row
+  in list order: an item right after a selected item, or first under a selected heading; a heading
+  after a selected item, or after a selected heading's section. Selecting ends as the new row opens
+  for typing. This replaces their dropping out as one-row entries **(call)**.
 - **Each action is one write and one Cmd+Z step (call),** and follows step one's "Saving" as a
   one-off action: typing that lands while it waits makes it run once more on the new text.
 - **Every group action shows an Undo message (owner),** on desktop and mobile: a move, a drag, a
