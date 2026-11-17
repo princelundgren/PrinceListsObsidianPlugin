@@ -2,7 +2,7 @@ import type { Menu } from 'obsidian';
 import { headingChoices } from '../core/group-edits';
 import { contentStartLine } from '../obsidian/marker';
 import type { PrinceListView } from './list-view';
-import { atLine, onMenuHide } from './menu-anchor';
+import { atLine, trackWhileShown } from './menu-anchor';
 
 /**
  * Adds "Top of the list" and then the view's headings, in list order, to `menu`. Choosing one hands
@@ -15,8 +15,7 @@ export function addMoveChoices(view: PrinceListView, menu: Menu, onChoose: (head
 			menu.addItem((item) => item.setTitle(label).onClick(() => onChoose(null)));
 			continue;
 		}
-		const anchor = view.editing.track(headingLine);
-		onMenuHide(menu, () => view.editing.untrack(anchor));
+		const anchor = trackWhileShown(view, headingLine, menu);
 		menu.addItem((item) => item.setTitle(label).onClick(atLine(anchor, onChoose)));
 	}
 }
