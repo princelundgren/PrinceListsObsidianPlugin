@@ -71,7 +71,7 @@ export function moveToHeading(view: PrinceListView): void {
 
 /** Copies the items on `rows`, each right below its own, in one write, with an Undo message. */
 export function duplicateItems(view: PrinceListView, rows: readonly number[]): void {
-	if (rows.length > 0) queueGroupAction(view, rows, planGroupDuplicate, (written) => `${countPhrase(written.copies.length, 0)} duplicated.`);
+	if (rows.length > 0) queueGroupAction(view, rows, planGroupDuplicate, (written) => `${countPhrase(written.copied, 0)} duplicated.`);
 }
 
 /** Deletes the selected items and headings in one write, with an Undo message, and ends the selection. */

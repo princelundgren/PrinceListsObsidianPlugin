@@ -27,6 +27,8 @@ export interface TagsPopoverTarget {
 	side: 'above' | 'below';
 	/** The button it opens from, whose aria-expanded follows it and which takes focus back; null for a menu's targets. */
 	button: HTMLElement | null;
+	/** Where Escape or a stale close sends focus when there is no button, such as the bar's More. */
+	returnFocusTo?: () => HTMLElement | null;
 	chips: readonly TagChip[];
 	tagsToLeaveOut(): readonly string[];
 	add(tag: string): void;
@@ -134,8 +136,8 @@ export function placeTagsPopover(view: PrinceListView): void {
 
 /**
  * Places the open popover against its anchor again after a render, which can rebuild or move it, or
- * closes it once its target is stale or its anchor is null. Focus it held goes to the target's button
- * when the button takes it, or to the list.
+ * closes it once its target is stale or its anchor is null. Focus it held goes to the target's
+ * button, or else where the target returns focus, when that takes it, or to the list.
  */
 export function syncTagsPopover(view: PrinceListView): void {
 	const popover = popovers.get(view);
@@ -147,7 +149,7 @@ export function syncTagsPopover(view: PrinceListView): void {
 	}
 	const heldFocus = popover.el.contains(popover.el.doc.activeElement);
 	closeTagsPopover(view);
-	if (heldFocus) returnFocus(view, open.target);
+	if (heldFocus) returnFocus(view, focusAfterClose(open.target));
 }
 
 /** Whether `target` is in the popover while it's open. */
@@ -156,9 +158,14 @@ export function isInTagsPopover(view: PrinceListView, target: Node | null): bool
 	return popover !== undefined && popover.open !== null && popover.el.contains(target);
 }
 
-function returnFocus(view: PrinceListView, target: TagsPopoverTarget): void {
-	target.button?.focus();
-	if (!target.button || target.button.doc.activeElement !== target.button) focusList(view);
+function focusAfterClose(target: TagsPopoverTarget): HTMLElement | null {
+	return target.button ?? target.returnFocusTo?.() ?? null;
+}
+
+// To `to` when it takes focus, or else to the list.
+function returnFocus(view: PrinceListView, to: HTMLElement | null): void {
+	to?.focus();
+	if (!to || to.doc.activeElement !== to) focusList(view);
 }
 
 // Closes first, so the target's write finds the view as it will render it.
@@ -166,7 +173,7 @@ function pick(view: PrinceListView, change: 'add' | 'remove', tag: string): void
 	const target = popovers.get(view)?.open?.target;
 	if (!target) return;
 	closeTagsPopover(view);
-	returnFocus(view, target);
+	returnFocus(view, target.button);
 	if (change === 'add') target.add(tag);
 	else target.remove(tag);
 }
@@ -182,7 +189,7 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	evt.preventDefault();
 	const target = popovers.get(view)?.open?.target;
 	closeTagsPopover(view);
-	if (target) returnFocus(view, target);
+	if (target) returnFocus(view, focusAfterClose(target));
 }
 
 // Switching to another app leaves it open, as it leaves the card's tag popover.

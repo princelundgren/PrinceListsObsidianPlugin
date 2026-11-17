@@ -23,7 +23,6 @@ import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, wri
 
 export const CARD_CLASS = 'princelists-card';
 export const CARD_TITLE_CLASS = 'princelists-card-title';
-export const CARD_TITLE_LINE_CLASS = 'princelists-card-title-line';
 export const CARD_NOTES_CLASS = 'princelists-card-notes';
 export const CARD_ACTIONS_CLASS = 'princelists-card-actions';
 export const CARD_STAR_CLASS = 'princelists-card-star';
@@ -200,8 +199,7 @@ function createCardElement(): HTMLElement {
 	addTickZone(el);
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
-	const titleLine = body.createDiv({ cls: CARD_TITLE_LINE_CLASS });
-	titleLine.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
+	body.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	body.createDiv({ cls: CARD_NOTES_CLASS });
 	// The item's tags, then its buttons together at the row's end, so they keep their places. The
 	// buttons follow a row's marks: tags, star, repeat, date.
@@ -272,18 +270,10 @@ async function removeEmptyItem(view: PrinceListView, file: TFile, pending: Track
 	}
 }
 
-/** Puts the caret at the end of the open card's title, where a click past its text would. */
 /** Puts the caret at the end of the open card's notes; does nothing without a card. */
 export function focusCardNotesEnd(view: PrinceListView): void {
 	const editor = view.card?.editor;
 	if (!editor) return;
 	editor.focus();
 	editor.dispatch({ selection: { anchor: editor.state.doc.length }, scrollIntoView: true });
-}
-
-export function focusCardTitleEnd(view: PrinceListView): void {
-	const title = view.card?.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
-	if (!title) return;
-	title.focus();
-	title.setSelectionRange(title.value.length, title.value.length);
 }
