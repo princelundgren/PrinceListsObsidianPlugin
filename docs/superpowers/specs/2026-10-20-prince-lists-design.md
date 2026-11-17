@@ -776,7 +776,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
   Delete item. The
   card's ⋯ has the same without the card's own entries. The heading menu groups Select; New item,
-  New heading below and Rename heading; Edit in Markdown; Collapse or Expand all headings
+  New heading below, Rename heading and Tag…; Edit in Markdown; Collapse or Expand all headings
   **(call)**; Delete heading. That is more groups than the three or so in Apple's [Context
   menus](https://developer.apple.com/design/human-interface-guidelines/context-menus), which also
   puts the most-used entries first and destructive ones last.
@@ -787,7 +787,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   opens that row's own menu
   ([selecting several rows](2026-11-07-select-several-design.md), "The actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
-  heading and Delete heading, and Select **(owner, 2026-11-11)**. Step two adds Edit in Markdown,
+  heading, Tag… and Delete heading, and Select **(owner, 2026-11-11)**. Step two adds Edit in Markdown,
   Collapse all headings and Expand all headings, and a menu on the list's background (step two's
   design, "Right-click menus").
   - New item adds one as the first item under the heading. In a section without items, it goes
@@ -808,7 +808,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
-  heading and Delete heading **(owner, 2026-10-20)**, and Select, as on desktop **(call)**. Step two
+  heading, Tag… and Delete heading **(owner, 2026-10-20)**, and Select, as on desktop **(call)**. Step two
   adds Edit in Markdown, Collapse all headings and Expand all headings. It's a tap, not a
   long-press, so there is still no long-press menu. With a card open, the tap only closes the card
   ("Selecting and adding"). While selecting, the tap selects the heading instead, and the

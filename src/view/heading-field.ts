@@ -12,7 +12,7 @@ import { buildHeading, HEADING_CLASS, LINE_ATTR } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, enqueueAt, writePlanned } from './write';
 
 export const HEADING_FIELD_CLASS = 'princelists-heading-field';
-const NAME_REFUSED_NOTICE = "That name can't be used for this heading.";
+export const NAME_REFUSED_NOTICE = "That name can't be used for this heading.";
 
 /** The open heading field. A new one's heading was added for it, and goes again unless it gets a name. */
 export interface HeadingField extends HeadingFieldStart {
