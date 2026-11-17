@@ -56,6 +56,10 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(
 			text.slice(FRONT.length) + '- [ ] a ⛔ out\n  - [ ] s1\n  - [ ] s2\n  - [ ] s3 ⛔ out\n',
 		);
+		const selectors = FRONT + '- [ ] a \u{1f194}\ufe0f x1\n  - [ ] s \u26d4\ufe0f x1,y\n';
+		expect(body(planGroupDuplicate(selectors, 3, [3])?.next)).toBe(
+			selectors.slice(FRONT.length) + '- [ ] a\n  - [ ] s \u26d4\ufe0f y\n',
+		);
 	});
 
 	test('keeps a block id the same way on item lines and notes lines', () => {
@@ -66,6 +70,19 @@ describe('planGroupDuplicate', () => {
 	test('takes a block id off only the end of a block, where Obsidian reads one', () => {
 		const text = FRONT + '- [ ] a\n  raise 2 ^10\n  and more ^p1\n';
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  raise 2 ^10\n  and more\n');
+	});
+
+	test('takes a block id off a sub-task only where it ends its paragraph', () => {
+		const text = FRONT + '- [ ] a\n  - [ ] s raise 2 ^10\n    and more\n  - [ ] t ^t1\n';
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(
+			text.slice(FRONT.length) + '- [ ] a\n  - [ ] s raise 2 ^10\n    and more\n  - [ ] t\n',
+		);
+	});
+
+	test('takes the block id off a paragraph right above a table', () => {
+		const table = '  | x | y |\n  |---|---|\n  | 1 | 2 |\n';
+		const text = FRONT + '- [ ] a\n  intro ^p1\n' + table;
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  intro\n' + table);
 	});
 
 	test('takes the Tasks id off a sub-task in the notes, but leaves a code block as it is', () => {
