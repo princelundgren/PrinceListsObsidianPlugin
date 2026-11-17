@@ -27,7 +27,7 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 		untick: state.anyTicked,
 		addStar: state.anyUnstarred,
 		removeStar: state.anyStarred,
-		tag: state.items > 0,
+		tag: state.items + state.headings > 0,
 		today: state.items > 0,
 		tomorrow: state.items > 0,
 		pickDate: state.items > 0,
@@ -77,8 +77,8 @@ export function changeMessage(change: GroupChange, written: Pick<PlannedGroupCha
 /** What a tag entry changed, for its Undo message. */
 export type TagChange = 'addTag' | 'removeTag';
 
-/** The Undo message for `change` of `tag` on the `changed` items the write touched. */
-export function tagChangeMessage(change: TagChange, tag: string, changed: number): string {
-	const items = countPhrase(changed, 0);
-	return change === 'addTag' ? `#${tag} added to ${items}.` : `#${tag} removed from ${items}.`;
+/** The Undo message for `change` of `tag` on the `items` and `headings` the write touched. */
+export function tagChangeMessage(change: TagChange, tag: string, items: number, headings: number): string {
+	const rows = countPhrase(items, headings);
+	return change === 'addTag' ? `#${tag} added to ${rows}.` : `#${tag} removed from ${rows}.`;
 }

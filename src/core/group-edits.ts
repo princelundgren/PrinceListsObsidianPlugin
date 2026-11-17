@@ -176,7 +176,8 @@ export function countPhrase(items: number, headings: number): string {
 	return items === 0 ? part(headings, 'heading') : `${part(items, 'item')} and ${part(headings, 'heading')}`;
 }
 
-function isHeading(model: ListModel, line: number): boolean {
+/** Whether a section's heading is on `line`. */
+export function isHeading(model: ListModel, line: number): boolean {
 	return model.sections.some((section) => section.headingLine === line);
 }
 

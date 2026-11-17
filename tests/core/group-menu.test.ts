@@ -43,8 +43,8 @@ describe('groupEntries', () => {
 		expect(groupEntries(MIXED, false)).not.toContain('move');
 	});
 
-	test('offers only Delete for a selection of headings', () => {
-		expect(groupEntries({ ...NONE, headings: 2 }, true)).toEqual(['delete']);
+	test('offers only Tag… and Delete for a selection of headings', () => {
+		expect(groupEntries({ ...NONE, headings: 2 }, true)).toEqual(['tag', 'delete']);
 	});
 
 	test('keeps to one group of entries when asked', () => {
@@ -60,8 +60,8 @@ describe('barButtons', () => {
 		expect(barButtons(MIXED, true)).toEqual({ move: true, tick: true, star: true, tag: true, date: true, delete: true });
 	});
 
-	test('enables only Delete for a selection of headings', () => {
-		expect(barButtons({ ...NONE, headings: 2 }, true)).toEqual({ move: false, tick: false, star: false, tag: false, date: false, delete: true });
+	test('enables only Tag and Delete for a selection of headings', () => {
+		expect(barButtons({ ...NONE, headings: 2 }, true)).toEqual({ move: false, tick: false, star: false, tag: true, date: false, delete: true });
 	});
 
 	test('disables Move to while a heading is selected', () => {
@@ -100,7 +100,12 @@ describe('changeMessage', () => {
 });
 
 test('names the tag and how many items the write changed', () => {
-	expect(tagChangeMessage('addTag', 'pantry', 3)).toBe('#pantry added to 3 items.');
-	expect(tagChangeMessage('removeTag', 'pantry', 5)).toBe('#pantry removed from 5 items.');
-	expect(tagChangeMessage('addTag', 'pantry', 1)).toBe('#pantry added to 1 item.');
+	expect(tagChangeMessage('addTag', 'pantry', 3, 0)).toBe('#pantry added to 3 items.');
+	expect(tagChangeMessage('removeTag', 'pantry', 5, 0)).toBe('#pantry removed from 5 items.');
+	expect(tagChangeMessage('addTag', 'pantry', 1, 0)).toBe('#pantry added to 1 item.');
+});
+
+test('tagChangeMessage counts the headings it changed', () => {
+	expect(tagChangeMessage('addTag', 'work', 2, 1)).toBe('#work added to 2 items and 1 heading.');
+	expect(tagChangeMessage('removeTag', 'work', 0, 2)).toBe('#work removed from 2 headings.');
 });

@@ -39,15 +39,18 @@ export function inheritedFor(model: ListModel, inherited: InheritedTags, line: n
 }
 
 /**
- * The tags every item on `rows` carries, its own or inherited, as the first item spells them;
- * headings and other rows count for nothing, and `[]` when no row is an item.
+ * The tags every item and heading on `rows` carries, as the first row spells them: an item its own
+ * and its section's, a heading its section's (the list's, then its own). Other rows count for
+ * nothing, and `[]` when no row is an item or a heading.
  */
 export function sharedCarried(lines: readonly Line[], model: ListModel, inherited: InheritedTags, rows: readonly number[]): string[] {
-	const perItem = [...new Set(rows)]
-		.sort((a, b) => a - b)
-		.filter((row) => itemAt(model, row))
-		.map((row) => carriedTags(itemTags(lines[row]?.text ?? '').tags, inheritedFor(model, inherited, row)));
-	return (perItem[0] ?? []).filter((tag) => perItem.every((tags) => tags.some((other) => sameTag(other, tag))));
+	const perRow = [...new Set(rows)].sort((a, b) => a - b).flatMap((row) => {
+		const section = model.sections.findIndex(({ headingLine }) => headingLine === row);
+		if (section !== -1) return [inherited.bySection[section] ?? inherited.list];
+		if (itemAt(model, row)) return [carriedTags(itemTags(lines[row]?.text ?? '').tags, inheritedFor(model, inherited, row))];
+		return [];
+	});
+	return (perRow[0] ?? []).filter((tag) => perRow.every((tags) => tags.some((other) => sameTag(other, tag))));
 }
 
 /** The tags of a list's `tags` property as Obsidian reads them (`#work`): without the `#`, only those that are tags, each once. */
