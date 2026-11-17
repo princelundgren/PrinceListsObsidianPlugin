@@ -554,9 +554,13 @@ this met on 2026-10-30 **(owner)**.
     card's tag button, star, repeat button, day and ⋯ are buttons the ⋯'s height,
     centered on one line, with icons the format bar's size, since they stand with it under the
     notes **(owner, 2026-11-17)**. This replaces drawing them as small as the row's star on
-    desktop, beside the title **(owner, 2026-11-07, #339)**. On a phone, where each is a
-    finger-sized box, a day's text gets the room on each side that an icon has, so the buttons
-    read as one evenly spaced group **(owner, 2026-11-07, #339)**.
+    desktop, beside the title **(owner, 2026-11-07, #339)**. On desktop these buttons and the
+    format bar's are 28 by 28 CSS pixels, Apple's default macOS control size
+    ([Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility)),
+    with 4 between them on desktop and on a phone **(owner, 2026-11-17)**. This replaces 24 by 24
+    with 2 between, WCAG 2.2's minimum target size, which put them close enough to misclick. On a
+    phone, where each is a finger-sized box, a day's text gets the room on each side that an icon
+    has, so the buttons read as one evenly spaced group **(owner, 2026-11-07, #339)**.
     Where the app's web view lacks CSS's `cap` unit (before Chrome 118 and Safari 17.2) they keep
     their full size.
   - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
