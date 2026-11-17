@@ -29,8 +29,10 @@ only documented Obsidian APIs are used.
 
 - **One way of selecting, on desktop and mobile (owner, 2026-11-11).** Hold a row still for the
   hold time, or pick Select in its menu, to start selecting; on desktop Cmd+click,
-  Shift+click, Shift+Up and Shift+Down start it too **(owner)**. While selecting, a click or a tap
-  adds or removes a row, and a bar at the bottom holds the actions **(owner)**.
+  Shift+click, Shift+Up and Shift+Down start it too **(owner)**. While selecting, a tap adds or
+  removes a row, and a bar at the bottom holds the actions **(owner)**. On desktop Cmd+click and
+  Shift+click select rows, and a plain click ends selecting, as in a file list **(owner,
+  2026-11-17)**.
 - **Dragging a selected row drags the whole selection** as one block. A selected heading brings its
   section **(owner)**.
 - **Move to heading…** sends the selection under a heading picked from a list, with no drag
@@ -70,8 +72,9 @@ only documented Obsidian APIs are used.
   (step two, "Collapsing a heading"). A change from outside keeps the rows the view can still find
   and drops the rest **(call)**.
 - **It's never written to the file and isn't remembered (call).** Closing the list ends it.
-- **It ends** with Done, Escape, or removing the last selected row **(call)**. A click or a tap on
-  empty space keeps it, so a near miss between rows doesn't lose it **(call)**. An open menu or
+- **It ends** with Done, Escape, or removing the last selected row **(call)**, and on desktop with
+  a plain click on a row or a heading while no card is open **(owner, 2026-11-17)**. A click or a
+  tap on empty space keeps it, so a near miss between rows doesn't lose it **(call)**. An open menu or
   dialog, the tag popover included, takes the first Escape, and Escape in a text field is the
   field's **(call)**. Once it ends, a click opens a card again.
 
@@ -118,15 +121,21 @@ only documented Obsidian APIs are used.
 
 ## While selecting
 
-- **A click or a tap on a row or a heading adds or removes it (owner; on desktop, owner
-  2026-11-11),** and one on a heading doesn't open the heading menu. Cmd+click does the same.
-  Shift+click, and holding another row, select every shown row between it and the anchor, as a
-  first Shift+click does **(call)**, and a move after that hold drags them all. Holding a selected
-  row changes nothing, since it may start dragging the selection **(call)**. A click or a tap on
-  a link in a title still opens it **(call)**.
+- **A tap on a row or a heading adds or removes it (owner),** and one on a heading doesn't open
+  the heading menu. On desktop Cmd+click does that. Shift+click, and holding another row, select
+  every shown row between it and the anchor, as a first Shift+click does **(call)**, and a move
+  after that hold drags them all. Holding a selected row changes nothing, since it may start
+  dragging the selection **(call)**. A click or a tap on a link in a title still opens it
+  **(call)**.
+- **On desktop a plain click ends selecting and acts as it does before selecting (owner,
+  2026-11-17),** as a click in a file list replaces its selection: on an item it opens the card,
+  and on a heading it only ends selecting. So a plain click still opens an item while rows are
+  selected, and Cmd+click adds one. With a card open it only closes the card (below).
 - **Checkboxes keep their look, and only the highlight marks a selected row (owner,
-  2026-11-12):** a filled selection circle looked like a ticked box. A click or a tap on a
-  checkbox or beside it selects, so nothing is ticked by mistake.
+  2026-11-12):** a filled selection circle looked like a ticked box. A tap on a checkbox or
+  beside it selects, so nothing is ticked by mistake. On desktop, with no card open, a plain
+  click there ends selecting and ticks that item, as a plain click on the row opens it **(owner,
+  2026-11-17)**.
 - **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
   to, Tick, Tag, Star, Date and Delete. On desktop it takes the same place whether or not the
   floating "+" shows there **(call)**.
@@ -249,21 +258,20 @@ Left out on purpose, each for its reason:
 Each in the pull request that makes it untrue:
 
 - **Step one, "Selecting and adding":** a click with Cmd or Shift held, Shift+Up or Shift+Down, a
-  hold or Select starts selecting instead of only closing the card; while selecting, a click
+  hold or Select starts selecting instead of only closing the card; while selecting, a tap
   selects instead of opening a card, Cmd+Enter adds below the selection, and the bar takes the
   floating "+"'s place.
-- **Step one, "Ticking":** with Cmd or Shift held, and while selecting, a click on the checkbox or
-  beside it selects.
+- **Step one, "Ticking":** a click with Cmd or Shift held, or a tap while selecting, on the
+  checkbox or beside it selects.
 - **Step one, "Item actions":** the selection's menu, and Select in an item's and a heading's
-  menus; while selecting, a click or a tap on a heading selects it instead of opening the heading
-  menu.
+  menus; while selecting, a tap on a heading selects it instead of opening the heading menu.
 - **Step one, "Dragging" and "Touch on mobile":** a hold that reaches the hold time, by touch or
   with a mouse, starts selecting; a drag of a selected row moves the selection.
 - **Step one, "Undo":** "the list's only undo on mobile stays the Undo button after a delete" no
   longer holds: every group action shows one.
 - **Step two, "Dragging a heading":** a selection with a heading drops as a section does, and
-  while selecting a click or a tap on a heading selects it.
-- **Step two, "Collapsing a heading":** while selecting, a click or a tap on a heading selects it;
+  while selecting a tap on a heading selects it.
+- **Step two, "Collapsing a heading":** while selecting, a tap on a heading selects it;
   Move to heading… expands a collapsed target.
 - **AGENTS.md, "Read before working":** links this design.
 
