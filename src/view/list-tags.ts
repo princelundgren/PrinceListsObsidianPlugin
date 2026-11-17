@@ -41,8 +41,8 @@ export function openListTags(view: PrinceListView, button: HTMLElement | null = 
 /**
  * Draws the list's tags at the end of `row`, after its title, as one button whose press opens Tag
  * list…'s popover, then a tag icon button that opens it too, which styles.css shows only while the
- * row holds focus, as when the title is being edited. Returns the slot for the tag icon button when
- * it is `kept`, the focused element the redraw keeps.
+ * title or the button holds focus. Returns the slot for the tag icon button when it is `kept`, the
+ * focused element the redraw keeps.
  */
 export function buildListTags(view: PrinceListView, row: HTMLElement, kept: HTMLElement | null): HTMLElement | null {
 	const tags = listTags(view.text);

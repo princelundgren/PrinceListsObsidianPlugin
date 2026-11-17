@@ -39,8 +39,10 @@ textarea.princelists-field:focus {
 	margin: 0 0 var(--size-4-2);
 }
 
-/* The tag button after the list's title and tags shows only while the title is being edited, or holds focus itself. */
-.princelists-title-row:not(:focus-within) .princelists-list-tag-button {
+/* The tag button after the list's title and tags shows only while the title or the button holds
+   focus, not the tags, so a press on them or focus returning to them doesn't show it. */
+.princelists-title-row:not(:focus-within) .princelists-list-tag-button,
+.princelists-list-tags:focus ~ .princelists-list-tag-button {
 	display: none;
 }
 

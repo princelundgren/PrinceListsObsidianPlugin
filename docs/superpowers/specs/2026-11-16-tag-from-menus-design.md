@@ -158,11 +158,11 @@ had failed **(owner, 2026-11-16, #442)**.
 - **A list shows a tag button while its title is edited (owner, 2026-11-16),** after its tags if it
   has any **(owner, 2026-11-17)**, so it can be tagged without a menu. It is the card's tag icon,
   named "Tag list", and opens the same popover; the title keeps focus until the press's click, so
-  the button stays to take it **(call)**. It hides once focus leaves the title row (the title or the
-  button), so after a pick or Escape focus goes to the list, as from the menus. Where the title
-  keeps the row's width (no `field-sizing`), it takes a line under the title while shown. This
-  replaces showing it only on a list with no tags, where the chips were the only way in once it had
-  some.
+  the button stays to take it **(call)**. It shows only while the title or the button holds focus,
+  not the tags, so after a pick or Escape from it focus goes to the list, as from the menus, and a
+  press on the tags doesn't show it. Where the title keeps the row's width (no `field-sizing`), it
+  takes a line under the title while shown. This replaces showing it only on a list with no tags,
+  where the chips were the only way in once it had some.
 - **The rows' tag look (owner, 2026-11-17):** gray pills in a tag's shape, as a row's own tags
   are ([filtering by tag](2026-11-07-tag-filter-design.md), "Rows"). This replaces Obsidian's tag
   colors **(call)**.
