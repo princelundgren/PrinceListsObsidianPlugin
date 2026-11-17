@@ -24,8 +24,9 @@ const UNDERLINE_OR_RULE = /^\s*(?:=+|-+|(?:-\s*){3,}|(?:\*\s*){3,}|(?:_\s*){3,})
 
 /**
  * Copies each item on `rows`, with its notes, right below itself, in one write. A copy is unticked,
- * as is its checklist, and loses its block ids and Tasks ids, also a sub-task's in its notes, and
- * those ids in its `⛔` fields; the rest of its text is the item's, and a code block or other block
+ * as is its checklist, and loses its block ids, except one whose paragraph's last line would read as
+ * an underline or a rule without it, and its Tasks ids, also a sub-task's in its notes, and those
+ * ids in its `⛔` fields; the rest of its text is the item's, and a code block or other block
  * the notes editor draws whole is copied as it is. The edit maps every line to where it went, so
  * history inverts it. Returns null when a row is a heading or not an item.
  */
