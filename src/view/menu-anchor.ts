@@ -14,7 +14,10 @@ export function trackWhileShown(view: PrinceListView, line: number, menu: Menu):
 	return anchor;
 }
 
-/** Runs `action` when `menu` hides, beside the menu's other hide actions: `Menu.onHide` keeps only one. */
+/**
+ * Runs `action` when `menu` hides, or at once if it already hid, beside the menu's other hide actions:
+ * `Menu.onHide` keeps only one.
+ */
 export function onMenuHide(menu: Menu, action: () => void): void {
 	whenHidden(menu, (callback) => menu.onHide(callback), action);
 }
