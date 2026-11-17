@@ -155,12 +155,14 @@ had failed **(owner, 2026-11-16, #442)**.
 - **Chips right of the title (owner, 2026-11-16):** each of the list's tags as `#tag`, in the
   `tags` property's order, read as **Tag list…** reads them. They show only when the list has tags
   **(call)**.
-- **A list with no tags shows a tag button while its title is edited (owner, 2026-11-16),** where
-  the chips would sit, so it can be tagged without a menu. It is the card's tag icon, named "Tag
-  list", and opens the same popover; the title keeps focus until the press's click, so the button
-  stays to take it **(call)**. It hides once focus leaves the title row (the title or the button), so
-  after a pick or Escape focus goes to the list, as from the menus. Where the title keeps the row's width (no `field-sizing`), it
-  takes a line under the title while shown. With tags, the chips are the way in, so it doesn't show.
+- **A list shows a tag button while its title is edited (owner, 2026-11-16),** after its tags if it
+  has any **(owner, 2026-11-17)**, so it can be tagged without a menu. It is the card's tag icon,
+  named "Tag list", and opens the same popover; the title keeps focus until the press's click, so
+  the button stays to take it **(call)**. It hides once focus leaves the title row (the title or the
+  button), so after a pick or Escape focus goes to the list, as from the menus. Where the title
+  keeps the row's width (no `field-sizing`), it takes a line under the title while shown. This
+  replaces showing it only on a list with no tags, where the chips were the only way in once it had
+  some.
 - **The rows' tag look (owner, 2026-11-17):** gray pills in a tag's shape, as a row's own tags
   are ([filtering by tag](2026-11-07-tag-filter-design.md), "Rows"). This replaces Obsidian's tag
   colors **(call)**.
