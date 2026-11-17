@@ -49,6 +49,8 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(FRONT + '- [ ] see 🆔 abc docs\n', 3, [3])?.next)).toBe('- [ ] see 🆔 abc docs\n- [ ] see 🆔 abc docs\n');
 		expect(body(planGroupDuplicate(FRONT + '- [ ] a 🆔 abc⛔ xyz\n', 3, [3])?.next)).toBe('- [ ] a 🆔 abc⛔ xyz\n- [ ] a ⛔ xyz\n');
 		expect(body(planGroupDuplicate(FRONT + '- [ ] 🆔 abc #home\n', 3, [3])?.next)).toBe('- [ ] 🆔 abc #home\n- [ ] #home\n');
+		const subTask = '- [ ] a\n  - [ ] 🆔 x1 ^s1\n    more\n';
+		expect(body(planGroupDuplicate(FRONT + subTask, 3, [3])?.next)).toBe(subTask + '- [ ] a\n  - [ ] ^s1\n    more\n');
 	});
 
 	test("drops from the copy's ⛔ fields the ids its own 🆔 fields lost, and a ⛔ left empty", () => {

@@ -257,7 +257,8 @@ only documented Obsidian APIs are used.
   notes a block id goes only where Obsidian reads one, at the end of a paragraph or heading, after
   a space as on an item line. Its `⛔` fields lose exactly the ids its own `🆔` fields lost, and a
   `⛔` left empty goes, so a copied sub-task isn't blocked by the original's; a `⛔` naming a task
-  outside the item stays **(call)**. The rest of its text is the item's, and a block the notes
+  outside the item stays **(call)**. The ids a `⛔` keeps are written as Tasks writes them, joined
+  with `,` **(call)**. The rest of its text is the item's, and a block the notes
   editor draws whole, such as a code block, is copied as it is, inside a quote too. It shows only
   while no heading is selected **(owner, 2026-11-17)**, since a heading's copy right below it would
   take its items. The selection stays on

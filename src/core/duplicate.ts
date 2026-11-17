@@ -129,7 +129,9 @@ function withoutTasksIds(text: string, dropped: ReadonlySet<string>): string {
 		if (left !== '' && !TASKS_ID.test(field)) kept = kept.slice(0, from) + left + kept.slice(to);
 		else kept = withoutField(kept, from, to, startsLine);
 	}
-	return joinItemLine({ ...parts, tail: kept + end });
+	// With every field gone from the start of the line, the block id after them needs no space before it.
+	const tail = startsLine && kept === '' && fields !== '' ? end.trimStart() : kept + end;
+	return joinItemLine({ ...parts, tail });
 }
 
 // An item line without its block id; a title that is only a block id goes too.
