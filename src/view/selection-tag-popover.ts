@@ -6,11 +6,14 @@ import { contentStartLine } from '../obsidian/marker';
 import { queueGroupAction } from './group-write';
 import type { PrinceListView } from './list-view';
 import { stripTagOrder } from './tag-suggest';
-import { closeTagsPopover, isTagsPopoverOpen, openTagsPopover } from './tags-popover';
+import { closeTagsPopover, isTagsPopoverOpenFrom, openTagsPopover } from './tags-popover';
 
-/** Closes the popover and focuses `button` if it's open; opens it over `button` otherwise. */
+/**
+ * Closes the popover and focuses `button` if it's open from `button`; opens it over `button`
+ * otherwise, in place of one open for another target.
+ */
 export function toggleSelectionTagPopover(view: PrinceListView, button: HTMLElement): void {
-	if (isTagsPopoverOpen(view)) {
+	if (isTagsPopoverOpenFrom(view, button)) {
 		closeTagsPopover(view);
 		button.focus();
 	} else openSelectionTagPopover(view, button);

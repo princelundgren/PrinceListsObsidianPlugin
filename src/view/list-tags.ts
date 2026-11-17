@@ -15,8 +15,9 @@ export const LIST_TAG_BUTTON_CLASS = 'princelists-list-tag-button';
 export const LIST_TAGS_REFUSED_NOTICE = "The list's tags can't be changed here. Use Show file properties.";
 
 /**
- * Opens the tag popover under the list's title: the tags of its `tags` property as chips, each
- * with a × that takes it off, and a field whose pick adds a tag. It closes once the Markdown
+ * Opens the tag popover under the list's title, or above it when there is more room there: the tags
+ * of its `tags` property as chips, each with a × that takes it off, and a field whose pick adds a
+ * tag. It closes once the Markdown
  * differs from what it opened with, or the view has no title element. Nothing opens when the view
  * has no title element. Opened from the chips beside the title, `button` is theirs, which shows it
  * open and takes focus back.

@@ -21,7 +21,7 @@ this project.
     shows items' tags on rows and cards, and filters a list and the Schedule by them, and
     [inherited tags](docs/superpowers/specs/2026-11-15-inherited-tags-design.md) makes a list's and a
     heading's tags count for their items, and [tag from menus](docs/superpowers/specs/2026-11-16-tag-from-menus-design.md)
-    sets them from the heading's and the list's menus. [Selecting several rows](docs/superpowers/specs/2026-11-07-select-several-design.md)
+    sets them from the heading's and the list's menus and beside the list's title. [Selecting several rows](docs/superpowers/specs/2026-11-07-select-several-design.md)
     acts on many items and headings at once, and [tagging a selection](docs/superpowers/specs/2026-11-12-select-tags-design.md)
     adds and removes a tag on all of them. [Repeating items](docs/superpowers/specs/2026-11-13-repeating-items-design.md)
     are done until their next date, then come back.
@@ -32,9 +32,9 @@ this project.
     latest ones for the plugin are
     [the card's tag popover](docs/superpowers/plans/2026-11-12-card-tag-popover.md),
     [tagging a selection](docs/superpowers/plans/2026-11-12-select-tags.md),
-    [repeating items coming back](docs/superpowers/plans/2026-11-14-repeating-items-come-back.md) and
-    [inherited tags](docs/superpowers/plans/2026-11-16-inherited-tags.md),
-    [tag from menus](docs/superpowers/plans/2026-11-16-tag-from-menus.md) and
+    [repeating items coming back](docs/superpowers/plans/2026-11-14-repeating-items-come-back.md),
+    [inherited tags](docs/superpowers/plans/2026-11-16-inherited-tags.md) and
+    [tag from menus](docs/superpowers/plans/2026-11-16-tag-from-menus.md), and
     [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
     README's and the listing's pictures. Implement a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.

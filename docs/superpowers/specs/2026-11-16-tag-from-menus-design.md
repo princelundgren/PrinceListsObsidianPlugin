@@ -1,7 +1,7 @@
 ---
 status: live
 governs: [src/**, styles.css]
-verified: 2026-11-16
+verified: 2026-11-17
 tracking: ["#434", "#442", "#446"]
 ---
 
@@ -71,8 +71,8 @@ A heading has one way: its tags are in its text, so the tag goes in the text.
   text changed. Chips, button and where focus returns are the target's too.
 - **Where it opens (call):** against the heading for Tag…, and against the list's title for Tag
   list…, scrolled into view if needed, inside the view and right-aligned with it as far as the
-  view's width allows. A heading's popover opens above it when there is more room there than
-  below, so the field never opens off the view's bottom. It follows its anchor as the list scrolls
+  view's width allows. Either opens above its anchor when there is more room there than below, so
+  the field never opens off the view's bottom. It follows its anchor as the list scrolls
   and as the view draws again, and closes once the anchor isn't drawn.
 - **The chips (owner)** are the target's own tags, each with a × named "Remove #work":
   - **A heading's chips are the tags at the end of its text (call),** after its last word that
@@ -88,7 +88,8 @@ A heading has one way: its tags are in its text, so the tag goes in the text.
   - for a heading, every tag in its text and the list's own;
   - for the list, its own. A heading's tag stays, since putting it on the list covers every item.
 - **A pick or a × writes, and the popover closes (call),** as the selection's does, with no
-  message: one target changes, as with the card's popover. Focus goes back to the list.
+  message: one target changes, as with the card's popover. Focus goes back to the list, or to the
+  chips that opened it.
 
 ## A heading's tags
 
@@ -157,8 +158,8 @@ had failed **(owner, 2026-11-16, #442)**.
 - **A list with no tags shows a tag button while its title is edited (owner, 2026-11-16),** where
   the chips would sit, so it can be tagged without a menu. It is the card's tag icon, named "Tag
   list", and opens the same popover; the title keeps focus until the press's click, so the button
-  stays to take it **(call)**. It hides once focus leaves the title, so after a pick or Escape focus
-  goes to the list, as from the menus. Where the title keeps the row's width (no `field-sizing`), it
+  stays to take it **(call)**. It hides once focus leaves the title row (the title or the button), so
+  after a pick or Escape focus goes to the list, as from the menus. Where the title keeps the row's width (no `field-sizing`), it
   takes a line under the title while shown. With tags, the chips are the way in, so it doesn't show.
 - **The rows' tag look (call):** the same `--tag-*` variables the rows' own tags use, so a theme's
   tag style reaches them.
