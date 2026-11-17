@@ -695,8 +695,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   ("Ticking") or a link in its title, opens its card and makes it the anchor. Clicking empty space
   closes the card and clears the anchor. While selecting, a tap on an item selects it instead of
   opening its card, and on desktop a plain click ends selecting and opens it; a click or a tap on
-  empty space keeps the selection ([selecting several rows](2026-11-07-select-several-design.md), "While
-  selecting").
+  empty space ends selecting **(owner, 2026-11-17)** ([selecting several
+  rows](2026-11-07-select-several-design.md), "While selecting").
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A

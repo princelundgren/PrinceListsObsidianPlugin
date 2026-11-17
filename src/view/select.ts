@@ -26,13 +26,14 @@ const announcers = new WeakMap<PrinceListView, { status: HTMLElement; describerI
  * rows from the anchor to it, and either starts selecting. An open card closes first, its item
  * selected; while selecting, a plain click or tap only closes it. Returns whether it handled the click.
  * Otherwise a plain click on a row or heading, not on a checkbox or beside it, clears the selection and
- * makes it the anchor; one on a checkbox or beside it ends selecting; one on empty space before
- * selecting clears the anchor. All return false, so the click goes on as it would with nothing
+ * makes it the anchor; one on a checkbox or beside it ends selecting; one on empty space ends
+ * selecting, or clears the anchor before it, unless a card is open. All return false, so the click goes on as it would with nothing
  * selected.
  */
 export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
 	if (isEmptySpace(view, target)) {
-		if (!view.selecting) clearSelection(view);
+		// While a card is open, the click only closes the card.
+		if (!view.selecting || !view.card) clearSelection(view);
 		return false;
 	}
 	const rowEl = selectableRowAt(view, target);

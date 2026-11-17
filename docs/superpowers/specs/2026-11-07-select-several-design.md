@@ -74,7 +74,8 @@ only documented Obsidian APIs are used.
 - **It's never written to the file and isn't remembered (call).** Closing the list ends it.
 - **It ends** with Done, Escape, or removing the last selected row **(call)**, and on desktop with
   a plain click on a row or a heading while no card is open **(owner, 2026-11-17)**. A click or a
-  tap on empty space keeps it, so a near miss between rows doesn't lose it **(call)**. An open menu or
+  tap on empty space ends it too, while no card is open **(owner, 2026-11-17)**. This replaces
+  keeping it there, so that a near miss between rows didn't lose it **(call)**. An open menu or
   dialog, the tag popover included, takes the first Escape, and Escape in a text field is the
   field's **(call)**. Once it ends, a click opens a card again.
 
