@@ -85,6 +85,12 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  intro\n' + table);
 	});
 
+	test('takes the block id off a paragraph right above a table in a quote', () => {
+		const table = '  > | x | y |\n  > |---|---|\n';
+		const text = FRONT + '- [ ] a\n  > intro ^p1\n' + table;
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  > intro\n' + table);
+	});
+
 	test('takes the block id off the text line of an underlined heading, as off a # heading', () => {
 		const underlined = FRONT + '- [ ] a\n  Title ^h1\n  ---\n';
 		expect(body(planGroupDuplicate(underlined, 3, [3])?.next)).toBe(underlined.slice(FRONT.length) + '- [ ] a\n  Title\n  ---\n');

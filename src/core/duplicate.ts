@@ -1,6 +1,6 @@
-import { Parser } from 'commonmark';
+import { Parser, type Node } from 'commonmark';
 import { notesAtMargin, plainNotesLines, untickChecklist } from './checklist';
-import { drawnBlocks } from './drawn-blocks';
+import { tableStart } from './drawn-blocks';
 import { moveEdit } from './follow';
 import type { PlannedGroupEdit } from './group-actions';
 import { BARE_BLOCK_ID, BLOCK_ID_PATTERN, joinItemLine, parseItemLine, splitTail, tailFields, untickLine } from './item-line';
@@ -15,6 +15,8 @@ export interface PlannedDuplicate extends PlannedGroupEdit {
 // A block id names one block, and a Tasks id one task, so a copy keeps neither.
 const TASKS_ID = /^🆔\ufe0f? */;
 const DEPENDS_ON = /^⛔\ufe0f? */;
+
+const QUOTE_MARKER = /^[ \t]*>/;
 
 /**
  * Copies each item on `rows`, with its notes, right below itself, in one write. A copy is unticked,
@@ -66,7 +68,6 @@ function copyOf(original: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'):
 function blockEnds(lines: readonly Line[], item: ItemBlock): Set<number> {
 	const notes = notesAtMargin(lines, item);
 	const ends = new Set<number>();
-	const paragraphStarts = new Set<number>();
 	const walker = new Parser().parse(maskBlocks(notes, 0).text).walker();
 	for (let step = walker.next(); step; step = walker.next()) {
 		const { node, entering } = step;
@@ -74,13 +75,27 @@ function blockEnds(lines: readonly Line[], item: ItemBlock): Set<number> {
 		const [[startLine], [endLine]] = node.sourcepos;
 		// An underlined heading ends on its last line of text, above the underline.
 		ends.add(item.titleLine + (node.type === 'heading' && startLine < endLine ? endLine - 1 : endLine));
-		if (node.type === 'paragraph') paragraphStarts.add(startLine - 1);
-	}
-	// A table that starts on a later line of a paragraph ends a paragraph on the line above it.
-	for (const block of drawnBlocks(joinLines(notes))) {
-		if (block.kind === 'table' && !paragraphStarts.has(block.lines.start)) ends.add(item.titleLine + block.lines.start);
+		if (node.type !== 'paragraph') continue;
+		// A table that starts on a later line of a paragraph ends a paragraph on the line above it.
+		const depth = quoteDepth(node);
+		const paragraph = notes.slice(startLine - 1, endLine).map((line) => insideQuotes(line.text, depth));
+		const table = tableStart(paragraph, 1);
+		if (table !== undefined) ends.add(item.titleLine + startLine - 1 + table);
 	}
 	return ends;
+}
+
+function quoteDepth(node: Node): number {
+	let depth = 0;
+	for (let parent = node.parent; parent; parent = parent.parent) if (parent.type === 'block_quote') depth++;
+	return depth;
+}
+
+// `text` without the `>` markers of the `depth` quotes around it, as many of them as it has.
+function insideQuotes(text: string, depth: number): string {
+	let inside = text;
+	for (let quote = 0; quote < depth && QUOTE_MARKER.test(inside); quote++) inside = inside.replace(QUOTE_MARKER, '');
+	return inside;
 }
 
 function withoutBlockId(text: string): string {
