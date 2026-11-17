@@ -1112,6 +1112,15 @@ button.princelists-card-repeat.is-repeating {
 	overflow-wrap: break-word;
 }
 
+/* On rows and beside the list's title, tags are gray, so a list with many reads calmly; the card's
+   chips and the tag popover keep Obsidian's tag colors. */
+.princelists-tags .princelists-tag,
+.princelists-list-tags .princelists-tag {
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
+	border-color: transparent;
+}
+
 .princelists-item.is-done .princelists-tag {
 	color: var(--checklist-done-color);
 }
@@ -1125,14 +1134,14 @@ button.princelists-card-repeat.is-repeating {
 	margin-block: var(--size-4-2);
 }
 
-/* Each strip tag is a button drawn as a tag in a note. */
+/* Each strip tag is a button shaped as a tag in a note, gray as a row's tags are. */
 button.princelists-strip-tag {
 	height: auto;
 	font-size: var(--tag-size);
 	font-weight: var(--tag-weight);
-	color: var(--tag-color);
-	background-color: var(--tag-background);
-	border: var(--tag-border-width) solid var(--tag-border-color);
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
+	border: var(--tag-border-width) solid transparent;
 	padding: var(--tag-padding-y) var(--tag-padding-x);
 	border-radius: var(--tag-radius);
 	line-height: var(--line-height-tight);
@@ -1156,9 +1165,7 @@ button.princelists-list-tag-button {
 
 @media (hover: hover) {
 	button.princelists-strip-tag:hover {
-		color: var(--tag-color-hover);
-		background-color: var(--tag-background-hover);
-		border-color: var(--tag-border-color-hover);
+		background-color: var(--background-modifier-border);
 	}
 }
 
