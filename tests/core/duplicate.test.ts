@@ -49,6 +49,8 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(FRONT + '- [ ] see 🆔 abc docs\n', 3, [3])?.next)).toBe('- [ ] see 🆔 abc docs\n- [ ] see 🆔 abc docs\n');
 		expect(body(planGroupDuplicate(FRONT + '- [ ] a 🆔 abc⛔ xyz\n', 3, [3])?.next)).toBe('- [ ] a 🆔 abc⛔ xyz\n- [ ] a ⛔ xyz\n');
 		expect(body(planGroupDuplicate(FRONT + '- [ ] 🆔 abc #home\n', 3, [3])?.next)).toBe('- [ ] 🆔 abc #home\n- [ ] #home\n');
+		const subTask = '- [ ] a\n  - [ ] 🆔 x1 ^s1\n    more\n';
+		expect(body(planGroupDuplicate(FRONT + subTask, 3, [3])?.next)).toBe(subTask + '- [ ] a\n  - [ ] ^s1\n    more\n');
 	});
 
 	test("drops from the copy's ⛔ fields the ids its own 🆔 fields lost, and a ⛔ left empty", () => {
@@ -83,6 +85,19 @@ describe('planGroupDuplicate', () => {
 		const table = '  | x | y |\n  |---|---|\n  | 1 | 2 |\n';
 		const text = FRONT + '- [ ] a\n  intro ^p1\n' + table;
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  intro\n' + table);
+	});
+
+	test('takes the block id off a paragraph right above a table in a quote', () => {
+		const table = '  > | x | y |\n  > |---|---|\n';
+		const text = FRONT + '- [ ] a\n  > intro ^p1\n' + table;
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  > intro\n' + table);
+	});
+
+	test('takes the block id off the text line of an underlined heading, as off a # heading', () => {
+		const underlined = FRONT + '- [ ] a\n  Title ^h1\n  ---\n';
+		expect(body(planGroupDuplicate(underlined, 3, [3])?.next)).toBe(underlined.slice(FRONT.length) + '- [ ] a\n  Title\n  ---\n');
+		const marked = FRONT + '- [ ] a\n  ## Title ^h1\n';
+		expect(body(planGroupDuplicate(marked, 3, [3])?.next)).toBe(marked.slice(FRONT.length) + '- [ ] a\n  ## Title\n');
 	});
 
 	test('takes the Tasks id off a sub-task in the notes, but leaves a code block as it is', () => {

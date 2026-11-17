@@ -86,22 +86,30 @@ function kindOf(type: string, firstLine: string): DrawnBlock['kind'] | null {
 	}
 }
 
-// As @lezer/markdown reads one, a table runs to the paragraph's end, and starts on its first line, or on
-// a later one when the first has no pipe.
 function* blocksInParagraph(texts: readonly string[], paragraph: LineRange, startsItsLine: boolean): Generator<DrawnBlock> {
-	const isFirstLinePiped = hasPipe(texts[paragraph.start] as string);
-	for (let i = startsItsLine ? paragraph.start : paragraph.start + 1; i < paragraph.end; i++) {
-		const text = texts[i] as string;
-		const next = texts[i + 1];
-		const mayStartTable = i === paragraph.start || !isFirstLinePiped;
-		if (mayStartTable && next !== undefined && i + 1 < paragraph.end && isTableStart(text, next)) {
-			const lines = { start: i, end: paragraph.end };
-			yield { lines, kind: 'table', markdown: blockText(texts, lines) };
-			return;
-		}
+	const first = startsItsLine ? paragraph.start : paragraph.start + 1;
+	const table = tableStart(texts.slice(paragraph.start, paragraph.end), first - paragraph.start);
+	const tableLine = table === undefined ? paragraph.end : paragraph.start + table;
+	for (let i = first; i < tableLine; i++) {
 		const line = { start: i, end: i + 1 };
-		if (isEmbedLine(text)) yield { lines: line, kind: 'embed', markdown: blockText(texts, line) };
+		if (isEmbedLine(texts[i] as string)) yield { lines: line, kind: 'embed', markdown: blockText(texts, line) };
 	}
+	if (table === undefined) return;
+	const lines = { start: tableLine, end: paragraph.end };
+	yield { lines, kind: 'table', markdown: blockText(texts, lines) };
+}
+
+/**
+ * The index in `paragraph`, one paragraph's lines, of the first line from `from` on where a table
+ * starts, or undefined. As @lezer/markdown reads one, a table runs to the paragraph's end, and starts
+ * on its first line, or on a later one when the first has no pipe.
+ */
+export function tableStart(paragraph: readonly string[], from: number): number | undefined {
+	const isFirstLinePiped = hasPipe(paragraph[0] ?? '');
+	for (let i = from; i + 1 < paragraph.length; i++) {
+		if ((i === 0 || !isFirstLinePiped) && isTableStart(paragraph[i] as string, paragraph[i + 1] as string)) return i;
+	}
+	return undefined;
 }
 
 function isTableStart(header: string, delimiter: string): boolean {
