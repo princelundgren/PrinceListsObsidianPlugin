@@ -786,8 +786,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - **The card's ⋯ menu, and a right-click on the open card, hold only Edit in Markdown and Delete
     item (owner, 2026-11-17).** The card shows the box and buttons for its tags, date, repeat and
     star (step two's design, "When and the Schedule view"), and "+" adds an item below it. This
-    replaces the rest of a row's menu but its quick entries there **(owner, 2026-10-29 and
-    2026-11-11)**: Select, Add star or Remove star, Repeat…, New item below and New heading below.
+    replaces menus that also held Select, Add star or Remove star, Repeat…, New item below and New
+    heading below **(owner, 2026-10-29 and 2026-11-11)**.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star entries' "Add star" and "Remove star";
     and "Remove", as in Remove image.
@@ -821,11 +821,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
-- **On both desktop and mobile,** the open card has a ⋯ button with Edit in Markdown and Delete item
-  ("Item actions"). On mobile this is the only way to reach them **(owner)**. Selecting rows with a
-  hold reaches the selection's actions through its bar: Move to, Date and Delete, and the rest in
-  its More menu ([selecting several rows](2026-11-07-select-several-design.md), "The bar"). The
-  button's accessible name is "Item actions" **(call)**.
+- **On both desktop and mobile,** the open card has a ⋯ button with Edit in Markdown and Delete
+  item. On mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches
+  the selection's actions through its bar: Move to, Date and Delete, and the rest in its More menu
+  ([selecting several rows](2026-11-07-select-several-design.md), "The bar"). The button's
+  accessible name is "Item actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading, Tag… and Delete heading **(owner, 2026-10-20)**, and Select, as on desktop **(call)**. Step two
   adds Edit in Markdown, Collapse all headings and Expand all headings. It's a tap, not a
