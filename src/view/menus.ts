@@ -19,13 +19,15 @@ import { openHeadingTags } from './heading-tags';
 import { itemQuickMenu } from './item-quick-menu';
 import type { PrinceListView } from './list-view';
 import { openListTags } from './list-tags';
-import { atLine, trackWhileShown } from './menu-anchor';
+import { atLine, onMenuHide, trackWhileShown } from './menu-anchor';
 import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
 import { ownElements } from './own-rows';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
-import { selectRow } from './select';
+import { SELECTED_CLASS, selectRow } from './select';
 import { addGroupEntries } from './selection-menu';
 import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
+
+const MENU_TARGET_CLASS = 'princelists-menu-target';
 
 // The item actions, from a right-click on desktop and the card's ⋯, after Select and the card's own
 // entries (spec, "Item actions").
@@ -219,10 +221,21 @@ function headingLinesOf(model: ListModel): number[] {
 // a menu of their own, and the list note gets none of the list's.
 export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): void {
 	if (target.closest(`textarea, input:not([type="checkbox"]), .${NOTES_CODEMIRROR_CLASS}, .${NOTE_CLASS}`)) return;
-	const menu = menuAt(view, target) ?? backgroundMenu(view, evt);
+	const rowMenu = menuAt(view, target);
+	const menu = rowMenu ?? backgroundMenu(view, evt);
 	if (!menu) return;
 	evt.preventDefault();
+	if (rowMenu) markWhileShown(target, rowMenu);
 	menu.showAtMouseEvent(evt);
+}
+
+// Marks the right-clicked row or heading while its own menu shows, more lightly than a selected row:
+// Select in the menu selects it, and a selected row's menu is the selection's, so it isn't marked.
+function markWhileShown(target: HTMLElement, menu: Menu): void {
+	const rowEl = target.closest<HTMLElement>(`.${ITEM_CLASS}, .${HEADING_CLASS}`);
+	if (!rowEl || rowEl.hasClass(CARD_CLASS) || rowEl.hasClass(SELECTED_CLASS)) return;
+	rowEl.addClass(MENU_TARGET_CLASS);
+	onMenuHide(menu, () => rowEl.removeClass(MENU_TARGET_CLASS));
 }
 
 // Obsidian makes a contextmenu on mobile after a still hold, and holding a row or a heading opens no

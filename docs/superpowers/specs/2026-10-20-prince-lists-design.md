@@ -756,6 +756,12 @@ back only what was typed and leaves the empty line, which can be deleted like an
   rows](2026-11-07-select-several-design.md), "Starting to select"). Delete item removes the item
   and its notes, and its name says what goes **(owner, 2026-10-29)**. Step two adds Edit in
   Markdown.
+- **The right-clicked row or heading is marked while its own menu shows (owner, 2026-11-17),** with
+  the background Obsidian gives a hovered file, `--nav-item-background-hover`, so it is clear which
+  row the menu acts on. The mark goes when the menu closes; Select selects the row instead. It is
+  lighter than a selected row's highlight, since a selected row opens the selection's menu, and a
+  row outside the selection would otherwise look added to it. A selected row and the open card
+  aren't marked.
 - **A row's right-click menu also does what the item's card does (owner, 2026-10-29),** so an item
   needn't be opened for it: Tick or Untick, Tag…, which opens the card with its tag popover
   **(owner, #448)**, Add star or Remove star, then Set date to today, Set date to tomorrow, Set
