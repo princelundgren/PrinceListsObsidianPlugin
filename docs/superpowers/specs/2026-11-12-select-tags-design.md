@@ -34,8 +34,8 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## The bar's Tag button
 
-- **Its place (call):** Move to, Tick, Star, Tag, Date, then Delete past the divider. It has the
-  `tag` icon, as the card's tag button does, and the label "Tag".
+- **Its place (owner, #450):** Move to, Tick, Tag, Star, Date, then Delete past the divider. It has
+  the `tag` icon, as the card's tag button does, and the label "Tag".
 - **Enabled while any item or heading is selected (owner, 2026-11-16),** since a heading's tag
   counts for its items ([inherited tags](2026-11-15-inherited-tags-design.md)). Move to, Tick, Star
   and Date stay as they are.
@@ -101,10 +101,10 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## The selection's menu
 
-- **Tag… (call),** after the star entries, opens the popover over the bar's Tag button, so desktop
-  has one way to tag a selection whether it starts from the menu or the bar. It shows while any item
-  or heading is selected. The selection's menu is desktop only, as today; the bar opens no menu for
-  Tag.
+- **Tag… (owner, #450),** before the star entries, opens the popover over the bar's Tag button, so
+  desktop has one way to tag a selection whether it starts from the menu or the bar. It shows while
+  any item or heading is selected. The selection's menu is desktop only, as today; the bar opens no
+  menu for Tag.
 
 ## The write and the message
 

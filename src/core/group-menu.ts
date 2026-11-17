@@ -1,7 +1,7 @@
 import { countPhrase, type GroupState, type PlannedGroupChange } from './group-edits';
 
 /** An entry of the selection's menu. */
-export type GroupEntry = 'move' | 'tick' | 'untick' | 'addStar' | 'removeStar' | 'tag' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'delete';
+export type GroupEntry = 'move' | 'tick' | 'untick' | 'tag' | 'addStar' | 'removeStar' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'delete';
 
 /** The entries the bar shows one group of at a time. */
 export type EntryGroup = 'tick' | 'star' | 'date';
@@ -25,9 +25,9 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 		move: listHasHeadings && state.headings === 0 && state.items > 0,
 		tick: state.anyUnticked,
 		untick: state.anyTicked,
+		tag: state.items + state.headings > 0,
 		addStar: state.anyUnstarred,
 		removeStar: state.anyStarred,
-		tag: state.items + state.headings > 0,
 		today: state.items > 0,
 		tomorrow: state.items > 0,
 		pickDate: state.items > 0,
