@@ -2,7 +2,7 @@
 status: live
 governs: [src/**, styles.css]
 verified: 2026-11-16
-tracking: ["#434"]
+tracking: ["#434", "#442"]
 ---
 
 # PrinceLists for Obsidian: tagging a heading or the list from its menus
@@ -145,11 +145,38 @@ A heading has one way: its tags are in its text, so the tag goes in the text.
   write guard, as a rename does. The strip and the Schedule follow at once, as after any change to
   `tags`.
 
+## The list's tags beside its title
+
+Without them, the list view shows the list's own tags nowhere: rows show only their own, and the
+tag strip leaves out the list's. After **Tag list…** nothing on screen changed, which read as if it
+had failed **(owner, 2026-11-16, #442)**.
+
+- **Chips right of the title (owner, 2026-11-16):** each of the list's tags as `#tag`, in the
+  `tags` property's order, read as **Tag list…** reads them. They show only when the list has tags
+  **(call)**.
+- **The rows' tag look (call):** the same `--tag-*` variables the rows' own tags use, so a theme's
+  tag style reaches them.
+- **They follow the title's text (call)** and wrap onto a line of their own under it when the title
+  is long or the view narrow. The title, a text field, would otherwise be as wide as the view, so it
+  is sized to its text with CSS `field-sizing: content`, Baseline since June 2026 (MDN). Where a
+  device's browser engine lacks it, the field keeps its full width and the chips sit under it
+  **(accepted, owner, 2026-11-16)**.
+- **A press on them opens Tag list…'s popover (call),** under the title as from the menus. They are
+  one button, named "Tag list: " and its tags, as "Tag list: #home, #work", with
+  `aria-haspopup="dialog"` and `aria-expanded`; after a pick or Escape, focus goes back to it. They
+  don't filter, since every item carries them **(call)**.
+- **The title stays the field that renames the note (call):** the chips sit beside it, not in it,
+  and a redraw keeps the field while it has focus, as today. A press beside a short title puts the
+  caret at its end, as on the card's title.
+
+Approaches: (1) chosen; (2) measuring the title's text in script to size the field: works on every
+engine, but hand-sizes what the platform's CSS does; (3) chips always under the title: the
+simplest, but not where the owner chose.
+
 ## Not in this design
 
 - **Tagging a heading or list from the Schedule.** The Schedule has no heading or list menu.
-- **Showing a heading's or list's tags anywhere new.** A heading shows them in its text, as
-  today.
+- **Showing a heading's tags anywhere new.** A heading shows them in its text, as today.
 - **Other lists' tags as suggestions,** for the same reason the card leaves them out (filtering by
   tag, "The tag button opens a small popover"). Typing `work` still offers `New tag: #work`.
 

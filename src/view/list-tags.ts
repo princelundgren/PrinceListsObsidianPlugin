@@ -9,28 +9,46 @@ import type { PrinceListView } from './list-view';
 import { openTagsPopover } from './tags-popover';
 import { enqueueAt, writePlanned } from './write';
 
+export const LIST_TAGS_CLASS = 'princelists-list-tags';
+
 export const LIST_TAGS_REFUSED_NOTICE = "The list's tags can't be changed here. Use Show file properties.";
 
 /**
  * Opens the tag popover under the list's title: the tags of its `tags` property as chips, each
  * with a × that takes it off, and a field whose pick adds a tag. It closes once the Markdown
  * differs from what it opened with, or the view has no title element. Nothing opens when the view
- * has no title element.
+ * has no title element. Opened from the chips beside the title, `button` is theirs, which shows it
+ * open and takes focus back.
  */
-export function openListTags(view: PrinceListView): void {
+export function openListTags(view: PrinceListView, button: HTMLElement | null = null): void {
 	const opened = view.text;
 	const tags = listTags(opened);
 	openTagsPopover(view, {
 		label: 'Tag the list',
 		anchor: () => view.listTitleEl,
 		side: 'below',
-		button: null,
+		button,
 		chips: tags.map((tag) => ({ tag, text: `#${tag}` })),
 		tagsToLeaveOut: () => tags,
 		add: (tag) => changeTag(view, 'addTag', tag),
 		remove: (tag) => changeTag(view, 'removeTag', tag),
 		isStale: () => view.text !== opened,
 	});
+}
+
+/**
+ * Draws the list's tags at the end of `row`, after its title, as one button whose press opens Tag
+ * list…'s popover. Draws nothing when the list has no tags.
+ */
+export function buildListTagChips(view: PrinceListView, row: HTMLElement): void {
+	const tags = listTags(view.text);
+	if (tags.length === 0) return;
+	const names = tags.map((tag) => `#${tag}`);
+	const button = row.createEl('button', {
+		cls: LIST_TAGS_CLASS,
+		attr: { 'aria-label': `Tag list: ${names.join(', ')}`, 'aria-haspopup': 'dialog', 'aria-expanded': 'false' },
+	});
+	for (const name of names) button.createSpan({ cls: 'princelists-tag', text: name });
 }
 
 function changeTag(view: PrinceListView, change: TagChange, tag: string): void {
