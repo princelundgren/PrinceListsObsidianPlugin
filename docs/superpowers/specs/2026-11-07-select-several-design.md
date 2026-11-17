@@ -256,7 +256,10 @@ only documented Obsidian APIs are used.
 - **Duplicate (owner, 2026-11-17)** copies each selected item, with its notes, right below itself,
   in one write. A copy is unticked and drops its done marks **(owner, 2026-11-17)**, and its
   checklist is unticked as a repeat's is **(owner, 2026-11-17)**. It leaves out block ids and Tasks
-  `🆔` ids, a sub-task's in its notes too, since each names one block or task **(call)**. In the
+  `🆔` ids, a sub-task's in its notes too, since each names one block or task **(call)**. A box in
+  a quote or callout isn't a sub-task the plugin reads ([notes in one
+  editor](2026-10-29-notes-in-one-editor-design.md), "A box in a quote"), so its `🆔` is copied as
+  written **(call)**. In the
   notes a block id goes only where Obsidian reads one, at the end of a paragraph or heading, after
   a space as on an item line. Its `⛔` fields lose exactly the ids its own `🆔` fields lost, and a
   `⛔` left empty goes, so a copied sub-task isn't blocked by the original's; a `⛔` naming a task
