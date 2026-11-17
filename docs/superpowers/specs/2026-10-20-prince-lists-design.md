@@ -708,7 +708,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
     and drags nothing, and an open card stays open. That covers the right-click menus, the card's ⋯,
     the selection bar's menus and the menus in the notes, a card's or the list's. A right-click
     still opens its own menu, and a click on the selection bar, the floating "+" or outside the view
-    acts as before. A list inside another note keeps its own menus as they are.
+    acts as before, except on the bar button whose menu shows, which only closes it **(owner,
+    2026-11-17)**. A list inside another note keeps its own menus as they are.
   - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
     the card, one press closes the menu and the card together (#301).
   - **Android's Back doesn't close the card (owner, 2026-11-14):** Obsidian documents no way for a
