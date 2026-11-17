@@ -1,5 +1,6 @@
 import { Parser } from 'commonmark';
 import { notesAtMargin, plainNotesLines, untickChecklist } from './checklist';
+import { drawnBlocks } from './drawn-blocks';
 import { moveEdit } from './follow';
 import type { PlannedGroupEdit } from './group-actions';
 import { BARE_BLOCK_ID, BLOCK_ID_PATTERN, joinItemLine, parseItemLine, splitTail, tailFields, untickLine } from './item-line';
@@ -63,11 +64,19 @@ function copyOf(original: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'):
 
 // The notes lines that end a paragraph or heading, where Obsidian reads a block id at the end.
 function blockEnds(lines: readonly Line[], item: ItemBlock): Set<number> {
+	const notes = notesAtMargin(lines, item);
 	const ends = new Set<number>();
-	const walker = new Parser().parse(maskBlocks(notesAtMargin(lines, item), 0).text).walker();
+	const paragraphStarts = new Set<number>();
+	const walker = new Parser().parse(maskBlocks(notes, 0).text).walker();
 	for (let step = walker.next(); step; step = walker.next()) {
 		const { node, entering } = step;
-		if (entering && (node.type === 'paragraph' || node.type === 'heading')) ends.add(item.titleLine + node.sourcepos[1][0]);
+		if (!entering || (node.type !== 'paragraph' && node.type !== 'heading')) continue;
+		ends.add(item.titleLine + node.sourcepos[1][0]);
+		if (node.type === 'paragraph') paragraphStarts.add(node.sourcepos[0][0] - 1);
+	}
+	// A table that starts on a later line of a paragraph ends a paragraph on the line above it.
+	for (const block of drawnBlocks(joinLines(notes))) {
+		if (block.kind === 'table' && !paragraphStarts.has(block.lines.start)) ends.add(item.titleLine + block.lines.start);
 	}
 	return ends;
 }

@@ -75,6 +75,12 @@ describe('planGroupDuplicate', () => {
 		);
 	});
 
+	test('takes the block id off a paragraph right above a table', () => {
+		const table = '  | x | y |\n  |---|---|\n  | 1 | 2 |\n';
+		const text = FRONT + '- [ ] a\n  intro ^p1\n' + table;
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  intro\n' + table);
+	});
+
 	test('takes the Tasks id off a sub-task in the notes, but leaves a code block as it is', () => {
 		const text = FRONT + '- [ ] a\n  - [ ] sub 🆔 x1\n  ```\n  code ^x\n  ```\n';
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(
