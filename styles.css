@@ -1240,15 +1240,6 @@ button.princelists-strip-no-tag.is-lit {
 	}
 }
 
-/* The card's title has its line to itself, at the card's full width. */
-.princelists-card-title-line {
-	display: flex;
-}
-
-.princelists-card-title-line > textarea.princelists-card-title {
-	flex: 1 1 100%;
-}
-
 .princelists-card-tags {
 	display: flex;
 	flex-wrap: wrap;
