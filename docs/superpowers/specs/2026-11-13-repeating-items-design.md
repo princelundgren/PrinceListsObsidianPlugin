@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-14
+verified: 2026-11-17
 governs: [src/**, styles.css]
 tracking: ["#320"]
 ---
@@ -215,11 +215,13 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
 - **"Repeat…" in the row's right-click menu,** in the date entries' group after Remove date, so the
   row's menu still does what the card does (the design, "Item actions", owner, 2026-10-29). From
   the row it opens the card with the popover open.
-- **And in the card's ⋯ menu,** which has no date entries, in a group of its own after Select,
-  where the row's date group stands. A repeating item's card has its repeat button instead
+- **And in the card's ⋯ menu,** which has no date entries, in a group of its own after the star's
+  group, where the row's date group stands. A repeating item's card has its repeat button instead
   ("Showing a repeat").
-- **A popover,** as the card's tag button opens one: it hangs under the card's head, its end at the
-  tools' end. The card's date is the platform's own `<input type="date">` picker (step two's
+- **A popover,** as the card's tag button opens one: it hangs over the notes from the card's
+  buttons, its end at theirs, or below them where above would pass the top of the list (filtering
+  by tag's design, "The card"). Opening it from a row's Repeat… first scrolls the buttons into
+  view. The card's date is the platform's own `<input type="date">` picker (step two's
   design, "When"), which can't hold more controls.
 - **The popover:** how often (Day, Week, Month, Year); every how many; from its date or from when
   it's ticked; for months, the same day or the last day; an end (Never, On a date, After so many

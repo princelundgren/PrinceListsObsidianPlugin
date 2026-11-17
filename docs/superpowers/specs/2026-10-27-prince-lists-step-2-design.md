@@ -317,21 +317,27 @@ this met on 2026-10-30 **(owner)**.
 
 ### When and the Schedule view (owner)
 
-- **Setting a When (owner, 2026-10-27):** the card's top right has a calendar icon, between the
-  star and the ⋯, so the star comes before the day as on the row **(owner, 2026-11-05)**. Once the
-  item has a When, its day takes the icon's place, with no icon of its own, as on the row. Clicking either
-  opens the platform's date picker through an `<input type="date">`. Obsidian has no date picker
-  API, and the HTML input gives each platform's own picker.
-  - **In a view 480 px wide or narrower (owner, 2026-11-05),** such as a phone or a
-    sidebar, the star, When and ⋯ always have a line of their own under the title, together at its
-    right, where a row shows its day. Beside the title they took about half a phone's line, and
-    moved down only on some titles; split, with the day under the title's start, a lone calendar
-    looked out of place.
-  - **In a wider pane too narrow for the title beside them (call),** they move to a line of their
-    own under the title, still on the right, so the title keeps about 8em to show and edit.
+- **Setting a When (owner, 2026-10-27):** the card's buttons under its notes have a calendar
+  icon, after the tag button. Once the item has a When, its day takes the icon's place, with no
+  icon of its own, as on the row. Clicking either opens the platform's date picker through an
+  `<input type="date">`. Obsidian has no date picker API, and the HTML input gives each platform's
+  own picker.
+  - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width: the
+    tag button, the When, a repeating item's repeat button, and ⋯ at the row's end. The row starts
+    where the notes' text starts, as the format bar's first icon does, and the title has the
+    card's whole width. While the notes have focus, the format bar shows under the buttons, so
+    hiding it moves no button under a pointer that pressed one. A mouse press on a button leaves
+    focus in the notes until what it opens takes it, since leaving them draws a link on the caret's
+    line as its label and could pull the row up mid-press **(call)**; a phone's tap goes to what it
+    touched, and lowers the keyboard for the date picker. Scrolled into view, the row stays clear
+    of mobile's navigation bar and desktop's status bar **(call)**. On a desktop card this takes a
+    row more than the title's line did; with long notes on a phone, the row can be below the
+    screen. This replaces the buttons at the title's right, and their line of their own under it
+    in a view 480 px wide or narrower **(owner, 2026-11-05)** or too narrow for the title, which
+    left half a phone's line empty.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
-    button beside the day: it crowded the card's top right, and every platform's picker can
-    already clear the day.
+    button beside the day: it crowded the card's buttons, and every platform's picker can already
+    clear the day.
 - **On a row (call):** a short day at the row's end, with no icon of its own: "Today", "Tomorrow", a
   weekday for the rest of the next seven days, or else the date, in the language set in Obsidian.
   A past day shows its date. A repeating item's `repeat` icon stands just before it (repeating
@@ -521,10 +527,12 @@ this met on 2026-10-30 **(owner)**.
 
 ### Star (owner: in its list only)
 
-- **The card's star button (owner, 2026-10-27)** sits between the When and the ⋯ and adds or
-  removes the star: an outline when the item has none, filled in `--color-yellow` when it has one.
-  A list's row adds or removes it from its right-click menu too **(owner, 2026-10-29)**, where the
-  item menu at first had no star entry **(owner)**: the step one design's "Item actions".
+- **The card's ⋯ menu adds or removes the star (owner, 2026-11-17),** as Add star or Remove star,
+  and a starred card shows the row's star after its title and tags, as a mark, not a button. A
+  press on the mark puts the caret in the title, as a press beside the title does **(call)**. This
+  replaces a star button among the card's buttons **(owner, 2026-10-27)**, which the card's row
+  of buttons had no room for. A list's row adds or removes it from its right-click menu too
+  **(owner, 2026-10-29)**: the step one design's "Item actions".
 - **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
   show: a list, the Schedule view and a list inside another note.
 - **Where the star and the day sit (owner, 2026-11-05):**
@@ -534,12 +542,12 @@ this met on 2026-10-30 **(owner)**.
     letters. The checkbox reaches a little above and below them; the star, which Lucide draws
     inside a margin, runs from the baseline to the capitals' top. Each keeps the room its full size
     takes, so the text doesn't move and a tap anywhere the full-size box was still ticks. An open
-    card's tag button, star, day, a repeating item's repeat button and ⋯ are buttons the ⋯'s
-    height, centered on one line; on desktop its tag, its star, its repeat button, and its calendar
-    while it has no day, are drawn as small as the row's star. On a phone, where each is a
-    finger-sized box, they are as large as the ⋯, so no icon leaves a wide margin in its box, and a
-    day's text gets the room on each side that an icon has, so the tools read as one evenly spaced
-    group **(owner, 2026-11-07, #339)**.
+    card's tag button, day, a repeating item's repeat button and ⋯ are buttons the ⋯'s height,
+    centered on one line, with icons the format bar's size, since they stand with it under the
+    notes **(owner, 2026-11-17)**. This replaces drawing them as small as the row's star on
+    desktop, beside the title **(owner, 2026-11-07, #339)**. On a phone, where each is a
+    finger-sized box, a day's text gets the room on each side that an icon has, so the buttons
+    read as one evenly spaced group **(owner, 2026-11-07, #339)**.
     Where the app's web view lacks CSS's `cap` unit (before Chrome 118 and Safari 17.2) they keep
     their full size.
   - In a view or list block 480 px wide or narrower, such as a sidebar or a phone, the star and
@@ -564,7 +572,8 @@ Obsidian documents no way to put its editor in a plugin's view.
   link, as in a note, and Cmd+B or Cmd+I again takes it off **(call)**. The title's are registered
   on the view's own `scope`, as Cmd+Z is, and the notes' are in their editor's keymap; anywhere
   else the key stays Obsidian's.
-- **A format bar under the notes** while their editor has focus, in two groups: Bold, Italic,
+- **A format bar under the notes** while their editor has focus, and in a card under its buttons
+  ("When and the Schedule view"), in two groups: Bold, Italic,
   Strikethrough and Underline; then Task list, Bullet list, Numbered list, Add link, Add external
   link, Code and Code block, in one group so the bar stays short **(owner, 2026-11-05)**. It has
   no Undo or Redo **(owner, 2026-11-05)**; Cmd+Z and Cmd+Shift+Z still undo and redo. A press

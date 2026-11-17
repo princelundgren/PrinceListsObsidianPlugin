@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-16
+verified: 2026-11-17
 governs: [src/**, styles.css]
 tracking: ["#325", "#340", "#383"]
 ---
@@ -174,9 +174,10 @@ every tagged part of a list is done, such as what is left to buy.
 
 ## The card
 
-- **A tag button left of the star (owner),** so the card's top reads tag, star, day, ⋯, as a
-  closed row reads title, tags, star, day. Its icon is a tag from Obsidian's built-in Lucide set
-  **(call)**, and its tooltip is "Add tag".
+- **A tag button first in the card's buttons, under the notes (owner, 2026-11-17),** so they read
+  tag, day, ⋯ (step two, "When"). This replaces a tag button left of the star in the card's head
+  (owner). Its icon is a tag from Obsidian's built-in Lucide set **(call)**, and its tooltip is
+  "Add tag".
 - **The item's tags follow the title, as on a closed row (owner, #340),** each with an × that takes
   it off. These are the tags in its tail; a tag in the title stays in the title field, where it's
   edited as text **(call)**. Today the card hides the tail while you edit (step one, "Editing"), so
@@ -191,24 +192,26 @@ every tagged part of a list is done, such as what is left to buy.
   - **A click or tap beside a short title puts the caret at its end (call),** where it landed
     when the field had the full width. The press keeps focus where it was, so a phone's keyboard
     stays up.
-  - **In a view 480 pixels wide or narrower,** the title and its tags take the head's first line,
-    and the tag button, star, day and ⋯ the line under it, as the title alone does today
-    **(call)**.
-- **The tag button opens a small popover under it (owner, #340),** over the card's content, so
-  opening it moves nothing. It holds one field with Obsidian's `AbstractInputSuggest` (`@since`
-  1.4.10, older than `minAppVersion` 1.13.4). It suggests this list's tags **(call)**, the same set
-  the strip shows with no tag lit, less the item's own and those it inherits, and `New tag: #<tag>`
-  for anything else. Other lists' tags aren't offered: the metadata cache would hold them, but with
-  their notes' tags, which this design doesn't count. A leading `#` is optional, and
-  text that isn't a tag (a space, only numbers) isn't offered **(call)**.
-  - **The popover is the plugin's own element in the card (call),** under the tag button with its
-    end edge at the end of the card's top row of buttons, so it stays inside the card, and no wider
-    than the card. It uses the card's border, radius and shadow variables, at `--layer-popover`
-    (30 in Obsidian 1.15). Obsidian adds its suggestions to the page's body at z-index 60, above it
-    (checked in 1.15). The HTML `popover` attribute would draw it in the browser's top layer, above
-    those suggestions. Of what Obsidian documents, a `Menu` can't hold a field, a `Modal` can't sit
-    at a button, `HoverPopover` is a hover preview, shown after a wait, and `PopoverSuggest` is the
-    base of the suggestion list itself.
+- **The tag button opens a small popover (owner, #340),** over the card's content, so opening it
+  moves nothing. Where it hangs is under "The popover is the plugin's own element" below; this
+  replaces a popover under the button in the card's head. It holds one field with Obsidian's
+  `AbstractInputSuggest` (`@since` 1.4.10, older than `minAppVersion` 1.13.4). It suggests this
+  list's tags **(call)**, the same set the strip shows with no tag lit, less the item's own and
+  those it inherits, and `New tag: #<tag>` for anything else. Other lists' tags aren't offered: the
+  metadata cache would hold them, but with their notes' tags, which this design doesn't count. A
+  leading `#` is optional, and text that isn't a tag (a space, only numbers) isn't offered
+  **(call)**.
+  - **The popover is the plugin's own element in the card (call),** over the notes from the card's
+    buttons, with its end edge at the end of their row, so it stays inside the card and clear of a
+    phone's keyboard, and no wider than the card **(owner, 2026-11-17)**. Where above the buttons
+    would pass the top of the list, which can't be scrolled to, it hangs below them instead
+    **(call)**. Opening it from a row's Tag… first scrolls the buttons into view. It uses the card's
+    border, radius and shadow variables, at `--layer-popover` (30 in Obsidian 1.15). Obsidian adds
+    its suggestions to the page's body at z-index 60, above it (checked in 1.15). The HTML `popover`
+    attribute would draw it in the browser's top layer, above those suggestions. Of what Obsidian
+    documents, a `Menu` can't hold a field, a `Modal` can't sit at a button, `HoverPopover` is a
+    hover preview, shown after a wait, and `PopoverSuggest` is the base of the suggestion list
+    itself.
   - **It closes on a pick, on Escape, or on a tap outside it (owner, #340),** and a second press of
     the tag button closes it too **(call)**. A tap outside is focus leaving its field for another
     part of the window; switching to another app leaves it open, as it leaves the list's title
