@@ -68,6 +68,13 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(text.slice(FRONT.length) + '- [ ] a\n  raise 2 ^10\n  and more\n');
 	});
 
+	test('takes a block id off a sub-task only where it ends its paragraph', () => {
+		const text = FRONT + '- [ ] a\n  - [ ] s raise 2 ^10\n    and more\n  - [ ] t ^t1\n';
+		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(
+			text.slice(FRONT.length) + '- [ ] a\n  - [ ] s raise 2 ^10\n    and more\n  - [ ] t\n',
+		);
+	});
+
 	test('takes the Tasks id off a sub-task in the notes, but leaves a code block as it is', () => {
 		const text = FRONT + '- [ ] a\n  - [ ] sub 🆔 x1\n  ```\n  code ^x\n  ```\n';
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(

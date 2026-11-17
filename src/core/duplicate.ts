@@ -47,12 +47,14 @@ function copyOf(original: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'):
 	const itemLines = [item.titleLine, ...plain].filter((at) => parseItemLine((lines[at] as Line).text));
 	const dropped = new Set(itemLines.flatMap((at) => tasksIds((lines[at] as Line).text)));
 	const title = lines[item.titleLine] as Line;
-	const copy: Line[] = [{ text: withoutIds(untickLine(title.text), dropped), eol: title.eol }];
+	const copy: Line[] = [{ text: withoutItemBlockId(withoutTasksIds(untickLine(title.text), dropped)), eol: title.eol }];
 	for (let at = item.titleLine + 1; at < item.endLine; at++) {
 		const line = lines[at] as Line;
 		if (!plain.has(at)) copy.push(line);
-		else if (parseItemLine(line.text)) copy.push({ text: withoutIds(line.text, dropped), eol: line.eol });
-		else if (!ends.has(at)) copy.push(line);
+		else if (parseItemLine(line.text)) {
+			const text = withoutTasksIds(line.text, dropped);
+			copy.push({ text: ends.has(at) ? withoutItemBlockId(text) : text, eol: line.eol });
+		} else if (!ends.has(at)) copy.push(line);
 		else if (!BARE_BLOCK_ID.test(line.text.trim())) copy.push({ text: withoutBlockId(line.text), eol: line.eol });
 	}
 	while (copy.length > 1 && isBlank((copy[copy.length - 1] as Line).text)) copy.pop();
@@ -87,9 +89,9 @@ function tasksIds(text: string): string[] {
 		.map((field) => field.replace(TASKS_ID, ''));
 }
 
-// An item line without its block id, its Tasks id fields and the ids of `dropped` in its ⛔ fields,
-// and without a ⛔ field left empty; a title that is only a block id goes too.
-function withoutIds(text: string, dropped: ReadonlySet<string>): string {
+// An item line without its Tasks id fields and the ids of `dropped` in its ⛔ fields, and without a
+// ⛔ field left empty.
+function withoutTasksIds(text: string, dropped: ReadonlySet<string>): string {
 	const parts = parseItemLine(text);
 	if (!parts) return text;
 	const { fields, end } = splitTail(parts.tail);
@@ -101,9 +103,16 @@ function withoutIds(text: string, dropped: ReadonlySet<string>): string {
 		if (left !== '' && !TASKS_ID.test(field)) kept = kept.slice(0, from) + left + kept.slice(to);
 		else kept = withoutField(kept, from, to, startsLine);
 	}
-	const blockId = end.trimEnd() !== '';
-	const title = BARE_BLOCK_ID.test(parts.title) && kept === '' ? '' : parts.title;
-	return joinItemLine({ ...parts, title, tail: kept + (blockId ? '' : end) });
+	return joinItemLine({ ...parts, tail: kept + end });
+}
+
+// An item line without its block id; a title that is only a block id goes too.
+function withoutItemBlockId(text: string): string {
+	const parts = parseItemLine(text);
+	if (!parts) return text;
+	const { fields, end } = splitTail(parts.tail);
+	const title = BARE_BLOCK_ID.test(parts.title) && fields === '' ? '' : parts.title;
+	return joinItemLine({ ...parts, title, tail: fields + (end.trimEnd() !== '' ? '' : end) });
 }
 
 // A ⛔ field without the ids of `dropped`, or '' when none is left.
