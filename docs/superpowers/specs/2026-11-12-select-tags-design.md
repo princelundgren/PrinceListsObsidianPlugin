@@ -37,7 +37,7 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 ## The bar's Tag button
 
 - **Gone from the bar (owner, 2026-11-17):** Tag… is an entry of the bar's More menu, after Tick and
-  Untick, and More is the bar's third button ([selecting several
+  Untick, and More is the bar's last button, past a divider after Delete ([selecting several
   rows](2026-11-07-select-several-design.md), "The bar"). This replaces a Tag button between Tick
   and Star **(owner, #450)**, with the `tag` icon and the label "Tag".
 - **Tag… shows while any item or heading is selected (owner, 2026-11-16),** since a heading's tag

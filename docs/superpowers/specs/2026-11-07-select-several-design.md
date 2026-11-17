@@ -170,8 +170,9 @@ only documented Obsidian APIs are used.
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
   48 by 48 dp with 8 between
   ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
-  More sits apart at the far end, past a divider, after Delete **(owner, 2026-11-17)**. The bar is
-  the same on desktop.
+  More sits apart at the far end, past a divider, after Delete **(owner, 2026-11-17)**. This
+  replaces Delete apart past a divider, so a near miss on Date didn't reach it **(call)**. The bar
+  is the same on desktop.
 - **One row (owner, 2026-11-17):** Done, an ✕ named "Done", comes first, then the actions spread
   across the bar. The bar shows no count: its accessible name says how many rows are selected
   **(call)**. This replaces the count beside Done, and their own row above the actions on a phone

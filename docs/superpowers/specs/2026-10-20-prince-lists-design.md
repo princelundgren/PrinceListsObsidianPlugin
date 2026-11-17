@@ -801,10 +801,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
   which also puts the most-used entries first and destructive ones last.
 - **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected row
   included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Tag…, Add star and
-  Remove star, the four date entries, and Delete in red, naming what goes. Each acts on every
-  selected item at once and shows an Undo message, and a right-click on a row outside the selection
-  opens that row's own menu ([selecting several rows](2026-11-07-select-several-design.md), "The
-  actions").
+  Remove star, the four date entries, New item below, New heading below and Duplicate, and Delete in
+  red, naming what goes. Each acts on every selected item at once and shows an Undo message, and a
+  right-click on a row outside the selection opens that row's own menu ([selecting several
+  rows](2026-11-07-select-several-design.md), "The actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading, Tag… and Delete heading, and Select **(owner, 2026-11-11)**. Step two adds Edit in Markdown,
   Collapse all headings and Expand all headings, and a menu on the list's background (step two's
