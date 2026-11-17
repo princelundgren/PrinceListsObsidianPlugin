@@ -916,6 +916,13 @@ back only what was typed and leaves the empty line, which can be deleted like an
   items, or Cmd+Z on desktop. A list block and the Schedule redraw after every tick already. With
   Show archived items on, it stays in place, blue, as it does with any delay. An item ticked in its
   open card stays there, blue, and goes when the card closes.
+- **A ticked item's checkbox is the accent color at half strength (owner, 2026-11-17),** set
+  through Obsidian's documented `--checkbox-color`, so a list with many done items reads calmly.
+  This replaces the full accent color. Its edge matches its fill, with no darker ring where the
+  border would overlap it. Its tick is the text color, through `--checkbox-marker-color`, since
+  Obsidian's tick, the background color, has too little contrast against the paler fill
+  **(call)**. An archived item keeps Obsidian's tick against its blue. A web view without CSS
+  `color-mix` keeps the full accent and Obsidian's tick.
 - **"Archived" is worked out, never written down.** It is computed from `✔` plus the delay.
   Nothing in the file changes when an item becomes archived.
 - **"Show archived items" in the pane's ⋯ menu (owner, 2026-11-05; archived is the owner's word)**
@@ -940,13 +947,6 @@ back only what was typed and leaves the empty line, which can be deleted like an
     2026-11-03)**.
   - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
     it stands apart from a ticked item not yet archived.
-  - **A ticked item's checkbox is the accent color at half strength (owner, 2026-11-17),** set
-    through Obsidian's documented `--checkbox-color`, so a list with many done items reads calmly.
-    This replaces the full accent color. Its edge matches its fill, with no darker ring where the
-    border would overlap it. Its tick is the text color, through `--checkbox-marker-color`, since
-    Obsidian's tick, the background color, has too little contrast against the paler fill
-    **(call)**. An archived item keeps Obsidian's tick against its blue. A web view without CSS
-    `color-mix` keeps the full accent and Obsidian's tick.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.
