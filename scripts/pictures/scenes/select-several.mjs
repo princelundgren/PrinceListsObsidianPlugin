@@ -1,7 +1,7 @@
-// In To do, a row is held until it is selected, two more are clicked to join it, dragging one takes all
+// In To do, a row is held until it is selected, two more are Cmd-clicked to join it, dragging one takes all
 // three under the Admin heading, Add star from the bar's Star stars them, and Done ends selecting.
 import { titleOf } from '../listing.mjs';
-import { boundsOf, drawnMouse, headingBounds, hover, middleOf, paneClip, showAlone, sleep, undoingChanges } from '../page.mjs';
+import { boundsOf, drawnMouse, headingBounds, hover, middleOf, MOD_KEY, paneClip, showAlone, sleep, undoingChanges } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
 import { recordGif } from '../record.mjs';
 
@@ -60,7 +60,8 @@ async function selectDragAndStar(session) {
 		const row = await titleStart(title);
 		await mouse.glide(row.x, row.y, 600);
 		await sleep(250);
-		await mouse.click();
+		// A plain click would end selecting and open the item.
+		await mouse.click(MOD_KEY);
 		await sleep(600);
 	}
 	const admin = await headingBounds(session, 'Admin');
