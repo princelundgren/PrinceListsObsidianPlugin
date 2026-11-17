@@ -4,7 +4,10 @@ import type { PrinceListView } from './list-view';
 export const CARD_TOOLS_CLASS = 'princelists-card-tools';
 const POPOVER_BELOW_CLASS = 'princelists-card-popover-below';
 
-/** Scrolls the open card's buttons into view, as far as needed, then runs `then`, with or without a card. */
+/**
+ * Scrolls the open card's buttons into view, as far as needed, then runs `then`. Without a card it
+ * only runs `then`; if the card closes before its notes editor measures, neither runs.
+ */
 export function revealCardTools(view: PrinceListView, then: () => void): void {
 	afterNotesLayout(view, () => toolsOf(view)?.scrollIntoView({ block: 'nearest' }), then);
 }

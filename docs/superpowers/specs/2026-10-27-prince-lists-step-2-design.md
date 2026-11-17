@@ -322,19 +322,20 @@ this met on 2026-10-30 **(owner)**.
   icon of its own, as on the row. Clicking either opens the platform's date picker through an
   `<input type="date">`. Obsidian has no date picker API, and the HTML input gives each platform's
   own picker.
-  - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width: the
-    tag button, the When, a repeating item's repeat button, and ⋯ at the row's end. The row starts
-    where the notes' text starts, as the format bar's first icon does, and the title has the
-    card's whole width. While the notes have focus, the format bar shows under the buttons, so
-    hiding it moves no button under a pointer that pressed one. A mouse press on a button leaves
-    focus in the notes until what it opens takes it, since leaving them draws a link on the caret's
-    line as its label and could pull the row up mid-press **(call)**; a phone's tap goes to what it
-    touched, and lowers the keyboard for the date picker. Scrolled into view, the row stays clear
-    of mobile's navigation bar and desktop's status bar **(call)**. On a desktop card this takes a
-    row more than the title's line did; with long notes on a phone, the row can be below the
-    screen. This replaces the buttons at the title's right, and their line of their own under it
-    in a view 480 px wide or narrower **(owner, 2026-11-05)** or too narrow for the title, which
-    left half a phone's line empty.
+  - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width: the tag
+    button, the When, a repeating item's repeat button, and ⋯ at the row's end. The row starts where
+    the notes' text starts, as the format bar's first icon does, and the title has the card's whole
+    width. While the notes have focus, the format bar shows under the buttons, so hiding it moves no
+    button under a pointer that pressed one. A mouse press on a button leaves focus in the notes
+    through the click, since leaving them draws a link on the caret's line as its label and could
+    pull the row up mid-press **(call)**; a phone's tap goes to what it touched, and lowers the
+    keyboard for the date picker. Brought into view for a popover or a row's Tag…, Set date… or
+    Repeat…, the row stays clear of mobile's navigation bar and desktop's status bar **(call)**;
+    opening an item from the Schedule scrolls only as far as the card. On a desktop card this takes
+    a row more than the title's line did; with long notes on a phone, the row can be below the
+    screen. This replaces the buttons at the title's right, and their line of their own under it in
+    a view 480 px wide or narrower **(owner, 2026-11-05)** or too narrow for the title, which left
+    half a phone's line empty.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's buttons, and every platform's picker can already
     clear the day.

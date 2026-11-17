@@ -887,7 +887,7 @@ button.princelists-new-item {
 	align-items: center;
 	gap: var(--size-2-1);
 	margin-inline-start: calc(-1 * var(--size-2-2));
-	/* Brought into view clear of what sits over the list's bottom, as the floating "+" keeps clear. */
+	/* Brought into view clear of mobile's navigation bar and desktop's status bar. */
 	scroll-margin-bottom: calc(var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 

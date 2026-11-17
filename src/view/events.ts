@@ -213,7 +213,7 @@ function keepFocusBesideTitle(evt: MouseEvent): void {
 
 // Leaving the notes draws the caret's line as it reads, a link as its label, so a press on the card's
 // buttons that took focus could pull them from under the pointer before the click. The notes keep
-// focus until what the click opens takes it. A phone's tap lowers the keyboard for the date picker.
+// focus through the click. A phone's tap lowers the keyboard for the date picker.
 function keepNotesFocused(view: PrinceListView, evt: MouseEvent): void {
 	if (Platform.isMobile || !view.card?.editor?.hasFocus) return;
 	if (targetOf(evt)?.closest(`.${CARD_TOOLS_CLASS}`)) evt.preventDefault();
