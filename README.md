@@ -20,9 +20,9 @@ Tag items to group them across sections. The items' tags sit above the list, and
 
 ![In a grocery list, lemons is opened and gets the curry tag from the tag button, picked from the suggestions, then #curry in the strip of tags above the list leaves the five items for the curry, under their headings](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tags.gif)
 
-Hold an item to select it, then click or tap others to add them. Move, tick, tag, star, date or delete them all at once.
+Hold an item to select it, then Cmd+click or tap others to add them. Move, tick, tag, star, date or delete them all at once.
 
-![In a todo list, a row is held until it is selected and two more are clicked to join it, then dragging one takes all three under the Admin heading, and Star in the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
+![In a todo list, a row is held until it is selected and two more are Cmd-clicked to join it, then dragging one takes all three under the Admin heading, and Star in the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
 
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 

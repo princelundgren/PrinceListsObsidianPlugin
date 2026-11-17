@@ -607,7 +607,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   ("Selecting").
 - **With Cmd or Shift held, a click on the checkbox or beside it selects the row** instead of
   ticking it ([selecting several rows](2026-11-07-select-several-design.md), "Starting to select").
-  While selecting, a click or a tap there selects too ("While selecting").
+  While selecting, a tap there selects too, and on desktop, with no card open, a plain click
+  ends selecting and ticks ("While selecting").
 - **On mobile a one-line row is 40px tall (owner, 2026-11-05),** the size Obsidian 1.15 gives its
   undocumented `--touch-size-s`, so a tap doesn't land on the next row. Desktop keeps its rows
   denser.
@@ -690,9 +691,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
 
 - **Selecting (call):** clicking an item, anywhere except its checkbox, the zone beside it
   ("Ticking") or a link in its title, opens its card and makes it the anchor. Clicking empty space
-  closes the card and clears the anchor. While selecting, a click or a tap on an item selects it
-  instead of opening its card, and one on empty space keeps the selection ([selecting several
-  rows](2026-11-07-select-several-design.md), "While selecting").
+  closes the card and clears the anchor. While selecting, a tap on an item selects it instead of
+  opening its card, and on desktop a plain click ends selecting and opens it; a click or a tap on
+  empty space keeps the selection ([selecting several rows](2026-11-07-select-several-design.md), "While
+  selecting").
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A
@@ -754,6 +756,12 @@ back only what was typed and leaves the empty line, which can be deleted like an
   rows](2026-11-07-select-several-design.md), "Starting to select"). Delete item removes the item
   and its notes, and its name says what goes **(owner, 2026-10-29)**. Step two adds Edit in
   Markdown.
+- **The right-clicked row or heading is marked while its own menu shows (owner, 2026-11-17),** with
+  the background Obsidian gives a hovered file, `--nav-item-background-hover`, so it is clear which
+  row the menu acts on. The mark goes when the menu closes; Select selects the row instead. It is
+  lighter than a selected row's highlight, since a selected row opens the selection's menu, and a
+  row outside the selection would otherwise look added to it. A selected row and the open card
+  aren't marked.
 - **A row's right-click menu also does what the item's card does (owner, 2026-10-29),** so an item
   needn't be opened for it: Tick or Untick, Tag…, which opens the card with its tag popover
   **(owner, #448)**, Add star or Remove star, then Set date to today, Set date to tomorrow, Set

@@ -1,4 +1,4 @@
-import { Keymap } from 'obsidian';
+import { Keymap, Platform } from 'obsidian';
 import { isListText } from '../obsidian/marker';
 import { addItem, newItem } from './add-button';
 import { CARD_CLASS, closeCard } from './card';
@@ -8,7 +8,7 @@ import { ownClosest, ownElements } from './own-rows';
 import { CHECKBOX_CLASS, END_CLASS, HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, LINE_ATTR, lineOf, TICK_SELECTOR } from './render-list';
 
 // The class on a selected row or heading.
-const SELECTED_CLASS = 'princelists-selected';
+export const SELECTED_CLASS = 'princelists-selected';
 const SELECTED_FIRST_CLASS = 'princelists-selected-first';
 const SELECTED_LAST_CLASS = 'princelists-selected-last';
 const STATUS_CLASS = 'princelists-selection-status';
@@ -22,11 +22,13 @@ const announcers = new WeakMap<PrinceListView, { status: HTMLElement; describerI
 
 /**
  * Handles a click on a row, a heading, a checkbox or the zone beside one with Cmd or Shift held, or a
- * click or a tap on one while selecting: Cmd and the plain click or tap add or remove the row, Shift
- * selects the shown rows from the anchor to it, and either starts selecting. An open card closes
- * first, its item selected; while selecting, a plain click or tap only closes it. Returns whether it
- * handled the click. Before selecting, a plain click on a row or heading, not on a checkbox or beside
- * it, makes it the anchor, and one on empty space clears the anchor; both return false.
+ * tap on one while selecting on mobile: Cmd and the tap add or remove the row, Shift selects the shown
+ * rows from the anchor to it, and either starts selecting. An open card closes first, its item
+ * selected; while selecting, a plain click or tap only closes it. Returns whether it handled the click.
+ * Otherwise a plain click on a row or heading, not on a checkbox or beside it, clears the selection and
+ * makes it the anchor; one on a checkbox or beside it ends selecting; one on empty space before
+ * selecting clears the anchor. All return false, so the click goes on as it would with nothing
+ * selected.
  */
 export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
 	if (isEmptySpace(view, target)) {
@@ -45,12 +47,14 @@ export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTM
 		focusList(view);
 		return true;
 	}
-	const adds = view.selecting || toggles;
+	const adds = toggles || (view.selecting && Platform.isMobile);
 	if (!adds && !ranges) {
 		if (!target.closest(TICK_SELECTOR)) {
 			view.selection.clear();
 			view.selection.setAnchor(line);
 			drawSelection(view);
+		} else if (view.selecting) {
+			clearSelection(view);
 		}
 		return false;
 	}
