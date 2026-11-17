@@ -14,7 +14,7 @@ import type { PrinceListView } from './list-view';
 import { atLine } from './menu-anchor';
 import { queueTickAt } from './tick';
 
-// What the item's card does, from its row's right-click menu: tick, star, tags, the date and the repeat. Each entry
+// What the item's card does, from its row's right-click menu: tick, tags, star, the date and the repeat. Each entry
 // says what the item holds when the menu opens, and does just that.
 export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLElement, anchor: TrackedLine, menu: Menu): void {
 	const { done, starred, when } = timelessItemRow((view.lines()[item.titleLine] as Line).text, item.titleLine);
@@ -25,13 +25,13 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 			.setIcon(done ? 'square' : 'check')
 			.onClick(atLine(anchor, (line) => queueTickAt(view, line, row, !done))),
 	);
+	menu.addItem((entry) => entry.setTitle('Tag…').setIcon('tag').onClick(atLine(anchor, (line) => tagPopover(view, line))));
 	menu.addItem((entry) =>
 		entry
 			.setTitle(starred ? 'Remove star' : 'Add star')
 			.setIcon(starred ? 'star-off' : 'star')
 			.onClick(atLine(anchor, (line) => queueLineEdit(view, line, (text) => setStar(text, !starred)))),
 	);
-	menu.addItem((entry) => entry.setTitle('Tag…').setIcon('tag').onClick(atLine(anchor, (line) => tagPopover(view, line))));
 	menu.addSeparator();
 	menu.addItem((entry) => entry.setTitle('Set date to today').setIcon('calendar-check').onClick(setDay(() => dayOf(new Date()))));
 	menu.addItem((entry) => entry.setTitle('Set date to tomorrow').setIcon('calendar-plus').onClick(setDay(() => dayAfter(new Date()))));

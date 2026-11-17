@@ -275,7 +275,7 @@ function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
 	if (item && row) {
 		const anchor = trackWhileShown(view, item.titleLine, menu);
 		addSelectEntry(view, anchor, menu);
-		// The open card shows its box, star and date already, so it gets what its ⋯ has.
+		// The open card shows its box, tag button, star and date already, so it gets what its ⋯ has.
 		if (row.classList.contains(CARD_CLASS)) addRepeatEntry(view, anchor, menu);
 		else itemQuickMenu(view, item, row, anchor, menu);
 		itemMenu(view, anchor, menu);
