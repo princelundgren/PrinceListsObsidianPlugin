@@ -38,6 +38,7 @@ import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
 import type { DraftBase } from './line-edit';
 import { enableMouseHold } from './hold-mouse';
+import { openListTags } from './list-tags';
 import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
@@ -262,6 +263,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	onPaneMenu(menu: Menu, source: string): void {
 		super.onPaneMenu(menu, source);
 		if (isListText(this.text)) {
+			menu.addItem((item) => item.setTitle('Tag list…').setIcon('tag').onClick(() => openListTags(this)));
 			menu.addItem((item) =>
 				item
 					.setTitle('Show archived items')

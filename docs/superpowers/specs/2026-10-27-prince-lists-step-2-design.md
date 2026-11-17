@@ -604,7 +604,7 @@ The block fields this section described are gone.
 - **The heading menu gains "Edit in Markdown",** with the caret at the end of the heading's line,
   on desktop and on mobile, and Collapse or Expand all headings ("Collapsing a heading").
 - **Right-clicking the list's background on desktop** opens the list menu: New item, New heading,
-  Edit in Markdown, Show archived items, Show starred only, Collapse or Expand all headings, and
+  Tag list…, Edit in Markdown, Show archived items, Show starred only, Collapse or Expand all headings, and
   Open schedule. The background is anywhere a click lands on no row, heading, field, link or notes
   editor: the list note is its editor, and gets no list menu ([notes in one
   editor](2026-10-29-notes-in-one-editor-design.md), "Keys and touch").
@@ -613,7 +613,8 @@ The block fields this section described are gone.
     section's last item, before any text below it that isn't an item, which an item can't follow
     without joining it **(call)**.
   - Edit in Markdown puts the caret at the end of that section's last line **(call)**.
-  - Show archived items, Show starred only and Open schedule do what they do in the pane's ⋯ menu.
+  - Show archived items, Show starred only and Open schedule do what they do in the pane's ⋯ menu,
+    which has Tag list… too, on a list ([tag from menus](2026-11-16-tag-from-menus-design.md)).
   - Mobile has no background menu: the plugin opens no menu on a long-press (step one, "Touch on
     mobile").
 - **Right-clicking a picture on desktop** in a card's notes or the list note opens the picture's

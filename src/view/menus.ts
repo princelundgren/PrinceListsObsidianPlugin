@@ -18,6 +18,7 @@ import { addHeading, openHeadingField } from './heading-field';
 import { openHeadingTags } from './heading-tags';
 import { itemQuickMenu } from './item-quick-menu';
 import type { PrinceListView } from './list-view';
+import { openListTags } from './list-tags';
 import { atLine, trackWhileShown } from './menu-anchor';
 import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
 import { ownElements } from './own-rows';
@@ -127,6 +128,7 @@ export function listMenu(view: PrinceListView, model: ListModel, section: Sectio
 			.setIcon('heading')
 			.onClick(atAnchor(headingAnchor, (line) => addHeading(view, line === null ? 'top' : { afterSection: line }))),
 	);
+	menu.addItem((entry) => entry.setTitle('Tag list…').setIcon('tag').onClick(() => openListTags(view)));
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Edit in Markdown')

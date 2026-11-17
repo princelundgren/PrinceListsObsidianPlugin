@@ -54,7 +54,8 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
   the card's border, radius and shadow variables, at `--layer-popover`. It sits above the bar's
   Tag button, right-aligned with it, and stays inside the view. The bar is on the view's container,
   outside the content element that the card's popover listens on, so this one needs focus, Escape
-  and outside-press handling of its own.
+  and outside-press handling of its own. A heading's and the list's popovers share it
+  ([tag from menus](2026-11-16-tag-from-menus-design.md)).
 - **First, the selection's tags (owner):** a chip per tag in the selected items' tails, each with a
   ×. A tag only some carry shows how many, as `#pantry 2 of 5` **(owner)**; one all carry shows as
   `#pantry` **(call)**. The rest is **(call)**: chips in the strip's order, which holds every
