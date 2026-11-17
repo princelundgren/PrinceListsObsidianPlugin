@@ -150,8 +150,8 @@ only documented Obsidian APIs are used.
 - **With a card open,** such as one a row's own menu opened, a click or a tap outside it only closes
   it, as step one's "while a card is open, a click outside it only closes it" says **(owner,
   2026-10-27)**; Cmd+click and Shift+click still select, as in "Starting to select" **(call)**.
-- **Cmd+Enter adds the new item below the last selected item** in list order **(call)**, and
-  selecting ends as its card opens. With only headings selected it adds one as "+" does.
+- **Cmd+Enter adds the new item where New item below does** ("The actions"), so below the selection
+  means one place **(call)**, and selecting ends as its card opens.
 - **Cmd+click on a link** in a title still opens it in a new tab, as Obsidian does: the link wins
   over selecting **(call)**.
 
