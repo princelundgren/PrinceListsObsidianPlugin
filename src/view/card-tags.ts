@@ -53,15 +53,18 @@ function showsTags(box: HTMLElement, tags: readonly string[]): boolean {
 	return shown.length === tags.length && shown.every((tag, i) => tag === tags[i]);
 }
 
+/** Opens the tag popover, or closes it if it's open, focusing the tag button. */
+export function toggleTagPopover(view: PrinceListView): void {
+	if (view.tagPopover) escapeTagPopover(view);
+	else openTagPopover(view);
+}
+
 /**
  * Opens the tag popover under the open card's tag button, with its type-ahead, and focuses its field;
- * closes it if it's open, focusing the tag button.
+ * leaves it as it is when it's open.
  */
-export function toggleTagPopover(view: PrinceListView): void {
-	if (view.tagPopover) {
-		escapeTagPopover(view);
-		return;
-	}
+export function openTagPopover(view: PrinceListView): void {
+	if (view.tagPopover) return;
 	const button = tagButtonOf(view);
 	const head = button?.closest<HTMLElement>(`.${CARD_HEAD_CLASS}`);
 	if (!button || !head) return;
