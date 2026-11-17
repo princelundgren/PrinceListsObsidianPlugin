@@ -418,7 +418,7 @@ textarea.princelists-title {
 }
 
 .princelists-card-notes .cm-content {
-	min-height: calc(3em * var(--line-height-normal));
+	min-height: calc(2em * var(--line-height-normal));
 }
 
 .princelists-card-notes .cm-line,

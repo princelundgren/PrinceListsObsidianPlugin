@@ -584,8 +584,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     do in any note: tables, code, callouts, math and embeds by Obsidian's own Markdown rendering,
     the rest by the notes' editor ([notes in one
     editor](2026-10-29-notes-in-one-editor-design.md), "What shows drawn").
-  - **A card's notes are at least three lines tall (owner, 2026-10-27),** empty or not, and stay so
-    while they're typed in, so they're easy to tap. Empty notes show a gray "Notes".
+  - **A card's notes are at least two lines tall (owner, 2026-11-17),** empty or not, and stay so
+    while they're typed in, so they're easy to tap. This replaces three lines (owner, 2026-10-27),
+    which left too much empty room once the format bar kept its row under the notes. Empty notes
+    show a gray "Notes".
   - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
     typed in reads as its text, as a title does.
   - Links in a card can be clicked.
