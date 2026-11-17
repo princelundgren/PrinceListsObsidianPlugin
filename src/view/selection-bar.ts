@@ -4,6 +4,7 @@ import { barButtons, type BarButton } from '../core/group-menu';
 import { contentStartLine } from '../obsidian/marker';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
+import { onMenuHide } from './menu-anchor';
 import { showViewMenu } from './menu-press';
 import { clearSelection, focusList } from './select';
 import { addHeadingEntries } from './heading-menu';
@@ -14,9 +15,13 @@ import { closeTagsPopover, isInTagsPopover, syncTagsPopover } from './tags-popov
 /** The class on the view's content while selecting. */
 const SELECTING_CLASS = 'princelists-selecting';
 
+// `menuFrom`: the button whose menu shows, or null. `closing`: the button a press found its own
+// menu open on, so that press only closes the menu, which Obsidian does on mousedown.
 interface SelectionBar {
 	el: HTMLElement;
 	buttons: Map<BarButton, HTMLButtonElement>;
+	menuFrom: HTMLElement | null;
+	closing: HTMLElement | null;
 }
 
 const bars = new WeakMap<PrinceListView, SelectionBar>();
@@ -55,13 +60,20 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 		buttons.set(button, buttonEl);
 		actions.set(buttonEl, () => act(view, button, buttonEl));
 	}
+	const bar: SelectionBar = { el, buttons, menuFrom: null, closing: null };
+	view.registerDomEvent(el, 'pointerdown', (evt) => {
+		const buttonEl = targetOf(evt)?.closest('button') ?? null;
+		bar.closing = buttonEl !== null && buttonEl === bar.menuFrom ? buttonEl : null;
+	});
 	view.registerDomEvent(el, 'click', (evt) => {
 		const buttonEl = targetOf(evt)?.closest('button');
-		if (!buttonEl || buttonEl.disabled) return;
+		const closing = bar.closing;
+		bar.closing = null;
+		if (!buttonEl || buttonEl.disabled || buttonEl === closing) return;
 		leaveTagPopover(view, buttonEl);
 		actions.get(buttonEl)?.();
 	});
-	bars.set(view, { el, buttons });
+	bars.set(view, bar);
 	return el;
 }
 
@@ -125,9 +137,17 @@ function showMoveMenu(view: PrinceListView, buttonEl: HTMLElement): void {
 	showMenu(view, buttonEl, (menu) => addHeadingEntries(view, menu, (headingLine) => moveSelectionTo(view, headingLine)));
 }
 
+// A press on the button while its menu shows closes the menu instead of opening it again.
 function showMenu(view: PrinceListView, buttonEl: HTMLElement, fill: (menu: Menu) => void): void {
 	const menu = new Menu();
 	fill(menu);
+	const bar = bars.get(view);
+	if (bar) {
+		bar.menuFrom = buttonEl;
+		onMenuHide(menu, () => {
+			if (bar.menuFrom === buttonEl) bar.menuFrom = null;
+		});
+	}
 	const { left, top, width } = buttonEl.getBoundingClientRect();
 	showViewMenu(view, menu, () => menu.showAtPosition({ x: left, y: top, width, overlap: true }, buttonEl.doc));
 }

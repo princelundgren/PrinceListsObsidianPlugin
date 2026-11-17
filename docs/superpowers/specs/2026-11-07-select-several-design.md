@@ -165,6 +165,8 @@ only documented Obsidian APIs are used.
   hide, such as Date with only headings selected, is disabled; Move to is disabled while a heading
   is selected. This replaces Tick, Tag and Star as buttons of their own **(owner, #450)**: with New
   as well, seven labeled buttons need a view 443 px wide, more than most phones have.
+- **A press on a button whose menu shows closes the menu (owner, 2026-11-17),** as a second press
+  on a menu button does elsewhere; a press on another button opens that one's.
 - **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
   CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
