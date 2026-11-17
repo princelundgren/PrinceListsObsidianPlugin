@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-17
+verified: 2026-11-18
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -726,8 +726,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   or turn it off **(owner, 2026-11-05)**. While selecting, the selection's bar takes its place
   ([selecting several rows](2026-11-07-select-several-design.md), "The bar").
   - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
-    fields included. While selecting, it adds the new item below the last selected item in list
-    order instead. An empty list shows a gray hint saying how to add an item.
+    fields included. While selecting, it adds the new item where the selection's New item below
+    does instead ([selecting several rows](2026-11-07-select-several-design.md), "While
+    selecting"). An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.
