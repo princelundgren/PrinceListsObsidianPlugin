@@ -13,8 +13,8 @@ export interface PlannedDuplicate extends PlannedGroupEdit {
 }
 
 // A block id names one block, and a Tasks id one task, so a copy keeps neither.
-const TASKS_ID = /^🆔️? */;
-const DEPENDS_ON = /^⛔️? */;
+const TASKS_ID = /^🆔\ufe0f? */;
+const DEPENDS_ON = /^⛔\ufe0f? */;
 
 /**
  * Copies each item on `rows`, with its notes, right below itself, in one write. A copy is unticked,

@@ -56,6 +56,10 @@ describe('planGroupDuplicate', () => {
 		expect(body(planGroupDuplicate(text, 3, [3])?.next)).toBe(
 			text.slice(FRONT.length) + '- [ ] a ⛔ out\n  - [ ] s1\n  - [ ] s2\n  - [ ] s3 ⛔ out\n',
 		);
+		const selectors = FRONT + '- [ ] a \u{1f194}\ufe0f x1\n  - [ ] s \u26d4\ufe0f x1,y\n';
+		expect(body(planGroupDuplicate(selectors, 3, [3])?.next)).toBe(
+			selectors.slice(FRONT.length) + '- [ ] a\n  - [ ] s \u26d4\ufe0f y\n',
+		);
 	});
 
 	test('keeps a block id the same way on item lines and notes lines', () => {
