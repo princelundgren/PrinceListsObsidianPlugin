@@ -68,6 +68,9 @@ export async function hover(session, x, y, { drawn = false } = {}) {
 	if (drawn) await pointer(session, x, y, 'move');
 }
 
+/** Obsidian's Mod key in a mouse event's CDP `modifiers`: Cmd on macOS, Ctrl elsewhere. */
+export const MOD_KEY = process.platform === 'darwin' ? 4 : 2;
+
 /** Clicks at `x, y` with the `left` or `right` button. */
 export async function click(session, x, y, button = 'left') {
 	await hover(session, x, y);
@@ -79,12 +82,13 @@ export async function click(session, x, y, button = 'left') {
 /**
  * A mouse for recordings, starting at `x, y`: each input moves the drawn pointer too. `glide` moves
  * in steps over about `ms`, so the pointer travels on screen; `press`, `release` and `click` act where
- * it is; `drag` drags what's under it to `x, y` with HTML drag and drop, rejecting if no drag starts.
+ * it is, `click` with CDP `modifiers` held, such as `MOD_KEY`; `drag` drags what's under it to `x, y`
+ * with HTML drag and drop, rejecting if no drag starts.
  */
 export function drawnMouse(session, x, y) {
 	const at = { x, y };
 	const sendMove = () => session.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at, ...held });
-	const button = (type) => session.send('Input.dispatchMouseEvent', { type, ...at, button: 'left', clickCount: 1 });
+	const button = (type, modifiers = 0) => session.send('Input.dispatchMouseEvent', { type, ...at, button: 'left', clickCount: 1, modifiers });
 	// Chromium starts a drag only from moves that say the button is down.
 	let held = {};
 	const glide = async (toX, toY, ms, sendStep) => {
@@ -109,9 +113,9 @@ export function drawnMouse(session, x, y) {
 			await button('mouseReleased');
 			held = {};
 		},
-		async click() {
-			await mouse.press();
-			await mouse.release();
+		async click(modifiers = 0) {
+			await button('mousePressed', modifiers);
+			await button('mouseReleased', modifiers);
 		},
 		async drag(toX, toY, ms = 900) {
 			await session.send('Input.setInterceptDrags', { enabled: true });
