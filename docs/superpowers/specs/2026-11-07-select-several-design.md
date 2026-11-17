@@ -136,9 +136,9 @@ only documented Obsidian APIs are used.
   beside it selects, so nothing is ticked by mistake. On desktop, with no card open, a plain
   click there ends selecting and ticks that item, as a plain click on the row opens it **(owner,
   2026-11-17)**.
-- **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
-  to, Date, More and Delete. On desktop it takes the same place whether or not the
-  floating "+" shows there **(call)**.
+- **A bar replaces the floating "+" at the bottom of the pane:** Done, then Move to, Date, Delete
+  and More. On desktop it takes the same place whether or not the floating "+" shows there
+  **(call)**.
 - **While the tag popover is open,** a click or a tap on a row, a heading, the tag strip or the
   list's title only closes it: it selects nothing and opens nothing
   ([tagging a selection](2026-11-12-select-tags-design.md), "What closes it").
@@ -170,17 +170,18 @@ only documented Obsidian APIs are used.
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
   48 by 48 dp with 8 between
   ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
-  Delete sits apart at the far end, past a divider, so a near miss on More doesn't reach it
-  **(call)**. The bar is the same on desktop.
-- **One row where it fits (owner, 2026-11-12):** Done, an ✕ named "Done", and the count come
-  first, then the actions spread across the bar, every button an icon. A narrower view, such as
-  a phone's, puts Done and the count on a row above the actions.
-- **Icons only where even that doesn't fit (owner, 2026-11-12):** in a narrower view still, such
-  as a narrow sidebar, the actions lose their labels, keeping them as tooltips and
-  names, the gaps tighten, and the buttons narrow below 48 px rather than spill out of the bar.
-- **The widths (call),** measured in Obsidian 1.15.1's default theme: the four labeled buttons fit
-  from a view 275 px wide, and one row from 430 px. This replaces 390 and 542 px for six buttons
-  ([tagging a selection](2026-11-12-select-tags-design.md), "The bar's Tag button").
+  More sits apart at the far end, past a divider, after Delete **(owner, 2026-11-17)**. The bar is
+  the same on desktop.
+- **One row (owner, 2026-11-17):** Done, an ✕ named "Done", comes first, then the actions spread
+  across the bar. The bar shows no count: its accessible name says how many rows are selected
+  **(call)**. This replaces the count beside Done, and their own row above the actions on a phone
+  **(owner, 2026-11-12)**.
+- **Icons only where that doesn't fit (owner, 2026-11-12):** in a narrower view, such as a small
+  phone or a narrow sidebar, the actions lose their labels, keeping them as tooltips and names, the
+  gaps tighten, and the buttons narrow below 48 px rather than spill out of the bar.
+- **The width (call),** measured in Obsidian 1.15.1's default theme: the labeled row fits from a
+  view 340 px wide. This replaces 275 px for the actions alone and 430 px for one row with the
+  count.
 - **Done ends selecting,** and so does Delete, New item below, New heading below or removing the
   last selected row **(call)**. Other actions keep the selection, so several can follow each other.
 

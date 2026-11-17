@@ -15,7 +15,6 @@ const SELECTING_CLASS = 'princelists-selecting';
 
 interface SelectionBar {
 	el: HTMLElement;
-	countEl: HTMLElement;
 	buttons: Map<BarButton, HTMLButtonElement>;
 }
 
@@ -24,29 +23,27 @@ const bars = new WeakMap<PrinceListView, SelectionBar>();
 const BUTTONS: readonly { button: BarButton; label: string; icon: string }[] = [
 	{ button: 'move', label: 'Move to', icon: 'list-end' },
 	{ button: 'date', label: 'Date', icon: 'calendar' },
-	{ button: 'more', label: 'More', icon: 'more-horizontal' },
 	{ button: 'delete', label: 'Delete', icon: 'trash-2' },
+	{ button: 'more', label: 'More', icon: 'more-horizontal' },
 ];
 
 /**
- * Builds the bar for acting on the selection (selecting several rows, "The bar"): Done and how many
- * rows are selected, then Move to, Date and More, and Delete apart past a divider. It goes
- * on the view's container where the floating "+" goes, hidden until syncSelectionBar shows it.
+ * Builds the bar for acting on the selection (selecting several rows, "The bar"): Done, then Move
+ * to, Date and Delete, and More apart past a divider. It goes on the view's container where the
+ * floating "+" goes, hidden until syncSelectionBar shows it.
  */
 export function buildSelectionBar(view: PrinceListView): HTMLElement {
 	const el = view.containerEl.createDiv({ cls: 'princelists-selection-bar', attr: { role: 'toolbar', 'aria-label': 'Selection' } });
 	el.hide();
-	const top = el.createDiv({ cls: 'princelists-selection-bar-top' });
-	const done = top.createEl('button', { cls: 'princelists-selection-done', attr: { 'aria-label': 'Done' } });
+	const done = el.createEl('button', { cls: 'princelists-selection-done', attr: { 'aria-label': 'Done' } });
 	setTooltip(done, 'Done');
 	setIcon(done, 'x');
-	const countEl = top.createSpan({ cls: 'princelists-selection-count' });
 	el.createDiv({ cls: 'princelists-selection-divider', attr: { 'aria-hidden': 'true' } });
 	const actionsEl = el.createDiv({ cls: 'princelists-selection-actions' });
 	const actions = new Map<HTMLElement, () => void>([[done, () => clearSelection(view)]]);
 	const buttons = new Map<BarButton, HTMLButtonElement>();
 	for (const { button, label, icon } of BUTTONS) {
-		if (button === 'delete') actionsEl.createDiv({ cls: 'princelists-selection-divider', attr: { 'aria-hidden': 'true' } });
+		if (button === 'more') actionsEl.createDiv({ cls: 'princelists-selection-divider', attr: { 'aria-hidden': 'true' } });
 		const buttonEl = actionsEl.createEl('button', {
 			cls: `princelists-selection-action princelists-selection-${button}`,
 			attr: { 'aria-label': label, ...popupAttrs(button) },
@@ -63,7 +60,7 @@ export function buildSelectionBar(view: PrinceListView): HTMLElement {
 		leaveTagPopover(view, buttonEl);
 		actions.get(buttonEl)?.();
 	});
-	bars.set(view, { el, countEl, buttons });
+	bars.set(view, { el, buttons });
 	return el;
 }
 
@@ -73,7 +70,7 @@ export function shownSelectionBar(view: PrinceListView): HTMLElement | null {
 }
 
 /**
- * Shows the bar while the view is selecting, with how many rows are selected and each button enabled
+ * Shows the bar while the view is selecting, named for how many rows are selected, with each button enabled
  * only while it has something to act on, and marks the view's content as selecting. Hides both
  * otherwise, first moving focus to the list if the bar holds it. Closes the tag popover once the
  * selection it opened for changes.
@@ -84,7 +81,7 @@ export function syncSelectionBar(view: PrinceListView): void {
 	if (!bar) return;
 	if (view.selecting) {
 		const rows = view.selection.lines();
-		bar.countEl.setText(`${rows.length} selected`);
+		bar.el.setAttr('aria-label', `${rows.length} selected`);
 		const enabled = barButtons(groupState(view.text, contentStartLine(view.text), rows), listHasHeadings(view));
 		for (const [button, buttonEl] of bar.buttons) buttonEl.disabled = !enabled[button];
 	}
