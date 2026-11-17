@@ -1,9 +1,11 @@
+import { Notice } from 'obsidian';
 import { tagChangeMessage, type TagChange } from '../core/group-menu';
 import { sharedCarried } from '../core/inherited-tags';
 import { rowTexts, sameRowTexts } from '../core/row-texts';
-import { planGroupTag, selectionTags } from '../core/selection-tags';
+import { anyHeadingRefused, planGroupTag, selectionTags } from '../core/selection-tags';
 import { contentStartLine } from '../obsidian/marker';
 import { queueGroupAction } from './group-write';
+import { NAME_REFUSED_NOTICE } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { stripTagOrder } from './tag-suggest';
 import { closeTagsPopover, isTagsPopoverOpenFrom, openTagsPopover } from './tags-popover';
@@ -49,7 +51,11 @@ function changeTag(view: PrinceListView, change: TagChange, tag: string): void {
 	queueGroupAction(
 		view,
 		view.selection.lines(),
-		(text, contentStart, rows) => planGroupTag(text, contentStart, rows, change, tag),
+		(text, contentStart, rows) => {
+			const planned = planGroupTag(text, contentStart, rows, change, tag);
+			if (!planned && anyHeadingRefused(text, contentStart, rows, change, tag)) new Notice(NAME_REFUSED_NOTICE);
+			return planned;
+		},
 		(written) => tagChangeMessage(change, tag, written.items, written.headings),
 	);
 }
