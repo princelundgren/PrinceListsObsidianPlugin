@@ -64,7 +64,6 @@ function itemMenu(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 		entry
 			.setTitle('Delete item')
 			.setIcon('trash-2')
-			.setWarning(true)
 			.onClick(atLine(anchor, (line) => deleteItemAt(view, line))),
 	);
 }
@@ -111,7 +110,6 @@ export function headingMenu(view: PrinceListView, model: ListModel, section: Sec
 		entry
 			.setTitle('Delete heading')
 			.setIcon('trash-2')
-			.setWarning(true)
 			.onClick(atLine(anchor, (line) => deleteHeadingAt(view, line))),
 	);
 }

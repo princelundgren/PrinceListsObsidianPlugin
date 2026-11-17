@@ -801,7 +801,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   which also puts the most-used entries first and destructive ones last.
 - **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected row
   included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Tag…, Add star and
-  Remove star, the four date entries, and Delete in red, naming what goes. Each acts on every
+  Remove star, the four date entries, and Delete, naming what goes. Each acts on every
   selected item at once and shows an Undo message, and a right-click on a row outside the selection
   opens that row's own menu ([selecting several rows](2026-11-07-select-several-design.md), "The
   actions").
@@ -849,10 +849,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     color with no button background: below the message, or at its right edge on a phone. The
     notice lays it out, so its place doesn't depend on the message's length. `Notice.addButton`
     does this but isn't in the API, so the button is the plugin's, added after the message.
-- **Delete item and Delete heading show in red (owner, 2026-10-20)** in every menu that has them,
-  through `MenuItem.setWarning(true)`. The red comes from the `is-warning` class, so with Settings →
-  Appearance → Native menus on, the desktop right-click menus may not show it (obsidian.md/help,
-  Settings: native menus "will not be affected by your theme").
+- **Delete shows in the same color as the other entries and buttons (owner, 2026-11-17),** in every
+  menu and in the selection bar. Its name says what goes, and it sits last in each menu, in a group
+  of its own where the menu has others. This replaces Delete item and Delete heading in red
+  **(owner, 2026-10-20)**.
 
 ### Dragging (owner)
 

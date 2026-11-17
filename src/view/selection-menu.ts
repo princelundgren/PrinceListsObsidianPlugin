@@ -39,7 +39,6 @@ export function addGroupEntries(view: PrinceListView, menu: Menu, only?: EntryGr
 				item
 					.setTitle(`Delete ${countPhrase(state.items, state.headings)}`)
 					.setIcon('trash-2')
-					.setWarning(true)
 					.onClick(() => deleteSelection(view)),
 			);
 		} else {

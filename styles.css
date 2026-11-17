@@ -826,10 +826,6 @@ button.princelists-new-item {
 	white-space: nowrap;
 }
 
-.princelists-selection-bar button.princelists-selection-delete {
-	color: var(--text-error);
-}
-
 .princelists-selection-bar button:disabled {
 	color: var(--text-faint);
 }

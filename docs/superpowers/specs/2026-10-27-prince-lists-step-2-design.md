@@ -633,7 +633,7 @@ The block fields this section described are gone.
     mobile").
 - **Right-clicking a picture on desktop** in a card's notes or the list note opens the picture's
   menu, laid out as Obsidian's own image menu: Copy image and Remove image, then Obsidian's link
-  menu, then Delete image in red at the bottom. Swap file and Reset size are left out
+  menu, then Delete image at the bottom. Swap file and Reset size are left out
   **(owner, 2026-10-28)**.
   - Remove image takes out the link only, and Delete image takes out the link and moves the file to
     the trash after Obsidian's own prompt **(owner, 2026-10-28)**. A cancel leaves both.

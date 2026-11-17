@@ -235,8 +235,8 @@ only documented Obsidian APIs are used.
   - **iOS and desktop keep Cancel and Set (owner, 2026-11-12).** iOS writes today into an empty
     input as its picker opens, and on an iPad closing the picker leaves the input focused, so no
     event says a day was chosen. On desktop a date can be typed **(call)**.
-- **Delete (call)** names what goes, such as "Delete 5 items" or "Delete 4 items and 1 heading", in
-  red as today. A selected heading goes and keeps its items unless they're selected too, as Delete
+- **Delete (call)** names what goes, such as "Delete 5 items" or "Delete 4 items and 1 heading". A
+  selected heading goes and keeps its items unless they're selected too, as Delete
   heading does.
 - **Tick, Star and Date apply to items only (call):** a selected heading ticks, stars and dates
   nothing, and an entry with nothing to act on hides. Tag and Delete act on headings too
