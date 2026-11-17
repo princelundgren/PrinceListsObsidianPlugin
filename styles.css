@@ -880,14 +880,15 @@ button.princelists-new-item {
 }
 
 /* The card's row under its notes, at its end: the item's tags, then its buttons, which keep their
-   places whatever tags it has, while many tags wrap within their own box. The tag and repeat popovers
-   hang from it. */
+   places whatever tags it has. Tags that don't fit beside the buttons take their own line above
+   them. The tag and repeat popovers hang from it. */
 .princelists-card-tools {
 	position: relative;
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: flex-end;
 	align-items: center;
-	gap: var(--size-2-1);
+	gap: var(--size-4-1) var(--size-2-1);
 	/* Brought into view clear of mobile's navigation bar and desktop's status bar. */
 	scroll-margin-bottom: calc(var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
@@ -1249,7 +1250,6 @@ button.princelists-strip-no-tag.is-lit {
 }
 
 .princelists-card-tags {
-	min-width: 0;
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: flex-end;
@@ -1263,6 +1263,11 @@ button.princelists-strip-no-tag.is-lit {
 	align-items: center;
 	gap: var(--size-2-1);
 	padding-inline-end: var(--size-2-1);
+}
+
+/* A tag wider than the card breaks within its text. */
+.princelists-card-tag {
+	overflow-wrap: anywhere;
 }
 
 /* The × takes the chip's own color, on the chip's background. */

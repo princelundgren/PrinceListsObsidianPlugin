@@ -326,9 +326,11 @@ this met on 2026-10-30 **(owner)**.
   - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width, at the
     row's end, with the item's tags just before them, each with its ×. The buttons keep their
     places whatever tags it has: the tag button, the star, the repeat button, the When and ⋯, in
-    the order a row shows its tags, star, repeat and day **(owner, 2026-11-17)**. Many tags wrap
-    within their own box, beside the buttons **(call)**. The title has its line to
-    itself, at the card's whole width. The format bar sits between the notes and the buttons, shown
+    the order a row shows its tags, star, repeat and day **(owner, 2026-11-17)**. Tags that don't
+    fit beside the buttons take their own line above them, the buttons still at the end, and a tag
+    wider than the card breaks within its text **(call)**, since on a phone the buttons leave
+    little room beside them. The title has its line to itself, at the card's whole width. The format
+    bar sits between the notes and the buttons, shown
     while the notes have focus and keeping its room while hidden, on a phone too, so the card never
     changes height and no button moves when the notes take or lose focus **(owner, 2026-11-17)**.
     While hidden, its room reads as part of the notes: it shows the text cursor, and a click or tap
