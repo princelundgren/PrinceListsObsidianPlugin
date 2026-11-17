@@ -192,9 +192,9 @@ Compared with Obsidian's own editor side by side on desktop:
 
 ## The format bar
 
-- **Under the editor while it has focus,** in a card between it and its buttons, with the same buttons
-  and rules as step two's "Formatting in a card". A press keeps focus in the editor, so a phone's
-  keyboard stays up, but for Add link, whose search box takes it.
+- **Under the editor while it has focus,** in a card between it and its buttons, with the same
+  buttons and rules as step two's "Formatting in a card". A press keeps focus in the editor, so a
+  phone's keyboard stays up, but for Add link, whose search box takes it.
 - **On mobile, one row that scrolls sideways (owner),** with no scroll bar, as Obsidian's own
   toolbar above the keyboard does. On desktop, whole groups still wrap on a narrow card.
 

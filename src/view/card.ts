@@ -129,6 +129,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
+	// The format bar goes right after the notes, as their sibling, which the stylesheet hides it by.
 	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, notes);
 }
 
