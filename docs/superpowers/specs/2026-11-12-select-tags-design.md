@@ -85,6 +85,7 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 - **The selection stays (owner),** as after the bar's other actions, so a star or a date can follow.
 - **What closes it (call):**
   - Escape, once Obsidian's suggestions have taken the first one while they show, as on the card.
+    Focus goes to More, so the keyboard stays at the bar **(owner, 2026-11-17)**.
   - A press anywhere else in the view, on a row, the tag strip or the list's title, which does
     nothing else: it neither selects nor unselects a row, nor opens a card nor lights a tag, so a
     near miss doesn't change what the next pick reaches. Focus leaves the field before the press's
