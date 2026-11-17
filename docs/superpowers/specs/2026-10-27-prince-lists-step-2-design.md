@@ -325,17 +325,19 @@ this met on 2026-10-30 **(owner)**.
   - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width: the tag
     button, the When, a repeating item's repeat button, and ⋯ at the row's end. The row starts where
     the notes' text starts, as the format bar's first icon does, and the title has the card's whole
-    width. While the notes have focus, the format bar shows under the buttons, so hiding it moves no
-    button under a pointer that pressed one. A mouse press on a button leaves focus in the notes
-    through the click, since leaving them draws a link on the caret's line as its label and could
-    pull the row up mid-press **(call)**; a phone's tap goes to what it touched, and lowers the
-    keyboard for the date picker. Brought into view for a popover or a row's Tag…, Set date… or
-    Repeat…, the row stays clear of mobile's navigation bar and desktop's status bar **(call)**;
-    opening an item from the Schedule scrolls only as far as the card. On a desktop card this takes
-    a row more than the title's line did; with long notes on a phone, the row can be below the
-    screen. This replaces the buttons at the title's right, and their line of their own under it in
-    a view 480 px wide or narrower **(owner, 2026-11-05)** or too narrow for the title, which left
-    half a phone's line empty.
+    width. The format bar sits between the notes and the buttons, shown while the notes have focus
+    and keeping its room while hidden, on a phone too, so the card never changes height and no
+    button moves when the notes take or lose focus **(owner, 2026-11-17)**. This replaces the bar
+    under the buttons, which made the card a row taller while the notes had focus. A mouse press on
+    a button leaves focus in the notes through the click, since leaving them draws a link on the
+    caret's line as its label and could pull the row up mid-press **(call)**; a phone's tap goes to
+    what it touched, and lowers the keyboard for the date picker. Brought into view for a popover or
+    a row's Tag…, Set date… or Repeat…, the row stays clear of mobile's navigation bar and desktop's
+    status bar **(call)**; opening an item from the Schedule scrolls only as far as the card. On a
+    desktop card the buttons and the bar's room take two rows more than the title's line did; with
+    long notes on a phone, the row can be below the screen. This replaces the buttons at the title's
+    right, and their line of their own under it in a view 480 px wide or narrower **(owner,
+    2026-11-05)** or too narrow for the title, which left half a phone's line empty.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's buttons, and every platform's picker can already
     clear the day.
@@ -573,8 +575,8 @@ Obsidian documents no way to put its editor in a plugin's view.
   link, as in a note, and Cmd+B or Cmd+I again takes it off **(call)**. The title's are registered
   on the view's own `scope`, as Cmd+Z is, and the notes' are in their editor's keymap; anywhere
   else the key stays Obsidian's.
-- **A format bar under the notes** while their editor has focus, and in a card under its buttons
-  ("When and the Schedule view"), in two groups: Bold, Italic,
+- **A format bar under the notes** while their editor has focus, and in a card between its notes and
+  its buttons ("When and the Schedule view"), in two groups: Bold, Italic,
   Strikethrough and Underline; then Task list, Bullet list, Numbered list, Add link, Add external
   link, Code and Code block, in one group so the bar stays short **(owner, 2026-11-05)**. It has
   no Undo or Redo **(owner, 2026-11-05)**; Cmd+Z and Cmd+Shift+Z still undo and redo. A press

@@ -914,9 +914,10 @@ button.princelists-new-item {
 	display: none;
 }
 
-/* The card's sits under its buttons, while its notes have focus. */
+/* The card's sits between its notes and its buttons, and keeps its room while hidden, so the card
+   never changes height and no button moves when the notes take or lose focus. */
 .princelists-card-notes:not(:focus-within) ~ .princelists-format-bar {
-	display: none;
+	visibility: hidden;
 }
 
 .princelists-card-body > .princelists-format-bar {

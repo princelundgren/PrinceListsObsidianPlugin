@@ -129,9 +129,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	// The format bar goes under the buttons, so hiding it never moves a button mid-press.
-	const tools = card.el.querySelector<HTMLElement>(`.${CARD_TOOLS_CLASS}`) ?? undefined;
-	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, tools);
+	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, notes);
 }
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {
