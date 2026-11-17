@@ -17,6 +17,10 @@ const TASKS_ID = /^🆔\ufe0f? */;
 const DEPENDS_ON = /^⛔\ufe0f? */;
 
 const QUOTE_MARKER = /^[ \t]*>/;
+// What may stand before a block that starts its line: indent and quote markers, but no list marker.
+const QUOTES_ONLY = /^[ \t>]*$/;
+// A setext underline or a thematic break, which a paragraph's last line becomes without its block id.
+const UNDERLINE_OR_RULE = /^\s*(?:=+|-+|(?:-\s*){3,}|(?:\*\s*){3,}|(?:_\s*){3,})\s*$/;
 
 /**
  * Copies each item on `rows`, with its notes, right below itself, in one write. A copy is unticked,
@@ -58,7 +62,11 @@ function copyOf(original: readonly Line[], item: ItemBlock, eol: '\n' | '\r\n'):
 			const text = withoutTasksIds(line.text, dropped);
 			copy.push({ text: ends.has(at) ? withoutItemBlockId(text) : text, eol: line.eol });
 		} else if (!ends.has(at)) copy.push(line);
-		else if (!BARE_BLOCK_ID.test(line.text.trim())) copy.push({ text: withoutBlockId(line.text), eol: line.eol });
+		else if (!BARE_BLOCK_ID.test(insideQuotes(line.text, Infinity).trim())) copy.push({ text: withoutParagraphBlockId(line.text), eol: line.eol });
+		else if (at > item.titleLine + 1 && isSeparator(lines, at - 1) && (at + 1 === item.endLine || isSeparator(lines, at + 1))) {
+			// The id's line had a separator on each side: one of them is enough.
+			copy.pop();
+		}
 	}
 	while (copy.length > 1 && isBlank((copy[copy.length - 1] as Line).text)) copy.pop();
 	return copy.map((line) => ({ text: line.text, eol: line.eol || eol }));
@@ -72,17 +80,26 @@ function blockEnds(lines: readonly Line[], item: ItemBlock): Set<number> {
 	for (let step = walker.next(); step; step = walker.next()) {
 		const { node, entering } = step;
 		if (!entering || (node.type !== 'paragraph' && node.type !== 'heading')) continue;
-		const [[startLine], [endLine]] = node.sourcepos;
-		// An underlined heading ends on its last line of text, above the underline.
-		ends.add(item.titleLine + (node.type === 'heading' && startLine < endLine ? endLine - 1 : endLine));
-		if (node.type !== 'paragraph') continue;
-		// A table that starts on a later line of a paragraph ends a paragraph on the line above it.
+		const [[startLine, startColumn], [endLine]] = node.sourcepos;
+		if (node.type === 'heading') {
+			// An underlined heading ends on its last line of text, above the underline.
+			ends.add(item.titleLine + (startLine < endLine ? endLine - 1 : endLine));
+			continue;
+		}
+		// A table in the paragraph, which a quote leaves plain text, ends it on the line above the table.
 		const depth = quoteDepth(node);
 		const paragraph = notes.slice(startLine - 1, endLine).map((line) => insideQuotes(line.text, depth));
-		const table = tableStart(paragraph, 1);
-		if (table !== undefined) ends.add(item.titleLine + startLine - 1 + table);
+		const startsItsLine = QUOTES_ONLY.test((notes[startLine - 1] as Line).text.slice(0, startColumn - 1));
+		const table = tableStart(paragraph, startsItsLine ? 0 : 1);
+		if (table === undefined) ends.add(item.titleLine + endLine);
+		else if (table > 0) ends.add(item.titleLine + startLine - 1 + table);
 	}
 	return ends;
+}
+
+// A blank line, or one with only quote markers.
+function isSeparator(lines: readonly Line[], at: number): boolean {
+	return insideQuotes((lines[at] as Line).text, Infinity).trim() === '';
 }
 
 function quoteDepth(node: Node): number {
@@ -96,6 +113,12 @@ function insideQuotes(text: string, depth: number): string {
 	let inside = text;
 	for (let quote = 0; quote < depth && QUOTE_MARKER.test(inside); quote++) inside = inside.replace(QUOTE_MARKER, '');
 	return inside;
+}
+
+// A paragraph's last line without its block id, unless that would make it an underline or a rule.
+function withoutParagraphBlockId(text: string): string {
+	const without = withoutBlockId(text);
+	return UNDERLINE_OR_RULE.test(insideQuotes(without, Infinity)) ? text : without;
 }
 
 function withoutBlockId(text: string): string {

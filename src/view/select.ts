@@ -1,4 +1,5 @@
 import { Keymap, Platform } from 'obsidian';
+import { placesBelow } from '../core/group-menu';
 import { isListText } from '../obsidian/marker';
 import { addItem, newItem } from './add-button';
 import { CARD_CLASS, closeCard } from './card';
@@ -171,16 +172,14 @@ export function drawSelection(view: PrinceListView): void {
 }
 
 /**
- * Cmd+Enter: with an item selected, adds an item below the last selected item in list order; with
- * no item selected, adds one as "+" does. Either way the selection ends.
+ * Cmd+Enter: adds an item where the selection's New item below does (core's placesBelow), or as "+"
+ * does with nothing selected. Either way the selection ends.
  */
 export function newItemBelowSelection(view: PrinceListView): void {
 	if (!isListText(view.text)) return;
-	const selected = view.selection.lines();
-	const items = new Set(shownRows(view.listScrollEl).filter((row) => row.kind === 'item').map((row) => row.line));
-	const lastItem = selected.filter((line) => items.has(line)).pop();
+	const places = placesBelow(shownRows(view.listScrollEl), view.selection.lines());
 	clearSelection(view);
-	if (lastItem !== undefined) addItem(view, { after: lastItem });
+	if (places) addItem(view, places.item);
 	else newItem(view);
 }
 
