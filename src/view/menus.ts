@@ -8,7 +8,7 @@ import { contentStartLine, isListText } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import { editInMarkdown } from '../obsidian/switch';
 import { addItem, followPlace } from './add-button';
-import { CARD_CLASS, focusCardTitle, isNewEmptyItem } from './card';
+import { CARD_CLASS } from './card';
 import { deleteHeadingAt, deleteItemAt } from './delete';
 import { NOTE_CLASS } from './fields';
 import { addStarredOnlyItem, toggleStarredOnly } from './filter';
@@ -28,14 +28,13 @@ import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
 const MENU_TARGET_CLASS = 'princelists-menu-target';
 
-// The item actions, from a right-click on desktop and the card's ⋯, after Select and the card's own
-// entries (spec, "Item actions").
-function itemMenu(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
+// A row's New item below and New heading below, after its own entries (spec, "Item actions").
+function addInsertEntries(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 	menu.addItem((entry) =>
 		entry
 			.setTitle('New item below')
 			.setIcon('list-plus')
-			.onClick(atLine(anchor, (line) => newItemBelow(view, line))),
+			.onClick(atLine(anchor, (line) => addItem(view, { after: line }))),
 	);
 	menu.addItem((entry) =>
 		entry
@@ -44,6 +43,10 @@ function itemMenu(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 			.onClick(atLine(anchor, (line) => addHeading(view, { afterItem: line }))),
 	);
 	menu.addSeparator();
+}
+
+// Edit in Markdown and Delete item: the whole of the open card's menus, and the end of a row's.
+function itemMenu(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Edit in Markdown')
@@ -155,9 +158,9 @@ export function listMenu(view: PrinceListView, model: ListModel, section: Sectio
 }
 
 // Select, first and in a group of its own, for a row that isn't selected: it starts selecting with the
-// row, or adds it while selecting. Not on a new empty item, which selecting would remove with its card.
+// row, or adds it while selecting.
 function addSelectEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
-	if (anchor.line !== null && (view.selection.has(anchor.line) || isNewEmptyItem(view, anchor.line))) return;
+	if (anchor.line !== null && view.selection.has(anchor.line)) return;
 	menu.addItem((entry) =>
 		entry
 			.setTitle('Select')
@@ -247,7 +250,6 @@ export function showCardMenu(view: PrinceListView, button: HTMLElement): void {
 	if (!item) return;
 	const menu = new Menu();
 	const anchor = trackWhileShown(view, item.titleLine, menu);
-	addSelectEntry(view, anchor, menu);
 	itemMenu(view, anchor, menu);
 	const { left, bottom, width } = button.getBoundingClientRect();
 	showViewMenu(view, menu, () => menu.showAtPosition({ x: left, y: bottom, width, overlap: true, left: true }, button.doc));
@@ -270,9 +272,12 @@ function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
 	const menu = new Menu();
 	if (item && row) {
 		const anchor = trackWhileShown(view, item.titleLine, menu);
-		addSelectEntry(view, anchor, menu);
-		// The open card has buttons for what a row's menu adds, so it gets what its ⋯ has.
-		if (!row.classList.contains(CARD_CLASS)) itemQuickMenu(view, item, row, anchor, menu);
+		// The open card has buttons and its own ways for the rest, so it gets what its ⋯ has.
+		if (!row.classList.contains(CARD_CLASS)) {
+			addSelectEntry(view, anchor, menu);
+			itemQuickMenu(view, item, row, anchor, menu);
+			addInsertEntries(view, anchor, menu);
+		}
 		itemMenu(view, anchor, menu);
 	} else if (section) {
 		headingMenu(view, model, section, menu);
@@ -292,13 +297,6 @@ function backgroundMenu(view: PrinceListView, evt: MouseEvent): Menu | null {
 	const menu = new Menu();
 	listMenu(view, model, section, menu);
 	return menu;
-}
-
-// New item below. On an empty item the open card added, that item is the new one: closing the card
-// would remove it, only for the new item to take its place.
-function newItemBelow(view: PrinceListView, line: number): void {
-	if (isNewEmptyItem(view, line)) focusCardTitle(view);
-	else addItem(view, { after: line });
 }
 
 // Typing waits 2 seconds to be saved, so it is saved first for the Markdown to show it.

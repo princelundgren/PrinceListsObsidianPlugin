@@ -175,7 +175,7 @@ every tagged part of a list is done, such as what is left to buy.
 ## The card
 
 - **A tag button first in the card's buttons, under the notes (owner, 2026-11-17),** so they read
-  tag, day, repeat, star, ⋯ (step two, "When"). This replaces a tag button left of the star in the
+  tag, star, repeat, day, ⋯ (step two, "When"). This replaces a tag button left of the star in the
   card's head (owner). Its icon is a tag from Obsidian's built-in Lucide set **(call)**, and its
   tooltip is "Add tag".
 - **The item's tags start the row under the notes, before its buttons (owner, 2026-11-17),** each

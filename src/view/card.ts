@@ -203,14 +203,15 @@ function createCardElement(): HTMLElement {
 	const titleLine = body.createDiv({ cls: CARD_TITLE_LINE_CLASS });
 	titleLine.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	body.createDiv({ cls: CARD_NOTES_CLASS });
-	// The item's tags, then its buttons together at the row's end, so they keep their places.
+	// The item's tags, then its buttons together at the row's end, so they keep their places. The
+	// buttons follow a row's marks: tags, star, repeat, date.
 	const tools = body.createDiv({ cls: CARD_TOOLS_CLASS });
 	buildCardTags(tools);
 	const buttons = tools.createDiv({ cls: 'princelists-card-buttons' });
 	buildTagButton(buttons);
-	buildWhenPicker(buttons);
-	buildRepeatButton(buttons);
 	setIcon(buttons.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
+	buildRepeatButton(buttons);
+	buildWhenPicker(buttons);
 	const actions = buttons.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
 	return el;

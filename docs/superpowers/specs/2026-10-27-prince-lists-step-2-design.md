@@ -318,13 +318,14 @@ this met on 2026-10-30 **(owner)**.
 ### When and the Schedule view (owner)
 
 - **Setting a When (owner, 2026-10-27):** the card's buttons under its notes have a calendar
-  icon, after the tag button. Once the item has a When, its day takes the icon's place, with no
+  icon, after the repeat button. Once the item has a When, its day takes the icon's place, with no
   icon of its own, as on the row. Clicking either opens the platform's date picker through an
   `<input type="date">`. Obsidian has no date picker API, and the HTML input gives each platform's
   own picker.
   - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width: the
     item's tags first, each with its ×, then the buttons together at the row's end, so they keep
-    their places whatever tags it has: the tag button, the When, the repeat button, the star and ⋯.
+    their places whatever tags it has: the tag button, the star, the repeat button, the When and ⋯,
+    in the order a row shows its tags, star, repeat and day **(owner, 2026-11-17)**.
     Under many tags the buttons wrap together to a line of their own. The title has its line to
     itself, at the card's whole width. The format bar sits between the notes and the buttons, shown
     while the notes have focus and keeping its room while hidden, on a phone too, so the card never
@@ -535,7 +536,7 @@ this met on 2026-10-30 **(owner)**.
 ### Star (owner: in its list only)
 
 - **A star button among the card's buttons adds or removes the star (owner, 2026-11-17),** after
-  the repeat button. It is Lucide's `star`, filled in `--color-yellow` while the item has one, as
+  the tag button. It is Lucide's `star`, filled in `--color-yellow` while the item has one, as
   on the row, and its tooltip says Add star or Remove star. This replaces Add star or Remove star
   in the card's ⋯ menu, with a star mark beside the title: the row under the notes has room for it.
   A list's row adds or removes it from its right-click menu too **(owner, 2026-10-29)**: the step
@@ -549,7 +550,7 @@ this met on 2026-10-30 **(owner)**.
     letters. The checkbox reaches a little above and below them; the star, which Lucide draws
     inside a margin, runs from the baseline to the capitals' top. Each keeps the room its full size
     takes, so the text doesn't move and a tap anywhere the full-size box was still ticks. An open
-    card's tag button, day, a repeating item's repeat button and ⋯ are buttons the ⋯'s height,
+    card's tag button, star, repeat button, day and ⋯ are buttons the ⋯'s height,
     centered on one line, with icons the format bar's size, since they stand with it under the
     notes **(owner, 2026-11-17)**. This replaces drawing them as small as the row's star on
     desktop, beside the title **(owner, 2026-11-07, #339)**. On a phone, where each is a

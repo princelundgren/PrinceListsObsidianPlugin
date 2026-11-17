@@ -260,7 +260,7 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   repeat doesn't, so it earns the room. A ticked row that will come back keeps the icon, so a
   grayed row says it isn't gone for good; a done line that won't, ended or a Tasks history line,
   shows none **(call)**.
-- **Every card shows the same icon as a button after its date (owner, 2026-11-17),** in the
+- **Every card shows the same icon as a button before its date, as a row does (owner, 2026-11-17),** in the
   card's buttons and their spacing. It opens the popover, and it takes `--text-accent` while the
   item repeats **(call)**, as the star button takes yellow while the item has one. This replaces
   the button on a repeating item's card alone, with Repeat… in the ⋯ menu of the others. The ⋯

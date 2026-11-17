@@ -99,10 +99,10 @@ only documented Obsidian APIs are used.
     checkbox or the zone beside it, a link, the collapse arrow, a field or inside the open card
     **(call)**.
 - **Select, first in a row's or a heading's menu (owner, 2026-11-11; step one, "Item actions"):**
-  the right-click menu **(owner, 2026-11-11)**, and a card's ⋯ and the heading menu on mobile
-  **(call)**. It starts selecting with that row, or adds it while selecting, and shows only while
-  that row isn't selected: a selected row's right-click opens the selection's menu instead
-  **(call)**. The ⋯ of a new empty item has no Select, as selecting it would remove it **(call)**.
+  the right-click menu **(owner, 2026-11-11)** and the heading menu on mobile **(call)**, but not
+  the open card's menus **(owner, 2026-11-17)**, which replaces a card's ⋯ having it **(call)**. It
+  starts selecting with that row, or adds it while selecting, and shows only while that row isn't
+  selected: a selected row's right-click opens the selection's menu instead **(call)**.
 - **Cmd+click adds or removes a row (owner), and Shift+click selects every shown row between the
   anchor and the click (owner);** either starts selecting **(owner, 2026-11-11)**. The anchor is
   the open card's item, or the last row clicked or tapped, or held to start selecting; a

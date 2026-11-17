@@ -41,8 +41,8 @@ and data safety, and owner's advocate. Their findings are folded in.
   couldn't see on macOS or an iPhone.
 - **A note from outside the vault** with the marker, opened in Obsidian on desktop, is a list too.
 - **On desktop,** you right-click for actions and drag with the mouse.
-- **On mobile,** you tap to open an item and hold-and-move to drag it. Item actions sit in a ⋯
-  button on the open card, and tapping a heading opens the heading menu.
+- **On mobile,** you tap to open an item and hold-and-move to drag it. Item actions sit in the open
+  card's buttons and its ⋯ button, and tapping a heading opens the heading menu.
 - **It is built in two parts.** 1a is desktop plus the mobile basics. 1b adds dragging on mobile,
   pasting pictures into a card, and Cmd+Z undo.
 - **Step one is done** when one real list has lived only in Obsidian for two weeks.
@@ -781,17 +781,18 @@ back only what was typed and leaves the empty line, which can be deleted like an
     recent user action, and with Native menus on a menu's click may not count as one; then the
     card opens without it, and its date button opens the picker. Either way the card's buttons
     are scrolled into view first, since long notes can push them off-screen **(owner, 2026-11-17)**.
-  - **The card's ⋯ menu, and a right-click on the open card, stay without the rest (owner,
-    2026-10-29),** since the card shows the box and buttons for its tags, date, repeat and star
-    (step two's design, "When and the Schedule view"). This replaces Add star or Remove star and
-    Repeat… there, which the card had while it had no buttons for them **(owner, 2026-11-17)**.
+  - **The card's ⋯ menu, and a right-click on the open card, hold only Edit in Markdown and Delete
+    item (owner, 2026-11-17).** The card shows the box and buttons for its tags, date, repeat and
+    star (step two's design, "When and the Schedule view"), and "+" adds an item below it. This
+    replaces the rest of a row's menu but its quick entries there **(owner, 2026-10-29 and
+    2026-11-11)**: Select, Add star or Remove star, Repeat…, New item below and New heading below.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star entries' "Add star" and "Remove star";
     and "Remove", as in Remove image.
 - **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
   of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick, Tag… and
   the star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
-  Delete item. The card's ⋯ has the same without the card's own entries. The heading menu groups
+  Delete item. The card's ⋯ has Edit in Markdown and Delete item. The heading menu groups
   Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse or Expand
   all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
   [Context menus](https://developer.apple.com/design/human-interface-guidelines/context-menus),
@@ -818,8 +819,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
-- **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On mobile
-  this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move to, Tick,
+- **On both desktop and mobile,** the open card has a ⋯ button with Edit in Markdown and Delete item
+  ("Item actions"). On mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move to, Tick,
   Tag, Star, Date and Delete for them through the selection's bar ([selecting several
   rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
   actions" **(call)**.
