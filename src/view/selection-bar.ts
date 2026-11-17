@@ -100,7 +100,10 @@ export function openSelectionTags(view: PrinceListView): void {
 	if (button && !button.disabled) openSelectionTagPopover(view, button);
 }
 
-/** Opens the heading menu over the bar's Move to button, for a menu's Move to heading…; nothing while the button is missing or disabled. */
+/**
+ * Opens the menu of the list's headings over the bar's Move to button, for a menu's Move to heading…;
+ * nothing while the button is missing or disabled.
+ */
 export function openMoveMenu(view: PrinceListView): void {
 	const button = bars.get(view)?.buttons.get('move');
 	if (button && !button.disabled) showMoveMenu(view, button);
