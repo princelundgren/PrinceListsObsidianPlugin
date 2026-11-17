@@ -157,14 +157,15 @@ only documented Obsidian APIs are used.
 
 ## The bar
 
-- **Its buttons (owner, 2026-11-17):** Move to opens the heading menu ("The actions") and Delete
-  deletes, as the menu's entries do. Date opens a small menu of the selection menu's date entries, and More one of
-  the rest: Tick and Untick, Tag…, the star entries, New item below, New heading below and
-  Duplicate, so a mixed selection gets both Tick and Untick. Tag… opens the selection's tag popover
-  over More ([tagging a selection](2026-11-12-select-tags-design.md)). A button whose entries all
-  hide, such as Date with only headings selected, is disabled; Move to is disabled while a heading
-  is selected. This replaces Tick, Tag and Star as buttons of their own **(owner, #450)**: with New
-  as well, seven labeled buttons need a view 443 px wide, more than most phones have.
+- **Its buttons (owner, 2026-11-17):** Move to opens a menu of the list's headings ("The actions")
+  and Delete deletes, as the menu's entries do. Date opens a small menu of the selection menu's date
+  entries, and More one of the rest: Tick and Untick, Tag…, the star entries, New item below, New
+  heading below and Duplicate, so a mixed selection gets both Tick and Untick. Tag… opens the
+  selection's tag popover over More ([tagging a selection](2026-11-12-select-tags-design.md)). A
+  button whose entries all hide, such as Date with only headings selected, is disabled; Move to is
+  disabled while a heading is selected. This replaces Tick, Tag and Star as buttons of their own
+  **(owner, #450)**: with New as well, seven labeled buttons need a view 443 px wide, more than most
+  phones have.
 - **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
   CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's

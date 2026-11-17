@@ -9,7 +9,7 @@ import { atLine, onMenuHide } from './menu-anchor';
  * its heading's line, or null for the top, to `onChoose`; the heading lines follow the view's edits
  * while the menu shows, and a heading that went shows a notice instead.
  */
-export function addHeadingEntries(view: PrinceListView, menu: Menu, onChoose: (headingLine: number | null) => void): void {
+export function addMoveChoices(view: PrinceListView, menu: Menu, onChoose: (headingLine: number | null) => void): void {
 	for (const { label, headingLine } of headingChoices(view.text, contentStartLine(view.text))) {
 		if (headingLine === null) {
 			menu.addItem((item) => item.setTitle(label).onClick(() => onChoose(null)));

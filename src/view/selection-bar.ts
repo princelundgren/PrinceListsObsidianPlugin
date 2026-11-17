@@ -6,7 +6,7 @@ import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { showViewMenu } from './menu-press';
 import { clearSelection, focusList } from './select';
-import { addHeadingEntries } from './heading-menu';
+import { addMoveChoices } from './move-menu';
 import { addGroupEntries, deleteSelection, listHasHeadings, moveSelectionTo } from './selection-menu';
 import { openSelectionTagPopover } from './selection-tag-popover';
 import { closeTagsPopover, isInTagsPopover, syncTagsPopover } from './tags-popover';
@@ -122,7 +122,7 @@ function leaveTagPopover(view: PrinceListView, buttonEl: HTMLElement): void {
 }
 
 function showMoveMenu(view: PrinceListView, buttonEl: HTMLElement): void {
-	showMenu(view, buttonEl, (menu) => addHeadingEntries(view, menu, (headingLine) => moveSelectionTo(view, headingLine)));
+	showMenu(view, buttonEl, (menu) => addMoveChoices(view, menu, (headingLine) => moveSelectionTo(view, headingLine)));
 }
 
 function showMenu(view: PrinceListView, buttonEl: HTMLElement, fill: (menu: Menu) => void): void {
