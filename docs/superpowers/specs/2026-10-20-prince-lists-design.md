@@ -701,6 +701,12 @@ back only what was typed and leaves the empty line, which can be deleted like an
     click on a row or heading with Cmd or Shift held starts selecting instead: the card closes, and
     its item stays selected with the clicked row ([selecting several
     rows](2026-11-07-select-several-design.md), "Starting to select").
+  - **While one of the view's menus is open, a click in the list only closes it (owner,
+    2026-11-17),** as a click outside an open card only closes the card: it opens, ticks, selects
+    and drags nothing, and an open card stays open. That covers the right-click menus, the card's ⋯,
+    the selection bar's menus and the menus in the notes, a card's or the list's. A right-click
+    still opens its own menu, and a click on the selection bar, the floating "+" or outside the view
+    acts as before. A list inside another note keeps its own menus as they are.
   - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
     the card, one press closes the menu and the card together (#301).
   - **Android's Back doesn't close the card (owner, 2026-11-14):** Obsidian documents no way for a

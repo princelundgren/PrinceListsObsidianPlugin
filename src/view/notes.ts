@@ -63,9 +63,16 @@ export function handleLinkClick(app: App, sourcePath: string, evt: MouseEvent, t
 
 // For a host's contextmenu listener, on desktop only: mobile has no right-click, and the plugin
 // opens no menu on a long-press (spec, "Layout"). True when the right-click was on an internal link,
-// which then shows Obsidian's link menu and no other. No page previews: they wait until Obsidian
-// documents the `hover-link` event's payload (spec, "Not in step one").
-export function handleLinkMenu(app: App, sourcePath: string, evt: MouseEvent, target: HTMLElement): boolean {
+// which then shows Obsidian's link menu and no other; `display` shows it by calling `show`, and by
+// default only calls it. No page previews: they wait until Obsidian documents the `hover-link` event's
+// payload (spec, "Not in step one").
+export function handleLinkMenu(
+	app: App,
+	sourcePath: string,
+	evt: MouseEvent,
+	target: HTMLElement,
+	display: (menu: Menu, show: () => void) => void = (_menu, show) => show(),
+): boolean {
 	const link = target.closest(INTERNAL_LINK);
 	if (!link) return false;
 	const href = linkText(link);
@@ -74,7 +81,7 @@ export function handleLinkMenu(app: App, sourcePath: string, evt: MouseEvent, ta
 	const menu = new Menu();
 	// It returns a boolean whose meaning isn't documented, so it isn't used.
 	app.workspace.handleLinkContextMenu(menu, href, sourcePath);
-	menu.showAtMouseEvent(evt);
+	display(menu, () => menu.showAtMouseEvent(evt));
 	return true;
 }
 

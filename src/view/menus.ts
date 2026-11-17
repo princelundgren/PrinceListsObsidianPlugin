@@ -20,6 +20,7 @@ import { itemQuickMenu } from './item-quick-menu';
 import type { PrinceListView } from './list-view';
 import { openListTags } from './list-tags';
 import { atLine, onMenuHide, trackWhileShown } from './menu-anchor';
+import { showViewMenu } from './menu-press';
 import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
 import { ownElements } from './own-rows';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
@@ -226,7 +227,7 @@ export function showContextMenu(view: PrinceListView, evt: MouseEvent, target: H
 	if (!menu) return;
 	evt.preventDefault();
 	if (rowMenu) markWhileShown(target, rowMenu);
-	menu.showAtMouseEvent(evt);
+	showViewMenu(view, menu, () => menu.showAtMouseEvent(evt));
 }
 
 // Marks the right-clicked row or heading while its own menu shows, more lightly than a selected row:
@@ -252,7 +253,7 @@ export function cancelHoldMenu(view: PrinceListView, evt: MouseEvent, target: HT
 export function showHeadingMenu(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
 	const heading = target.closest<HTMLElement>(`.${HEADING_CLASS}`);
 	const menu = heading ? menuAt(view, heading) : null;
-	menu?.showAtMouseEvent(evt);
+	if (menu) showViewMenu(view, menu, () => menu.showAtMouseEvent(evt));
 	return menu !== null;
 }
 
@@ -267,7 +268,7 @@ export function showCardMenu(view: PrinceListView, button: HTMLElement): void {
 	addRepeatEntry(view, anchor, menu);
 	itemMenu(view, anchor, menu);
 	const { left, bottom, width } = button.getBoundingClientRect();
-	menu.showAtPosition({ x: left, y: bottom, width, overlap: true, left: true }, button.doc);
+	showViewMenu(view, menu, () => menu.showAtPosition({ x: left, y: bottom, width, overlap: true, left: true }, button.doc));
 }
 
 function menuAt(view: PrinceListView, target: HTMLElement): Menu | null {
