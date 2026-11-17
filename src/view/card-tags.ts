@@ -17,9 +17,9 @@ export const TAG_INPUT_CLASS = 'princelists-tag-input';
 
 const tagOfRemove = new WeakMap<HTMLElement, string>();
 
-/** Adds the "Add tag" button first in the card's `buttons`, so they read tag, day, repeat, star, ⋯. */
+/** Adds the "Add tag" button first in the card's `buttons`, so they read tag, star, repeat, day, ⋯. */
 export function buildTagButton(tools: HTMLElement): void {
-	setIcon(tools.createEl('button', { cls: TAG_BUTTON_CLASS, attr: { 'aria-label': 'Add tag', 'aria-expanded': 'false' }, prepend: true }), 'tag');
+	setIcon(tools.createEl('button', { cls: TAG_BUTTON_CLASS, attr: { 'aria-label': 'Add tag', 'aria-expanded': 'false' }, prepend: true }), 'plus');
 }
 
 /** Adds the card's tags box to `tools`, before its buttons, hidden until it has a tag. */

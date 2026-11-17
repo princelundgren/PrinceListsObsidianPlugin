@@ -879,13 +879,13 @@ button.princelists-new-item {
 	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The card's row under its notes: the item's tags, then its buttons together at the row's end, which
-   keep their places whatever tags it has and wrap to a line of their own under many. The tag and
-   repeat popovers hang from it. */
+/* The card's row under its notes, at its end: the item's tags, then its buttons, which keep their
+   places whatever tags it has, while many tags wrap within their own box. The tag and repeat popovers
+   hang from it. */
 .princelists-card-tools {
 	position: relative;
 	display: flex;
-	flex-wrap: wrap;
+	justify-content: flex-end;
 	align-items: center;
 	gap: var(--size-2-1);
 	/* Brought into view clear of mobile's navigation bar and desktop's status bar. */
@@ -893,10 +893,10 @@ button.princelists-new-item {
 }
 
 .princelists-card-buttons {
+	flex: none;
 	display: flex;
 	align-items: center;
 	gap: var(--size-2-1);
-	margin-inline-start: auto;
 }
 
 /* Under the notes editor while it has focus, its first icon lined up with the notes' text. On a
@@ -1105,6 +1105,11 @@ button.princelists-card-repeat.is-repeating {
 	color: var(--text-accent);
 }
 
+/* A day, in the repeat button's accent; three classes, to outrank the picker's hover rule. */
+.princelists-when-picker .princelists-when-button.is-dated {
+	color: var(--text-accent);
+}
+
 .princelists-when {
 	flex: none;
 	align-self: baseline;
@@ -1244,8 +1249,10 @@ button.princelists-strip-no-tag.is-lit {
 }
 
 .princelists-card-tags {
+	min-width: 0;
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: flex-end;
 	align-items: center;
 	gap: var(--size-4-1);
 }

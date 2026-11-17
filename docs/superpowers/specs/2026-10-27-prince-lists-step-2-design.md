@@ -319,14 +319,15 @@ this met on 2026-10-30 **(owner)**.
 
 - **Setting a When (owner, 2026-10-27):** the card's buttons under its notes have a calendar
   icon, after the repeat button. Once the item has a When, its day takes the icon's place, with no
-  icon of its own, as on the row. Clicking either opens the platform's date picker through an
+  icon of its own, as on the row, in `--text-accent` as the repeat button is while the item repeats
+  **(owner, 2026-11-17)**. Clicking either opens the platform's date picker through an
   `<input type="date">`. Obsidian has no date picker API, and the HTML input gives each platform's
   own picker.
-  - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width: the
-    item's tags first, each with its ×, then the buttons together at the row's end, so they keep
-    their places whatever tags it has: the tag button, the star, the repeat button, the When and ⋯,
-    in the order a row shows its tags, star, repeat and day **(owner, 2026-11-17)**.
-    Under many tags the buttons wrap together to a line of their own. The title has its line to
+  - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width, at the
+    row's end, with the item's tags just before them, each with its ×. The buttons keep their
+    places whatever tags it has: the tag button, the star, the repeat button, the When and ⋯, in
+    the order a row shows its tags, star, repeat and day **(owner, 2026-11-17)**. Many tags wrap
+    within their own box, beside the buttons **(call)**. The title has its line to
     itself, at the card's whole width. The format bar sits between the notes and the buttons, shown
     while the notes have focus and keeping its room while hidden, on a phone too, so the card never
     changes height and no button moves when the notes take or lose focus **(owner, 2026-11-17)**.

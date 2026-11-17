@@ -176,10 +176,12 @@ every tagged part of a list is done, such as what is left to buy.
 
 - **A tag button first in the card's buttons, under the notes (owner, 2026-11-17),** so they read
   tag, star, repeat, day, ⋯ (step two, "When"). This replaces a tag button left of the star in the
-  card's head (owner). Its icon is a tag from Obsidian's built-in Lucide set **(call)**, and its
-  tooltip is "Add tag".
-- **The item's tags start the row under the notes, before its buttons (owner, 2026-11-17),** each
-  with an × that takes it off, so the title has its line to itself. This replaces the tags
+  card's head (owner). Its icon is Lucide's `plus` **(owner, 2026-11-17)**, which beside the chips
+  says it adds one, and its tooltip is "Add tag". Lucide's `tag-plus` would say both, but Obsidian
+  doesn't ship it yet; this replaces a tag icon **(call)**.
+- **The item's tags sit in the row under the notes, just before its buttons (owner, 2026-11-17),**
+  each with an × that takes it off, so the title has its line to itself and the chips sit by the
+  button that adds them. This replaces the tags starting the row at its other end. This replaces the tags
   following the title, as on a closed row **(owner, #340)**, with the title field as wide as its
   text. These are the tags in its tail; a tag in the title stays in the title field, where it's
   edited as text **(call)**. Today the card hides the tail while you edit (step one, "Editing"), so
