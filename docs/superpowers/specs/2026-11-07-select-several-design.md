@@ -142,6 +142,8 @@ only documented Obsidian APIs are used.
 - **While the tag popover is open,** a click or a tap on a row, a heading, the tag strip or the
   list's title only closes it: it selects nothing and opens nothing
   ([tagging a selection](2026-11-12-select-tags-design.md), "What closes it").
+- **While one of the view's menus is open,** a click or a tap in the list only closes it: it selects
+  nothing and opens nothing (step one, "Selecting and adding").
 - **Right-click on a selected row** opens the selection's menu **(owner)**; on a row outside the
   selection it opens that row's own menu, as today, and leaves the selection **(call)**.
 - **Dragging a selected row drags the whole selection** ("Dragging the selection").

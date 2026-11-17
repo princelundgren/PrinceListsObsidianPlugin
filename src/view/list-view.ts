@@ -33,6 +33,7 @@ import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents, swallowClickAfterHold } from './events';
 import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
+import { registerMenuPress } from './menu-press';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
@@ -108,10 +109,12 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** Set once the view closes, so a tap still queued then does nothing. */
 	viewClosed = false;
 	/**
-	 * Set by a hold canceled on a row or heading, a row lifted to drag, or a row held with a mouse, so
-	 * the click that ends it opens nothing.
+	 * Set when a press must open nothing, such as one that ends a hold or closes a popover or menu, so
+	 * its click is held back.
 	 */
 	swallowNextClick = false;
+	/** The menu the view showed last, while it shows (spec, "Selecting and adding"). */
+	shownMenu: Menu | null = null;
 	// The list scrolls here, not in contentEl, so nothing relies on Obsidian's stylesheet scrolling
 	// `.view-content`. Not `scrollEl`: that may be a name Obsidian's views use at runtime.
 	readonly listScrollEl: HTMLElement;
@@ -210,6 +213,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		}));
 		onWindowReturn(this, this.containerEl, () => bringBackInList(this));
 		registerFieldEvents(this);
+		registerMenuPress(this);
 		focusListWhenActive(this);
 		registerFileRedraws(this);
 		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);

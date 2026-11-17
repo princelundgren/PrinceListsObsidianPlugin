@@ -4,6 +4,7 @@ import { pasteSource } from '../core/clipboard';
 import type { Format } from '../core/format';
 import { fieldText, notesText, type EditableText } from './editable-text';
 import type { PrinceListView } from './list-view';
+import { showViewMenu } from './menu-press';
 import { insertNoteLink } from './note-link-modal';
 import { NOTES_BLOCK_CLASS } from './notes-blocks';
 import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
@@ -47,7 +48,7 @@ export function showTextMenu(view: PrinceListView, evt: MouseEvent, target: HTML
 		menu.addSeparator();
 	}
 	addClipboardItems(menu, text);
-	menu.showAtMouseEvent(evt);
+	showViewMenu(view, menu, () => menu.showAtMouseEvent(evt));
 	return true;
 }
 

@@ -7,6 +7,7 @@ import { pictureLinks, planPictureRemove, type PictureLink, type PictureLinkAt }
 import { contentStartLine } from '../obsidian/marker';
 import type { Card } from './card';
 import type { PrinceListView } from './list-view';
+import { showViewMenu } from './menu-press';
 import { NOTES_BLOCK_CLASS } from './notes-blocks';
 import { cardNotesSource, listNoteSource, type NotesSource } from './notes-source';
 import { drawnPictureColumn, NOTES_PICTURE_CLASS } from './notes-widgets';
@@ -43,7 +44,7 @@ export function showPictureMenu(view: PrinceListView, evt: MouseEvent, target: H
 				.onClick(() => void deletePicture(view, removable, file)),
 		);
 	}
-	menu.showAtMouseEvent(evt);
+	showViewMenu(view, menu, () => menu.showAtMouseEvent(evt));
 	return true;
 }
 

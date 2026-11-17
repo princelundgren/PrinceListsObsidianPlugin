@@ -4,6 +4,7 @@ import { barButtons, type BarButton, type EntryGroup } from '../core/group-menu'
 import { contentStartLine } from '../obsidian/marker';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
+import { showViewMenu } from './menu-press';
 import { clearSelection, focusList } from './select';
 import { addGroupEntries, deleteSelection, listHasHeadings, moveToHeading } from './selection-menu';
 import { openSelectionTagPopover, toggleSelectionTagPopover } from './selection-tag-popover';
@@ -134,5 +135,5 @@ function showGroupMenu(view: PrinceListView, group: EntryGroup, buttonEl: HTMLEl
 	const menu = new Menu();
 	addGroupEntries(view, menu, group);
 	const { left, top, width } = buttonEl.getBoundingClientRect();
-	menu.showAtPosition({ x: left, y: top, width, overlap: true }, buttonEl.doc);
+	showViewMenu(view, menu, () => menu.showAtPosition({ x: left, y: top, width, overlap: true }, buttonEl.doc));
 }

@@ -28,6 +28,7 @@ import { afterFieldInput, beforeFieldInput, endFieldHistory, startFieldHistory, 
 import { barActionAt, FORMAT_BAR_CLASS } from './format';
 import { HEADING_FIELD_CLASS, headingFieldBlur, headingFieldKey } from './heading-field';
 import type { PrinceListView } from './list-view';
+import { showViewMenu } from './menu-press';
 import { cancelHoldMenu, showCardMenu, showContextMenu, showHeadingMenu } from './menus';
 import { insertNoteLink } from './note-link-modal';
 import { handleLinkClick, handleLinkMenu, NOTES_CHECKBOX_SELECTOR, NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
@@ -226,7 +227,7 @@ function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
 function onContextMenu(view: PrinceListView, evt: MouseEvent): void {
 	const target = targetOf(evt);
 	if (!target || isInNestedBlock(view.contentEl, target)) return;
-	if (showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target) || showTextMenu(view, evt, target)) return;
+	if (showPictureMenu(view, evt, target) || handleLinkMenu(view.app, view.sourcePath, evt, target, (menu, show) => showViewMenu(view, menu, show)) || showTextMenu(view, evt, target)) return;
 	showContextMenu(view, evt, target);
 }
 
