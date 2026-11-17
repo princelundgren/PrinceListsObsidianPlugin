@@ -2,7 +2,7 @@ import { countPhrase, type GroupState, type PlannedGroupChange } from './group-e
 import type { HeadingPlace, ItemPlace } from './list-actions';
 
 /** An entry of the selection's menu. */
-export type GroupEntry = 'move' | 'tick' | 'untick' | 'tag' | 'addStar' | 'removeStar' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'newItem' | 'newHeading' | 'delete';
+export type GroupEntry = 'move' | 'tick' | 'untick' | 'tag' | 'addStar' | 'removeStar' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'newItem' | 'newHeading' | 'duplicate' | 'delete';
 
 /** The entries the bar's Date and More buttons each show in a menu. */
 export type EntryGroup = 'date' | 'more';
@@ -12,13 +12,13 @@ export type GroupChange = 'tick' | 'untick' | 'addStar' | 'removeStar' | 'setDat
 
 const ENTRY_GROUPS: Record<EntryGroup, readonly GroupEntry[]> = {
 	date: ['today', 'tomorrow', 'pickDate', 'removeDate'],
-	more: ['tick', 'untick', 'tag', 'addStar', 'removeStar', 'newItem', 'newHeading'],
+	more: ['tick', 'untick', 'tag', 'addStar', 'removeStar', 'newItem', 'newHeading', 'duplicate'],
 };
 
 /**
  * The entries for a selection that holds `state`, in the menu's order, or only `only`'s group of them.
  * An entry with nothing to change hides. Move shows only while no heading is selected, in a list with
- * headings.
+ * headings, and Duplicate only while no heading is selected.
  */
 export function groupEntries(state: GroupState, listHasHeadings: boolean, only?: EntryGroup): GroupEntry[] {
 	const shows: Record<GroupEntry, boolean> = {
@@ -34,6 +34,7 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 		removeDate: state.anyDated,
 		newItem: state.items + state.headings > 0,
 		newHeading: state.items + state.headings > 0,
+		duplicate: state.items > 0 && state.headings === 0,
 		delete: state.items + state.headings > 0,
 	};
 	const order = only ? ENTRY_GROUPS[only] : (Object.keys(shows) as GroupEntry[]);

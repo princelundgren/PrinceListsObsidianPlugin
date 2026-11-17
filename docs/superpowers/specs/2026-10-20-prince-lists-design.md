@@ -760,8 +760,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
 ### Item actions (owner)
 
 - **On desktop, right-click an item** for New item below, New heading below and Delete item
-  **(call)**, and Select, which starts selecting with it **(owner, 2026-11-11)** ([selecting several
-  rows](2026-11-07-select-several-design.md), "Starting to select"). Delete item removes the item
+  **(call)**, Duplicate, which copies it with its notes right below itself as a selection's
+  Duplicate does **(owner, 2026-11-17)**, and Select, which starts selecting with it **(owner,
+  2026-11-11)** ([selecting several rows](2026-11-07-select-several-design.md), "Starting to
+  select"). Delete item removes the item
   and its notes, and its name says what goes **(owner, 2026-10-29)**. Step two adds Edit in
   Markdown.
 - **The right-clicked row or heading is marked while its own menu shows (owner, 2026-11-17),** with
@@ -791,10 +793,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     and "Remove", as in Remove image.
 - **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
   of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick, Tag… and
-  the star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
-  Delete item. The card's ⋯ has Edit in Markdown and Delete item. The heading menu groups
-  Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse or Expand
-  all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
+  the star; the date entries, with Repeat…; New item below, New heading below and Duplicate; Edit
+  in Markdown; Delete item. The card's ⋯ has Edit in Markdown and Delete item. The heading menu
+  groups Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse
+  or Expand all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
   [Context menus](https://developer.apple.com/design/human-interface-guidelines/context-menus),
   which also puts the most-used entries first and destructive ones last.
 - **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected row

@@ -28,17 +28,22 @@ describe('groupEntries', () => {
 			'removeDate',
 			'newItem',
 			'newHeading',
+			'duplicate',
 			'delete',
 		]);
 	});
 
 	test('shows only the entries that change something', () => {
 		const state = { ...NONE, items: 2, anyUnticked: true, anyStarred: true };
-		expect(groupEntries(state, true)).toEqual(['move', 'tick', 'tag', 'removeStar', 'today', 'tomorrow', 'pickDate', 'newItem', 'newHeading', 'delete']);
+		expect(groupEntries(state, true)).toEqual(['move', 'tick', 'tag', 'removeStar', 'today', 'tomorrow', 'pickDate', 'newItem', 'newHeading', 'duplicate', 'delete']);
 	});
 
 	test('hides Move to heading while a heading is selected', () => {
 		expect(groupEntries({ ...MIXED, headings: 1 }, true)).not.toContain('move');
+	});
+
+	test('hides Duplicate while a heading is selected', () => {
+		expect(groupEntries({ ...MIXED, headings: 1 }, true)).not.toContain('duplicate');
 	});
 
 	test('hides Move to heading in a list without headings', () => {
@@ -51,7 +56,7 @@ describe('groupEntries', () => {
 
 	test('keeps to one group of entries when asked', () => {
 		expect(groupEntries(MIXED, true, 'date')).toEqual(['today', 'tomorrow', 'pickDate', 'removeDate']);
-		expect(groupEntries(MIXED, true, 'more')).toEqual(['tick', 'untick', 'tag', 'addStar', 'removeStar', 'newItem', 'newHeading']);
+		expect(groupEntries(MIXED, true, 'more')).toEqual(['tick', 'untick', 'tag', 'addStar', 'removeStar', 'newItem', 'newHeading', 'duplicate']);
 		expect(groupEntries({ ...NONE, headings: 2 }, true, 'more')).toEqual(['tag', 'newItem', 'newHeading']);
 		expect(groupEntries({ ...NONE, headings: 2 }, true, 'date')).toEqual([]);
 	});

@@ -159,8 +159,8 @@ only documented Obsidian APIs are used.
 
 - **Its buttons (owner, 2026-11-17):** Move to opens the heading picker and Delete deletes, as the
   menu's entries do. Date opens a small menu of the selection menu's date entries, and More one of
-  the rest: Tick and Untick, Tag…, the star entries, New item below and New heading below, so a
-  mixed selection gets both Tick and Untick. Tag… opens the selection's tag popover
+  the rest: Tick and Untick, Tag…, the star entries, New item below, New heading below and
+  Duplicate, so a mixed selection gets both Tick and Untick. Tag… opens the selection's tag popover
   over More ([tagging a selection](2026-11-12-select-tags-design.md)). A button whose entries all
   hide, such as Date with only headings selected, is disabled; Move to is disabled while a heading
   is selected. This replaces Tick, Tag and Star as buttons of their own **(owner, #450)**: with New
@@ -245,12 +245,20 @@ only documented Obsidian APIs are used.
   in list order: an item right after a selected item, or first under a selected heading; a heading
   after a selected item, or after a selected heading's section. Selecting ends as the new row opens
   for typing. This replaces their dropping out as one-row entries **(call)**.
+- **Duplicate (owner, 2026-11-17)** copies each selected item, with its notes, right below itself,
+  in one write. A copy is unticked and drops its done marks **(owner, 2026-11-17)**. It leaves out
+  block ids and Tasks `🆔` ids, a sub-task's in its notes too, since each names one block or task
+  **(call)**; the rest of its text is the item's, and a block the notes editor draws whole, such as
+  a code block, is copied as it is. It shows only while no heading is selected **(owner,
+  2026-11-17)**, since a heading's copy right below it would take its items. The selection stays on
+  the items, as other actions keep it **(call)**.
 - **Each action is one write and one Cmd+Z step (call),** and follows step one's "Saving" as a
   one-off action: typing that lands while it waits makes it run once more on the new text.
 - **Every group action shows an Undo message (owner),** on desktop and mobile: a move, a drag, a
-  tick, a star, a tag, a date or a delete. Its button takes the same step back as Cmd+Z, as the
-  message after a delete does today. Without it, a phone could never take back a mistaken group
-  move, since undo there is otherwise only the message after a delete (step one, "Undo").
+  tick, a star, a tag, a date, a duplicate **(call)** or a delete. Its button takes the same step
+  back as Cmd+Z, as the message after a delete does today. Without it, a phone could never take
+  back a mistaken group move, since undo there is otherwise only the message after a delete (step
+  one, "Undo").
 
 ## Not in this design
 

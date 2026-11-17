@@ -1,5 +1,6 @@
 import type { Menu } from 'obsidian';
 import { groupCount } from '../core/group-actions';
+import { planGroupDuplicate } from '../core/duplicate';
 import { countPhrase, groupState, planGroupDelete, planGroupLineEdit, planGroupTick, type PlannedGroupChange } from '../core/group-edits';
 import { changeMessage, groupEntries, placesBelow, type EntryGroup, type GroupChange, type GroupEntry } from '../core/group-menu';
 import { removeWhen } from '../core/repeat-line';
@@ -69,6 +70,11 @@ export function moveToHeading(view: PrinceListView): void {
 	}).open();
 }
 
+/** Copies the items on `rows`, each right below its own, in one write, with an Undo message. */
+export function duplicateItems(view: PrinceListView, rows: readonly number[]): void {
+	if (rows.length > 0) queueGroupAction(view, rows, planGroupDuplicate, (written) => `${countPhrase(written.copies.length, 0)} duplicated.`);
+}
+
 /** Deletes the selected items and headings in one write, with an Undo message, and ends the selection. */
 export function deleteSelection(view: PrinceListView): void {
 	const rows = view.selection.lines();
@@ -93,6 +99,7 @@ const PARTS: Record<GroupEntry, string> = {
 	removeDate: 'date',
 	newItem: 'new',
 	newHeading: 'new',
+	duplicate: 'new',
 	delete: 'delete',
 };
 
@@ -109,6 +116,7 @@ const ENTRY_LOOKS: Record<Exclude<GroupEntry, 'delete'>, { title: string; icon: 
 	removeDate: { title: 'Remove date', icon: 'calendar-x' },
 	newItem: { title: 'New item below', icon: 'list-plus' },
 	newHeading: { title: 'New heading below', icon: 'heading' },
+	duplicate: { title: 'Duplicate', icon: 'copy' },
 };
 
 function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag'>): void {
@@ -135,6 +143,8 @@ function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag'>)
 			return addBelowSelection(view, (places) => addItem(view, places.item));
 		case 'newHeading':
 			return addBelowSelection(view, (places) => addHeading(view, places.heading));
+		case 'duplicate':
+			return duplicateItems(view, view.selection.lines());
 	}
 }
 
