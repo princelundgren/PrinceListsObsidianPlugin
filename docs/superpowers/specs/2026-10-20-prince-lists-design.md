@@ -780,8 +780,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   [Context menus](https://developer.apple.com/design/human-interface-guidelines/context-menus),
   which also puts the most-used entries first and destructive ones last.
 - **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected row
-  included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Add star and Remove
-  star, Tag…, the four date entries, and Delete in red, naming what goes. Each acts on every
+  included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Tag…, Add star and
+  Remove star, the four date entries, and Delete in red, naming what goes. Each acts on every
   selected item at once and shows an Undo message, and a right-click on a row outside the selection
   opens that row's own menu ([selecting several rows](2026-11-07-select-several-design.md), "The
   actions").
@@ -803,7 +803,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     does, so no double blank line is left **(call)**.
 - **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On mobile
   this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move to, Tick,
-  Star, Tag, Date and Delete for them through the selection's bar ([selecting several
+  Tag, Star, Date and Delete for them through the selection's bar ([selecting several
   rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename

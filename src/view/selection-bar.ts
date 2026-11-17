@@ -23,15 +23,15 @@ const bars = new WeakMap<PrinceListView, SelectionBar>();
 const BUTTONS: readonly { button: BarButton; label: string; icon: string }[] = [
 	{ button: 'move', label: 'Move to', icon: 'list-end' },
 	{ button: 'tick', label: 'Tick', icon: 'check' },
-	{ button: 'star', label: 'Star', icon: 'star' },
 	{ button: 'tag', label: 'Tag', icon: 'tag' },
+	{ button: 'star', label: 'Star', icon: 'star' },
 	{ button: 'date', label: 'Date', icon: 'calendar' },
 	{ button: 'delete', label: 'Delete', icon: 'trash-2' },
 ];
 
 /**
  * Builds the bar for acting on the selection (selecting several rows, "The bar"): Done and how many
- * rows are selected, then Move to, Tick, Star, Tag and Date, and Delete apart past a divider. It goes
+ * rows are selected, then Move to, Tick, Tag, Star and Date, and Delete apart past a divider. It goes
  * on the view's container where the floating "+" goes, hidden until syncSelectionBar shows it.
  */
 export function buildSelectionBar(view: PrinceListView): HTMLElement {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { followLine } from '../../src/core/follow';
-import { planGroupTag, selectionTags } from '../../src/core/selection-tags';
+import { anyHeadingRefused, planGroupTag, selectionTags } from '../../src/core/selection-tags';
 
 const FRONT = '---\nprincelists: true\n---\n';
 // Lines 3 to 7 of the text.
@@ -80,5 +80,21 @@ describe('planGroupTag', () => {
 	});
 	test('returns null when a row is neither an item nor a heading', () => {
 		expect(planGroupTag(FRONT + '- [ ] call\n\nSome words\n', 3, [3, 5], 'addTag', 'work')).toBeNull();
+	});
+});
+
+describe('anyHeadingRefused', () => {
+	test("is true for a heading Tag… won't change, as one the change would empty", () => {
+		expect(anyHeadingRefused(FRONT + '## #work\n- [ ] call\n', 3, [3, 4], 'removeTag', 'work')).toBe(true);
+	});
+	test('is false when the headings have nothing to change', () => {
+		expect(anyHeadingRefused(FRONT + '## Office #work\n', 3, [3], 'addTag', 'work')).toBe(false);
+		expect(anyHeadingRefused(FRONT + '## Office\n', 3, [3], 'removeTag', 'work')).toBe(false);
+	});
+	test('is false when a row is neither an item nor a heading, which stops the change before any heading', () => {
+		expect(anyHeadingRefused(FRONT + '## #work\n- [ ] call #work\nnotes\n', 3, [3, 4, 5], 'removeTag', 'work')).toBe(false);
+	});
+	test('is false for items alone', () => {
+		expect(anyHeadingRefused(FRONT + '- [ ] call\n', 3, [3], 'removeTag', 'work')).toBe(false);
 	});
 });

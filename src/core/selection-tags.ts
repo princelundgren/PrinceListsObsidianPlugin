@@ -6,7 +6,7 @@ import type { TagChange } from './group-menu';
 import { headingEndTags, planHeadingTag } from './heading-tags';
 import { itemTags } from './item-tags';
 import { joinLines, splitLines, type Line } from './lines';
-import { itemAt, parseList } from './parse';
+import { itemAt, parseList, type ListModel } from './parse';
 import { addTag, removeTag } from './tag-edit';
 import { sameTag } from './tags';
 
@@ -61,7 +61,7 @@ export function planGroupTag(text: string, contentStart: number, rows: readonly 
 	const model = parseList(splitLines(text), contentStart);
 	// From the bottom up, so a heading whose text joins onto one line leaves the rows above it where they are.
 	const ordered = [...new Set(rows)].sort((a, b) => b - a);
-	if (ordered.some((row) => !isHeading(model, row) && !itemAt(model, row))) return null;
+	if (!allTaggable(model, ordered)) return null;
 	let lines: Line[] = splitLines(text);
 	let where: (number | null)[] = lines.map((_, line) => line);
 	let items = 0;
@@ -89,4 +89,17 @@ export function planGroupTag(text: string, contentStart: number, rows: readonly 
 	if (topChanged === -1) return null;
 	const moved = where.some((to, from) => to !== from);
 	return { next: joinLines(lines), edit: moved ? moveEdit(where) : { start: topChanged, delta: 0, kind: 'change' }, items, headings };
+}
+
+/**
+ * Whether Tag… refusing a heading on `rows` is why planGroupTag returns null for them in `text`:
+ * every row is an item or a heading, and Tag… would refuse the change for one of the headings.
+ */
+export function anyHeadingRefused(text: string, contentStart: number, rows: readonly number[], change: TagChange, tag: string): boolean {
+	if (!allTaggable(parseList(splitLines(text), contentStart), rows)) return false;
+	return rows.some((row) => planHeadingTag(text, contentStart, row, change, tag).kind === 'refused');
+}
+
+function allTaggable(model: ListModel, rows: readonly number[]): boolean {
+	return rows.every((row) => isHeading(model, row) || itemAt(model, row) !== undefined);
 }

@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-16
+verified: 2026-11-17
 governs: [src/**, styles.css]
 tracking: ["#79"]
 ---
@@ -128,7 +128,7 @@ only documented Obsidian APIs are used.
   2026-11-12):** a filled selection circle looked like a ticked box. A click or a tap on a
   checkbox or beside it selects, so nothing is ticked by mistake.
 - **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
-  to, Tick, Star, Tag, Date and Delete. On desktop it takes the same place whether or not the
+  to, Tick, Tag, Star, Date and Delete. On desktop it takes the same place whether or not the
   floating "+" shows there **(call)**.
 - **While the tag popover is open,** a click or a tap on a row, a heading, the tag strip or the
   list's title only closes it: it selects nothing and opens nothing
@@ -196,7 +196,7 @@ only documented Obsidian APIs are used.
 ## The actions
 
 - **The selection's menu** opens with a right-click on a selected row ("While selecting"), and the
-  bar's Tick, Star and Date open parts of it ("The bar"). Its Tag…, after the star entries, opens
+  bar's Tick, Star and Date open parts of it ("The bar"). Its Tag…, before the star entries, opens
   the selection's tag popover over the bar's Tag button
   ([tagging a selection](2026-11-12-select-tags-design.md)).
 - **Move to heading… (owner)** opens a picker, Obsidian's `SuggestModal`, that lists "Top of the

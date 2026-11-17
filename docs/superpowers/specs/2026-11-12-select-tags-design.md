@@ -1,8 +1,8 @@
 ---
 status: live
 governs: [src/**, styles.css]
-verified: 2026-11-16
-tracking: ["#361", "#443"]
+verified: 2026-11-17
+tracking: ["#361", "#443", "#450"]
 ---
 
 # PrinceLists for Obsidian: tagging a selection
@@ -34,8 +34,8 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## The bar's Tag button
 
-- **Its place (call):** Move to, Tick, Star, Tag, Date, then Delete past the divider. It has the
-  `tag` icon, as the card's tag button does, and the label "Tag".
+- **Its place (owner, #450):** Move to, Tick, Tag, Star, Date, then Delete past the divider. It has
+  the `tag` icon, as the card's tag button does, and the label "Tag".
 - **Enabled while any item or heading is selected (owner, 2026-11-16),** since a heading's tag
   counts for its items ([inherited tags](2026-11-15-inherited-tags-design.md)). Move to, Tick, Star
   and Date stay as they are.
@@ -101,10 +101,10 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 
 ## The selection's menu
 
-- **Tag… (call),** after the star entries, opens the popover over the bar's Tag button, so desktop
-  has one way to tag a selection whether it starts from the menu or the bar. It shows while any item
-  or heading is selected. The selection's menu is desktop only, as today; the bar opens no menu for
-  Tag.
+- **Tag… (owner, #450),** before the star entries, opens the popover over the bar's Tag button, so
+  desktop has one way to tag a selection whether it starts from the menu or the bar. It shows while
+  any item or heading is selected. The selection's menu is desktop only, as today; the bar opens no
+  menu for Tag.
 
 ## The write and the message
 
@@ -114,15 +114,17 @@ tag popover, `addTag` and `removeTag`). Their rules hold unless this design says
 - **The Undo message (owner)** says what changed, as the other group actions do: `#pantry added
   to 3 items.`, `#pantry removed from 5 items.`, `#work added to 2 items and 1 heading.` and
   `#work removed from 2 headings.` **(call: the wording)**, counting only the rows the write
-  changed. A write that would change nothing writes nothing and says nothing **(call)**.
+  changed. A write that would change nothing writes nothing and says nothing **(call)**, unless
+  a heading refused it ("Headings" below).
 - **A tag in a title (call)** isn't a chip, as on the card, and × leaves it. An item with the tag
   only in its title counts as having it when adding, as `addTag` does, so a pick can change fewer
   items than the chip's count suggests; the message says how many it did.
-- **Headings (owner, 2026-11-16)** get the tag in their text, with Tag…'s edit
-  ([tag from menus](2026-11-16-tag-from-menus-design.md)). A heading that Tag… would refuse (a ×
-  leaving it with no text, or a result that wouldn't read back as the heading) is left as it is,
-  and the rest still change **(call)**. A heading and its items both selected each get the tag in
-  their own text, as selected **(call)**.
+- **Headings (owner, 2026-11-16)** get the tag in their text, with Tag…'s edit ([tag from
+  menus](2026-11-16-tag-from-menus-design.md)). A heading that Tag… would refuse (a × leaving it
+  with no text, or a result that wouldn't read back as the heading) is left as it is, and the rest
+  still change **(call)**. When that leaves nothing to write, Rename heading's message says why, as
+  the heading's own Tag… does **(owner, #450)**. A heading and its items both selected each get the
+  tag in their own text, as selected **(call)**.
 
 ## Not in this design
 
