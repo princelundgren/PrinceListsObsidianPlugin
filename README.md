@@ -4,7 +4,7 @@
 
 PrinceLists turns a note into a todo list, and a Schedule view shows what's coming up across all your lists. It's simple to use, and powerful when you need it.
 
-![In a todo list in Obsidian, a new item gets a title, notes with a link and a dropped picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
+![In a todo list in Obsidian, a new item gets a title, a day and a star, then notes with a link and a dropped picture, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
 Make a list from the ribbon, a folder, or a note you already have.
 
@@ -22,7 +22,7 @@ Tag items to group them across sections. The items' tags sit above the list, and
 
 Hold an item to select it, then Cmd+click or tap others to add them. Move, tick, tag, star, date, duplicate or delete them all at once.
 
-![In a todo list, a row is held until it is selected and two more are Cmd-clicked to join it, then dragging one takes all three under the Admin heading, and Star in the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
+![In a todo list, a row is held until it is selected and two more are Cmd-clicked to join it, then dragging one takes all three under the Admin heading, and Add star in the More menu of the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
 
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 
@@ -30,7 +30,7 @@ Each item has a title, a date, a star and powerful notes, with a toolbar for for
 
 The Schedule shows the dated items from all your lists.
 
-![The Schedule in the right sidebar scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
+![The Schedule in the right sidebar scrolls through dated items from several lists, grouped by list, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
 It works great on your phone too.
 
