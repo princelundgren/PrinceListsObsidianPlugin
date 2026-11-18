@@ -30,3 +30,12 @@ test('keeps each menu’s actions apart', () => {
 	second.hide();
 	expect(ran).toEqual(['second']);
 });
+
+test('runs an action registered after the menu hid at once', () => {
+	const { menu, setHideCallback, hide } = fakeMenu();
+	const ran: string[] = [];
+	whenHidden(menu, setHideCallback, () => ran.push('untrack'));
+	hide();
+	whenHidden(menu, setHideCallback, () => ran.push('open'));
+	expect(ran).toEqual(['untrack', 'open']);
+});

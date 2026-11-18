@@ -1,6 +1,6 @@
 import type { PrinceListView } from './list-view';
 
-/** The open card's row of buttons under its notes: tag, date, repeat and ⋯. */
+/** The open card's row under its notes: its tags, then the tag, star, repeat, day and ⋯ buttons. */
 export const CARD_TOOLS_CLASS = 'princelists-card-tools';
 const POPOVER_BELOW_CLASS = 'princelists-card-popover-below';
 

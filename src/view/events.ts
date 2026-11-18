@@ -4,19 +4,20 @@ import { openAsMarkdown } from '../obsidian/switch';
 import { addItem, addItemBelowCard, hasNoItems } from './add-button';
 import {
 	CARD_ACTIONS_CLASS,
+	CARD_STAR_CLASS,
 	CARD_TITLE_CLASS,
-	CARD_TITLE_LINE_CLASS,
 	cardTitleBlur,
 	cardTitleInput,
 	closeCard,
 	dismissCard,
-	focusCardTitleEnd,
+	focusCardNotesEnd,
 	openCard,
 } from './card';
-import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, isOpenRepeatButton, repeatClick, repeatInput, saveRepeat } from './card-repeat';
-import { cardTagsClick, closeTagPopover, escapeTagPopover, isOpenTagButton } from './card-tags';
+import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, repeatClick, repeatInput, saveRepeat } from './card-repeat';
+import { cardTagsClick, closeTagPopover, escapeTagPopover } from './card-tags';
+import { toggleCardStar } from './card-star';
 import { CARD_TOOLS_CLASS } from './card-tools';
-import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
+import { whenChange, whenClick, whenKeyDown, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, focusListTitleEnd, keepOneLine, TITLE_CLASS, TITLE_ROW_CLASS } from './fields';
@@ -123,6 +124,11 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		whenClick(target);
 		return;
 	}
+	// The room the card's hidden format bar keeps is part of its notes.
+	if (target.hasClass(FORMAT_BAR_CLASS) && view.card?.el.contains(target) && !view.card.editor?.hasFocus) {
+		focusCardNotesEnd(view);
+		return;
+	}
 	const action = barActionAt(target);
 	if (action) {
 		const editor = barEditor(view, target);
@@ -155,11 +161,11 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 		return;
 	}
 	if (view.card?.el.contains(target)) {
-		if (target.hasClass(CARD_TITLE_LINE_CLASS)) {
-			focusCardTitleEnd(view);
+		if (cardTagsClick(view, target) || repeatClick(view, target)) return;
+		if (target.closest(`.${CARD_STAR_CLASS}`)) {
+			toggleCardStar(view);
 			return;
 		}
-		if (cardTagsClick(view, target) || repeatClick(view, target)) return;
 		const actions = target.closest<HTMLElement>(`.${CARD_ACTIONS_CLASS}`);
 		if (actions) showCardMenu(view, actions);
 		return;
@@ -172,7 +178,9 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const row = target.closest(`.${ITEM_CLASS}`);
 	const line = row ? lineOf(row) : null;
 	if (line !== null) {
-		openCard(view, line);
+		// On desktop typing goes straight into the title; on mobile, phones and tablets, a tap doesn't
+		// raise the keyboard.
+		openCard(view, line, !Platform.isMobile);
 		return;
 	}
 	if (Platform.isMobile) showHeadingMenu(view, evt, target);
@@ -190,23 +198,11 @@ function keepFieldFocused(evt: MouseEvent): void {
 	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, ${FILTER_TOGGLE_SELECTOR}`)) evt.preventDefault();
 }
 
-// So the click that follows closes the popover: a focusout first would close it, and the click reopen it.
-function keepTagFieldFocused(view: PrinceListView, evt: MouseEvent): void {
-	const target = targetOf(evt);
-	if (target && isOpenTagButton(view, target)) evt.preventDefault();
-}
-
-// So the click that follows closes the repeat popover, as for the tag popover's button.
-function keepRepeatFocused(view: PrinceListView, evt: MouseEvent): void {
-	const target = targetOf(evt);
-	if (target && isOpenRepeatButton(view, target)) evt.preventDefault();
-}
-
-// The title is only as wide as its text, so a press beside it lands on its line: the click that
-// follows puts the caret in the title, and the field that has focus keeps it until then.
+// The list's title is only as wide as its text, so a press beside it lands on its line: the click
+// that follows puts the caret in the title, and the field that has focus keeps it until then.
 function keepFocusBesideTitle(evt: MouseEvent): void {
 	const target = targetOf(evt);
-	if (target?.hasClass(CARD_TITLE_LINE_CLASS) || target?.hasClass(TITLE_ROW_CLASS)) evt.preventDefault();
+	if (target?.hasClass(TITLE_ROW_CLASS)) evt.preventDefault();
 	// The title keeps focus until the click, so the button it shows stays to take it.
 	if (target?.closest(`.${LIST_TAG_BUTTON_CLASS}`)) evt.preventDefault();
 }
@@ -223,8 +219,6 @@ function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
 	keepFieldFocused(evt);
 	keepNotesFocused(view, evt);
 	keepFocusBesideTitle(evt);
-	keepTagFieldFocused(view, evt);
-	keepRepeatFocused(view, evt);
 	keepTextUnselected(view, evt);
 }
 
@@ -280,6 +274,7 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	// A key that confirms an input method's composition isn't the user's Enter or Escape. One in a list
 	// block in the notes, such as Escape in its title field, is the block's.
 	if (evt.isComposing || !target?.instanceOf(HTMLElement) || eventInDrawnListBlock(view.contentEl, evt)) return;
+	if (target.instanceOf(HTMLInputElement) && target.hasClass(WHEN_INPUT_CLASS)) whenKeyDown(target);
 	if (evt.key === 'Escape') {
 		if (target === view.filterField?.inputEl) {
 			filterKeyDown(view, evt);
