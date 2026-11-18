@@ -1,5 +1,5 @@
-// In To do, a new item gets a title, notes with a link and a dropped picture, a star and a day, then
-// it's dragged into place and another item is ticked.
+// In To do, a new item gets a title, a day and a star, then notes with a link and a dropped picture,
+// then it's dragged into place and another item is ticked.
 import { fileURLToPath } from 'node:url';
 import { boundsOf, drawnMouse, hover, middleOf, paneClip, pressEnter, pressEscape, pressKey, setFolders, showAlone, sleep, type, undoingChanges } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
@@ -37,6 +37,17 @@ const scene = {
 			await sleep(500);
 			await type(session, ITEM);
 			await sleep(300);
+			// Set while the card is short enough to show its buttons, under the notes, and before the notes
+			// have focus: they keep it through a press on the buttons, so the arrows would move their caret.
+			await glideTo('.princelists-card .princelists-when-button');
+			await mouse.click();
+			await sleep(300);
+			for (let i = 0; i < 2; i++) await pressKey(session, 'ArrowRight');
+			await pressEnter(session);
+			await sleep(800);
+			await glideTo('.princelists-card .princelists-card-star');
+			await mouse.click();
+			await sleep(700);
 			await glideTo('.princelists-card .princelists-card-notes');
 			await mouse.click();
 			await sleep(200);
@@ -53,16 +64,12 @@ const scene = {
 			await session.send('Input.dispatchDragEvent', { type: 'dragEnter', x: x + width / 2, y: y + 60, data });
 			await session.send('Input.dispatchDragEvent', { type: 'dragOver', x: x + width / 2, y: y + 60, data });
 			await session.send('Input.dispatchDragEvent', { type: 'drop', x: x + width / 2, y: y + 60, data });
-			await sleep(1200);
-			await glideTo('.princelists-card .princelists-when-button');
-			await mouse.click();
-			await sleep(300);
-			for (let i = 0; i < 2; i++) await pressKey(session, 'ArrowRight');
-			await pressEnter(session);
-			await sleep(800);
-			await glideTo('.princelists-card .princelists-card-star');
-			await mouse.click();
-			await sleep(700);
+			// Until the picture is saved and drawn in the notes, then long enough to see it.
+			for (let waited = 0; !(await session.evaluate(`!!document.querySelector('.princelists-card img')`)); waited += 100) {
+				if (waited > 10000) throw new Error('The dropped picture never showed in the notes.');
+				await sleep(100);
+			}
+			await sleep(1500);
 			await pressEscape(session);
 			await sleep(900);
 
