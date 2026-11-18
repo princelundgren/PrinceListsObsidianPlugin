@@ -1,0 +1,4 @@
+/* Hidden rather than removed, so the bar keeps the place the pictures' crops are measured from. */
+.status-bar {
+	visibility: hidden;
+}
