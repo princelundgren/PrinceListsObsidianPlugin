@@ -34,6 +34,7 @@ import { registerFieldEvents, swallowClickAfterHold } from './events';
 import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
 import { registerMenuPress } from './menu-press';
+import { registerPopoverPress } from './popover-press';
 import { registerFileRedraws } from './notes-drawing';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
@@ -216,6 +217,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		onWindowReturn(this, this.containerEl, () => bringBackInList(this));
 		registerFieldEvents(this);
 		registerMenuPress(this);
+		registerPopoverPress(this);
 		focusListWhenActive(this);
 		registerFileRedraws(this);
 		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);

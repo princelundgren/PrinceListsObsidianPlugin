@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-17
+verified: 2026-11-18
 governs: [src/**, styles.css]
 tracking: ["#320"]
 ---
@@ -227,7 +227,9 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   times); the next three dates, updated as it changes; and Remove repeat.
 - **Nothing is written until Save:** #320 asks to check the next dates "before it's saved". The
   popover holds a draft; Save makes one write and one Undo step, and Escape or a click outside
-  drops the draft. If the list changes while it's open, Save is refused with a notice and the
+  drops the draft. A click in the list outside it does nothing else, and the card stays open
+  **(owner, 2026-11-18)**.
+  If the list changes while it's open, Save is refused with a notice and the
   popover reopens: with the user's draft, since a refusal the user didn't cause shouldn't lose what
   they set, or on the line as it reads now when the view's own edit, such as the item coming back,
   changed that line. An outside change to the item's own line takes the card's item as it does

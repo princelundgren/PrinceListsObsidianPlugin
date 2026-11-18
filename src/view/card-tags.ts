@@ -108,11 +108,6 @@ export function escapeTagPopover(view: PrinceListView): void {
 	tagButtonOf(view)?.focus();
 }
 
-/** Whether `target` is the open card's tag button while its popover is open. */
-export function isOpenTagButton(view: PrinceListView, target: HTMLElement): boolean {
-	return view.tagPopover !== null && target.closest(`.${TAG_BUTTON_CLASS}`) !== null;
-}
-
 /**
  * Opens or closes the tag popover for a click on the tag button, or takes a tag off the open card's
  * item for one on a chip's ×. Returns whether `target` was on either.
