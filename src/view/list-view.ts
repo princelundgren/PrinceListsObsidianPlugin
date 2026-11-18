@@ -1,5 +1,5 @@
 import type { EditorView } from '@codemirror/view';
-import { type Component, debounce, type Menu, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
+import { type Component, debounce, type Menu, type Modal, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { showsOn } from '../core/button-platforms';
 import { CollapsedHeadings } from '../core/collapsed';
@@ -67,8 +67,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	card: Card | null = null;
 	/** The open card's tag popover, its field and the field's type-ahead, or null while it is closed. */
 	tagPopover: { el: HTMLElement; input: HTMLInputElement; suggest: TagSuggest } | null = null;
-	/** The open card's repeat popover, the item's line as it read and the outside changes when it opened, and its draft; null while it is closed. */
-	repeatPopover: { el: HTMLElement; opened: DraftBase; draft: RepeatDraft | 'read-only' } | null = null;
+	/** The open card's repeat form, the item's line as it read and the outside changes when it opened, its draft, and on mobile the modal it's in rather than a popover; null while it is closed. */
+	repeatPopover: { el: HTMLElement; opened: DraftBase; draft: RepeatDraft | 'read-only'; modal: Modal | null } | null = null;
 	listTitle: ListTitleSession | null = null;
 	listNote: ListNoteSession | null = null;
 	// Not `titleEl`: ItemView has an undocumented `titleEl`, the pane header's title, which Obsidian

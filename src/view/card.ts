@@ -167,8 +167,9 @@ export function cardTitleBlur(view: PrinceListView, field: HTMLTextAreaElement):
 export function cardLost(view: PrinceListView, card: Card, line: number): void {
 	const focused = card.el.doc.activeElement;
 	// The repeat popover has nothing left to write to. Closing it with focus inside takes the focus
-	// with it, so no focusout would end the card: it closes with the popover.
-	if (isInRepeatPopover(view, focused)) {
+	// with it, so no focusout would end the card: it closes with the popover. Mobile's modal holds
+	// the user's attention as much, with or without focus in a field.
+	if (isInRepeatPopover(view, focused) || view.repeatPopover?.modal) {
 		closeRepeatPopover(view);
 		new Notice(CHANGED_ELSEWHERE_NOTICE);
 		dismissCard(view);

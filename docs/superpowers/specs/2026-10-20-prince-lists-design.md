@@ -709,7 +709,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     outside it only closes it (owner, 2026-11-18),** as for the menus below: the card stays open,
     and a click with Cmd or Shift held starts no selection. Focus goes back to the popover's button,
     and stays where it was for the date picker. A press while a menu shows over the popover closes
-    only the menu. On a phone, a touch that starts a scroll closes the tag or repeat popover too
+    only the menu. On a phone, a touch that starts a scroll closes the tag popover too
     **(call)**. The date picker is Chromium's own on desktop, which closes before the page hears the
     press and closes on Escape with no event, so after the click or key that shows it the view reads
     its documented `:open` state while it shows **(call)**. Chromium supports `:open` from version

@@ -222,6 +222,14 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   by tag's design, "The card"). Opening it from a row's Repeat… first scrolls the buttons into
   view. The card's date is the platform's own `<input type="date">` picker (step two's
   design, "When"), which can't hold more controls.
+- **On mobile, Obsidian's `Modal` instead (owner, 2026-11-18),** titled "Repeat", with the same
+  form and buttons, as the selection's Set date… opens one (selecting several rows, "The
+  actions"). On a phone the popover hung below the buttons under the keyboard, and the scroll that
+  would reach the rest closed it. The modal opens with no field focused, so the keyboard comes up
+  only for a field the user taps, and it closes on Save, Remove repeat, its close button, a tap
+  outside it or Back, which drop the draft as Escape does. Mobile is `Platform.isMobile`, a tablet
+  included, as for the floating "+", and each label stands above its fields there. Desktop keeps
+  the popover.
 - **The popover:** how often (Day, Week, Month, Year); every how many; from its date or from when
   it's ticked; for months, the same day or the last day; an end (Never, On a date, After so many
   times); the next three dates, updated as it changes; and Remove repeat.
