@@ -1351,8 +1351,8 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
 ### Touch on mobile
 
 - **iOS WebKit fires no `contextmenu` event** (MDN compat data). Obsidian makes one itself on iOS
-  after a still hold, 800 ms by its code. A device confirmed the event (its haptic comes with it);
-  the 800 ms wasn't measured. On an Android emulator a dispatched `contextmenu` on a block's row or
+  after a still hold, 800 ms by its code, with its haptic. On an iPhone it came 825 and 835 ms after
+  the finger went down (2026-11-18, #489). On an Android emulator a dispatched `contextmenu` on a block's row or
   the list's background opens no menu; a real hold on Android isn't checked.
   - Because holding starts selecting and dragging, item rows must not open a menu, and a heading
     opens its menu on a tap. So on mobile, cancel `contextmenu` on rows and headings, in the capture
@@ -1363,10 +1363,13 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
     sends one when the finger lifts. The next `pointerdown` clears the flag, so a mouse's
     right-click, which sends no touch, can't eat a later click.
   - Obsidian's own haptic on a hold can't be turned off (no documented API), and it is accepted.
-- **Dragging uses Pointer Events with a hold timer.** Kanban uses 500 ms, canceled if the finger
-  moves more than 5 px first. Spike 2 confirmed both values on an iPhone, with the rows'
-  `-webkit-user-select: none` and `-webkit-touch-callout: none`: the maintainer keeps 500 ms
+- **Dragging uses Pointer Events with a hold timer,** canceled if the finger moves more than 5 px
+  first, as Kanban does. Spike 2 confirmed the hold on an iPhone, with the rows'
+  `-webkit-user-select: none` and `-webkit-touch-callout: none`
   (`docs/superpowers/notes/2026-10-21-spike-touch.md`).
+  - **The hold is 800 ms (owner, 2026-11-18, #489),** close to Obsidian's own, so on iOS the row
+    selects as Obsidian's haptic comes, not about a third of a second before it. A mouse's hold on
+    desktop is as long, as a hold selects the same way by touch or with a mouse.
   - Once a row is lifted, a non-passive `touchmove` handler calls `preventDefault` to stop
     scrolling.
   - A lift selects its row, and takes the selection it carries once the finger has moved more

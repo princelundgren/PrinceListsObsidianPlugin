@@ -1,4 +1,5 @@
-export const HOLD_MS = 500;
+// Close to Obsidian's own hold on iOS, whose haptic comes with it (spec, "Touch on mobile").
+export const HOLD_MS = 800;
 export const MOVE_TOLERANCE_PX = 5;
 export const EDGE_ZONE_PX = 56;
 export const EDGE_STEP_MAX_PX = 12;
