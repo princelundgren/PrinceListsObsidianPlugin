@@ -26,7 +26,7 @@ import { cardLost, dismissCard, type Card } from './card';
 import { closeRepeatPopover } from './card-repeat';
 import { closeTagPopover } from './card-tags';
 import { bringBackInList } from './come-back';
-import { fitHeight } from './dom';
+import { fitHeight, isTextField } from './dom';
 import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
@@ -84,6 +84,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	readonly selection = new RowSelection(this.editing);
 	/** Whether the view is selecting: from the first row selected until none is, with the bar in place of the floating "+". */
 	selecting = false;
+	/** The items and headings being added whose card or field hasn't opened yet; on mobile they hide the floating "+" as an open card does. */
+	addsPending = 0;
 	readonly dragsRows = true;
 	readonly dragsHeadings = true;
 	filterField: FilterField | null = null;
@@ -362,12 +364,15 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.listNoteEditor = null;
 	}
 
-	/** Shows or hides the view's buttons, and the selection bar, to match the text, the settings and selecting. */
+	/**
+	 * Shows or hides the view's buttons, and the selection bar, to match the text, the settings and
+	 * selecting. On mobile, editing also hides the floating "+".
+	 */
 	syncButtons(): void {
 		const isList = isListText(this.text);
-		const showsFloating = isList && !this.selecting && this.showsAddButton();
-		this.newItemButton?.toggle(showsFloating);
-		this.contentEl.toggleClass('princelists-has-floating-add', showsFloating);
+		// The room below the last row stays while the "+" hides for editing, so the list doesn't move.
+		this.contentEl.toggleClass('princelists-has-floating-add', this.placesFloatingAdd());
+		this.syncNewItemButton();
 		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
 		this.syncFindButtons();
 		syncSelectionBar(this);
@@ -379,9 +384,25 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		else this.syncButtons();
 	}
 
+	/**
+	 * Shows the floating "+" where the view places it, except on mobile while a card is open, an item
+	 * or heading is being added, or a text field in the view has focus, a tag popover's included.
+	 * `focused` is the node that has focus, or is taking it.
+	 */
+	syncNewItemButton(focused: Node | null = this.containerEl.doc.activeElement): void {
+		const typing = isTextField(focused) && this.containerEl.contains(focused);
+		const editing = Platform.isMobile && (this.card !== null || this.addsPending > 0 || typing);
+		this.newItemButton?.toggle(!editing && this.placesFloatingAdd());
+	}
+
 	/** Whether the settings show the floating "+" that adds an item on this device. */
 	showsAddButton(): boolean {
 		return showsOn(this.settings().floatingAddButton, Platform.isMobile);
+	}
+
+	// A list not selecting, with the settings showing the "+" on this device.
+	private placesFloatingAdd(): boolean {
+		return isListText(this.text) && !this.selecting && this.showsAddButton();
 	}
 
 	// The header's filter icon shows only on a list, pressed while the field is open. The toggles in

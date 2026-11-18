@@ -3,6 +3,7 @@ import { headingText } from '../core/display';
 import { planHeadingRemoval, saveHeadingName, type HeadingFieldStart, type HeadingSave } from '../core/heading-field';
 import { planHeadingInsert, type HeadingPlace } from '../core/list-actions';
 import { contentStartLine } from '../obsidian/marker';
+import { whileAdding } from './add-button';
 import { addCollapseArrow } from './collapse';
 import { fitHeight } from './dom';
 import { FIELD_CLASS } from './fields';
@@ -25,12 +26,14 @@ export interface HeadingField extends HeadingFieldStart {
 // New heading below: an empty heading, then the field on it (spec, "Item actions").
 export function addHeading(view: PrinceListView, place: HeadingPlace): void {
 	const anchor = place === 'top' ? null : 'afterItem' in place ? place.afterItem : place.afterSection;
-	enqueueAt(view, anchor, async (pending) => {
-		const added = await writePlanned(view, (text) => {
-			const followed = followHeadingPlace(place, pending?.line ?? null);
-			return followed ? planHeadingInsert(text, contentStartLine(text), followed) : null;
+	whileAdding(view, () => {
+		enqueueAt(view, anchor, async (pending) => {
+			const added = await writePlanned(view, (text) => {
+				const followed = followHeadingPlace(place, pending?.line ?? null);
+				return followed ? planHeadingInsert(text, contentStartLine(text), followed) : null;
+			});
+			if (added) openHeadingField(view, added.line, true);
 		});
-		if (added) openHeadingField(view, added.line, true);
 	});
 }
 

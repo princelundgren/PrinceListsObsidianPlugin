@@ -732,20 +732,35 @@ back only what was typed and leaves the empty line, which can be deleted like an
   desktop and mobile by default, and the "Floating add button" setting can keep it to one of them
   or turn it off **(owner, 2026-11-05)**. While selecting, the selection's bar takes its place
   ([selecting several rows](2026-11-07-select-several-design.md), "The bar").
-  - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
-    fields included. While selecting, it adds the new item where the selection's New item below
-    does instead ([selecting several rows](2026-11-07-select-several-design.md), "While
+  - **On mobile it hides while editing (owner, 2026-11-17):** while a card is open, and while a
+    text field in the list view has focus, such as an item's title or notes, a heading's rename
+    field, the list's title or note, the filter field or a tag popover's field, so it isn't in the
+    way of typing. It comes back once the card closes and no field has focus. Focus moving from one
+    field to another keeps it hidden, and so does an item or heading being added until its card or
+    field opens, while the file is written, so ending selecting or leaving a field just before an
+    add doesn't show it for that moment. The room it leaves below the last row stays, so the list
+    doesn't move. Mobile is `Platform.isMobile`, a tablet included, as for the "Floating add button"
+    setting. Desktop keeps it in view, and a list inside another note keeps its own New item button
+    as it is.
+  - **Cmd+Enter does what "+" does on desktop** (step two), anywhere in a list that has focus, a
+    card's fields included. While selecting, it adds the new item where the selection's New item
+    below does instead ([selecting several rows](2026-11-07-select-several-design.md), "While
     selecting"). An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
-  becomes the first item of the list, before the first heading.
+  becomes the first item of the list, before the first heading. On mobile, where "+" shows only
+  while no card is open, nothing is selected when it's tapped, so it always adds the first item; a
+  phone adds an item below another by holding it to select it, then More → New item below
+  **(owner, 2026-11-17)**.
   - The new item opens with the cursor in its title.
   - **Enter in a title closes the card (owner, 2026-10-27),** as Escape does, so typing a new
     item's name and pressing Enter finishes it. Shift+Enter adds another item below it instead, so
-    a run of items can still be typed in one go. On mobile, "+" adds each next item.
+    a run of items can still be typed in one go. On mobile, where "+" hides while a card is open,
+    a run of items is a title, Enter, then "+" for each next one, which adds it first in the list,
+    above the one before **(owner, 2026-11-17)**.
   - In a new item whose title is still empty, Shift+Enter closes the card instead, which removes the
-    item, so a second Shift+Enter ends a run of new items. "+" and Cmd+Enter keep it, with the
-    cursor back in its title. Delete item closes the card, which removes the item as a cancel, with
-    no Undo **(call)**.
+    item, so a second Shift+Enter ends a run of new items. "+" on desktop and Cmd+Enter keep it,
+    with the cursor back in its title. Delete item closes the card, which removes the item as a
+    cancel, with no Undo **(call)**.
   - A new item is removed again if you close its card while its title is still empty and it has
     no notes **(call)**. Removing it restores the text from before it was added, so an empty line
     the insert wrote goes too. If the file changed outside the view while the card was open, the
@@ -793,9 +808,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
     are scrolled into view first, since long notes can push them off-screen **(owner, 2026-11-17)**.
   - **The card's ⋯ menu, and a right-click on the open card, hold only Edit in Markdown and Delete
     item (owner, 2026-11-17).** The card shows the box and buttons for its tags, date, repeat and
-    star (step two's design, "When and the Schedule view"), and "+" adds an item below it. This
-    replaces menus that also held Select, Add star or Remove star, Repeat…, New item below and New
-    heading below **(owner, 2026-10-29 and 2026-11-11)**.
+    star (step two's design, "When and the Schedule view"). On desktop "+" or Cmd+Enter adds an
+    item below it; on a phone, where "+" hides while a card is open, closing the card, holding its
+    row and choosing More → New item below does. This replaces menus that also held Select, Add star
+    or Remove star, Repeat…, New item below and New heading below **(owner, 2026-10-29 and
+    2026-11-11)**.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star entries' "Add star" and "Remove star";
     and "Remove", as in Remove image.
