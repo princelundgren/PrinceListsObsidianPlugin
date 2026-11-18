@@ -40,24 +40,23 @@ export function openListTags(view: PrinceListView, button: HTMLElement | null = 
 
 /**
  * Draws the list's tags at the end of `row`, after its title, as one button whose press opens Tag
- * list…'s popover. A list with no tags gets a tag icon button there instead, which styles.css shows
- * only while the row holds focus, as when the title is being edited. Returns the slot for the tag
- * button when it is `kept`, the focused element the redraw keeps, and the list still has no tags.
+ * list…'s popover, then a tag icon button that opens it too, which styles.css shows only while the
+ * title or the button holds focus. Returns the slot for the tag icon button when it is `kept`, the
+ * focused element the redraw keeps.
  */
 export function buildListTags(view: PrinceListView, row: HTMLElement, kept: HTMLElement | null): HTMLElement | null {
 	const tags = listTags(view.text);
-	if (tags.length === 0) {
-		if (kept?.hasClass(LIST_TAG_BUTTON_CLASS)) return row.createDiv();
-		const button = row.createEl('button', { cls: LIST_TAG_BUTTON_CLASS, attr: { 'aria-label': 'Tag list', 'aria-haspopup': 'dialog' } });
-		setIcon(button, 'tag');
-		return null;
+	if (tags.length > 0) {
+		const names = tags.map((tag) => `#${tag}`);
+		const chips = row.createEl('button', {
+			cls: LIST_TAGS_CLASS,
+			attr: { 'aria-label': `Tag list: ${names.join(', ')}`, 'aria-haspopup': 'dialog', 'aria-expanded': 'false' },
+		});
+		for (const name of names) chips.createSpan({ cls: 'princelists-tag', text: name });
 	}
-	const names = tags.map((tag) => `#${tag}`);
-	const button = row.createEl('button', {
-		cls: LIST_TAGS_CLASS,
-		attr: { 'aria-label': `Tag list: ${names.join(', ')}`, 'aria-haspopup': 'dialog', 'aria-expanded': 'false' },
-	});
-	for (const name of names) button.createSpan({ cls: 'princelists-tag', text: name });
+	if (kept?.hasClass(LIST_TAG_BUTTON_CLASS)) return row.createDiv();
+	const button = row.createEl('button', { cls: LIST_TAG_BUTTON_CLASS, attr: { 'aria-label': 'Tag list', 'aria-haspopup': 'dialog' } });
+	setIcon(button, 'tag');
 	return null;
 }
 
