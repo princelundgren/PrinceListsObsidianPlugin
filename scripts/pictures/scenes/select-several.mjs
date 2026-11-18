@@ -1,6 +1,6 @@
 // In To do, a row is held until it is selected, two more are Cmd-clicked to join it, dragging one takes all
 // three under the Admin heading, Add star from the bar's More menu stars them, and Done ends selecting.
-import { titleOf } from '../listing.mjs';
+import { rowOf, titleOf } from '../listing.mjs';
 import { boundsOf, drawnMouse, headingBounds, hover, middleOf, MOD_KEY, paneClip, showAlone, sleep, undoingChanges } from '../page.mjs';
 import { pointer } from '../pointer.mjs';
 import { recordGif } from '../record.mjs';
@@ -65,7 +65,7 @@ async function selectDragAndStar(session) {
 		await sleep(600);
 	}
 	const admin = await headingBounds(session, 'Admin');
-	await mouse.drag(mouse.at.x, admin.y + admin.height * 0.75, 1000);
+	await mouse.drag(mouse.at.x, admin.y + admin.height * 0.75, { ms: 1000, pictureBounds: await rowOf(session, ROWS.at(-1)) });
 	await sleep(1000);
 	await clickOn('.princelists-selection-more', 800);
 	await sleep(700);

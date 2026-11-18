@@ -4,7 +4,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { toWebp } from './encode.mjs';
-import { pointer } from './pointer.mjs';
+import { carry, letGo, pictureOf, pointer } from './pointer.mjs';
 
 const TYPING_MS = 35;
 const GLIDE_STEP_MS = 16;
@@ -83,7 +83,9 @@ export async function click(session, x, y, button = 'left') {
  * A mouse for recordings, starting at `x, y`: each input moves the drawn pointer too. `glide` moves
  * in steps over about `ms`, so the pointer travels on screen; `press`, `release` and `click` act where
  * it is, `click` with CDP `modifiers` held, such as `MOD_KEY`; `drag` drags what's under it to `x, y`
- * with HTML drag and drop, rejecting if no drag starts.
+ * over `ms` with HTML drag and drop, rejecting if no drag starts. Under the pointer it draws `picture`
+ * from `pictureOf`, or a picture of `pictureBounds` taken once the drag has started, for an element
+ * the start changes, as a row of a selection shows the count it carries.
  */
 export function drawnMouse(session, x, y) {
 	const at = { x, y };
@@ -117,7 +119,8 @@ export function drawnMouse(session, x, y) {
 			await button('mousePressed', modifiers);
 			await button('mouseReleased', modifiers);
 		},
-		async drag(toX, toY, ms = 900) {
+		async drag(toX, toY, { ms = 900, picture = null, pictureBounds = null } = {}) {
+			let carried = picture;
 			await session.send('Input.setInterceptDrags', { enabled: true });
 			try {
 				const started = new Promise((resolve) => session.on('Input.dragIntercepted', ({ data }) => resolve(data)));
@@ -125,12 +128,15 @@ export function drawnMouse(session, x, y) {
 				await sleep(120);
 				await mouse.glide(at.x + 4, at.y + 8, 80);
 				const data = await withinDragStart(started, at);
+				carried ??= pictureBounds && (await pictureOf(session, pictureBounds));
+				if (carried) await carry(session, carried, at.x, at.y);
 				const dragEvent = (type) => session.send('Input.dispatchDragEvent', { type, ...at, data });
 				await dragEvent('dragEnter');
 				await glide(toX, toY, ms, () => dragEvent('dragOver'));
 				await sleep(300);
 				await dragEvent('drop');
 			} finally {
+				if (carried) await letGo(session);
 				await mouse.release();
 				await session.send('Input.setInterceptDrags', { enabled: false });
 			}
