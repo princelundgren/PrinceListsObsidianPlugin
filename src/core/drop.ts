@@ -27,6 +27,20 @@ export function dropAt(shown: readonly ShownRow[], dragged: number, over: { line
 	return stays ? null : drop;
 }
 
+/** A new item's drop: as a dragged item's, or first in a list that shows no rows, with no drop line. */
+export type NewItemDrop = Drop | { place: 'first'; line: null; above: true };
+
+/**
+ * Where an item dragged from the floating "+" goes, over the shown row on `over.line` as dropAt reads
+ * it, placed as a dragged item is. A new item has no place to stay in, so every gap aims. A list that
+ * shows no rows takes it first, wherever it's dropped. null when `over` isn't a shown row.
+ */
+export function newItemDropAt(shown: readonly ShownRow[], over: { line: number; below: boolean } | null): NewItemDrop | null {
+	if (shown.length === 0) return { place: 'first', line: null, above: true };
+	const at = over ? shown.findIndex((row) => row.line === over.line) : -1;
+	return over && at !== -1 ? dropAbove(shown, over.below ? at + 1 : at) : null;
+}
+
 /** A dragged item's move: the title line it's on, and where it goes. */
 export interface ItemMove {
 	from: number;

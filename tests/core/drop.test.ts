@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { dropAt, groupDropAt, moveFromDrawn, sectionDropAt, type ShownRow } from '../../src/core/drop';
+import { dropAt, groupDropAt, moveFromDrawn, newItemDropAt, sectionDropAt, type ShownRow } from '../../src/core/drop';
 import { ListEditing } from '../../src/core/editing';
 import { planRemoval } from '../../src/core/empty-item';
 import { splitLines } from '../../src/core/lines';
@@ -176,5 +176,34 @@ describe('groupDropAt', () => {
 	test('gives null over a moving row or a row not shown', () => {
 		expect(groupDropAt(shown, [3, 5], upper(5))).toBeNull();
 		expect(groupDropAt(shown, [3, 5], lower(9))).toBeNull();
+	});
+});
+
+describe('newItemDropAt', () => {
+	// a first in the list, then b and c under H, with an untouched block between them.
+	const shown = [item(2), heading(3), item(4), untouched(5), item(6)];
+
+	test('goes after the item above the gap, as a dragged item does', () => {
+		expect(newItemDropAt(shown, lower(2))).toEqual({ place: { after: 2 }, line: 2, above: false });
+		expect(newItemDropAt(shown, lower(6))).toEqual({ place: { after: 6 }, line: 6, above: false });
+	});
+	test('goes first under a heading', () => {
+		expect(newItemDropAt(shown, lower(3))).toEqual({ place: { firstUnder: 3 }, line: 3, above: false });
+	});
+	test('passes over an untouched block to the item above it', () => {
+		expect(newItemDropAt(shown, upper(6))).toEqual({ place: { after: 4 }, line: 4, above: false });
+	});
+	test('goes first in the list above the first row', () => {
+		expect(newItemDropAt(shown, upper(2))).toEqual({ place: 'first', line: 2, above: true });
+	});
+	test('aims next to an item, where a dragged item would stay put', () => {
+		expect(newItemDropAt(shown, upper(4))).toEqual({ place: { firstUnder: 3 }, line: 3, above: false });
+	});
+	test('gives null over a row not shown, or over no row', () => {
+		expect(newItemDropAt(shown, lower(9))).toBeNull();
+		expect(newItemDropAt(shown, null)).toBeNull();
+	});
+	test('goes first in a list that shows no rows, with no drop line', () => {
+		expect(newItemDropAt([], null)).toEqual({ place: 'first', line: null, above: true });
 	});
 });
