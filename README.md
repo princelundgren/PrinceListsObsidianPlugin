@@ -2,6 +2,8 @@
 
 <p align="center"><b>Todo lists for Obsidian, kept as plain Markdown notes.</b></p>
 
+![Obsidian with the Groceries list open, the items' tags above the list, two items ticked and fresh basil's notes open with a link and a checklist, beside the Schedule, which shows today's dated items from several lists](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/overview.webp)
+
 PrinceLists turns a note into a todo list, and a Schedule view shows what's coming up across all your lists. It's simple to use, and powerful when you need it.
 
 ![In a todo list in Obsidian, two items are ticked and one is dragged up, then the floating + is dragged into the list, and the item it adds there gets a title, a day, a star and notes with a short list](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
