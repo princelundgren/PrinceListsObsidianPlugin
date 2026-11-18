@@ -4,7 +4,7 @@ import { boundsOf, fingerDown, fingerUp, middleOf, sleep, still, tap } from '../
 
 const ROWS = ['bananas', 'lemons', 'fresh basil'];
 // Longer than the hold time, so the first row is selected before the finger lifts.
-const HOLD_MS = 800;
+const HOLD_MS = 1000;
 // Until the finger mark has faded.
 const SETTLE_MS = 900;
 

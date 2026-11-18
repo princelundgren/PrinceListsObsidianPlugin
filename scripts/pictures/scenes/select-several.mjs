@@ -9,7 +9,7 @@ const REST = { x: 520, y: 120 };
 // None starred yet, so Add star changes all three.
 const ROWS = ['call the plumber about the kitchen tap', 'return the library books', 'book a dentist appointment'];
 // Longer than the hold time, so the row is selected while the button is still down.
-const HOLD_MS = 900;
+const HOLD_MS = 1000;
 
 const scene = {
 	name: 'select-several',

@@ -43,7 +43,8 @@ const scene = {
 					const bakery = await headingBounds(session, 'Bakery');
 					const to = { x: from.x, y: bakery.y + bakery.height * 0.75 };
 					await fingerDown(session, from.x, from.y);
-					await sleep(600);
+					// Longer than the hold time, so the hold selects the item before the finger slides it.
+					await sleep(1000);
 					await fingerSlide(session, from, to, 900);
 					await sleep(300);
 					await fingerUp(session, to.x, to.y);
