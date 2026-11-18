@@ -4,7 +4,6 @@ import { stepDay, upcomingDays } from '../core/repeat';
 import { anchorOf, canWrite, draftAfterRefusal, draftOf, ensureTickable, removeRepeat, repeatOf, setRepeat, type RepeatDraft } from '../core/repeat-line';
 import { dayLabel, dayOf } from '../core/when';
 import { CARD_TOOLS_CLASS, placeCardPopover } from './card-tools';
-import { WHEN_INPUT_CLASS } from './card-when';
 import { addHiddenLabel, addHiddenLabelInside } from './dom';
 import { queueDraftEdit } from './line-edit';
 import type { PrinceListView } from './list-view';
@@ -40,16 +39,17 @@ interface Controls {
 
 const controlsOf = new WeakMap<HTMLElement, Controls>();
 
-/** Adds the card's `Repeat` button last in `tools`, so call it right after the date picker; hidden until the item repeats. */
-export function buildRepeatButton(tools: HTMLElement): void {
-	const button = tools.createEl('button', { cls: REPEAT_BUTTON_CLASS, attr: { 'aria-label': 'Repeat', 'aria-expanded': 'false' } });
+/** Adds the card's `Repeat` button to `buttons`; call it after the star and before the date picker. */
+export function buildRepeatButton(buttons: HTMLElement): void {
+	const button = buttons.createEl('button', { cls: REPEAT_BUTTON_CLASS, attr: { 'aria-label': 'Repeat', 'aria-expanded': 'false' } });
 	setIcon(button, 'repeat');
-	button.hide();
 }
 
-/** Shows the card's `Repeat` button while its item repeats. */
+/** Marks the card's `Repeat` button, and names it `Edit repeat`, while its item repeats. */
 export function showRepeatButton(cardEl: HTMLElement, repeats: boolean): void {
-	cardEl.querySelector<HTMLElement>(`.${REPEAT_BUTTON_CLASS}`)?.toggle(repeats);
+	const button = cardEl.querySelector<HTMLElement>(`.${REPEAT_BUTTON_CLASS}`);
+	button?.toggleClass('is-repeating', repeats);
+	button?.setAttribute('aria-label', repeats ? 'Edit repeat' : 'Repeat');
 }
 
 /** Opens the repeat popover from the open card's buttons, with the draft its item's line gives; closes it if it's open. */
@@ -93,10 +93,10 @@ export function closeRepeatPopover(view: PrinceListView): void {
 	repeatButtonOf(view)?.setAttr('aria-expanded', 'false');
 }
 
-/** Closes the repeat popover and focuses the card's repeat button, or its date when the item doesn't repeat yet. */
+/** Closes the repeat popover and focuses the card's repeat button. */
 export function escapeRepeatPopover(view: PrinceListView): void {
 	closeRepeatPopover(view);
-	focusRepeatEntry(view);
+	repeatButtonOf(view)?.focus();
 }
 
 /** Whether `target` is in the open repeat popover. */
@@ -160,7 +160,7 @@ function writeToLine(view: PrinceListView, change: (line: string) => string): vo
 		// The write is async: focus comes back to the card only if the user hasn't gone elsewhere.
 		written: () => {
 			const { body, activeElement } = view.contentEl.doc;
-			if (activeElement === body || activeElement === null) focusRepeatEntry(view);
+			if (activeElement === body || activeElement === null) repeatButtonOf(view)?.focus();
 		},
 		refused: (tracked) => {
 			const now = view.lines()[tracked]?.text;
@@ -168,12 +168,6 @@ function writeToLine(view: PrinceListView, change: (line: string) => string): vo
 			openRepeatPopover(view, draftAfterRefusal(open.draft, open.opened.text, now));
 		},
 	});
-}
-
-function focusRepeatEntry(view: PrinceListView): void {
-	const button = repeatButtonOf(view);
-	if (button && button.isShown()) button.focus();
-	else view.card?.el.querySelector<HTMLElement>(`.${WHEN_INPUT_CLASS}`)?.focus();
 }
 
 function repeatButtonOf(view: PrinceListView): HTMLElement | null {

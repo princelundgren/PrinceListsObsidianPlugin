@@ -18,15 +18,14 @@ import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
 import { cardNotesSource } from './notes-source';
 import { ownElement } from './own-rows';
-import { addStar, STAR_CLASS } from './row-marks';
 import { addTickZone, buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
 export const CARD_CLASS = 'princelists-card';
 export const CARD_TITLE_CLASS = 'princelists-card-title';
-export const CARD_TITLE_LINE_CLASS = 'princelists-card-title-line';
 export const CARD_NOTES_CLASS = 'princelists-card-notes';
 export const CARD_ACTIONS_CLASS = 'princelists-card-actions';
+export const CARD_STAR_CLASS = 'princelists-card-star';
 
 export interface Card {
 	el: HTMLElement;
@@ -124,7 +123,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 		card.el.querySelector(`.${HIDDEN_LABEL_CLASS}`)?.setText(row.label);
 		showDone(card.el, row);
 		showWhen(card, row.when);
-		showStarMark(card.el, row.starred);
+		showStar(card.el, row.starred);
 		showRepeatButton(card.el, row.repeats);
 		showCardTags(card.el, row.tailTags);
 	}
@@ -132,9 +131,8 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	// The format bar goes under the buttons, so hiding it never moves a button mid-press.
-	const tools = card.el.querySelector<HTMLElement>(`.${CARD_TOOLS_CLASS}`) ?? undefined;
-	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, tools);
+	// The format bar goes right after the notes, as their sibling, which the stylesheet hides it by.
+	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, notes);
 }
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {
@@ -204,24 +202,27 @@ function createCardElement(): HTMLElement {
 	addTickZone(el);
 	addHiddenLabel(el.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), '');
 	const body = el.createDiv({ cls: 'princelists-card-body' });
-	const titleLine = body.createDiv({ cls: CARD_TITLE_LINE_CLASS });
-	titleLine.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
-	buildCardTags(titleLine);
-	addStar(titleLine);
-	showStarMark(el, false);
+	body.createEl('textarea', { cls: [FIELD_CLASS, CARD_TITLE_CLASS], attr: { rows: 1, placeholder: 'Title' } });
 	body.createDiv({ cls: CARD_NOTES_CLASS });
+	// The item's tags, then its buttons together at the row's end, so they keep their places. The
+	// buttons follow a row's marks: tags, star, repeat, date.
 	const tools = body.createDiv({ cls: CARD_TOOLS_CLASS });
-	buildTagButton(tools);
-	buildWhenPicker(tools);
-	buildRepeatButton(tools);
-	const actions = tools.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
+	buildCardTags(tools);
+	const buttons = tools.createDiv({ cls: 'princelists-card-buttons' });
+	buildTagButton(buttons);
+	setIcon(buttons.createEl('button', { cls: CARD_STAR_CLASS, attr: { 'aria-label': 'Add star' } }), 'star');
+	buildRepeatButton(buttons);
+	buildWhenPicker(buttons);
+	const actions = buttons.createEl('button', { cls: CARD_ACTIONS_CLASS, attr: { 'aria-label': 'Item actions' } });
 	setIcon(actions, 'more-horizontal');
 	return el;
 }
 
-// The row's star mark, after the title and its tags, shown while the item has a star.
-function showStarMark(cardEl: HTMLElement, starred: boolean): void {
-	cardEl.querySelector<HTMLElement>(`.${CARD_TITLE_LINE_CLASS} > .${STAR_CLASS}`)?.toggle(starred);
+// Filled, as the row's star, while the item has one.
+function showStar(cardEl: HTMLElement, starred: boolean): void {
+	const star = cardEl.querySelector(`.${CARD_STAR_CLASS}`);
+	star?.toggleClass('is-starred', starred);
+	star?.setAttribute('aria-label', starred ? 'Remove star' : 'Add star');
 }
 
 function rowAt(view: PrinceListView, line: number | null): ItemRow | null {
@@ -272,10 +273,10 @@ async function removeEmptyItem(view: PrinceListView, file: TFile, pending: Track
 	}
 }
 
-/** Puts the caret at the end of the open card's title, where a click past its text would. */
-export function focusCardTitleEnd(view: PrinceListView): void {
-	const title = view.card?.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
-	if (!title) return;
-	title.focus();
-	title.setSelectionRange(title.value.length, title.value.length);
+/** Puts the caret at the end of the open card's notes; does nothing without a card. */
+export function focusCardNotesEnd(view: PrinceListView): void {
+	const editor = view.card?.editor;
+	if (!editor) return;
+	editor.focus();
+	editor.dispatch({ selection: { anchor: editor.state.doc.length }, scrollIntoView: true });
 }

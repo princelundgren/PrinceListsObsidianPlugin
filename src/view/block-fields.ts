@@ -157,7 +157,6 @@ export function showBlockItemMenu(block: ListBlock, evt: MouseEvent, titleLine: 
 		item
 			.setTitle('Delete item')
 			.setIcon('trash-2')
-			.setWarning(true)
 			.onClick(() => {
 				if (block.editing.text === seen) deleteBlockItem(block, titleLine);
 				else new Notice(CHANGED_ELSEWHERE_NOTICE);

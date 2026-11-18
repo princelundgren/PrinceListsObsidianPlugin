@@ -27,9 +27,9 @@ textarea.princelists-field:focus {
 	box-shadow: none;
 }
 
-/* The title and, after its text, the list's tags or tag button, which wrap under it when they
-   don't fit. Sized to its text, the title leaves room beside it; without field-sizing it keeps the
-   row's width. */
+/* The title and, after its text, the list's tags, then its tag button, which wrap under it when
+   they don't fit. Sized to its text, the title leaves room beside it; without field-sizing it keeps
+   the row's width. */
 .princelists-title-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -39,8 +39,10 @@ textarea.princelists-field:focus {
 	margin: 0 0 var(--size-4-2);
 }
 
-/* A list with no tags: the tag button shows only while the title is being edited, or holds focus itself. */
-.princelists-title-row:not(:focus-within) .princelists-list-tag-button {
+/* The tag button after the list's title and tags shows only while the title or the button holds
+   focus, not the tags, so a press on them or focus returning to them doesn't show it. */
+.princelists-title-row:not(:focus-within) .princelists-list-tag-button,
+.princelists-list-tags:focus ~ .princelists-list-tag-button {
 	display: none;
 }
 
@@ -113,7 +115,8 @@ textarea.princelists-title {
 
 .princelists-heading {
 	margin: var(--size-4-4) calc(-1 * var(--princelists-reach, 0px)) var(--size-4-1);
-	padding-bottom: var(--size-4-1);
+	/* The room under a heading's line, above its border, so a tag pill in the heading clears the rule. */
+	padding-bottom: var(--size-2-3);
 	padding-inline-end: var(--princelists-reach, 0px);
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-size: inherit;
@@ -203,6 +206,19 @@ textarea.princelists-title {
 	font-family: inherit;
 }
 
+/* A ticked item's checkbox is the accent at half strength, so a list with many done items reads
+   calmly, and its tick the text color, which keeps its contrast against the paler fill. The fill
+   stops inside the border, so the half-strength edge isn't drawn over it as a darker ring. Where
+   color-mix is missing it keeps the full accent and Obsidian's tick. */
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+	.princelists-item.is-done:not(.is-archived) .princelists-checkbox {
+		--checkbox-color: color-mix(in srgb, var(--interactive-accent) 50%, transparent);
+		--checkbox-color-hover: color-mix(in srgb, var(--interactive-accent-hover) 50%, transparent);
+		--checkbox-marker-color: var(--text-normal);
+		background-clip: padding-box;
+	}
+}
+
 /* An archived item's checkbox is blue, to tell it from a ticked item not yet archived. */
 .princelists-item.is-archived .princelists-checkbox {
 	--checkbox-color: var(--color-blue);
@@ -212,6 +228,8 @@ textarea.princelists-title {
 /* Gray in place, with no strikethrough (spec, "Ticking"). */
 .princelists-item.is-done .princelists-item-title {
 	color: var(--checklist-done-color);
+	--tag-color: var(--checklist-done-color);
+	--tag-color-hover: var(--checklist-done-color);
 }
 
 /* A hold on a row or heading selects nothing and shows no callout, as in spike 2 (spec, "Touch on
@@ -404,7 +422,7 @@ textarea.princelists-title {
 }
 
 /* A notes editor reads as the text around it, as Obsidian's own small editors do: its font, Obsidian's
-   caret, and no focus ring. A card's is at least three lines tall, empty or not, so it is easy to tap. */
+   caret, and no focus ring. A card's is at least two lines tall, empty or not, so it is easy to tap. */
 .princelists-card-notes .cm-scroller,
 .princelists-list-note .cm-scroller {
 	font-family: inherit;
@@ -418,7 +436,7 @@ textarea.princelists-title {
 }
 
 .princelists-card-notes .cm-content {
-	min-height: calc(3em * var(--line-height-normal));
+	min-height: calc(2em * var(--line-height-normal));
 }
 
 .princelists-card-notes .cm-line,
@@ -726,13 +744,12 @@ button.princelists-new-item {
 }
 
 /* The bar while selecting, in the floating "+"'s place and kept above mobile's navigation bar and
-   desktop's status bar the same way (spec, "The bar"): Done and how many are selected, then the actions
-   spread across the bar, with Delete apart past a divider. A view too narrow for one row puts Done and
-   the count on a row above the actions. Every button takes at least 48 by 48 with 8 between them, and
-   the height holds the rows with 8 around and between, and the bar's border. */
+   desktop's status bar the same way (spec, "The bar"): Done, then the actions spread across the bar,
+   with More apart past a divider, all on one row. Every button takes at least 48 by 48 with 8 between
+   them, and the height holds the row with 8 around it, and the bar's border. */
 .princelists-selection-bar,
 .princelists-content {
-	--princelists-selection-bar-height: calc(2 * var(--size-4-12) + 3 * var(--size-4-2) + 2 * var(--border-width));
+	--princelists-selection-bar-height: calc(var(--size-4-12) + 2 * var(--size-4-2) + 2 * var(--border-width));
 }
 
 .princelists-selection-bar {
@@ -741,7 +758,7 @@ button.princelists-new-item {
 	right: var(--size-4-4);
 	bottom: calc(var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 	display: flex;
-	flex-direction: column;
+	align-items: center;
 	box-sizing: border-box;
 	max-width: var(--file-line-width);
 	height: var(--princelists-selection-bar-height);
@@ -754,29 +771,18 @@ button.princelists-new-item {
 	box-shadow: var(--shadow-s);
 }
 
-.princelists-selection-bar-top,
-.princelists-selection-actions {
-	display: flex;
-	flex: 1;
-	align-items: center;
-	gap: var(--size-4-2);
-}
-
-/* Move to, Tick, Tag, Star, Date, the divider, then Delete: the actions as wide as the widest of them. */
+/* Move to, Date, Delete, the divider, then More: the actions as wide as the widest of them. */
 .princelists-selection-actions {
 	display: grid;
-	grid-template-columns: repeat(5, 1fr) auto 1fr;
+	flex: 1;
+	grid-template-columns: repeat(3, 1fr) auto 1fr;
+	align-items: center;
+	gap: var(--size-4-2);
+	align-self: stretch;
 }
 
-.princelists-selection-bar-top {
-	font-size: var(--font-ui-small);
-	white-space: nowrap;
-}
-
-/* Room for "999 selected", so the actions stay put as the count grows. */
-.princelists-selection-count {
-	min-width: 10ch;
-	font-variant-numeric: tabular-nums;
+.princelists-selection-bar button.princelists-selection-done {
+	flex: none;
 }
 
 .princelists-selection-divider {
@@ -784,43 +790,18 @@ button.princelists-new-item {
 	border-inline-start: var(--border-width) solid var(--background-modifier-border);
 }
 
-.princelists-selection-bar > .princelists-selection-divider {
-	display: none;
-}
-
-/* The narrowest view where Done, the count and six labelled buttons keep 48 px on one row, measured in
-   Obsidian 1.15.1's default theme: at 541 the last button overflows the bar's padding. */
-@container princelists-view (min-width: 542px) {
-	.princelists-selection-bar,
-	.princelists-content {
-		--princelists-selection-bar-height: calc(var(--size-4-12) + 2 * var(--size-4-2) + 2 * var(--border-width));
-	}
-
-	.princelists-selection-bar {
-		flex-direction: row;
-		align-items: center;
-	}
-
-	.princelists-selection-bar-top {
-		flex: none;
-		align-self: stretch;
-	}
-
-	.princelists-selection-bar > .princelists-selection-divider {
-		display: block;
-	}
-}
-
-/* In a view too narrow for six labelled buttons 48 wide, such as a phone's or a sidebar, they show only
-   their icons, the gaps tighten, and the buttons narrow below 48 rather than spill out of the bar. */
-@container princelists-view (max-width: 389px) {
+/* In a view too narrow for Done and four labeled buttons 48 wide on one row, such as a small phone or
+   a narrow sidebar, the actions show only their icons, the gaps tighten, and the buttons narrow below
+   48 rather than spill out of the bar. Measured in Obsidian 1.15.1's default theme: at 339 the last
+   button overflows the bar's padding. */
+@container princelists-view (max-width: 339px) {
 	.princelists-selection-bar {
 		left: var(--size-4-2);
 		right: var(--size-4-2);
 	}
 
 	.princelists-selection-actions {
-		grid-template-columns: repeat(5, minmax(0, 1fr)) auto minmax(0, 1fr);
+		grid-template-columns: repeat(3, minmax(0, 1fr)) auto minmax(0, 1fr);
 		gap: var(--size-4-1);
 	}
 
@@ -863,10 +844,6 @@ button.princelists-new-item {
 	white-space: nowrap;
 }
 
-.princelists-selection-bar button.princelists-selection-delete {
-	color: var(--text-error);
-}
-
 .princelists-selection-bar button:disabled {
 	color: var(--text-faint);
 }
@@ -879,24 +856,25 @@ button.princelists-new-item {
 	height: calc(var(--princelists-selection-bar-height) + var(--size-4-4) + var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-/* The card's buttons, a row under its notes, with ⋯ at its end. Its first icon lines up with the
-   notes' text, as the format bar's does. The tag and repeat popovers hang from it. */
+/* The card's row under its notes, at its end: the item's tags, then its buttons, which keep their
+   places whatever tags it has. Tags that don't fit beside the buttons take their own line above
+   them. The tag and repeat popovers hang from it. */
 .princelists-card-tools {
 	position: relative;
 	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
 	align-items: center;
-	gap: var(--size-2-1);
-	margin-inline-start: calc(-1 * var(--size-2-2));
+	gap: var(--size-4-1) var(--size-2-1);
 	/* Brought into view clear of mobile's navigation bar and desktop's status bar. */
 	scroll-margin-bottom: calc(var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
-.princelists-is-mobile .princelists-card-tools {
-	margin-inline-start: calc((var(--icon-size) - var(--input-height)) / 2);
-}
-
-.princelists-card-tools > button.princelists-card-actions {
-	margin-inline-start: auto;
+.princelists-card-buttons {
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: var(--size-2-2);
 }
 
 /* Under the notes editor while it has focus, its first icon lined up with the notes' text. On a
@@ -905,22 +883,30 @@ button.princelists-new-item {
 .princelists-format-bar {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--size-2-1) var(--size-4-3);
+	gap: var(--size-2-2) var(--size-4-3);
 	margin-top: var(--size-4-1);
-	margin-inline-start: calc(-1 * var(--size-2-2));
+	margin-inline-start: calc(-1 * var(--size-2-3));
 }
 
 .princelists-notes-codemirror:not(.cm-focused) + .princelists-format-bar {
 	display: none;
 }
 
-/* The card's sits under its buttons, while its notes have focus. */
-.princelists-card-notes:not(:focus-within) ~ .princelists-format-bar {
-	display: none;
+/* The card's sits between its notes and its buttons. While the notes lack focus only its buttons
+   hide, so it keeps its room and the card never changes height, and the room reads as part of the
+   notes: a click there starts typing at their end. Its padding takes the gap above it, so no strip
+   between the notes and it misses. */
+.princelists-card-body > .princelists-format-bar {
+	margin-top: calc(-1 * var(--size-4-2));
+	padding-top: var(--size-4-2);
 }
 
-.princelists-card-body > .princelists-format-bar {
-	margin-top: 0;
+.princelists-card-notes:not(:focus-within) ~ .princelists-format-bar {
+	cursor: text;
+}
+
+.princelists-card-notes:not(:focus-within) ~ .princelists-format-bar > .princelists-format-group {
+	visibility: hidden;
 }
 
 .princelists-is-mobile .princelists-format-bar {
@@ -937,7 +923,7 @@ button.princelists-new-item {
 .princelists-format-group {
 	flex: none;
 	display: flex;
-	gap: var(--size-2-1);
+	gap: var(--size-2-2);
 }
 
 /* Icon buttons on the view's own background: the card's, the list title's, the find row's, the tag strip's and the Schedule's title's. */
@@ -945,6 +931,7 @@ button.princelists-card-actions,
 button.princelists-card-tag-button,
 button.princelists-list-tag-button,
 button.princelists-card-repeat,
+button.princelists-card-star,
 .princelists-format-bar button,
 .princelists-when-button,
 button.princelists-archived-toggle,
@@ -960,11 +947,20 @@ button.princelists-find-button {
 	color: var(--icon-color);
 }
 
+/* The card's buttons and every format bar's, the list note's too, are Apple's default macOS control
+   size, 28 px, which a phone's finger-sized box already exceeds. */
+.princelists-card-buttons button,
+.princelists-card-buttons .princelists-when-button,
+.princelists-format-bar button {
+	padding: var(--size-2-3);
+}
+
 /* No button shadow on the icon buttons and strip tags, but Obsidian's ring when the keyboard focuses one. */
 button.princelists-card-actions:not(:focus-visible),
 button.princelists-card-tag-button:not(:focus-visible),
 button.princelists-list-tag-button:not(:focus-visible),
 button.princelists-card-repeat:not(:focus-visible),
+button.princelists-card-star:not(:focus-visible),
 button.princelists-card-tag-remove:not(:focus-visible),
 .princelists-format-bar button:not(:focus-visible),
 button.princelists-archived-toggle:not(:focus-visible),
@@ -984,6 +980,7 @@ button.princelists-schedule-list-label:not(:focus-visible) {
 	button.princelists-card-tag-button:hover,
 	button.princelists-list-tag-button:hover,
 	button.princelists-card-repeat:hover,
+	button.princelists-card-star:hover,
 	.princelists-format-bar button:hover,
 	.princelists-when-picker:hover .princelists-when-button,
 	button.princelists-archived-toggle:hover,
@@ -1022,6 +1019,7 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 .princelists-is-mobile button.princelists-card-actions,
 .princelists-is-mobile button.princelists-card-tag-button,
 .princelists-is-mobile button.princelists-card-repeat,
+.princelists-is-mobile button.princelists-card-star,
 .princelists-is-mobile .princelists-format-bar button,
 .princelists-is-mobile .princelists-when-button,
 .princelists-is-mobile button.princelists-archived-toggle,
@@ -1043,7 +1041,7 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 /* Rename heading's field reads as the heading it edits. */
 textarea.princelists-heading-field {
 	margin: var(--size-4-4) 0 var(--size-4-1);
-	padding-bottom: var(--size-4-1);
+	padding-bottom: var(--size-2-3);
 	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-weight: var(--font-bold);
@@ -1079,9 +1077,23 @@ button.princelists-undo:hover {
 	fill: currentColor;
 }
 
-/* In the open card, a press on the mark lands on the title's line, which puts the caret in the title. */
-.princelists-card .princelists-star {
-	pointer-events: none;
+/* Filled, as the row's star. */
+button.princelists-card-star.is-starred {
+	color: var(--color-yellow);
+}
+
+button.princelists-card-star.is-starred svg {
+	fill: currentColor;
+}
+
+/* The accent color says the item repeats; on its row, the repeat icon says it. */
+button.princelists-card-repeat.is-repeating {
+	color: var(--text-accent);
+}
+
+/* A day, in the repeat button's accent; three classes, to outrank the picker's hover rule. */
+.princelists-when-picker .princelists-when-button.is-dated {
+	color: var(--text-accent);
 }
 
 .princelists-when {
@@ -1127,7 +1139,27 @@ button.princelists-undo:hover {
 	overflow-wrap: break-word;
 }
 
-.princelists-item.is-done .princelists-tag {
+/* On rows and beside the list's title, tags are gray, so a list with many reads calmly; the card's
+   chips and the tag popover keep Obsidian's tag colors. */
+.princelists-tags .princelists-tag,
+.princelists-list-tags .princelists-tag {
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
+	border-color: transparent;
+}
+
+/* A tag typed in a heading or a row's title, which Obsidian's renderer draws, is gray the same way. */
+.princelists-heading,
+.princelists-item-title {
+	--tag-color: var(--text-normal);
+	--tag-color-hover: var(--text-normal);
+	--tag-background: var(--background-modifier-hover);
+	--tag-background-hover: var(--background-modifier-border);
+	--tag-border-color: transparent;
+	--tag-border-color-hover: transparent;
+}
+
+.princelists-item.is-done .princelists-tags .princelists-tag {
 	color: var(--checklist-done-color);
 }
 
@@ -1140,14 +1172,14 @@ button.princelists-undo:hover {
 	margin-block: var(--size-4-2);
 }
 
-/* Each strip tag is a button drawn as a tag in a note. */
+/* Each strip tag is a button shaped as a tag in a note, gray as a row's tags are. */
 button.princelists-strip-tag {
 	height: auto;
 	font-size: var(--tag-size);
 	font-weight: var(--tag-weight);
-	color: var(--tag-color);
-	background-color: var(--tag-background);
-	border: var(--tag-border-width) solid var(--tag-border-color);
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
+	border: var(--tag-border-width) solid transparent;
 	padding: var(--tag-padding-y) var(--tag-padding-x);
 	border-radius: var(--tag-radius);
 	line-height: var(--line-height-tight);
@@ -1161,6 +1193,7 @@ button.princelists-strip-no-tag,
 button.princelists-clear-tags,
 button.princelists-card-tag-button,
 button.princelists-card-repeat,
+button.princelists-card-star,
 button.princelists-card-tag-remove,
 button.princelists-list-tags,
 button.princelists-list-tag-button {
@@ -1170,13 +1203,11 @@ button.princelists-list-tag-button {
 
 @media (hover: hover) {
 	button.princelists-strip-tag:hover {
-		color: var(--tag-color-hover);
-		background-color: var(--tag-background-hover);
-		border-color: var(--tag-border-color-hover);
+		background-color: var(--background-modifier-border);
 	}
 }
 
-/* No tag has a strip tag's shape without the tag colors, so it doesn't read as a tag. */
+/* No tag has a strip tag's shape without its gray pill, so it doesn't read as a tag. */
 button.princelists-strip-no-tag {
 	height: auto;
 	font-size: var(--tag-size);
@@ -1212,31 +1243,10 @@ button.princelists-strip-no-tag.is-lit {
 	}
 }
 
-/* The card's tags follow its title, as on a closed row: where field-sizing works the title is as
-   wide as its text, and elsewhere it keeps the full width, with the tags on the line under it. */
-.princelists-card-title-line {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: baseline;
-	gap: var(--size-4-1);
-}
-
-.princelists-card-title-line > textarea.princelists-card-title {
-	flex: 1 1 100%;
-}
-
-@supports (field-sizing: content) {
-	.princelists-card-title-line > textarea.princelists-card-title {
-		field-sizing: content;
-		flex: 0 1 auto;
-		width: auto;
-		max-width: 100%;
-	}
-}
-
 .princelists-card-tags {
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: flex-end;
 	align-items: center;
 	gap: var(--size-4-1);
 }
@@ -1247,6 +1257,11 @@ button.princelists-strip-no-tag.is-lit {
 	align-items: center;
 	gap: var(--size-2-1);
 	padding-inline-end: var(--size-2-1);
+}
+
+/* A tag wider than the card breaks within its text. */
+.princelists-card-tag {
+	overflow-wrap: anywhere;
 }
 
 /* The × takes the chip's own color, on the chip's background. */
@@ -1340,7 +1355,7 @@ input.princelists-repeat-count {
 	gap: var(--size-4-2);
 }
 
-/* It sits above its anchor, such as the bar's Tag button, its end at the anchor's, and stays inside
+/* It sits above its anchor, such as the bar's More button, its end at the anchor's, and stays inside
    the view with --size-4-2 to spare each side and above; tags-popover.ts sets where the anchor is.
    The chips wrap above the field, which takes the full width, and scroll once they would reach the
    view's top, so the field stays in view. */
@@ -1453,7 +1468,7 @@ input.princelists-tag-input {
 
 	/* A day's button holds only its text, and is as tall as the ⋯. */
 	.princelists-when-button.is-dated {
-		padding-block: calc((var(--icon-size) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
+		padding-block: calc((var(--icon-size) + 2 * var(--size-2-3) - var(--line-height-normal) * 1em) / 2);
 	}
 }
 
@@ -1508,7 +1523,7 @@ button.princelists-collapse {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding-block: var(--size-4-4) var(--size-4-1);
+	padding-block: var(--size-4-4) var(--size-2-3);
 	padding-inline: 0 var(--size-4-2);
 	font-size: inherit;
 	background: none;

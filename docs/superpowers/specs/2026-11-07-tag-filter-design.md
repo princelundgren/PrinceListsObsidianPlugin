@@ -76,9 +76,10 @@ are used.
   **(call)**, since their items show only then. A list with no tags shows no strip **(owner)**.
 - **It wraps onto more lines** when the tags don't fit across the pane **(call)**.
 - **Each tag is a toggle button,** with `aria-pressed` as the field's toggles have, at least 24 by
-  24 CSS pixels, the minimum in WCAG 2.2's "Target Size (Minimum)" **(call)**. It is drawn with
-  Obsidian's tag CSS variables, so it looks like a tag in a note, and a lit tag with the accent
-  color.
+  24 CSS pixels, the minimum in WCAG 2.2's "Target Size (Minimum)" **(call)**. It has a tag's
+  shape and size from Obsidian's tag CSS variables, but is gray, normal text on a gray pill, and a
+  lit tag takes the accent color **(owner, 2026-11-17)**. This replaces Obsidian's tag colors,
+  which made a list with many tags purple all over.
 - **A press keeps focus where it was (call),** as a press on the field's toggles does, so a phone's
   keyboard stays up while the field is open.
 - **The strip keeps every tag while filtering (owner),** not only those of the items still shown,
@@ -119,7 +120,7 @@ together ([tagging a selection](2026-11-12-select-tags-design.md)), or to see wh
 every tagged part of a list is done, such as what is left to buy.
 
 - **A toggle button first in the strip,** before the tags, labeled "No tag", without a `#`. It
-  has a strip tag's shape and size without the tag colors, with a dashed border, so it doesn't read
+  has a strip tag's shape and size without its gray pill, with a dashed border, so it doesn't read
   as a tag named `#notag` **(call)**; lit, it takes the accent color as a lit tag does.
 - **It is in every strip,** a list's and the Schedule's, so a list with no tags, which has no
   strip, has no No tag. It stays when every item has a tag; lit, it then finds nothing.
@@ -155,6 +156,11 @@ every tagged part of a list is done, such as what is left to buy.
 
 - **A row shows its tags as labels (owner),** like its star and day: tapping one does what tapping
   the row does, which opens its card. Only the strip filters **(owner)**.
+- **A row's tags are gray (owner, 2026-11-17),** normal text on a gray pill, as the strip's are, so
+  a list with many tags reads calmly. A tag typed in a row's title, in a list or the Schedule, or in
+  a heading is gray too **(owner, 2026-11-17)**: the view sets Obsidian's documented `--tag-*`
+  variables there, so the renderer draws it that way. The open card's chips and the tag popover keep
+  Obsidian's tag colors.
 - **The row's chips are the tags in its tail,** read with the rule above **(call)**. A tag in the
   title already shows inside the title, which Obsidian's renderer draws, so it gets no second chip.
   A tap on it does what a tap on a link in a row does (step one, "Layout"), which is Obsidian's,
@@ -168,30 +174,23 @@ every tagged part of a list is done, such as what is left to buy.
     between the title and them.
 - **The reading order is title, tags, star, day at every width (call),** so a screen reader reads
   a row the same way on a phone and a desktop.
-- **A done item's chips are gray,** as its title is **(call)**.
+- **A done item's chips on its row take its title's gray text (call).**
 - **Rows in the Schedule and in a list inside another note show their tags too (call),** as they
   show the star.
 
 ## The card
 
 - **A tag button first in the card's buttons, under the notes (owner, 2026-11-17),** so they read
-  tag, day, ⋯ (step two, "When"). This replaces a tag button left of the star in the card's head
-  (owner). Its icon is a tag from Obsidian's built-in Lucide set **(call)**, and its tooltip is
-  "Add tag".
-- **The item's tags follow the title, as on a closed row (owner, #340),** each with an × that takes
-  it off. These are the tags in its tail; a tag in the title stays in the title field, where it's
-  edited as text **(call)**. Today the card hides the tail while you edit (step one, "Editing"), so
-  a tag typed there can't be seen again in the view; showing them fixes that.
-  - **The title field is as wide as its text (call),** with CSS `field-sizing: content` (Chromium
-    123, Safari 26.2), so the tags follow it on its line. Once the title wraps it takes the full
-    width and the tags go to the line under it, as a closed row's do. An empty field is as wide as
-    its placeholder.
-  - **In a web view without `field-sizing` (call),** such as iOS and iPadOS before 26.2, the field
-    keeps the full width and the tags go on the line under the title. An `@supports` rule picks
-    the layout, so no script measures the text.
-  - **A click or tap beside a short title puts the caret at its end (call),** where it landed
-    when the field had the full width. The press keeps focus where it was, so a phone's keyboard
-    stays up.
+  tag, star, repeat, day, ⋯ (step two, "When"). This replaces a tag button left of the star in the
+  card's head (owner). Its icon is a tag from Obsidian's built-in Lucide set **(owner,
+  2026-11-17)**, and its tooltip is "Add tag".
+- **The item's tags sit in the row under the notes, just before its buttons (owner, 2026-11-17),**
+  each with an × that takes it off, so the title has its line to itself and the chips sit by the
+  button that adds them. This replaces the tags following the title, as on a closed row **(owner,
+  #340)**, with the title field as wide as its text. These are the tags in its tail; a tag in the
+  title stays in the title field, where it's edited as text **(call)**. Today the card hides the
+  tail while you edit (step one, "Editing"), so a tag typed there can't be seen again in the view;
+  showing them fixes that.
 - **The tag button opens a small popover (owner, #340),** over the card's content, so opening it
   moves nothing. Where it hangs is under "The popover is the plugin's own element" below; this
   replaces a popover under the button in the card's head. It holds one field with Obsidian's
@@ -227,7 +226,7 @@ every tagged part of a list is done, such as what is left to buy.
     field. Obsidian's suggestions carry no roles (checked in 1.15), and the
     plugin doesn't add any to Obsidian's elements, so a screen reader isn't told what's suggested;
     Enter adds the highlighted one, the first unless the arrows move it.
-- **The popover has a second home, at the selection bar's Tag button,** where it adds a tag to
+- **The popover has a second home, over the selection bar's More button,** where it adds a tag to
   every selected item or heading or takes one off them all
   ([tagging a selection](2026-11-12-select-tags-design.md)).
 - **Typing a tag at the end of the title keeps working (owner):** the file reads it as the tail, as
