@@ -74,7 +74,8 @@ only documented Obsidian APIs are used.
 - **It's never written to the file and isn't remembered (call).** Closing the list ends it.
 - **It ends** with Done, Escape, or removing the last selected row **(call)**, and on desktop with
   a plain click on a row or a heading while no card is open **(owner, 2026-11-17)**. A click or a
-  tap on empty space keeps it, so a near miss between rows doesn't lose it **(call)**. An open menu or
+  tap on empty space ends it too, while no card is open **(owner, 2026-11-17)**. This replaces
+  keeping it there, so that a near miss between rows didn't lose it **(call)**. An open menu or
   dialog, the tag popover included, takes the first Escape, and Escape in a text field is the
   field's **(call)**. Once it ends, a click opens a card again.
 
@@ -166,6 +167,13 @@ only documented Obsidian APIs are used.
   disabled while a heading is selected. This replaces Tick, Tag and Star as buttons of their own
   **(owner, #450)**: with New as well, seven labeled buttons need a view 443 px wide, more than most
   phones have.
+- **A press on a button whose menu shows closes the menu (owner, 2026-11-17),** as a second press
+  on a menu button does elsewhere; a press on another button opens that one's. Space on the
+  focused button closes it too **(owner, 2026-11-17)**. Enter doesn't: Obsidian's open menu takes
+  Enter for its highlighted entry before the button hears it, and documents no way around that, so
+  Escape closes the menu from the keyboard **(call)**.
+- **Move to, Date and More are menu buttons (owner, 2026-11-17):** `aria-haspopup="menu"`, and
+  `aria-expanded` true while the button's menu shows and false otherwise.
 - **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
   CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
