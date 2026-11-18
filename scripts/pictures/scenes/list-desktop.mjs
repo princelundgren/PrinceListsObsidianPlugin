@@ -60,10 +60,7 @@ const scene = {
 			for (let i = 0; i < 2; i++) await pressKey(session, 'ArrowRight');
 			await pressEnter(session);
 			await sleep(800);
-			await glideTo('.princelists-card .princelists-card-actions');
-			await mouse.click();
-			await sleep(400);
-			await glideTo('.menu-item', 'Add star');
+			await glideTo('.princelists-card .princelists-card-star');
 			await mouse.click();
 			await sleep(700);
 			await pressEscape(session);

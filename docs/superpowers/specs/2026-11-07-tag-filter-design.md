@@ -175,23 +175,16 @@ every tagged part of a list is done, such as what is left to buy.
 ## The card
 
 - **A tag button first in the card's buttons, under the notes (owner, 2026-11-17),** so they read
-  tag, day, ⋯ (step two, "When"). This replaces a tag button left of the star in the card's head
-  (owner). Its icon is a tag from Obsidian's built-in Lucide set **(call)**, and its tooltip is
-  "Add tag".
-- **The item's tags follow the title, as on a closed row (owner, #340),** each with an × that takes
-  it off. These are the tags in its tail; a tag in the title stays in the title field, where it's
-  edited as text **(call)**. Today the card hides the tail while you edit (step one, "Editing"), so
-  a tag typed there can't be seen again in the view; showing them fixes that.
-  - **The title field is as wide as its text (call),** with CSS `field-sizing: content` (Chromium
-    123, Safari 26.2), so the tags follow it on its line. Once the title wraps it takes the full
-    width and the tags go to the line under it, as a closed row's do. An empty field is as wide as
-    its placeholder.
-  - **In a web view without `field-sizing` (call),** such as iOS and iPadOS before 26.2, the field
-    keeps the full width and the tags go on the line under the title. An `@supports` rule picks
-    the layout, so no script measures the text.
-  - **A click or tap beside a short title puts the caret at its end (call),** where it landed
-    when the field had the full width. The press keeps focus where it was, so a phone's keyboard
-    stays up.
+  tag, star, repeat, day, ⋯ (step two, "When"). This replaces a tag button left of the star in the
+  card's head (owner). Its icon is a tag from Obsidian's built-in Lucide set **(owner,
+  2026-11-17)**, and its tooltip is "Add tag".
+- **The item's tags sit in the row under the notes, just before its buttons (owner, 2026-11-17),**
+  each with an × that takes it off, so the title has its line to itself and the chips sit by the
+  button that adds them. This replaces the tags following the title, as on a closed row **(owner,
+  #340)**, with the title field as wide as its text. These are the tags in its tail; a tag in the
+  title stays in the title field, where it's edited as text **(call)**. Today the card hides the
+  tail while you edit (step one, "Editing"), so a tag typed there can't be seen again in the view;
+  showing them fixes that.
 - **The tag button opens a small popover (owner, #340),** over the card's content, so opening it
   moves nothing. Where it hangs is under "The popover is the plugin's own element" below; this
   replaces a popover under the button in the card's head. It holds one field with Obsidian's

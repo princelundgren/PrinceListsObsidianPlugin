@@ -41,8 +41,8 @@ and data safety, and owner's advocate. Their findings are folded in.
   couldn't see on macOS or an iPhone.
 - **A note from outside the vault** with the marker, opened in Obsidian on desktop, is a list too.
 - **On desktop,** you right-click for actions and drag with the mouse.
-- **On mobile,** you tap to open an item and hold-and-move to drag it. Item actions sit in a ⋯
-  button on the open card, and tapping a heading opens the heading menu.
+- **On mobile,** you tap to open an item and hold-and-move to drag it. Item actions sit in the open
+  card's buttons and its ⋯ button, and tapping a heading opens the heading menu.
 - **It is built in two parts.** 1a is desktop plus the mobile basics. 1b adds dragging on mobile,
   pasting pictures into a card, and Cmd+Z undo.
 - **Step one is done** when one real list has lived only in Obsidian for two weeks.
@@ -623,8 +623,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   title field while you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was,
   except that doubled `✔` marks collapse to the earliest and a leftover `✔` on an open line is
   dropped (see Completion). Step two hides an item's star too, and saving puts it back once. The
-  card shows the tail's tags after the title, as a closed row does, each with an × that takes it
-  off ([filtering by tag](2026-11-07-tag-filter-design.md), "The card").
+  card shows the tail's tags in the row under its notes, just before its buttons, each with an ×
+  that takes it off ([filtering by tag](2026-11-07-tag-filter-design.md), "The card").
 - **An item's When (step two):** the calendar icon in the card's buttons under its notes, or the
   day in its place, sets it, and the picker's own Clear or Reset removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
@@ -735,7 +735,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     item's name and pressing Enter finishes it. Shift+Enter adds another item below it instead, so
     a run of items can still be typed in one go. On mobile, "+" adds each next item.
   - In a new item whose title is still empty, Shift+Enter closes the card instead, which removes the
-    item, so a second Shift+Enter ends a run of new items. "+" and New item below keep it, with the
+    item, so a second Shift+Enter ends a run of new items. "+" and Cmd+Enter keep it, with the
     cursor back in its title. Delete item closes the card, which removes the item as a cancel, with
     no Undo **(call)**.
   - A new item is removed again if you close its card while its title is still empty and it has
@@ -781,18 +781,18 @@ back only what was typed and leaves the empty line, which can be deleted like an
     recent user action, and with Native menus on a menu's click may not count as one; then the
     card opens without it, and its date button opens the picker. Either way the card's buttons
     are scrolled into view first, since long notes can push them off-screen **(owner, 2026-11-17)**.
-  - **The card's ⋯ menu, and a right-click on the open card, stay without the rest (owner,
-    2026-10-29),** since the card shows the box, the date and the tag button. Add star or Remove
-    star is there, in a group of its own after Select, since the card has no star button **(owner,
-    2026-11-17)**. Repeat… follows, in a group of its own, while the card shows no repeat button;
-    a repeating item's card, and a ticked one's that comes back, has the button instead.
+  - **The card's ⋯ menu, and a right-click on the open card, hold only Edit in Markdown and Delete
+    item (owner, 2026-11-17).** The card shows the box and buttons for its tags, date, repeat and
+    star (step two's design, "When and the Schedule view"), and "+" adds an item below it. This
+    replaces menus that also held Select, Add star or Remove star, Repeat…, New item below and New
+    heading below **(owner, 2026-10-29 and 2026-11-11)**.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star entries' "Add star" and "Remove star";
     and "Remove", as in Remove image.
 - **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
   of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick, Tag… and
   the star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
-  Delete item. The card's ⋯ has the same without the card's own entries. The heading menu groups
+  Delete item. The card's ⋯ has Edit in Markdown and Delete item. The heading menu groups
   Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse or Expand
   all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
   [Context menus](https://developer.apple.com/design/human-interface-guidelines/context-menus),
@@ -819,9 +819,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
-- **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On mobile
-  this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move to, Tick,
-  Tag, Star, Date and Delete for them through the selection's bar ([selecting several
+- **On both desktop and mobile,** the open card has a ⋯ button with Edit in Markdown and Delete
+  item. On mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches
+  Move to, Tick, Tag, Star, Date and Delete for them through the selection's bar ([selecting several
   rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
   actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename

@@ -318,29 +318,34 @@ this met on 2026-10-30 **(owner)**.
 ### When and the Schedule view (owner)
 
 - **Setting a When (owner, 2026-10-27):** the card's buttons under its notes have a calendar
-  icon, after the tag button. Once the item has a When, its day takes the icon's place, with no
-  icon of its own, as on the row. Clicking either opens the platform's date picker through an
+  icon, after the repeat button. Once the item has a When, its day takes the icon's place, with no
+  icon of its own, as on the row, in `--text-accent` as the repeat button is while the item repeats
+  **(owner, 2026-11-17)**. Clicking either opens the platform's date picker through an
   `<input type="date">`. Obsidian has no date picker API, and the HTML input gives each platform's
   own picker.
-  - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width: the tag
-    button, the When, a repeating item's repeat button, and ⋯ at the row's end. The row starts where
-    the notes' text starts, as the format bar's first icon does, and the title has the card's whole
-    width. The format bar sits between the notes and the buttons, shown while the notes have focus
-    and keeping its room while hidden, on a phone too, so the card never changes height and no
-    button moves when the notes take or lose focus **(owner, 2026-11-17)**. While hidden, its room
-    reads as part of the notes: it shows the text cursor, and a click or tap there puts the caret at
-    the notes' end **(owner, 2026-11-17)**. This replaces the bar under the buttons, which made the
-    card a row taller while the notes had focus. A mouse press on a button leaves focus in the notes
-    through the click, since leaving them draws a link on the caret's line as its label and could
-    pull the row up mid-press **(call)**; a phone's tap goes to what it touched, and lowers the
-    keyboard for the date picker. Brought into view for a popover or a row's Tag…, Set date… or
-    Repeat…, the row stays clear of mobile's navigation bar and desktop's status bar **(call)**;
-    opening an item from the Schedule scrolls only as far as the card. On a desktop card the buttons
-    and the bar's room take two rows more than the title's line did, three on a card narrow enough
-    that the bar wraps; with long notes on a phone, the row can be below the screen. This replaces
-    the buttons at the title's right, and their line of their own under it in a view 480 px wide or
-    narrower **(owner, 2026-11-05)** or too narrow for the title, which left half a phone's line
-    empty.
+  - **The card's buttons sit in a row under its notes (owner, 2026-11-17),** at every width, at the
+    row's end, with the item's tags just before them, each with its ×. The buttons keep their
+    places whatever tags it has: the tag button, the star, the repeat button, the When and ⋯, in
+    the order a row shows its tags, star, repeat and day **(owner, 2026-11-17)**. Tags that don't
+    fit beside the buttons take their own line above them, the buttons still at the end, and a tag
+    wider than the card breaks within its text **(call)**, since on a phone the buttons leave
+    little room beside them. The title has its line to itself, at the card's whole width. The format
+    bar sits between the notes and the buttons, shown
+    while the notes have focus and keeping its room while hidden, on a phone too, so the card never
+    changes height and no button moves when the notes take or lose focus **(owner, 2026-11-17)**.
+    While hidden, its room reads as part of the notes: it shows the text cursor, and a click or tap
+    there puts the caret at the notes' end **(owner, 2026-11-17)**. This replaces the bar under the
+    buttons, which made the card a row taller while the notes had focus. A mouse press on a button
+    leaves focus in the notes through the click, since leaving them draws a link on the caret's line
+    as its label and could pull the row up mid-press **(call)**; a phone's tap goes to what it
+    touched, and lowers the keyboard for the date picker. Brought into view for a popover or a row's
+    Tag…, Set date… or Repeat…, the row stays clear of mobile's navigation bar and desktop's status
+    bar **(call)**; opening an item from the Schedule scrolls only as far as the card. On a desktop
+    card the buttons and the bar's room take two rows more than the title's line did, three on a
+    card narrow enough that the bar wraps; with long notes on a phone, the row can be below the
+    screen. This replaces the buttons at the title's right, and their line of their own under it in
+    a view 480 px wide or narrower **(owner, 2026-11-05)** or too narrow for the title, which left
+    half a phone's line empty.
   - **The picker's own Clear or Reset removes the When (owner, 2026-10-27).** There is no clear
     button beside the day: it crowded the card's buttons, and every platform's picker can already
     clear the day.
@@ -533,12 +538,12 @@ this met on 2026-10-30 **(owner)**.
 
 ### Star (owner: in its list only)
 
-- **The card's ⋯ menu adds or removes the star (owner, 2026-11-17),** as Add star or Remove star,
-  and a starred card shows the row's star after its title and tags, as a mark, not a button. A
-  press on the mark puts the caret in the title, as a press beside the title does **(call)**. This
-  replaces a star button among the card's buttons **(owner, 2026-10-27)**, which the card's row
-  of buttons had no room for. A list's row adds or removes it from its right-click menu too
-  **(owner, 2026-10-29)**: the step one design's "Item actions".
+- **A star button among the card's buttons adds or removes the star (owner, 2026-11-17),** after
+  the tag button. It is Lucide's `star`, filled in `--color-yellow` while the item has one, as
+  on the row, and its tooltip says Add star or Remove star. This replaces Add star or Remove star
+  in the card's ⋯ menu, with a star mark beside the title: the row under the notes has room for it.
+  A list's row adds or removes it from its right-click menu too **(owner, 2026-10-29)**: the step
+  one design's "Item actions".
 - **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
   show: a list, the Schedule view and a list inside another note.
 - **Where the star and the day sit (owner, 2026-11-05):**
@@ -548,7 +553,7 @@ this met on 2026-10-30 **(owner)**.
     letters. The checkbox reaches a little above and below them; the star, which Lucide draws
     inside a margin, runs from the baseline to the capitals' top. Each keeps the room its full size
     takes, so the text doesn't move and a tap anywhere the full-size box was still ticks. An open
-    card's tag button, day, a repeating item's repeat button and ⋯ are buttons the ⋯'s height,
+    card's tag button, star, repeat button, day and ⋯ are buttons the ⋯'s height,
     centered on one line, with icons the format bar's size, since they stand with it under the
     notes **(owner, 2026-11-17)**. This replaces drawing them as small as the row's star on
     desktop, beside the title **(owner, 2026-11-07, #339)**. On a phone, where each is a
