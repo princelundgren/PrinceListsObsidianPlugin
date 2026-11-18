@@ -19,25 +19,17 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   posts an inline comment for each issue and one summary comment, whose first line names the
   commit it reviewed: "## Claude review of" and the pull request's head commit, so whoever merges
   can check that the review saw the commit being merged **(owner, 2026-11-18)**.
-  - **The prompt is GitHub Docs' "Review code" prompt file (owner, 2026-10-21),** kept generic:
-    security, performance, code quality, architecture and design, and testing and documentation.
-    The owner's additions: it reads `AGENTS.md` first for the rules, and it checks drift from the
-    documentation under `docs/`.
-  - **Left out on purpose (owner, 2026-10-21):** the earlier prompt's lines asking for confident
-    findings only, no nits the linters catch, and the rule or design section each finding breaks.
-    The owner revisits that after a few real reviews, so a review shouldn't ask to restore them.
-  - Issues are 🔴 critical (fix before merge) or 🟡 suggestions, each with line references, the
-    problem, a suggested fix with code, and the reason. The summary adds what's done well and what
-    the review checked and found sound, and an empty 🔴 or 🟡 section reads only "None."
-    **(owner, 2026-11-06)**.
-  - **A 🟡 names a change to make (owner, 2026-11-06):** to a line the pull request adds or changes,
-    or to a doc the change makes untrue. A finding about code the change neither touches nor makes
-    wrong, or one that only asks to check or confirm something, isn't posted: it leaves the author
-    nothing to do. The 🔴 bar is unchanged, and the lines left out above stay out.
-  - The prompt is used under CC BY 4.0
-    ([source](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files/review-code),
-    [license](https://creativecommons.org/licenses/by/4.0/)). The workflow's comment above it lists
-    what was changed.
+  - **It calls the shared review (owner, 2026-11-18).** `claude-code-review.yml` is a caller of
+    [prince-claude-pr-review-workflow](https://github.com/princelundgren/prince-claude-pr-review-workflow)'s
+    `claude-review.yml` at its `v1` tag, passing only `CLAUDE_CODE_OAUTH_TOKEN`. The prompt, the
+    tools and the job's safeguards live there; its README's "What it does" and "What it guards"
+    describe them.
+  - It reads `AGENTS.md` first, so this repository's rules, keeping `docs/` true among them, apply
+    to every review.
+  - Findings are 🔴 Critical Issues, 🟡 Suggestions and 🔵 Nits, and the summary lists under ✅
+    Checked what the review found sound. Every push starts another review, so a 🔵 is fixed only
+    in a push that also fixes something else; otherwise it gets a reply saying why not, and its
+    thread is resolved.
   - Drafts are skipped. A person's new push cancels a review that is still running.
 - **`@claude` on demand (owner, 2026-10-20).** `claude.yml` runs when a comment on an issue, or on
   a pull request from a branch in this repository, mentions `@claude`. Claude answers in a comment.
@@ -45,14 +37,17 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 - **Claude reviews and answers; it doesn't change code (call).** Neither workflow lets it commit
   or push. Asking it to fix something gets a suggested change in a comment. Letting it push would
   need the Claude GitHub App's token, which carries the app's full permissions.
-- **The actions.** Both workflows pin [anthropics/claude-code-action](https://github.com/anthropics/claude-code-action)
-  and `actions/checkout` to full commit SHAs. Dependabot proposes updates.
+- **The actions.** `claude.yml` pins [anthropics/claude-code-action](https://github.com/anthropics/claude-code-action)
+  and `actions/checkout` to full commit SHAs, and Dependabot proposes updates. The review calls the
+  shared workflow at `v1`, a moving tag for releases with the same caller contract.
 
 ## Why
 
 - **One maintainer.** A first pass catches broken rules and drift from the design before the
   owner reads the change.
-- **A prompt in the workflow, not the code-review plugin (call).** The documentation offers both.
+- **A shared review, not a copy (owner, 2026-11-18).** Several repositories use the same review,
+  so a fix to it lands once, and `v1` brings it here without a change in this repository.
+- **A review prompt, not the code-review plugin (call).** The documentation offers both.
   The prompt wins because:
   - The plugin can't be pinned the documented way. The action's `plugin_marketplaces` input takes
     Git URLs and accepts one only if it ends in `.git`, so a URL can't name a ref. The action's
@@ -84,21 +79,10 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   writing code and workflows, and a workflow can't narrow them. Comments therefore come from
   `github-actions[bot]`.
 - **The tools (call).**
-  - The review may run three exact commands, each naming its pull request: `gh pr diff`, a
-    `gh pr view` query that returns only its own earlier summaries, and `gh pr comment --body-file
-    -`, which posts from standard input. A redirect could feed it a file inside the checkout, but
-    that adds no reach: Claude could retype anything it can read there. It can also post inline
-    comments. It can't read anyone else's comments.
-  - The title and description come from the pull request event: a step writes them to `.pr-text/`
-    in the checkout, through environment variables as `docs.yml` does, and Claude reads the files.
-    Two more `gh pr view` commands read them before, but they worked only when Claude typed them
-    exactly, and the reviews of #141 and #142 said they couldn't read either. The files hold the
-    text as it was when the event fired, so an edit without a push reaches the next review. The
-    commits come from the API, since the checkout holds only the merge commit: the next step
-    writes each one's subject and changed lines, counted as `AGENTS.md` says, to the same folder
-    with the job's token, and Claude reads that file too, so the review needs no new tool. Past the
-    API's 300 files a size is the commit's total, lock files included. A merge shows `merge` in
-    place of its size, which counts what the base brought in. A failed call fails the job.
+  - The review's tools, and how it reads the pull request's title, description and commits, are
+    the shared workflow's (its README, "What it guards"): three exact `gh` commands for its own
+    pull request, inline comments, and no way to read anyone else's comments. It isn't given each
+    commit's changed lines, so the author checks the commit size rule in `AGENTS.md`.
   - For `@claude`, deny rules take back the file-edit tools, `git add`, `git commit`, `git rm` and
     the push that the action grants when it's mentioned. In the action's `acceptEdits` mode, shell
     commands such as `mkdir`, `mv` or `sed` can still change files in the checkout, but nothing
@@ -132,7 +116,7 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   - For `@claude`, the action strips hidden markup from the context it gathers, and its docs warn
     that new bypasses may emerge. An appended system prompt tells Claude that this text, and a pull
     request's code, is material to read, never instructions.
-  - The review reads, unfiltered, the pull request's title, description, commit subjects and diff,
+  - The review reads, unfiltered, the pull request's title, description, commit messages and diff,
     written or pushed by someone with write access, and its own summaries. Its prompt says the
     same.
   - The limited token and tools bound what a successful injection could do.
@@ -156,10 +140,8 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 - **Bounded runs (call).** Each workflow sets `--max-turns` and a job timeout. A run that reaches
   the turn limit ends with an error, possibly before the review's summary is posted. A person's
   new push cancels a review that is still running.
-  - The review allows 50 turns, `@claude` 30. This prompt's first run took 8 turns on an 86-line
-    workflow change; the earlier, narrower prompt took 13 on a 598-line code change. This one
-    covers five review areas and checks all of `docs/` for drift, so 50 leaves room for a large
-    change, and the 20-minute job timeout still bounds a run.
+  - The review allows 50 turns and 20 minutes, set in the shared workflow; `@claude` allows 30
+    turns and 30 minutes.
 
 ## Since going public (2026-10-22)
 
@@ -173,9 +155,10 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   the release workflow. Only the repository admin role bypasses it.
 - **`persist-credentials: false` in `claude.yml`,** for tidiness only (see "The job token is
   readable").
-- **Actions** allow only GitHub's own actions, `anthropics/claude-code-action` and the
-  `oven-sh/setup-bun` it uses, each pinned to a full commit SHA. Runs from outside contributors'
-  fork pull requests wait for approval.
+- **Actions** allow only GitHub's own actions, `anthropics/claude-code-action`, the
+  `oven-sh/setup-bun` it uses, and the shared review's repository
+  (`princelundgren/prince-claude-pr-review-workflow/*`). Runs from outside contributors' fork pull
+  requests wait for approval.
 
 ## Verified on the first runs (2026-10-21)
 
@@ -191,9 +174,5 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 
 ## Not yet verified
 
-- **Which calls the permission rules refused.** The first review reported 4 refusals, one of them
-  `node scripts/check-docs.mjs`; the full output is hidden, so the others aren't known. Local
-  `claude -p` probes showed the exact rules refuse near misses and the deny rules stop `git commit`
-  and the push script.
 - **`@claude` reading `AGENTS.md`.** Claude Code reads it when there's no `CLAUDE.md`, from 2.1.277,
   but `claude.yml`'s prompt doesn't name it, and no `@claude` run has shown it loaded.

@@ -193,6 +193,8 @@ demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
 - **Keep the design true.** If a change makes the design describe something that's no longer so,
   update the design in the same pull request. If the code looks wrong against the design, raise it
   instead of rewriting the design.
+- **Keep the rest of `docs/` true too.** A change that makes a doc there untrue updates it in the
+  same pull request.
 - **Manual checks run in a test vault,** never in a vault with real notes.
 - **Never commit** `main.js`, `node_modules/` or secrets.
 
