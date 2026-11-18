@@ -27,9 +27,9 @@ textarea.princelists-field:focus {
 	box-shadow: none;
 }
 
-/* The title and, after its text, the list's tags or tag button, which wrap under it when they
-   don't fit. Sized to its text, the title leaves room beside it; without field-sizing it keeps the
-   row's width. */
+/* The title and, after its text, the list's tags, then its tag button, which wrap under it when
+   they don't fit. Sized to its text, the title leaves room beside it; without field-sizing it keeps
+   the row's width. */
 .princelists-title-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -39,8 +39,10 @@ textarea.princelists-field:focus {
 	margin: 0 0 var(--size-4-2);
 }
 
-/* A list with no tags: the tag button shows only while the title is being edited, or holds focus itself. */
-.princelists-title-row:not(:focus-within) .princelists-list-tag-button {
+/* The tag button after the list's title and tags shows only while the title or the button holds
+   focus, not the tags, so a press on them or focus returning to them doesn't show it. */
+.princelists-title-row:not(:focus-within) .princelists-list-tag-button,
+.princelists-list-tags:focus ~ .princelists-list-tag-button {
 	display: none;
 }
 
