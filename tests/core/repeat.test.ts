@@ -136,6 +136,11 @@ describe('the end of the date range', () => {
 		expect(nextDay('9999-12-01', rule(1, 'month', { whenDone: true }), '9999-12-31')).toBeNull();
 	});
 
+	test('addDays gives null before 0000-01-01 and keeps the first day', () => {
+		expect(addDays('0000-01-01', -1)).toBeNull();
+		expect(addDays('0000-01-02', -1)).toBe('0000-01-01');
+	});
+
 	test('upcomingDays gives only the dates before the end', () => {
 		expect(upcomingDays('9999-12-30', rule(1, 'day'), null, '9999-12-29', 3)).toEqual(['9999-12-31']);
 	});
