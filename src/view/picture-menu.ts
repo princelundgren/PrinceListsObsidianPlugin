@@ -39,7 +39,6 @@ export function showPictureMenu(view: PrinceListView, evt: MouseEvent, target: H
 			item
 				.setTitle('Delete image')
 				.setIcon('trash-2')
-				.setWarning(true)
 				.setSection('danger')
 				.onClick(() => void deletePicture(view, removable, file)),
 		);

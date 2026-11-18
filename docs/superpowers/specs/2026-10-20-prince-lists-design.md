@@ -802,11 +802,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   which also puts the most-used entries first and destructive ones last.
 - **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected row
   included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Tag…, Add star and
-  Remove star, the four date entries, New item below, New heading below and Duplicate, and Delete in
-  red, naming what goes. Each change acts on every selected item at once and shows an Undo message;
-  New item below and New heading below add one row under the selection's last row and end
-  selecting, and a right-click on a row outside the selection opens that row's own menu ([selecting
-  several rows](2026-11-07-select-several-design.md), "The actions").
+  Remove star, the four date entries, New item below, New heading below and Duplicate, and Delete,
+  naming what goes. Each change acts on every selected item at once and shows an Undo message; New
+  item below and New heading below add one row under the selection's last row and end selecting, and
+  a right-click on a row outside the selection opens that row's own menu ([selecting several
+  rows](2026-11-07-select-several-design.md), "The actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading, Tag… and Delete heading, and Select **(owner, 2026-11-11)**. Step two adds Edit in Markdown,
   Collapse all headings and Expand all headings, and a menu on the list's background (step two's
@@ -851,10 +851,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     color with no button background: below the message, or at its right edge on a phone. The
     notice lays it out, so its place doesn't depend on the message's length. `Notice.addButton`
     does this but isn't in the API, so the button is the plugin's, added after the message.
-- **Delete item and Delete heading show in red (owner, 2026-10-20)** in every menu that has them,
-  through `MenuItem.setWarning(true)`. The red comes from the `is-warning` class, so with Settings →
-  Appearance → Native menus on, the desktop right-click menus may not show it (obsidian.md/help,
-  Settings: native menus "will not be affected by your theme").
+- **Delete shows in the same color as the other entries and buttons (owner, 2026-11-17),** in every
+  menu and in the selection bar. Its name says what goes, and it sits last in each menu, in a group
+  of its own where the menu has others. This replaces Delete item and Delete heading in red
+  **(owner, 2026-10-20)**.
 
 ### Dragging (owner)
 
@@ -1488,10 +1488,9 @@ Checked 2026-10-20.
     to automatically preventDefault" (checked 2026-10-27)
   - menus and events: `Menu.showAtMouseEvent`; `Workspace.on('file-menu' | 'file-open')`, where
     `file-open` "could be in a new leaf, an existing leaf, or an embed"; `Plugin.addRibbonIcon`;
-    `Workspace.openLinkText`; `MenuItem.setWarning` (0.15.0), which turns the item's "title and
-    icon" red; `MenuItem.setSection` (0.15.3), whose section IDs are read from the menu's
-    `data-section` attributes; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a context
-    menu to internal file links"
+    `Workspace.openLinkText`; `MenuItem.setSection` (0.15.3), whose section IDs are read from the
+    menu's `data-section` attributes; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a
+    context menu to internal file links"
   - rendering and metadata: `MarkdownRenderer.render`, `CachedMetadata.listItems`,
     `getFrontMatterInfo` (1.5.7), `parseYaml`, and `getFileCache` (returns null when not cached)
   - files:
