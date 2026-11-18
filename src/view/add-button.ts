@@ -3,19 +3,27 @@ import { planItemInsert, type ItemPlace } from '../core/list-actions';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { closeCard, focusCardTitle, isNewEmptyItem, openCard } from './card';
 import { expandFor } from './collapse';
+import type { RowDragHost } from './drag-host';
+import { enableNewItemDrag } from './drag-new-item';
 import type { PrinceListView } from './list-view';
 import { enqueueAt, writePlanned } from './write';
 
 // The floating "+" (spec, "Selecting and adding"). It goes outside listScrollEl, which is what
 // scrolls, so it stays put while the list scrolls. The view hides it in a note that isn't a list,
-// and where the settings turn it off.
-export function buildNewItemButton(view: PrinceListView, label: string): HTMLButtonElement {
+// and where the settings turn it off. Dragged onto the list, it adds the item where it drops, and
+// `edgeScroll` is what a touch drag scrolls at the edges, as a row's does.
+export function buildNewItemButton(view: PrinceListView, label: string, edgeScroll: RowDragHost['edgeScroll']): HTMLButtonElement {
 	view.containerEl.addClass('princelists-view');
 	view.containerEl.toggleClass('princelists-clears-status-bar', !Platform.isMobile);
 	const button = view.containerEl.createEl('button', { cls: 'princelists-new-item', attr: { 'aria-label': label } });
 	setTooltip(button, label);
 	setIcon(button, 'plus');
-	view.registerDomEvent(button, 'click', () => newItem(view));
+	const swallowsClick = enableNewItemDrag(view, button, edgeScroll, (place) => {
+		if (isListText(view.text)) addItem(view, place);
+	});
+	view.registerDomEvent(button, 'click', () => {
+		if (!swallowsClick()) newItem(view);
+	});
 	if (Platform.isMobile) {
 		// On the container, so a tag popover's field, which sits outside contentEl, counts too. They run
 		// after contentEl's focus listeners, so a card a focusout closes is gone by then.

@@ -756,6 +756,22 @@ back only what was typed and leaves the empty line, which can be deleted like an
     card's fields included. While selecting, it adds the new item where the selection's New item
     below does instead ([selecting several rows](2026-11-07-select-several-design.md), "While
     selecting"). An empty list shows a gray hint saying how to add an item.
+  - **Dragged onto the list, it adds the item where it drops (owner, 2026-11-18, #466),** and the
+    new item's card opens with the cursor in its title, as a click's does. While dragging, the drop
+    line a dragged item shows marks the place, by the same rules ("Dragging"): first under a
+    heading, after the shown item above, past hidden rows. A list that shows no rows takes it first,
+    wherever it drops. Dropped off the list, or with Escape, it adds nothing, and a click or tap
+    still adds as above. Starting the drag closes the card, as a row's drag does.
+    - **Desktop:** the browser's own drag, as a row's, so its picture of the round "+" follows the
+      pointer, and a drag sends no click.
+    - **Mobile:** a hold as long as a row's lifts the "+", which then follows the finger, and the
+      list scrolls at its edges as for a row. A release without moving adds nothing, as a row's
+      writes nothing. The button keeps the pointer it was pressed with, so the finger's moves arrive
+      on it rather than on the rows: it measures the rows on each move and again at the release,
+      takes `touch-action: none` so the hold doesn't pan, stops its `touchmove` once lifted so no
+      swipe of Obsidian's starts, and cancels the hold's contextmenu itself, since the view's cancel
+      covers only its content. The "+" starts in the bottom edge zone, so the list scrolls there only
+      once the finger has left it.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading. On mobile, where "+" shows only
   while no card is open, nothing is selected when it's tapped, so it always adds the first item; a
@@ -937,6 +953,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - **A redraw while dragging ends the drag (call),** with nothing written, since the row the
     finger holds is gone: an outside change, or the removal of an empty item that closing the card
     started. The release that follows is swallowed too.
+- **The floating "+" drags too,** adding a new item where it drops ("The floating "+" button").
 
 ### Done and archived (owner)
 

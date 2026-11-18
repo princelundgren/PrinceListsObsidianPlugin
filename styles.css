@@ -785,6 +785,15 @@ button.princelists-new-item {
 	background-color: var(--interactive-accent);
 	color: var(--text-on-accent);
 	box-shadow: var(--shadow-s);
+	touch-action: none;
+}
+
+/* Held on mobile, it lifts and follows the finger through the offsets the view sets (spec, "The
+   floating "+" button"). A touch on it never pans, so the hold and the move don't scroll the page. */
+button.princelists-new-item.princelists-new-item-lifted {
+	z-index: 1;
+	box-shadow: var(--shadow-l);
+	transform: translate(var(--princelists-lift-x, 0px), var(--princelists-lift-y, 0px)) scale(1.1);
 }
 
 @media (hover: hover) {

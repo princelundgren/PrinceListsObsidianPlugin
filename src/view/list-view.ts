@@ -227,7 +227,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		enableMouseDrag(dragHost);
 		if (Platform.isMobile) enableTouchDrag(dragHost);
 		if (Platform.isDesktop) enableMouseHold(this);
-		this.newItemButton = buildNewItemButton(this, labelWithKey('New item', ADD_KEY_NAME));
+		this.newItemButton = buildNewItemButton(this, labelWithKey('New item', ADD_KEY_NAME), dragHost.edgeScroll);
 		const selectionBar = buildSelectionBar(this);
 		swallowClickAfterHold(this, selectionBar);
 		buildTagsPopover(this);
