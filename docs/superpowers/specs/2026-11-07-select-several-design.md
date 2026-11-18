@@ -100,6 +100,9 @@ only documented Obsidian APIs are used.
   the bar showing **(owner, 2026-11-11)**.
   - **The held row shows as selected (owner, 2026-11-12),** not lifted: the lift's outline and
     background hid the highlight until the release.
+  - **By touch, a pressed row shows at once (owner, 2026-11-18),** with the lighter background a
+    right-clicked row has while its menu shows, until the hold selects it, the finger moves to
+    scroll, or the press ends, so the long hold has feedback from its start.
   - **By touch,** the row lifts for the drag once the finger moves it. The release writes nothing
     and is no tap.
   - **With a mouse,** the press stays within the touch's 5 px tolerance until the hold time

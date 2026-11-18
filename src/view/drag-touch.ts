@@ -10,6 +10,8 @@ import { ownClosest, ownElements } from './own-rows';
 import { forgetDrawn, HEADING_CLASS, ITEM_CLASS, LINE_ATTR, lineOf } from './render-list';
 
 const LIFTED_CLASS = 'princelists-lifted';
+// From the finger going down until the hold, a scroll or the release, so the hold shows from its start.
+const PRESSED_CLASS = 'princelists-pressed';
 const LIFT_OFFSET = '--princelists-lift';
 
 interface Lift {
@@ -73,6 +75,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 	const endPress = (): void => {
 		if (!press) return;
 		if (press.timer !== null) window.clearTimeout(press.timer);
+		press.row.removeClass(PRESSED_CLASS);
 		endLift(press);
 		press = null;
 	};
@@ -127,6 +130,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 
 	const lift = (current: Press): void => {
 		current.timer = null;
+		current.row.removeClass(PRESSED_CLASS);
 		const rowTop = current.row.getBoundingClientRect().top;
 		// The hold selects as the row lifts (selecting several rows, "Starting to select"), before the
 		// rows are measured, as the bar taking the "+"'s place can move them.
@@ -165,6 +169,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 		if (!row || row.hasClass(CARD_CLASS) || target?.closest(`.${COLLAPSE_CLASS}`) || target?.closest('textarea')) return;
 		const started: Press = { pointerId: evt.pointerId, row, startX: evt.clientX, startY: evt.clientY, x: evt.clientX, y: evt.clientY, timer: null, lift: null };
 		started.timer = window.setTimeout(() => lift(started), HOLD_MS);
+		row.addClass(PRESSED_CLASS);
 		press = started;
 	});
 	component.registerDomEvent(rowsEl, 'pointermove', (evt) => {
@@ -179,6 +184,7 @@ export function enableTouchDrag(host: RowDragHost): void {
 			// The touch is a scroll. The press stays open until the finger lifts.
 			window.clearTimeout(press.timer);
 			press.timer = null;
+			press.row.removeClass(PRESSED_CLASS);
 		}
 	});
 	component.registerDomEvent(rowsEl, 'pointerup', (evt) => {

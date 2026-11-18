@@ -324,9 +324,11 @@ textarea.princelists-heading-field {
 	border-start-end-radius: var(--radius-s);
 }
 
-/* A right-clicked row or heading while its menu shows: as a hovered file in Obsidian's file list,
-   lighter than a selected row, and reaching into the side margin as one does. */
-.princelists-menu-target:not(.princelists-selected) {
+/* A right-clicked row or heading while its menu shows, and one a finger presses until its hold
+   selects it: as a hovered file in Obsidian's file list, lighter than a selected row, and reaching
+   into the side margin as one does. */
+.princelists-menu-target:not(.princelists-selected),
+.princelists-pressed:not(.princelists-selected) {
 	--princelists-reach: var(--size-4-2);
 	background-color: var(--nav-item-background-hover);
 	border-radius: var(--radius-s);
