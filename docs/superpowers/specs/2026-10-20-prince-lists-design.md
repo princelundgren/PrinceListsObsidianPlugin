@@ -762,16 +762,23 @@ back only what was typed and leaves the empty line, which can be deleted like an
     heading, after the shown item above, past hidden rows. A list that shows no rows takes it first,
     wherever it drops. Dropped off the list, or with Escape, it adds nothing, and a click or tap
     still adds as above. Starting the drag closes the card, as a row's drag does.
-    - **Desktop:** the browser's own drag, as a row's, so its picture of the round "+" follows the
-      pointer, and a drag sends no click.
-    - **Mobile:** a hold as long as a row's lifts the "+", which then follows the finger, and the
-      list scrolls at its edges as for a row. A release without moving adds nothing, as a row's
-      writes nothing. The button keeps the pointer it was pressed with, so the finger's moves arrive
-      on it rather than on the rows: it measures the rows on each move and again at the release,
-      takes `touch-action: none` so the hold doesn't pan, stops its `touchmove` once lifted so no
-      swipe of Obsidian's starts, and cancels the hold's contextmenu itself, since the view's cancel
-      covers only its content. The "+" starts in the bottom edge zone, so the list scrolls there only
-      once the finger has left it.
+    - **Desktop:** the browser's own drag, as a row's, and a drag sends no click. A picture of the
+      round "+" follows the pointer, drawn from the button's icon and colors, since the browser's
+      own picture of it shows its square box's corners **(owner, 2026-11-18)**. The "+" left behind
+      hides while the drag lasts **(owner, 2026-11-18)**, and the drag is a move, as a row's, so the pointer shows no copy
+      badge.
+    - **Mobile: it drags as soon as the finger moves on it, with no hold (owner, 2026-11-18).**
+      A row needs its hold because a swipe on it scrolls the list; the "+" scrolls nothing. A press
+      that doesn't move, however long, is a tap and adds as above. The "+" follows the finger, and
+      the list scrolls at its edges as for a row. The button keeps the pointer it was pressed with,
+      so the finger's moves arrive on it rather than on the rows: it measures the rows on each move
+      and again at the release, takes `touch-action: none` so the press doesn't pan, stops its
+      `touchmove` so no swipe of Obsidian's starts, and cancels a still press's contextmenu itself,
+      since the view's cancel covers only its content. The "+" starts in the bottom edge zone, so
+      the list scrolls there only once the finger has left it.
+  - **It's a circle on every platform (owner, 2026-11-18):** Obsidian's buttons take its corner
+    shape, a superellipse on macOS, so the "+" sets `corner-shape: round` to match the round
+    picture its drag shows.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading. On mobile, where "+" shows only
   while no card is open, nothing is selected when it's tapped, so it always adds the first item; a

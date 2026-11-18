@@ -782,13 +782,21 @@ button.princelists-new-item {
 	height: var(--size-4-12);
 	padding: 0;
 	border-radius: 50%;
+	/* Obsidian's buttons take its corner shape, a superellipse on macOS, which would make it a rounded
+	   square unlike the round picture a drag of it shows. */
+	corner-shape: round;
 	background-color: var(--interactive-accent);
 	color: var(--text-on-accent);
 	box-shadow: var(--shadow-s);
 	touch-action: none;
 }
 
-/* Held on mobile, it lifts and follows the finger through the offsets the view sets (spec, "The
+/* Hidden while it's dragged with the mouse, as a picture of it follows the pointer. */
+button.princelists-new-item.princelists-new-item-dragging {
+	visibility: hidden;
+}
+
+/* Dragged on mobile, it lifts and follows the finger through the offsets the view sets (spec, "The
    floating "+" button"). A touch on it never pans, so the hold and the move don't scroll the page. */
 button.princelists-new-item.princelists-new-item-lifted {
 	z-index: 1;
