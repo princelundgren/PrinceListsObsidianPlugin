@@ -5,6 +5,7 @@ import { boundsOf, click, hover, middleOf, sleep, still, type } from '../page.mj
 
 const scene = {
 	name: 'desktop-4-filter',
+	caption: 'Find items, and bring back ticked ones',
 	...DESKTOP,
 	setup: (session) => showWithFolders(session, 'To do.md', 'list'),
 	async shoot(session, out) {

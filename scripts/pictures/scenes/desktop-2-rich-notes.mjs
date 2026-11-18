@@ -7,6 +7,7 @@ const ITEM = 'buy timber for two raised beds';
 
 const scene = {
 	name: 'desktop-2-rich-notes',
+	caption: 'Notes with links, checklists, tables and pictures',
 	...DESKTOP,
 	setup: (session) => showWithFolders(session, 'Projects/Garden.md', 'list'),
 	async shoot(session, out) {

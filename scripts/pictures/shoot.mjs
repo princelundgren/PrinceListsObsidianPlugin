@@ -7,6 +7,7 @@ import { parseArgs } from 'node:util';
 import { checkDemoVault, connect } from './cdp.mjs';
 import { sleep } from './page.mjs';
 import { pointer } from './pointer.mjs';
+import { drawWindowButtons, removeWindowButtons } from './window-buttons.mjs';
 
 const SCENES = new URL('./scenes/', import.meta.url);
 
@@ -29,9 +30,11 @@ async function shootScene(port, module, out) {
 		await session.send('Emulation.setFocusEmulationEnabled', { enabled: true });
 		await sleep(500);
 		await scene.setup(session);
+		if (!scene.phone) await drawWindowButtons(session);
 		await scene.shoot(session, out);
 	} finally {
 		await pointer(session, 0, 0, 'hide').catch(() => {});
+		await removeWindowButtons(session).catch(() => {});
 		await session.send('Emulation.setFocusEmulationEnabled', { enabled: false }).catch(() => {});
 		await session.send('Emulation.clearDeviceMetricsOverride').catch(() => {});
 		session.close();

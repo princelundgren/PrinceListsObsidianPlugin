@@ -1,4 +1,5 @@
-// What the community listing's scenes share: their page sizes, and the ticks the Groceries shots show.
+// What the scenes share beyond page.mjs: the listing's page sizes and the ticks its Groceries shots
+// show, and where an item's title, row and checkbox are.
 import { boundsOf, middleOf, setFolders, showAlone, sleep, undoingChanges } from './page.mjs';
 
 export const DESKTOP = { phone: false, page: { width: 1200, height: 800 }, scale: 2, theme: 'dark' };
@@ -12,16 +13,21 @@ const TICKED = ['bananas', 'tomatoes on the vine'];
 /** Returns where the item titled `title` has its title, throwing when no item has it. */
 export const titleOf = (session, title) => boundsOf(session, '.princelists-item-title', title);
 
-async function checkboxOf(session, title) {
-	const box = await session.evaluate(`(() => {
+// Where the element `part` picks from the row of the item titled `title` is, throwing when no item has it.
+const boundsInRow = (session, title, part) =>
+	session.evaluate(`(() => {
 		const row = [...document.querySelectorAll('.princelists-item')]
 			.find((item) => item.querySelector('.princelists-item-title')?.textContent.trim() === ${JSON.stringify(title)});
 		if (!row) throw new Error(${JSON.stringify(`No item in the list is titled "${title}".`)});
-		const { x, y, width, height } = row.querySelector('.princelists-checkbox').getBoundingClientRect();
+		const { x, y, width, height } = (${part})(row).getBoundingClientRect();
 		return { x, y, width, height };
 	})()`);
-	return middleOf(box);
-}
+
+/** Returns where the row of the item titled `title` is, throwing when no item has it. */
+export const rowOf = (session, title) => boundsInRow(session, title, '(row) => row');
+
+/** Returns the middle of the checkbox of the item titled `title`, throwing when no item has it. */
+export const checkboxOf = async (session, title) => middleOf(await boundsInRow(session, title, "(row) => row.querySelector('.princelists-checkbox')"));
 
 /** Shows Groceries alone in the main area. */
 export const showGroceries = (session) => showAlone(session, 'Groceries.md', 'list');
@@ -31,9 +37,6 @@ export async function showWithFolders(session, file, view) {
 	await setFolders(session, ['Home', 'Media', 'Projects', 'Travel']);
 	await showAlone(session, file, view);
 }
-
-/** Shows Groceries alone beside the file explorer. */
-export const showGroceriesWithFolders = (session) => showWithFolders(session, 'Groceries.md', 'list');
 
 /**
  * Ticks two items in the open Groceries with `press` (`click` or `tap`), runs `act`, then puts the

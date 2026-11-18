@@ -1,4 +1,7 @@
 {
   "nativeMenus": false,
-  "theme": "obsidian"
+  "theme": "obsidian",
+  "enabledCssSnippets": [
+    "hide-status-bar"
+  ]
 }
