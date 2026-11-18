@@ -38,7 +38,7 @@ export function itemQuickMenu(view: PrinceListView, item: ItemBlock, row: HTMLEl
 }
 
 /** Add star or Remove star, as the item holds `starred` when the menu opens. */
-export function addStarEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu, starred: boolean): void {
+function addStarEntry(view: PrinceListView, anchor: TrackedLine, menu: Menu, starred: boolean): void {
 	menu.addItem((entry) =>
 		entry
 			.setTitle(starred ? 'Remove star' : 'Add star')

@@ -41,8 +41,8 @@ and data safety, and owner's advocate. Their findings are folded in.
   couldn't see on macOS or an iPhone.
 - **A note from outside the vault** with the marker, opened in Obsidian on desktop, is a list too.
 - **On desktop,** you right-click for actions and drag with the mouse.
-- **On mobile,** you tap to open an item and hold-and-move to drag it. Item actions sit in a ⋯
-  button on the open card, and tapping a heading opens the heading menu.
+- **On mobile,** you tap to open an item and hold-and-move to drag it. Item actions sit in the open
+  card's buttons and its ⋯ button, and tapping a heading opens the heading menu.
 - **It is built in two parts.** 1a is desktop plus the mobile basics. 1b adds dragging on mobile,
   pasting pictures into a card, and Cmd+Z undo.
 - **Step one is done** when one real list has lived only in Obsidian for two weeks.
@@ -559,8 +559,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   the title **(call)**.
 - **While filtering,** Cmd+F's field shows below the list note (step two's design, "Cmd+F").
 - **Headings** are bold, with a thin rule below, their text lined up with the item titles (owner,
-  2026-11-05). In a list inside another note, which has no collapse arrow, they keep to the edge,
-  so no empty column makes them read as items (owner, 2026-11-06). In step two, an arrow in the
+  2026-11-05). The rule sits 6 px under the text, so a tag pill in the heading clears it by about
+  4 px (call). In a list inside another note, which has no collapse arrow, they keep to the edge, so
+  no empty column makes them read as items (owner, 2026-11-06). In step two, an arrow in the
   checkboxes' column collapses a heading's section (step two's design, "Collapsing a heading").
 - **Items** show a checkbox and a title, one per line. In step two a row also shows its star and
   its When, and a row shows its tags too (filtering by tag's design, "Rows").
@@ -584,8 +585,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     do in any note: tables, code, callouts, math and embeds by Obsidian's own Markdown rendering,
     the rest by the notes' editor ([notes in one
     editor](2026-10-29-notes-in-one-editor-design.md), "What shows drawn").
-  - **A card's notes are at least three lines tall (owner, 2026-10-27),** empty or not, and stay so
-    while they're typed in, so they're easy to tap. Empty notes show a gray "Notes".
+  - **A card's notes are at least two lines tall (owner, 2026-11-17),** empty or not, and stay so
+    while they're typed in, so they're easy to tap. This replaces three lines (owner, 2026-10-27),
+    which left too much empty room once the format bar kept its row under the notes. Empty notes
+    show a gray "Notes".
   - **No field draws a frame or focus ring, notes included (owner, 2026-10-27):** a field being
     typed in reads as its text, as a title does.
   - Links in a card can be clicked.
@@ -621,8 +624,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   title field while you edit: Tasks fields, tags, block ID and `✔`. It is put back as it was,
   except that doubled `✔` marks collapse to the earliest and a leftover `✔` on an open line is
   dropped (see Completion). Step two hides an item's star too, and saving puts it back once. The
-  card shows the tail's tags after the title, as a closed row does, each with an × that takes it
-  off ([filtering by tag](2026-11-07-tag-filter-design.md), "The card").
+  card shows the tail's tags in the row under its notes, just before its buttons, each with an ×
+  that takes it off ([filtering by tag](2026-11-07-tag-filter-design.md), "The card").
 - **An item's When (step two):** the calendar icon in the card's buttons under its notes, or the
   day in its place, sets it, and the picker's own Clear or Reset removes it.
 - **The list title (call):** editing it renames the file when you press Enter or leave the field,
@@ -693,8 +696,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   ("Ticking") or a link in its title, opens its card and makes it the anchor. Clicking empty space
   closes the card and clears the anchor. While selecting, a tap on an item selects it instead of
   opening its card, and on desktop a plain click ends selecting and opens it; a click or a tap on
-  empty space keeps the selection ([selecting several rows](2026-11-07-select-several-design.md), "While
-  selecting").
+  empty space ends selecting, while no card is open **(owner, 2026-11-17)** ([selecting several
+  rows](2026-11-07-select-several-design.md), "What the selection is").
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A
@@ -706,9 +709,15 @@ back only what was typed and leaves the empty line, which can be deleted like an
     and drags nothing, and an open card stays open. That covers the right-click menus, the card's ⋯,
     the selection bar's menus and the menus in the notes, a card's or the list's. A right-click
     still opens its own menu, and a click on the selection bar, the floating "+" or outside the view
-    acts as before. A list inside another note keeps its own menus as they are.
+    acts as before, except on the bar button whose menu shows, which only closes it **(owner,
+    2026-11-17)**. A list inside another note keeps its own menus as they are.
   - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
     the card, one press closes the menu and the card together (#301).
+  - **On desktop the card opens with the caret at the end of its title (owner, 2026-11-17),** so
+    typing edits the title straight away, from a click on the row or from the Schedule. On mobile,
+    phones and tablets, a tap opens it with no caret, so the on-screen keyboard stays down. With the
+    caret in the title, Shift+Up/Down select its text and Cmd+Z steps only through the title's own
+    history; Escape first closes the card, and the keys then reach the list.
   - **Android's Back doesn't close the card (owner, 2026-11-14):** Obsidian documents no way for a
     plugin to hear Back, as for ending a selection ([selecting several
     rows](2026-11-07-select-several-design.md), "Risks to check during the build"). Back closes a
@@ -734,13 +743,14 @@ back only what was typed and leaves the empty line, which can be deleted like an
     setting. Desktop keeps it in view, and a list inside another note keeps its own New item button
     as it is.
   - **Cmd+Enter does what "+" does on desktop** (step two), anywhere in a list that has focus, a
-    card's fields included. While selecting, it adds the new item below the last selected item in
-    list order instead. An empty list shows a gray hint saying how to add an item.
+    card's fields included. While selecting, it adds the new item where the selection's New item
+    below does instead ([selecting several rows](2026-11-07-select-several-design.md), "While
+    selecting"). An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading. On mobile, where "+" shows only
   while no card is open, nothing is selected when it's tapped, so it always adds the first item; a
-  phone adds an item below another with New item below in that item's card's ⋯ **(owner,
-  2026-11-17)**.
+  phone adds an item below another by holding it to select it, then More → New item below
+  **(owner, 2026-11-17)**.
   - The new item opens with the cursor in its title.
   - **Enter in a title closes the card (owner, 2026-10-27),** as Escape does, so typing a new
     item's name and pressing Enter finishes it. Shift+Enter adds another item below it instead, so
@@ -748,8 +758,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
     a run of items is a title, Enter, then "+" for each next one, which adds it first in the list,
     above the one before **(owner, 2026-11-17)**.
   - In a new item whose title is still empty, Shift+Enter closes the card instead, which removes the
-    item, so a second Shift+Enter ends a run of new items. "+" on desktop and New item below keep
-    it, with the cursor back in its title. Delete item closes the card, which removes the item as a
+    item, so a second Shift+Enter ends a run of new items. "+" on desktop and Cmd+Enter keep it,
+    with the cursor back in its title. Delete item closes the card, which removes the item as a
     cancel, with no Undo **(call)**.
   - A new item is removed again if you close its card while its title is still empty and it has
     no notes **(call)**. Removing it restores the text from before it was added, so an empty line
@@ -773,8 +783,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
 ### Item actions (owner)
 
 - **On desktop, right-click an item** for New item below, New heading below and Delete item
-  **(call)**, and Select, which starts selecting with it **(owner, 2026-11-11)** ([selecting several
-  rows](2026-11-07-select-several-design.md), "Starting to select"). Delete item removes the item
+  **(call)**, Duplicate, which copies it with its notes right below itself as a selection's
+  Duplicate does **(owner, 2026-11-17)**, and Select, which starts selecting with it **(owner,
+  2026-11-11)** ([selecting several rows](2026-11-07-select-several-design.md), "Starting to
+  select"). Delete item removes the item
   and its notes, and its name says what goes **(owner, 2026-10-29)**. Step two adds Edit in
   Markdown.
 - **The right-clicked row or heading is marked while its own menu shows (owner, 2026-11-17),** with
@@ -794,28 +806,31 @@ back only what was typed and leaves the empty line, which can be deleted like an
     recent user action, and with Native menus on a menu's click may not count as one; then the
     card opens without it, and its date button opens the picker. Either way the card's buttons
     are scrolled into view first, since long notes can push them off-screen **(owner, 2026-11-17)**.
-  - **The card's ⋯ menu, and a right-click on the open card, stay without the rest (owner,
-    2026-10-29),** since the card shows the box, the date and the tag button. Add star or Remove
-    star is there, in a group of its own after Select, since the card has no star button **(owner,
-    2026-11-17)**. Repeat… follows, in a group of its own, while the card shows no repeat button;
-    a repeating item's card, and a ticked one's that comes back, has the button instead.
+  - **The card's ⋯ menu, and a right-click on the open card, hold only Edit in Markdown and Delete
+    item (owner, 2026-11-17).** The card shows the box and buttons for its tags, date, repeat and
+    star (step two's design, "When and the Schedule view"). On desktop "+" or Cmd+Enter adds an
+    item below it; on a phone, where "+" hides while a card is open, closing the card, holding its
+    row and choosing More → New item below does. This replaces menus that also held Select, Add star
+    or Remove star, Repeat…, New item below and New heading below **(owner, 2026-10-29 and
+    2026-11-11)**.
   - **The words are the plugin's own (call):** ticking, as the README and the box say, rather than
     Tasks' "done" or Obsidian's "checkbox status"; the star entries' "Add star" and "Remove star";
     and "Remove", as in Remove image.
 - **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
   of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick, Tag… and
-  the star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
-  Delete item. The card's ⋯ has the same without the card's own entries. The heading menu groups
-  Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse or Expand
-  all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
+  the star; the date entries, with Repeat…; New item below, New heading below and Duplicate; Edit
+  in Markdown; Delete item. The card's ⋯ has Edit in Markdown and Delete item. The heading menu
+  groups Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse
+  or Expand all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
   [Context menus](https://developer.apple.com/design/human-interface-guidelines/context-menus),
   which also puts the most-used entries first and destructive ones last.
 - **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected row
   included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Tag…, Add star and
-  Remove star, the four date entries, and Delete in red, naming what goes. Each acts on every
-  selected item at once and shows an Undo message, and a right-click on a row outside the selection
-  opens that row's own menu ([selecting several rows](2026-11-07-select-several-design.md), "The
-  actions").
+  Remove star, the four date entries, New item below, New heading below and Duplicate, and Delete,
+  naming what goes. Each change acts on every selected item at once and shows an Undo message; New
+  item below and New heading below add one row under the selection's last row and end selecting, and
+  a right-click on a row outside the selection opens that row's own menu ([selecting several
+  rows](2026-11-07-select-several-design.md), "The actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading, Tag… and Delete heading, and Select **(owner, 2026-11-11)**. Step two adds Edit in Markdown,
   Collapse all headings and Expand all headings, and a menu on the list's background (step two's
@@ -832,11 +847,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   - Deleting a heading keeps its items, which join the section above. That's safer than losing
     them. A heading between two runs of blank lines takes the run after it, as a deleted item
     does, so no double blank line is left **(call)**.
-- **On both desktop and mobile,** the open card has a ⋯ button with the same item actions. On mobile
-  this is the only way to reach them **(owner)**. Selecting rows with a hold reaches Move to, Tick,
-  Tag, Star, Date and Delete for them through the selection's bar ([selecting several
-  rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
-  actions" **(call)**.
+- **On both desktop and mobile,** the open card has a ⋯ button with Edit in Markdown and Delete
+  item. On mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches
+  the selection's actions through its bar: Move to, Date and Delete, and the rest in its More menu
+  ([selecting several rows](2026-11-07-select-several-design.md), "The bar"). The button's
+  accessible name is "Item actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading, Tag… and Delete heading **(owner, 2026-10-20)**, and Select, as on desktop **(call)**. Step two
   adds Edit in Markdown, Collapse all headings and Expand all headings. It's a tap, not a
@@ -860,10 +875,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
     color with no button background: below the message, or at its right edge on a phone. The
     notice lays it out, so its place doesn't depend on the message's length. `Notice.addButton`
     does this but isn't in the API, so the button is the plugin's, added after the message.
-- **Delete item and Delete heading show in red (owner, 2026-10-20)** in every menu that has them,
-  through `MenuItem.setWarning(true)`. The red comes from the `is-warning` class, so with Settings →
-  Appearance → Native menus on, the desktop right-click menus may not show it (obsidian.md/help,
-  Settings: native menus "will not be affected by your theme").
+- **Delete shows in the same color as the other entries and buttons (owner, 2026-11-17),** in every
+  menu and in the selection bar. Its name says what goes, and it sits last in each menu, in a group
+  of its own where the menu has others. This replaces Delete item and Delete heading in red
+  **(owner, 2026-10-20)**.
 
 ### Dragging (owner)
 
@@ -926,6 +941,13 @@ back only what was typed and leaves the empty line, which can be deleted like an
   items, or Cmd+Z on desktop. A list block and the Schedule redraw after every tick already. With
   Show archived items on, it stays in place, blue, as it does with any delay. An item ticked in its
   open card stays there, blue, and goes when the card closes.
+- **A ticked item's checkbox is the accent color at half strength (owner, 2026-11-17),** set
+  through Obsidian's documented `--checkbox-color`, so a list with many done items reads calmly.
+  This replaces the full accent color. Its edge matches its fill, with no darker ring where the
+  border would overlap it. Its tick is the text color, through `--checkbox-marker-color`, since
+  Obsidian's tick, the background color, has too little contrast against the paler fill
+  **(call)**. An archived item keeps Obsidian's tick against its blue. A web view without CSS
+  `color-mix` keeps the full accent and Obsidian's tick.
 - **"Archived" is worked out, never written down.** It is computed from `✔` plus the delay.
   Nothing in the file changes when an item becomes archived.
 - **"Show archived items" in the pane's ⋯ menu (owner, 2026-11-05; archived is the owner's word)**
@@ -949,7 +971,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     with Ctrl on Windows and Linux. Mobile, which usually has no keyboard, shows no key **(owner,
     2026-11-03)**.
   - **An archived item's checkbox is blue (owner, 2026-10-27),** Obsidian's `--color-blue`, so
-    it stands apart from a ticked item not yet archived, whose checkbox keeps the accent color.
+    it stands apart from a ticked item not yet archived.
   - **It isn't remembered (owner, 2026-10-20).** It's off each time a list opens, and holds only
     while that view is open. Nothing is stored: not in the file, not in the view's state, and not
     in the app's local storage.
@@ -1497,10 +1519,9 @@ Checked 2026-10-20.
     to automatically preventDefault" (checked 2026-10-27)
   - menus and events: `Menu.showAtMouseEvent`; `Workspace.on('file-menu' | 'file-open')`, where
     `file-open` "could be in a new leaf, an existing leaf, or an embed"; `Plugin.addRibbonIcon`;
-    `Workspace.openLinkText`; `MenuItem.setWarning` (0.15.0), which turns the item's "title and
-    icon" red; `MenuItem.setSection` (0.15.3), whose section IDs are read from the menu's
-    `data-section` attributes; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a context
-    menu to internal file links"
+    `Workspace.openLinkText`; `MenuItem.setSection` (0.15.3), whose section IDs are read from the
+    menu's `data-section` attributes; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a
+    context menu to internal file links"
   - rendering and metadata: `MarkdownRenderer.render`, `CachedMetadata.listItems`,
     `getFrontMatterInfo` (1.5.7), `parseYaml`, and `getFileCache` (returns null when not cached)
   - files:

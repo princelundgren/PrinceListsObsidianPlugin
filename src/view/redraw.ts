@@ -81,8 +81,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		fresh.createEl('p', { text: "This note isn't a list" });
 		fresh.createEl('button', { text: 'Open as Markdown', cls: OPEN_AS_MARKDOWN_CLASS });
 	}
-	// The chips beside the title are drawn again, and so is a focused tag button once the list has
-	// tags, so focus they held moves to what is drawn there now.
+	// The chips beside the title are drawn again, so focus they held moves to what is drawn there now.
 	const titleTags = `.${LIST_TAGS_CLASS}, .${LIST_TAG_BUTTON_CLASS}`;
 	const active = contentEl.doc.activeElement;
 	const titleTagsHadFocus = active !== null && listSizerEl.contains(active) && active.matches(titleTags);

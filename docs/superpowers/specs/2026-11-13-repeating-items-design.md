@@ -215,9 +215,8 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
 - **"Repeat…" in the row's right-click menu,** in the date entries' group after Remove date, so the
   row's menu still does what the card does (the design, "Item actions", owner, 2026-10-29). From
   the row it opens the card with the popover open.
-- **And in the card's ⋯ menu,** which has no date entries, in a group of its own after the star's
-  group, where the row's date group stands. A repeating item's card has its repeat button instead
-  ("Showing a repeat").
+- **In the card, its repeat button,** which every card shows ("Showing a repeat"), so the card's ⋯
+  menu has no Repeat… **(owner, 2026-11-17)**.
 - **A popover,** as the card's tag button opens one: it hangs over the notes from the card's
   buttons, its end at theirs, or below them where above would pass the top of the list (filtering
   by tag's design, "The card"). Opening it from a row's Repeat… first scrolls the buttons into
@@ -261,10 +260,14 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   repeat doesn't, so it earns the room. A ticked row that will come back keeps the icon, so a
   grayed row says it isn't gone for good; a done line that won't, ended or a Tasks history line,
   shows none **(call)**.
-- **The card of a repeating item shows the same icon as a button after its date,** in the card's
-  tool group and its spacing **(call)**. It opens the popover. While the card shows it, its ⋯
-  menu has no Repeat…, as the ⋯ leaves out what the card already shows (the design, "Item
-  actions", owner, 2026-10-29 and 2026-11-11).
+- **Every card shows the same icon as a button before its date, as a row does (owner, 2026-11-17),** in the
+  card's buttons and their spacing. It opens the popover, and it takes `--text-accent` while the
+  item repeats **(call)**, as the star button takes yellow while the item has one. Its tooltip,
+  and so its accessible name, says Repeat, or Edit repeat while the item repeats, as the star's says
+  Add star or Remove star, so the state isn't shown by color alone **(call)**. This replaces
+  the button on a repeating item's card alone, with Repeat… in the ⋯ menu of the others. The ⋯
+  leaves out what the card already shows (the design, "Item actions", owner, 2026-10-29 and
+  2026-11-11).
 
 ## What it changes elsewhere
 

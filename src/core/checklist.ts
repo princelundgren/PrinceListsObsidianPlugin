@@ -49,10 +49,22 @@ function tickLine(lines: readonly Line[], at: number, lineText: string): Planned
  * callout, or one inside a `%%` or `$$` region or an HTML comment, stays as it is.
  */
 export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[] {
+	const result = lines.slice();
+	for (const at of plainNotesLines(lines, item)) {
+		const line = lines[at] as Line;
+		const parts = parseItemLine(line.text);
+		if (parts && parts.status !== ' ') result[at] = { text: joinItemLine({ ...parts, status: ' ' }), eol: line.eol };
+	}
+	return result;
+}
+
+/**
+ * The file lines of the item's notes that are plain Markdown: outside the blocks the notes editor
+ * draws whole, such as a code fence or a callout, `%%` and `$$` regions and HTML comments.
+ */
+export function plainNotesLines(lines: readonly Line[], item: ItemBlock): number[] {
 	const first = item.titleLine + 1;
-	const width = columnOf(item.notesIndent);
-	// As the notes editor reads them, at the left margin.
-	const notes = lines.slice(first, item.endLine).map((line) => ({ text: stripIndent(line.text, width), eol: line.eol }));
+	const notes = notesAtMargin(lines, item);
 	const kept = new Set<number>();
 	const text = joinLines(notes);
 	for (const block of [...drawnBlocks(text).map((b) => b.lines), ...commentBlocks(text)]) {
@@ -61,11 +73,14 @@ export function untickChecklist(lines: readonly Line[], item: ItemBlock): Line[]
 	for (const [from, to] of maskBlocks(notes, 0).runs) {
 		for (let i = from; i <= to; i++) kept.add(i);
 	}
-	const result = lines.slice();
-	notes.forEach((_, i) => {
-		const line = lines[first + i] as Line;
-		const parts = kept.has(i) ? null : parseItemLine(line.text);
-		if (parts && parts.status !== ' ') result[first + i] = { text: joinItemLine({ ...parts, status: ' ' }), eol: line.eol };
-	});
-	return result;
+	return notes.flatMap((_, i) => (kept.has(i) ? [] : [first + i]));
+}
+
+/**
+ * The item's notes lines, from the line after its title, at the left margin as the notes editor
+ * reads them.
+ */
+export function notesAtMargin(lines: readonly Line[], item: ItemBlock): Line[] {
+	const width = columnOf(item.notesIndent);
+	return lines.slice(item.titleLine + 1, item.endLine).map((line) => ({ text: stripIndent(line.text, width), eol: line.eol }));
 }
