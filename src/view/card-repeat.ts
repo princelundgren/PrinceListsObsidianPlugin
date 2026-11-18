@@ -104,11 +104,6 @@ export function isInRepeatPopover(view: PrinceListView, target: Node | null): bo
 	return view.repeatPopover?.el.contains(target) ?? false;
 }
 
-/** Whether `target` is the open card's repeat button while its popover is open. */
-export function isOpenRepeatButton(view: PrinceListView, target: HTMLElement): boolean {
-	return view.repeatPopover !== null && target.closest(`.${REPEAT_BUTTON_CLASS}`) !== null;
-}
-
 /**
  * Handles a click on the repeat button, Save or Remove repeat. Returns whether `target` was on one.
  */

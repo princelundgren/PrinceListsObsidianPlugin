@@ -13,10 +13,10 @@ import {
 	focusCardTitleEnd,
 	openCard,
 } from './card';
-import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, isOpenRepeatButton, repeatClick, repeatInput, saveRepeat } from './card-repeat';
-import { cardTagsClick, closeTagPopover, escapeTagPopover, isOpenTagButton } from './card-tags';
+import { escapeRepeatPopover, closeRepeatPopover, isInRepeatPopover, repeatClick, repeatInput, saveRepeat } from './card-repeat';
+import { cardTagsClick, closeTagPopover, escapeTagPopover } from './card-tags';
 import { CARD_TOOLS_CLASS } from './card-tools';
-import { whenChange, whenClick, WHEN_INPUT_CLASS } from './card-when';
+import { whenChange, whenClick, whenKeyDown, WHEN_INPUT_CLASS } from './card-when';
 import { COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { beginListTitle, commitListTitle, focusListTitleEnd, keepOneLine, TITLE_CLASS, TITLE_ROW_CLASS } from './fields';
@@ -190,18 +190,6 @@ function keepFieldFocused(evt: MouseEvent): void {
 	if (targetOf(evt)?.closest(`.${FORMAT_BAR_CLASS}, ${FILTER_TOGGLE_SELECTOR}`)) evt.preventDefault();
 }
 
-// So the click that follows closes the popover: a focusout first would close it, and the click reopen it.
-function keepTagFieldFocused(view: PrinceListView, evt: MouseEvent): void {
-	const target = targetOf(evt);
-	if (target && isOpenTagButton(view, target)) evt.preventDefault();
-}
-
-// So the click that follows closes the repeat popover, as for the tag popover's button.
-function keepRepeatFocused(view: PrinceListView, evt: MouseEvent): void {
-	const target = targetOf(evt);
-	if (target && isOpenRepeatButton(view, target)) evt.preventDefault();
-}
-
 // The title is only as wide as its text, so a press beside it lands on its line: the click that
 // follows puts the caret in the title, and the field that has focus keeps it until then.
 function keepFocusBesideTitle(evt: MouseEvent): void {
@@ -223,8 +211,6 @@ function onMouseDown(view: PrinceListView, evt: MouseEvent): void {
 	keepFieldFocused(evt);
 	keepNotesFocused(view, evt);
 	keepFocusBesideTitle(evt);
-	keepTagFieldFocused(view, evt);
-	keepRepeatFocused(view, evt);
 	keepTextUnselected(view, evt);
 }
 
@@ -280,6 +266,7 @@ function onKeyDown(view: PrinceListView, evt: KeyboardEvent): void {
 	// A key that confirms an input method's composition isn't the user's Enter or Escape. One in a list
 	// block in the notes, such as Escape in its title field, is the block's.
 	if (evt.isComposing || !target?.instanceOf(HTMLElement) || eventInDrawnListBlock(view.contentEl, evt)) return;
+	if (target.instanceOf(HTMLInputElement) && target.hasClass(WHEN_INPUT_CLASS)) whenKeyDown(target);
 	if (evt.key === 'Escape') {
 		if (target === view.filterField?.inputEl) {
 			filterKeyDown(view, evt);

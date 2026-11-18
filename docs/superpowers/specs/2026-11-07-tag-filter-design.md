@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-17
+verified: 2026-11-18
 governs: [src/**, styles.css]
 tracking: ["#325", "#340", "#383"]
 ---
@@ -213,14 +213,17 @@ every tagged part of a list is done, such as what is left to buy.
     hover preview, shown after a wait, and `PopoverSuggest` is the base of the suggestion list
     itself.
   - **It closes on a pick, on Escape, or on a tap outside it (owner, #340),** and a second press of
-    the tag button closes it too **(call)**. A tap outside is focus leaving its field for another
-    part of the window; switching to another app leaves it open, as it leaves the list's title
-    field **(call)**. Outside the card, that tap also closes the card, as today.
+    the tag button closes it too **(call)**. A tap in the list outside it only closes it: the card
+    stays open, and the tap does nothing else **(owner, 2026-11-18)**; a touch that starts a scroll
+    closes it too **(call)**. Otherwise a tap outside is focus leaving its field for another part of
+    the window; switching to another app leaves it open, as it leaves the list's title field
+    **(call)**.
   - **While Obsidian's suggestions show, the first Escape closes only them (owner, #340),** as in
     Obsidian's own fields: their keys are Obsidian's while they show, and an Escape it takes never
     reaches the plugin (checked in 1.15). The next Escape closes the popover.
-  - **After a pick, Escape or a second press of the tag button, focus goes back to the tag button
-    (call),** so another tag is one more press. A second Escape closes the card.
+  - **After a pick, Escape, a second press of the tag button or a tap in the list outside the
+    popover, focus goes back to the tag button (call),** so another tag is one more press. A second
+    Escape closes the card.
   - **A screen reader (call):** the tag button says whether the popover is open
     (`aria-expanded`), and the field's label is "Add tag", not only its placeholder, given as the
     plugin's other fields' labels are, so it shows no tooltip. Opening it moves focus to the

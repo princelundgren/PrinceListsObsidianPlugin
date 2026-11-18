@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-17
+verified: 2026-11-18
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -701,6 +701,16 @@ back only what was typed and leaves the empty line, which can be deleted like an
     click on a row or heading with Cmd or Shift held starts selecting instead: the card closes, and
     its item stays selected with the clicked row ([selecting several
     rows](2026-11-07-select-several-design.md), "Starting to select").
+  - **While the card's tag popover, repeat popover or date picker is open, a click in the list
+    outside it only closes it (owner, 2026-11-18),** as for the menus below: the card stays open,
+    and a click with Cmd or Shift held starts no selection. Focus goes back to the popover's button,
+    or to the date for the repeat popover of an item that doesn't repeat yet, and stays where it was
+    for the date picker. A press while a menu shows over the popover closes only the menu. On a
+    phone, a touch that starts a scroll closes the tag or repeat popover too **(call)**. The date
+    picker is Chromium's own on desktop, which closes before the page hears the press and closes on
+    Escape with no event, so after the click or key that shows it the view reads its documented
+    `:open` state while it shows **(call)**. Chromium supports `:open` from version 133; an older
+    Obsidian installer keeps the old behavior, where that click also acts.
   - **While one of the view's menus is open, a click in the list only closes it (owner,
     2026-11-17),** as a click outside an open card only closes the card: it opens, ticks, selects
     and drags nothing, and an open card stays open. That covers the right-click menus, the card's ⋯,
