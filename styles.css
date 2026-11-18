@@ -858,7 +858,7 @@ button.princelists-new-item {
 	flex: none;
 	display: flex;
 	align-items: center;
-	gap: var(--size-2-1);
+	gap: var(--size-2-2);
 }
 
 /* Under the notes editor while it has focus, its first icon lined up with the notes' text. On a
@@ -867,9 +867,9 @@ button.princelists-new-item {
 .princelists-format-bar {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--size-2-1) var(--size-4-3);
+	gap: var(--size-2-2) var(--size-4-3);
 	margin-top: var(--size-4-1);
-	margin-inline-start: calc(-1 * var(--size-2-2));
+	margin-inline-start: calc(-1 * var(--size-2-3));
 }
 
 .princelists-notes-codemirror:not(.cm-focused) + .princelists-format-bar {
@@ -907,7 +907,7 @@ button.princelists-new-item {
 .princelists-format-group {
 	flex: none;
 	display: flex;
-	gap: var(--size-2-1);
+	gap: var(--size-2-2);
 }
 
 /* Icon buttons on the view's own background: the card's, the list title's, the find row's, the tag strip's and the Schedule's title's. */
@@ -929,6 +929,14 @@ button.princelists-find-button {
 	border-radius: var(--clickable-icon-radius);
 	background-color: transparent;
 	color: var(--icon-color);
+}
+
+/* The card's buttons and every format bar's, the list note's too, are Apple's default macOS control
+   size, 28 px, which a phone's finger-sized box already exceeds. */
+.princelists-card-buttons button,
+.princelists-card-buttons .princelists-when-button,
+.princelists-format-bar button {
+	padding: var(--size-2-3);
 }
 
 /* No button shadow on the icon buttons and strip tags, but Obsidian's ring when the keyboard focuses one. */
@@ -1444,7 +1452,7 @@ input.princelists-tag-input {
 
 	/* A day's button holds only its text, and is as tall as the ⋯. */
 	.princelists-when-button.is-dated {
-		padding-block: calc((var(--icon-size) + 2 * var(--size-2-2) - var(--line-height-normal) * 1em) / 2);
+		padding-block: calc((var(--icon-size) + 2 * var(--size-2-3) - var(--line-height-normal) * 1em) / 2);
 	}
 }
 
