@@ -240,6 +240,15 @@ test('unclosedStart counts lines from the start of the file', () => {
 	}
 });
 
+// CommonMark 0.31.2, 4.6, type 2: an HTML comment block ends only at a line containing `-->`.
+test('an HTML comment block stays open past --!> and ends at -->', () => {
+	expect(maskBlocks(splitLines('<!--\nx\n--!>\n'), 0).unclosedStart).toBe(0);
+	expect(maskBlocks(splitLines('<!--\nx\n-->\n'), 0).unclosedStart).toBeNull();
+	const percentInComment = '<!--\n--!>\n%%\n- [ ] a\n%%\n';
+	expect(maskBlocks(splitLines(percentInComment), 0)).toEqual({ text: percentInComment, unclosedStart: 0, runs: [] });
+	expect(parse(percentInComment).sections[0]?.items).toEqual([]);
+});
+
 test('a link reference definition that no CommonMark node covers is untouched content', () => {
 	const model = parse('- [ ] a\n\n[x]: https://example.com\n\n- [ ] b\n');
 	expect(model.sections).toEqual([{ headingLine: null, items: [item(0, 1), item(4, 5)], endLine: 5 }]);
