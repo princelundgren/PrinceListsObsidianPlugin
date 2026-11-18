@@ -181,8 +181,9 @@ every tagged part of a list is done, such as what is left to buy.
   - **In a view 480 pixels wide or narrower,** the star and the day go to the row's right edge, as
     in a row without tags (`styles.css`, the 480-pixel container query).
   - **In a list inside another note, an open title field takes the place of the title and its
-    tags (call),** which share one box, and hides the tags as every title field does (step one,
-    "Editing"); the star and the day stay at the line's end.
+    tags (owner, 2026-11-18),** which share one box, and hides the tags as every title field does
+    (step one, "Editing"), rather than showing them on a line under the field; the star and the day
+    stay at the line's end.
 - **The reading order is title, tags, star, day at every width (call),** so a screen reader reads
   a row the same way on a phone and a desktop.
 - **A done item's chips on its row take its title's gray text (call).**
