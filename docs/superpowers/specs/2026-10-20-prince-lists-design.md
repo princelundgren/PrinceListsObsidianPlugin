@@ -769,7 +769,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
       badge.
     - **Mobile: it drags as soon as the finger moves on it, with no hold (owner, 2026-11-18).**
       A row needs its hold because a swipe on it scrolls the list; the "+" scrolls nothing. A press
-      that doesn't move, however long, is a tap and adds as above. The "+" follows the finger, and
+      that doesn't move is a tap and adds as above. The "+" follows the finger, and
       the list scrolls at its edges as for a row. The button keeps the pointer it was pressed with,
       so the finger's moves arrive on it rather than on the rows: it measures the rows on each move
       and again at the release, takes `touch-action: none` so the press doesn't pan, stops its

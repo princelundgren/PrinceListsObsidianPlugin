@@ -96,19 +96,23 @@ function enableMouse(view: PrinceListView, button: HTMLElement, addAt: AddAt): v
 		});
 		closeCard(view);
 	});
+	// The drop for the row under the pointer. Between rows, such as over a heading's margin, the drop
+	// line stays where it was.
+	const aim = (current: Aim, evt: DragEvent): void => {
+		const target = targetOf(evt);
+		const over = target && ownClosest(rowsEl, target, `[${LINE_ATTR}]`);
+		const line = over ? lineOf(over) : null;
+		const shown = shownRows(rowsEl);
+		if (shown.length > 0 && (!over || line === null)) return;
+		const box = over?.getBoundingClientRect();
+		showAim(rowsEl, current, newItemDropAt(shown, box && line !== null ? { line, below: evt.clientY > box.top + box.height / 2 } : null));
+	};
 	view.registerDomEvent(rowsEl, 'dragover', (evt) => {
 		const current = ownDrag(evt);
 		if (!current) return;
 		evt.preventDefault();
 		if (evt.dataTransfer) evt.dataTransfer.dropEffect = 'move';
-		const target = targetOf(evt);
-		const over = target && ownClosest(rowsEl, target, `[${LINE_ATTR}]`);
-		const line = over ? lineOf(over) : null;
-		const shown = shownRows(rowsEl);
-		// Between rows, such as over a heading's margin, the drop line stays where it was.
-		if (shown.length > 0 && (!over || line === null)) return;
-		const box = over?.getBoundingClientRect();
-		showAim(rowsEl, current, newItemDropAt(shown, box && line !== null ? { line, below: evt.clientY > box.top + box.height / 2 } : null));
+		aim(current, evt);
 	});
 	view.registerDomEvent(rowsEl, 'dragleave', (evt) => {
 		if (drag && !rowsEl.contains(evt.relatedTarget as Node | null)) showAim(rowsEl, drag, null);
@@ -117,6 +121,8 @@ function enableMouse(view: PrinceListView, button: HTMLElement, addAt: AddAt): v
 		const current = ownDrag(evt);
 		if (!current) return;
 		evt.preventDefault();
+		// Aimed again, as a row's drop is: a redraw since the last dragover may have moved the rows.
+		aim(current, evt);
 		const place = current.place;
 		endDrag();
 		if (place) addAt(place);
