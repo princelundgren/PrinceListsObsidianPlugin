@@ -1490,10 +1490,9 @@ Checked 2026-10-20.
     to automatically preventDefault" (checked 2026-10-27)
   - menus and events: `Menu.showAtMouseEvent`; `Workspace.on('file-menu' | 'file-open')`, where
     `file-open` "could be in a new leaf, an existing leaf, or an embed"; `Plugin.addRibbonIcon`;
-    `Workspace.openLinkText`; `MenuItem.setWarning` (0.15.0), which turns the item's "title and
-    icon" red; `MenuItem.setSection` (0.15.3), whose section IDs are read from the menu's
-    `data-section` attributes; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a context
-    menu to internal file links"
+    `Workspace.openLinkText`; `MenuItem.setSection` (0.15.3), whose section IDs are read from the
+    menu's `data-section` attributes; `Workspace.handleLinkContextMenu` (0.12.10), which adds "a
+    context menu to internal file links"
   - rendering and metadata: `MarkdownRenderer.render`, `CachedMetadata.listItems`,
     `getFrontMatterInfo` (1.5.7), `parseYaml`, and `getFileCache` (returns null when not cached)
   - files:
