@@ -85,7 +85,7 @@ Embed a list in any note, and tick it there.
 - **Drag** to reorder.
 - **Star** an item and give it a date.
 - **Repeat** every few days, weeks, months or years; a ticked item comes back open once its date has come and you next open its list or the Schedule.
-- **Tags** on an item, a heading or the whole list, from the card or a right-click menu.
+- **Tags** on an item, from its card or right-click menu; a tag in a heading (`## Office #work`) counts for its section, and one in the list's `tags` property for every item.
 - **Select several** by holding an item, or with Cmd+click and Shift+click, to move, date, tick, tag, star, duplicate or delete them at once.
 - **Tick and forget:** ticked items hide after a day, or the time you choose.
 - **Find** items by title, notes or date, and show only starred items, or archived ones too.
