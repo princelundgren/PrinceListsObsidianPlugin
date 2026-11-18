@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-17
+verified: 2026-11-18
 governs: [src/**, styles.css]
 tracking: ["#325", "#340", "#383"]
 ---
@@ -165,13 +165,24 @@ every tagged part of a list is done, such as what is left to buy.
   title already shows inside the title, which Obsidian's renderer draws, so it gets no second chip.
   A tap on it does what a tap on a link in a row does (step one, "Layout"), which is Obsidian's,
   not the card's; the build checks what that is (risk 3).
-- **The tags follow the title on its line at every width (owner, 2026-11-07).** The title's text
-  is drawn by Obsidian's renderer, so the tags can't flow inside it: they follow it and wrap among
-  themselves when the line is full **(call)**.
-  - **In a wider pane,** the star and the day follow the tags.
+- **The tags follow the title's last word at every width (owner, 2026-11-17),** a space after it,
+  and wrap onto the next line as words do. With the tags beside the title's box, a title that
+  wrapped took the row's width, which left its tags in a column at the right, apart from the title.
+  This replaces the tags following the title's box (owner, 2026-11-07).
+  - **The title and its tags are one run of text (call):** the title, which Obsidian's renderer
+    draws, is laid out inline with the paragraph it draws, and the chips follow it in the same box,
+    so the renderer's output stays as it drew it. Each chip keeps its pill whole on one line,
+    unless the tag alone is wider than the row, when it breaks within its text **(call)**.
+  - **Lines of chips that wrap keep 4 pixels between them (owner, 2026-11-17),** so they don't
+    touch. The space is under every chip, so a tagged row is a few pixels taller than a row without
+    tags, and its checkbox and title stay where they are when its card opens (step one, "Layout").
+  - **In a wider pane,** the star and the day follow the title and its tags on their first line,
+    so they end that line once the title and tags wrap.
   - **In a view 480 pixels wide or narrower,** the star and the day go to the row's right edge, as
-    in a row without tags (`styles.css`, the 480-pixel container query), and the tags fill the room
-    between the title and them.
+    in a row without tags (`styles.css`, the 480-pixel container query).
+  - **In a list inside another note, an open title field takes the place of the title and its
+    tags (call),** which share one box, and hides the tags as every title field does (step one,
+    "Editing"); the star and the day stay at the line's end.
 - **The reading order is title, tags, star, day at every width (call),** so a screen reader reads
   a row the same way on a phone and a desktop.
 - **A done item's chips on its row take its title's gray text (call).**

@@ -3,7 +3,7 @@ import { RIBBON_ICON } from '../constants';
 import { listFolder, type ListGroup, type ScheduledItem } from '../core/schedule';
 import { addHiddenLabel } from './dom';
 import { renderInline, type MarkdownHost } from './notes';
-import { addTickZone, CHECKBOX_CLASS, ITEM_CLASS } from './render-list';
+import { addTickZone, CHECKBOX_CLASS, ITEM_CLASS, TITLE_AND_TAGS_CLASS } from './render-list';
 import { addRepeat, addStar, addTags, addWhen } from './row-marks';
 
 export const LIST_HEADING_CLASS = 'princelists-schedule-list-heading';
@@ -21,9 +21,9 @@ export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today:
 	addHiddenLabel(box, item.title);
 	const text = rowEl.createDiv({ cls: 'princelists-schedule-text' });
 	const titleLine = text.createDiv({ cls: 'princelists-schedule-title-line' });
-	const block = renderInline(host, item.listPath, titleLine.createDiv({ cls: 'princelists-item-title' }), item.title);
-	addTags(titleLine, item.tailTags);
-	titleLine.toggleClass('is-tagged', item.tailTags.length > 0);
+	const titleAndTags = titleLine.createDiv({ cls: TITLE_AND_TAGS_CLASS });
+	const block = renderInline(host, item.listPath, titleAndTags.createDiv({ cls: 'princelists-item-title' }), item.title);
+	addTags(titleAndTags, item.tailTags);
 	if (item.starred) addStar(titleLine);
 	addWhen(titleLine, item.day, today);
 	if (item.repeats) addRepeat(titleLine);

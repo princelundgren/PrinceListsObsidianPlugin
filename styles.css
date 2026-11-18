@@ -100,7 +100,7 @@ textarea.princelists-title {
 .princelists-list-note,
 .princelists-untouched,
 .princelists-heading,
-.princelists-item-title {
+.princelists-title-and-tags {
 	min-width: 0;
 	overflow-wrap: break-word;
 }
@@ -192,16 +192,24 @@ textarea.princelists-heading-field {
 /* The row's parts sit on the title's first baseline, so they stay on its first line when it wraps and
    a smaller day still lines up with it. An open card or title field lines its checkbox up the same
    way. */
-.princelists-item > .princelists-item-title,
+.princelists-item > .princelists-title-and-tags,
 .princelists-item > .princelists-schedule-text,
 .princelists-item > .princelists-card-body,
 .princelists-item > .princelists-block-field,
-.princelists-schedule-title-line > .princelists-item-title {
+.princelists-schedule-title-line > .princelists-title-and-tags {
 	align-self: baseline;
 }
 
-/* An empty title still has a line, so its row keeps its height and a baseline. */
-.princelists-item-title:empty::before {
+/* The tags flow after the title's last word and wrap as words do, so the title is inline, and so is
+   the one paragraph Obsidian's renderer draws in it. */
+.princelists-title-and-tags > .princelists-item-title,
+.princelists-title-and-tags > .princelists-item-title > p {
+	display: inline;
+}
+
+/* An empty title still has a line, so its row keeps its height and a baseline. At the end, so it
+   doesn't keep the space before a first tag at the line's start. */
+.princelists-title-and-tags::after {
 	content: '';
 	display: inline-block;
 }
@@ -1168,15 +1176,13 @@ button.princelists-card-repeat.is-repeating {
 	--icon-size: 1em;
 }
 
-/* A row's tags follow its title, which Obsidian's renderer draws, so they can't flow inside it. They
-   wrap among themselves when the line is full. */
-.princelists-tags {
-	flex: 0 1 auto;
-	align-self: baseline;
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--size-4-1);
+/* A row's chips each keep their pill whole on one line, unless one tag is wider than the row. The
+   margin under them keeps lines of chips that wrap 4 pixels apart; none above, so the title and
+   checkbox sit where an untagged row's do. */
+.princelists-tags > .princelists-tag {
+	display: inline-block;
 	max-width: 100%;
+	margin-block: 0 var(--size-4-1);
 }
 
 .princelists-tag {
@@ -1641,21 +1647,10 @@ button.princelists-collapse {
 }
 
 /* In a view or list block about as narrow as a sidebar, the star and the day move to the row's right
-   edge, so a title that wraps leaves no gap before them, and the days line up. In a tagged row the
-   tags take that room instead of the title, so they follow the title as in a wider pane. */
+   edge, so a title that wraps leaves no gap before them, and the days line up. */
 @container (max-width: 480px) {
-	.princelists-item > .princelists-item-title,
-	.princelists-schedule-title-line > .princelists-item-title {
-		flex: 1 1 auto;
-	}
-
-	.princelists-item.is-tagged > .princelists-item-title,
-	.princelists-schedule-title-line.is-tagged > .princelists-item-title {
-		flex: 0 1 auto;
-	}
-
-	.princelists-item.is-tagged > .princelists-tags,
-	.princelists-schedule-title-line.is-tagged > .princelists-tags {
+	.princelists-item > .princelists-title-and-tags,
+	.princelists-schedule-title-line > .princelists-title-and-tags {
 		flex: 1 1 auto;
 	}
 }
