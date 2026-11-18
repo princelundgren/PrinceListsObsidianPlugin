@@ -1,12 +1,13 @@
 import { Menu, setIcon, setTooltip } from 'obsidian';
 import { groupState } from '../core/group-edits';
-import { barButtons, type BarButton, type EntryGroup } from '../core/group-menu';
+import { barButtons, type BarButton } from '../core/group-menu';
 import { contentStartLine } from '../obsidian/marker';
 import { targetOf } from './dom';
 import type { PrinceListView } from './list-view';
 import { showViewMenu } from './menu-press';
 import { clearSelection, focusList } from './select';
-import { addGroupEntries, deleteSelection, listHasHeadings, moveToHeading } from './selection-menu';
+import { addMoveChoices } from './move-menu';
+import { addGroupEntries, deleteSelection, listHasHeadings, moveSelectionTo } from './selection-menu';
 import { openSelectionTagPopover } from './selection-tag-popover';
 import { closeTagsPopover, isInTagsPopover, syncTagsPopover } from './tags-popover';
 
@@ -99,20 +100,25 @@ export function openSelectionTags(view: PrinceListView): void {
 	if (button && !button.disabled) openSelectionTagPopover(view, button);
 }
 
-// Move to and Delete act as the selection menu's entries do; Date and More open a menu of their
-// group's entries above the button.
-function act(view: PrinceListView, button: BarButton, buttonEl: HTMLElement): void {
-	if (opensMenu(button)) showGroupMenu(view, button, buttonEl);
-	else if (button === 'move') moveToHeading(view);
-	else deleteSelection(view);
+/**
+ * Opens the menu of the list's headings over the bar's Move to button, for a menu's Move to heading…;
+ * nothing while the button is missing or disabled.
+ */
+export function openMoveMenu(view: PrinceListView): void {
+	const button = bars.get(view)?.buttons.get('move');
+	if (button && !button.disabled) showMoveMenu(view, button);
 }
 
-function opensMenu(button: BarButton): button is EntryGroup {
-	return button !== 'move' && button !== 'delete';
+// Move to opens a menu of the list's headings over the button, and Date and More one of their
+// group's entries; Delete acts as the selection menu's entry does.
+function act(view: PrinceListView, button: BarButton, buttonEl: HTMLElement): void {
+	if (button === 'move') showMoveMenu(view, buttonEl);
+	else if (button === 'delete') deleteSelection(view);
+	else showMenu(view, buttonEl, (menu) => addGroupEntries(view, menu, button));
 }
 
 function popupAttrs(button: BarButton): Record<string, string> {
-	return opensMenu(button) ? { 'aria-haspopup': 'menu' } : {};
+	return button === 'delete' ? {} : { 'aria-haspopup': 'menu' };
 }
 
 // Safari doesn't focus a clicked button, so the popover's field can keep focus while another button acts.
@@ -121,9 +127,13 @@ function leaveTagPopover(view: PrinceListView, buttonEl: HTMLElement): void {
 	closeTagsPopover(view);
 }
 
-function showGroupMenu(view: PrinceListView, group: EntryGroup, buttonEl: HTMLElement): void {
+function showMoveMenu(view: PrinceListView, buttonEl: HTMLElement): void {
+	showMenu(view, buttonEl, (menu) => addMoveChoices(view, menu, (headingLine) => moveSelectionTo(view, headingLine)));
+}
+
+function showMenu(view: PrinceListView, buttonEl: HTMLElement, fill: (menu: Menu) => void): void {
 	const menu = new Menu();
-	addGroupEntries(view, menu, group);
+	fill(menu);
 	const { left, top, width } = buttonEl.getBoundingClientRect();
 	showViewMenu(view, menu, () => menu.showAtPosition({ x: left, y: top, width, overlap: true }, buttonEl.doc));
 }

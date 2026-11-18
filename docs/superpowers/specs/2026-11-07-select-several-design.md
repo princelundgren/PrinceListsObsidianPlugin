@@ -157,14 +157,15 @@ only documented Obsidian APIs are used.
 
 ## The bar
 
-- **Its buttons (owner, 2026-11-17):** Move to opens the heading picker and Delete deletes, as the
-  menu's entries do. Date opens a small menu of the selection menu's date entries, and More one of
-  the rest: Tick and Untick, Tag…, the star entries, New item below, New heading below and
-  Duplicate, so a mixed selection gets both Tick and Untick. Tag… opens the selection's tag popover
-  over More ([tagging a selection](2026-11-12-select-tags-design.md)). A button whose entries all
-  hide, such as Date with only headings selected, is disabled; Move to is disabled while a heading
-  is selected. This replaces Tick, Tag and Star as buttons of their own **(owner, #450)**: with New
-  as well, seven labeled buttons need a view 443 px wide, more than most phones have.
+- **Its buttons (owner, 2026-11-17):** Move to opens a menu of the list's headings ("The actions")
+  and Delete deletes, as the menu's entries do. Date opens a small menu of the selection menu's date
+  entries, and More one of the rest: Tick and Untick, Tag…, the star entries, New item below, New
+  heading below and Duplicate, so a mixed selection gets both Tick and Untick. Tag… opens the
+  selection's tag popover over More ([tagging a selection](2026-11-12-select-tags-design.md)). A
+  button whose entries all hide, such as Date with only headings selected, is disabled; Move to is
+  disabled while a heading is selected. This replaces Tick, Tag and Star as buttons of their own
+  **(owner, #450)**: with New as well, seven labeled buttons need a view 443 px wide, more than most
+  phones have.
 - **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
   CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
@@ -215,14 +216,19 @@ only documented Obsidian APIs are used.
   bar's Date and More open parts of it ("The bar"). Its Tag…, before the star entries, opens
   the selection's tag popover over the bar's More button
   ([tagging a selection](2026-11-12-select-tags-design.md)).
-- **Move to heading… (owner)** opens a picker, Obsidian's `SuggestModal`, that lists "Top of the
-  list" and then the list's headings in order, and narrows as you type **(call)**. A pick sends the
-  selected items to the end of that section, after its last item, as the background menu's New item
-  places one (step two, "Right-click menus") **(call)**; "Top of the list" sends them to the end of
-  the part before the first heading. A heading name used twice shows its place, such as "Frozen,
-  2 of 2" **(call)**. A collapsed target section expands, as step two's adding does. It shows only
-  while no heading is selected, and in a list with headings: sections reorder by dragging
-  **(call)**. Items under the picked heading that are selected move to the end too.
+- **Move to heading… (owner)** opens a menu over the bar's Move to button, as Date and More open
+  theirs, from the bar or from the selection's menu. It lists "Top of the list" and then the list's
+  headings in order **(owner, 2026-11-17)**. On desktop Obsidian's menu doesn't scroll, so in a list
+  with more headings than fit in the window, about 30 in one 800 px tall, the last ones can't be
+  reached from Move to; dragging still moves items there **(owner, 2026-11-17)**. This replaces a
+  picker in the middle of the screen, Obsidian's `SuggestModal`, that narrowed as you typed
+  **(call)**. A pick sends the selected items to the end of that section, after its last item, as
+  the background menu's New item places one (step two, "Right-click menus") **(call)**; "Top of the
+  list" sends them to the end of the part before the first heading. A heading name used twice shows
+  its place, such as "Frozen, 2 of 2" **(call)**. A collapsed target section expands, as step two's
+  adding does. It shows only while no heading is selected, and in a list with headings: sections
+  reorder by dragging **(call)**. Items under the picked heading that are selected move to the end
+  too.
 - **Tick and Untick, Add star and Remove star (call)** show by what the selection holds: Tick
   while any selected item is unticked, Untick while any is ticked, both for a mix. Each changes only
   the items that need it. A repeating item is ticked like any other. An item the plugin can't

@@ -11,12 +11,11 @@ import { addItem } from './add-button';
 import { DateModal } from './date-modal';
 import { queueGroupAction } from './group-write';
 import { addHeading } from './heading-field';
-import { HeadingPickerModal } from './heading-picker';
 import type { PrinceListView } from './list-view';
 import { onMenuHide } from './menu-anchor';
 import { queueGroupMove, shownRows } from './move';
 import { clearSelection } from './select';
-import { openSelectionTags } from './selection-bar';
+import { openMoveMenu, openSelectionTags } from './selection-bar';
 
 type GroupPlan = (text: string, contentStart: number, rows: readonly number[]) => PlannedGroupChange | null;
 
@@ -45,8 +44,9 @@ export function addGroupEntries(view: PrinceListView, menu: Menu, only?: EntryGr
 			const { title, icon } = ENTRY_LOOKS[entry];
 			menu.addItem((item) =>
 				item.setTitle(title).setIcon(icon).onClick(() => {
-					// After the menu hides, so the focus it gives back doesn't leave the popover's field.
+					// After the menu hides, so the focus it gives back doesn't leave the popover or menu it opens.
 					if (entry === 'tag') onMenuHide(menu, () => openSelectionTags(view));
+					else if (entry === 'move') onMenuHide(menu, () => openMoveMenu(view));
 					else act(view, entry);
 				}),
 			);
@@ -59,14 +59,12 @@ export function listHasHeadings(view: PrinceListView): boolean {
 	return view.parse().model.sections.some((section) => section.headingLine !== null);
 }
 
-/** Opens the heading picker, then moves the selected rows to the end of the section picked. */
-export function moveToHeading(view: PrinceListView): void {
-	new HeadingPickerModal(view, (headingLine) => {
-		const rows = view.selection.lines();
-		if (rows.length === 0) return;
-		const { items, headings } = groupCount(view.text, contentStartLine(view.text), rows);
-		queueGroupMove(view, rows, { endOf: headingLine }, `${countPhrase(items, headings)} moved.`);
-	}).open();
+/** Moves the selected rows to the end of the section under `headingLine`, or of the part before the first heading for null. */
+export function moveSelectionTo(view: PrinceListView, headingLine: number | null): void {
+	const rows = view.selection.lines();
+	if (rows.length === 0) return;
+	const { items, headings } = groupCount(view.text, contentStartLine(view.text), rows);
+	queueGroupMove(view, rows, { endOf: headingLine }, `${countPhrase(items, headings)} moved.`);
 }
 
 /** Copies the items on `rows`, each right below its own, in one write, with an Undo message. */
@@ -118,10 +116,8 @@ const ENTRY_LOOKS: Record<Exclude<GroupEntry, 'delete'>, { title: string; icon: 
 	duplicate: { title: 'Duplicate', icon: 'copy' },
 };
 
-function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag'>): void {
+function act(view: PrinceListView, entry: Exclude<GroupEntry, 'delete' | 'tag' | 'move'>): void {
 	switch (entry) {
-		case 'move':
-			return moveToHeading(view);
 		case 'tick':
 			return changeSelection(view, 'tick', (text, start, rows) => planGroupTick(text, start, rows, true, new Date()));
 		case 'untick':
