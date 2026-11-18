@@ -86,7 +86,7 @@ Embed a list in any note, and tick it there.
 - **Star** an item and give it a date.
 - **Repeat** every few days, weeks, months or years; a ticked item comes back open once its date has come and you next open its list or the Schedule.
 - **Tags** on an item, a heading or the whole list, from the card or a right-click menu.
-- **Select several** to move, date, tick, tag, star, duplicate or delete them at once.
+- **Select several** by holding an item, or with Cmd+click and Shift+click, to move, date, tick, tag, star, duplicate or delete them at once.
 - **Tick and forget:** ticked items hide after a day, or the time you choose.
 - **Find** items by title, notes or date, and show only starred items, or archived ones too.
 - **Filter by tag** from the strip above the list, or show the items with **No tag**.
@@ -102,13 +102,13 @@ Embed a list in any note, and tick it there.
 
 **Across lists**
 
-- **The Schedule** shows dated items by day and by list, or in date order. The ribbon icon opens it.
+- **The Schedule** shows dated items by day and by list, or in date order with **Sort by date**. The ribbon icon opens it.
 - **A list inside another note** can be ticked and edited there.
 - **Works with Tasks:** dates use the Tasks plugin's format.
 
 **Keys and devices**
 
-- **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters, Cmd+Z undoes. Use Ctrl on Windows and Linux.
+- **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters, Cmd+Shift+A shows or hides archived items, Cmd+Z undoes. Use Ctrl on Windows and Linux.
 - **Right-click menus** on items, headings, pictures and the list.
 - **Made for touch:** finger-sized buttons, and hold to select or drag.
 - **Fits your theme,** light or dark.
