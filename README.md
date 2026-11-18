@@ -147,7 +147,7 @@ Bug reports, ideas and pull requests are welcome.
 
 - Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [rules in AGENTS.md](AGENTS.md#rules-that-are-never-broken).
 - Be kind: see the [code of conduct](CODE_OF_CONDUCT.md).
-- The designs for [step one](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and [step two](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md) say what the plugin does and why.
+- The designs listed in [AGENTS.md](AGENTS.md#project-overview) say what the plugin does and why.
 - To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ## License

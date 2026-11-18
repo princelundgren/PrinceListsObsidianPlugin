@@ -32,6 +32,7 @@ this project.
     latest ones for the plugin are
     [the card's tag popover](docs/superpowers/plans/2026-11-12-card-tag-popover.md),
     [tagging a selection](docs/superpowers/plans/2026-11-12-select-tags.md),
+    [repeating items](docs/superpowers/plans/2026-11-13-repeating-items.md),
     [repeating items coming back](docs/superpowers/plans/2026-11-14-repeating-items-come-back.md),
     [inherited tags](docs/superpowers/plans/2026-11-16-inherited-tags.md) and
     [tag from menus](docs/superpowers/plans/2026-11-16-tag-from-menus.md), and
