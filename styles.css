@@ -212,6 +212,8 @@ textarea.princelists-title {
 /* Gray in place, with no strikethrough (spec, "Ticking"). */
 .princelists-item.is-done .princelists-item-title {
 	color: var(--checklist-done-color);
+	--tag-color: var(--checklist-done-color);
+	--tag-color-hover: var(--checklist-done-color);
 }
 
 /* A hold on a row or heading selects nothing and shows no callout, as in spike 2 (spec, "Touch on
@@ -1113,7 +1115,27 @@ button.princelists-card-repeat.is-repeating {
 	overflow-wrap: break-word;
 }
 
-.princelists-item.is-done .princelists-tag {
+/* On rows and beside the list's title, tags are gray, so a list with many reads calmly; the card's
+   chips and the tag popover keep Obsidian's tag colors. */
+.princelists-tags .princelists-tag,
+.princelists-list-tags .princelists-tag {
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
+	border-color: transparent;
+}
+
+/* A tag typed in a heading or a row's title, which Obsidian's renderer draws, is gray the same way. */
+.princelists-heading,
+.princelists-item-title {
+	--tag-color: var(--text-normal);
+	--tag-color-hover: var(--text-normal);
+	--tag-background: var(--background-modifier-hover);
+	--tag-background-hover: var(--background-modifier-border);
+	--tag-border-color: transparent;
+	--tag-border-color-hover: transparent;
+}
+
+.princelists-item.is-done .princelists-tags .princelists-tag {
 	color: var(--checklist-done-color);
 }
 
@@ -1126,14 +1148,14 @@ button.princelists-card-repeat.is-repeating {
 	margin-block: var(--size-4-2);
 }
 
-/* Each strip tag is a button drawn as a tag in a note. */
+/* Each strip tag is a button shaped as a tag in a note, gray as a row's tags are. */
 button.princelists-strip-tag {
 	height: auto;
 	font-size: var(--tag-size);
 	font-weight: var(--tag-weight);
-	color: var(--tag-color);
-	background-color: var(--tag-background);
-	border: var(--tag-border-width) solid var(--tag-border-color);
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
+	border: var(--tag-border-width) solid transparent;
 	padding: var(--tag-padding-y) var(--tag-padding-x);
 	border-radius: var(--tag-radius);
 	line-height: var(--line-height-tight);
@@ -1157,13 +1179,11 @@ button.princelists-list-tag-button {
 
 @media (hover: hover) {
 	button.princelists-strip-tag:hover {
-		color: var(--tag-color-hover);
-		background-color: var(--tag-background-hover);
-		border-color: var(--tag-border-color-hover);
+		background-color: var(--background-modifier-border);
 	}
 }
 
-/* No tag has a strip tag's shape without the tag colors, so it doesn't read as a tag. */
+/* No tag has a strip tag's shape without its gray pill, so it doesn't read as a tag. */
 button.princelists-strip-no-tag {
 	height: auto;
 	font-size: var(--tag-size);
