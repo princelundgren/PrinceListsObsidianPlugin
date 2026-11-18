@@ -220,7 +220,7 @@ every tagged part of a list is done, such as what is left to buy.
     field. Obsidian's suggestions carry no roles (checked in 1.15), and the
     plugin doesn't add any to Obsidian's elements, so a screen reader isn't told what's suggested;
     Enter adds the highlighted one, the first unless the arrows move it.
-- **The popover has a second home, at the selection bar's Tag button,** where it adds a tag to
+- **The popover has a second home, over the selection bar's More button,** where it adds a tag to
   every selected item or heading or takes one off them all
   ([tagging a selection](2026-11-12-select-tags-design.md)).
 - **Typing a tag at the end of the title keeps working (owner):** the file reads it as the tail, as

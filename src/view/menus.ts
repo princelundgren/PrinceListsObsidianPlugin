@@ -23,12 +23,13 @@ import { NOTES_CODEMIRROR_CLASS } from './notes-editor';
 import { ownElements } from './own-rows';
 import { HEADING_CLASS, ITEM_CLASS, lineOf } from './render-list';
 import { SELECTED_CLASS, selectRow } from './select';
-import { addGroupEntries } from './selection-menu';
+import { addGroupEntries, duplicateItems } from './selection-menu';
 import { enqueueAt, SAVE_FAILED_NOTICE } from './write';
 
 const MENU_TARGET_CLASS = 'princelists-menu-target';
 
-// A row's New item below and New heading below, after its own entries (spec, "Item actions").
+// A row's New item below, New heading below and Duplicate, after its own entries (spec, "Item
+// actions").
 function addInsertEntries(view: PrinceListView, anchor: TrackedLine, menu: Menu): void {
 	menu.addItem((entry) =>
 		entry
@@ -41,6 +42,12 @@ function addInsertEntries(view: PrinceListView, anchor: TrackedLine, menu: Menu)
 			.setTitle('New heading below')
 			.setIcon('heading')
 			.onClick(atLine(anchor, (line) => addHeading(view, { afterItem: line }))),
+	);
+	menu.addItem((entry) =>
+		entry
+			.setTitle('Duplicate')
+			.setIcon('copy')
+			.onClick(atLine(anchor, (line) => duplicateItems(view, [line]))),
 	);
 	menu.addSeparator();
 }

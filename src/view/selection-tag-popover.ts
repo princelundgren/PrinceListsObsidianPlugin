@@ -8,33 +8,24 @@ import { queueGroupAction } from './group-write';
 import { NAME_REFUSED_NOTICE } from './heading-field';
 import type { PrinceListView } from './list-view';
 import { stripTagOrder } from './tag-suggest';
-import { closeTagsPopover, isTagsPopoverOpenFrom, openTagsPopover } from './tags-popover';
+import { openTagsPopover } from './tags-popover';
 
 /**
- * Closes the popover and focuses `button` if it's open from `button`; opens it over `button`
- * otherwise, in place of one open for another target.
+ * Opens the tag popover over `anchor`, as a menu's target, for the selected items and headings:
+ * their tags as chips, each with a × that takes it off them all, and a field whose pick gives a tag
+ * to them all. It closes once the view stops selecting, or the selected rows or their text differ
+ * from those it opened with. Escape sends focus back to `anchor`, and a pick to the list.
  */
-export function toggleSelectionTagPopover(view: PrinceListView, button: HTMLElement): void {
-	if (isTagsPopoverOpenFrom(view, button)) {
-		closeTagsPopover(view);
-		button.focus();
-	} else openSelectionTagPopover(view, button);
-}
-
-/**
- * Opens the tag popover over `button` for the selected items and headings: their tags as chips, each
- * with a × that takes it off them all, and a field whose pick gives a tag to them all. It closes once the view stops
- * selecting, or the selected rows or their text differ from those it opened with.
- */
-export function openSelectionTagPopover(view: PrinceListView, button: HTMLElement): void {
+export function openSelectionTagPopover(view: PrinceListView, anchor: HTMLElement): void {
 	const lines = view.selection.lines();
 	const { total, chips } = selectionTags(view.text, contentStartLine(view.text), lines, stripTagOrder(view));
 	const opened = rowTexts(view.text, lines);
 	openTagsPopover(view, {
 		label: 'Tag the selection',
-		anchor: () => button,
+		anchor: () => anchor,
 		side: 'above',
-		button,
+		button: null,
+		returnFocusTo: () => anchor,
 		chips: chips.map(({ tag, count }) => ({ tag, text: count === total ? `#${tag}` : `#${tag} ${count} of ${total}` })),
 		// The selection when asked, which is the one it opened with: any change closes the popover.
 		tagsToLeaveOut: () => {

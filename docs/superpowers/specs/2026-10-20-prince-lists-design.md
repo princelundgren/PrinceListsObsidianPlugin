@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-17
+verified: 2026-11-18
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -726,8 +726,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
   or turn it off **(owner, 2026-11-05)**. While selecting, the selection's bar takes its place
   ([selecting several rows](2026-11-07-select-several-design.md), "The bar").
   - **Cmd+Enter does what "+" does** (step two), anywhere in a list that has focus, a card's
-    fields included. While selecting, it adds the new item below the last selected item in list
-    order instead. An empty list shows a gray hint saying how to add an item.
+    fields included. While selecting, it adds the new item where the selection's New item below
+    does instead ([selecting several rows](2026-11-07-select-several-design.md), "While
+    selecting"). An empty list shows a gray hint saying how to add an item.
 - **Where a new item goes (call):** directly below the selected item. When nothing is selected, it
   becomes the first item of the list, before the first heading.
   - The new item opens with the cursor in its title.
@@ -760,8 +761,10 @@ back only what was typed and leaves the empty line, which can be deleted like an
 ### Item actions (owner)
 
 - **On desktop, right-click an item** for New item below, New heading below and Delete item
-  **(call)**, and Select, which starts selecting with it **(owner, 2026-11-11)** ([selecting several
-  rows](2026-11-07-select-several-design.md), "Starting to select"). Delete item removes the item
+  **(call)**, Duplicate, which copies it with its notes right below itself as a selection's
+  Duplicate does **(owner, 2026-11-17)**, and Select, which starts selecting with it **(owner,
+  2026-11-11)** ([selecting several rows](2026-11-07-select-several-design.md), "Starting to
+  select"). Delete item removes the item
   and its notes, and its name says what goes **(owner, 2026-10-29)**. Step two adds Edit in
   Markdown.
 - **The right-clicked row or heading is marked while its own menu shows (owner, 2026-11-17),** with
@@ -791,18 +794,19 @@ back only what was typed and leaves the empty line, which can be deleted like an
     and "Remove", as in Remove image.
 - **The order (owner, 2026-11-11):** Select first, then Edit in Markdown and Delete each in a group
   of its own at the end, so a near miss reaches neither. A row's menu groups Select; Tick, Tag… and
-  the star; the date entries, with Repeat…; New item below and New heading below; Edit in Markdown;
-  Delete item. The card's ⋯ has Edit in Markdown and Delete item. The heading menu groups
-  Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse or Expand
-  all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
+  the star; the date entries, with Repeat…; New item below, New heading below and Duplicate; Edit
+  in Markdown; Delete item. The card's ⋯ has Edit in Markdown and Delete item. The heading menu
+  groups Select; New item, New heading below, Rename heading and Tag…; Edit in Markdown; Collapse
+  or Expand all headings **(call)**; Delete heading. That is more groups than the three or so in Apple's
   [Context menus](https://developer.apple.com/design/human-interface-guidelines/context-menus),
   which also puts the most-used entries first and destructive ones last.
 - **Right-clicking a selected row opens the selection's menu (owner, 2026-11-07),** one selected row
   included **(owner, 2026-11-11)**, instead: Move to heading…, Tick and Untick, Tag…, Add star and
-  Remove star, the four date entries, and Delete in red, naming what goes. Each acts on every
-  selected item at once and shows an Undo message, and a right-click on a row outside the selection
-  opens that row's own menu ([selecting several rows](2026-11-07-select-several-design.md), "The
-  actions").
+  Remove star, the four date entries, New item below, New heading below and Duplicate, and Delete in
+  red, naming what goes. Each change acts on every selected item at once and shows an Undo message;
+  New item below and New heading below add one row under the selection's last row and end
+  selecting, and a right-click on a row outside the selection opens that row's own menu ([selecting
+  several rows](2026-11-07-select-several-design.md), "The actions").
 - **Right-click a heading (call)** for the heading menu: New item, New heading below, Rename
   heading, Tag… and Delete heading, and Select **(owner, 2026-11-11)**. Step two adds Edit in Markdown,
   Collapse all headings and Expand all headings, and a menu on the list's background (step two's
@@ -821,9 +825,9 @@ back only what was typed and leaves the empty line, which can be deleted like an
     does, so no double blank line is left **(call)**.
 - **On both desktop and mobile,** the open card has a ⋯ button with Edit in Markdown and Delete
   item. On mobile this is the only way to reach them **(owner)**. Selecting rows with a hold reaches
-  Move to, Tick, Tag, Star, Date and Delete for them through the selection's bar ([selecting several
-  rows](2026-11-07-select-several-design.md), "The bar"). The button's accessible name is "Item
-  actions" **(call)**.
+  the selection's actions through its bar: Move to, Date and Delete, and the rest in its More menu
+  ([selecting several rows](2026-11-07-select-several-design.md), "The bar"). The button's
+  accessible name is "Item actions" **(call)**.
 - **On mobile, tapping a heading opens the heading menu:** New item, New heading below, Rename
   heading, Tag… and Delete heading **(owner, 2026-10-20)**, and Select, as on desktop **(call)**. Step two
   adds Edit in Markdown, Collapse all headings and Expand all headings. It's a tap, not a

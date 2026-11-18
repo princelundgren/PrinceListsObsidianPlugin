@@ -136,9 +136,9 @@ only documented Obsidian APIs are used.
   beside it selects, so nothing is ticked by mistake. On desktop, with no card open, a plain
   click there ends selecting and ticks that item, as a plain click on the row opens it **(owner,
   2026-11-17)**.
-- **A bar replaces the floating "+" at the bottom of the pane:** Done and "5 selected", and Move
-  to, Tick, Tag, Star, Date and Delete. On desktop it takes the same place whether or not the
-  floating "+" shows there **(call)**.
+- **A bar replaces the floating "+" at the bottom of the pane:** Done, then Move to, Date, Delete
+  and More. On desktop it takes the same place whether or not the floating "+" shows there
+  **(call)**.
 - **While the tag popover is open,** a click or a tap on a row, a heading, the tag strip or the
   list's title only closes it: it selects nothing and opens nothing
   ([tagging a selection](2026-11-12-select-tags-design.md), "What closes it").
@@ -150,36 +150,41 @@ only documented Obsidian APIs are used.
 - **With a card open,** such as one a row's own menu opened, a click or a tap outside it only closes
   it, as step one's "while a card is open, a click outside it only closes it" says **(owner,
   2026-10-27)**; Cmd+click and Shift+click still select, as in "Starting to select" **(call)**.
-- **Cmd+Enter adds the new item below the last selected item** in list order **(call)**, and
-  selecting ends as its card opens. With only headings selected it adds one as "+" does.
+- **Cmd+Enter adds the new item where New item below does** ("The actions"), so below the selection
+  means one place **(call)**, and selecting ends as its card opens.
 - **Cmd+click on a link** in a title still opens it in a new tab, as Obsidian does: the link wins
   over selecting **(call)**.
 
 ## The bar
 
-- **Its buttons (call):** Move to opens the heading picker and Delete deletes, as the menu's
-  entries do. Tick, Star and Date each open a small menu of the selection menu's entries for them,
-  so a mixed selection gets both Tick and Untick. Tag opens the selection's tag popover
-  ([tagging a selection](2026-11-12-select-tags-design.md)). A button whose entries all hide, such
-  as Tick with only headings selected, is disabled; Move to is disabled while a heading is
-  selected.
+- **Its buttons (owner, 2026-11-17):** Move to opens the heading picker and Delete deletes, as the
+  menu's entries do. Date opens a small menu of the selection menu's date entries, and More one of
+  the rest: Tick and Untick, Tag…, the star entries, New item below, New heading below and
+  Duplicate, so a mixed selection gets both Tick and Untick. Tag… opens the selection's tag popover
+  over More ([tagging a selection](2026-11-12-select-tags-design.md)). A button whose entries all
+  hide, such as Date with only headings selected, is disabled; Move to is disabled while a heading
+  is selected. This replaces Tick, Tag and Star as buttons of their own **(owner, #450)**: with New
+  as well, seven labeled buttons need a view 443 px wide, more than most phones have.
 - **Sized for a finger (owner, 2026-11-11):** each button, Done included, takes at least 48 by 48
   CSS pixels, with at least 8 between them **(call)**. That meets Apple's 44 by 44 points
   ([Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons)) and Android's
   48 by 48 dp with 8 between
   ([Touch target size](https://support.google.com/accessibility/android/answer/7101858)).
-  Delete sits apart at the far end, past a divider, so a near miss on Date doesn't reach it
-  **(call)**. The bar is the same on desktop.
-- **One row where it fits (owner, 2026-11-12):** Done, an ✕ named "Done", and the count come
-  first, then the actions spread across the bar, every button an icon. A narrower view, such as
-  a phone's, puts Done and the count on a row above the actions.
-- **Icons only where even that doesn't fit (owner, 2026-11-12):** in a narrower view still, such
-  as a sidebar or a small phone, the actions lose their labels, keeping them as tooltips and
-  names, the gaps tighten, and the buttons narrow below 48 px rather than spill out of the bar.
-- **The widths** of both layouts are in [tagging a selection](2026-11-12-select-tags-design.md),
-  "The bar's Tag button".
-- **Done ends selecting,** and so does Delete or removing the last selected row **(call)**. Other
-  actions keep the selection, so several can follow each other.
+  More sits apart at the far end, past a divider, after Delete **(owner, 2026-11-17)**. This
+  replaces Delete apart past a divider, so a near miss on Date didn't reach it **(call)**. The bar
+  is the same on desktop.
+- **One row (owner, 2026-11-17):** Done, an ✕ named "Done", comes first, then the actions spread
+  across the bar. The bar shows no count: its accessible name says how many rows are selected
+  **(call)**. This replaces the count beside Done, and their own row above the actions on a phone
+  **(owner, 2026-11-12)**.
+- **Icons only where that doesn't fit (owner, 2026-11-12):** in a narrower view, such as a small
+  phone or a narrow sidebar, the actions lose their labels, keeping them as tooltips and names, the
+  gaps tighten, and the buttons narrow below 48 px rather than spill out of the bar.
+- **The width (call),** measured in Obsidian 1.15.1's default theme: the labeled row fits from a
+  view 340 px wide. This replaces 275 px for the actions alone and 430 px for one row with the
+  count.
+- **Done ends selecting,** and so does Delete, New item below, New heading below or removing the
+  last selected row **(call)**. Other actions keep the selection, so several can follow each other.
 
 ## Dragging the selection
 
@@ -207,8 +212,8 @@ only documented Obsidian APIs are used.
 ## The actions
 
 - **The selection's menu** opens with a right-click on a selected row ("While selecting"), and the
-  bar's Tick, Star and Date open parts of it ("The bar"). Its Tag…, before the star entries, opens
-  the selection's tag popover over the bar's Tag button
+  bar's Date and More open parts of it ("The bar"). Its Tag…, before the star entries, opens
+  the selection's tag popover over the bar's More button
   ([tagging a selection](2026-11-12-select-tags-design.md)).
 - **Move to heading… (owner)** opens a picker, Obsidian's `SuggestModal`, that lists "Top of the
   list" and then the list's headings in order, and narrows as you type **(call)**. A pick sends the
@@ -237,14 +242,35 @@ only documented Obsidian APIs are used.
 - **Tick, Star and Date apply to items only (call):** a selected heading ticks, stars and dates
   nothing, and an entry with nothing to act on hides. Tag and Delete act on headings too
   ([tagging a selection](2026-11-12-select-tags-design.md)).
-- **One-row entries drop out (call):** New item below, New heading below, Rename heading and Edit
-  in Markdown.
+- **One-row entries drop out (call):** Rename heading and Edit in Markdown.
+- **New item below and New heading below (owner, 2026-11-17)** add under the selection's last row
+  in list order: an item right after a selected item, or first under a selected heading; a heading
+  after a selected item, or after a selected heading's section. Selecting ends as the new row opens
+  for typing. This replaces their dropping out as one-row entries **(call)**.
+- **Duplicate (owner, 2026-11-17)** copies each selected item, with its notes, right below itself,
+  in one write. A copy is unticked and drops its done marks **(owner, 2026-11-17)**, and its
+  checklist is unticked as a repeat's is **(owner, 2026-11-17)**. It leaves out block ids and Tasks
+  `🆔` ids, a sub-task's in its notes too, since each names one block or task **(call)**. A box in a
+  quote or callout isn't a sub-task the plugin reads ([notes in one
+  editor](2026-10-29-notes-in-one-editor-design.md), "A box in a quote"), so its `🆔` is copied as
+  written **(call)**. In the notes a block id goes only where Obsidian reads one, at the end of a
+  paragraph or heading, after a space as on an item line. A paragraph's last line keeps its id
+  when the line without it would read as a heading's underline or a rule, so the copy reads as the
+  item does **(call)**. Its `⛔` fields lose exactly the ids its own `🆔` fields lost, and a `⛔`
+  left empty goes, so a copied sub-task isn't blocked by the original's; a `⛔` naming a task
+  outside the item stays **(call)**. The ids a `⛔` keeps are written
+  as Tasks writes them, joined with `,` **(call)**. The rest of its text is the item's, and a block
+  the notes editor draws whole, such as a code block, is copied as it is, inside a quote too. It
+  shows only while no heading is selected **(owner, 2026-11-17)**, since a heading's copy right
+  below it would take its items. The selection stays on the items, as other actions keep it
+  **(call)**.
 - **Each action is one write and one Cmd+Z step (call),** and follows step one's "Saving" as a
   one-off action: typing that lands while it waits makes it run once more on the new text.
 - **Every group action shows an Undo message (owner),** on desktop and mobile: a move, a drag, a
-  tick, a star, a tag, a date or a delete. Its button takes the same step back as Cmd+Z, as the
-  message after a delete does today. Without it, a phone could never take back a mistaken group
-  move, since undo there is otherwise only the message after a delete (step one, "Undo").
+  tick, a star, a tag, a date, a duplicate **(call)** or a delete. Its button takes the same step
+  back as Cmd+Z, as the message after a delete does today. Without it, a phone could never take
+  back a mistaken group move, since undo there is otherwise only the message after a delete (step
+  one, "Undo").
 
 ## Not in this design
 
