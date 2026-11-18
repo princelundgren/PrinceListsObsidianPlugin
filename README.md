@@ -4,41 +4,63 @@
 
 ![Obsidian with the Groceries list open, the items' tags above the list, two items ticked and fresh basil's notes open with a link and a checklist, beside the Schedule, which shows today's dated items from several lists](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/overview.webp)
 
-PrinceLists turns a note into a todo list, and a Schedule view shows what's coming up across all your lists. It's simple to use, and powerful when you need it.
+PrinceLists turns a note into a todo list, and the Schedule shows what's coming up across all your lists.
+
+## A quick tour
+
+### Lists
+
+Tick, drag and add items right where they go.
 
 ![In a todo list in Obsidian, two items are ticked and one is dragged up, then the floating + is dragged into the list, and the item it adds there gets a title, a day, a star and notes with a short list](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
-Make a list from the ribbon, a folder, or a note you already have.
+### Make a list
+
+From the ribbon, a folder, or a note you already have.
 
 | Click the list icon in the ribbon | Right-click a folder in the sidebar | Right-click a note to turn it into a list |
 | --- | --- | --- |
 | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-ribbon.webp" alt="The pointer on the list icon in Obsidian's ribbon, with its tooltip Create new list" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/new-list-folder.webp" alt="A folder's right-click menu in the file explorer, with New list highlighted" width="220"> | <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/turn-into-list.webp" alt="A note's right-click menu in the file explorer, with Turn into list highlighted" width="220"> |
 
-Ticked items hide after a day, or the time you choose in the settings. The filter icon finds items by their text, and can bring the hidden ones back, with blue checkboxes.
+### Find
+
+Filter a list by text, and bring back ticked items.
 
 ![In a todo list, an item is ticked and grays out, then the filter icon in the pane's header opens a field, its toggle brings back three items ticked days ago with blue checkboxes, and typing book leaves four items, three that mention it and one whose note has its letters in order, until the filter icon closes the field again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/filter.gif)
 
-Tag items to group them across sections. The items' tags sit above the list, and a click shows only the items that have one. A tag on a heading counts for the items in its section, and one in the list's `tags` property for every item.
+### Tags
+
+Tag items, then click a tag to see only those.
 
 ![In a grocery list, lemons is opened and gets the curry tag from the tag button, picked from the suggestions, then #curry in the strip of tags above the list leaves the five items for the curry, under their headings](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tags.gif)
 
-Hold an item to select it, then Cmd+click or tap others to add them. Move, tick, tag, star, date, duplicate or delete them all at once.
+### Select several
+
+Hold an item, add others, and act on them all at once.
 
 ![In a todo list, a row is held until it is selected and two more are Cmd-clicked to join it, then dragging one takes all three under the Admin heading, and Add star in the More menu of the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
 
-Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
+### Notes
+
+Every item has notes, with full Markdown and a toolbar.
 
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/notes.webp" alt="An open item whose notes hold bold text, a link, a checklist, a table and a picture, with the format bar under the notes" width="520">
 
-The Schedule shows the dated items from all your lists.
+### Schedule
+
+Dated items from all your lists, in one sidebar.
 
 ![The Schedule in the right sidebar scrolls through dated items from several lists, grouped by list, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
-It works great on your phone too.
+### On your phone
+
+Made for touch, with the same lists.
 
 <img src="https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/tick-and-drag.gif" alt="On a phone, in a grocery list with sections, an item is ticked, then the floating add button adds an item with a short note, which is held and dragged into the Bakery section" width="300">
 
-You can embed lists in normal notes.
+### Lists inside notes
+
+Embed a list in any note, and tick it there.
 
 ````markdown
 ```princelists
@@ -52,44 +74,45 @@ You can embed lists in normal notes.
 
 **Lists**
 
-- **Any note can be a list:** make a new one, in a folder you choose in the settings if you like, or turn a note with checkboxes into one.
-- **Back to Markdown** any time with **Open as Markdown**, or for good with **Turn into note**.
-- **Sections** come from headings. Drag them, collapse one, or collapse them all.
+- **Any note can be a list:** make one, or turn a note with checkboxes into one.
+- **Back to Markdown** with **Open as Markdown**, or for good with **Turn into note**.
+- **Sections** come from headings: drag them, or collapse one or all.
 - **A note for the list** sits under its title.
 
 **Items**
 
-- **Add** with the floating **+**, or drag the **+** onto the list to add an item right where it drops, and **drag** to reorder. The settings can keep the **+** to desktop or mobile, or turn it off.
+- **Add** with the floating **+**, or drag the **+** to where the item goes.
+- **Drag** to reorder.
 - **Star** an item and give it a date.
-- **Repeat** an item: set every 3 days, each month on the last day or another rule, with an end if you like, from its card or its menu, and a ticked item is done until its next date, then comes back open when you next open or return to its list, or return to Obsidian while a list view, the Schedule or a note showing that list is on screen. Opening the Schedule brings back the due items of every list, and opening a note that shows a list brings back that list's. Until then, Tasks queries and other apps show it done.
-- **Tags:** write a tag on an item, or add it from the tag button in its card or **Tag…** in its right-click menu, with suggestions. Items show their own tags as labels. A tag in a heading, as in `## Office #work`, counts for every item in its section, and the `tags` property counts for every item in the list, though neither shows on the rows. The list's tags show right of its title, and a press on them opens **Tag list…**, as does a tag button after the title and its tags while you edit the title. **Tag…** in a heading's menu adds or removes a tag at the end of its text, and **Tag list…** in the list's menu, or the pane's ⋯ menu, adds or removes one in the list's `tags` property.
-- **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, dates or deletes them all at once, and its **More** menu ticks, tags, stars or duplicates them, each with Undo, or adds an item or heading below them; dragging one drags them all. A selected heading brings its section; Tag puts the tag in the heading's own text.
-- **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
-- **Find:** the filter icon in a list's header opens a field that filters it by title and notes, matching the letters you type in order, so "mlk" finds "oat milk", and by date as written, such as "2026-11". Toggles beside it show only starred items, or archived items too. Headings stay, a message says when nothing matches, and a button clears the field. The field stays open until the icon or Escape closes it. The Schedule has one beside its title, with the starred toggle.
-- **Filter by tag:** a strip of the items' tags sits above the list. Click a tag to show only the items that have it, or two to show those that have both. The strip leaves out the list's own `tags`, which every item has. **No tag** shows the items that carry no tag, counting their heading's and the list's, alone or added to a tag's. A setting shows the strip always or only while the filter is open. The Schedule has one too, which also shows the lists' own tags and counts the headings' tags. Nested tags count under their parent, and case doesn't matter.
-- **Duplicate** an item with its notes, from its right-click menu or a selection's **More** menu.
+- **Repeat** every few days, weeks, months or years; a ticked item comes back open once its date has come and you next open its list or the Schedule.
+- **Tags** on an item, a heading or the whole list, from the card or a right-click menu.
+- **Select several** to move, date, tick, tag, star, duplicate or delete them at once.
+- **Tick and forget:** ticked items hide after a day, or the time you choose.
+- **Find** items by title, notes or date, and show only starred items, or archived ones too.
+- **Filter by tag** from the strip above the list, or show the items with **No tag**.
+- **Duplicate** an item with its notes.
 - **Delete** with Undo.
 
 **Notes on an item**
 
-- **Edited like a note:** Markdown shows only where the cursor is, as in Obsidian's Live Preview. The list's own note edits the same way.
-- **Any Markdown:** links, checklists, tables and code.
-- **A toolbar** for bold, italic, links, lists, code blocks and more.
-- **Paste from the web:** copied web pages and rich text paste as Markdown. Markdown copied from Obsidian pastes as it is.
-- **Pictures:** paste or drop them in. On iOS, a picture dropped from Photos may not reach Obsidian; paste it instead.
+- **Edited like a note,** with Markdown shown only where the cursor is.
+- **Any Markdown:** links, checklists, tables and code, with a toolbar.
+- **Paste from the web** as Markdown.
+- **Pictures:** paste or drop them in.
 
 **Across lists**
 
-- **The Schedule,** in the right sidebar, sorts dated items into Today (with anything overdue), Tomorrow, Next 7 days and Later. Each day is grouped by list, with each list's folder; **Sort by date**, beside its title, puts every list's items in date order instead, each showing its list's name, with its path on hover. It stays as you left it. The ribbon icon opens it, and a setting adds a button for it to each list's header. Closed its tab? The ribbon icon or PrinceLists' settings bring it back.
-- **A list inside another note** can be ticked and edited there. If you rename the list, update the block.
+- **The Schedule** shows dated items by day and by list, or in date order. The ribbon icon opens it.
+- **A list inside another note** can be ticked and edited there.
 - **Works with Tasks:** dates use the Tasks plugin's format.
 
 **Keys and devices**
 
-- **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters a list or the Schedule, Cmd+Shift+A shows or hides archived items, Cmd+Z undoes, and Cmd+B, Cmd+I and Cmd+K format. Use Ctrl on Windows and Linux.
-- **Right-click menus** on items, headings, pictures and the list. On desktop, text in a card or the list's note gets a menu too: add a link, format, and paste with or without formatting.
-- **Made for touch:** a floating **+**, finger-sized buttons, and hold to select or drag.
+- **Shortcuts:** Cmd+Enter adds an item, Cmd+F filters, Cmd+Z undoes. Use Ctrl on Windows and Linux.
+- **Right-click menus** on items, headings, pictures and the list.
+- **Made for touch:** finger-sized buttons, and hold to select or drag.
 - **Fits your theme,** light or dark.
+- **Settings:** a folder for new lists, when ticked items hide, the tag strip, where the floating **+** shows, a Schedule button in each list's header, and the Schedule back in the sidebar if you closed it.
 
 ## Quick start
 
@@ -141,6 +164,9 @@ The full format is in the [design](docs/superpowers/specs/2026-10-20-prince-list
   - **Vault enumeration:** to find your lists, the Schedule goes through your vault's list of notes, and reads only the lists.
   - **Clipboard access:** only when you ask. Copy image, Copy text, Cut and Copy write to it. Paste and Paste as plain text in the right-click menu read it, and what you paste with Cmd+V is read from your paste. PrinceLists never reads the clipboard by itself.
 - **Obsidian Sync:** turn on Sync's "Active community plugin list" and "Installed community plugin list" to get PrinceLists on your other devices. If two devices edit a list within seconds, Sync can drop one change, as in any note. Sync's "Create conflict file" setting keeps both, as extra lists.
+- **A repeating item** stays ticked in the file until it comes back, so until then Tasks queries and other apps show it done.
+- **Renamed a list?** Update the blocks that show it in other notes.
+- **On iOS,** a picture dropped from Photos may not reach Obsidian; paste it instead.
 - **Made for** Obsidian on macOS, iOS, Android and Windows. If something looks wrong, [open an issue](https://github.com/princelundgren/PrinceListsObsidianPlugin/issues).
 
 ## Contributing
