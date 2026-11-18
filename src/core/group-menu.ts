@@ -1,24 +1,25 @@
+import type { ShownRow } from './drop';
 import { countPhrase, type GroupState, type PlannedGroupChange } from './group-edits';
+import type { HeadingPlace, ItemPlace } from './list-actions';
 
 /** An entry of the selection's menu. */
-export type GroupEntry = 'move' | 'tick' | 'untick' | 'tag' | 'addStar' | 'removeStar' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'delete';
+export type GroupEntry = 'move' | 'tick' | 'untick' | 'tag' | 'addStar' | 'removeStar' | 'today' | 'tomorrow' | 'pickDate' | 'removeDate' | 'newItem' | 'newHeading' | 'duplicate' | 'delete';
 
-/** The entries the bar shows one group of at a time. */
-export type EntryGroup = 'tick' | 'star' | 'date';
+/** The entries the bar's Date and More buttons each show in a menu. */
+export type EntryGroup = 'date' | 'more';
 
 /** What a tick, star or date entry changed, for its Undo message. */
 export type GroupChange = 'tick' | 'untick' | 'addStar' | 'removeStar' | 'setDate' | 'removeDate';
 
 const ENTRY_GROUPS: Record<EntryGroup, readonly GroupEntry[]> = {
-	tick: ['tick', 'untick'],
-	star: ['addStar', 'removeStar'],
 	date: ['today', 'tomorrow', 'pickDate', 'removeDate'],
+	more: ['tick', 'untick', 'tag', 'addStar', 'removeStar', 'newItem', 'newHeading', 'duplicate'],
 };
 
 /**
  * The entries for a selection that holds `state`, in the menu's order, or only `only`'s group of them.
  * An entry with nothing to change hides. Move shows only while no heading is selected, in a list with
- * headings.
+ * headings, and Duplicate only while no heading is selected.
  */
 export function groupEntries(state: GroupState, listHasHeadings: boolean, only?: EntryGroup): GroupEntry[] {
 	const shows: Record<GroupEntry, boolean> = {
@@ -32,6 +33,9 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 		tomorrow: state.items > 0,
 		pickDate: state.items > 0,
 		removeDate: state.anyDated,
+		newItem: state.items + state.headings > 0,
+		newHeading: state.items + state.headings > 0,
+		duplicate: state.items > 0 && state.headings === 0,
 		delete: state.items + state.headings > 0,
 	};
 	const order = only ? ENTRY_GROUPS[only] : (Object.keys(shows) as GroupEntry[]);
@@ -39,24 +43,42 @@ export function groupEntries(state: GroupState, listHasHeadings: boolean, only?:
 }
 
 /** A button of the bar that acts on the selection. */
-export type BarButton = 'move' | EntryGroup | 'tag' | 'delete';
+export type BarButton = 'move' | EntryGroup | 'delete';
 
 /**
- * Whether each of the bar's buttons has something to act on for a selection that holds `state`: Move
- * to while Move to heading… shows, Tick, Star and Date while any entry of their group does, Tag while
- * its entry shows, and Delete while anything is selected.
+ * Whether each of the bar's buttons has something to act on for a selection that holds `state`:
+ * Move to while Move to heading… shows, Date and More while any entry of their menu does, and
+ * Delete while anything is selected.
  */
 export function barButtons(state: GroupState, listHasHeadings: boolean): Record<BarButton, boolean> {
 	const entries = groupEntries(state, listHasHeadings);
 	const showsAny = (group: EntryGroup): boolean => ENTRY_GROUPS[group].some((entry) => entries.includes(entry));
 	return {
 		move: entries.includes('move'),
-		tick: showsAny('tick'),
-		star: showsAny('star'),
-		tag: entries.includes('tag'),
 		date: showsAny('date'),
+		more: showsAny('more'),
 		delete: entries.includes('delete'),
 	};
+}
+
+/** Where a new item and a new heading go below the selection. */
+export interface PlacesBelow {
+	item: ItemPlace;
+	heading: HeadingPlace;
+}
+
+/**
+ * Where New item below, Cmd+Enter and New heading below add, under the last of the `selected` lines
+ * among the `shown` rows, in list order: an item right after a selected item and a heading after it,
+ * or an item first under a selected heading and a heading after its section. Null when no selected
+ * row is shown.
+ */
+export function placesBelow(shown: readonly ShownRow[], selected: readonly number[]): PlacesBelow | null {
+	const lines = new Set(selected);
+	const row = shown.filter((row) => row.kind !== 'untouched' && lines.has(row.line)).pop();
+	if (!row) return null;
+	if (row.kind === 'item') return { item: { after: row.line }, heading: { afterItem: row.line } };
+	return { item: { firstUnder: row.line }, heading: { afterSection: row.line } };
 }
 
 /** The Undo message for `change` on `written.changed` items, naming the items a tick skipped because they can't repeat. */

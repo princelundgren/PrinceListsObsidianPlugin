@@ -7,9 +7,8 @@ import type { PrinceListView } from './list-view';
  * A primary press in the list outside the open card's tag popover, repeat popover or date picker only
  * closes it, as a press while one of the view's menus shows only closes the menu (spec, "Selecting and
  * adding"): it opens, ticks, selects and drags nothing, its click is held back, and the card stays
- * open. Focus goes back to the popover's button, or the date when the repeat popover has none, and
- * stays where it was for the date picker. Both run in the capture phase, before the view's own
- * listeners.
+ * open. Focus goes back to the popover's button, and stays where it was for the date picker. Both
+ * run in the capture phase, before the view's own listeners.
  */
 export function registerPopoverPress(view: PrinceListView): void {
 	let pressClosedIt = false;

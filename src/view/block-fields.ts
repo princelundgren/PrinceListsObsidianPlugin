@@ -13,7 +13,7 @@ import { showUndoNotice } from './delete';
 import { fitHeight } from './dom';
 import { FIELD_CLASS } from './fields';
 import type { ListBlock } from './list-block';
-import { ITEM_CLASS, LINE_ATTR, ROWS_DRAG } from './render-list';
+import { ITEM_CLASS, LINE_ATTR, ROWS_DRAG, TITLE_AND_TAGS_CLASS } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, tryEdit } from './write';
 
 export const BLOCK_TRASH_CLASS = 'princelists-block-trash';
@@ -25,7 +25,7 @@ export interface BlockField {
 	el: HTMLTextAreaElement;
 	/** What the field held when it opened, so an untouched field loses nothing. */
 	opened: string;
-	/** The title the field took the place of, put back when it closes. */
+	/** The title and its tags, which the field took the place of, put back when it closes. */
 	titleEl: Element;
 	/** Set when the block's own insert added the item, so closing an empty field removes it again. */
 	inserted: InsertedItem | null;
@@ -33,11 +33,11 @@ export interface BlockField {
 	pressed: boolean;
 }
 
-// Puts a field in place of the row's title, holding the title without its star (spec, "A list inside
-// another note").
+// Puts a field in place of the row's title and its tags, holding the title without its star (spec, "A
+// list inside another note").
 export function openBlockField(block: ListBlock, titleLine: number, inserted: InsertedItem | null): void {
 	closeBlockField(block, true);
-	const titleEl = block.rowsEl.querySelector(`.${ITEM_CLASS}[${LINE_ATTR}="${titleLine}"] .princelists-item-title`);
+	const titleEl = block.rowsEl.querySelector(`.${ITEM_CLASS}[${LINE_ATTR}="${titleLine}"] .${TITLE_AND_TAGS_CLASS}`);
 	if (!titleEl) return;
 	const title = parseItemLine(splitLines(block.editing.text)[titleLine]?.text ?? '')?.title ?? '';
 	const wrapper = createDiv({ cls: BLOCK_FIELD_CLASS });
@@ -157,7 +157,6 @@ export function showBlockItemMenu(block: ListBlock, evt: MouseEvent, titleLine: 
 		item
 			.setTitle('Delete item')
 			.setIcon('trash-2')
-			.setWarning(true)
 			.onClick(() => {
 				if (block.editing.text === seen) deleteBlockItem(block, titleLine);
 				else new Notice(CHANGED_ELSEWHERE_NOTICE);

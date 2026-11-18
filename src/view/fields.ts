@@ -8,7 +8,7 @@ import { showNotesEditor } from './notes-editor';
 import { listNoteSource } from './notes-source';
 
 export const TITLE_CLASS = 'princelists-title';
-// The title and, after it, the list's tags or tag button.
+// The title and, after it, the list's tags and its tag button.
 export const TITLE_ROW_CLASS = 'princelists-title-row';
 export const NOTE_CLASS = 'princelists-list-note';
 // Every textarea in the view, which styles.css makes read as the text it edits.

@@ -1,4 +1,5 @@
 import { Keymap, Platform } from 'obsidian';
+import { placesBelow } from '../core/group-menu';
 import { isListText } from '../obsidian/marker';
 import { addItem, newItem } from './add-button';
 import { CARD_CLASS, closeCard } from './card';
@@ -26,13 +27,14 @@ const announcers = new WeakMap<PrinceListView, { status: HTMLElement; describerI
  * rows from the anchor to it, and either starts selecting. An open card closes first, its item
  * selected; while selecting, a plain click or tap only closes it. Returns whether it handled the click.
  * Otherwise a plain click on a row or heading, not on a checkbox or beside it, clears the selection and
- * makes it the anchor; one on a checkbox or beside it ends selecting; one on empty space before
- * selecting clears the anchor. All return false, so the click goes on as it would with nothing
- * selected.
+ * makes it the anchor; one on a checkbox or beside it ends selecting; one on empty space clears the
+ * anchor before selecting, and ends selecting while no card is open. All return false, so the click
+ * goes on as it would with nothing selected.
  */
 export function onSelectClick(view: PrinceListView, evt: MouseEvent, target: HTMLElement): boolean {
 	if (isEmptySpace(view, target)) {
-		if (!view.selecting) clearSelection(view);
+		// While a card is open, the click only closes the card.
+		if (!view.selecting || !view.card) clearSelection(view);
 		return false;
 	}
 	const rowEl = selectableRowAt(view, target);
@@ -170,16 +172,14 @@ export function drawSelection(view: PrinceListView): void {
 }
 
 /**
- * Cmd+Enter: with an item selected, adds an item below the last selected item in list order; with
- * no item selected, adds one as "+" does. Either way the selection ends.
+ * Cmd+Enter: adds an item where the selection's New item below does (core's placesBelow), or as "+"
+ * does with nothing selected. Either way the selection ends.
  */
 export function newItemBelowSelection(view: PrinceListView): void {
 	if (!isListText(view.text)) return;
-	const selected = view.selection.lines();
-	const items = new Set(shownRows(view.listScrollEl).filter((row) => row.kind === 'item').map((row) => row.line));
-	const lastItem = selected.filter((line) => items.has(line)).pop();
+	const places = placesBelow(shownRows(view.listScrollEl), view.selection.lines());
 	clearSelection(view);
-	if (lastItem !== undefined) addItem(view, { after: lastItem });
+	if (places) addItem(view, places.item);
 	else newItem(view);
 }
 
