@@ -129,9 +129,8 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 	const focused = card.el.doc.activeElement;
 	if (title && focused !== title) title.value = view.editing.selectedTitle();
 	const notes = card.el.querySelector<HTMLElement>(`.${CARD_NOTES_CLASS}`);
-	// The format bar goes under the buttons, so hiding it never moves a button mid-press.
-	const tools = card.el.querySelector<HTMLElement>(`.${CARD_TOOLS_CLASS}`) ?? undefined;
-	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, tools);
+	// The format bar goes right after the notes, as their sibling, which the stylesheet hides it by.
+	if (notes) card.editor = showNotesEditor(view, cardNotesSource(view, card), notes, notes);
 }
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {
@@ -267,6 +266,14 @@ async function removeEmptyItem(view: PrinceListView, file: TFile, pending: Track
 		// The card went without its row, and the item may have stayed.
 		if (view.file === file) view.render();
 	}
+}
+
+/** Puts the caret at the end of the open card's notes; does nothing without a card. */
+export function focusCardNotesEnd(view: PrinceListView): void {
+	const editor = view.card?.editor;
+	if (!editor) return;
+	editor.focus();
+	editor.dispatch({ selection: { anchor: editor.state.doc.length }, scrollIntoView: true });
 }
 
 /** Puts the caret at the end of the open card's title, where a click past its text would. */

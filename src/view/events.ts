@@ -10,6 +10,7 @@ import {
 	cardTitleInput,
 	closeCard,
 	dismissCard,
+	focusCardNotesEnd,
 	focusCardTitleEnd,
 	openCard,
 } from './card';
@@ -121,6 +122,11 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	if (onSelectClick(view, evt, target)) return;
 	if (target.instanceOf(HTMLInputElement) && target.hasClass(WHEN_INPUT_CLASS)) {
 		whenClick(target);
+		return;
+	}
+	// The room the card's hidden format bar keeps is part of its notes.
+	if (target.hasClass(FORMAT_BAR_CLASS) && view.card?.el.contains(target) && !view.card.editor?.hasFocus) {
+		focusCardNotesEnd(view);
 		return;
 	}
 	const action = barActionAt(target);
