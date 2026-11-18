@@ -16,6 +16,13 @@ export function buildNewItemButton(view: PrinceListView, label: string): HTMLBut
 	setTooltip(button, label);
 	setIcon(button, 'plus');
 	view.registerDomEvent(button, 'click', () => newItem(view));
+	if (Platform.isMobile) {
+		// On the container, so a tag popover's field, which sits outside contentEl, counts too. They run
+		// after contentEl's focus listeners, so a card a focusout closes is gone by then.
+		view.registerDomEvent(view.containerEl, 'focusin', (evt) => view.syncNewItemButton(evt.targetNode));
+		// FocusEvent types it as an EventTarget; between elements it is an Element or null.
+		view.registerDomEvent(view.containerEl, 'focusout', (evt) => view.syncNewItemButton(evt.relatedTarget as Node | null));
+	}
 	return button;
 }
 
@@ -52,14 +59,31 @@ export function hasNoItems(view: PrinceListView): boolean {
 // The insert queues behind the removal of an empty item that closing the card may start.
 export function addItem(view: PrinceListView, place: ItemPlace): void {
 	expandFor(view, place);
-	closeCard(view);
-	const anchor = place === 'first' ? null : 'after' in place ? place.after : place.firstUnder;
-	enqueueAt(view, anchor, async (pending) => {
-		const added = await writePlanned(view, (text) => {
-			const followed = followPlace(place, pending?.line ?? null);
-			return followed ? planItemInsert(text, contentStartLine(text), followed) : null;
+	whileAdding(view, () => {
+		closeCard(view);
+		const anchor = place === 'first' ? null : 'after' in place ? place.after : place.firstUnder;
+		enqueueAt(view, anchor, async (pending) => {
+			const added = await writePlanned(view, (text) => {
+				const followed = followPlace(place, pending?.line ?? null);
+				return followed ? planItemInsert(text, contentStartLine(text), followed) : null;
+			});
+			if (added) openCard(view, added.line, true, added.inserted);
 		});
-		if (added) openCard(view, added.line, true, added.inserted);
+	});
+}
+
+/**
+ * Runs `add`, which queues the write of a new item or heading, and counts it as pending until that
+ * write's task is done, so on mobile the floating "+" stays hidden until the card or field opens.
+ */
+export function whileAdding(view: PrinceListView, add: () => void): void {
+	view.addsPending++;
+	add();
+	view.syncNewItemButton();
+	// Queued after the add's write, so it runs however that ends, also when the write never starts.
+	void view.enqueue(async () => {
+		view.addsPending--;
+		view.syncNewItemButton();
 	});
 }
 

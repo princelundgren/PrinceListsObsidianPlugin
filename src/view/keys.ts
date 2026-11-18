@@ -2,7 +2,7 @@ import { Platform, Scope, type Modifier } from 'obsidian';
 import type { Format } from '../core/format';
 import { modKeyName } from '../core/key-name';
 import { isListText } from '../obsidian/marker';
-import { targetOf } from './dom';
+import { isTextField, targetOf } from './dom';
 import { openFilter } from './filter';
 import { applyFormat } from './format';
 import type { PrinceListView } from './list-view';
@@ -80,8 +80,5 @@ function isInCard(view: PrinceListView, evt: KeyboardEvent): boolean {
 }
 
 function isInField(evt: KeyboardEvent): boolean {
-	const target = targetOf(evt);
-	if (!target) return false;
-	if (target.instanceOf(HTMLInputElement)) return target.type !== 'checkbox';
-	return target.instanceOf(HTMLTextAreaElement) || target.isContentEditable;
+	return isTextField(targetOf(evt));
 }

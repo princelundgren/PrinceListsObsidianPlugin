@@ -178,7 +178,9 @@ function onClick(view: PrinceListView, evt: MouseEvent): void {
 	const row = target.closest(`.${ITEM_CLASS}`);
 	const line = row ? lineOf(row) : null;
 	if (line !== null) {
-		openCard(view, line);
+		// On desktop typing goes straight into the title; on mobile, phones and tablets, a tap doesn't
+		// raise the keyboard.
+		openCard(view, line, !Platform.isMobile);
 		return;
 	}
 	if (Platform.isMobile) showHeadingMenu(view, evt, target);

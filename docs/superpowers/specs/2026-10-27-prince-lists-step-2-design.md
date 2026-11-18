@@ -465,11 +465,13 @@ this met on 2026-10-30 **(owner)**.
   show no "+" on that device, it leaves the "+" out: "Press Cmd+Enter to add an item", and "Press
   Enter in the title to add an item" on mobile **(owner, 2026-11-05)**. Changing the "+"'s
   setting draws open empty lists again, so the hint follows at once; a list with items only shows
-  or hides its buttons.
-- **Cmd+Enter adds an item (owner),** the same as "+": below the selected item, or as the list's
-  first item when nothing is selected. It's registered on the view's own `scope` as `Mod+Enter`,
-  like Cmd+Z, so it works anywhere in a list that has focus, a card's fields included, and isn't
-  a default hotkey **(call)**.
+  or hides its buttons. On mobile the hint keeps naming "+" while a new list's focused title hides
+  the "+": it shows once the title loses focus, and Enter in the title also adds the first item
+  **(call)**.
+- **Cmd+Enter adds an item (owner),** the same as "+" on desktop: below the selected item, or as
+  the list's first item when nothing is selected. It's registered on the view's own `scope` as
+  `Mod+Enter`, like Cmd+Z, so it works anywhere in a list that has focus, a card's fields included,
+  and isn't a default hotkey **(call)**.
 
 ### Dragging a heading (owner)
 

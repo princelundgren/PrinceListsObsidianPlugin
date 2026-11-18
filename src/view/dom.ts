@@ -62,3 +62,10 @@ export function targetOf(evt: UIEvent): HTMLElement | null {
 	while (node && !node.instanceOf(HTMLElement)) node = node.parentNode;
 	return node;
 }
+
+/** Whether `el` takes typing: a textarea, an input other than a checkbox, or editable content such as a notes editor. */
+export function isTextField(el: Node | null): boolean {
+	if (!el?.instanceOf(HTMLElement)) return false;
+	if (el.instanceOf(HTMLInputElement)) return el.type !== 'checkbox';
+	return el.instanceOf(HTMLTextAreaElement) || el.isContentEditable;
+}
