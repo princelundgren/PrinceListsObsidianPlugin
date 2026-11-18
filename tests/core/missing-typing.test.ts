@@ -44,6 +44,11 @@ describe('missingTyping', () => {
 		expect(missingTyping('- [ ] Buy #shop 📅 2026-11-01\n', 'Buy #shop', 'title')).toBe(false);
 	});
 
+	test("finds a typed title that ends in a repeat's 🔚 end", () => {
+		expect(missingTyping('- [ ] Physio 🔚 2x 🔁 every day\n', 'Physio 🔚 2x', 'title')).toBe(false);
+		expect(missingTyping('- [ ] Physio 🔚 2x 🔁 every day\n', 'Physio 🔚 2x 🔁 every day', 'title')).toBe(false);
+	});
+
 	test('finds a tag typed as the whole title of a starred item', () => {
 		expect(missingTyping('- [ ]  ⭐ #shop\n', '#shop', 'title')).toBe(false);
 	});
