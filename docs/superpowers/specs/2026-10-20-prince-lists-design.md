@@ -695,8 +695,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
   ("Ticking") or a link in its title, opens its card and makes it the anchor. Clicking empty space
   closes the card and clears the anchor. While selecting, a tap on an item selects it instead of
   opening its card, and on desktop a plain click ends selecting and opens it; a click or a tap on
-  empty space keeps the selection ([selecting several rows](2026-11-07-select-several-design.md), "While
-  selecting").
+  empty space ends selecting, while no card is open **(owner, 2026-11-17)** ([selecting several
+  rows](2026-11-07-select-several-design.md), "What the selection is").
   - **While a card is open, a click outside it only closes it (owner, 2026-10-27):** a click on
     another item, a heading or the list note doesn't also open it. A checkbox still only ticks; the
     zone beside another row's only closes the card, as empty space does (owner, 2026-11-05). A
@@ -708,7 +708,8 @@ back only what was typed and leaves the empty line, which can be deleted like an
     and drags nothing, and an open card stays open. That covers the right-click menus, the card's ⋯,
     the selection bar's menus and the menus in the notes, a card's or the list's. A right-click
     still opens its own menu, and a click on the selection bar, the floating "+" or outside the view
-    acts as before. A list inside another note keeps its own menus as they are.
+    acts as before, except on the bar button whose menu shows, which only closes it **(owner,
+    2026-11-17)**. A list inside another note keeps its own menus as they are.
   - **Escape closes the card (owner, 2026-11-06),** as Enter in a title does. With a menu open in
     the card, one press closes the menu and the card together (#301).
   - **Android's Back doesn't close the card (owner, 2026-11-14):** Obsidian documents no way for a
