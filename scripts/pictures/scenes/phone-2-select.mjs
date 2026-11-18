@@ -10,6 +10,7 @@ const SETTLE_MS = 900;
 
 const scene = {
 	name: 'phone-2-select',
+	caption: 'Hold to select several, and act on them all',
 	...PHONE,
 	setup: showGroceries,
 	async shoot(session, out) {

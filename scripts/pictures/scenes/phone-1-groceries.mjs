@@ -4,6 +4,7 @@ import { headingBounds, middleOf, sleep, still, tap } from '../page.mjs';
 
 const scene = {
 	name: 'phone-1-groceries',
+	caption: 'Made for touch, with the same lists',
 	...PHONE,
 	setup: showGroceries,
 	async shoot(session, out) {

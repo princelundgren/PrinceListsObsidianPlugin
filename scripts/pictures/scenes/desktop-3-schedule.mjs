@@ -4,6 +4,7 @@ import { closeSchedule, hover, showAlone, showScheduleInSidebar, sleep, still } 
 
 const scene = {
 	name: 'desktop-3-schedule',
+	caption: 'The Schedule: dated items from all your lists',
 	...DESKTOP,
 	setup: (session) => showAlone(session, 'Home/Chores.md', 'list'),
 	async shoot(session, out) {

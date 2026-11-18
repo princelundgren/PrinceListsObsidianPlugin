@@ -3,6 +3,7 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { captioned } from './caption.mjs';
 import { toWebp } from './encode.mjs';
 import { carry, letGo, pictureOf, pointer } from './pointer.mjs';
 
@@ -314,10 +315,11 @@ export async function paneClip(session, pane = '.workspace-leaf.mod-active') {
 	return { ...bounds, height: Math.min(bounds.y + bounds.height, statusBarTop) - bounds.y };
 }
 
-/** Saves the scene's clip as `<out>/<scene name>.webp`. */
+/** Saves the scene's clip as `<out>/<scene name>.webp`, under the scene's `caption` when it has one. */
 export async function still(session, scene, out) {
 	const clip = await clipOf(session, scene);
-	const { data } = await session.send('Page.captureScreenshot', { format: 'png', ...(clip && { clip: { ...clip, scale: 1 } }) });
+	const { data: shot } = await session.send('Page.captureScreenshot', { format: 'png', ...(clip && { clip: { ...clip, scale: 1 } }) });
+	const data = scene.caption ? await captioned(session, shot, scene.caption) : shot;
 	const folder = await mkdtemp(join(tmpdir(), 'princelists-still-'));
 	try {
 		const png = join(folder, `${scene.name}.png`);

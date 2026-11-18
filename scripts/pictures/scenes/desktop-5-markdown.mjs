@@ -4,6 +4,7 @@ import { boundsOf, click, hover, middleOf, showAlone, sleep, still } from '../pa
 
 const scene = {
 	name: 'desktop-5-markdown',
+	caption: 'Every list is an ordinary Markdown note',
 	...DESKTOP,
 	setup: (session) => showAlone(session, 'Recipes/Weeknight dinners.md', 'list'),
 	async shoot(session, out) {
