@@ -13,6 +13,8 @@ const ADDED: [string, string, string][] = [
 		'frozen',
 		'- [x] Fries ⭐ ✔ 2026-11-07 10:00 ⏳ 2026-11-08 #frozen ^id  ',
 	],
+	['- [ ] Physio 🔚 2x 🔁 every day', 'physio', '- [ ] Physio 🔚 2x 🔁 every day #physio'],
+	['- [ ]  ⭐ 🔚 3x 🔁 every day', 'errand', '- [ ]  ⭐ 🔚 3x 🔁 every day #errand'],
 ];
 
 describe('addTag', () => {
@@ -39,6 +41,8 @@ describe('removeTag', () => {
 		['- [ ] Fries #Frozen #pantry #frozen', 'frozen', '- [ ] Fries #pantry'],
 		['- [ ] #errand ⏳ 2026-11-08', 'errand', '- [ ] ⏳ 2026-11-08'],
 		['- [ ] #frozen Fries', 'frozen', '- [ ] #frozen Fries'],
+		['- [ ] Physio 🔚 2x #health 🔁 every day', 'health', '- [ ] Physio 🔚 2x 🔁 every day'],
+		['- [ ]  ⭐ 🔚 3x #errand 🔁 every day', 'errand', '- [ ]  ⭐ 🔚 3x 🔁 every day'],
 	])('%j without %s is %j', (line, tag, expected) => {
 		expect(removeTag(line, tag)).toBe(expected);
 	});
