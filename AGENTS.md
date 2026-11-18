@@ -174,9 +174,9 @@ demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
   `obsidian.d.ts` documents. They read the page only to find elements, where they are, which folders
   are open and whether it's a phone's, act through DevTools input events, and add only what
   screenshots leave out: the drawn pointer and the picture a mouse drag carries (`pointer.mjs`), and
-  the window's buttons on a Mac (`window-buttons.mjs`). The folder also holds `run-in-obsidian.mjs`, which runs a check by hand as page JavaScript. A check
-  file calls only what `obsidian.d.ts` documents, and reads only PrinceLists' own view, never
-  Obsidian's.
+  the window's buttons on a Mac (`window-buttons.mjs`). The folder also holds
+  `run-in-obsidian.mjs`, which runs a check by hand as page JavaScript. A check file calls only what
+  `obsidian.d.ts` documents, and reads only PrinceLists' own view, never Obsidian's.
 - **File size:** keep each file under about 300 lines; split by responsibility.
 
 ## Working on a change
