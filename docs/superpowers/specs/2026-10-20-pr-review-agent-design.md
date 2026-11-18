@@ -30,7 +30,8 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     Checked what the review found sound. Every push starts another review, so a 🔵 is fixed only
     in a push that also fixes something else; otherwise it gets a reply saying why not, and its
     thread is resolved.
-  - Drafts are skipped. A person's new push cancels a review that is still running.
+  - The shared workflow's job skips drafts, a fork's pull request, and anything a bot opened or
+    sent. The caller's `concurrency` lets a person's new push cancel a review that is still running.
 - **`@claude` on demand (owner, 2026-10-20).** `claude.yml` runs when a comment on an issue, or on
   a pull request from a branch in this repository, mentions `@claude`. Claude answers in a comment.
 - **Forks get neither (owner, 2026-10-20).** The maintainer reviews a fork's pull request.
@@ -63,8 +64,11 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 
 ## Trust model
 
-- **Who starts Claude.** The review runs only for a pull request from a branch here, opened by a
-  person, so its author has write access. `claude.yml` starts only for a comment by a person whose
+"Both workflows" here means `claude.yml` and the shared workflow that `claude-code-review.yml`
+calls: the review's settings below are the shared workflow's, at whatever `v1` points to.
+
+- **Who starts Claude.** The shared workflow's job runs the review only for a pull request from a
+  branch here, opened by a person, so its author has write access. `claude.yml` starts only for a comment by a person whose
   association with the repository is owner, member or collaborator. The action then checks the
   commenter's write access and rejects bots. Both workflows leave `allowed_bots` empty and don't
   use `allowed_non_write_users`.
