@@ -231,8 +231,9 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
   this tidy grid over a sentence ("Every [1] [day], counted from …"), which wraps unpredictably on a
   phone, and over presets with the form behind "Custom…", which would change this design and add
   code. It is 25em wide, which fits its widest row, Ends with its date, and never wider than the
-  card **(call)**. On a phone or tablet, or where the card leaves it too narrow for that row, each
-  label stands above its fields **(call)**. A rule it can't write shows the same title and footer.
+  card **(owner, 2026-11-18)**. On a phone or tablet, or where the card leaves it too narrow for
+  that row, each label stands above its fields **(call)**. A rule it can't write shows the same
+  title and footer.
 - **Nothing is written until Save:** #320 asks to check the next dates "before it's saved". The
   popover holds a draft; Save makes one write and one Undo step, and Escape or a click outside
   drops the draft. A click in the list outside it does nothing else, and the card stays open
