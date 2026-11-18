@@ -559,10 +559,11 @@ back only what was typed and leaves the empty line, which can be deleted like an
   the title **(call)**.
 - **While filtering,** Cmd+F's field shows below the list note (step two's design, "Cmd+F").
 - **Headings** are bold, with a thin rule below, their text lined up with the item titles (owner,
-  2026-11-05). The rule sits 6 px under the text, so a tag pill in the heading clears it by about
-  4 px (call). In a list inside another note, which has no collapse arrow, they keep to the edge, so
-  no empty column makes them read as items (owner, 2026-11-06). In step two, an arrow in the
-  checkboxes' column collapses a heading's section (step two's design, "Collapsing a heading").
+  2026-11-05). A tag in a heading is in normal weight, as on a row (owner, 2026-11-18). The rule
+  sits 6 px under the text, so a tag pill in the heading clears it by about 4 px (call). In a list
+  inside another note, which has no collapse arrow, they keep to the edge, so no empty column makes
+  them read as items (owner, 2026-11-06). In step two, an arrow in the checkboxes' column collapses
+  a heading's section (step two's design, "Collapsing a heading").
 - **Items** show a checkbox and a title, one per line. In step two a row also shows its star and
   its When, and a row shows its tags too (filtering by tag's design, "Rows").
 - **Item titles and headings are rendered as Markdown (owner, 2026-10-21),** with Obsidian's own
