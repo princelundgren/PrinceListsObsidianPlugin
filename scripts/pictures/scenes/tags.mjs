@@ -49,7 +49,10 @@ async function tagAndFilter(session) {
 	await type(session, TAG.slice(0, 2));
 	await sleep(900);
 	await pressEnter(session);
-	await sleep(1200);
+	await sleep(600);
+	// Off the tag button, whose tooltip would stay on after the card closes.
+	await mouse.glide(title.x + 40, title.y + title.height / 2, 500);
+	await sleep(400);
 	await pressEscape(session);
 	await sleep(300);
 	await pressEscape(session);

@@ -4,7 +4,7 @@
 
 PrinceLists turns a note into a todo list, and a Schedule view shows what's coming up across all your lists. It's simple to use, and powerful when you need it.
 
-![In a todo list in Obsidian, a new item gets a title, notes with a link and a dropped picture, a star and a day, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
+![In a todo list in Obsidian, a new item gets a title, a day and a star, then notes with a link and a dropped picture, then it is dragged into place and another item is ticked](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/list-desktop.gif)
 
 Make a list from the ribbon, a folder, or a note you already have.
 
@@ -22,7 +22,7 @@ Tag items to group them across sections. The items' tags sit above the list, and
 
 Hold an item to select it, then Cmd+click or tap others to add them. Move, tick, tag, star, date, duplicate or delete them all at once.
 
-![In a todo list, a row is held until it is selected and two more are Cmd-clicked to join it, then dragging one takes all three under the Admin heading, and Star in the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
+![In a todo list, a row is held until it is selected and two more are Cmd-clicked to join it, then dragging one takes all three under the Admin heading, and Add star in the More menu of the bar at the bottom stars them](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/select-several.gif)
 
 Each item has a title, a date, a star and powerful notes, with a toolbar for formatting.
 
@@ -30,7 +30,7 @@ Each item has a title, a date, a star and powerful notes, with a toolbar for for
 
 The Schedule shows the dated items from all your lists.
 
-![The Schedule in the right sidebar scrolls through dated items from several lists, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
+![The Schedule in the right sidebar scrolls through dated items from several lists, grouped by list, under Today, Tomorrow, Next 7 days and the start of Later](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/schedule.gif)
 
 It works great on your phone too.
 
@@ -59,7 +59,7 @@ You can embed lists in normal notes.
 
 - **Add** with the floating **+**, or drag the **+** onto the list to add an item right where it drops, and **drag** to reorder. The settings can keep the **+** to desktop or mobile, or turn it off.
 - **Star** an item and give it a date.
-- **Repeat** an item: set every 3 days, each month on the last day or another rule, with an end if you like, from its card or its menu, and a ticked item is done until its next date, then comes back open when you next open or return to its list, or return to Obsidian while a list view, the Schedule or a note showing that list is on screen. Until then, Tasks queries and other apps show it done.
+- **Repeat** an item: set every 3 days, each month on the last day or another rule, with an end if you like, from its card or its menu, and a ticked item is done until its next date, then comes back open when you next open or return to its list, or return to Obsidian while a list view, the Schedule or a note showing that list is on screen. Opening the Schedule brings back the due items of every list, and opening a note that shows a list brings back that list's. Until then, Tasks queries and other apps show it done.
 - **Tags:** write a tag on an item, or add it from the tag button in its card or **Tag…** in its right-click menu, with suggestions. Items show their own tags as labels. A tag in a heading, as in `## Office #work`, counts for every item in its section, and the `tags` property counts for every item in the list, though neither shows on the rows. The list's tags show right of its title, and a press on them opens **Tag list…**, as does a tag button after the title and its tags while you edit the title. **Tag…** in a heading's menu adds or removes a tag at the end of its text, and **Tag list…** in the list's menu, or the pane's ⋯ menu, adds or removes one in the list's `tags` property.
 - **Select several:** hold an item, or choose **Select** in its menu. On desktop, Cmd+click, Shift+click and Shift+Up or Down select too. A bar then moves, dates or deletes them all at once, and its **More** menu ticks, tags, stars or duplicates them, each with Undo, or adds an item or heading below them; dragging one drags them all. A selected heading brings its section; Tag puts the tag in the heading's own text.
 - **Tick and forget:** ticked items hide after a day, or after a time you choose, from at once to a week.
@@ -147,7 +147,7 @@ Bug reports, ideas and pull requests are welcome.
 
 - Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the [rules in AGENTS.md](AGENTS.md#rules-that-are-never-broken).
 - Be kind: see the [code of conduct](CODE_OF_CONDUCT.md).
-- The designs for [step one](docs/superpowers/specs/2026-10-20-prince-lists-design.md) and [step two](docs/superpowers/specs/2026-10-27-prince-lists-step-2-design.md) say what the plugin does and why.
+- The designs listed in [AGENTS.md](AGENTS.md#project-overview) say what the plugin does and why.
 - To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ## License
