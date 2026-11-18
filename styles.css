@@ -1217,6 +1217,11 @@ button.princelists-card-repeat.is-repeating {
 	--tag-border-color-hover: transparent;
 }
 
+/* A heading's tag is in normal weight, as on a row, not the heading's bold. */
+.princelists-heading {
+	--tag-weight: var(--font-normal);
+}
+
 .princelists-item.is-done .princelists-tags .princelists-tag {
 	color: var(--checklist-done-color);
 }
