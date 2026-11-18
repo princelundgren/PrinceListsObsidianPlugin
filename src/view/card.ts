@@ -40,10 +40,10 @@ export interface Card {
 	lostAt: number | null;
 }
 
-// Opens the item at `titleLine` in place of its row, closing any open card first. The cursor goes in
-// the title only when `focusTitle` is set, so a tap on a row doesn't open the on-screen keyboard; the
-// card itself takes focus otherwise, so Escape reaches it. A card opened on an item its own insert
-// created passes `inserted`.
+// Opens the item at `titleLine` in place of its row, closing any open card first. The cursor goes at
+// the end of the title only when `focusTitle` is set, so a tap on a row doesn't open the on-screen
+// keyboard; the card itself takes focus otherwise, so Escape reaches it. A card opened on an item its
+// own insert created passes `inserted`.
 export function openCard(view: PrinceListView, titleLine: number, focusTitle = false, inserted?: InsertedItem): void {
 	closeCard(view);
 	view.editing.open(titleLine);
@@ -60,8 +60,12 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 	}
 	const title = card.el.querySelector<HTMLTextAreaElement>(`.${CARD_TITLE_CLASS}`);
 	if (title) fitHeight(title);
-	if (focusTitle) title?.focus();
-	else card.el.focus({ preventScroll: true });
+	if (focusTitle) {
+		// A new item's card scrolls into view; any other is scrolled by whoever opened it, if at all.
+		title?.focus({ preventScroll: !inserted });
+		title?.setSelectionRange(title.value.length, title.value.length);
+	} else card.el.focus({ preventScroll: true });
+	view.syncNewItemButton();
 }
 
 // The user closed the card in the view, in one of the ways the spec lists ("Selecting and adding"). An
@@ -78,8 +82,15 @@ export function closeCard(view: PrinceListView): void {
 		const pending = view.editing.track(line);
 		const inserted = card.inserted;
 		void view.enqueue(() => removeEmptyItem(view, file, pending, inserted));
-		return;
+	} else {
+		putRowBack(view, card, line);
 	}
+	// After the card's element goes, so a field of its that had focus no longer counts.
+	view.syncNewItemButton();
+}
+
+// Puts the card's item back as a row, or leaves it out where it no longer shows.
+function putRowBack(view: PrinceListView, card: Card, line: number | null): void {
 	const row = rowAt(view, line);
 	if (row && isRowVisible(view, row)) {
 		card.el.replaceWith(buildRow(view, view.sourcePath, row, view.blocks));
@@ -107,6 +118,7 @@ export function dismissCard(view: PrinceListView): void {
 	if (!card) return;
 	endCard(view, card);
 	card.el.remove();
+	view.syncNewItemButton();
 }
 
 // Fills the card from the text, or, after a redraw, updates its line, its box and the
