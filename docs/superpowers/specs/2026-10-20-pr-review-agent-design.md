@@ -68,10 +68,10 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 calls: the review's settings below are the shared workflow's, at whatever `v1` points to.
 
 - **Who starts Claude.** The shared workflow's job runs the review only for a pull request from a
-  branch here, opened by a person, so its author has write access. `claude.yml` starts only for a comment by a person whose
-  association with the repository is owner, member or collaborator. The action then checks the
-  commenter's write access and rejects bots. Both workflows leave `allowed_bots` empty and don't
-  use `allowed_non_write_users`.
+  branch here, opened by a person, so its author has write access. `claude.yml` starts only for a
+  comment by a person whose association with the repository is owner, member or collaborator. The
+  action then checks the commenter's write access and rejects bots. Both workflows leave
+  `allowed_bots` empty and don't use `allowed_non_write_users`.
   - Claude doesn't review Dependabot's pull requests, or any other bot's: the gate covers the pull
     request's author and the event's sender, so the review never reads the text of a pull request
     a bot opened, and a bot's events can't cancel a review. Commits inside a person's pull request
