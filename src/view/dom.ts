@@ -33,25 +33,26 @@ export function fitHeight(textarea: HTMLTextAreaElement): void {
 }
 
 export const HIDDEN_LABEL_CLASS = 'princelists-hidden-label';
-let hiddenLabels = 0;
+let labelIds = 0;
 
 // Names `control` for screen readers from a hidden element just after it. Not aria-label: Obsidian
 // shows every aria-label as a hover tooltip.
 export function addHiddenLabel(control: HTMLElement, text: string): HTMLElement {
-	const label = hiddenLabelFor(control, text);
+	const label = createSpan({ cls: HIDDEN_LABEL_CLASS, text, attr: { hidden: '' } });
+	labelBy(control, label);
 	control.after(label);
 	return label;
 }
 
-// The same, for a container that holds its own label.
-export function addHiddenLabelInside(container: HTMLElement, text: string): void {
-	container.append(hiddenLabelFor(container, text));
+/** Names `labelled` for screen readers by the text of `label`, visible or hidden. */
+export function labelBy(labelled: HTMLElement, label: HTMLElement): void {
+	label.id = newLabelId();
+	labelled.setAttr('aria-labelledby', label.id);
 }
 
-function hiddenLabelFor(labelled: HTMLElement, text: string): HTMLElement {
-	const id = `${HIDDEN_LABEL_CLASS}-${++hiddenLabels}`;
-	labelled.setAttr('aria-labelledby', id);
-	return createSpan({ cls: HIDDEN_LABEL_CLASS, text, attr: { id, hidden: '' } });
+/** An id no other id from here shares, in any window, for a label and its control to point at. */
+export function newLabelId(): string {
+	return `princelists-label-${++labelIds}`;
 }
 
 // Obsidian's instanceOf, since a pane can sit in a popout window, whose elements aren't instances of

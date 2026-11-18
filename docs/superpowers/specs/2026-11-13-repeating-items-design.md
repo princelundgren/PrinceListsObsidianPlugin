@@ -225,6 +225,14 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
 - **The popover:** how often (Day, Week, Month, Year); every how many; from its date or from when
   it's ticked; for months, the same day or the last day; an end (Never, On a date, After so many
   times); the next three dates, updated as it changes; and Remove repeat.
+- **How the popover looks (owner, 2026-11-18):** a "Repeat" title, the form in a label column and a
+  fields column with each row on one line, then under a line the next dates, after a muted "Next"
+  and joined by " · ", and the buttons: Remove repeat at the start, Save at the end. The owner chose
+  this tidy grid over a sentence ("Every [1] [day], counted from …"), which wraps unpredictably on a
+  phone, and over presets with the form behind "Custom…", which would change this design and add
+  code. It is 25em wide, which fits its widest row, Ends with its date, and never wider than the
+  card **(call)**. On a phone or tablet, or where the card leaves it too narrow for that row, each
+  label stands above its fields **(call)**. A rule it can't write shows the same title and footer.
 - **Nothing is written until Save:** #320 asks to check the next dates "before it's saved". The
   popover holds a draft; Save makes one write and one Undo step, and Escape or a click outside
   drops the draft. A click in the list outside it does nothing else, and the card stays open
@@ -298,7 +306,6 @@ Tasks' own way, a done copy plus a new open line, is the anti-goal above.
 ## Left to the builder
 
 - The notice's wording and how long it shows, and what a selection's tick says.
-- How the popover's controls look on a phone, within the design's touch rules.
 
 ## Tests
 
