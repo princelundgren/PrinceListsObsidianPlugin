@@ -113,10 +113,16 @@ textarea.princelists-title {
 	margin: var(--size-4-1) 0;
 }
 
+/* The room under a heading's line, above its border, so a tag pill in the heading clears the rule. The
+   rename field, collapse arrow and selected highlight measure by it. */
+.princelists-heading,
+textarea.princelists-heading-field {
+	--princelists-heading-room: var(--size-2-3);
+}
+
 .princelists-heading {
 	margin: var(--size-4-4) calc(-1 * var(--princelists-reach, 0px)) var(--size-4-1);
-	/* The room under a heading's line, above its border, so a tag pill in the heading clears the rule. */
-	padding-bottom: var(--size-2-3);
+	padding-bottom: var(--princelists-heading-room);
 	padding-inline-end: var(--princelists-reach, 0px);
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-size: inherit;
@@ -129,20 +135,27 @@ textarea.princelists-title {
 	list-style: none;
 }
 
+/* A row's padding above and below its title, which a selected heading's highlight measures by too. */
+.princelists-item,
+.princelists-heading {
+	--princelists-row-padding: var(--size-4-1);
+}
+
 .princelists-item {
 	position: relative;
 	display: flex;
 	align-items: flex-start;
 	gap: var(--size-4-2);
-	--princelists-row-padding: var(--size-4-1);
 	margin-inline: calc(-1 * var(--princelists-reach, 0px));
 	padding: var(--princelists-row-padding) var(--princelists-reach, 0px);
 	line-height: var(--line-height-normal);
 }
 
 /* On mobile a one-line row is 40px tall, the size Obsidian 1.15 gives its undocumented
-   --touch-size-s, so a finger doesn't land on the next row. */
-.princelists-is-mobile .princelists-item {
+   --touch-size-s, so a finger doesn't land on the next row. A selected heading's highlight measures by
+   the same padding, while the heading keeps its size. */
+.princelists-is-mobile .princelists-item,
+.princelists-is-mobile .princelists-heading {
 	--princelists-row-padding: calc((40px - var(--line-height-normal) * 1em) / 2);
 }
 
@@ -244,14 +257,29 @@ textarea.princelists-title {
 	-webkit-touch-callout: none;
 }
 
-/* Selected rows and headings, marked as Obsidian marks selected files in its file list. A run of selected
-   rows reads as one block, rounded only at its first and last row. The highlight reaches into the view's
-   side margin by the open card's side padding, so it doesn't touch the checkbox. The checkbox, title,
-   tick zone and collapse arrow stay where they were, since their offsets add the reach. */
+/* Selected rows and headings, behind them Obsidian's selected-text tint of the accent, which stays
+   plainly the accent on a black background, and their text a selected file's. The tint is built from
+   the accent as Obsidian builds --text-selection, not read from it, since a theme may set that to the
+   selected text's own color. A run of selected rows reads as one block, rounded only at its first and
+   last row. The highlight reaches into the view's side margin by the open card's side padding, so it
+   doesn't touch the checkbox. The checkbox, title, tick zone and collapse arrow stay where they were,
+   since their offsets add the reach. */
 .princelists-selected {
 	--princelists-reach: var(--size-4-2);
-	background-color: var(--nav-item-background-selected);
+	--princelists-selection: var(--text-selection);
+	background-color: var(--princelists-selection);
 	color: var(--nav-item-color-selected);
+}
+
+/* Where color-mix is missing, the tint is --text-selection itself. */
+@supports (color: color-mix(in oklch, red 50%, transparent)) {
+	.princelists-selected {
+		--princelists-selection: color-mix(in oklch, var(--interactive-accent) 20%, transparent);
+	}
+
+	.theme-dark .princelists-selected {
+		--princelists-selection: color-mix(in oklch, var(--interactive-accent) 33%, transparent);
+	}
 }
 
 .princelists-selected.princelists-selected-first {
@@ -262,6 +290,30 @@ textarea.princelists-title {
 .princelists-selected.princelists-selected-last {
 	border-end-start-radius: var(--radius-s);
 	border-end-end-radius: var(--radius-s);
+}
+
+/* A selected heading's highlight reaches up into the space above it, as tall as a one-line row's: the
+   row's padding and taller line, less the heading's padding and border below. A heading's line is the
+   body's, --line-height-tight. Drawn above the heading, not padded into its margin, which collapses
+   with the margin before it, so nothing moves. A lifted heading keeps to its outline. */
+.princelists-heading.princelists-selected:not(.princelists-lifted)::before {
+	content: '';
+	position: absolute;
+	inset-inline: 0;
+	inset-block-end: 100%;
+	height: calc(2 * var(--princelists-row-padding) + (var(--line-height-normal) - var(--line-height-tight)) * 1em - var(--princelists-heading-room) - var(--border-width));
+	background-color: inherit;
+}
+
+/* A run that starts at a heading is rounded at the top of its reach. */
+.princelists-heading.princelists-selected-first:not(.princelists-lifted) {
+	border-start-start-radius: 0;
+	border-start-end-radius: 0;
+}
+
+.princelists-heading.princelists-selected-first:not(.princelists-lifted)::before {
+	border-start-start-radius: var(--radius-s);
+	border-start-end-radius: var(--radius-s);
 }
 
 /* A right-clicked row or heading while its menu shows: as a hovered file in Obsidian's file list,
@@ -295,7 +347,7 @@ textarea.princelists-title {
 
 /* A lifted selected row keeps its highlight over its opaque background. */
 .princelists-lifted.princelists-selected {
-	background-image: linear-gradient(var(--nav-item-background-selected), var(--nav-item-background-selected));
+	background-image: linear-gradient(var(--princelists-selection), var(--princelists-selection));
 }
 
 /* How many rows a dragged selection carries, on the row it lifts, at the row's end. */
@@ -1041,7 +1093,7 @@ button.princelists-starred-toggle.princelists-starred-only svg {
 /* Rename heading's field reads as the heading it edits. */
 textarea.princelists-heading-field {
 	margin: var(--size-4-4) 0 var(--size-4-1);
-	padding-bottom: var(--size-2-3);
+	padding-bottom: var(--princelists-heading-room);
 	padding-inline-start: calc(var(--checkbox-size) + var(--size-4-2));
 	border-bottom: var(--border-width) solid var(--background-modifier-border);
 	font-weight: var(--font-bold);
@@ -1523,7 +1575,7 @@ button.princelists-collapse {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding-block: var(--size-4-4) var(--size-2-3);
+	padding-block: var(--size-4-4) var(--princelists-heading-room);
 	padding-inline: 0 var(--size-4-2);
 	font-size: inherit;
 	background: none;
