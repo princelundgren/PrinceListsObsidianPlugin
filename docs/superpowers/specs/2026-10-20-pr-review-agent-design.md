@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-11-06
+verified: 2026-11-18
 governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
 ---
 
@@ -16,7 +16,9 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 
 - **Automatic review (owner, 2026-10-20).** `claude-code-review.yml` runs when a pull request from a
   branch in this repository is opened, pushed to, reopened or marked ready for review. Claude
-  posts an inline comment for each issue and one summary comment.
+  posts an inline comment for each issue and one summary comment, whose first line names the
+  commit it reviewed: "## Claude review of" and the pull request's head commit, so whoever merges
+  can check that the review saw the commit being merged **(owner, 2026-11-18)**.
   - **The prompt is GitHub Docs' "Review code" prompt file (owner, 2026-10-21),** kept generic:
     security, performance, code quality, architecture and design, and testing and documentation.
     The owner's additions: it reads `AGENTS.md` first for the rules, and it checks drift from the
