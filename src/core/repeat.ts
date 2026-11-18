@@ -52,7 +52,7 @@ export function writeEnd(end: RepeatEnd): string {
 	return `${END_MARK} ${end.kind === 'date' ? end.day : `${end.left}x`}`;
 }
 
-/** `day`, a real `YYYY-MM-DD`, moved by `days` calendar days, counted in UTC so a clock change can't shift it; null past 9999-12-31. */
+/** `day`, a real `YYYY-MM-DD`, moved by `days` calendar days, counted in UTC so a clock change can't shift it; null outside 0000-01-01 to 9999-12-31. */
 export function addDays(day: string, days: number): string | null {
 	return formatUtc(utcOf(day) + days * DAY_MS);
 }
@@ -119,6 +119,7 @@ function lastDayOfMonth(year: number, monthIndex: number): number {
 /** A UTC time as `YYYY-MM-DD`, or null when it isn't a date with a four-digit year. */
 function formatUtc(time: number): string | null {
 	const date = new Date(time);
-	if (Number.isNaN(date.getTime()) || date.getUTCFullYear() > 9999) return null;
+	const year = date.getUTCFullYear();
+	if (Number.isNaN(year) || year < 0 || year > 9999) return null;
 	return date.toISOString().slice(0, 10);
 }

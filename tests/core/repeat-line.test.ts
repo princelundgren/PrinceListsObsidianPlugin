@@ -333,6 +333,8 @@ describe('comeBack', () => {
 		expect(comeBack('- [x] Water ✔ 2026-11-20 18:05 🔁 every day', at(14))).toBe('- [ ] Water 🔁 every day ⏳ 2026-11-14'));
 	test('a date that would pass 9999 on a later step never', () =>
 		expect(comeBack('- [x] Water ✔ 2026-11-14 18:05 🔁 every day 🛫 9999-12-30 📅 2026-11-14', at(18))).toBeNull());
+	test('a date that would move before 0000 never', () =>
+		expect(comeBack('- [x] Old ✔ 2026-11-14 18:05 🔁 every day when done 🛫 0000-01-02 📅 2026-11-20', at(15))).toBeNull());
 	test('a done item given a repeat, on its next date', () => {
 		const given = setRepeat('- [x] Water ✔ 2026-11-14 18:05', every(1, 'day'), null, '2026-11-14');
 		expect(comeBack(given, at(14, 23))).toBeNull();

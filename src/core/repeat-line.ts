@@ -86,7 +86,7 @@ export function hasDate(line: string): boolean {
 /**
  * The day a done repeating line comes back on, or null when it never does: it isn't a line this
  * plugin ticked, its rule can't be followed, it was the last time, or its dates can't move there
- * without passing 9999-12-31.
+ * without leaving 0000-01-01 to 9999-12-31.
  */
 export function backDay(line: string, now: Date): string | null {
 	return comebackOf(line, now)?.day ?? null;
@@ -283,7 +283,7 @@ function countDown(endText: string, end: RepeatEnd | null): string {
 	return endText.replace(/\d+(?=x\s*$)/i, String(end.left - 1));
 }
 
-/** The fields with each date field's day moved by `days`, or null when one passes 9999-12-31. */
+/** The fields with each date field's day moved by `days`, or null when one leaves 0000-01-01 to 9999-12-31. */
 function moveDates(fields: string, days: number): string | null {
 	let moved = '';
 	let copied = 0;
