@@ -1,14 +1,17 @@
-import { setIcon } from 'obsidian';
+import { Platform, setIcon } from 'obsidian';
 import { anchorOf, canWrite, draftAfterRefusal, draftOf, ensureTickable, removeRepeat, setRepeat, type RepeatDraft } from '../core/repeat-line';
 import { dayOf } from '../core/when';
 import { CARD_TOOLS_CLASS, placeCardPopover } from './card-tools';
-import { labelBy } from './dom';
-import { queueDraftEdit } from './line-edit';
+import { labelBy, targetOf } from './dom';
+import { queueDraftEdit, type DraftBase } from './line-edit';
 import type { PrinceListView } from './list-view';
 import { buildRepeatForm, readRepeatForm, REMOVE_CLASS, SAVE_CLASS } from './repeat-form';
+import { RepeatModal } from './repeat-modal';
 
 const REPEAT_BUTTON_CLASS = 'princelists-card-repeat';
 const POPOVER_CLASS = 'princelists-repeat-popover';
+const FORM_CLASS = 'princelists-repeat-form';
+const IN_MODAL_CLASS = 'princelists-repeat-in-modal';
 
 /** Adds the card's `Repeat` button to `buttons`; call it after the star and before the date picker. */
 export function buildRepeatButton(buttons: HTMLElement): void {
@@ -34,7 +37,8 @@ function toggleRepeatPopover(view: PrinceListView): void {
 
 /**
  * Opens the repeat popover, and leaves it as it is when it's open, which a menu entry has no
- * reason to close. `kept` is the draft to show instead of the line's own.
+ * reason to close. `kept` is the draft to show instead of the line's own. On mobile the form opens
+ * in a modal instead, which the view's own state and handlers treat as the popover.
  */
 export function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 'read-only'): void {
 	if (view.repeatPopover) return;
@@ -43,9 +47,14 @@ export function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 're
 	const text = line === null ? undefined : view.lines()[line]?.text;
 	if (!tools || text === undefined) return;
 	const draft = kept ?? draftOf(text);
+	const opened = { text, seen: view.outsideChanges };
+	if (Platform.isMobile) {
+		openRepeatModal(view, opened, draft);
+		return;
+	}
 	// Focusable itself, so a press on its labels or gaps keeps focus inside it.
-	const el = tools.createDiv({ cls: POPOVER_CLASS, attr: { role: 'dialog', tabindex: -1 } });
-	view.repeatPopover = { el, opened: { text, seen: view.outsideChanges }, draft };
+	const el = tools.createDiv({ cls: [POPOVER_CLASS, FORM_CLASS], attr: { role: 'dialog', tabindex: -1 } });
+	view.repeatPopover = { el, opened, draft, modal: null };
 	labelBy(el, el.createDiv({ cls: 'princelists-repeat-title', text: 'Repeat' }));
 	buildRepeatForm(el, text, draft);
 	repeatButtonOf(view)?.setAttr('aria-expanded', 'true');
@@ -53,12 +62,44 @@ export function openRepeatPopover(view: PrinceListView, kept?: RepeatDraft | 're
 	placeCardPopover(view, el);
 }
 
-/** Closes the repeat popover. */
+// Its content is outside the view, so it takes the view's input, click and Enter handling itself. No
+// field takes focus as it opens, which would raise the keyboard over the form at once.
+function openRepeatModal(view: PrinceListView, opened: DraftBase, draft: RepeatDraft | 'read-only'): void {
+	const modal = new RepeatModal(
+		view.app,
+		(contentEl) => {
+			const el = contentEl.createDiv({ cls: [FORM_CLASS, IN_MODAL_CLASS], attr: { tabindex: -1 } });
+			view.repeatPopover = { el, opened, draft, modal };
+			buildRepeatForm(el, opened.text, draft);
+			for (const type of ['input', 'change']) el.addEventListener(type, (evt) => repeatInput(view, evt));
+			el.addEventListener('click', (evt) => {
+				const target = targetOf(evt);
+				if (target) repeatClick(view, target);
+			});
+		},
+		() => {
+			if (view.repeatPopover?.modal !== modal) return;
+			view.repeatPopover = null;
+			repeatButtonOf(view)?.setAttr('aria-expanded', 'false');
+		},
+	);
+	modal.scope.register([], 'Enter', (evt) => {
+		if (!evt.targetNode?.instanceOf(HTMLInputElement) || !isInRepeatPopover(view, evt.targetNode)) return true;
+		saveRepeat(view);
+		return false;
+	});
+	modal.open();
+	repeatButtonOf(view)?.setAttr('aria-expanded', 'true');
+}
+
+/** Closes the repeat popover, or on mobile its modal. */
 export function closeRepeatPopover(view: PrinceListView): void {
 	const open = view.repeatPopover;
 	if (!open) return;
+	// Cleared first, so the modal's own close, which runs onClose, finds nothing left to do.
 	view.repeatPopover = null;
-	open.el.remove();
+	if (open.modal) open.modal.close();
+	else open.el.remove();
 	repeatButtonOf(view)?.setAttr('aria-expanded', 'false');
 }
 

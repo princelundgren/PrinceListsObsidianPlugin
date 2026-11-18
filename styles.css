@@ -1403,13 +1403,16 @@ button.princelists-selection-tag-remove {
 }
 
 /* A title, the form in a label column and a fields column, then a footer: the next dates and the
-   buttons, under a line. 25em fits the widest row, Ends with its date. The popover is its own
+   buttons, under a line. 25em fits the widest row, Ends with its date. The form is its own
    container, so one too narrow for that stacks each label above its fields, as a phone or tablet
-   does. The query reads the content box, 25em less the padding and border, so a change to either
-   means checking 23.5em again. */
+   does. The query reads the popover's content box, 25em less the padding and border, so a change to
+   either means checking 23.5em again. */
 .princelists-repeat-popover {
 	box-sizing: border-box;
 	width: 25em;
+}
+
+.princelists-repeat-form {
 	container: princelists-repeat / inline-size;
 }
 
@@ -1487,12 +1490,15 @@ button.princelists-repeat-save {
 	margin-inline-start: auto;
 }
 
-.princelists-is-mobile .princelists-repeat-body {
+/* The modal mobile opens it in sits outside the view, so it stacks by its own class. */
+.princelists-is-mobile .princelists-repeat-body,
+.princelists-repeat-in-modal .princelists-repeat-body {
 	grid-template-columns: minmax(0, 1fr);
 	row-gap: var(--size-4-1);
 }
 
-.princelists-is-mobile .princelists-repeat-row:not(:first-child) > .princelists-repeat-label {
+.princelists-is-mobile .princelists-repeat-row:not(:first-child) > .princelists-repeat-label,
+.princelists-repeat-in-modal .princelists-repeat-row:not(:first-child) > .princelists-repeat-label {
 	margin-block-start: var(--size-4-2);
 }
 
