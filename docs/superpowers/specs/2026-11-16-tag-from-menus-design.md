@@ -1,7 +1,7 @@
 ---
 status: live
 governs: [src/**, styles.css]
-verified: 2026-11-17
+verified: 2026-11-18
 tracking: ["#434", "#442", "#446"]
 ---
 
