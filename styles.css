@@ -1307,37 +1307,109 @@ button.princelists-selection-tag-remove {
 	scroll-margin-bottom: calc(var(--view-bottom-spacing, 0px) + var(--princelists-status-bar-room, 0px));
 }
 
+/* A title, the form in a label column and a fields column, then a footer: the next dates and the
+   buttons, under a line. 25em fits the widest row, Ends with its date. The popover is its own
+   container, so one too narrow for that stacks each label above its fields, as a phone or tablet
+   does. The query reads the content box, 25em less the padding and border, so a change to either
+   means checking 23.5em again. */
 .princelists-repeat-popover {
 	box-sizing: border-box;
-	width: 20em;
+	width: 25em;
+	container: princelists-repeat / inline-size;
+}
+
+.princelists-repeat-title {
+	margin-block-end: var(--size-4-3);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-semibold);
 }
 
 .princelists-repeat-body {
-	display: flex;
-	flex-direction: column;
-	gap: var(--size-4-2);
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	align-items: center;
+	gap: var(--size-4-2) var(--size-4-3);
 }
 
 .princelists-repeat-row {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--size-4-1) var(--size-4-2);
+	display: contents;
 }
 
-.princelists-repeat-row > :first-child:not(select, input) {
-	min-width: 6.5em;
+.princelists-repeat-fields {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-2);
+	min-width: 0;
+}
+
+.princelists-repeat-fields > select,
+.princelists-repeat-fields > input[type='date'] {
+	flex: 1 1 0;
+	min-width: 0;
 }
 
 input.princelists-repeat-count {
-	width: 5em;
+	flex: none;
+	width: 4em;
+}
+
+.princelists-repeat-times,
+.princelists-repeat-next-label {
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.princelists-repeat-read-only {
+	grid-column: 1 / -1;
+}
+
+.princelists-repeat-footer {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-3);
+	margin-block-start: var(--size-4-3);
+	padding-block-start: var(--size-4-3);
+	border-top: var(--border-width) solid var(--background-modifier-border);
+}
+
+.princelists-repeat-next {
+	display: flex;
+	gap: var(--size-4-2);
+	font-size: var(--font-ui-small);
+}
+
+.princelists-repeat-day {
+	white-space: nowrap;
 }
 
 .princelists-repeat-actions {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: flex-end;
 	gap: var(--size-4-2);
+}
+
+button.princelists-repeat-save {
+	margin-inline-start: auto;
+}
+
+.princelists-is-mobile .princelists-repeat-body {
+	grid-template-columns: minmax(0, 1fr);
+	row-gap: var(--size-4-1);
+}
+
+.princelists-is-mobile .princelists-repeat-row:not(:first-child) > .princelists-repeat-label {
+	margin-block-start: var(--size-4-2);
+}
+
+@container princelists-repeat (max-width: 23.5em) {
+	.princelists-repeat-body {
+		grid-template-columns: minmax(0, 1fr);
+		row-gap: var(--size-4-1);
+	}
+
+	.princelists-repeat-row:not(:first-child) > .princelists-repeat-label {
+		margin-block-start: var(--size-4-2);
+	}
 }
 
 /* It sits above its anchor, such as the bar's Tag button, its end at the anchor's, and stays inside
