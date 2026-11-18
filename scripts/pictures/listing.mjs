@@ -38,9 +38,6 @@ export async function showWithFolders(session, file, view) {
 	await showAlone(session, file, view);
 }
 
-/** Shows Groceries alone beside the file explorer. */
-export const showGroceriesWithFolders = (session) => showWithFolders(session, 'Groceries.md', 'list');
-
 /**
  * Ticks two items in the open Groceries with `press` (`click` or `tap`), runs `act`, then puts the
  * note back as it was.
