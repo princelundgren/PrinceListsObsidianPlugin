@@ -1,7 +1,7 @@
 ---
 status: building
 verified: 2026-11-25
-governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
+governs: [.github/workflows/claude-code-review.yml]
 ---
 
 # PrinceLists: the pull request review agent
@@ -34,22 +34,21 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
     thread is resolved.
   - The shared workflow's job skips drafts, a fork's pull request, and anything a bot opened or
     sent. The caller's `concurrency` lets a person's new push cancel a review that is still running.
-- **`@claude` on demand (owner, 2026-10-20).** `claude.yml` runs when a comment on an issue, or on
-  a pull request from a branch in this repository, mentions `@claude`. Claude answers in a comment.
-- **Forks get neither (owner, 2026-10-20).** The maintainer reviews a fork's pull request.
-- **Claude reviews and answers; it doesn't change code (call).** Neither workflow lets it commit
-  or push. Asking it to fix something gets a suggested change in a comment. Letting it push would
-  need the Claude GitHub App's token, which carries the app's full permissions.
-- **The actions.** `claude.yml` pins [anthropics/claude-code-action](https://github.com/anthropics/claude-code-action)
-  and `actions/checkout` to full commit SHAs, and Dependabot proposes updates. The review calls the
-  shared workflow at `v1`, a moving tag for releases with the same caller contract.
+- **No `@claude` (owner, 2026-11-25).** The mention workflow, `claude.yml`, was removed: from
+  2026-10-21 nobody asked it anything, and replies that only named it started runs that spent
+  subscription usage.
+- **Forks get no review (owner, 2026-10-20).** The maintainer reviews a fork's pull request.
+- **Claude reviews; it doesn't change code (call).** The review can't commit or push. Letting it
+  push would need the Claude GitHub App's token, which carries the app's full permissions.
+- **The actions.** The review calls the shared workflow at `v2`, a moving tag for releases with the
+  same caller contract.
 
 ## Why
 
 - **One maintainer.** A first pass catches broken rules and drift from the design before the
   owner reads the change.
 - **A shared review, not a copy (owner, 2026-11-18).** Several repositories use the same review,
-  so a fix to it lands once, and `v1` brings it here without a change in this repository.
+  so a fix to it lands once, and `v2` brings it here without a change in this repository.
 - **A review prompt, not the code-review plugin (call).** The documentation offers both.
   The prompt wins because:
   - The plugin can't be pinned the documented way. The action's `plugin_marketplaces` input takes
@@ -66,21 +65,17 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
 
 ## Trust model
 
-"Both workflows" here means `claude.yml` and the shared workflow that `claude-code-review.yml`
-calls: the review's settings below are the shared workflow's, at whatever `v1` points to.
+The review's settings below are the shared workflow's, at whatever `v2` points to.
 
 - **Who starts Claude.** The shared workflow's job runs the review only for a pull request from a
-  branch here, opened by a person, so its author has write access. `claude.yml` starts only for a
-  comment by a person whose association with the repository is owner, member or collaborator. The
-  action then checks the commenter's write access and rejects bots. Both workflows leave
-  `allowed_bots` empty and don't use `allowed_non_write_users`.
+  branch here, opened by a person, so its author has write access. It leaves `allowed_bots` empty
+  and doesn't use `allowed_non_write_users`.
   - Claude doesn't review Dependabot's pull requests, or any other bot's: the gate covers the pull
     request's author and the event's sender, so the review never reads the text of a pull request
     a bot opened, and a bot's events can't cancel a review. Commits inside a person's pull request
-    can come from anyone. `@claude` does read that text when someone with write access asks on a
-    bot's pull request.
-- **The token (call).** Both workflows give the action the job's own token. It can read the code
-  and write to pull requests (and, for `@claude`, issues), but it can't push. The Claude GitHub
+    can come from anyone.
+- **The token (call).** The review gives the action the job's own token. It can read the code
+  and write to pull requests, but it can't push. The Claude GitHub
   App's token is the action's default, but it carries the app's full permissions, including
   writing code and workflows, and a workflow can't narrow them. Comments therefore come from
   `github-actions[bot]`.
@@ -89,19 +84,14 @@ calls: the review's settings below are the shared workflow's, at whatever `v1` p
     the shared workflow's (its README, "What it guards"): three exact `gh` commands for its own
     pull request, inline comments, and no way to read anyone else's comments. It isn't given each
     commit's changed lines, so the author checks the commit size rule in `AGENTS.md`.
-  - For `@claude`, deny rules take back the file-edit tools, `git add`, `git commit`, `git rm` and
-    the push that the action grants when it's mentioned. In the action's `acceptEdits` mode, shell
-    commands such as `mkdir`, `mv` or `sed` can still change files in the checkout, but nothing
-    can commit or push them.
-  - Neither workflow can use `WebFetch`, which would otherwise reach some preapproved domains
-    without asking.
-- **Reads stay in the working directory (call).** Both workflows set Claude Code's
+  - The review can't use `WebFetch`, which would otherwise reach some preapproved domains without
+    asking.
+- **Reads stay in the working directory (call).** The shared workflow sets Claude Code's
   `blockReadsOutsideWorkingDirectories`, so Claude's file tools and its shell reads can't reach
   outside the checkout. That matters because the action's own processes keep the Claude token in
-  their environment, readable under `/proc`. `@claude` also gets the folder where the action
-  writes CI job logs.
-- **The environment scrub (call).** Both workflows set `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`, so the
-  commands Claude runs don't get the credentials it recognizes, such as the Claude token. GitHub
+  their environment, readable under `/proc`.
+- **The environment scrub (call).** The shared workflow sets `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`,
+  so the commands Claude runs don't get the credentials it recognizes, such as the Claude token. GitHub
   tokens stay, so `gh` works. It cleans only the processes Claude starts, not the action's own,
   hence the read block above. Claude Code also runs those commands in their own process
   namespace, which hides the action's processes from them.
@@ -116,38 +106,27 @@ calls: the review's settings below are the shared workflow's, at whatever `v1` p
   such as `.claude/`, `.mcp.json` and `CLAUDE.md`, from the base branch. `AGENTS.md` and a
   `CLAUDE.md` in a subfolder aren't on that list, so a pull request that edits or adds one is
   reviewed against its own version. Only people with write access open pull requests from
-  branches here, and neither workflow runs on a fork's, so a fork's `AGENTS.md` never reaches
+  branches here, and the review doesn't run on a fork's, so a fork's `AGENTS.md` never reaches
   Claude.
 - **Untrusted text.** Issues and comments can come from anyone and carry hidden instructions.
-  - For `@claude`, the action strips hidden markup from the context it gathers, and its docs warn
-    that new bypasses may emerge. An appended system prompt tells Claude that this text, and a pull
-    request's code, is material to read, never instructions.
   - The review reads, unfiltered, the pull request's title, description, commit messages and diff,
     written or pushed by someone with write access, and its own summaries. Its prompt says the
     same.
   - The limited token and tools bound what a successful injection could do.
-- **The job token is readable.** In both workflows the action writes the job's token into the
+- **The job token is readable.** The action writes the job's token into the
   checkout's git configuration, in the origin URL, whatever checkout's `persist-credentials` says.
   Claude can read it there. That's accepted: the token can't push, and it expires with the job.
-  So `persist-credentials: false` is tidiness, not a control. Both workflows set it; `claude.yml`
-  could only once the repository was public, because while it was private the action's branch
-  setup fetched with checkout's credential before setting its own.
-- **Accepted: the summary filter.** The review reads earlier comments by `github-actions` that
-  start with "## Claude review". `@claude`'s comments come from the same account, so an injected
-  `@claude` could plant one. That would need `@claude` to be injected first, which already reaches
-  further.
+  So `persist-credentials: false` is tidiness, not a control.
 
 ## Auth and cost (owner, 2026-10-20)
 
 - **A Claude subscription token**, made with `claude setup-token`. It lasts a year. The review
-  reads it from Parameter Store through the shared workflow; `@claude` reads it from a
-  `CLAUDE_CODE_OAUTH_TOKEN` secret. Runs count against the subscription's usage, not API billing.
-  Neither workflow needs the Claude GitHub App. Replies post as `github-actions[bot]`.
-- **Bounded runs (call).** Each workflow sets `--max-turns` and a job timeout. A run that reaches
+  reads it from Parameter Store through the shared workflow. Runs count against the
+  subscription's usage, not API billing. The review doesn't need the Claude GitHub App. Replies
+  post as `github-actions[bot]`.
+- **Bounded runs (call).** The shared workflow allows 50 turns and 20 minutes. A run that reaches
   the turn limit ends with an error, possibly before the review's summary is posted. A person's
   new push cancels a review that is still running.
-  - The review allows 50 turns and 20 minutes, set in the shared workflow; `@claude` allows 30
-    turns and 30 minutes.
 
 ## Since going public (2026-10-22)
 
@@ -159,8 +138,6 @@ calls: the review's settings below are the shared workflow's, at whatever `v1` p
   pull request that falls behind `main` still needs its branch updated before it merges.
 - **A ruleset for tags** covers creating, updating and deleting them, since a pushed tag starts
   the release workflow. Only the repository admin role bypasses it.
-- **`persist-credentials: false` in `claude.yml`,** for tidiness only (see "The job token is
-  readable").
 - **Actions** allow only GitHub's own actions, `anthropics/claude-code-action`, the
   `oven-sh/setup-bun` it uses, the shared review's repository
   (`princelundgren/prince-claude-pr-review-workflow/*`), and the token reader it runs,
@@ -178,8 +155,3 @@ calls: the review's settings below are the shared workflow's, at whatever `v1` p
 - **The scrub and the process namespace apply.** The log lists `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: 1`
   in the action's environment, and `ps aux | wc -l` gave 5 inside Claude's shell.
 - **The exact comment rule matches.** The review posted with `gh pr comment N --body-file -`.
-
-## Not yet verified
-
-- **`@claude` reading `AGENTS.md`.** Claude Code reads it when there's no `CLAUDE.md`, from 2.1.277,
-  but `claude.yml`'s prompt doesn't name it, and no `@claude` run has shown it loaded.
