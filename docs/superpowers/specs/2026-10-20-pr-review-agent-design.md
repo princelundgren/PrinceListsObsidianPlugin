@@ -1,6 +1,6 @@
 ---
 status: building
-verified: 2026-11-18
+verified: 2026-11-25
 governs: [.github/workflows/claude-code-review.yml, .github/workflows/claude.yml]
 ---
 
@@ -21,7 +21,9 @@ Decisions are marked **(owner)** and **(call)** as in the main design.
   can check that the review saw the commit being merged **(owner, 2026-11-18)**.
   - **It calls the shared review (owner, 2026-11-18).** `claude-code-review.yml` is a caller of
     [prince-claude-pr-review-workflow](https://github.com/princelundgren/prince-claude-pr-review-workflow)'s
-    `claude-review.yml` at its `v1` tag, passing only `CLAUDE_CODE_OAUTH_TOKEN`. The prompt, the
+    `claude-review.yml` at its `v2` tag, granting `id-token: write` and passing only the
+    `CI_SECRETS_AWS_ACCOUNT` secret: `v2` reads the Claude token from the maintainer's AWS
+    Parameter Store over GitHub OIDC **(owner, 2026-11-25)**. The prompt, the
     tools and the job's safeguards live there; its README's "What it does" and "What it guards"
     describe them.
   - It reads `AGENTS.md` first, so this repository's rules, keeping `docs/` true among them, apply
@@ -137,10 +139,10 @@ calls: the review's settings below are the shared workflow's, at whatever `v1` p
 
 ## Auth and cost (owner, 2026-10-20)
 
-- **A Claude subscription token.** The workflows read a `CLAUDE_CODE_OAUTH_TOKEN` secret, made
-  with `claude setup-token`. It lasts a year. Runs count against the subscription's usage, not
-  API billing. Neither workflow needs the Claude GitHub App, only this secret. Replies post as
-  `github-actions[bot]`.
+- **A Claude subscription token**, made with `claude setup-token`. It lasts a year. The review
+  reads it from Parameter Store through the shared workflow; `@claude` reads it from a
+  `CLAUDE_CODE_OAUTH_TOKEN` secret. Runs count against the subscription's usage, not API billing.
+  Neither workflow needs the Claude GitHub App. Replies post as `github-actions[bot]`.
 - **Bounded runs (call).** Each workflow sets `--max-turns` and a job timeout. A run that reaches
   the turn limit ends with an error, possibly before the review's summary is posted. A person's
   new push cancels a review that is still running.
@@ -160,9 +162,10 @@ calls: the review's settings below are the shared workflow's, at whatever `v1` p
 - **`persist-credentials: false` in `claude.yml`,** for tidiness only (see "The job token is
   readable").
 - **Actions** allow only GitHub's own actions, `anthropics/claude-code-action`, the
-  `oven-sh/setup-bun` it uses, and the shared review's repository
-  (`princelundgren/prince-claude-pr-review-workflow/*`). Runs from outside contributors' fork pull
-  requests wait for approval.
+  `oven-sh/setup-bun` it uses, the shared review's repository
+  (`princelundgren/prince-claude-pr-review-workflow/*`), and the token reader it runs,
+  `princelundgren/prince-ssm-secrets-action` with the `aws-actions/configure-aws-credentials` it
+  uses. Runs from outside contributors' fork pull requests wait for approval.
 
 ## Verified on the first runs (2026-10-21)
 
