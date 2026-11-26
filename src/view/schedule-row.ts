@@ -1,5 +1,6 @@
 import { setIcon, setTooltip, type Component } from 'obsidian';
 import { RIBBON_ICON } from '../constants';
+import type { OverdueStyle } from '../core/overdue';
 import { listFolder, type ListGroup, type ScheduledItem } from '../core/schedule';
 import { addHiddenLabel } from './dom';
 import { renderInline, type MarkdownHost } from './notes';
@@ -12,7 +13,7 @@ export const LIST_HEADING_CLASS = 'princelists-schedule-list-heading';
  * A Schedule row for `item`, with its list's name when `showsList`, and the Component its
  * rendered title needs, which `host` must remove once the row goes.
  */
-export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today: string, { showsList }: { showsList: boolean }): { rowEl: HTMLLIElement; block: Component | null } {
+export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today: string, { showsList, overdue }: { showsList: boolean; overdue: OverdueStyle }): { rowEl: HTMLLIElement; block: Component | null } {
 	const rowEl = createEl('li', { cls: ITEM_CLASS });
 	rowEl.toggleClass('is-done', item.done);
 	addTickZone(rowEl);
@@ -25,7 +26,7 @@ export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today:
 	const block = renderInline(host, item.listPath, titleAndTags.createDiv({ cls: 'princelists-item-title' }), item.title);
 	addTags(titleAndTags, item.tailTags);
 	if (item.starred) addStar(titleLine);
-	addWhen(titleLine, item.day, today);
+	addWhen(titleLine, item.day, today, item.done, overdue);
 	if (item.repeats) addRepeat(titleLine);
 	if (showsList) addListName(text, item.listName, listFolder(item.listPath));
 	return { rowEl, block };

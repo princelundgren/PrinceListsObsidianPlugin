@@ -7,11 +7,13 @@ import { labelWithKey } from '../core/key-name';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import type { OverdueStyle } from '../core/overdue';
 import { byList, datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { litForStrip, NO_LIT_TAGS, type LitTags } from '../core/tags';
 import { backDayMessage, dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
+import type { OverdueLook } from '../obsidian/overdue-look';
 import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine, listTags } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
@@ -71,8 +73,10 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	// design, "Saving").
 	private readonly comeBackFailedOn = new Map<string, string>();
 	private blocks: Component[] = [];
-	// Today, the groups and the tag strip as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
+	// Today, the overdue settings, the groups and the tag strip as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
 	private drawn: string | null = null;
+	// The day drawn last, whose days read differently after midnight.
+	private drawnDay: string | null = null;
 	filter: string | null = null;
 	filterField: FilterField | null = null;
 	/** Off each time the Schedule opens, as its filter is. */
@@ -91,6 +95,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	constructor(
 		leaf: WorkspaceLeaf,
 		private readonly archiveDelay: ArchiveDelay,
+		private readonly overdueLook: OverdueLook,
 		readonly tagStripMode: () => TagStripMode,
 		private readonly grouping: ScheduleGrouping,
 	) {
@@ -138,11 +143,16 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) void this.refresh();
 		}));
-		onWindowReturn(this, this.containerEl, () => this.bringBack());
+		onWindowReturn(this, this.containerEl, () => {
+			// No timer moves the rows' days, so on a new day the window's focus draws them again.
+			if (this.drawnDay !== null && dayOf(new Date()) !== this.drawnDay) this.draw();
+			this.bringBack();
+		});
 		this.registerEvent(metadataCache.on('changed', (file, data, cache) => this.listChanged(file, data, cache)));
 		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
 		this.registerEvent(this.archiveDelay.onChange(() => this.draw()));
+		this.registerEvent(this.overdueLook.onChange(() => this.draw()));
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
 		this.registerDomEvent(this.contentEl, 'mousedown', (evt) => {
 			if (targetOf(evt)?.closest(FILTER_TOGGLE_SELECTOR)) evt.preventDefault();
@@ -358,7 +368,9 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		// No row shows its notes, so saving them alone draws nothing again.
 		const shown = groups.map(({ items, ...group }) => ({ ...group, items: items.map(({ notes: _notes, ...row }) => row) }));
 		const grouped = this.grouping.byList();
-		const drawn = JSON.stringify([today, dated.length === 0, shown, strip, this.litTags, grouped]);
+		const overdue = this.overdueLook.style;
+		const drawn = JSON.stringify([today, overdue, dated.length === 0, shown, strip, this.litTags, grouped]);
+		this.drawnDay = today;
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;
@@ -371,19 +383,19 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 			const heading = this.groupsEl.createDiv({ cls: HEADING_CLASS, text: GROUP_NAMES[group], attr: { role: 'heading', 'aria-level': 2 } });
 			this.headings.set(heading, group);
 			addCollapseArrow(heading, collapsed);
-			if (!grouped) this.drawRows(items, today, { showsList: true });
+			if (!grouped) this.drawRows(items, today, { showsList: true, overdue });
 			else {
 				for (const list of byList(items)) {
 					const listHeading = this.groupsEl.appendChild(buildListHeading(list));
 					this.listHeadings.set(listHeading, list.listPath);
-					this.drawRows(list.items, today, { showsList: false });
+					this.drawRows(list.items, today, { showsList: false, overdue });
 				}
 			}
 		}
 		this.scrollEl.scrollTop = scroll;
 	}
 
-	private drawRows(items: readonly ScheduledItem[], today: string, options: { showsList: boolean }): void {
+	private drawRows(items: readonly ScheduledItem[], today: string, options: { showsList: boolean; overdue: OverdueStyle }): void {
 		if (items.length === 0) return;
 		const list = this.groupsEl.createEl('ul', { cls: ITEMS_CLASS });
 		for (const item of items) {

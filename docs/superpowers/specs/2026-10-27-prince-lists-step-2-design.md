@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-18
+verified: 2026-11-26
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -351,10 +351,35 @@ this met on 2026-10-30 **(owner)**.
     clear the day.
 - **On a row (call):** a short day at the row's end, with no icon of its own: "Today", "Tomorrow", a
   weekday for the rest of the next seven days, or else the date, in the language set in Obsidian.
-  A past day shows its date. A repeating item's `repeat` icon stands just before it (repeating
-  items' design, "Showing a repeat").
+  A past day shows "Yesterday" for the day before today and the date for any earlier day, ticked or
+  not, unless the item is overdue (below). A repeating item's `repeat` icon stands just before it
+  (repeating items' design, "Showing a repeat").
   - **A date in the current year has no year (owner, 2026-11-05),** such as "Nov 12", since the
     year took much of the row; one in another year keeps it, such as "Jan 4, 2027".
+  - **An overdue item reads as late (owner, 2026-11-26, #163),** in a list, a list inside another
+    note and the Schedule alike, so one item reads the same everywhere. It's overdue when it isn't
+    ticked and its When, the `⏳` the row shows, is before today; a `📅` or `🛫` date doesn't count
+    **(call)**. A ticked item shows its day as any past day does, and a tick or an untick changes
+    the day's label and color at once **(call)**. Like every row, it runs no timer: an item turns
+    overdue when its view next draws after midnight, and a list or a list inside another note draws
+    again when it or Obsidian's window gets focus on a new day, as the Schedule does **(call)**.
+  - **Its label is a setting (owner, 2026-11-26),** "Overdue dates show" (Settings, below):
+    "Yesterday or the date", the default, which shows the day as any past day shows it, so a row
+    shows when it slipped without opening the card; "Overdue"; or "Today", which matches the group
+    it sits in.
+  - **Its color is a setting too (owner, 2026-11-26),** "Color overdue dates", on by default: the
+    day takes `--text-error`, so it follows the theme, with every label. The `repeat` icon before
+    it keeps `--text-muted` **(call)**.
+  - **A screen reader hears "Overdue,"** then the day as "Yesterday or the date" shows it, such as
+    "Overdue, Yesterday" or "Overdue, Nov 23", whatever the label shows, since the color can't
+    reach it. It's text only a screen reader reads, in place of the shown label, never an
+    `aria-label`, which Obsidian shows as a tooltip **(call)**.
+  - **The card shows the day as "Yesterday or the date" does,** in its accent color, whatever the
+    setting, so an overdue item's date is one click away **(call)**. The repeat form's next days
+    and the "Back …" notice are never past, so they don't change.
+  - **Showing "Today" for every past day by default was weighed (owner, 2026-11-26)** and left as
+    an option: it hides which items slipped. A separate Overdue group above Today would change the
+    decided groups.
 - **The Schedule view** is a view of its own, opened with an "Open schedule" command and a ribbon
   icon **(call)**. The icon is Lucide's `calendar-clock`, not `calendar`, which the Daily notes
   core plugin's ribbon button uses **(owner, 2026-10-27)**. It gathers, from every list in the vault, the items with a When
@@ -410,7 +435,8 @@ this met on 2026-10-30 **(owner)**.
   list's name, and go to the row's right edge in a narrow pane, as in every row ("Where the star
   and the day sit").
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
-    Today with no day read as an item with no date beside the overdue ones that show theirs.
+    Today with no day read as an item with no date beside the overdue ones, which always show a
+    label.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
   its title in a list's title style. A muted line under it says in a few words what the page shows,
   so it takes one line on a phone, and the empty page says how an item gets a When **(owner,
@@ -446,8 +472,8 @@ this met on 2026-10-30 **(owner)**.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
   metadata cache's `changed` event and the vault's `rename` and `delete`. Those keep the lists it
   has read current, so focus reads only lists it doesn't hold yet, and it draws again only when
-  today or its rows change. Like a list, it runs no timer, so a view left open over midnight moves
-  its items when it next gets focus.
+  today, its rows or the overdue settings change. Like a list, it runs no timer, so a view left
+  open over midnight moves its items when it or Obsidian's window next gets focus.
 - **Repeating items that came due come back** when it opens or gets focus, or Obsidian's window
   does, while shown, never when a list changes. Every item in
   the lists it reads counts, archived and undated ones included
@@ -670,8 +696,9 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the floating "+"'s, below, and "Tag
-strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
+the plugin as it was before the page existed, except the floating "+"'s, below, "Tag
+strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting"), and the two
+overdue settings', below, which the owner chose so late items show as late from the update on.
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
@@ -689,6 +716,16 @@ strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
     `registerEvent`. A list block with an open field or a drag draws it when the field closes or
     the drag ends.
   - **It writes nothing to any list,** since archived is worked out, never written down.
+- **Overdue dates show (owner, 2026-11-26, #163):** a `dropdown` control, next after Hide ticked
+  items after **(call)**, with "Yesterday or the date" (the default), "Overdue" and "Today", saved
+  as `"yesterday-or-date"`, `"overdue"` and `"today"`. What each shows is in "When and the
+  Schedule view", "On a row". A stored value that is none of them is read as the default, as the
+  delay's is.
+- **Color overdue dates (owner, 2026-11-26, #163):** a `toggle`, on by default, next after Overdue
+  dates show **(call)**; its description says the color is the theme's error color, usually red.
+  A stored value that isn't true or false is read as the default.
+  - **A change to either redraws** the list views, the list blocks and the Schedule, as the delay's
+    does, and again when Sync brings a change. It writes nothing to any list.
 - **Floating add button (owner, 2026-11-05):** a `dropdown` control with desktop and mobile,
   desktop only, mobile only and off, saved as `"both"`, `"desktop"`, `"mobile"` and `"off"`.
   Mobile is `Platform.isMobile`, a tablet included, as for keys' names. The floating "+" shows

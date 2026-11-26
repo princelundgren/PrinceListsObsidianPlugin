@@ -737,8 +737,9 @@ textarea.princelists-heading-field {
 	outline: none;
 }
 
-/* Heard by screen readers, not seen: how many rows are selected. */
-.princelists-selection-status {
+/* Heard by screen readers, not seen: how many rows are selected, and that a row's day is overdue. */
+.princelists-selection-status,
+.princelists-spoken {
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -1180,6 +1181,10 @@ button.princelists-card-repeat.is-repeating {
 	align-self: baseline;
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
+}
+
+.princelists-when.princelists-when-overdue {
+	color: var(--text-error);
 }
 
 /* In the day's color and font size, just before it. */

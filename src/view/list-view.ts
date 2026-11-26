@@ -10,13 +10,16 @@ import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
 import { listInheritedTags } from '../core/display';
 import type { InheritedTags } from '../core/inherited-tags';
+import type { OverdueStyle } from '../core/overdue';
 import { parseList, type ListModel } from '../core/parse';
 import type { RepeatDraft } from '../core/repeat-line';
 import { serialQueue } from '../core/queue';
 import { RowSelection } from '../core/selection';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { NO_LIT_TAGS, type LitTags } from '../core/tags';
+import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
+import type { OverdueLook } from '../obsidian/overdue-look';
 import { contentStartLine, isListText, listTags } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import type { PrinceListsSettings } from '../obsidian/settings';
@@ -105,6 +108,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		const model = parseList(lines, contentStartLine(text));
 		return { lines, model, inherited: listInheritedTags(lines, model, listTags(text)) };
 	});
+	// The day the rows were drawn on, whose days read differently after midnight.
+	private drawnDay: string | null = null;
 	/** How many outside changes the view has taken, so a queued tap can tell one landed. */
 	outsideChanges = 0;
 	/** Whether the last redraw left out rows inside the list note being typed. */
@@ -124,10 +129,12 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** What the view draws, at Obsidian's readable line width, as a Markdown view's sizer. */
 	readonly listSizerEl: HTMLElement;
 	readonly tagStripMode = (): TagStripMode => this.settings().tagStrip;
+	readonly overdueStyle = (): OverdueStyle => this.overdueLook.style;
 
 	constructor(
 		leaf: WorkspaceLeaf,
 		readonly archiveDelay: ArchiveDelay,
+		private readonly overdueLook: OverdueLook,
 		private readonly settings: () => Readonly<PrinceListsSettings>,
 	) {
 		super(leaf);
@@ -211,10 +218,11 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
+		this.registerEvent(this.overdueLook.onChange(() => this.render()));
 		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
-			if (leaf === this.leaf) bringBackInList(this);
+			if (leaf === this.leaf) this.returned();
 		}));
-		onWindowReturn(this, this.containerEl, () => bringBackInList(this));
+		onWindowReturn(this, this.containerEl, () => this.returned());
 		registerFieldEvents(this);
 		registerMenuPress(this);
 		registerPopoverPress(this);
@@ -341,9 +349,16 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	// repeating item that came due, as a redraw is when the view sees the day change.
 	render(focusing: Element | null = null): void {
 		this.redrawFiltered.cancel();
+		this.drawnDay = dayOf(new Date());
 		redraw(this, focusing);
 		this.syncButtons();
 		bringBackInList(this);
+	}
+
+	// The view or its window got focus. No timer moves the rows' days, so on a new day it draws again.
+	private returned(): void {
+		if (this.drawnDay === null || dayOf(new Date()) === this.drawnDay) bringBackInList(this);
+		else this.render();
 	}
 
 	/** The toggle is part of the field, so archived items hide again with it. */
