@@ -1,4 +1,5 @@
 import { getLanguage, setIcon } from 'obsidian';
+import { rowDay, type OverdueStyle } from '../core/overdue';
 import { dayLabel } from '../core/when';
 
 const STAR_CLASS = 'princelists-star';
@@ -15,9 +16,23 @@ export function addRepeat(rowEl: HTMLElement): void {
 	if (when) rowEl.insertBefore(icon, when);
 }
 
-export function addWhen(rowEl: HTMLElement, day: string, today: string): void {
-	fillWhen(rowEl.createSpan({ cls: 'princelists-when' }), day, today);
+/**
+ * The row's day at its end. An overdue item's shows the label `style` names, in the error color when
+ * it says so, with "Overdue" and the plain label for screen readers in place of what's shown.
+ */
+export function addWhen(rowEl: HTMLElement, day: string, today: string, done: boolean, style: OverdueStyle): void {
+	const el = rowEl.createSpan({ cls: 'princelists-when' });
+	const { shown, spoken } = rowDay(day, today, done, style.label, getLanguage());
+	if (spoken === null) {
+		el.setText(shown);
+		return;
+	}
+	el.toggleClass('princelists-when-overdue', style.colored);
+	el.createSpan({ text: shown, attr: { 'aria-hidden': 'true' } });
+	el.createSpan({ cls: 'princelists-spoken', text: spoken });
 }
+
+/** The card's day: the plain label, whether or not the item is overdue. */
 
 export function fillWhen(el: HTMLElement, day: string, today: string): void {
 	el.setText(dayLabel(day, today, getLanguage()));

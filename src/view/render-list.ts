@@ -2,6 +2,7 @@ import { Platform, type Component } from 'obsidian';
 import { findsNothing, visibleSections, withoutRange, type ItemRow, type RowFilter, type SectionRows } from '../core/display';
 import type { LineRange } from '../core/follow';
 import type { Line } from '../core/lines';
+import type { OverdueStyle } from '../core/overdue';
 import type { ListModel } from '../core/parse';
 import { dayOf } from '../core/when';
 import { addCollapseArrow } from './collapse';
@@ -35,6 +36,7 @@ export const ROWS_DRAG = Platform.isDesktop;
 export interface RowHost extends MarkdownHost {
 	readonly dragsRows: boolean;
 	readonly dragsHeadings: boolean;
+	overdueStyle(): OverdueStyle;
 }
 
 export function lineOf(el: Element): number | null {
@@ -208,7 +210,7 @@ export function buildRow(host: RowHost, sourcePath: string, row: ItemRow, blocks
 	record(blocks, rowEl, renderInline(host, sourcePath, titleAndTags.createDiv({ cls: 'princelists-item-title' }), row.title));
 	addTags(titleAndTags, row.tailTags);
 	if (row.starred) addStar(rowEl);
-	if (row.when !== null) addWhen(rowEl, row.when, dayOf(new Date()));
+	if (row.when !== null) addWhen(rowEl, row.when, dayOf(new Date()), row.done, host.overdueStyle());
 	if (row.repeats) addRepeat(rowEl);
 	showDone(rowEl, row);
 	return rowEl;
@@ -217,8 +219,8 @@ export function buildRow(host: RowHost, sourcePath: string, row: ItemRow, blocks
 // A tick in place leaves a row showing other than its key says, so a moved row shows its row's box again.
 function takeRow(view: PrinceListView, sourcePath: string, row: ItemRow, blocks: Map<HTMLElement, Component>, drawn: DrawnRows, today: string): HTMLLIElement {
 	const { titleLine, ...shown } = row;
-	// Today only changes how a When reads.
-	const key = JSON.stringify(['item', sourcePath, shown.when === null ? null : today, shown]);
+	// Today and the overdue settings only change how a When reads.
+	const key = JSON.stringify(['item', sourcePath, shown.when === null ? null : [today, view.overdueStyle()], shown]);
 	const moved = drawn.get(key)?.shift();
 	if (moved?.instanceOf(HTMLLIElement)) {
 		setLine(moved, titleLine);

@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-18
+verified: 2026-11-26
 governs: [src/**, styles.css, manifest.json]
 ---
 

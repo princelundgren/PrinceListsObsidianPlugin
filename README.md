@@ -83,7 +83,7 @@ Embed a list in any note, and tick it there.
 
 - **Add** with the floating **+**, or drag the **+** to where the item goes.
 - **Drag** to reorder.
-- **Star** an item and give it a date.
+- **Star** an item and give it a date. Once the date has passed, an item you haven't ticked shows it's late.
 - **Repeat** every few days, weeks, months or years; a ticked item comes back open once its date has come and you next open its list or the Schedule.
 - **Tags** on an item, from its card or right-click menu; a tag in a heading (`## Office #work`) counts for its section, and one in the list's `tags` property for every item.
 - **Select several** by holding an item, or with Cmd+click and Shift+click, to move, date, tick, tag, star, duplicate or delete them at once.
@@ -102,7 +102,7 @@ Embed a list in any note, and tick it there.
 
 **Across lists**
 
-- **The Schedule** shows dated items by day and by list, or in date order with **Sort by date**. The ribbon icon opens it.
+- **The Schedule** shows dated items by day and by list, or in date order with **Sort by date**. Overdue items sit under Today and show they're late. The ribbon icon opens it.
 - **A list inside another note** can be ticked and edited there.
 - **Works with Tasks:** dates use the Tasks plugin's format.
 
@@ -112,7 +112,7 @@ Embed a list in any note, and tick it there.
 - **Right-click menus** on items, headings, pictures and the list.
 - **Made for touch:** finger-sized buttons, and hold to select or drag.
 - **Fits your theme,** light or dark.
-- **Settings:** a folder for new lists, when ticked items hide, the tag strip, where the floating **+** shows, a Schedule button in each list's header, and the Schedule back in the sidebar if you closed it.
+- **Settings:** a folder for new lists, when ticked items hide, what an overdue item's date says and whether it's red, the tag strip, where the floating **+** shows, a Schedule button in each list's header, and the Schedule back in the sidebar if you closed it.
 
 ## Quick start
 
@@ -152,7 +152,7 @@ Stuff for the new apartment.
 - **`princelists: true`** makes a note a list.
 - **`tags`** is the list's tags, as in `tags: [home, errands]`, set with **Tag list…** in the list's menu, in Obsidian's file properties sidebar (**Show file properties**) while the list is open, or with **Edit in Markdown**. Write the tags without a `#`, or quote it: an unquoted `tags: #home` is a YAML comment and gives the list no tag. Every item counts them.
 - **Headings** are sections, **checkboxes** are items, and lines indented under an item are its notes.
-- **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are, except that a repeating item's 📅 and 🛫 move with its ⏳ when it comes back.
+- **An item's date** is the [Tasks](https://github.com/obsidian-tasks-group/obsidian-tasks) plugin's scheduled date, ⏳. Other Tasks fields, such as 📅, stay as they are, except that a repeating item's 📅 and 🛫 move with its ⏳ when it comes back. Only the ⏳ date makes an item overdue, not 📅.
 - **`✔` with a time** marks when you ticked an item. Tasks still sees it as done.
 - **Only the lines you edit change.** The rest of the note stays as you wrote it. The one exception is a repeating item coming back, which changes its own line and unticks the checklist in its notes.
 

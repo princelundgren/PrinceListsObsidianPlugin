@@ -184,7 +184,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.rowsEl.empty();
 		this.rootEl.append(this.rowsEl);
 		const shown = sections ?? this.shownSections();
-		this.drawnRows = rowsKey(file, shown);
+		this.drawnRows = rowsKey(file, this.overdueStyle(), shown);
 		for (const section of shown) {
 			if (section.heading) this.rowsEl.append(buildHeading(this, file.path, section.heading, this.blocks));
 			let list: HTMLUListElement | null = null;
@@ -222,7 +222,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 			return;
 		}
 		const sections = this.shownSections();
-		if (rowsKey(file, sections) === drawnRows) this.drawnText = this.editing.text;
+		if (rowsKey(file, this.overdueStyle(), sections) === drawnRows) this.drawnText = this.editing.text;
 		else this.drawWith(sections);
 	}
 
@@ -272,9 +272,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 }
 
-// The link's file, today, which a row's day is shown against, and every heading and item row the block
-// draws, with the lines their LINE_ATTRs must keep true.
-function rowsKey(file: TFile, sections: SectionRows[]): string {
+// The link's file, today and the overdue settings, which a row's day is shown with, and every heading
+// and item row the block draws, with the lines their LINE_ATTRs must keep true.
+function rowsKey(file: TFile, overdue: OverdueStyle, sections: SectionRows[]): string {
 	const drawn = sections.map(({ heading, rows }) => [heading, rows.filter((row) => row.kind === 'item')]);
-	return JSON.stringify([file.path, dayOf(new Date()), drawn]);
+	return JSON.stringify([file.path, dayOf(new Date()), overdue, drawn]);
 }
