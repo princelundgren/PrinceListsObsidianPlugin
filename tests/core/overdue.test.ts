@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { colorOverdueOf, isOverdue, type OverdueLabel, overdueLabelOf, rowDay } from '../../src/core/overdue';
+import { isOverdue, type OverdueLabel, overdueLabelOf, rowDay } from '../../src/core/overdue';
 
 const TODAY = '2026-11-26';
 
@@ -10,17 +10,6 @@ describe('overdueLabelOf', () => {
 
 	test.each([undefined, 'late', 1, null])('reads %s as yesterday-or-date', (stored) => {
 		expect(overdueLabelOf(stored)).toBe('yesterday-or-date');
-	});
-});
-
-describe('colorOverdueOf', () => {
-	test.each([
-		[true, true],
-		[false, false],
-		[undefined, true],
-		['no', true],
-	])('reads %s as %s', (stored, colored) => {
-		expect(colorOverdueOf(stored)).toBe(colored);
 	});
 });
 

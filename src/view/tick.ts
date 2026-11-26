@@ -67,8 +67,8 @@ async function tick(view: PrinceListView, row: HTMLElement | null, pending: { li
 			const ticked = itemRow((edited[titleLine] as Line).text, titleLine, now, view.archiveDelay.ms);
 			// With the "At once" delay a tick archives the item, which hides it now, not at the next redraw.
 			// A tick that takes the repeat icon away, as on the last time, or brings it back, redraws too,
-			// as does one that makes an overdue item's day plain or a plain one overdue.
-			const redraws = tickRedraws(was, ticked, dayOf(now), view.showArchived);
+			// as does one that changes whether its day is overdue or its color.
+			const redraws = tickRedraws(was, ticked, dayOf(now), view.showArchived, view.overdueStyle());
 			if (!redraws && row?.isConnected && lineOf(row) === titleLine) showDone(row, ticked);
 			else view.render();
 			return;
