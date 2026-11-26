@@ -443,7 +443,8 @@ this met on 2026-10-30 **(owner)**.
   2026-11-04)**.
   - **In a pane about as narrow as a sidebar (owner, 2026-11-04),** it has a sidebar's margins and
     the title at heading size, through a container query; the width where that starts, 480 px, is
-    a **(call)**.
+    a **(call)**. On desktop its bottom margin grows by the floating "+"'s room for the status bar,
+    so the last row scrolls clear of it **(call)**.
 - **Ticking works in place.** A repeating item (🔁) ticks like any other, with the "Back" notice a
   tick in its list shows; one the plugin can't repeat shows the same message as in its list instead
   of ticking. A tick is worked out on the text the view last read, so a list changed, renamed or

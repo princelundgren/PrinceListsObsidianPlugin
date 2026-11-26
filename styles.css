@@ -1763,10 +1763,10 @@ button.princelists-collapse {
 }
 
 /* In a pane about as narrow as a sidebar, the Schedule has a sidebar's margins and a heading-sized
-   title. */
+   title. On desktop the bottom one also clears the status bar, which the wider margin already does. */
 @container (max-width: 480px) {
 	.princelists-schedule .princelists-scroll {
-		padding: var(--size-4-3);
+		padding: var(--size-4-3) var(--size-4-3) calc(var(--size-4-3) + var(--princelists-status-bar-room, 0px));
 	}
 
 	.princelists-schedule-title {
