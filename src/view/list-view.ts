@@ -17,6 +17,7 @@ import { serialQueue } from '../core/queue';
 import { RowSelection } from '../core/selection';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { NO_LIT_TAGS, type LitTags } from '../core/tags';
+import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import type { OverdueLook } from '../obsidian/overdue-look';
 import { contentStartLine, isListText, listTags } from '../obsidian/marker';
@@ -107,6 +108,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		const model = parseList(lines, contentStartLine(text));
 		return { lines, model, inherited: listInheritedTags(lines, model, listTags(text)) };
 	});
+	// The day the rows were drawn on, whose days read differently after midnight.
+	private drawnDay: string | null = null;
 	/** How many outside changes the view has taken, so a queued tap can tell one landed. */
 	outsideChanges = 0;
 	/** Whether the last redraw left out rows inside the list note being typed. */
@@ -217,9 +220,9 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
 		this.registerEvent(this.overdueLook.onChange(() => this.render()));
 		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
-			if (leaf === this.leaf) bringBackInList(this);
+			if (leaf === this.leaf) this.returned();
 		}));
-		onWindowReturn(this, this.containerEl, () => bringBackInList(this));
+		onWindowReturn(this, this.containerEl, () => this.returned());
 		registerFieldEvents(this);
 		registerMenuPress(this);
 		registerPopoverPress(this);
@@ -346,9 +349,16 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	// repeating item that came due, as a redraw is when the view sees the day change.
 	render(focusing: Element | null = null): void {
 		this.redrawFiltered.cancel();
+		this.drawnDay = dayOf(new Date());
 		redraw(this, focusing);
 		this.syncButtons();
 		bringBackInList(this);
+	}
+
+	// The view or its window got focus. No timer moves the rows' days, so on a new day it draws again.
+	private returned(): void {
+		if (this.drawnDay === null || dayOf(new Date()) === this.drawnDay) bringBackInList(this);
+		else this.render();
 	}
 
 	/** The toggle is part of the field, so archived items hide again with it. */

@@ -75,6 +75,8 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	private blocks: Component[] = [];
 	// Today, the overdue settings, the groups and the tag strip as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
 	private drawn: string | null = null;
+	// The day drawn last, whose days read differently after midnight.
+	private drawnDay: string | null = null;
 	filter: string | null = null;
 	filterField: FilterField | null = null;
 	/** Off each time the Schedule opens, as its filter is. */
@@ -141,7 +143,11 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) void this.refresh();
 		}));
-		onWindowReturn(this, this.containerEl, () => this.bringBack());
+		onWindowReturn(this, this.containerEl, () => {
+			// No timer moves the rows' days, so on a new day the window's focus draws them again.
+			if (this.drawnDay !== null && dayOf(new Date()) !== this.drawnDay) this.draw();
+			this.bringBack();
+		});
 		this.registerEvent(metadataCache.on('changed', (file, data, cache) => this.listChanged(file, data, cache)));
 		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
@@ -364,6 +370,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const grouped = this.grouping.byList();
 		const overdue = this.overdueLook.style;
 		const drawn = JSON.stringify([today, overdue, dated.length === 0, shown, strip, this.litTags, grouped]);
+		this.drawnDay = today;
 		if (drawn === this.drawn) return;
 		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;

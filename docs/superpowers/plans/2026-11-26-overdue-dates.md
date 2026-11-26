@@ -59,8 +59,8 @@ a copy of the demo vault (AGENTS.md).
    label too, and hovering the day shows no tooltip. Manual check in Task 3.
 4. **A narrow pane or a phone with "Overdue" shown:** the longer word keeps the row's layout, the
    day at the row's end as other labels are. Manual check in Task 3.
-5. **A view left open over midnight:** the next focus or draw marks items that became overdue,
-   since all three redraw keys already carry today. Manual check in Task 3: with an item dated
+5. **A view left open over midnight:** the next focus or draw marks items that became overdue:
+   each view draws again when it or the window gets focus on a new day. Manual check in Task 3: with an item dated
    today, turn off automatic date and time in macOS's Date & Time settings, set the date a day on,
    then focus the view; set it back after.
 

@@ -47,9 +47,11 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private drawnText: string | null = null;
 	// What the rows showed when drawn, or null when the block drew a message instead.
 	private drawnRows: string | null = null;
-	// The archive delay or the overdue settings changed under an open field or a drag, so the rows are
-	// drawn when that ends.
+	// The archive delay, the overdue settings or the day changed under an open field or a drag, so the
+	// rows are drawn when that ends.
 	private rowLookChangedSinceDraw = false;
+	// The day the rows were drawn on, whose days read differently after midnight.
+	private drawnDay: string | null = null;
 	// The text the last comeback failed to write on: a failed write isn't tried again (step one's design,
 	// "Saving").
 	private comeBackFailedOn: string | null = null;
@@ -73,9 +75,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		const { metadataCache, vault, workspace } = this.app;
 		this.registerEvent(metadataCache.on('changed', (file, data) => this.fileChanged(file, data)));
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
-			if (leaf?.view.containerEl.contains(this.rootEl)) this.bringBack();
+			if (leaf?.view.containerEl.contains(this.rootEl)) this.returned();
 		}));
-		onWindowReturn(this, this.rootEl, () => this.bringBack());
+		onWindowReturn(this, this.rootEl, () => this.returned());
 		this.registerEvent(vault.on('create', () => void this.resolve()));
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
@@ -143,6 +145,12 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		});
 	}
 
+	// Its note or window got focus. No timer moves the rows' days, so on a new day they draw again.
+	private returned(): void {
+		if (this.drawnDay !== null && dayOf(new Date()) !== this.drawnDay) this.rowLookChanged();
+		this.bringBack();
+	}
+
 	dragHost(): RowDragHost {
 		return blockDragHost(this);
 	}
@@ -154,8 +162,8 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 
 	// After a field closes, whose title went back in its place, or a drag ends: the rows are drawn
-	// again only if the text, the archive delay or the overdue settings changed since they were, and
-	// never under a drag.
+	// again only if the text, the archive delay, the overdue settings or the day changed since they were,
+	// and never under a drag.
 	drawIfChanged(): void {
 		if (!this.dragging && (this.editing.text !== this.drawnText || this.rowLookChangedSinceDraw)) this.draw();
 	}
@@ -168,6 +176,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private drawWith(sections: SectionRows[] | null): void {
 		this.drawnText = this.editing.text;
 		this.rowLookChangedSinceDraw = false;
+		this.drawnDay = dayOf(new Date());
 		this.drawnRows = null;
 		// A drag whose row this detaches may never end here: a drop outside the block, or Escape,
 		// sends rowsEl nothing.

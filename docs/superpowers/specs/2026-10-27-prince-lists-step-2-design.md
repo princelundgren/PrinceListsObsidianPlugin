@@ -361,7 +361,8 @@ this met on 2026-10-30 **(owner)**.
     ticked and its When, the `⏳` the row shows, is before today; a `📅` or `🛫` date doesn't count
     **(call)**. A ticked item shows its day as any past day does, and a tick or an untick changes
     the day's label and color at once **(call)**. Like every row, it runs no timer: an item turns
-    overdue when its view next draws after midnight.
+    overdue when its view next draws after midnight, and a list or a list inside another note draws
+    again when it or Obsidian's window gets focus on a new day, as the Schedule does **(call)**.
   - **Its label is a setting (owner, 2026-11-26),** "Overdue dates show" (Settings, below):
     "Yesterday or the date", the default, which shows the day as any past day shows it, so a row
     shows when it slipped without opening the card; "Overdue"; or "Today", which matches the group
@@ -472,7 +473,7 @@ this met on 2026-10-30 **(owner)**.
   metadata cache's `changed` event and the vault's `rename` and `delete`. Those keep the lists it
   has read current, so focus reads only lists it doesn't hold yet, and it draws again only when
   today, its rows or the overdue settings change. Like a list, it runs no timer, so a view left
-  open over midnight moves its items when it next gets focus.
+  open over midnight moves its items when it or Obsidian's window next gets focus.
 - **Repeating items that came due come back** when it opens or gets focus, or Obsidian's window
   does, while shown, never when a list changes. Every item in
   the lists it reads counts, archived and undated ones included
