@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: prince-lists-obsidian-plugin
+  description: Obsidian plugin for todo lists in plain Markdown notes, on desktop and mobile
+spec:
+  type: app
+  lifecycle: production
+  owner: prince
+  system: apps
