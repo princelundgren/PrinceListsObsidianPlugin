@@ -66,9 +66,9 @@ describe('days', () => {
 		expect(daysFrom('2026-03-28', '2026-03-30')).toBe(2);
 		expect(daysFrom('2026-12-31', '2027-01-01')).toBe(1);
 	});
-	test('dayLabelKind names today, tomorrow, the next days by weekday, and the rest by date', () => {
-		const kinds = ['2026-10-27', '2026-10-28', '2026-10-29', '2026-11-02', '2026-11-03', '2026-10-26'].map((day) => dayLabelKind(day, '2026-10-27'));
-		expect(kinds).toEqual(['today', 'tomorrow', 'weekday', 'weekday', 'date-this-year', 'date-this-year']);
+	test('dayLabelKind names today, tomorrow, yesterday, the next days by weekday, and the rest by date', () => {
+		const kinds = ['2026-10-27', '2026-10-28', '2026-10-29', '2026-11-02', '2026-11-03', '2026-10-26', '2026-10-25'].map((day) => dayLabelKind(day, '2026-10-27'));
+		expect(kinds).toEqual(['today', 'tomorrow', 'weekday', 'weekday', 'date-this-year', 'yesterday', 'date-this-year']);
 	});
 	test('dayLabelKind keeps the year only for a date in another year', () => {
 		const kinds = ['2026-12-31', '2027-01-01', '2025-12-31', '2026-01-01'].map((day) => dayLabelKind(day, '2026-12-25'));
@@ -78,12 +78,16 @@ describe('days', () => {
 	test.each([
 		['2026-11-05', 'en', 'Today'],
 		['2026-11-06', 'en', 'Tomorrow'],
+		['2026-11-04', 'en', 'Yesterday'],
 		['2026-11-09', 'en', 'Monday'],
 		['2026-11-12', 'en', 'Nov 12'],
 		['2027-01-04', 'en', 'Jan 4, 2027'],
 		['2026-11-12', 'sv', '12 nov.'],
 	])('dayLabel shows %s in %s as %s', (day, language, label) => {
 		expect(dayLabel(day, '2026-11-05', language)).toBe(label);
+	});
+	test('dayLabel shows the day before New Year as yesterday, not with its year', () => {
+		expect(dayLabel('2026-12-31', '2027-01-01', 'en')).toBe('Yesterday');
 	});
 });
 
