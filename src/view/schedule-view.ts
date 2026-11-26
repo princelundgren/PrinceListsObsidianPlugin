@@ -137,6 +137,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 
 	async onOpen(): Promise<void> {
 		this.contentEl.addClass('princelists-content', 'princelists-schedule');
+		this.containerEl.toggleClass('princelists-clears-status-bar', !Platform.isMobile);
 		this.contentEl.toggleClass('princelists-is-mobile', Platform.isMobile);
 		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);
 		const { workspace, metadataCache, vault } = this.app;
