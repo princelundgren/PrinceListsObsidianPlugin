@@ -42,6 +42,7 @@ export function rowDay(day: string, today: string, done: boolean, label: Overdue
 }
 
 const OVERDUE_SHOWN: Record<OverdueLabel, string | null> = {
+	// The plain day, as any past day shows it.
 	'yesterday-or-date': null,
 	overdue: 'Overdue',
 	today: 'Today',

@@ -33,7 +33,6 @@ export function addWhen(rowEl: HTMLElement, day: string, today: string, done: bo
 }
 
 /** The card's day: the plain label, whether or not the item is overdue. */
-
 export function fillWhen(el: HTMLElement, day: string, today: string): void {
 	el.setText(dayLabel(day, today, getLanguage()));
 }
