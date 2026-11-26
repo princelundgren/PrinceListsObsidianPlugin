@@ -12,6 +12,7 @@ import type { TagStripMode } from '../core/tag-strip-mode';
 import { litForStrip, NO_LIT_TAGS, type LitTags } from '../core/tags';
 import { backDayMessage, dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
+import type { OverdueLook } from '../obsidian/overdue-look';
 import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine, listTags } from '../obsidian/marker';
 import { openAsList } from '../obsidian/switch';
@@ -91,6 +92,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	constructor(
 		leaf: WorkspaceLeaf,
 		private readonly archiveDelay: ArchiveDelay,
+		private readonly overdueLook: OverdueLook,
 		readonly tagStripMode: () => TagStripMode,
 		private readonly grouping: ScheduleGrouping,
 	) {
@@ -143,6 +145,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
 		this.registerEvent(this.archiveDelay.onChange(() => this.draw()));
+		this.registerEvent(this.overdueLook.onChange(() => this.draw()));
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
 		this.registerDomEvent(this.contentEl, 'mousedown', (evt) => {
 			if (targetOf(evt)?.closest(FILTER_TOGGLE_SELECTOR)) evt.preventDefault();

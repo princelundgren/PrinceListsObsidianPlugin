@@ -2,12 +2,14 @@ import { FileView, MarkdownView, normalizePath, Notice, Plugin, TFile, TFolder }
 import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { archiveDelayHoursOf, archiveDelayMs } from './core/archive';
 import { buttonPlatformsOf } from './core/button-platforms';
+import { colorOverdueOf, overdueLabelOf } from './core/overdue';
 import { serialQueue } from './core/queue';
 import { groupByListOf } from './core/schedule';
 import { tagStripModeOf } from './core/tag-strip-mode';
 import { ArchiveDelay } from './obsidian/archive-delay';
 import { createList, openNewList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
+import { OverdueLook } from './obsidian/overdue-look';
 import { addScheduleTab, openSchedule } from './obsidian/open-schedule';
 import { DEFAULT_SETTINGS, type PrinceListsSettings, PrinceListsSettingTab } from './obsidian/settings';
 import { openAsList, openAsMarkdown, registerAutoSwitch } from './obsidian/switch';
@@ -22,6 +24,7 @@ import { followTagStripMode } from './view/tag-strip';
 export default class PrinceListsPlugin extends Plugin {
 	settings: PrinceListsSettings = { ...DEFAULT_SETTINGS };
 	private readonly archiveDelay = new ArchiveDelay(() => archiveDelayMs(this.settings.archiveDelayHours));
+	private readonly overdueLook = new OverdueLook(() => ({ label: this.settings.overdueLabel, colored: this.settings.colorOverdue }));
 	private newListRequests = 0;
 	private readonly enqueueNewList = serialQueue((error) => {
 		console.error('PrinceLists: could not create the list', error);
@@ -31,15 +34,15 @@ export default class PrinceListsPlugin extends Plugin {
 	override async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
-		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, this.archiveDelay, () => this.settings));
+		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, this.archiveDelay, this.overdueLook, () => this.settings));
 		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) =>
-			new ScheduleView(leaf, this.archiveDelay, () => this.settings.tagStrip, {
+			new ScheduleView(leaf, this.archiveDelay, this.overdueLook, () => this.settings.tagStrip, {
 				byList: () => this.settings.groupScheduleByList,
 				setByList: (on) => void this.groupScheduleByList(on),
 			}),
 		);
 		this.registerMarkdownCodeBlockProcessor('princelists', (source, el, ctx) =>
-			ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath, this.archiveDelay)),
+			ctx.addChild(new ListBlock(this.app, el, source, ctx.sourcePath, this.archiveDelay, this.overdueLook)),
 		);
 		registerAutoSwitch(this);
 
@@ -163,13 +166,14 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onExternalSettingsChange() {
 		const before = this.archiveDelay.ms;
-		const { floatingAddButton, tagStrip, groupScheduleByList } = this.settings;
+		const { floatingAddButton, tagStrip, groupScheduleByList, overdueLabel, colorOverdue } = this.settings;
 		await this.loadSettings();
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
 		if (this.settings.floatingAddButton !== floatingAddButton) this.syncAddButtons();
 		else this.syncListButtons();
 		if (this.settings.tagStrip !== tagStrip) this.followTagStripModeInViews();
 		if (this.settings.groupScheduleByList !== groupScheduleByList) this.renderSchedules();
+		if (this.settings.overdueLabel !== overdueLabel || this.settings.colorOverdue !== colorOverdue) this.overdueLook.changed();
 	}
 
 	/** Called by the settings tab after it saves `key`. */
@@ -178,6 +182,7 @@ export default class PrinceListsPlugin extends Plugin {
 		if (key === 'showScheduleButton') this.syncListButtons();
 		if (key === 'floatingAddButton') this.syncAddButtons();
 		if (key === 'tagStrip') this.followTagStripModeInViews();
+		if (key === 'overdueLabel' || key === 'colorOverdue') this.overdueLook.changed();
 	}
 
 	private listViews(): PrinceListView[] {
@@ -219,6 +224,8 @@ export default class PrinceListsPlugin extends Plugin {
 			archiveDelayHours: archiveDelayHoursOf(stored?.archiveDelayHours),
 			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
 			tagStrip: tagStripModeOf(stored?.tagStrip),
+			overdueLabel: overdueLabelOf(stored?.overdueLabel),
+			colorOverdue: colorOverdueOf(stored?.colorOverdue),
 			groupScheduleByList: groupByListOf(stored?.groupScheduleByList),
 		};
 	}

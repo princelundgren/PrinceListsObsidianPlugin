@@ -1,6 +1,7 @@
 import { type App, PluginSettingTab, type Plugin, type SettingDefinitionItem } from 'obsidian';
 import { type ArchiveDelayHours, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import type { ButtonPlatforms } from '../core/button-platforms';
+import { DEFAULT_COLOR_OVERDUE, DEFAULT_OVERDUE_LABEL, type OverdueLabel } from '../core/overdue';
 import { DEFAULT_GROUP_BY_LIST } from '../core/schedule';
 import { DEFAULT_TAG_STRIP_MODE, type TagStripMode } from '../core/tag-strip-mode';
 import { openSchedule } from './open-schedule';
@@ -10,6 +11,10 @@ export interface PrinceListsSettings {
 	newListFolder: string;
 	/** How long after its tick a done item is archived, in hours, as the dropdown stores it. */
 	archiveDelayHours: ArchiveDelayHours;
+	/** What an overdue item's day says. */
+	overdueLabel: OverdueLabel;
+	/** Whether an overdue item's day takes the theme's error color. */
+	colorOverdue: boolean;
 	/** Whether a list's header shows the "Open schedule" button. */
 	showScheduleButton: boolean;
 	/** Where a list shows the round "+" at its bottom right. */
@@ -23,6 +28,8 @@ export interface PrinceListsSettings {
 export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	newListFolder: '',
 	archiveDelayHours: DEFAULT_ARCHIVE_DELAY_HOURS,
+	overdueLabel: DEFAULT_OVERDUE_LABEL,
+	colorOverdue: DEFAULT_COLOR_OVERDUE,
 	showScheduleButton: false,
 	floatingAddButton: 'both',
 	tagStrip: DEFAULT_TAG_STRIP_MODE,
@@ -36,6 +43,12 @@ const ARCHIVE_DELAY_NAMES: Record<ArchiveDelayHours, string> = {
 	'24': '1 day',
 	'48': '2 days',
 	'168': '1 week',
+};
+
+const OVERDUE_LABEL_NAMES: Record<OverdueLabel, string> = {
+	'yesterday-or-date': 'Yesterday or the date',
+	overdue: 'Overdue',
+	today: 'Today',
 };
 
 const BUTTON_PLATFORM_NAMES: Record<ButtonPlatforms, string> = {
@@ -85,6 +98,25 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 					key: 'archiveDelayHours',
 					defaultValue: DEFAULT_SETTINGS.archiveDelayHours,
 					options: ARCHIVE_DELAY_NAMES,
+				},
+			},
+			{
+				name: 'Overdue dates show',
+				desc: "What an item's day says once it has passed and the item isn't ticked.",
+				control: {
+					type: 'dropdown',
+					key: 'overdueLabel',
+					defaultValue: DEFAULT_SETTINGS.overdueLabel,
+					options: OVERDUE_LABEL_NAMES,
+				},
+			},
+			{
+				name: 'Color overdue dates',
+				desc: "Shows an overdue item's day in your theme's error color, usually red.",
+				control: {
+					type: 'toggle',
+					key: 'colorOverdue',
+					defaultValue: DEFAULT_SETTINGS.colorOverdue,
 				},
 			},
 			{

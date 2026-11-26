@@ -10,6 +10,7 @@ import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
 import { listInheritedTags } from '../core/display';
 import type { InheritedTags } from '../core/inherited-tags';
+import type { OverdueStyle } from '../core/overdue';
 import { parseList, type ListModel } from '../core/parse';
 import type { RepeatDraft } from '../core/repeat-line';
 import { serialQueue } from '../core/queue';
@@ -17,6 +18,7 @@ import { RowSelection } from '../core/selection';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { NO_LIT_TAGS, type LitTags } from '../core/tags';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
+import type { OverdueLook } from '../obsidian/overdue-look';
 import { contentStartLine, isListText, listTags } from '../obsidian/marker';
 import { openSchedule } from '../obsidian/open-schedule';
 import type { PrinceListsSettings } from '../obsidian/settings';
@@ -124,10 +126,12 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	/** What the view draws, at Obsidian's readable line width, as a Markdown view's sizer. */
 	readonly listSizerEl: HTMLElement;
 	readonly tagStripMode = (): TagStripMode => this.settings().tagStrip;
+	readonly overdueStyle = (): OverdueStyle => this.overdueLook.style;
 
 	constructor(
 		leaf: WorkspaceLeaf,
 		readonly archiveDelay: ArchiveDelay,
+		private readonly overdueLook: OverdueLook,
 		private readonly settings: () => Readonly<PrinceListsSettings>,
 	) {
 		super(leaf);
@@ -211,6 +215,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
+		this.registerEvent(this.overdueLook.onChange(() => this.render()));
 		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) bringBackInList(this);
 		}));

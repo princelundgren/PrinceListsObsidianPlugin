@@ -9,10 +9,12 @@ import { NO_LINES_MOVED, type OwnEdit } from '../core/follow';
 import { splitLines } from '../core/lines';
 import { parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import type { OverdueStyle } from '../core/overdue';
 import { NO_LIT_TAGS } from '../core/tags';
 import { dayOf } from '../core/when';
 import { WriteEchoes } from '../core/write-echoes';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
+import type { OverdueLook } from '../obsidian/overdue-look';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { blockDragHost, enableBlockDrag } from './block-drag';
 import { NEW_ITEM_CLASS, registerBlockEvents } from './block-events';
@@ -45,8 +47,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private drawnText: string | null = null;
 	// What the rows showed when drawn, or null when the block drew a message instead.
 	private drawnRows: string | null = null;
-	// The archive delay changed under an open field or a drag, so the rows are drawn when that ends.
-	private delayChangedSinceDraw = false;
+	// The archive delay or the overdue settings changed under an open field or a drag, so the rows are
+	// drawn when that ends.
+	private rowLookChangedSinceDraw = false;
 	// The text the last comeback failed to write on: a failed write isn't tried again (step one's design,
 	// "Saving").
 	private comeBackFailedOn: string | null = null;
@@ -57,6 +60,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		source: string,
 		private readonly notePath: string,
 		private readonly archiveDelay: ArchiveDelay,
+		private readonly overdueLook: OverdueLook,
 	) {
 		super(containerEl);
 		this.link = blockLink(source);
@@ -75,10 +79,8 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerEvent(vault.on('create', () => void this.resolve()));
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
-		this.registerEvent(this.archiveDelay.onChange(() => {
-			if (this.field || this.dragging) this.delayChangedSinceDraw = true;
-			else this.drawIfRowsChanged();
-		}));
+		this.registerEvent(this.archiveDelay.onChange(() => this.rowLookChanged()));
+		this.registerEvent(this.overdueLook.onChange(() => this.rowLookChanged()));
 		registerBlockEvents(this, this.rootEl, this.notePath);
 		enableBlockDrag(this);
 		void this.resolve().then(() => this.bringBack());
@@ -152,9 +154,10 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 
 	// After a field closes, whose title went back in its place, or a drag ends: the rows are drawn
-	// again only if the text or the archive delay changed since they were, and never under a drag.
+	// again only if the text, the archive delay or the overdue settings changed since they were, and
+	// never under a drag.
 	drawIfChanged(): void {
-		if (!this.dragging && (this.editing.text !== this.drawnText || this.delayChangedSinceDraw)) this.draw();
+		if (!this.dragging && (this.editing.text !== this.drawnText || this.rowLookChangedSinceDraw)) this.draw();
 	}
 
 	draw(): void {
@@ -164,7 +167,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	// `sections`, when given, are shownSections() of the current text.
 	private drawWith(sections: SectionRows[] | null): void {
 		this.drawnText = this.editing.text;
-		this.delayChangedSinceDraw = false;
+		this.rowLookChangedSinceDraw = false;
 		this.drawnRows = null;
 		// A drag whose row this detaches may never end here: a drop outside the block, or Escape,
 		// sends rowsEl nothing.
@@ -200,6 +203,15 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		const lines = splitLines(this.editing.text);
 		const model = parseList(lines, contentStartLine(this.editing.text));
 		return visibleSections(lines, model, new Date(), { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: this.archiveDelay.ms, find: null, keepLine: null, collapsed: new Set() }, NO_INHERITED_TAGS);
+	}
+
+	overdueStyle(): OverdueStyle {
+		return this.overdueLook.style;
+	}
+
+	private rowLookChanged(): void {
+		if (this.field || this.dragging) this.rowLookChangedSinceDraw = true;
+		else this.drawIfRowsChanged();
 	}
 
 	// A change from outside often leaves every row as drawn, such as a list view's save of an item's notes.
