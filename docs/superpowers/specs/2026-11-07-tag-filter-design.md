@@ -206,7 +206,7 @@ every tagged part of a list is done, such as what is left to buy.
 - **The tag button opens a small popover (owner, #340),** over the card's content, so opening it
   moves nothing. Where it hangs is under "The popover is the plugin's own element" below; this
   replaces a popover under the button in the card's head. It holds one field with Obsidian's
-  `AbstractInputSuggest` (`@since` 1.4.10, older than `minAppVersion` 1.13.4). It suggests this
+  `AbstractInputSuggest` (`@since` 1.4.10, older than `minAppVersion`). It suggests this
   list's tags **(call)**, the same set the strip shows with no tag lit, less the item's own and
   those it inherits, and `New tag: #<tag>` for anything else. Other lists' tags aren't offered: the
   metadata cache would hold them, but with their notes' tags, which this design doesn't count. A
