@@ -19,7 +19,7 @@ vitest.
 
 ## Global Constraints
 
-- The color is `var(--text-highlight-bg)`, in `styles.css` only. Never a hard-coded color.
+- The color is `var(--highlight-background)`, in `styles.css` only. Never a hard-coded color.
 - Documented APIs only: `prepareSimpleSearch` and `SearchResult.matches` from `obsidian.d.ts`,
   Obsidian's `Node.win` and `Node.doc`, the DOM's `CSS.highlights`, `Highlight` and `Range`, and
   CodeMirror's decorations.
@@ -158,12 +158,12 @@ Expected: PASS, every existing test unchanged.
   and the end.
 
 - [ ] **Step 9: The color and its test.** In `styles.css`:
-  `::highlight(princelists-find) { background-color: var(--text-highlight-bg); }`. In
+  `::highlight(princelists-find) { background-color: var(--highlight-background); }`. In
   `tests/styles.test.ts`, a test that reads the rule's body:
 
 ```ts
 const rule = styles.match(/::highlight\(princelists-find\) \{([^}]*)\}/)?.[1];
-expect(rule).toContain('background-color: var(--text-highlight-bg);');
+expect(rule).toContain('background-color: var(--highlight-background);');
 ```
 
 Run: `npx vitest run tests/styles.test.ts`
@@ -237,7 +237,7 @@ git commit -m "Color Find's words in item titles"
     too, and `BlockWidget.destroy` calls `view.findPaint.forget(dom)`.
 
 - [ ] **Step 3: The mark's color and its test.** In `styles.css`,
-  `.princelists-find-match { background-color: var(--text-highlight-bg); }`, and in
+  `.princelists-find-match { background-color: var(--highlight-background); }`, and in
   `tests/styles.test.ts` a test that reads that rule's body, as Task 1's does.
 
 Run: `npx vitest run tests/styles.test.ts`
