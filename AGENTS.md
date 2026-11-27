@@ -24,7 +24,8 @@ this project.
     sets them from the heading's and the list's menus and beside the list's title. [Selecting several rows](docs/superpowers/specs/2026-11-07-select-several-design.md)
     acts on many items and headings at once, and [tagging a selection](docs/superpowers/specs/2026-11-12-select-tags-design.md)
     adds and removes a tag on all of them. [Repeating items](docs/superpowers/specs/2026-11-13-repeating-items-design.md)
-    are done until their next date, then come back.
+    are done until their next date, then come back. [Highlighting what Find finds](docs/superpowers/specs/2026-11-27-find-highlight-design.md)
+    colors the words Find matches.
     - Decisions marked **(owner)** are the maintainer's. Don't change one without an issue the
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
@@ -39,8 +40,9 @@ this project.
     [overdue dates](docs/superpowers/plans/2026-11-26-overdue-dates.md),
     [date colors](docs/superpowers/plans/2026-11-27-date-colors.md),
     [star color](docs/superpowers/plans/2026-11-27-star-color.md),
-    [settings sections](docs/superpowers/plans/2026-11-27-settings-sections.md) and
-    [upcoming color](docs/superpowers/plans/2026-11-27-upcoming-color.md), and
+    [settings sections](docs/superpowers/plans/2026-11-27-settings-sections.md),
+    [upcoming color](docs/superpowers/plans/2026-11-27-upcoming-color.md) and
+    [find highlight](docs/superpowers/plans/2026-11-27-find-highlight.md), and
     [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
     README's and the listing's pictures. Implement a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.
