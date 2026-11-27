@@ -20,7 +20,7 @@ const notesFindField = StateField.define<NotesFind>({
 	update(value, tr) {
 		let find = value.find;
 		for (const effect of tr.effects) if (effect.is(notesFindEffect)) find = effect.value;
-		if (find === value.find && !tr.docChanged) return value;
+		if (find === value.find && (!find || !tr.docChanged)) return value;
 		return { find, marks: marksOf(tr.state, find) };
 	},
 	provide: (field) => EditorView.decorations.from(field, (value) => value.marks),
