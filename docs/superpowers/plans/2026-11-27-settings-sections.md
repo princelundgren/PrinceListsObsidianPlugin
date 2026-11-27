@@ -6,7 +6,7 @@
 with a live preview of the date and star colors and the design's new names and descriptions.
 
 **Architecture:** `getSettingDefinitions` returns three `group` definitions. Appearance starts
-with a `render` row that draws two sample rows with `addStar`, `addWhen` and `showStarColor`, the
+with a `render` row that draws four sample rows with `addStar`, `addWhen` and `showStarColor`, the
 helpers real rows use, and redraws them on `OverdueLook.onChange`. The sample rows' data and days
 are worked out in `src/core/`, so they're tested.
 
@@ -50,16 +50,30 @@ are worked out in `src/core/`, so they're tested.
 - [ ] **Step 1: Write the failing tests**
 
 ```ts
-test('the first sample row is starred and due the day before now', () => {
-	expect(previewRows(new Date(2026, 10, 27, 9))[0]).toEqual({ title: 'Water the plants', when: '2026-11-26', starred: true });
+const now = new Date(2026, 10, 27, 9);
+
+test('the first sample row is due a week before now and not starred', () => {
+	expect(previewRows(now)[0]).toEqual({ title: 'Return the library books', when: '2026-11-20', starred: false });
 });
 
-test('the second sample row is due today and not starred', () => {
-	expect(previewRows(new Date(2026, 10, 27, 9))[1]).toEqual({ title: 'Call the dentist', when: '2026-11-27', starred: false });
+test('the second sample row is starred and due the day before now', () => {
+	expect(previewRows(now)[1]).toEqual({ title: 'Water the plants', when: '2026-11-26', starred: true });
 });
 
-test("the day before the first of a month is the last day of the month before", () => {
-	expect(previewRows(new Date(2026, 2, 1, 0, 30))[0].when).toBe('2026-02-28');
+test('the third sample row is due today and not starred', () => {
+	expect(previewRows(now)[2]).toEqual({ title: 'Call the dentist', when: '2026-11-27', starred: false });
+});
+
+test('the fourth sample row is due three days after now and not starred', () => {
+	expect(previewRows(now)[3]).toEqual({ title: 'Pick up the parcel', when: '2026-11-30', starred: false });
+});
+
+test('the day before the first of a month is the last day of the month before', () => {
+	expect(previewRows(new Date(2026, 2, 1, 0, 30))[1]?.when).toBe('2026-02-28');
+});
+
+test('three days after a day near a month end falls in the next month', () => {
+	expect(previewRows(new Date(2026, 10, 29, 9))[3]?.when).toBe('2026-12-02');
 });
 ```
 
@@ -70,13 +84,13 @@ Expected: FAIL, the module isn't there.
 
 - [ ] **Step 3: Implement `previewRows` in `src/core/settings-preview.ts`**
 
-Days through `dayOf` from `src/core/when.ts`, the day before as `new Date(y, m, d - 1)`, as
-`dayAfter` does it. A doc comment on each export.
+Days through `dayOf` from `src/core/when.ts`, each as `new Date(y, m, d + offset)`, as
+`dayAfter` does it, in date order. A doc comment on each export.
 
 - [ ] **Step 4: Run them to see them pass**
 
 Run: `npx vitest run tests/core/settings-preview.test.ts`
-Expected: PASS, 3 tests.
+Expected: PASS, 6 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -139,13 +153,13 @@ color", "Today date color". The preview is Appearance's first item:
 	searchable: false,
 	render: (setting) => {
 		setting.settingEl.addClass('princelists-settings-preview');
-		const listEl = setting.settingEl.createDiv({ cls: 'princelists-settings-preview-rows' });
-		const draw = () => drawSettingsPreview(listEl, this.overdueLook.style, new Date());
+		const previewEl = setting.settingEl.createDiv({ cls: 'princelists-settings-preview-rows' });
+		const draw = () => drawSettingsPreview(previewEl, this.overdueLook.style, new Date());
 		draw();
 		const ref = this.overdueLook.onChange(draw);
 		return () => {
 			this.overdueLook.offref(ref);
-			listEl.remove();
+			previewEl.remove();
 		};
 	},
 },

@@ -22,3 +22,7 @@ test('the fourth sample row is due three days after now and not starred', () => 
 test('the day before the first of a month is the last day of the month before', () => {
 	expect(previewRows(new Date(2026, 2, 1, 0, 30))[1]?.when).toBe('2026-02-28');
 });
+
+test('three days after a day near a month end falls in the next month', () => {
+	expect(previewRows(new Date(2026, 10, 29, 9))[3]?.when).toBe('2026-12-02');
+});

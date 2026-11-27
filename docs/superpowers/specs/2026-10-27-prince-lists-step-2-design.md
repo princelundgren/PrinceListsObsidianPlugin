@@ -721,7 +721,7 @@ the plugin as it was before the page existed, except the Add button's, below, an
 
 #### Lists
 
-- **Folder for new lists:** "Where "Create new list" puts a list. Leave empty to use Obsidian's
+- **Folder for new lists:** "Where 'Create new list' puts a list. Leave empty to use Obsidian's
   location for new notes." Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
   says. Any path is kept, and a folder that isn't there is made with the next list (call): the
