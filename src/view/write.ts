@@ -3,6 +3,7 @@ import { NO_LINES_MOVED, type OwnEdit } from '../core/follow';
 import { guardedWrite, planAndWrite, type WriteResult } from '../core/action-write';
 import type { TrackedLine } from '../core/editing';
 import { RepeatingItemError, UnsafeEditError } from '../core/edit-items';
+import { applyOwnText } from './list-follow';
 import type { PrinceListView } from './list-view';
 
 export const UNSAFE_EDIT_NOTICE = "This list's layout can't take that change. Make it in Markdown instead.";
@@ -52,7 +53,7 @@ export async function writeAction(
 			save: () => view.save(),
 			process: (fn) => view.app.vault.process(file, fn),
 			sameFile: () => view.file === file,
-			took: (text) => view.applyOwnText(text, edit),
+			took: (text) => applyOwnText(view, text, edit),
 			reread: async () => {
 				const text = await view.app.vault.read(file);
 				if (!view.viewClosed && view.file === file) view.setViewData(text, false);

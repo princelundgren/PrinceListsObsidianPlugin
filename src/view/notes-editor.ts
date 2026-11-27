@@ -12,6 +12,7 @@ import { isBlank } from '../core/parse';
 import { notesBoxClick } from './checklist';
 import { targetOf } from './dom';
 import { buildFormatBar } from './format';
+import { handleTyped } from './list-follow';
 import type { PrinceListView } from './list-view';
 import { NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
 import { drawnBlocksField, NOTES_BLOCK_CLASS } from './notes-blocks';
@@ -168,7 +169,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				const change = changedLines(tr.startState.doc.toString(), tr.state.doc.toString());
 				if (!change) continue;
 				const typed = current.save(change);
-				view.handleTyped(typed);
+				handleTyped(view, typed);
 				if ('edit' in typed) {
 					const added = addedLines(tr.state.doc.toString(), current.visitText());
 					if (!added) continue;

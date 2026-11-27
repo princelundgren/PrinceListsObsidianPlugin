@@ -2,12 +2,13 @@ import { listStripTags } from '../core/display';
 import { litForStrip, NO_LIT_TAGS } from '../core/tags';
 import { emptyHint } from '../core/empty-hint';
 import { isListText } from '../obsidian/marker';
-import { hasNoItems } from './add-button';
+import { hasNoItems, showsAddButton } from './add-button';
 import { dismissCard, refreshCard } from './card';
 import { fitHeight, replaceKeeping } from './dom';
 import { buildListNote, buildListTitle, refreshListNote, TITLE_ROW_CLASS } from './fields';
 import { addArchivedToggle, addStarredToggle, buildFilterField, NO_MATCH_CLASS, NO_MATCH_HINT } from './filter';
 import { ADD_KEY_NAME } from './keys';
+import { paintFind } from './list-find';
 import { buildListTags, LIST_TAG_BUTTON_CLASS, LIST_TAGS_CLASS } from './list-tags';
 import type { PrinceListView } from './list-view';
 import { drawnRows, END_CLASS, OPEN_AS_MARKDOWN_CLASS, renderList, type CardPlace, type FieldPlace } from './render-list';
@@ -63,7 +64,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 		if (field?.keeps) slot = field.el;
 		const listDrawn = renderList(view, fresh, lines, model, card, view.blocks, view.editing.listNoteRange(), field, drawn);
 		view.rowsHeldBack = listDrawn.heldBack;
-		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint(ADD_KEY_NAME, view.showsAddButton()) });
+		if (isEmpty) fresh.createDiv({ cls: 'princelists-empty-hint', text: emptyHint(ADD_KEY_NAME, showsAddButton(view)) });
 		if (listDrawn.foundNothing) fresh.createDiv({ cls: NO_MATCH_CLASS, text: NO_MATCH_HINT });
 		// Room to scroll the last row clear of the floating "+".
 		fresh.createDiv({ cls: END_CLASS });
@@ -98,7 +99,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);
 	listScrollEl.scrollTop = scrollTop;
 	drawSelection(view);
-	view.paintFind();
+	paintFind(view);
 }
 
 // Where a redraw puts the card: a slot for the card that keeps focus, or the card, updated.
