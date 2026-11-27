@@ -24,7 +24,7 @@ From the ribbon, a folder, or a note you already have.
 
 ### Find
 
-Filter a list by text, and bring back ticked items.
+Filter a list by text, with the words it finds colored, and bring back ticked items.
 
 ![In a todo list, an item is ticked and grays out, then the filter icon in the pane's header opens a field, its toggle brings back three items ticked days ago with blue checkboxes, and typing book leaves the three items that mention it, with the word colored in each, until the filter icon closes the field again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/filter.gif)
 
