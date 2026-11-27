@@ -151,7 +151,8 @@ this met on 2026-10-30 **(owner)**.
   `prepareFuzzySearch` (owner, 2026-11-06): the text's letters in order, with gaps between them,
   so "mlk" finds "oat milk". A wrong or swapped letter finds nothing, and neither does another
   word order. It ignores case and folds accents as Obsidian does, so "e" finds "é" (owner,
-  2026-11-06). Two letters can match a long note, which the owner accepted.
+  2026-11-06), which needs Obsidian 1.15.0 (the design's "Minimum Obsidian version"). Two letters
+  can match a long note, which the owner accepted.
   - **It searches the title, the notes and the When as the file writes it (owner, 2026-11-06),**
     each on its own, Markdown included. The When matches letter for letter, as part of the day,
     not fuzzily, so `2026-11` finds November's items, where fuzzily it would find `2026-12-01`
