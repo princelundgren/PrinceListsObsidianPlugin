@@ -230,14 +230,18 @@ describe('matchesSchedule', () => {
 		['**milk**', true],
 		['oat', true],
 		['grocer', true],
+		['milk oat grocer', true],
+		['milk bread', false],
+		['**the', false],
+		['milk 2026-10-28', false],
 		['bread', false],
 		['2026-10-28', true],
 	])('%j matches: %s', (query, matches) => {
 		expect(matchesSchedule(item, containing(query) as Find)).toBe(matches);
 	});
 
-	test('matches the day as exact text, never fuzzily', () => {
-		const anyDay = (text: string) => ({ text, fuzzyMatches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) });
+	test('matches the day as exact text, never through the word search', () => {
+		const anyDay = (text: string) => ({ text, matches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) });
 		expect(matchesSchedule(item, anyDay('2026-10'))).toBe(true);
 		expect(matchesSchedule(item, anyDay('2026-11'))).toBe(false);
 	});

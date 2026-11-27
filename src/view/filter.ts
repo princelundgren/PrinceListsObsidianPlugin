@@ -1,4 +1,4 @@
-import { prepareFuzzySearch, SearchComponent, setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
+import { prepareSimpleSearch, SearchComponent, setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
 import type { Find } from '../core/display';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { NO_LIT_TAGS, type LitTags } from '../core/tags';
@@ -59,14 +59,14 @@ export interface FilterHost {
 }
 
 /**
- * What `query` finds, with Obsidian's fuzzy search for words: its letters in order, with gaps,
+ * What `query` finds, with Obsidian's simple search: each of its words as written, in any order,
  * ignoring case and accents. Spaces around it are ignored, and null for no text, which filters nothing.
  */
 export function findOf(query: string): Find | null {
 	const text = query.trim();
 	if (text === '') return null;
-	const search = prepareFuzzySearch(text);
-	return { text, fuzzyMatches: (shown) => search(shown) !== null };
+	const search = prepareSimpleSearch(text);
+	return { text, matches: (shown) => search(shown) !== null };
 }
 
 /** The icon that opens and closes the field. */

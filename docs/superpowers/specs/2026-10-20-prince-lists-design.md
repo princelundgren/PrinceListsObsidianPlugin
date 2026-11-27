@@ -1198,7 +1198,7 @@ From here on the document is for the builder.
   takes from Obsidian at runtime. Every device must run at least that version, mobile included.
   Step one needed 1.5.7, for `getFrontMatterInfo`; the notes editor raised it to 1.13.4
   **(owner, 2026-10-29)**, as its design's risk 1 says. The filter raised it to 1.15.0
-  **(owner, 2026-11-27)**: `prepareFuzzySearch` ignores accents only from 1.15.0 on (Obsidian's
+  **(owner, 2026-11-27)**: `prepareSimpleSearch` ignores accents only from 1.15.0 on (Obsidian's
   changelog), and step two's filter promises that "e" finds "é". `manifest.json` holds the
   current value.
 - **Installing:** copy `main.js`, `manifest.json` and `styles.css` into

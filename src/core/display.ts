@@ -55,10 +55,10 @@ export interface SectionRows {
 	collapsed: boolean;
 }
 
-/** What Cmd+F's field holds: the text as typed, and the view's fuzzy search for it, which core only calls. */
+/** What Cmd+F's field holds: the text as typed, and the view's word search for it, which core only calls. */
 export interface Find {
 	text: string;
-	fuzzyMatches: (text: string) => boolean;
+	matches: (text: string) => boolean;
 }
 
 export interface RowFilter {
@@ -155,10 +155,10 @@ export function isItemVisible(lines: readonly Line[], model: ListModel, now: Dat
 
 function itemMatches(lines: readonly Line[], item: ItemBlock, row: ItemRow, find: Find | null): boolean {
 	if (find === null) return true;
-	return find.fuzzyMatches(row.title) || find.fuzzyMatches(getItemNotes(lines, item)) || whenMatches(row.when, find);
+	return find.matches([row.title, getItemNotes(lines, item)].join('\n')) || whenMatches(row.when, find);
 }
 
-/** Whether the typed text is part of `when`, the day as the file writes it: a fuzzy match would let "2026-11" find 2026-12-01 too. */
+/** Whether the typed text is part of `when`, the day as the file writes it, letter for letter. */
 export function whenMatches(when: string | null, find: Find): boolean {
 	return when !== null && when.includes(find.text);
 }
