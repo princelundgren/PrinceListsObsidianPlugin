@@ -22,7 +22,7 @@ variables and no `:has()`.
 - **While Find holds text, each word it matches gets a background color (owner):** in item titles,
   in a list and in the Schedule, and in the notes of an item whose card is open.
 - **The color is Obsidian's `--highlight-background` (owner, 2026-11-27),** the one Obsidian gives
-  `==marked==` text, so it follows the theme. From Obsidian 1.14 the app no longer sets
+  `==marked==` text, so it follows the theme. Obsidian (1.15.1, checked) no longer sets
   `--text-highlight-bg`, which its docs still list as "Highlighted text background": a theme may
   set it, and `--highlight-background` takes it then, else a yellow.
 - **Titles use the browser's CSS Custom Highlight API (owner).** It colors text without changing the
