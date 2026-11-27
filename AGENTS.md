@@ -174,15 +174,15 @@ demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
 - **`scripts/`:** Node scripts that aren't part of the plugin, such as the docs check. Its
   `node:test` tests sit beside it, outside `tests/`, because vitest collects the test files there.
   `scripts/pictures/` copies the demo vault and takes the README's stills and GIFs and the listing's
-  screenshots, one scene module per picture in `scenes/`. A scene that changes a note puts it back
-  when it ends. The scripts reach Obsidian through its `app` global, calling only what
-  `obsidian.d.ts` documents. They read the page only to find elements, where they are, which folders
-  are open and whether it's a phone's, act through DevTools input events, and add only what
-  screenshots leave out, the drawn pointer and the picture a mouse drag carries (`pointer.mjs`) and
-  the window's buttons on a Mac (`window-buttons.mjs`), and a listing shot's caption
-  (`caption.mjs`). The folder also holds `run-in-obsidian.mjs`, which runs a check by hand as page
-  JavaScript. A check file calls only what `obsidian.d.ts` documents, and reads only PrinceLists'
-  own view, never Obsidian's.
+  screenshots, one scene module per picture in `scenes/`. A scene that changes a note or
+  PrinceLists' settings puts them back when it ends. The scripts reach Obsidian through its `app`
+  global, calling only what `obsidian.d.ts` documents. They read the page only to find elements,
+  where they are, which folders are open and whether it's a phone's, act through DevTools input
+  events, and add only what screenshots leave out, the drawn pointer and the picture a mouse drag
+  carries (`pointer.mjs`) and the window's buttons on a Mac (`window-buttons.mjs`), and a listing
+  shot's caption (`caption.mjs`). The folder also holds `run-in-obsidian.mjs`, which runs a check by
+  hand as page JavaScript. A check file calls only what `obsidian.d.ts` documents, and reads only
+  PrinceLists' own view, never Obsidian's.
 - **File size:** keep each file under about 300 lines; split by responsibility.
 
 ## Working on a change
