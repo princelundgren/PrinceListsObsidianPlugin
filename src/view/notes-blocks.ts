@@ -124,6 +124,7 @@ class BlockWidget extends WidgetType {
 
 	destroy(dom: HTMLElement): void {
 		unloadWidget(this.view, dom);
+		this.view.findPaint.forget(dom);
 	}
 
 	// The editor's mousedown handler shows the block's Markdown, leaves a link or button in it be, keeps

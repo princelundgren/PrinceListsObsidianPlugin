@@ -1,5 +1,5 @@
 ---
-status: building
+status: live
 verified: 2026-11-27
 governs: [src/**, styles.css]
 ---

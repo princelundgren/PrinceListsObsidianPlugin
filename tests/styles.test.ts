@@ -25,3 +25,8 @@ test('styles.css colors what Find matches with the theme\'s highlight', () => {
 	const rule = styles.match(/::highlight\(princelists-find\) \{([^}]*)\}/)?.[1];
 	expect(rule).toContain('background-color: var(--highlight-background);');
 });
+
+test('styles.css colors what Find matches in the notes editor with the same highlight', () => {
+	const rule = styles.match(/\.princelists-find-match \{([^}]*)\}/)?.[1];
+	expect(rule).toContain('background-color: var(--highlight-background);');
+});

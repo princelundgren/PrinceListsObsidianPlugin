@@ -24,9 +24,9 @@ From the ribbon, a folder, or a note you already have.
 
 ### Find
 
-Filter a list by text, and bring back ticked items.
+Filter a list by text, with the words it finds colored, and bring back ticked items.
 
-![In a todo list, an item is ticked and grays out, then the filter icon in the pane's header opens a field, its toggle brings back three items ticked days ago with blue checkboxes, and typing book leaves the three items that mention it, until the filter icon closes the field again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/filter.gif)
+![In a todo list, an item is ticked and grays out, then the filter icon in the pane's header opens a field, its toggle brings back three items ticked days ago with blue checkboxes, and typing book leaves the three items that mention it, with the word colored in each, until the filter icon closes the field again](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/filter.gif)
 
 ### Tags
 
@@ -94,7 +94,7 @@ Pick colors for overdue, today's and upcoming dates and for the star, and see th
 - **Tags** on an item, from its card or right-click menu; a tag in a heading (`## Office #work`) counts for its section, and one in the list's `tags` property for every item.
 - **Select several** by holding an item, or with Cmd+click and Shift+click, to move, date, tick, tag, star, duplicate or delete them at once.
 - **Tick and forget:** ticked items hide after a day, or the time you choose.
-- **Find** items by title, notes or date, and show only starred items, or archived ones too.
+- **Find** items by title, notes or date, with the words it finds colored, and show only starred items, or archived ones too.
 - **Filter by tag** from the strip above the list, or show the items with **No tag**.
 - **Duplicate** an item with its notes.
 - **Delete** with Undo.
@@ -173,6 +173,7 @@ The full format is in the [design](docs/superpowers/specs/2026-10-20-prince-list
 - **A repeating item** stays ticked in the file until it comes back, so until then Tasks queries and other apps show it done.
 - **Renamed a list?** Update the blocks that show it in other notes.
 - **On iOS,** a picture dropped from Photos may not reach Obsidian; paste it instead.
+- **On iOS and iPadOS before 17.2,** Find colors the words it finds only in a card's notes text, not in titles or in the notes' tables, callouts, code blocks and embeds. It finds them all the same.
 - **Made for** Obsidian on macOS, iOS, Android and Windows. If something looks wrong, [open an issue](https://github.com/princelundgren/PrinceListsObsidianPlugin/issues).
 
 ## Contributing

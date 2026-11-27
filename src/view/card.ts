@@ -17,6 +17,7 @@ import { FIELD_CLASS, keepOneLine } from './fields';
 import { findOf } from './filter';
 import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
+import { showNotesFind } from './notes-find';
 import { cardNotesSource } from './notes-source';
 import { ownElement } from './own-rows';
 import { addTickZone, buildRow, CHECKBOX_CLASS, ITEM_CLASS, ITEM_TITLE_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
@@ -58,6 +59,7 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 		const rowTitle = ownElement(row, `.${ITEM_TITLE_CLASS}`);
 		if (rowTitle) view.findPaint.forget(rowTitle);
 		row.replaceWith(card.el);
+		if (card.editor) showNotesFind(card.editor, findOf(view.filter ?? ''));
 	} else {
 		view.render();
 	}

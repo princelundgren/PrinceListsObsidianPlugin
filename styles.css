@@ -251,6 +251,11 @@ textarea.princelists-heading-field {
 	background-color: var(--highlight-background);
 }
 
+/* The same words in the notes editor's text, marked by CodeMirror. */
+.princelists-find-match {
+	background-color: var(--highlight-background);
+}
+
 /* Gray in place, with no strikethrough (spec, "Ticking"). */
 .princelists-item.is-done .princelists-item-title {
 	color: var(--checklist-done-color);
