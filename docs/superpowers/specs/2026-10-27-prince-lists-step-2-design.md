@@ -768,8 +768,10 @@ the plugin as it was before the page existed, except the Add button's, below, an
 #### Appearance
 
 - **Preview (owner, 2026-11-27):** "Colors come from your theme." The section's first row, a
-  `render` definition that draws two sample rows with the star, the dates and the styles a list's rows use:
-  "Water the plants", starred and due yesterday, and "Call the dentist", due today. It redraws
+  `render` definition that draws three sample rows with the star, the dates and the styles a
+  list's rows use: "Water the plants", starred and due yesterday, "Call the dentist", due today,
+  and "Pick up the parcel", due in three days, so a weekday shows in the plain color (owner,
+  2026-11-27). It redraws
   when any of the four settings below changes, from the same `Events` object the views listen to.
   When Obsidian tears the row down, as it does to draw it again after Sync changes a setting, it
   stops listening and takes its rows away. A drawn imitation was the other choice; it
