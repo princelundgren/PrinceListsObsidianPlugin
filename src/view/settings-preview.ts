@@ -1,7 +1,7 @@
 import { previewRows } from '../core/settings-preview';
 import type { OverdueStyle } from '../core/overdue';
 import { dayOf } from '../core/when';
-import { CHECKBOX_CLASS, ITEM_CLASS, ITEMS_CLASS, TITLE_AND_TAGS_CLASS } from './render-list';
+import { CHECKBOX_CLASS, ITEM_CLASS, ITEM_TITLE_CLASS, ITEMS_CLASS, TITLE_AND_TAGS_CLASS } from './render-list';
 import { addStar, addWhen, showStarColor } from './row-marks';
 
 /**
@@ -18,7 +18,7 @@ export function drawSettingsPreview(el: HTMLElement, style: OverdueStyle, now: D
 	for (const row of previewRows(now)) {
 		const rowEl = listEl.createEl('li', { cls: ITEM_CLASS });
 		rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' });
-		rowEl.createDiv({ cls: TITLE_AND_TAGS_CLASS }).createDiv({ cls: 'princelists-item-title', text: row.title });
+		rowEl.createDiv({ cls: TITLE_AND_TAGS_CLASS }).createDiv({ cls: ITEM_TITLE_CLASS, text: row.title });
 		if (row.starred) addStar(rowEl);
 		addWhen(rowEl, row.when, today, false, style);
 	}

@@ -10,8 +10,8 @@ const first = (word: string): WordSearch => (text) => {
 /** A word's search that reports every match. */
 const every = (word: string): WordSearch => (text) => {
 	const spans: Span[] = [];
-	const lower = text.toLowerCase();
-	for (let at = lower.indexOf(word); at >= 0; at = lower.indexOf(word, at + word.length)) {
+	const [lower, wordLower] = [text.toLowerCase(), word.toLowerCase()];
+	for (let at = lower.indexOf(wordLower); at >= 0; at = lower.indexOf(wordLower, at + word.length)) {
 		spans.push([at, at + word.length]);
 	}
 	return spans.length ? spans : null;
@@ -63,6 +63,11 @@ describe('pieceSpans', () => {
 		expect(pieceSpans(cells, [first('milk')])).toEqual([
 			{ start: { piece: 1, offset: 0 }, end: { piece: 1, offset: 4 } },
 		]);
+	});
+
+	test('colors nothing for a match on the line break between blocks', () => {
+		const cells = [{ text: 'Oat', block: 0 }, { text: 'milk', block: 1 }];
+		expect(pieceSpans(cells, [first('\n')])).toEqual([]);
 	});
 
 	test('passes over an empty text node', () => {

@@ -63,17 +63,16 @@ export function pieceSpans(
 		starts.push(text.length);
 		text += piece.text;
 	});
-	const pointAt = (at: number, isEnd: boolean): PiecePoint => {
-		let piece = 0;
+	const pointAt = (at: number, isEnd: boolean): PiecePoint | null => {
 		for (let i = 0; i < pieces.length; i++) {
 			const start = starts[i] ?? 0;
 			const end = start + (pieces[i]?.text.length ?? 0);
-			if (isEnd ? at > start && at <= end : at >= start && at < end) {
-				piece = i;
-				break;
-			}
+			if (isEnd ? at > start && at <= end : at >= start && at < end) return { piece: i, offset: at - start };
 		}
-		return { piece, offset: at - (starts[piece] ?? 0) };
+		return null;
 	};
-	return findSpans(text, words).map(([from, to]) => ({ start: pointAt(from, false), end: pointAt(to, true) }));
+	return findSpans(text, words).flatMap(([from, to]) => {
+		const [start, end] = [pointAt(from, false), pointAt(to, true)];
+		return start && end ? [{ start, end }] : [];
+	});
 }
