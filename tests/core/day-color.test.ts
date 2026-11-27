@@ -21,8 +21,8 @@ describe('todayColorOf', () => {
 		expect(todayColorOf('none')).toBe('none');
 	});
 
-	test.each([undefined, 'lime', 3, null])('reads %s as green', (stored) => {
-		expect(todayColorOf(stored)).toBe('green');
+	test.each([undefined, 'lime', 3, null])('reads %s as blue', (stored) => {
+		expect(todayColorOf(stored)).toBe('blue');
 	});
 });
 

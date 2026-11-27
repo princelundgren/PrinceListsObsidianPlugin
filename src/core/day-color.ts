@@ -6,7 +6,7 @@ export const DATE_COLORS = ['none', 'red', 'orange', 'yellow', 'green', 'cyan', 
 export type DateColor = (typeof DATE_COLORS)[number];
 
 export const DEFAULT_OVERDUE_COLOR: DateColor = 'red';
-export const DEFAULT_TODAY_COLOR: DateColor = 'green';
+export const DEFAULT_TODAY_COLOR: DateColor = 'blue';
 
 /** The colors the settings give an overdue item's day and today's. */
 export interface DayColors {

@@ -372,7 +372,7 @@ this met on 2026-10-30 **(owner)**.
     it follows the theme and light and dark mode; a free color picker was weighed and turned down
     for that reason (owner, 2026-11-27). The `repeat` icon before it keeps `--text-muted`
     **(call)**.
-  - **Today's day has a color of its own (owner, 2026-11-27),** "Today date color", green by
+  - **Today's day has a color of its own (owner, 2026-11-27),** "Today date color", blue by
     default: a row that isn't ticked and whose When is today takes it, the rule an overdue item
     follows **(call)**. An overdue item that shows "Today" keeps the overdue color, so it still
     reads as late.
@@ -733,7 +733,9 @@ and today's stand out, from the update on.
   that order next after Overdue dates show **(call)**, each with None, Red, Orange, Yellow, Green,
   Cyan, Blue, Purple and Pink, saved as `"none"`, `"red"` and so on. None leaves the day in
   `--text-muted`, as any other day; each color is `--color-` and its name. Overdue defaults to Red
-  and Today to Green. A stored value that is none of the choices is read as the default.
+  and Today to Blue, which read clearly as small text in light and dark alike, where the light
+  theme's orange and green are faint (owner, 2026-11-27). A stored value that is none of the
+  choices is read as the default.
   - **A change to any of the three redraws** the list views, the list blocks and the Schedule, as
     the delay's does, and again when Sync brings a change. It writes nothing to any list.
 - **Floating add button (owner, 2026-11-05):** a `dropdown` control with desktop and mobile,

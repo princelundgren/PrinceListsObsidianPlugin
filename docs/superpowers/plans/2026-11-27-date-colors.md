@@ -3,7 +3,7 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Let the settings pick the color of an overdue item's day and of today's day, from
-Obsidian's theme colors, with Today green by default.
+Obsidian's theme colors, with Today blue by default.
 
 **Architecture:** A pure `src/core/day-color.ts` decides which color a row's day takes and reads
 the stored settings. `OverdueStyle` carries the two colors in place of `colored`, so every redraw
@@ -45,7 +45,7 @@ view", "On a row", and "Settings", "Overdue date color and Today date color".
 **Interfaces:**
 - Produces:
   - `DATE_COLORS = ['none', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'pink'] as const`, `type DateColor`
-  - `DEFAULT_OVERDUE_COLOR: DateColor = 'red'`, `DEFAULT_TODAY_COLOR: DateColor = 'green'`
+  - `DEFAULT_OVERDUE_COLOR: DateColor = 'red'`, `DEFAULT_TODAY_COLOR: DateColor = 'blue'`
   - `overdueColorOf(stored: unknown): DateColor`
   - `todayColorOf(stored: unknown): DateColor`
   - `dayColor(day: string, today: string, done: boolean, colors: { overdueColor: DateColor; todayColor: DateColor }): DateColor`
@@ -55,7 +55,7 @@ view", "On a row", and "Settings", "Overdue date color and Today date color".
 ```ts
 overdueColorOf('blue') === 'blue'; overdueColorOf('none') === 'none'
 overdueColorOf(undefined) === 'red'; overdueColorOf('crimson') === 'red'
-todayColorOf('pink') === 'pink'; todayColorOf(undefined) === 'green'; todayColorOf(3) === 'green'
+todayColorOf('pink') === 'pink'; todayColorOf(undefined) === 'blue'; todayColorOf(3) === 'blue'
 // with { overdueColor: 'orange', todayColor: 'cyan' } and today 2026-11-27:
 dayColor('2026-11-26', T, false, c) === 'orange'; dayColor('2026-11-27', T, false, c) === 'cyan'
 dayColor('2026-11-27', T, true, c) === 'none'; dayColor('2026-11-26', T, true, c) === 'none'
@@ -117,7 +117,7 @@ Expected: PASS.
 Run: `npm run lint && npm run build && npm test && node scripts/check-docs.mjs`
 Expected: all pass.
 
-By hand in a test vault: Today green and overdue red by default, each dropdown recolors open
+By hand in a test vault: Today blue and overdue red by default, each dropdown recolors open
 lists and the Schedule at once, None leaves the day gray, and a ticked item due today stays gray.
 
 - [ ] **Step 4: Commit** `Add settings for the colors of overdue and today's dates`
