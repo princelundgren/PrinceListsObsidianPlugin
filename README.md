@@ -70,6 +70,12 @@ Embed a list in any note, and tick it there.
 
 ![In an ordinary note, a princelists block naming Hardware store is typed between two paragraphs, with the link picked from Obsidian's suggestions, and once the cursor leaves the block the list shows in its place, with its checkboxes, a star and a New item button](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/embedded-list.gif)
 
+### Make it yours
+
+Pick colors for overdue, today's and upcoming dates and for the star, and see them in the settings' preview as you go.
+
+![Over a todo list, the gear opens Obsidian's settings, and in PrinceLists' Appearance section the overdue color is set to Red, today's to Blue, upcoming to Purple and the star's to Orange, the preview above taking each at once, then closing the settings shows the list's dates and stars in those colors](https://raw.githubusercontent.com/princelundgren/PrinceListsObsidianPlugin/main/docs/images/settings.gif)
+
 ## Full feature list
 
 **Lists**
@@ -112,7 +118,7 @@ Embed a list in any note, and tick it there.
 - **Right-click menus** on items, headings, pictures and the list.
 - **Made for touch:** finger-sized buttons, and hold to select or drag.
 - **Fits your theme,** light or dark.
-- **Settings:** a folder for new lists, when ticked items hide, what an overdue item's date says and its color, the colors of today's and upcoming dates, the star's color, the tag strip, where the floating **+** shows, a Schedule button in each list's header, and the Schedule back in the sidebar if you closed it.
+- **Settings,** in Lists, Schedule and Appearance sections, with a preview of the colors: a folder for new lists, when ticked items hide, what an overdue item's date says and its color, the colors of today's and upcoming dates, the star's color, the tag strip, where the floating **+** shows, a Schedule button in each list's header, and the Schedule back in the sidebar if you closed it.
 
 ## Quick start
 
