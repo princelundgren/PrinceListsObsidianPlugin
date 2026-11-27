@@ -152,7 +152,7 @@ this met on 2026-10-30 **(owner)**.
   "oat mi" and "milk oat" find "Oat milk", and "mlk" finds nothing. Letters in order with gaps, as
   `prepareFuzzySearch` matches, found too much: two or three letters matched almost any long note
   (owner, 2026-11-27). It ignores case and folds accents as Obsidian does, so "e" finds "é"
-  (owner, 2026-11-06).
+  (owner, 2026-11-06), which needs Obsidian 1.15.0 (the design's "Minimum Obsidian version").
   - **It searches the title, the notes and the When as the file writes it (owner, 2026-11-06),**
     Markdown included. The words may be spread over the title and the notes, so "milk recipe"
     finds "Oat milk" whose notes say "recipe" (owner, 2026-11-27). The When matches letter for

@@ -1197,7 +1197,10 @@ From here on the document is for the builder.
   `@since` tag in `obsidian.d.ts`, and from the CodeMirror and Lezer packages the bundled code
   takes from Obsidian at runtime. Every device must run at least that version, mobile included.
   Step one needed 1.5.7, for `getFrontMatterInfo`; the notes editor raised it to 1.13.4
-  **(owner, 2026-10-29)**, as its design's risk 1 says. `manifest.json` holds the current value.
+  **(owner, 2026-10-29)**, as its design's risk 1 says. The filter raised it to 1.15.0
+  **(owner, 2026-11-27)**: `prepareSimpleSearch` ignores accents only from 1.15.0 on (Obsidian's
+  changelog), and step two's filter promises that "e" finds "é". `manifest.json` holds the
+  current value.
 - **Installing:** copy `main.js`, `manifest.json` and `styles.css` into
   `<vault>/.obsidian/plugins/princelists/`. The folder name must match the ID, or
   `onExternalSettingsChange` and similar methods aren't called (Manifest docs). Obsidian Sync takes
@@ -1479,14 +1482,12 @@ Most of this is undocumented behavior seen in 1.14.4, so pin it with tests and a
   - `vault.getAbstractFileByPath(file.path)` can't do it. Its doc says it finds a file "inside the
     vault" (since 0.11.11), but spike 1 found that it returns the outside note too (observed in
     1.14.4).
-  - The only documented way is `file instanceof TExternalFile`. It needs `minAppVersion` 1.14.4,
-    and raising it is the owner's call if a later fallback needs it. `TExternalFile` is
-    `@since 1.14.4`, so it's not in the API before that, and where the class is missing at
-    runtime, `instanceof` throws a `TypeError`. The `obsidianmd/no-unsupported-api` lint rule
-    doesn't check `instanceof`, so it wouldn't catch that (tested with `eslint-plugin-obsidianmd`
-    0.4.2 on 2026-10-20).
-  - The picture refusal tells them apart by `file.parent === null` instead, observed in 1.14.4 as
-    the rename check does **(call)**: `TExternalFile` is newer than `minAppVersion`.
+  - The only documented way is `file instanceof TExternalFile`, `@since 1.14.4`, which
+    `minAppVersion` covers. The `obsidianmd/no-unsupported-api` lint rule doesn't check
+    `instanceof` (tested with `eslint-plugin-obsidianmd` 0.4.2 on 2026-10-20), so it wouldn't flag
+    a class newer than `minAppVersion` there, where `instanceof` throws a `TypeError`.
+  - The picture refusal tells them apart by `file.parent === null`, observed in 1.14.4 as the
+    rename check does **(call)**.
 - **Outside notes don't raise `minAppVersion`:** nothing here uses an API newer than it.
 
 ## Testing and owner checkpoints
