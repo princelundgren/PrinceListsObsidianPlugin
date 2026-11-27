@@ -367,12 +367,12 @@ this met on 2026-10-30 **(owner)**.
     "Yesterday or the date", the default, which shows the day as any past day shows it, so a row
     shows when it slipped without opening the card; "Overdue"; or "Today", which matches the group
     it sits in.
-  - **Its color is a setting too (owner, 2026-11-27),** "Overdue date color", red by default, with
+  - **Its color is a setting too (owner, 2026-11-27),** "Overdue date color", None by default, with
     every label. Each choice is one of Obsidian's documented theme colors, such as `--color-red`, so
     it follows the theme and light and dark mode; a free color picker was weighed and turned down
     for that reason (owner, 2026-11-27). The `repeat` icon before it keeps `--text-muted`
     **(call)**.
-  - **Today's day has a color of its own (owner, 2026-11-27),** "Today date color", blue by
+  - **Today's day has a color of its own (owner, 2026-11-27),** "Today date color", None by
     default: a row that isn't ticked and whose When is today takes it, the rule an overdue item
     follows **(call)**. An overdue item that shows "Today" keeps the overdue color, so it still
     reads as late.
@@ -703,10 +703,8 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the floating "+"'s, below, "Tag
-strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting"), the two
-overdue settings' and Today date color's, below, which the owner chose so late items show as late,
-and today's stand out, from the update on.
+the plugin as it was before the page existed, except the floating "+"'s, below, and "Tag
+strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
@@ -732,10 +730,10 @@ and today's stand out, from the update on.
 - **Overdue date color and Today date color (owner, 2026-11-27):** two `dropdown` controls, in
   that order next after Overdue dates show **(call)**, each with None, Red, Orange, Yellow, Green,
   Cyan, Blue, Purple and Pink, saved as `"none"`, `"red"` and so on. None leaves the day in
-  `--text-muted`, as any other day; each color is `--color-` and its name. Overdue defaults to Red
-  and Today to Blue, which read clearly as small text in light and dark alike, where the light
-  theme's orange and green are faint (owner, 2026-11-27). A stored value that is none of the
-  choices is read as the default.
+  `--text-muted`, as any other day; each color is `--color-` and its name. Both default to None, so
+  the plugin looks as it did before them (owner, 2026-11-27). Of the colors, Red and Blue read
+  most clearly as small text in light and dark alike; the light theme's orange and green are faint.
+  A stored value that is none of the choices is read as the default.
   - **A change to any of the three redraws** the list views, the list blocks and the Schedule, as
     the delay's does, and again when Sync brings a change. It writes nothing to any list.
 - **Floating add button (owner, 2026-11-05):** a `dropdown` control with desktop and mobile,
