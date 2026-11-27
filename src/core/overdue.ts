@@ -1,4 +1,5 @@
 import type { DayColors } from './day-color';
+import type { ThemeColor } from './theme-color';
 import { dayLabel, daysFrom } from './when';
 
 /** What an overdue item's day says, as the settings' dropdown stores it. */
@@ -7,9 +8,10 @@ export type OverdueLabel = (typeof OVERDUE_LABELS)[number];
 
 export const DEFAULT_OVERDUE_LABEL: OverdueLabel = 'yesterday-or-date';
 
-/** How the settings show an overdue item's day, and the colors of its day and today's. */
+/** How the settings show a row's day and star: the overdue label, the overdue and Today colors, and the star's color. */
 export interface OverdueStyle extends DayColors {
 	readonly label: OverdueLabel;
+	readonly starColor: ThemeColor;
 }
 
 /** A row's day: what it shows, and what a screen reader hears in its place, or null when that's the same. */

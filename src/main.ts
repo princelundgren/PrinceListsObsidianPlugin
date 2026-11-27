@@ -6,6 +6,7 @@ import { DEFAULT_OVERDUE_COLOR, DEFAULT_TODAY_COLOR } from './core/day-color';
 import { overdueLabelOf } from './core/overdue';
 import { serialQueue } from './core/queue';
 import { groupByListOf } from './core/schedule';
+import { DEFAULT_STAR_COLOR } from './core/star';
 import { tagStripModeOf } from './core/tag-strip-mode';
 import { themeColorOf } from './core/theme-color';
 import { ArchiveDelay } from './obsidian/archive-delay';
@@ -26,7 +27,7 @@ import { followTagStripMode } from './view/tag-strip';
 export default class PrinceListsPlugin extends Plugin {
 	settings: PrinceListsSettings = { ...DEFAULT_SETTINGS };
 	private readonly archiveDelay = new ArchiveDelay(() => archiveDelayMs(this.settings.archiveDelayHours));
-	private readonly overdueLook = new OverdueLook(() => ({ label: this.settings.overdueLabel, overdueColor: this.settings.overdueColor, todayColor: this.settings.todayColor }));
+	private readonly overdueLook = new OverdueLook(() => ({ label: this.settings.overdueLabel, overdueColor: this.settings.overdueColor, todayColor: this.settings.todayColor, starColor: this.settings.starColor }));
 	private newListRequests = 0;
 	private readonly enqueueNewList = serialQueue((error) => {
 		console.error('PrinceLists: could not create the list', error);
@@ -168,14 +169,14 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onExternalSettingsChange() {
 		const before = this.archiveDelay.ms;
-		const { floatingAddButton, tagStrip, groupScheduleByList, overdueLabel, overdueColor, todayColor } = this.settings;
+		const { floatingAddButton, tagStrip, groupScheduleByList, overdueLabel, overdueColor, todayColor, starColor } = this.settings;
 		await this.loadSettings();
 		if (this.archiveDelay.ms !== before) this.archiveDelay.changed();
 		if (this.settings.floatingAddButton !== floatingAddButton) this.syncAddButtons();
 		else this.syncListButtons();
 		if (this.settings.tagStrip !== tagStrip) this.followTagStripModeInViews();
 		if (this.settings.groupScheduleByList !== groupScheduleByList) this.renderSchedules();
-		if (this.settings.overdueLabel !== overdueLabel || this.settings.overdueColor !== overdueColor || this.settings.todayColor !== todayColor) this.overdueLook.changed();
+		if (this.settings.overdueLabel !== overdueLabel || this.settings.overdueColor !== overdueColor || this.settings.todayColor !== todayColor || this.settings.starColor !== starColor) this.overdueLook.changed();
 	}
 
 	/** Called by the settings tab after it saves `key`. */
@@ -184,7 +185,7 @@ export default class PrinceListsPlugin extends Plugin {
 		if (key === 'showScheduleButton') this.syncListButtons();
 		if (key === 'floatingAddButton') this.syncAddButtons();
 		if (key === 'tagStrip') this.followTagStripModeInViews();
-		if (key === 'overdueLabel' || key === 'overdueColor' || key === 'todayColor') this.overdueLook.changed();
+		if (key === 'overdueLabel' || key === 'overdueColor' || key === 'todayColor' || key === 'starColor') this.overdueLook.changed();
 	}
 
 	private listViews(): PrinceListView[] {
@@ -229,6 +230,7 @@ export default class PrinceListsPlugin extends Plugin {
 			overdueLabel: overdueLabelOf(stored?.overdueLabel),
 			overdueColor: themeColorOf(stored?.overdueColor, DEFAULT_OVERDUE_COLOR),
 			todayColor: themeColorOf(stored?.todayColor, DEFAULT_TODAY_COLOR),
+			starColor: themeColorOf(stored?.starColor, DEFAULT_STAR_COLOR),
 			groupScheduleByList: groupByListOf(stored?.groupScheduleByList),
 		};
 	}

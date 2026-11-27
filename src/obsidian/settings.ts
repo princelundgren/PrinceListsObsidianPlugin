@@ -4,6 +4,7 @@ import type { ButtonPlatforms } from '../core/button-platforms';
 import { DEFAULT_OVERDUE_COLOR, DEFAULT_TODAY_COLOR } from '../core/day-color';
 import { DEFAULT_OVERDUE_LABEL, type OverdueLabel } from '../core/overdue';
 import { DEFAULT_GROUP_BY_LIST } from '../core/schedule';
+import { DEFAULT_STAR_COLOR } from '../core/star';
 import { DEFAULT_TAG_STRIP_MODE, type TagStripMode } from '../core/tag-strip-mode';
 import type { ThemeColor } from '../core/theme-color';
 import { openSchedule } from './open-schedule';
@@ -19,6 +20,8 @@ export interface PrinceListsSettings {
 	overdueColor: ThemeColor;
 	/** The theme color of the day of an open item due today. */
 	todayColor: ThemeColor;
+	/** The theme color of an item's star. */
+	starColor: ThemeColor;
 	/** Whether a list's header shows the "Open schedule" button. */
 	showScheduleButton: boolean;
 	/** Where a list shows the round "+" at its bottom right. */
@@ -35,6 +38,7 @@ export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	overdueLabel: DEFAULT_OVERDUE_LABEL,
 	overdueColor: DEFAULT_OVERDUE_COLOR,
 	todayColor: DEFAULT_TODAY_COLOR,
+	starColor: DEFAULT_STAR_COLOR,
 	showScheduleButton: false,
 	floatingAddButton: 'both',
 	tagStrip: DEFAULT_TAG_STRIP_MODE,
@@ -144,6 +148,16 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 					type: 'dropdown',
 					key: 'todayColor',
 					defaultValue: DEFAULT_SETTINGS.todayColor,
+					options: THEME_COLOR_NAMES,
+				},
+			},
+			{
+				name: 'Star color',
+				desc: "The color of an item's star, from your theme's colors.",
+				control: {
+					type: 'dropdown',
+					key: 'starColor',
+					defaultValue: DEFAULT_SETTINGS.starColor,
 					options: THEME_COLOR_NAMES,
 				},
 			},
