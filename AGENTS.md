@@ -168,7 +168,9 @@ demo vault on the emulator and end it with `adb forward --remove tcp:<port>`.
 - **`src/core/`:** pure TypeScript with no Obsidian imports: the line model, item lines, the
   archived rule, parsing and edits. Every change here comes with unit tests.
 - **`src/obsidian/` and `src/view/`:** the Obsidian glue and the user interface.
-- **`tests/`:** vitest tests and Markdown fixtures.
+- **`tests/`:** vitest tests and Markdown fixtures. They run in Node; a test file that needs a DOM
+  starts with `// @vitest-environment jsdom`, and stands in for what jsdom lacks, such as Obsidian's
+  `el.win` and the CSS Custom Highlight API.
 - **`demo/vault/`:** the demo vault the pictures are taken in: made-up lists, notes and drawn
   pictures. The docs check reads its notes like any other doc.
 - **`docs/listing/`:** the community listing's screenshots, which the release step compares against
