@@ -14,8 +14,8 @@ const REFUSAL_NOTICES: Record<MarkerRefusal['refused'], string> = {
 // Only one wait is kept: a newer "Turn into list" ends the one before it.
 let endWait: (() => void) | null = null;
 
-// A note outside the vault has no parent (observed in 1.14.4); `TExternalFile` is newer than
-// minAppVersion, and getAbstractFileByPath returns such a note under its `file:` path.
+// A note outside the vault has no parent (observed in 1.14.4), and getAbstractFileByPath returns
+// such a note under its `file:` path.
 export function canTurnIntoList(app: App, file: TFile): boolean {
 	if (file.extension !== 'md' || file.parent === null) return false;
 	return !isMarkerValue(app.metadataCache.getFileCache(file)?.frontmatter);
