@@ -1,4 +1,5 @@
 import { getLanguage, setIcon } from 'obsidian';
+import { dayColor } from '../core/day-color';
 import { rowDay, type OverdueStyle } from '../core/overdue';
 import { dayLabel } from '../core/when';
 
@@ -17,17 +18,19 @@ export function addRepeat(rowEl: HTMLElement): void {
 }
 
 /**
- * The row's day at its end. An overdue item's shows the label `style` names, in the error color when
- * it says so, with "Overdue" and the plain label for screen readers in place of what's shown.
+ * The row's day at its end, in the color `style` gives an overdue day or today's. An overdue item's
+ * shows the label `style` names, with "Overdue" and the plain label for screen readers in place of
+ * what's shown.
  */
 export function addWhen(rowEl: HTMLElement, day: string, today: string, done: boolean, style: OverdueStyle): void {
 	const el = rowEl.createSpan({ cls: 'princelists-when' });
+	const color = dayColor(day, today, done, style);
+	if (color !== 'none') el.addClass(`princelists-when-${color}`);
 	const { shown, spoken } = rowDay(day, today, done, style.label, getLanguage());
 	if (spoken === null) {
 		el.setText(shown);
 		return;
 	}
-	el.toggleClass('princelists-when-overdue', style.colored);
 	el.createSpan({ text: shown, attr: { 'aria-hidden': 'true' } });
 	el.createSpan({ cls: 'princelists-spoken', text: spoken });
 }

@@ -1183,8 +1183,37 @@ button.princelists-card-repeat.is-repeating {
 	font-size: var(--font-ui-small);
 }
 
-.princelists-when.princelists-when-overdue {
-	color: var(--text-error);
+/* An overdue day's color and today's, as the settings pick them from the theme's colors. */
+.princelists-when.princelists-when-red {
+	color: var(--color-red);
+}
+
+.princelists-when.princelists-when-orange {
+	color: var(--color-orange);
+}
+
+.princelists-when.princelists-when-yellow {
+	color: var(--color-yellow);
+}
+
+.princelists-when.princelists-when-green {
+	color: var(--color-green);
+}
+
+.princelists-when.princelists-when-cyan {
+	color: var(--color-cyan);
+}
+
+.princelists-when.princelists-when-blue {
+	color: var(--color-blue);
+}
+
+.princelists-when.princelists-when-purple {
+	color: var(--color-purple);
+}
+
+.princelists-when.princelists-when-pink {
+	color: var(--color-pink);
 }
 
 /* In the day's color and font size, just before it. */

@@ -1,7 +1,8 @@
 import { type App, PluginSettingTab, type Plugin, type SettingDefinitionItem } from 'obsidian';
 import { type ArchiveDelayHours, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import type { ButtonPlatforms } from '../core/button-platforms';
-import { DEFAULT_COLOR_OVERDUE, DEFAULT_OVERDUE_LABEL, type OverdueLabel } from '../core/overdue';
+import { type DateColor, DEFAULT_OVERDUE_COLOR, DEFAULT_TODAY_COLOR } from '../core/day-color';
+import { DEFAULT_OVERDUE_LABEL, type OverdueLabel } from '../core/overdue';
 import { DEFAULT_GROUP_BY_LIST } from '../core/schedule';
 import { DEFAULT_TAG_STRIP_MODE, type TagStripMode } from '../core/tag-strip-mode';
 import { openSchedule } from './open-schedule';
@@ -13,8 +14,10 @@ export interface PrinceListsSettings {
 	archiveDelayHours: ArchiveDelayHours;
 	/** What an overdue item's day says. */
 	overdueLabel: OverdueLabel;
-	/** Whether an overdue item's day takes the theme's error color. */
-	colorOverdue: boolean;
+	/** The theme color of an overdue item's day. */
+	overdueColor: DateColor;
+	/** The theme color of the day of an open item due today. */
+	todayColor: DateColor;
 	/** Whether a list's header shows the "Open schedule" button. */
 	showScheduleButton: boolean;
 	/** Where a list shows the round "+" at its bottom right. */
@@ -29,7 +32,8 @@ export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	newListFolder: '',
 	archiveDelayHours: DEFAULT_ARCHIVE_DELAY_HOURS,
 	overdueLabel: DEFAULT_OVERDUE_LABEL,
-	colorOverdue: DEFAULT_COLOR_OVERDUE,
+	overdueColor: DEFAULT_OVERDUE_COLOR,
+	todayColor: DEFAULT_TODAY_COLOR,
 	showScheduleButton: false,
 	floatingAddButton: 'both',
 	tagStrip: DEFAULT_TAG_STRIP_MODE,
@@ -49,6 +53,18 @@ const OVERDUE_LABEL_NAMES: Record<OverdueLabel, string> = {
 	'yesterday-or-date': 'Yesterday or the date',
 	overdue: 'Overdue',
 	today: 'Today',
+};
+
+const DATE_COLOR_NAMES: Record<DateColor, string> = {
+	none: 'None',
+	red: 'Red',
+	orange: 'Orange',
+	yellow: 'Yellow',
+	green: 'Green',
+	cyan: 'Cyan',
+	blue: 'Blue',
+	purple: 'Purple',
+	pink: 'Pink',
 };
 
 const BUTTON_PLATFORM_NAMES: Record<ButtonPlatforms, string> = {
@@ -111,12 +127,23 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 				},
 			},
 			{
-				name: 'Color overdue dates',
-				desc: "Shows an overdue item's day in your theme's error color, usually red.",
+				name: 'Overdue date color',
+				desc: "The color of an overdue item's day, from your theme's colors.",
 				control: {
-					type: 'toggle',
-					key: 'colorOverdue',
-					defaultValue: DEFAULT_SETTINGS.colorOverdue,
+					type: 'dropdown',
+					key: 'overdueColor',
+					defaultValue: DEFAULT_SETTINGS.overdueColor,
+					options: DATE_COLOR_NAMES,
+				},
+			},
+			{
+				name: 'Today date color',
+				desc: "The color of the day of an item due today, from your theme's colors.",
+				control: {
+					type: 'dropdown',
+					key: 'todayColor',
+					defaultValue: DEFAULT_SETTINGS.todayColor,
+					options: DATE_COLOR_NAMES,
 				},
 			},
 			{

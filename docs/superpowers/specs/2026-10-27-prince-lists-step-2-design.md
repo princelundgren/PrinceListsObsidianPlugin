@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-26
+verified: 2026-11-27
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -367,9 +367,15 @@ this met on 2026-10-30 **(owner)**.
     "Yesterday or the date", the default, which shows the day as any past day shows it, so a row
     shows when it slipped without opening the card; "Overdue"; or "Today", which matches the group
     it sits in.
-  - **Its color is a setting too (owner, 2026-11-26),** "Color overdue dates", on by default: the
-    day takes `--text-error`, so it follows the theme, with every label. The `repeat` icon before
-    it keeps `--text-muted` **(call)**.
+  - **Its color is a setting too (owner, 2026-11-27),** "Overdue date color", None by default, with
+    every label. Each choice is one of Obsidian's documented theme colors, such as `--color-red`, so
+    it follows the theme and light and dark mode; a free color picker was weighed and turned down
+    for that reason (owner, 2026-11-27). The `repeat` icon before it keeps `--text-muted`
+    **(call)**.
+  - **Today's day has a color of its own (owner, 2026-11-27),** "Today date color", None by
+    default: a row that isn't ticked and whose When is today takes it, the rule an overdue item
+    follows **(call)**. An overdue item that shows "Today" keeps the overdue color, so it still
+    reads as late.
   - **A screen reader hears "Overdue,"** then the day as "Yesterday or the date" shows it, such as
     "Overdue, Yesterday" or "Overdue, Nov 23", whatever the label shows, since the color can't
     reach it. It's text only a screen reader reads, in place of the shown label, never an
@@ -697,9 +703,8 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the floating "+"'s, below, "Tag
-strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting"), and the two
-overdue settings', below, which the owner chose so late items show as late from the update on.
+the plugin as it was before the page existed, except the floating "+"'s, below, and "Tag
+strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
 
 - **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
@@ -722,11 +727,15 @@ overdue settings', below, which the owner chose so late items show as late from 
   as `"yesterday-or-date"`, `"overdue"` and `"today"`. What each shows is in "When and the
   Schedule view", "On a row". A stored value that is none of them is read as the default, as the
   delay's is.
-- **Color overdue dates (owner, 2026-11-26, #163):** a `toggle`, on by default, next after Overdue
-  dates show **(call)**; its description says the color is the theme's error color, usually red.
-  A stored value that isn't true or false is read as the default.
-  - **A change to either redraws** the list views, the list blocks and the Schedule, as the delay's
-    does, and again when Sync brings a change. It writes nothing to any list.
+- **Overdue date color and Today date color (owner, 2026-11-27):** two `dropdown` controls, in
+  that order next after Overdue dates show **(call)**, each with None, Red, Orange, Yellow, Green,
+  Cyan, Blue, Purple and Pink, saved as `"none"`, `"red"` and so on. None leaves the day in
+  `--text-muted`, as any other day; each color is `--color-` and its name. Both default to None, so
+  the plugin looks as it did before them (owner, 2026-11-27). Of the colors, Red and Blue read
+  most clearly as small text in light and dark alike; the light theme's orange and green are faint.
+  A stored value that is none of the choices is read as the default.
+  - **A change to any of the three redraws** the list views, the list blocks and the Schedule, as
+    the delay's does, and again when Sync brings a change. It writes nothing to any list.
 - **Floating add button (owner, 2026-11-05):** a `dropdown` control with desktop and mobile,
   desktop only, mobile only and off, saved as `"both"`, `"desktop"`, `"mobile"` and `"off"`.
   Mobile is `Platform.isMobile`, a tablet included, as for keys' names. The floating "+" shows
