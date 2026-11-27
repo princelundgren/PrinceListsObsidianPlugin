@@ -768,10 +768,11 @@ the plugin as it was before the page existed, except the Add button's, below, an
 #### Appearance
 
 - **Preview (owner, 2026-11-27):** "Colors come from your theme." The section's first row, a
-  `render` definition that draws two sample rows with the code and styles a list's rows use:
+  `render` definition that draws two sample rows with the star, the dates and the styles a list's rows use:
   "Water the plants", starred and due yesterday, and "Call the dentist", due today. It redraws
-  when any of the four settings below changes, from the same `Events` object the views listen to,
-  and stops listening when Obsidian tears the row down. A drawn imitation was the other choice; it
+  when any of the four settings below changes, from the same `Events` object the views listen to.
+  When Obsidian tears the row down, as it does to draw it again after Sync changes a setting, it
+  stops listening and takes its rows away. A drawn imitation was the other choice; it
   would drift from the real rows the next time their look changes. The sample rows can't be
   ticked, opened or focused **(call)**.
 - **Overdue label (owner, 2026-11-26, #163):** "What the date says once an unticked item is past
