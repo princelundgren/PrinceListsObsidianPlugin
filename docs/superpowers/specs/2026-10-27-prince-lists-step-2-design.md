@@ -163,6 +163,8 @@ this met on 2026-10-30 **(owner)**.
   - **The view builds the matcher and passes it to core,** which has no Obsidian imports **(call)**.
   - **The list redraws once typing pauses for 100 ms,** not at every letter, and at once when the
     field is emptied **(call)**.
+- **While the field holds text, each word it matches is colored**
+  ([highlighting what Find finds](2026-11-27-find-highlight-design.md)).
 - **Every heading shows while filtering (owner, 2026-11-07),** whether or not one of its items
   matches, so the list keeps its shape. Headings themselves aren't searched.
 - **Content the plugin leaves alone hides while filtering (call),** since it isn't an item and

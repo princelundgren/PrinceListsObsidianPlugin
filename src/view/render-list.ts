@@ -24,6 +24,8 @@ export const HEADING_CLASS = 'princelists-heading';
 export const OPEN_AS_MARKDOWN_CLASS = 'princelists-open-as-markdown';
 /** A row's title and the chips of its tail's tags, laid out as one run of text. */
 export const TITLE_AND_TAGS_CLASS = 'princelists-title-and-tags';
+/** A row's title, as Obsidian rendered it, which Find colors. */
+export const ITEM_TITLE_CLASS = 'princelists-item-title';
 // A row's or heading's first line. The plugin's own name: Markdown that Obsidian renders carries its
 // own `data-line` attributes, which the view must not read or shift.
 export const LINE_ATTR = 'data-princelists-line';
@@ -207,7 +209,7 @@ export function buildRow(host: RowHost, sourcePath: string, row: ItemRow, blocks
 	addTickZone(rowEl);
 	addHiddenLabel(rowEl.createEl('input', { cls: CHECKBOX_CLASS, type: 'checkbox' }), row.label);
 	const titleAndTags = rowEl.createDiv({ cls: TITLE_AND_TAGS_CLASS });
-	record(blocks, rowEl, renderInline(host, sourcePath, titleAndTags.createDiv({ cls: 'princelists-item-title' }), row.title));
+	record(blocks, rowEl, renderInline(host, sourcePath, titleAndTags.createDiv({ cls: ITEM_TITLE_CLASS }), row.title));
 	addTags(titleAndTags, row.tailTags);
 	if (row.starred) addStar(rowEl);
 	if (row.when !== null) addWhen(rowEl, row.when, dayOf(new Date()), row.done, host.overdueStyle());

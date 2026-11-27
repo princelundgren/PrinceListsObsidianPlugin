@@ -2,6 +2,7 @@ import { isArchived } from './archive';
 import { dayColor, type DayColors } from './day-color';
 import { splitAtx } from './edit-headings';
 import { getItemNotes } from './edit-items';
+import type { WordSearch } from './find-spans';
 import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
 import { carriedTags, inheritedTags, withoutListTags, type InheritedTags } from './inherited-tags';
 import { itemTags } from './item-tags';
@@ -59,6 +60,8 @@ export interface SectionRows {
 export interface Find {
 	text: string;
 	matches: (text: string) => boolean;
+	/** Each word's own search, one per space-separated word of `text`, to color what it matches. */
+	words: readonly WordSearch[];
 }
 
 export interface RowFilter {

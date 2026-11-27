@@ -9,7 +9,7 @@ import { isBlank, maskBlocks, parseList, type ItemBlock, type ListModel, type Se
 
 // A stand-in for the view's word search, which needs Obsidian: core only calls the one it's given.
 export const containing = (query: string) =>
-	query === '' ? null : { text: query, matches: (text: string) => query.toLowerCase().split(' ').every((word) => text.toLowerCase().includes(word)) };
+	query === '' ? null : { text: query, words: [], matches: (text: string) => query.toLowerCase().split(' ').every((word) => text.toLowerCase().includes(word)) };
 
 export const FIXTURES = readdirSync(new URL('../fixtures/', import.meta.url));
 export const readFixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), 'utf8');

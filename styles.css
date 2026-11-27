@@ -246,6 +246,11 @@ textarea.princelists-heading-field {
 	--checkbox-color-hover: var(--color-blue);
 }
 
+/* The words Find matches (the find highlight design). */
+::highlight(princelists-find) {
+	background-color: var(--highlight-background);
+}
+
 /* Gray in place, with no strikethrough (spec, "Ticking"). */
 .princelists-item.is-done .princelists-item-title {
 	color: var(--checklist-done-color);

@@ -1,5 +1,6 @@
 import { prepareSimpleSearch, SearchComponent, setIcon, setTooltip, type App, type Component, type Debouncer, type Menu, type WorkspaceLeaf } from 'obsidian';
 import type { Find } from '../core/display';
+import { queryWords } from '../core/find-spans';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { NO_LIT_TAGS, type LitTags } from '../core/tags';
 import { CLEAR_TAGS_CLASS, NO_TAG_CLASS, STRIP_TAG_CLASS } from './tag-strip';
@@ -66,7 +67,11 @@ export function findOf(query: string): Find | null {
 	const text = query.trim();
 	if (text === '') return null;
 	const search = prepareSimpleSearch(text);
-	return { text, matches: (shown) => search(shown) !== null };
+	const words = queryWords(text).map((word) => {
+		const wordSearch = prepareSimpleSearch(word);
+		return (shown: string) => wordSearch(shown)?.matches ?? null;
+	});
+	return { text, matches: (shown) => search(shown) !== null, words };
 }
 
 /** The icon that opens and closes the field. */

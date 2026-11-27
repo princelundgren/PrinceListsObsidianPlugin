@@ -241,7 +241,7 @@ describe('matchesSchedule', () => {
 	});
 
 	test('matches the day as exact text, never through the word search', () => {
-		const anyDay = (text: string) => ({ text, matches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) });
+		const anyDay = (text: string) => ({ text, words: [], matches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) });
 		expect(matchesSchedule(item, anyDay('2026-10'))).toBe(true);
 		expect(matchesSchedule(item, anyDay('2026-11'))).toBe(false);
 	});

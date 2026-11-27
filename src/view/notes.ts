@@ -13,6 +13,8 @@ export const NOTES_DRAWN_CHECKBOX_SELECTOR = `.${NOTES_DRAWN_CHECKBOX_CLASS}`;
 export interface MarkdownHost {
 	readonly app: App;
 	addChild<T extends Component>(component: T): T;
+	/** Called once Obsidian has rendered into `el`, which may be gone from the page by then. */
+	markdownRendered?(el: HTMLElement): void;
 }
 
 // Obsidian's own rendering, so pictures, links and embeds look as they do in any note (spec,
@@ -25,6 +27,7 @@ export function renderNotes(host: MarkdownHost, sourcePath: string, el: HTMLElem
 		() => {
 			// A title has no checklist: its boxes would tick on screen and save nothing.
 			for (const box of Array.from(el.querySelectorAll<HTMLInputElement>(NOTES_CHECKBOX_SELECTOR))) box.disabled = true;
+			host.markdownRendered?.(el);
 		},
 		(error: unknown) => console.error(error),
 	);

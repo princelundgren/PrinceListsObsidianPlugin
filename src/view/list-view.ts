@@ -34,7 +34,8 @@ import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
 import { registerFieldEvents, swallowClickAfterHold } from './events';
-import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
+import { FindPaint } from './find-highlight';
+import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, findOf, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
 import { registerMenuPress } from './menu-press';
 import { registerPopoverPress } from './popover-press';
@@ -44,9 +45,9 @@ import type { HeadingField } from './heading-field';
 import type { DraftBase } from './line-edit';
 import { enableMouseHold } from './hold-mouse';
 import { openListTags } from './list-tags';
-import { ownElements } from './own-rows';
+import { isInNestedBlock, ownElements } from './own-rows';
 import { redraw } from './redraw';
-import { LINE_ATTR, lineOf, setLine } from './render-list';
+import { ITEM_TITLE_CLASS, LINE_ATTR, lineOf, setLine } from './render-list';
 import { showStarColor } from './row-marks';
 import { focusListWhenActive } from './select';
 import { buildSelectionBar, syncSelectionBar } from './selection-bar';
@@ -99,6 +100,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	private scheduleAction: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
 	readonly blocks = new Map<HTMLElement, Component>();
+	/** The colors of what Cmd+F's words match in this list's titles. */
+	readonly findPaint = new FindPaint();
 	// One-off writes wait for the one before to land, then edit the text as it left it, so two quick
 	// taps on one box tick and untick it, and taps on two rows both land.
 	readonly enqueue = serialQueue((error) => console.error(error));
@@ -259,7 +262,20 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.endListNote();
 		this.dropListNoteEditor();
 		this.selection.clear();
+		this.findPaint.clear();
 		await super.onClose();
+	}
+
+	/** Colors what Cmd+F's words match in every title this list shows, and takes it from titles gone. */
+	paintFind(): void {
+		this.findPaint.paintAll(ownElements(this.listSizerEl, `.${ITEM_TITLE_CLASS}`), findOf(this.filter ?? ''));
+	}
+
+	/** Colors what Cmd+F's words match in `el` once it's rendered, when it's one of this list's titles. */
+	markdownRendered(el: HTMLElement): void {
+		if (this.viewClosed) return;
+		const isOwnTitle = el.hasClass(ITEM_TITLE_CLASS) && this.listSizerEl.contains(el) && !isInNestedBlock(this.listSizerEl, el);
+		if (isOwnTitle) this.findPaint.paint(el, findOf(this.filter ?? ''));
 	}
 
 	async onRename(file: TFile): Promise<void> {
