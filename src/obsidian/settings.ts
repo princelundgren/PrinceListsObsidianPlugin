@@ -22,6 +22,7 @@ export interface PrinceListsSettings {
 	overdueColor: ThemeColor;
 	/** The theme color of the day of an open item due today. */
 	todayColor: ThemeColor;
+	/** The theme color of the day of an open item due after today. */
 	upcomingColor: ThemeColor;
 	/** The theme color of an item's star. */
 	starColor: ThemeColor;
