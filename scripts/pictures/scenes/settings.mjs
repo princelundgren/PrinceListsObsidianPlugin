@@ -47,7 +47,8 @@ async function checkSettingsInWindow(session) {
  * Runs `act` from the default settings, then puts PrinceLists' saved settings back as they were.
  * PrinceLists reloads its settings when the file changes, as when Sync brings it, so the recording
  * starts from the defaults and the next scene sees the old colors. The settings are put back before
- * the settings close, so a close that fails can't leave the new colors saved.
+ * the settings close, so a close that fails can't leave the new colors saved, and the settings
+ * close even if putting them back fails.
  */
 async function restoringSettings(session, act) {
 	const saved = await session.evaluate(`(async () => (await app.vault.adapter.exists(${DATA})) ? app.vault.adapter.read(${DATA}) : null)()`);
@@ -55,11 +56,14 @@ async function restoringSettings(session, act) {
 		await writeSettings(session, '{}');
 		await act();
 	} finally {
-		await writeSettings(session, saved ?? '{}');
-		if (saved === null) await session.evaluate(`app.vault.adapter.remove(${DATA})`);
-		if (await session.evaluate(`!!document.querySelector('.modal.mod-settings')`)) {
-			const close = middleOf(await boundsOf(session, '.modal.mod-settings .lucide-x'));
-			await click(session, close.x, close.y);
+		try {
+			await writeSettings(session, saved ?? '{}');
+			if (saved === null) await session.evaluate(`app.vault.adapter.remove(${DATA})`);
+		} finally {
+			if (await session.evaluate(`!!document.querySelector('.modal.mod-settings')`)) {
+				const close = middleOf(await boundsOf(session, '.modal.mod-settings .lucide-x'));
+				await click(session, close.x, close.y);
+			}
 		}
 	}
 }
