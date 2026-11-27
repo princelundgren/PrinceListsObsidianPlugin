@@ -20,3 +20,8 @@ test('styles.css stretches the settings preview across the row when Obsidian sta
 	const rule = styles.match(/\.princelists-settings-preview > \.princelists-settings-preview-rows \{([^}]*)\}/)?.[1];
 	expect(rule).toContain('align-self: stretch;');
 });
+
+test('styles.css colors what Find matches with the theme\'s highlight', () => {
+	const rule = styles.match(/::highlight\(princelists-find\) \{([^}]*)\}/)?.[1];
+	expect(rule).toContain('background-color: var(--highlight-background);');
+});

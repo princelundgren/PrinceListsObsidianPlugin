@@ -7,6 +7,7 @@ import { labelWithKey } from '../core/key-name';
 import { joinLines, splitLines } from '../core/lines';
 import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import type { Find } from '../core/display';
 import type { OverdueStyle } from '../core/overdue';
 import { byList, datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import type { TagStripMode } from '../core/tag-strip-mode';
@@ -21,13 +22,14 @@ import { closeCard } from './card';
 import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
 import { targetOf } from './dom';
 import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, NO_MATCH_CLASS, NO_MATCH_HINT, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
+import { FindPaint } from './find-highlight';
 import { FIND_KEY_NAME } from './keys';
 import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
-import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
+import { HEADING_CLASS, ITEM_CLASS, ITEM_TITLE_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
 import { showStarColor } from './row-marks';
-import { buildListHeading, buildScheduleRow, LIST_HEADING_CLASS } from './schedule-row';
+import { buildListHeading, buildScheduleRow, LIST_HEADING_CLASS, LIST_NAME_CLASS, ROW_LIST_CLASS } from './schedule-row';
 import { buildTagStrip, showsTagStrip, stripClick } from './tag-strip';
 import { onWindowReturn } from './window-return';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
@@ -39,6 +41,8 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	later: 'Later',
 };
 
+// What Find colors in the Schedule: titles, and list names, which it searches too.
+const FIND_SELECTOR = `.${ITEM_TITLE_CLASS}, .${ROW_LIST_CLASS}, .${LIST_NAME_CLASS}`;
 const SCHEDULE_ABOUT = 'Dated items from all your lists, by day.';
 const GROUP_BUTTON_CLASS = 'princelists-group-button';
 
@@ -74,6 +78,8 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	// design, "Saving").
 	private readonly comeBackFailedOn = new Map<string, string>();
 	private blocks: Component[] = [];
+	// The colors of what Cmd+F's words match in the titles and list names.
+	private readonly findPaint = new FindPaint();
 	// Today, the overdue settings, the groups and the tag strip as drawn last. Every field but the notes counts: the rows keep these items, and ticks use their lines.
 	private drawn: string | null = null;
 	// The day drawn last, whose days read differently after midnight.
@@ -180,6 +186,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.comeBackFailedOn.clear();
 		this.collapsed.clear();
 		this.removeBlocks();
+		this.findPaint.clear();
 	}
 
 	async refresh(): Promise<void> {
@@ -377,7 +384,11 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		const overdue = this.overdueLook.style;
 		const drawn = JSON.stringify([today, overdue, dated.length === 0, shown, strip, this.litTags, grouped]);
 		this.drawnDay = today;
-		if (drawn === this.drawn) return;
+		// Rows that show the same still match a new query, as from "mi" to "mil", so they're colored again.
+		if (drawn === this.drawn) {
+			this.paintFind(filter.find);
+			return;
+		}
 		this.drawn = drawn;
 		const scroll = this.scrollEl.scrollTop;
 		this.removeBlocks();
@@ -399,6 +410,16 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 			}
 		}
 		this.scrollEl.scrollTop = scroll;
+		this.paintFind(filter.find);
+	}
+
+	private paintFind(find: Find | null): void {
+		this.findPaint.paintAll(Array.from(this.groupsEl.querySelectorAll<HTMLElement>(FIND_SELECTOR)), find);
+	}
+
+	/** Colors what Cmd+F's words match in a title once Obsidian has rendered it, while it shows here. */
+	markdownRendered(el: HTMLElement): void {
+		if (el.hasClass(ITEM_TITLE_CLASS) && this.groupsEl.contains(el)) this.findPaint.paint(el, findOf(this.filter ?? ''));
 	}
 
 	private drawRows(items: readonly ScheduledItem[], today: string, options: { showsList: boolean; overdue: OverdueStyle }): void {

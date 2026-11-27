@@ -98,6 +98,7 @@ export function redraw(view: PrinceListView, focusing: Element | null): void {
 	for (const field of contentEl.querySelectorAll('textarea')) fitHeight(field);
 	listScrollEl.scrollTop = scrollTop;
 	drawSelection(view);
+	view.paintFind();
 }
 
 // Where a redraw puts the card: a slot for the card that keeps focus, or the card, updated.

@@ -4,10 +4,14 @@ import type { OverdueStyle } from '../core/overdue';
 import { listFolder, type ListGroup, type ScheduledItem } from '../core/schedule';
 import { addHiddenLabel } from './dom';
 import { renderInline, type MarkdownHost } from './notes';
-import { addTickZone, CHECKBOX_CLASS, ITEM_CLASS, TITLE_AND_TAGS_CLASS } from './render-list';
+import { addTickZone, CHECKBOX_CLASS, ITEM_CLASS, ITEM_TITLE_CLASS, TITLE_AND_TAGS_CLASS } from './render-list';
 import { addRepeat, addStar, addTags, addWhen } from './row-marks';
 
 export const LIST_HEADING_CLASS = 'princelists-schedule-list-heading';
+/** A list's name in its subheading, while the Schedule groups by list. */
+export const LIST_NAME_CLASS = 'princelists-schedule-list-name';
+/** A list's name under a row's title, while the Schedule sorts by date. */
+export const ROW_LIST_CLASS = 'princelists-schedule-list';
 
 /**
  * A Schedule row for `item`, with its list's name when `showsList`, and the Component its
@@ -23,7 +27,7 @@ export function buildScheduleRow(host: MarkdownHost, item: ScheduledItem, today:
 	const text = rowEl.createDiv({ cls: 'princelists-schedule-text' });
 	const titleLine = text.createDiv({ cls: 'princelists-schedule-title-line' });
 	const titleAndTags = titleLine.createDiv({ cls: TITLE_AND_TAGS_CLASS });
-	const block = renderInline(host, item.listPath, titleAndTags.createDiv({ cls: 'princelists-item-title' }), item.title);
+	const block = renderInline(host, item.listPath, titleAndTags.createDiv({ cls: ITEM_TITLE_CLASS }), item.title);
 	addTags(titleAndTags, item.tailTags);
 	if (item.starred) addStar(titleLine);
 	addWhen(titleLine, item.day, today, item.done, overdue);
@@ -37,13 +41,13 @@ export function buildListHeading({ listName, folder }: ListGroup): HTMLDivElemen
 	const heading = createDiv({ cls: LIST_HEADING_CLASS, attr: { role: 'heading', 'aria-level': 3 } });
 	setIcon(heading.createSpan({ cls: 'princelists-schedule-list-icon', attr: { 'aria-hidden': 'true' } }), RIBBON_ICON);
 	const label = heading.createEl('button', { cls: 'princelists-schedule-list-label' });
-	label.createSpan({ cls: 'princelists-schedule-list-name', text: listName });
+	label.createSpan({ cls: LIST_NAME_CLASS, text: listName });
 	if (folder) label.createSpan({ cls: 'princelists-schedule-list-folder', text: folder });
 	return heading;
 }
 
 // The name alone, with its path in a tooltip, so a row stays short.
 function addListName(el: HTMLElement, listName: string, folder: string): void {
-	const nameEl = el.createDiv({ cls: 'princelists-schedule-list', text: listName });
+	const nameEl = el.createDiv({ cls: ROW_LIST_CLASS, text: listName });
 	if (folder) setTooltip(nameEl, `${folder}/${listName}`);
 }

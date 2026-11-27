@@ -1,6 +1,7 @@
 ---
-status: approved
+status: building
 verified: 2026-11-27
+governs: [src/**, styles.css]
 ---
 
 # PrinceLists for Obsidian: highlighting what Find finds
@@ -20,8 +21,10 @@ variables and no `:has()`.
 
 - **While Find holds text, each word it matches gets a background color (owner):** in item titles,
   in a list and in the Schedule, and in the notes of an item whose card is open.
-- **The color is Obsidian's `--text-highlight-bg` (owner),** the one Obsidian documents as
-  "Highlighted text background", so it follows the theme.
+- **The color is Obsidian's `--highlight-background` (owner, 2026-11-27),** the one Obsidian gives
+  `==marked==` text, so it follows the theme. From Obsidian 1.14 the app no longer sets
+  `--text-highlight-bg`, which its docs still list as "Highlighted text background": a theme may
+  set it, and `--highlight-background` takes it then, else a yellow.
 - **Titles use the browser's CSS Custom Highlight API (owner).** It colors text without changing the
   page, so a title's links, tags and formatting stay exactly as Obsidian rendered them.
 - **The notes editor uses a CodeMirror mark decoration (call),** the route CodeMirror's guide gives
@@ -94,7 +97,7 @@ variables and no `:has()`.
   Its drawn blocks are rendered by Obsidian's renderer into widgets, which the marks can't reach,
   so each widget adds highlight ranges over its rendered text once its render finishes, as a title
   does, and removes them when the widget goes.
-- **`styles.css`:** `::highlight(princelists-find) { background-color: var(--text-highlight-bg); }`
+- **`styles.css`:** `::highlight(princelists-find) { background-color: var(--highlight-background); }`
   **(call)**. A mark in the notes editor uses the same variable through a class.
 
 ## Not in this design
@@ -120,8 +123,8 @@ variables and no `:has()`.
    catches a repeat right after a match, as in "milkmilk". A core test covers both.
 2. **The color on Android,** whose system WebView must be Chromium 105 or later. Checked on the
    emulator.
-3. **`--text-highlight-bg` under a selection, and beside `==highlight==`:** text selected in a
-   colored title should still show it's selected. Obsidian gives `==marked==` text the same color,
+3. **The color under a selection, and beside `==highlight==`:** a row's title can't be selected,
+   but text selected in the notes should still show it's selected. Obsidian gives `==marked==` text the same color,
    so a title or note that uses it looks like a match there. It's accepted as the cost of the
    owner's color, which keeps to the theme **(call)**.
    Checked by hand in the dark and light themes.

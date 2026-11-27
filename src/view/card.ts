@@ -14,11 +14,12 @@ import { CARD_TOOLS_CLASS } from './card-tools';
 import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
+import { findOf } from './filter';
 import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
 import { cardNotesSource } from './notes-source';
 import { ownElement } from './own-rows';
-import { addTickZone, buildRow, CHECKBOX_CLASS, ITEM_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
+import { addTickZone, buildRow, CHECKBOX_CLASS, ITEM_CLASS, ITEM_TITLE_CLASS, LINE_ATTR, rowFilter, setLine, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, showLostTypingNotice, UNSAFE_EDIT_NOTICE, writeAction } from './write';
 
 export const CARD_CLASS = 'princelists-card';
@@ -54,6 +55,8 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 	if (row) {
 		refreshCard(view, card);
 		view.dropBlock(row);
+		const rowTitle = ownElement(row, `.${ITEM_TITLE_CLASS}`);
+		if (rowTitle) view.findPaint.forget(rowTitle);
 		row.replaceWith(card.el);
 	} else {
 		view.render();
@@ -93,7 +96,10 @@ export function closeCard(view: PrinceListView): void {
 function putRowBack(view: PrinceListView, card: Card, line: number | null): void {
 	const row = rowAt(view, line);
 	if (row && isRowVisible(view, row)) {
-		card.el.replaceWith(buildRow(view, view.sourcePath, row, view.blocks));
+		const rowEl = buildRow(view, view.sourcePath, row, view.blocks);
+		card.el.replaceWith(rowEl);
+		const title = ownElement(rowEl, `.${ITEM_TITLE_CLASS}`);
+		if (title) view.findPaint.paint(title, findOf(view.filter ?? ''));
 	} else {
 		card.el.remove();
 		// The item may have shown only while its card was open, in a collapsed section or past the

@@ -66,7 +66,11 @@ export function findOf(query: string): Find | null {
 	const text = query.trim();
 	if (text === '') return null;
 	const search = prepareSimpleSearch(text);
-	return { text, matches: (shown) => search(shown) !== null };
+	const words = text.split(' ').filter((word) => word !== '').map((word) => {
+		const wordSearch = prepareSimpleSearch(word);
+		return (shown: string) => wordSearch(shown)?.matches ?? null;
+	});
+	return { text, matches: (shown) => search(shown) !== null, words };
 }
 
 /** The icon that opens and closes the field. */

@@ -283,7 +283,7 @@ describe('visibleSections, matching the date', () => {
 	});
 
 	test('matches the When as exact text, never through the word search', () => {
-		const anyDay = { text: '2026-11', matches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) };
+		const anyDay = { text: '2026-11', words: [], matches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) };
 		const { lines, model } = list(text);
 		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: anyDay, keepLine: null, collapsed: new Set() }, NO_INHERITED_TAGS);
 		expect(sections[0]?.rows.map((shown) => shown.kind === 'item' && shown.title)).toEqual(['Renew']);
