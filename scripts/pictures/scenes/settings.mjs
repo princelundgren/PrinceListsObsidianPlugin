@@ -16,6 +16,10 @@ const CHOICES = [
 // Right of the list's description, clear of every row.
 const REST = { x: 900, y: 140 };
 const DATA = `app.vault.configDir + '/plugins/princelists/data.json'`;
+const LIST = '.workspace-leaf.mod-active';
+// PrinceLists' theme colors besides none, as `src/core/theme-color.ts` lists them. Its star is
+// yellow and its dates none unless the settings say otherwise.
+const COLORS = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'pink'];
 
 const scene = {
 	name: 'settings',
@@ -37,7 +41,16 @@ const scene = {
 
 /** Throws unless Settings opens inside the main window, where the recording can see it. */
 async function checkSettingsInWindow(session) {
-	const app = await session.evaluate(`app.vault.adapter.read(app.vault.configDir + '/app.json').then(JSON.parse).catch(() => ({}))`);
+	const app = await session.evaluate(`(async () => {
+		const path = app.vault.configDir + '/app.json';
+		if (!(await app.vault.adapter.exists(path))) return {};
+		const text = await app.vault.adapter.read(path);
+		try {
+			return JSON.parse(text);
+		} catch (error) {
+			throw new Error(path + " isn't valid JSON: " + error.message);
+		}
+	})()`);
 	if (app.settingsPopoutWindow !== false) {
 		throw new Error('Settings opens in its own window in this vault. Copy the demo vault again, which turns "Open settings in window" off.');
 	}
@@ -69,12 +82,44 @@ async function restoringSettings(session, act) {
 }
 
 /**
- * Writes `text` as PrinceLists' saved settings and waits for PrinceLists to read it back. Removed
- * any sooner, the file could go before PrinceLists reads it.
+ * Writes `text` as PrinceLists' saved settings and waits until To do has the star color it names
+ * and no date color it doesn't name. Removed any sooner, the file could go before PrinceLists reads
+ * it. A saved file that isn't a JSON object goes back as it was, with nothing to wait for, since
+ * what PrinceLists shows then can't be told from it.
  */
 async function writeSettings(session, text) {
 	await session.evaluate(`app.vault.adapter.write(${DATA}, ${JSON.stringify(text)})`);
-	await sleep(1500);
+	const settings = settingsIn(text);
+	if (settings === null) return;
+	const named = (color, fallback) => (color === 'none' || COLORS.includes(color) ? color : fallback);
+	const star = named(settings.starColor, 'yellow');
+	const days = [settings.overdueColor, settings.todayColor, settings.upcomingColor].map((color) => named(color, 'none'));
+	const unnamed = COLORS.filter((color) => !days.includes(color)).map((color) => `${LIST} .princelists-when-${color}`).join(', ');
+	await until(
+		session,
+		`!!document.querySelector('${LIST} .princelists-star-color-${star}') && !document.querySelector('${unnamed}')`,
+		10000,
+		"To do didn't show the colors in PrinceLists' data.json within 10 seconds of writing it.",
+	);
+}
+
+/** Returns the object `text` holds as JSON, or null when it holds anything else or isn't JSON. */
+function settingsIn(text) {
+	try {
+		const settings = JSON.parse(text);
+		return typeof settings === 'object' && !Array.isArray(settings) ? settings : null;
+	} catch {
+		return null;
+	}
+}
+
+/** Waits until the page expression `condition` is true, throwing `message` after `ms`. */
+async function until(session, condition, ms, message) {
+	const end = Date.now() + ms;
+	while (!(await session.evaluate(condition))) {
+		if (Date.now() > end) throw new Error(message);
+		await sleep(100);
+	}
 }
 
 /** Returns the bounds of the dropdown in the setting row named `name`. */
