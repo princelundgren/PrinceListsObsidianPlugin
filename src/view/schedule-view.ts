@@ -26,6 +26,7 @@ import { PrinceListView } from './list-view';
 import { handleLinkClick, type MarkdownHost } from './notes';
 import { openItem } from './open-item';
 import { HEADING_CLASS, ITEM_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
+import { showStarColor } from './row-marks';
 import { buildListHeading, buildScheduleRow, LIST_HEADING_CLASS } from './schedule-row';
 import { buildTagStrip, showsTagStrip, stripClick } from './tag-strip';
 import { onWindowReturn } from './window-return';
@@ -153,7 +154,11 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
 		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
 		this.registerEvent(this.archiveDelay.onChange(() => this.draw()));
-		this.registerEvent(this.overdueLook.onChange(() => this.draw()));
+		showStarColor(this.contentEl, this.overdueLook.style.starColor);
+		this.registerEvent(this.overdueLook.onChange(() => {
+			showStarColor(this.contentEl, this.overdueLook.style.starColor);
+			this.draw();
+		}));
 		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
 		this.registerDomEvent(this.contentEl, 'mousedown', (evt) => {
 			if (targetOf(evt)?.closest(FILTER_TOGGLE_SELECTOR)) evt.preventDefault();

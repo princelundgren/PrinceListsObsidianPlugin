@@ -172,9 +172,9 @@ this met on 2026-10-30 **(owner)**.
   archived items", and the Schedule's, which in a sidebar opens from a right-click on its tab. It
   filters as typed text does: every heading shows, a Schedule group shows while one of its items
   shows, collapsed ones included, and content the plugin leaves alone hides. With text in the
-  field too, an item shows only if it's starred and matches. The toggle is yellow and filled
-  while it's on, as a row's star is, and a press on it doesn't take focus from the field
-  **(call)**. Its tooltip stays "Show starred only", and it has no key **(call)**. It's on only
+  field too, an item shows only if it's starred and matches. While it's on, the toggle is filled in
+  the star's color ("Star color" in Settings), as a row's star is, and a press on it doesn't take
+  focus from the field **(call)**. Its tooltip stays "Show starred only", and it has no key **(call)**. It's on only
   while the field is open, so the lit toggle always shows why items are hidden: the menu item
   opens the field when it's closed, without focusing it **(call)**, and closing the field turns it
   off (owner, 2026-11-06). It isn't remembered (owner, 2026-11-06).
@@ -574,13 +574,16 @@ this met on 2026-10-30 **(owner)**.
 ### Star (owner: in its list only)
 
 - **A star button among the card's buttons adds or removes the star (owner, 2026-11-17),** after
-  the tag button. It is Lucide's `star`, filled in `--color-yellow` while the item has one, as
+  the tag button. It is Lucide's `star`, filled in the star's color while the item has one, as
   on the row, and its tooltip says Add star or Remove star. This replaces Add star or Remove star
   in the card's ⋯ menu, with a star mark beside the title: the row under the notes has room for it.
   A list's row adds or removes it from its right-click menu too **(owner, 2026-10-29)**: the step
   one design's "Item actions".
-- **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
+- **The row shows Lucide's `star`** after the title, filled in the star's color, wherever rows
   show: a list, the Schedule view and a list inside another note.
+- **The star's color is a setting (owner, 2026-11-27),** "Star color" (Settings, below), Yellow
+  by default, as the star always was. It colors the row's star, the card's star button while the
+  item has a star, and the starred-only toggle while it's on, so all three match.
 - **Where the star and the day sit (owner, 2026-11-05):**
   - On the title's first line: the day on its baseline, and the checkbox and the star centered on
     its capital letters.
@@ -736,6 +739,13 @@ strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
   A stored value that is none of the choices is read as the default.
   - **A change to any of the three redraws** the list views, the list blocks and the Schedule, as
     the delay's does, and again when Sync brings a change. It writes nothing to any list.
+- **Star color (owner, 2026-11-27):** a `dropdown` control, next after Today date color
+  **(call)**, with the date colors' choices, saved the same way. It defaults to Yellow, so the
+  star looks as it did before the setting. None draws the star in `--text-muted`, still filled, so
+  a starred item still reads as starred **(call)**. Each color is `--color-` and its name. A
+  stored value that is none of the choices is read as the default.
+  - **A change shows at once** in the list views, the list blocks and the Schedule, and again when
+    Sync brings one. It writes nothing to any list.
 - **Floating add button (owner, 2026-11-05):** a `dropdown` control with desktop and mobile,
   desktop only, mobile only and off, saved as `"both"`, `"desktop"`, `"mobile"` and `"off"`.
   Mobile is `Platform.isMobile`, a tablet included, as for keys' names. The floating "+" shows

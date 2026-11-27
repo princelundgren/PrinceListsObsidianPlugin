@@ -1,4 +1,7 @@
 import { joinItemLine, parseItemLine, setTitle, type ItemLineParts } from './item-line';
+import type { ThemeColor } from './theme-color';
+
+export const DEFAULT_STAR_COLOR: ThemeColor = 'yellow';
 
 const STAR = ' ⭐';
 // A star counts only after a space, so `5⭐` is a title, not a starred `5`.

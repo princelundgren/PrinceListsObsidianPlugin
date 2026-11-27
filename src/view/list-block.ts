@@ -22,6 +22,7 @@ import { noticeLostField, type BlockField } from './block-fields';
 import type { RowDragHost } from './drag-host';
 import { LIST_BLOCK_CLASS } from './own-rows';
 import { buildHeading, buildRow, ITEMS_CLASS, type RowHost } from './render-list';
+import { showStarColor } from './row-marks';
 import { onWindowReturn } from './window-return';
 import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE } from './write';
 
@@ -82,7 +83,11 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
 		this.registerEvent(this.archiveDelay.onChange(() => this.rowLookChanged()));
-		this.registerEvent(this.overdueLook.onChange(() => this.rowLookChanged()));
+		showStarColor(this.rootEl, this.overdueLook.style.starColor);
+		this.registerEvent(this.overdueLook.onChange(() => {
+			showStarColor(this.rootEl, this.overdueLook.style.starColor);
+			this.rowLookChanged();
+		}));
 		registerBlockEvents(this, this.rootEl, this.notePath);
 		enableBlockDrag(this);
 		void this.resolve().then(() => this.bringBack());

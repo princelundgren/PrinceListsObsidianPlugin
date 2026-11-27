@@ -47,6 +47,7 @@ import { openListTags } from './list-tags';
 import { ownElements } from './own-rows';
 import { redraw } from './redraw';
 import { LINE_ATTR, lineOf, setLine } from './render-list';
+import { showStarColor } from './row-marks';
 import { focusListWhenActive } from './select';
 import { buildSelectionBar, syncSelectionBar } from './selection-bar';
 import { buildTagsPopover, closeTagsPopover, placeTagsPopover } from './tags-popover';
@@ -218,7 +219,11 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
 		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
-		this.registerEvent(this.overdueLook.onChange(() => this.render()));
+		showStarColor(this.contentEl, this.overdueLook.style.starColor);
+		this.registerEvent(this.overdueLook.onChange(() => {
+			showStarColor(this.contentEl, this.overdueLook.style.starColor);
+			this.render();
+		}));
 		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
 			if (leaf === this.leaf) this.returned();
 		}));

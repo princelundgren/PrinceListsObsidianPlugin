@@ -1078,9 +1078,9 @@ button.princelists-archived-toggle.princelists-archived-shown {
 	color: var(--color-blue);
 }
 
-/* Filled yellow while only starred items show, as a starred row's star is. */
+/* Filled in the star's color while only starred items show, as a starred row's star is. */
 button.princelists-starred-toggle.princelists-starred-only {
-	color: var(--color-yellow);
+	color: var(--princelists-star-color, var(--color-yellow));
 }
 
 button.princelists-starred-toggle.princelists-starred-only svg {
@@ -1150,7 +1150,7 @@ button.princelists-undo:hover {
 	flex: none;
 	display: flex;
 	align-self: baseline;
-	color: var(--color-yellow);
+	color: var(--princelists-star-color, var(--color-yellow));
 }
 
 .princelists-star svg {
@@ -1159,7 +1159,7 @@ button.princelists-undo:hover {
 
 /* Filled, as the row's star. */
 button.princelists-card-star.is-starred {
-	color: var(--color-yellow);
+	color: var(--princelists-star-color, var(--color-yellow));
 }
 
 button.princelists-card-star.is-starred svg {
@@ -1181,6 +1181,43 @@ button.princelists-card-repeat.is-repeating {
 	align-self: baseline;
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
+}
+
+/* The star's color, as the settings pick it from the theme's colors, for the stars under a view's root. */
+.princelists-star-color-none {
+	--princelists-star-color: var(--text-muted);
+}
+
+.princelists-star-color-red {
+	--princelists-star-color: var(--color-red);
+}
+
+.princelists-star-color-orange {
+	--princelists-star-color: var(--color-orange);
+}
+
+.princelists-star-color-yellow {
+	--princelists-star-color: var(--color-yellow);
+}
+
+.princelists-star-color-green {
+	--princelists-star-color: var(--color-green);
+}
+
+.princelists-star-color-cyan {
+	--princelists-star-color: var(--color-cyan);
+}
+
+.princelists-star-color-blue {
+	--princelists-star-color: var(--color-blue);
+}
+
+.princelists-star-color-purple {
+	--princelists-star-color: var(--color-purple);
+}
+
+.princelists-star-color-pink {
+	--princelists-star-color: var(--color-pink);
 }
 
 /* An overdue day's color and today's, as the settings pick them from the theme's colors. */

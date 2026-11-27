@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { parseItemLine } from '../../src/core/item-line';
-import { isStarred, setStar, setTitleKeepingStar, splitStar } from '../../src/core/star';
+import { DEFAULT_STAR_COLOR, isStarred, setStar, setTitleKeepingStar, splitStar } from '../../src/core/star';
 
 const F = '\uFE0F';
 
@@ -132,4 +132,8 @@ test('a starred item whose title is cleared stays starred', () => {
 
 test('a star before trailing spaces still counts', () => {
 	expect(isStarred('- [ ] milk ⭐ ')).toBe(true);
+});
+
+test('the star is yellow unless the settings say otherwise', () => {
+	expect(DEFAULT_STAR_COLOR).toBe('yellow');
 });
