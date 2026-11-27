@@ -1,9 +1,12 @@
 import { comeBackEdit, planComeBacks } from '../core/come-back';
+import { editListFile } from '../obsidian/file-edit';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import type { PrinceListView } from './list-view';
+import { listRead } from './schedule-lists';
+import type { ScheduleView } from './schedule-view';
 import { enqueueAt, writeAction } from './write';
 
-// The text each view's last comeback failed to write on: a failed write isn't tried again (step one's
+// The text each list view's last comeback failed to write on: a failed write isn't tried again (step one's
 // design, "Saving"), though the view reads the file again and redraws after it.
 const failedOn = new WeakMap<PrinceListView, string>();
 
@@ -30,4 +33,24 @@ export function bringBackInList(view: PrinceListView): void {
 function comeBacks(view: PrinceListView, text: string, now: Date): { next: string } | null {
 	if (!isListText(text) || failedOn.get(view) === text) return null;
 	return planComeBacks(text, contentStartLine(text), now);
+}
+
+// Writes every due repeating item in the lists the Schedule read back open, hidden ones included (spec,
+// "Coming back"): only when the Schedule opens or gets focus or Obsidian returns to the screen, never
+// when a list changes, and never while it is out of sight. A list that changed since it was read
+// refuses it with no notice.
+export function bringBackInSchedule(view: ScheduleView): void {
+	if (!view.containerEl.isShown()) return;
+	void view.enqueue(async () => {
+		for (const path of [...view.lists.keys()]) {
+			const list = view.lists.get(path);
+			const file = view.app.vault.getFileByPath(path);
+			if (!list || !file || view.comeBackFailedOn.get(path) === list.text) continue;
+			const planned = planComeBacks(list.text, contentStartLine(list.text), new Date());
+			if (!planned) continue;
+			const result = await editListFile(view.app, file, list.text, planned.next, null);
+			if (result === 'failed') view.comeBackFailedOn.set(path, list.text);
+			if (result === 'written') listRead(view, file, planned.next);
+		}
+	});
 }

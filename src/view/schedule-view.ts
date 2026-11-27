@@ -1,38 +1,29 @@
-import { debounce, getLanguage, ItemView, type Menu, Notice, Platform, Scope, setIcon, setTooltip, TFile, type CachedMetadata, type Component, type TAbstractFile, type WorkspaceLeaf } from 'obsidian';
-import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from '../constants';
-import { planComeBacks } from '../core/come-back';
-import { toggleItem } from '../core/edit-items';
-import { isMarkerValue } from '../core/frontmatter';
+import { debounce, ItemView, type Menu, Platform, Scope, setIcon, setTooltip, type Component, type WorkspaceLeaf } from 'obsidian';
+import { SCHEDULE_ICON, VIEW_TYPE_SCHEDULE } from '../constants';
 import { labelWithKey } from '../core/key-name';
-import { joinLines, splitLines } from '../core/lines';
-import { itemAt, parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
 import type { Find } from '../core/display';
 import type { OverdueStyle } from '../core/overdue';
-import { byList, datedItems, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
+import { byList, scheduleFindsNothing, scheduleStripTags, shownSchedule, unarchived, type ScheduledItem, type ScheduleGroup } from '../core/schedule';
 import type { TagStripMode } from '../core/tag-strip-mode';
 import { litForStrip, NO_LIT_TAGS, type LitTags } from '../core/tags';
-import { backDayMessage, dayOf } from '../core/when';
+import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import type { OverdueLook } from '../obsidian/overdue-look';
-import { editListFile } from '../obsidian/file-edit';
-import { contentStartLine, listTags } from '../obsidian/marker';
-import { openAsList } from '../obsidian/switch';
-import { closeCard } from './card';
-import { addCollapseArrow, COLLAPSE_CLASS } from './collapse';
+import { addCollapseArrow } from './collapse';
+import { bringBackInSchedule } from './come-back';
 import { targetOf } from './dom';
-import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, NO_MATCH_CLASS, NO_MATCH_HINT, openFilter, registerFilterEvents, removeFilterField, STARRED_TOGGLE_CLASS, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
+import { addStarredOnlyItem, addStarredToggle, buildFilterField, FILTER_ICON, FILTER_TOGGLE_SELECTOR, FILTER_PAUSE_MS, FIND_BUTTON_CLASS, findOf, NO_MATCH_CLASS, NO_MATCH_HINT, openFilter, registerFilterEvents, removeFilterField, syncFilterButton, syncStarredToggle, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
 import { FindPaint } from './find-highlight';
 import { FIND_KEY_NAME } from './keys';
-import { PrinceListView } from './list-view';
-import { handleLinkClick, type MarkdownHost } from './notes';
-import { openItem } from './open-item';
-import { HEADING_CLASS, ITEM_CLASS, ITEM_TITLE_CLASS, ITEMS_CLASS, TICK_SELECTOR } from './render-list';
+import type { MarkdownHost } from './notes';
+import { HEADING_CLASS, ITEM_TITLE_CLASS, ITEMS_CLASS } from './render-list';
 import { showStarColor } from './row-marks';
-import { buildListHeading, buildScheduleRow, LIST_HEADING_CLASS, LIST_NAME_CLASS, ROW_LIST_CLASS } from './schedule-row';
-import { buildTagStrip, showsTagStrip, stripClick } from './tag-strip';
+import { GROUP_BUTTON_CLASS, onScheduleClick } from './schedule-click';
+import { isList, listChanged, listDeleted, listRenamed, readList, type ReadList } from './schedule-lists';
+import { buildListHeading, buildScheduleRow, LIST_NAME_CLASS, ROW_LIST_CLASS } from './schedule-row';
+import { buildTagStrip, showsTagStrip } from './tag-strip';
 import { onWindowReturn } from './window-return';
-import { CHANGED_ELSEWHERE_NOTICE, tryEdit } from './write';
 
 const GROUP_NAMES: Record<ScheduleGroup, string> = {
 	today: 'Today',
@@ -44,7 +35,6 @@ const GROUP_NAMES: Record<ScheduleGroup, string> = {
 // What Find colors in the Schedule: titles, and list names, which it searches too.
 const FIND_SELECTOR = `.${ITEM_TITLE_CLASS}, .${ROW_LIST_CLASS}, .${LIST_NAME_CLASS}`;
 const SCHEDULE_ABOUT = 'Dated items from all your lists, by day.';
-const GROUP_BUTTON_CLASS = 'princelists-group-button';
 
 /** Whether the Schedule groups by list, which the plugin keeps for every Schedule. */
 export interface ScheduleGrouping {
@@ -52,31 +42,25 @@ export interface ScheduleGrouping {
 	setByList(on: boolean): void;
 }
 
-// A list as the view last read it: a tick is worked out on that text.
-interface ReadList {
-	text: string;
-	items: ScheduledItem[];
-}
-
 // Every list's items with a When, by day (spec, "When and the Schedule view").
 export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 	// A static view, as Obsidian's docs class a calendar: a link opens in the main area, not in its place.
 	override navigation = false;
-	private lists = new Map<string, ReadList>();
-	private readonly rows = new WeakMap<Element, ScheduledItem>();
-	private readonly headings = new WeakMap<Element, ScheduleGroup>();
-	private readonly listHeadings = new WeakMap<Element, string>();
+	lists = new Map<string, ReadList>();
+	readonly rows = new WeakMap<Element, ScheduledItem>();
+	readonly headings = new WeakMap<Element, ScheduleGroup>();
+	readonly listHeadings = new WeakMap<Element, string>();
 	// Only while the view is open, as a list's collapsed headings.
-	private readonly collapsed = new Set<ScheduleGroup>();
+	readonly collapsed = new Set<ScheduleGroup>();
 	// Ticks run in turn, so each is worked out on the text the one before it wrote.
-	private readonly enqueue = serialQueue((error) => console.error(error));
+	readonly enqueue = serialQueue((error) => console.error(error));
 	// Paths an event updated while a refresh was reading, which its older reads must not overwrite.
 	// null while no refresh is reading.
-	private updatedPaths: Set<string> | null = null;
+	updatedPaths: Set<string> | null = null;
 	private refreshes = 0;
 	// Each list's text its last comeback failed to write on: a failed write isn't tried again (step one's
 	// design, "Saving").
-	private readonly comeBackFailedOn = new Map<string, string>();
+	readonly comeBackFailedOn = new Map<string, string>();
 	private blocks: Component[] = [];
 	// The colors of what Cmd+F's words match in the titles and list names.
 	private readonly findPaint = new FindPaint();
@@ -104,7 +88,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		private readonly archiveDelay: ArchiveDelay,
 		private readonly overdueLook: OverdueLook,
 		readonly tagStripMode: () => TagStripMode,
-		private readonly grouping: ScheduleGrouping,
+		readonly grouping: ScheduleGrouping,
 	) {
 		super(leaf);
 		const sizer = this.scrollEl.createDiv({ cls: 'princelists-sizer' });
@@ -154,18 +138,18 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		onWindowReturn(this, this.containerEl, () => {
 			// No timer moves the rows' days, so on a new day the window's focus draws them again.
 			if (this.drawnDay !== null && dayOf(new Date()) !== this.drawnDay) this.draw();
-			this.bringBack();
+			bringBackInSchedule(this);
 		});
-		this.registerEvent(metadataCache.on('changed', (file, data, cache) => this.listChanged(file, data, cache)));
-		this.registerEvent(vault.on('rename', (file, oldPath) => void this.listRenamed(file, oldPath)));
-		this.registerEvent(vault.on('delete', (file) => this.listDeleted(file.path)));
+		this.registerEvent(metadataCache.on('changed', (file, data, cache) => listChanged(this, file, data, cache)));
+		this.registerEvent(vault.on('rename', (file, oldPath) => void listRenamed(this, file, oldPath)));
+		this.registerEvent(vault.on('delete', (file) => listDeleted(this, file.path)));
 		this.registerEvent(this.archiveDelay.onChange(() => this.draw()));
 		showStarColor(this.contentEl, this.overdueLook.style.starColor);
 		this.registerEvent(this.overdueLook.onChange(() => {
 			showStarColor(this.contentEl, this.overdueLook.style.starColor);
 			this.draw();
 		}));
-		this.registerDomEvent(this.contentEl, 'click', (evt) => this.onClick(evt));
+		this.registerDomEvent(this.contentEl, 'click', (evt) => onScheduleClick(this, evt));
 		this.registerDomEvent(this.contentEl, 'mousedown', (evt) => {
 			if (targetOf(evt)?.closest(FILTER_TOGGLE_SELECTOR)) evt.preventDefault();
 		});
@@ -208,148 +192,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		}
 		this.lists = lists;
 		this.draw();
-		this.bringBack();
-	}
-
-	// Writes every due repeating item in the lists it read back open, hidden ones included (spec, "Coming
-	// back"): only when the Schedule opens or gets focus or Obsidian returns to the screen, never when a
-	// list changes, and never while it is out of sight. A list that changed since it was read refuses it
-	// with no notice.
-	bringBack(): void {
-		if (!this.containerEl.isShown()) return;
-		void this.enqueue(async () => {
-			for (const path of [...this.lists.keys()]) {
-				const list = this.lists.get(path);
-				const file = this.app.vault.getFileByPath(path);
-				if (!list || !file || this.comeBackFailedOn.get(path) === list.text) continue;
-				const planned = planComeBacks(list.text, contentStartLine(list.text), new Date());
-				if (!planned) continue;
-				const result = await editListFile(this.app, file, list.text, planned.next, null);
-				if (result === 'failed') this.comeBackFailedOn.set(path, list.text);
-				if (result === 'written') this.listRead(file, planned.next);
-			}
-		});
-	}
-
-	private listChanged(file: TFile, text: string, cache: CachedMetadata): void {
-		if (isList(cache)) this.listRead(file, text);
-		else this.listDeleted(file.path);
-	}
-
-	private listRead(file: TFile, text: string): void {
-		this.updatedPaths?.add(file.path);
-		this.lists.set(file.path, readList(file, text));
-		this.draw();
-	}
-
-	private async listRenamed(file: TAbstractFile, oldPath: string): Promise<void> {
-		this.updatedPaths?.add(oldPath).add(file.path);
-		const wasList = this.lists.delete(oldPath);
-		if (file instanceof TFile && isList(this.app.metadataCache.getFileCache(file))) {
-			this.lists.set(file.path, readList(file, await this.app.vault.cachedRead(file)));
-		} else if (!wasList) {
-			return;
-		}
-		this.draw();
-	}
-
-	private listDeleted(path: string): void {
-		this.updatedPaths?.add(path);
-		this.comeBackFailedOn.delete(path);
-		if (this.lists.delete(path)) this.draw();
-	}
-
-	private onClick(evt: MouseEvent): void {
-		const target = targetOf(evt);
-		if (target && stripClick(this, target)) return;
-		if (target?.closest(`.${GROUP_BUTTON_CLASS}`)) {
-			this.grouping.setByList(!this.grouping.byList());
-			return;
-		}
-		if (target?.closest(`.${FIND_BUTTON_CLASS}`)) {
-			toggleFilter(this);
-			return;
-		}
-		if (target?.closest(`.${STARRED_TOGGLE_CLASS}`)) {
-			toggleStarredOnly(this);
-			return;
-		}
-		const heading = target?.closest(`.${COLLAPSE_CLASS}`)?.closest(`.${HEADING_CLASS}`);
-		const group = heading && this.headings.get(heading);
-		if (group) {
-			this.toggleGroup(group);
-			return;
-		}
-		const listHeading = target?.closest(`.${LIST_HEADING_CLASS}`);
-		const listPath = listHeading && this.listHeadings.get(listHeading);
-		if (listPath) {
-			void this.openList(listPath);
-			return;
-		}
-		const rowEl = target?.closest(`.${ITEM_CLASS}`);
-		const item = rowEl && this.rows.get(rowEl);
-		if (!target || !item || handleLinkClick(this.app, item.listPath, evt, target)) return;
-		if (target.closest(TICK_SELECTOR)) {
-			// The box shows the file: the redraw after the write ticks it.
-			evt.preventDefault();
-			void this.enqueue(() => this.tick(item));
-		} else {
-			void this.openItem(item);
-		}
-	}
-
-	private toggleGroup(group: ScheduleGroup): void {
-		if (!this.collapsed.delete(group)) this.collapsed.add(group);
-		this.draw();
-	}
-
-	private async tick(item: ScheduledItem): Promise<void> {
-		const list = this.lists.get(item.listPath);
-		const file = this.app.vault.getFileByPath(item.listPath);
-		if (!list || !file) {
-			new Notice(CHANGED_ELSEWHERE_NOTICE);
-			return;
-		}
-		const lines = splitLines(list.text);
-		const block = itemAt(parseList(lines, contentStartLine(list.text)), item.titleLine);
-		// A change since the row was drawn may have put another item on its line.
-		if (!block || lines[item.titleLine]?.text !== item.line) {
-			new Notice(CHANGED_ELSEWHERE_NOTICE);
-			return;
-		}
-		const toggled = tryEdit(() => toggleItem(lines, block, new Date()));
-		if (!toggled) return;
-		const next = joinLines(toggled.lines);
-		// Taken at once, so the next tick in this list builds on it before the metadata cache catches up.
-		if ((await editListFile(this.app, file, list.text, next)) !== 'written') return;
-		this.listRead(file, next);
-		if (toggled.back !== null) new Notice(backDayMessage(toggled.back, getLanguage()));
-	}
-
-	private async openList(path: string): Promise<void> {
-		const view = await this.showList(path);
-		if (view) closeCard(view);
-	}
-
-	private async openItem(item: ScheduledItem): Promise<void> {
-		const view = await this.showList(item.listPath);
-		if (view) openItem(view, item.titleLine, item.line);
-	}
-
-	// In a tab that already shows the list, else a new one. Null when the list is gone, or its view didn't load.
-	private async showList(path: string): Promise<PrinceListView | null> {
-		const file = this.app.vault.getFileByPath(path);
-		if (!file) {
-			new Notice(CHANGED_ELSEWHERE_NOTICE);
-			return null;
-		}
-		const { workspace } = this.app;
-		// By its state, which a tab restored in the background keeps while its view waits to load.
-		const shown = workspace.getLeavesOfType(VIEW_TYPE_LIST).find((leaf) => leaf.getViewState().state?.file === file.path);
-		const leaf = shown ?? workspace.getLeaf('tab');
-		if (!(leaf.view instanceof PrinceListView && leaf.view.file === file)) await openAsList(leaf, file);
-		workspace.setActiveLeaf(leaf, { focus: true });
-		return leaf.view instanceof PrinceListView && leaf.view.file === file ? leaf.view : null;
+		bringBackInSchedule(this);
 	}
 
 	onPaneMenu(menu: Menu, source: string): void {
@@ -370,7 +213,7 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		this.draw();
 	}
 
-	private draw(): void {
+	draw(): void {
 		const now = new Date();
 		const today = dayOf(now);
 		const dated = [...this.lists.values()].flatMap((list) => unarchived(list.items, now, this.archiveDelay.ms));
@@ -444,12 +287,4 @@ export class ScheduleView extends ItemView implements MarkdownHost, FilterHost {
 		for (const block of this.blocks) this.removeChild(block);
 		this.blocks = [];
 	}
-}
-
-function isList(cache: CachedMetadata | null): boolean {
-	return isMarkerValue(cache?.frontmatter);
-}
-
-function readList(file: TFile, text: string): ReadList {
-	return { text, items: datedItems(text, contentStartLine(text), { path: file.path, name: file.basename, tags: listTags(text) }) };
 }

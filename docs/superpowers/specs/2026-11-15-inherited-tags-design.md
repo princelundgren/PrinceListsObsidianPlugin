@@ -54,7 +54,7 @@ concerns, nothing is written in the background, and only documented Obsidian API
   Both views read the text, as the list view already does for the marker
   (`src/obsidian/marker.ts`), not the metadata cache, which filtering by tag decided against for
   tags ("An item's tags"). The Schedule's `isList` reads the cache for the marker
-  (`src/view/schedule-view.ts`); the builder keeps that and reads the tags from the text it already
+  (`src/view/schedule-lists.ts`); the builder keeps that and reads the tags from the text it already
   loads for each list's items.
 - **What `parseFrontMatterTags` returns (checked in Obsidian 1.15.1's code):** it takes the key
   `tags` in any case, keeps string values only, drops any value with a space, and adds `#`, which
