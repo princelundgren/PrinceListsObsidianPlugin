@@ -7,12 +7,16 @@ export interface PreviewRow {
 	readonly starred: boolean;
 }
 
-/** The preview's sample rows for `now`: a starred one due the day before, so it's overdue, one due today, and one due in three days. */
+/**
+ * The preview's sample rows for `now`, in date order: two overdue, due a week before and the day
+ * before (that one starred), one due today, and one due in three days.
+ */
 export function previewRows(now: Date): readonly PreviewRow[] {
-	const yesterday = dayOf(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+	const day = (offset: number) => dayOf(new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset));
 	return [
-		{ title: 'Water the plants', when: yesterday, starred: true },
-		{ title: 'Call the dentist', when: dayOf(now), starred: false },
-		{ title: 'Pick up the parcel', when: dayOf(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3)), starred: false },
+		{ title: 'Return the library books', when: day(-7), starred: false },
+		{ title: 'Water the plants', when: day(-1), starred: true },
+		{ title: 'Call the dentist', when: day(0), starred: false },
+		{ title: 'Pick up the parcel', when: day(3), starred: false },
 	];
 }
