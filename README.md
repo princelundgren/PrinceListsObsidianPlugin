@@ -173,6 +173,7 @@ The full format is in the [design](docs/superpowers/specs/2026-10-20-prince-list
 - **A repeating item** stays ticked in the file until it comes back, so until then Tasks queries and other apps show it done.
 - **Renamed a list?** Update the blocks that show it in other notes.
 - **On iOS,** a picture dropped from Photos may not reach Obsidian; paste it instead.
+- **On iOS and iPadOS before 17.2,** Find colors the words it finds only in a card's notes text, not in titles or in the notes' tables, callouts, code blocks and embeds. It finds them all the same.
 - **Made for** Obsidian on macOS, iOS, Android and Windows. If something looks wrong, [open an issue](https://github.com/princelundgren/PrinceListsObsidianPlugin/issues).
 
 ## Contributing
