@@ -20,6 +20,7 @@ import { canTurnIntoList, turnIntoList } from './obsidian/turn-into-list';
 import { canTurnIntoNote, turnIntoNote } from './obsidian/turn-into-note';
 import { openFilter } from './view/filter';
 import { ListBlock } from './view/list-block';
+import { syncAddButtons, syncButtons } from './view/list-buttons';
 import { PrinceListView } from './view/list-view';
 import { ScheduleView } from './view/schedule-view';
 import { followTagStripMode } from './view/tag-strip';
@@ -193,11 +194,11 @@ export default class PrinceListsPlugin extends Plugin {
 	}
 
 	private syncListButtons(): void {
-		for (const view of this.listViews()) view.syncButtons();
+		for (const view of this.listViews()) syncButtons(view);
 	}
 
 	private syncAddButtons(): void {
-		for (const view of this.listViews()) view.syncAddButtons();
+		for (const view of this.listViews()) syncAddButtons(view);
 	}
 
 	private scheduleViews(): ScheduleView[] {

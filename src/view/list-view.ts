@@ -1,10 +1,8 @@
 import type { EditorView } from '@codemirror/view';
-import { type Component, debounce, type Menu, type Modal, Notice, Platform, setTooltip, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
-import { SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
-import { showsOn } from '../core/button-platforms';
+import { type Component, debounce, type Menu, type Modal, Platform, TextFileView, type TFile, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
+import { VIEW_TYPE_LIST, VIEW_TYPE_MARKDOWN } from '../constants';
 import { CollapsedHeadings } from '../core/collapsed';
-import { ListEditing, type Typed } from '../core/editing';
-import { followLine, type OwnEdit } from '../core/follow';
+import { ListEditing } from '../core/editing';
 import { labelWithKey } from '../core/key-name';
 import { rememberLast } from '../core/last-result';
 import { splitLines, type Line } from '../core/lines';
@@ -21,42 +19,34 @@ import { dayOf } from '../core/when';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
 import type { OverdueLook } from '../obsidian/overdue-look';
 import { contentStartLine, isListText, listTags } from '../obsidian/marker';
-import { openSchedule } from '../obsidian/open-schedule';
 import type { PrinceListsSettings } from '../obsidian/settings';
-import { openAsMarkdown } from '../obsidian/switch';
-import { buildNewItemButton, hasNoItems } from './add-button';
-import { cardLost, dismissCard, type Card } from './card';
+import { buildNewItemButton } from './add-button';
+import type { Card } from './card';
 import { closeRepeatPopover } from './card-repeat';
 import { closeTagPopover } from './card-tags';
 import { bringBackInList } from './come-back';
-import { fitHeight, isTextField } from './dom';
+import { fitHeight } from './dom';
 import { listDragHost } from './drag-host';
 import { enableMouseDrag } from './drag-mouse';
 import { enableTouchDrag } from './drag-touch';
-import { registerFieldEvents, swallowClickAfterHold } from './events';
+import { swallowClickAfterHold } from './events';
 import { FindPaint } from './find-highlight';
-import { addStarredOnlyItem, ARCHIVED_TOGGLE_CLASS, FILTER_ICON, FILTER_PAUSE_MS, findOf, syncFilterButton, syncStarredToggle, toggleFilter, toggleStarredOnly, type FilterField, type FilterHost } from './filter';
-import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from './keys';
-import { registerMenuPress } from './menu-press';
-import { registerPopoverPress } from './popover-press';
-import { registerFileRedraws } from './notes-drawing';
-import { NOTES_BLOCK_CLASS } from './notes-blocks';
-import { showNotesFind } from './notes-find';
+import { FILTER_PAUSE_MS, type FilterField, type FilterHost } from './filter';
+import { ADD_KEY_NAME, registerListKeys } from './keys';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
 import type { DraftBase } from './line-edit';
 import { enableMouseHold } from './hold-mouse';
-import { openListTags } from './list-tags';
-import { isInNestedBlock, ownElements } from './own-rows';
+import { addHeaderActions, syncButtons } from './list-buttons';
+import { clearList } from './list-clear';
+import { registerListEvents } from './list-events';
+import { paintRendered } from './list-find';
+import { outsideChange } from './list-follow';
+import { addListPaneItems } from './list-pane-menu';
 import { redraw } from './redraw';
-import { ITEM_TITLE_CLASS, LINE_ATTR, lineOf, setLine } from './render-list';
-import { showStarColor } from './row-marks';
-import { focusListWhenActive } from './select';
-import { buildSelectionBar, syncSelectionBar } from './selection-bar';
+import { buildSelectionBar } from './selection-bar';
 import { buildTagsPopover, closeTagsPopover, placeTagsPopover } from './tags-popover';
 import type { TagSuggest } from './tag-suggest';
-import { onWindowReturn } from './window-return';
-import { UNSAFE_EDIT_NOTICE } from './write';
 
 // canAcceptExtension stays at its default of false: true would open every note clicked from a
 // list pane in the list view.
@@ -97,9 +87,9 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	readonly dragsRows = true;
 	readonly dragsHeadings = true;
 	filterField: FilterField | null = null;
-	private newItemButton: HTMLButtonElement | null = null;
-	private findAction: HTMLElement | null = null;
-	private scheduleAction: HTMLElement | null = null;
+	newItemButton: HTMLButtonElement | null = null;
+	findAction: HTMLElement | null = null;
+	scheduleAction: HTMLElement | null = null;
 	/** The rendered titles, headings and list note, by the element they belong to. */
 	readonly blocks = new Map<HTMLElement, Component>();
 	/** The colors of what Cmd+F's words match in this list's titles. */
@@ -140,8 +130,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	constructor(
 		leaf: WorkspaceLeaf,
 		readonly archiveDelay: ArchiveDelay,
-		private readonly overdueLook: OverdueLook,
-		private readonly settings: () => Readonly<PrinceListsSettings>,
+		readonly overdueLook: OverdueLook,
+		readonly settings: () => Readonly<PrinceListsSettings>,
 	) {
 		super(leaf);
 		this.contentEl.addClass('princelists-content');
@@ -183,7 +173,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 			this.clear();
 			this.editing.text = data;
 		} else {
-			this.outsideChange(data);
+			outsideChange(this, data);
 		}
 		this.render();
 		// Only a reload (`clear` false) switches. A switch from inside the leaf's own load doesn't
@@ -196,51 +186,13 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		}
 	}
 
-	// Nothing here writes: an empty new item stays when the file switches (spec, "Selecting and
-	// adding").
 	clear(): void {
-		dismissCard(this);
-		this.editing.reset();
-		this.editing.text = '';
-		this.listTitle = null;
-		this.endListNote();
-		this.dropListNoteEditor();
-		this.listNoteEl = null;
-		this.headingField = null;
-		this.showArchived = false;
-		this.starredOnly = false;
-		this.litTags = NO_LIT_TAGS;
-		this.filter = null;
-		this.filterField = null;
-		this.collapsed.clear();
-		this.selection.clear();
-		this.outsideChanges++;
-		// Nothing of the old file stays, not even a field with focus, which render() would keep.
-		this.listSizerEl.empty();
-		// A different file opens at the top; render() keeps the scroll position otherwise.
-		this.listScrollEl.scrollTop = 0;
+		clearList(this);
 	}
 
 	protected async onOpen(): Promise<void> {
 		await super.onOpen();
-		this.registerEvent(this.archiveDelay.onChange(() => this.render()));
-		showStarColor(this.contentEl, this.overdueLook.style.starColor);
-		this.registerEvent(this.overdueLook.onChange(() => {
-			showStarColor(this.contentEl, this.overdueLook.style.starColor);
-			this.render();
-		}));
-		this.registerEvent(this.app.workspace.on('active-leaf-change', (leaf) => {
-			if (leaf === this.leaf) this.returned();
-		}));
-		onWindowReturn(this, this.containerEl, () => this.returned());
-		registerFieldEvents(this);
-		registerMenuPress(this);
-		registerPopoverPress(this);
-		focusListWhenActive(this);
-		registerFileRedraws(this);
-		this.contentEl.toggleClass('princelists-is-phone', Platform.isPhone);
-		// The collapse arrows always show where there's no hover.
-		this.contentEl.toggleClass('princelists-is-mobile', Platform.isMobile);
+		registerListEvents(this);
 		const dragHost = listDragHost(this);
 		enableMouseDrag(dragHost);
 		if (Platform.isMobile) enableTouchDrag(dragHost);
@@ -249,10 +201,8 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		const selectionBar = buildSelectionBar(this);
 		swallowClickAfterHold(this, selectionBar);
 		buildTagsPopover(this);
-		this.findAction = this.addAction(FILTER_ICON, labelWithKey('Filter list', FIND_KEY_NAME), () => toggleFilter(this));
-		// Each action goes left of the ones before, so this one sits leftmost.
-		this.scheduleAction = this.addAction(SCHEDULE_ICON, 'Open schedule', () => void openSchedule(this.app.workspace));
-		this.syncButtons();
+		addHeaderActions(this);
+		syncButtons(this);
 	}
 
 	protected async onClose(): Promise<void> {
@@ -268,23 +218,9 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		await super.onClose();
 	}
 
-	/**
-	 * Colors what Cmd+F's words match in every title this list shows and in the open card's notes, and
-	 * takes it from titles and blocks gone.
-	 */
-	paintFind(): void {
-		const find = findOf(this.filter ?? '');
-		const cardBlocks = this.card ? ownElements(this.card.el, `.${NOTES_BLOCK_CLASS}`) : [];
-		this.findPaint.paintAll([...ownElements(this.listSizerEl, `.${ITEM_TITLE_CLASS}`), ...cardBlocks], find);
-		if (this.card?.editor) showNotesFind(this.card.editor, find);
-	}
-
 	/** Colors what Cmd+F's words match in `el` once it's rendered, when it's one of this list's titles or a block of the card's notes. */
 	markdownRendered(el: HTMLElement): void {
-		if (this.viewClosed) return;
-		const isOwnTitle = el.hasClass(ITEM_TITLE_CLASS) && this.listSizerEl.contains(el) && !isInNestedBlock(this.listSizerEl, el);
-		const isCardBlock = el.hasClass(NOTES_BLOCK_CLASS) && !!this.card?.el.contains(el);
-		if (isOwnTitle || isCardBlock) this.findPaint.paint(el, findOf(this.filter ?? ''));
+		paintRendered(this, el);
 	}
 
 	async onRename(file: TFile): Promise<void> {
@@ -308,31 +244,7 @@ export class PrinceListView extends TextFileView implements FilterHost {
 
 	onPaneMenu(menu: Menu, source: string): void {
 		super.onPaneMenu(menu, source);
-		if (isListText(this.text)) {
-			menu.addItem((item) => item.setTitle('Tag list…').setIcon('tag').onClick(() => openListTags(this)));
-			menu.addItem((item) =>
-				item
-					.setTitle('Show archived items')
-					.setIcon('archive')
-					.setChecked(this.showArchived)
-					.onClick(() => this.toggleArchived()),
-			);
-			addStarredOnlyItem(menu, this.starredOnly, () => toggleStarredOnly(this));
-		}
-		menu.addItem((item) =>
-			item
-				.setTitle('Open schedule')
-				.setIcon(SCHEDULE_ICON)
-				.onClick(() => void openSchedule(this.app.workspace)),
-		);
-		menu.addItem((item) =>
-			item
-				.setTitle('Open as Markdown')
-				.setIcon('file-text')
-				.onClick(() => {
-					if (this.file) void openAsMarkdown(this.leaf, this.file);
-				}),
-		);
+		addListPaneItems(this, menu);
 	}
 
 	focusListTitle(): void {
@@ -349,25 +261,6 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		return this.parsedText(this.text);
 	}
 
-	// One of the view's own writes landed (writeAction). The line-based state and every row's line
-	// follow it at once, so no row is read with a stale line.
-	applyOwnText(next: string, edit: OwnEdit): void {
-		this.editing.applyOwn(next, edit);
-		this.shiftLines(edit);
-		// Deleting the selected item closes its card.
-		if (this.card && this.selected === null && this.card.lostAt === null) dismissCard(this);
-	}
-
-	// A keystroke's edit is already in the text: it saves after Obsidian's 2-second wait.
-	handleTyped(typed: Typed): void {
-		if ('edit' in typed) {
-			this.shiftLines(typed.edit);
-			this.requestSave();
-		} else if ('refused' in typed && typed.firstRefusal) {
-			new Notice(UNSAFE_EDIT_NOTICE);
-		}
-	}
-
 	dropBlock(el: HTMLElement): void {
 		const block = this.blocks.get(el);
 		if (block) this.removeChild(block);
@@ -381,12 +274,12 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		this.redrawFiltered.cancel();
 		this.drawnDay = dayOf(new Date());
 		redraw(this, focusing);
-		this.syncButtons();
+		syncButtons(this);
 		bringBackInList(this);
 	}
 
 	// The view or its window got focus. No timer moves the rows' days, so on a new day it draws again.
-	private returned(): void {
+	returned(): void {
 		if (this.drawnDay === null || dayOf(new Date()) === this.drawnDay) bringBackInList(this);
 		else this.render();
 	}
@@ -409,75 +302,5 @@ export class PrinceListView extends TextFileView implements FilterHost {
 	dropListNoteEditor(): void {
 		this.listNoteEditor?.destroy();
 		this.listNoteEditor = null;
-	}
-
-	/**
-	 * Shows or hides the view's buttons, and the selection bar, to match the text, the settings and
-	 * selecting. On mobile, editing also hides the floating "+".
-	 */
-	syncButtons(): void {
-		const isList = isListText(this.text);
-		// The room below the last row stays while the "+" hides for editing, so the list doesn't move.
-		this.contentEl.toggleClass('princelists-has-floating-add', this.placesFloatingAdd());
-		this.syncNewItemButton();
-		this.scheduleAction?.toggle(isList && this.settings().showScheduleButton);
-		this.syncFindButtons();
-		syncSelectionBar(this);
-	}
-
-	/** Follows a change to where the floating "+" shows: an empty list is drawn again, since its hint names it. */
-	syncAddButtons(): void {
-		if (hasNoItems(this)) this.render();
-		else this.syncButtons();
-	}
-
-	/**
-	 * Shows the floating "+" where the view places it, except on mobile while a card is open, an item
-	 * or heading is being added, or a text field in the view has focus, a tag popover's included.
-	 * `focused` is the node that has focus, or is taking it.
-	 */
-	syncNewItemButton(focused: Node | null = this.containerEl.doc.activeElement): void {
-		const typing = isTextField(focused) && this.containerEl.contains(focused);
-		const editing = Platform.isMobile && (this.card !== null || this.addsPending > 0 || typing);
-		this.newItemButton?.toggle(!editing && this.placesFloatingAdd());
-	}
-
-	/** Whether the settings show the floating "+" that adds an item on this device. */
-	showsAddButton(): boolean {
-		return showsOn(this.settings().floatingAddButton, Platform.isMobile);
-	}
-
-	// A list not selecting, with the settings showing the "+" on this device.
-	private placesFloatingAdd(): boolean {
-		return isListText(this.text) && !this.selecting && this.showsAddButton();
-	}
-
-	// The header's filter icon shows only on a list, pressed while the field is open. The toggles in
-	// the field's row are lit while archived items show and while only starred ones do.
-	private syncFindButtons(): void {
-		if (this.findAction) {
-			this.findAction.toggle(isListText(this.text));
-			syncFilterButton(this.findAction, this);
-		}
-		syncStarredToggle(this.filterField, this.starredOnly);
-		const button = this.filterField?.rowEl.querySelector<HTMLElement>(`.${ARCHIVED_TOGGLE_CLASS}`);
-		if (!button) return;
-		button.toggleClass('princelists-archived-shown', this.showArchived);
-		button.setAttribute('aria-pressed', String(this.showArchived));
-		setTooltip(button, labelWithKey(this.showArchived ? 'Hide archived items' : 'Show archived items', ARCHIVED_KEY_NAME));
-	}
-
-	private outsideChange(data: string): void {
-		this.outsideChanges++;
-		const before = this.selected;
-		const { lostSelected } = this.editing.outsideChange(data);
-		if (lostSelected && this.card && before !== null) cardLost(this, this.card, before);
-	}
-
-	private shiftLines(edit: OwnEdit): void {
-		if (edit.kind === 'change' && edit.delta === 0) return;
-		for (const el of ownElements(this.contentEl, `[${LINE_ATTR}]`)) {
-			setLine(el, followLine(lineOf(el) as number, edit));
-		}
 	}
 }

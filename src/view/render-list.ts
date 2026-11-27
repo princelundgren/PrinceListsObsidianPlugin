@@ -92,7 +92,7 @@ export interface FieldPlace {
 
 // Draws the sections under `el`. Each row and heading carries its first line in LINE_ATTR for the
 // view's delegated listeners, so they get no listeners of their own. The view keeps every LINE_ATTR
-// true to its text between redraws (PrinceListView.applyOwnText). Rendered titles and headings record
+// true to its text between redraws (applyOwnText in list-follow.ts). Rendered titles and headings record
 // their Component in `blocks`, keyed by their element. A row or heading in `drawn` that shows the same
 // moves here with its Component, and only its line changes. Rows inside `skip`, the list note being
 // typed, aren't drawn.

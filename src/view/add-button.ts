@@ -1,8 +1,10 @@
 import { Platform, setIcon, setTooltip } from 'obsidian';
+import { showsOn } from '../core/button-platforms';
 import { planItemInsert, type ItemPlace } from '../core/list-actions';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { closeCard, focusCardTitle, isNewEmptyItem, openCard } from './card';
 import { expandFor } from './collapse';
+import { isTextField } from './dom';
 import type { RowDragHost } from './drag-host';
 import { enableNewItemDrag } from './drag-new-item';
 import type { PrinceListView } from './list-view';
@@ -27,9 +29,9 @@ export function buildNewItemButton(view: PrinceListView, label: string, edgeScro
 	if (Platform.isMobile) {
 		// On the container, so a tag popover's field, which sits outside contentEl, counts too. They run
 		// after contentEl's focus listeners, so a card a focusout closes is gone by then.
-		view.registerDomEvent(view.containerEl, 'focusin', (evt) => view.syncNewItemButton(evt.targetNode));
+		view.registerDomEvent(view.containerEl, 'focusin', (evt) => syncNewItemButton(view, evt.targetNode));
 		// FocusEvent types it as an EventTarget; between elements it is an Element or null.
-		view.registerDomEvent(view.containerEl, 'focusout', (evt) => view.syncNewItemButton(evt.relatedTarget as Node | null));
+		view.registerDomEvent(view.containerEl, 'focusout', (evt) => syncNewItemButton(view, evt.relatedTarget as Node | null));
 	}
 	return button;
 }
@@ -87,11 +89,11 @@ export function addItem(view: PrinceListView, place: ItemPlace): void {
 export function whileAdding(view: PrinceListView, add: () => void): void {
 	view.addsPending++;
 	add();
-	view.syncNewItemButton();
+	syncNewItemButton(view);
 	// Queued after the add's write, so it runs however that ends, also when the write never starts.
 	void view.enqueue(async () => {
 		view.addsPending--;
-		view.syncNewItemButton();
+		syncNewItemButton(view);
 	});
 }
 
@@ -100,4 +102,25 @@ export function followPlace(place: ItemPlace, line: number | null): ItemPlace | 
 	if (place === 'first') return place;
 	if (line === null) return null;
 	return 'after' in place ? { after: line } : { firstUnder: line };
+}
+
+/**
+ * Shows the floating "+" where the view places it, except on mobile while a card is open, an item
+ * or heading is being added, or a text field in the view has focus, a tag popover's included.
+ * `focused` is the node that has focus, or is taking it.
+ */
+export function syncNewItemButton(view: PrinceListView, focused: Node | null = view.containerEl.doc.activeElement): void {
+	const typing = isTextField(focused) && view.containerEl.contains(focused);
+	const editing = Platform.isMobile && (view.card !== null || view.addsPending > 0 || typing);
+	view.newItemButton?.toggle(!editing && placesFloatingAdd(view));
+}
+
+/** Whether the settings show the floating "+" that adds an item on this device. */
+export function showsAddButton(view: PrinceListView): boolean {
+	return showsOn(view.settings().floatingAddButton, Platform.isMobile);
+}
+
+/** Whether the view places the floating "+": a list not selecting, with the settings showing it on this device. */
+export function placesFloatingAdd(view: PrinceListView): boolean {
+	return isListText(view.text) && !view.selecting && showsAddButton(view);
 }

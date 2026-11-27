@@ -8,6 +8,7 @@ import { parseItemLine } from '../core/item-line';
 import { missingTyping } from '../core/missing-typing';
 import { itemAt } from '../core/parse';
 import { contentStartLine } from '../obsidian/marker';
+import { syncNewItemButton } from './add-button';
 import { buildRepeatButton, closeRepeatPopover, isInRepeatPopover, showRepeatButton } from './card-repeat';
 import { buildCardTags, buildTagButton, closeTagPopover, showCardTags } from './card-tags';
 import { CARD_TOOLS_CLASS } from './card-tools';
@@ -15,6 +16,7 @@ import { buildWhenPicker, showWhen } from './card-when';
 import { addHiddenLabel, fitHeight, HIDDEN_LABEL_CLASS } from './dom';
 import { FIELD_CLASS, keepOneLine } from './fields';
 import { findOf } from './filter';
+import { handleTyped } from './list-follow';
 import type { PrinceListView } from './list-view';
 import { lockNotesEditor, showNotesEditor } from './notes-editor';
 import { showNotesFind } from './notes-find';
@@ -70,7 +72,7 @@ export function openCard(view: PrinceListView, titleLine: number, focusTitle = f
 		title?.focus({ preventScroll: !inserted });
 		title?.setSelectionRange(title.value.length, title.value.length);
 	} else card.el.focus({ preventScroll: true });
-	view.syncNewItemButton();
+	syncNewItemButton(view);
 }
 
 // The user closed the card in the view, in one of the ways the spec lists ("Selecting and adding"). An
@@ -91,7 +93,7 @@ export function closeCard(view: PrinceListView): void {
 		putRowBack(view, card, line);
 	}
 	// After the card's element goes, so a field of its that had focus no longer counts.
-	view.syncNewItemButton();
+	syncNewItemButton(view);
 }
 
 // Puts the card's item back as a row, or leaves it out where it no longer shows.
@@ -126,7 +128,7 @@ export function dismissCard(view: PrinceListView): void {
 	if (!card) return;
 	endCard(view, card);
 	card.el.remove();
-	view.syncNewItemButton();
+	syncNewItemButton(view);
 }
 
 // Fills the card from the text, or, after a redraw, updates its line, its box and the
@@ -154,7 +156,7 @@ export function refreshCard(view: PrinceListView, card: Card): void {
 
 export function cardTitleInput(view: PrinceListView, field: HTMLTextAreaElement): void {
 	keepOneLine(field);
-	view.handleTyped(view.editing.typeTitle(field.value));
+	handleTyped(view, view.editing.typeTitle(field.value));
 }
 
 // Everything after the title stays hidden while it is edited (spec, "Editing"), so leaving the field

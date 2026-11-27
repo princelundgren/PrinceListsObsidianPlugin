@@ -3,6 +3,7 @@ import { placesBelow } from '../core/group-menu';
 import { isListText } from '../obsidian/marker';
 import { addItem, newItem } from './add-button';
 import { CARD_CLASS, closeCard } from './card';
+import { syncButtons } from './list-buttons';
 import type { PrinceListView } from './list-view';
 import { shownRows } from './move';
 import { ownClosest, ownElements } from './own-rows';
@@ -168,7 +169,7 @@ export function drawSelection(view: PrinceListView): void {
 	if (status.getText() !== count) status.setText(count);
 	const wasSelecting = view.selecting;
 	if (selected.size === 0) view.selecting = false;
-	if (wasSelecting) view.syncButtons();
+	if (wasSelecting) syncButtons(view);
 }
 
 /**
