@@ -733,9 +733,7 @@ and today's stand out, from the update on.
   that order next after Overdue dates show **(call)**, each with None, Red, Orange, Yellow, Green,
   Cyan, Blue, Purple and Pink, saved as `"none"`, `"red"` and so on. None leaves the day in
   `--text-muted`, as any other day; each color is `--color-` and its name. Overdue defaults to Red
-  and Today to Green. They replace the "Color overdue dates" toggle: with no overdue color stored,
-  a stored `colorOverdue` of `false` reads as None, and nothing rewrites the settings to say so.
-  A stored value that is none of the choices is read as the default.
+  and Today to Green. A stored value that is none of the choices is read as the default.
   - **A change to any of the three redraws** the list views, the list blocks and the Schedule, as
     the delay's does, and again when Sync brings a change. It writes nothing to any list.
 - **Floating add button (owner, 2026-11-05):** a `dropdown` control with desktop and mobile,

@@ -18,12 +18,9 @@ function dateColorOf(stored: unknown): DateColor | null {
 	return DATE_COLORS.find((color) => color === stored) ?? null;
 }
 
-/**
- * A stored overdue color as one of the choices. With none stored, the "Color overdue dates" toggle it
- * replaced, `storedColorOverdue`, turned off reads as none; anything else is the default.
- */
-export function overdueColorOf(stored: unknown, storedColorOverdue: unknown): DateColor {
-	return dateColorOf(stored) ?? (storedColorOverdue === false && stored === undefined ? 'none' : DEFAULT_OVERDUE_COLOR);
+/** A stored overdue color as one of the choices: the default when it is none of them. */
+export function overdueColorOf(stored: unknown): DateColor {
+	return dateColorOf(stored) ?? DEFAULT_OVERDUE_COLOR;
 }
 
 /** A stored Today color as one of the choices: the default when it is none of them. */

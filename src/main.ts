@@ -218,7 +218,7 @@ export default class PrinceListsPlugin extends Plugin {
 	}
 
 	private async loadSettings(): Promise<void> {
-		const stored = (await this.loadData()) as (Partial<PrinceListsSettings> & { colorOverdue?: unknown }) | null;
+		const stored = (await this.loadData()) as Partial<PrinceListsSettings> | null;
 		this.settings = {
 			...DEFAULT_SETTINGS,
 			...stored,
@@ -226,7 +226,7 @@ export default class PrinceListsPlugin extends Plugin {
 			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
 			tagStrip: tagStripModeOf(stored?.tagStrip),
 			overdueLabel: overdueLabelOf(stored?.overdueLabel),
-			overdueColor: overdueColorOf(stored?.overdueColor, stored?.colorOverdue),
+			overdueColor: overdueColorOf(stored?.overdueColor),
 			todayColor: todayColorOf(stored?.todayColor),
 			groupScheduleByList: groupByListOf(stored?.groupScheduleByList),
 		};

@@ -20,13 +20,13 @@ view", "On a row", and "Settings", "Overdue date color and Today date color".
 - Colors are only Obsidian's CSS variables: `--color-red`, `--color-orange`, `--color-yellow`,
   `--color-green`, `--color-cyan`, `--color-blue`, `--color-purple`, `--color-pink`, and None
   leaves `--text-muted`. Never hard-code a color.
-- No background writes: reading an old `colorOverdue` never saves the settings.
+- No background writes: reading the settings never saves them.
 - Interface text in sentence case.
 
 ## Review Focus
 
-1. A vault whose settings say `colorOverdue: false` and no `overdueColor`: its overdue days stay
-   gray after the update (Task 1's `overdueColorOf` tests).
+1. A stored color that is none of the choices, such as a misspelt one: the default
+   (Task 1's `overdueColorOf` and `todayColorOf` tests).
 2. Ticking an item dated today turns its day gray at once, and unticking it turns it back, as
    for an overdue item (Task 1's `dayColor` tests, Task 2's `tickRedraws` tests).
 3. An overdue item with the "Today" label: it takes the overdue color, not Today's (Task 1).
@@ -46,16 +46,15 @@ view", "On a row", and "Settings", "Overdue date color and Today date color".
 - Produces:
   - `DATE_COLORS = ['none', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'pink'] as const`, `type DateColor`
   - `DEFAULT_OVERDUE_COLOR: DateColor = 'red'`, `DEFAULT_TODAY_COLOR: DateColor = 'green'`
-  - `overdueColorOf(stored: unknown, storedColorOverdue: unknown): DateColor`
+  - `overdueColorOf(stored: unknown): DateColor`
   - `todayColorOf(stored: unknown): DateColor`
   - `dayColor(day: string, today: string, done: boolean, colors: { overdueColor: DateColor; todayColor: DateColor }): DateColor`
 
 - [ ] **Step 1: Write the failing tests**
 
 ```ts
-overdueColorOf('blue', undefined) === 'blue'; overdueColorOf('none', true) === 'none'
-overdueColorOf(undefined, false) === 'none'; overdueColorOf(undefined, true) === 'red'
-overdueColorOf(undefined, undefined) === 'red'; overdueColorOf('crimson', false) === 'red'
+overdueColorOf('blue') === 'blue'; overdueColorOf('none') === 'none'
+overdueColorOf(undefined) === 'red'; overdueColorOf('crimson') === 'red'
 todayColorOf('pink') === 'pink'; todayColorOf(undefined) === 'green'; todayColorOf(3) === 'green'
 // with { overdueColor: 'orange', todayColor: 'cyan' } and today 2026-11-27:
 dayColor('2026-11-26', T, false, c) === 'orange'; dayColor('2026-11-27', T, false, c) === 'cyan'
@@ -71,8 +70,7 @@ Expected: FAIL, the module doesn't exist.
 - [ ] **Step 3: Implement `src/core/day-color.ts`**
 
 `dayColor` uses `isOverdue` from `./overdue` first, then today and not done. A stored color that
-is none of the choices reads as the default, except that a missing overdue color with a stored
-`colorOverdue` of `false` reads as `'none'`.
+is none of the choices reads as the default.
 
 - [ ] **Step 4: Run them to see them pass**
 
@@ -96,8 +94,8 @@ Expected: PASS.
 
 - [ ] **Step 1: Change `OverdueStyle`, the settings and their loading**
   - `PrinceListsSettings` gets `overdueColor` and `todayColor`, defaults from Task 1, and loses
-    `colorOverdue`. `loadSettings` reads them with `overdueColorOf(stored?.overdueColor,
-    stored?.colorOverdue)` and `todayColorOf(stored?.todayColor)`.
+    `colorOverdue`. `loadSettings` reads them with `overdueColorOf(stored?.overdueColor)`
+    and `todayColorOf(stored?.todayColor)`.
   - `onExternalSettingsChange` and `settingChanged` call `overdueLook.changed()` for either key.
   - Two dropdowns replace the toggle: "Overdue date color", described "The color of an overdue
     item's day, from your theme's colors.", and "Today date color", described "The color of the

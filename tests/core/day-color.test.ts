@@ -5,25 +5,13 @@ const TODAY = '2026-11-27';
 const COLORS = { overdueColor: 'orange', todayColor: 'cyan' } as const;
 
 describe('overdueColorOf', () => {
-	test.each([
-		['blue', undefined, 'blue'],
-		['none', true, 'none'],
-		['red', false, 'red'],
-	])('keeps a stored %s, whatever colorOverdue says', (stored, colorOverdue, color) => {
-		expect(overdueColorOf(stored, colorOverdue)).toBe(color);
+	test('keeps a stored choice', () => {
+		expect(overdueColorOf('blue')).toBe('blue');
+		expect(overdueColorOf('none')).toBe('none');
 	});
 
-	test('reads an old colorOverdue of false as none, so a color turned off stays off', () => {
-		expect(overdueColorOf(undefined, false)).toBe('none');
-	});
-
-	test.each([
-		[undefined, true],
-		[undefined, undefined],
-		['crimson', false],
-		[1, undefined],
-	])('reads %s with colorOverdue %s as red', (stored, colorOverdue) => {
-		expect(overdueColorOf(stored, colorOverdue)).toBe('red');
+	test.each([undefined, 'crimson', 1, null])('reads %s as red', (stored) => {
+		expect(overdueColorOf(stored)).toBe('red');
 	});
 });
 
