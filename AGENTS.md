@@ -24,7 +24,8 @@ this project.
     sets them from the heading's and the list's menus and beside the list's title. [Selecting several rows](docs/superpowers/specs/2026-11-07-select-several-design.md)
     acts on many items and headings at once, and [tagging a selection](docs/superpowers/specs/2026-11-12-select-tags-design.md)
     adds and removes a tag on all of them. [Repeating items](docs/superpowers/specs/2026-11-13-repeating-items-design.md)
-    are done until their next date, then come back.
+    are done until their next date, then come back. [Highlighting what Find finds](docs/superpowers/specs/2026-11-27-find-highlight-design.md)
+    colors the words Find matches.
     - Decisions marked **(owner)** are the maintainer's. Don't change one without an issue the
       maintainer agrees to.
     - Decisions marked **(call)** are open to a better argument.
