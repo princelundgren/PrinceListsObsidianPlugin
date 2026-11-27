@@ -8,7 +8,7 @@ export type OverdueLabel = (typeof OVERDUE_LABELS)[number];
 
 export const DEFAULT_OVERDUE_LABEL: OverdueLabel = 'yesterday-or-date';
 
-/** How the settings show a row's day and star: the overdue label, the overdue and Today colors, and the star's color. */
+/** How the settings show a row's day and star: the overdue label, the overdue, Today and upcoming colors, and the star's color. */
 export interface OverdueStyle extends DayColors {
 	readonly label: OverdueLabel;
 	readonly starColor: ThemeColor;

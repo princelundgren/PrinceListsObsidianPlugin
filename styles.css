@@ -1220,7 +1220,7 @@ button.princelists-card-repeat.is-repeating {
 	--princelists-star-color: var(--color-pink);
 }
 
-/* An overdue day's color and today's, as the settings pick them from the theme's colors. */
+/* An overdue day's color, today's and a later day's, as the settings pick them from the theme's colors. */
 .princelists-when.princelists-when-red {
 	color: var(--color-red);
 }

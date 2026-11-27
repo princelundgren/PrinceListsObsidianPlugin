@@ -1,7 +1,7 @@
 import { type App, PluginSettingTab, type Plugin, type SettingDefinitionItem } from 'obsidian';
 import { type ArchiveDelayHours, DEFAULT_ARCHIVE_DELAY_HOURS } from '../core/archive';
 import type { ButtonPlatforms } from '../core/button-platforms';
-import { DEFAULT_OVERDUE_COLOR, DEFAULT_TODAY_COLOR } from '../core/day-color';
+import { DEFAULT_OVERDUE_COLOR, DEFAULT_TODAY_COLOR, DEFAULT_UPCOMING_COLOR } from '../core/day-color';
 import { DEFAULT_OVERDUE_LABEL, type OverdueLabel } from '../core/overdue';
 import { DEFAULT_GROUP_BY_LIST } from '../core/schedule';
 import { DEFAULT_STAR_COLOR } from '../core/star';
@@ -22,6 +22,7 @@ export interface PrinceListsSettings {
 	overdueColor: ThemeColor;
 	/** The theme color of the day of an open item due today. */
 	todayColor: ThemeColor;
+	upcomingColor: ThemeColor;
 	/** The theme color of an item's star. */
 	starColor: ThemeColor;
 	/** Whether a list's header shows the "Open schedule" button. */
@@ -40,6 +41,7 @@ export const DEFAULT_SETTINGS: PrinceListsSettings = {
 	overdueLabel: DEFAULT_OVERDUE_LABEL,
 	overdueColor: DEFAULT_OVERDUE_COLOR,
 	todayColor: DEFAULT_TODAY_COLOR,
+	upcomingColor: DEFAULT_UPCOMING_COLOR,
 	starColor: DEFAULT_STAR_COLOR,
 	showScheduleButton: false,
 	floatingAddButton: 'both',
@@ -189,6 +191,11 @@ export class PrinceListsSettingTab extends PluginSettingTab {
 						desc: 'The date of an item due today.',
 						aliases: ['Today date color'],
 						control: { type: 'dropdown', key: 'todayColor', defaultValue: DEFAULT_SETTINGS.todayColor, options: THEME_COLOR_NAMES },
+					},
+					{
+						name: 'Upcoming color',
+						desc: 'The date of an item due after today.',
+						control: { type: 'dropdown', key: 'upcomingColor', defaultValue: DEFAULT_SETTINGS.upcomingColor, options: THEME_COLOR_NAMES },
 					},
 					{
 						name: 'Star color',

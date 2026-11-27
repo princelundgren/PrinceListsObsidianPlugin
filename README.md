@@ -112,7 +112,7 @@ Embed a list in any note, and tick it there.
 - **Right-click menus** on items, headings, pictures and the list.
 - **Made for touch:** finger-sized buttons, and hold to select or drag.
 - **Fits your theme,** light or dark.
-- **Settings:** a folder for new lists, when ticked items hide, what an overdue item's date says and its color, the color of today's date, the star's color, the tag strip, where the floating **+** shows, a Schedule button in each list's header, and the Schedule back in the sidebar if you closed it.
+- **Settings:** a folder for new lists, when ticked items hide, what an overdue item's date says and its color, the colors of today's and upcoming dates, the star's color, the tag strip, where the floating **+** shows, a Schedule button in each list's header, and the Schedule back in the sidebar if you closed it.
 
 ## Quick start
 
