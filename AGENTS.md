@@ -36,8 +36,9 @@ this project.
     [repeating items coming back](docs/superpowers/plans/2026-11-14-repeating-items-come-back.md),
     [inherited tags](docs/superpowers/plans/2026-11-16-inherited-tags.md),
     [tag from menus](docs/superpowers/plans/2026-11-16-tag-from-menus.md),
-    [overdue dates](docs/superpowers/plans/2026-11-26-overdue-dates.md) and
-    [date colors](docs/superpowers/plans/2026-11-27-date-colors.md), and
+    [overdue dates](docs/superpowers/plans/2026-11-26-overdue-dates.md),
+    [date colors](docs/superpowers/plans/2026-11-27-date-colors.md) and
+    [star color](docs/superpowers/plans/2026-11-27-star-color.md), and
     [picture tooling](docs/superpowers/plans/2026-10-30-picture-tooling.md) covers the
     README's and the listing's pictures. Implement a task as written, one task per pull request.
   - [CONTRIBUTING.md](CONTRIBUTING.md) covers the pull request process.
