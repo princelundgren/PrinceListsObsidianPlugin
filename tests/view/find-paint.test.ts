@@ -67,4 +67,16 @@ describe('FindPaint', () => {
 		expect(() => new FindPaint().paint(title('oat milk'), findOf('milk'))).not.toThrow();
 		expect(colored()).toEqual([]);
 	});
+
+	test('takes the highlight away once nothing in the window is colored', () => {
+		const paint = new FindPaint();
+		paint.paint(title('oat milk'), findOf('milk'));
+		paint.clear();
+		expect(css.highlights?.has(FIND_HIGHLIGHT)).toBe(false);
+	});
+
+	test('leaves no highlight in the window when an element has no match', () => {
+		new FindPaint().paint(title('oat milk'), findOf('soy'));
+		expect(css.highlights?.has(FIND_HIGHLIGHT)).toBe(false);
+	});
 });
