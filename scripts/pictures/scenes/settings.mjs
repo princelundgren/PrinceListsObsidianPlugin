@@ -82,13 +82,15 @@ async function restoringSettings(session, act) {
 }
 
 /**
- * Writes `text` as PrinceLists' saved settings and waits until To do shows the colors it names: its
- * star color, and no date color it doesn't name. Removed any sooner, the file could go before
- * PrinceLists reads it.
+ * Writes `text` as PrinceLists' saved settings and waits until To do has the star color it names
+ * and no date color it doesn't name. Removed any sooner, the file could go before PrinceLists reads
+ * it. A saved file that isn't a JSON object goes back as it was, with nothing to wait for, since
+ * what PrinceLists shows then can't be told from it.
  */
 async function writeSettings(session, text) {
 	await session.evaluate(`app.vault.adapter.write(${DATA}, ${JSON.stringify(text)})`);
-	const settings = JSON.parse(text);
+	const settings = settingsIn(text);
+	if (settings === null) return;
 	const named = (color, fallback) => (color === 'none' || COLORS.includes(color) ? color : fallback);
 	const star = named(settings.starColor, 'yellow');
 	const days = [settings.overdueColor, settings.todayColor, settings.upcomingColor].map((color) => named(color, 'none'));
@@ -99,6 +101,16 @@ async function writeSettings(session, text) {
 		10000,
 		"To do didn't show the colors in PrinceLists' data.json within 10 seconds of writing it.",
 	);
+}
+
+/** Returns the object `text` holds as JSON, or null when it holds anything else or isn't JSON. */
+function settingsIn(text) {
+	try {
+		const settings = JSON.parse(text);
+		return typeof settings === 'object' && !Array.isArray(settings) ? settings : null;
+	} catch {
+		return null;
+	}
 }
 
 /** Waits until the page expression `condition` is true, throwing `message` after `ms`. */
