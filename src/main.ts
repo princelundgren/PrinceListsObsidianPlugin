@@ -2,11 +2,12 @@ import { FileView, MarkdownView, normalizePath, Notice, Plugin, TFile, TFolder }
 import { RIBBON_ICON, SCHEDULE_ICON, VIEW_TYPE_LIST, VIEW_TYPE_SCHEDULE } from './constants';
 import { archiveDelayHoursOf, archiveDelayMs } from './core/archive';
 import { buttonPlatformsOf } from './core/button-platforms';
-import { overdueColorOf, todayColorOf } from './core/day-color';
+import { DEFAULT_OVERDUE_COLOR, DEFAULT_TODAY_COLOR } from './core/day-color';
 import { overdueLabelOf } from './core/overdue';
 import { serialQueue } from './core/queue';
 import { groupByListOf } from './core/schedule';
 import { tagStripModeOf } from './core/tag-strip-mode';
+import { themeColorOf } from './core/theme-color';
 import { ArchiveDelay } from './obsidian/archive-delay';
 import { createList, openNewList } from './obsidian/create-list';
 import { isListText } from './obsidian/marker';
@@ -226,8 +227,8 @@ export default class PrinceListsPlugin extends Plugin {
 			floatingAddButton: buttonPlatformsOf(stored?.floatingAddButton, DEFAULT_SETTINGS.floatingAddButton),
 			tagStrip: tagStripModeOf(stored?.tagStrip),
 			overdueLabel: overdueLabelOf(stored?.overdueLabel),
-			overdueColor: overdueColorOf(stored?.overdueColor),
-			todayColor: todayColorOf(stored?.todayColor),
+			overdueColor: themeColorOf(stored?.overdueColor, DEFAULT_OVERDUE_COLOR),
+			todayColor: themeColorOf(stored?.todayColor, DEFAULT_TODAY_COLOR),
 			groupScheduleByList: groupByListOf(stored?.groupScheduleByList),
 		};
 	}
