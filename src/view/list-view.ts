@@ -40,6 +40,8 @@ import { ADD_KEY_NAME, ARCHIVED_KEY_NAME, FIND_KEY_NAME, registerListKeys } from
 import { registerMenuPress } from './menu-press';
 import { registerPopoverPress } from './popover-press';
 import { registerFileRedraws } from './notes-drawing';
+import { NOTES_BLOCK_CLASS } from './notes-blocks';
+import { showNotesFind } from './notes-find';
 import type { ListNoteSession, ListTitleSession } from './fields';
 import type { HeadingField } from './heading-field';
 import type { DraftBase } from './line-edit';
@@ -266,16 +268,23 @@ export class PrinceListView extends TextFileView implements FilterHost {
 		await super.onClose();
 	}
 
-	/** Colors what Cmd+F's words match in every title this list shows, and takes it from titles gone. */
+	/**
+	 * Colors what Cmd+F's words match in every title this list shows and in the open card's notes, and
+	 * takes it from titles and blocks gone.
+	 */
 	paintFind(): void {
-		this.findPaint.paintAll(ownElements(this.listSizerEl, `.${ITEM_TITLE_CLASS}`), findOf(this.filter ?? ''));
+		const find = findOf(this.filter ?? '');
+		const cardBlocks = this.card ? ownElements(this.card.el, `.${NOTES_BLOCK_CLASS}`) : [];
+		this.findPaint.paintAll([...ownElements(this.listSizerEl, `.${ITEM_TITLE_CLASS}`), ...cardBlocks], find);
+		if (this.card?.editor) showNotesFind(this.card.editor, find);
 	}
 
-	/** Colors what Cmd+F's words match in `el` once it's rendered, when it's one of this list's titles. */
+	/** Colors what Cmd+F's words match in `el` once it's rendered, when it's one of this list's titles or a block of the card's notes. */
 	markdownRendered(el: HTMLElement): void {
 		if (this.viewClosed) return;
 		const isOwnTitle = el.hasClass(ITEM_TITLE_CLASS) && this.listSizerEl.contains(el) && !isInNestedBlock(this.listSizerEl, el);
-		if (isOwnTitle) this.findPaint.paint(el, findOf(this.filter ?? ''));
+		const isCardBlock = el.hasClass(NOTES_BLOCK_CLASS) && !!this.card?.el.contains(el);
+		if (isOwnTitle || isCardBlock) this.findPaint.paint(el, findOf(this.filter ?? ''));
 	}
 
 	async onRename(file: TFile): Promise<void> {

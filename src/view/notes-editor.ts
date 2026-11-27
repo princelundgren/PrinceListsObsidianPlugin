@@ -16,6 +16,7 @@ import type { PrinceListView } from './list-view';
 import { NOTES_DRAWN_CHECKBOX_SELECTOR } from './notes';
 import { drawnBlocksField, NOTES_BLOCK_CLASS } from './notes-blocks';
 import { notesDrawing } from './notes-drawing';
+import { notesFind } from './notes-find';
 import { notesKeymap } from './notes-keys';
 import type { NotesSource } from './notes-source';
 import { NOTES_PICTURE_CLASS } from './notes-widgets';
@@ -77,6 +78,7 @@ export function showNotesEditor(view: PrinceListView, source: NotesSource, area:
 				notesKeymap(),
 				blocks,
 				notesDrawing(view, view.sourcePath, blocks),
+				notesFind(),
 				placeholder('Notes'),
 				EditorView.lineWrapping,
 				EditorView.editorAttributes.of({ class: NOTES_CODEMIRROR_CLASS }),
