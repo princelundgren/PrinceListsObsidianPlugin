@@ -198,6 +198,14 @@ describe('visibleSections, filtered', () => {
 		expect(sectionsOf(text, now, false, '**bold**')[0]?.rows).toEqual([row(3, 'Bread')]);
 	});
 
+	test('keeps an item whose words are spread over its title and notes', () => {
+		expect(sectionsOf(text, now, false, 'bread bold')[0]?.rows).toEqual([row(3, 'Bread')]);
+	});
+
+	test('never matches a word running from the title into the notes', () => {
+		expect(sectionsOf(text, now, false, 'bread**bold')[0]?.rows).toEqual([]);
+	});
+
 	test('shows every heading, with or without an item that matches', () => {
 		expect(sectionsOf(text, now, false, 'rake').map((section) => section.heading?.text ?? null)).toEqual([null, 'Garden', 'Old']);
 	});
@@ -274,8 +282,8 @@ describe('visibleSections, matching the date', () => {
 		expect(sectionsOf(text, now, false, '2026-11')[0]?.rows.map((shown) => shown.kind === 'item' && shown.title)).toEqual(['Renew']);
 	});
 
-	test('matches the When as exact text, never fuzzily', () => {
-		const anyDay = { text: '2026-11', fuzzyMatches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) };
+	test('matches the When as exact text, never through the word search', () => {
+		const anyDay = { text: '2026-11', matches: (shown: string) => /^\d{4}-\d{2}-\d{2}$/.test(shown) };
 		const { lines, model } = list(text);
 		const sections = visibleSections(lines, model, now, { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: DAY, find: anyDay, keepLine: null, collapsed: new Set() }, NO_INHERITED_TAGS);
 		expect(sections[0]?.rows.map((shown) => shown.kind === 'item' && shown.title)).toEqual(['Renew']);

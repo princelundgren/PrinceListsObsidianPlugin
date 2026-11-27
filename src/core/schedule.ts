@@ -60,9 +60,9 @@ export function unarchived(items: readonly ScheduledItem[], now: Date, archiveDe
 		.map((item) => (item.done ? { ...item, repeats: backDay(item.line, now) !== null } : item));
 }
 
-/** Whether `find` finds the item: its title, its notes or its list's name fuzzily, or its day as exact text. */
+/** Whether `find` finds the item: every word somewhere in its title, notes and list's name, or its day as exact text. */
 export function matchesSchedule(item: ScheduledItem, find: Find): boolean {
-	return [item.title, item.notes, item.listName].some((text) => find.fuzzyMatches(text)) || whenMatches(item.day, find);
+	return find.matches([item.title, item.notes, item.listName].join('\n')) || whenMatches(item.day, find);
 }
 
 // Today takes everything overdue too.

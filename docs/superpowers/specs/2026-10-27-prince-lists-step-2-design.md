@@ -147,15 +147,17 @@ this met on 2026-10-30 **(owner)**.
 - **The field is Obsidian's own search field (owner, 2026-11-07),** whose clear button shows once
   it holds text and empties it as deleting the text does, keeping focus in it. Like Obsidian's own,
   it shows a magnifying glass and reads "Search..." (owner, 2026-11-07).
-- **As you type, items the text doesn't find hide.** The match is fuzzy, with Obsidian's
-  `prepareFuzzySearch` (owner, 2026-11-06): the text's letters in order, with gaps between them,
-  so "mlk" finds "oat milk". A wrong or swapped letter finds nothing, and neither does another
-  word order. It ignores case and folds accents as Obsidian does, so "e" finds "é" (owner,
-  2026-11-06). Two letters can match a long note, which the owner accepted.
+- **As you type, items the text doesn't find hide.** The match is by words, with Obsidian's
+  `prepareSimpleSearch` (owner, 2026-11-27): each word typed appears as written, in any order, so
+  "oat mi" and "milk oat" find "Oat milk", and "mlk" finds nothing. Letters in order with gaps, as
+  `prepareFuzzySearch` matches, found too much: two or three letters matched almost any long note
+  (owner, 2026-11-27). It ignores case and folds accents as Obsidian does, so "e" finds "é"
+  (owner, 2026-11-06).
   - **It searches the title, the notes and the When as the file writes it (owner, 2026-11-06),**
-    each on its own, Markdown included. The When matches letter for letter, as part of the day,
-    not fuzzily, so `2026-11` finds November's items, where fuzzily it would find `2026-12-01`
-    too (owner, 2026-11-06). The words a row shows for its day ("Tomorrow", "Fri") don't match,
+    Markdown included. The words may be spread over the title and the notes, so "milk recipe"
+    finds "Oat milk" whose notes say "recipe" (owner, 2026-11-27). The When matches letter for
+    letter, as part of the day, apart from the words, so `2026-11` finds November's items and not
+    `2026-12-01` (owner, 2026-11-06). The words a row shows for its day ("Tomorrow", "Fri") don't match,
     since they change each day and with Obsidian's language.
   - **Spaces around the text are ignored,** and spaces alone filter nothing **(call)**.
   - **The view builds the matcher and passes it to core,** which has no Obsidian imports **(call)**.
@@ -193,7 +195,8 @@ this met on 2026-10-30 **(owner)**.
   **(owner, 2026-11-06)**; its row has no archived toggle, since the Schedule never shows archived
   items. It works as a list's field, and:
   - **The list's name is searched too (owner, 2026-11-06),** besides the title, the notes and
-    the When, so typing a list's name shows its dated items.
+    the When, so typing a list's name shows its dated items. The words may be spread over the
+    title, the notes and the list's name (owner, 2026-11-27).
   - **A group shows while one of its items shows, collapsed ones too (owner, 2026-11-06),** and a
     collapsed group is collapsed again when the filter ends, as a list's sections are.
 - **With no match, "No items match" shows (owner, 2026-11-07),** centered across the pane, below
