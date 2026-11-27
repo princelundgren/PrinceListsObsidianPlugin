@@ -16,7 +16,7 @@ export class OverdueLook extends Events {
 		this.trigger('change');
 	}
 
-	/** Pass the result to `registerEvent`, so the listener goes when its view does. */
+	/** Pass the result to `registerEvent`, so the listener goes when its view does, or to `offref` when the listener goes sooner. */
 	onChange(callback: () => void): EventRef {
 		return this.on('change', callback);
 	}

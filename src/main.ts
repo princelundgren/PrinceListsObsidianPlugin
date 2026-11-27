@@ -36,7 +36,7 @@ export default class PrinceListsPlugin extends Plugin {
 
 	override async onload() {
 		await this.loadSettings();
-		this.addSettingTab(new PrinceListsSettingTab(this.app, this));
+		this.addSettingTab(new PrinceListsSettingTab(this.app, this, this.overdueLook));
 		this.registerView(VIEW_TYPE_LIST, (leaf) => new PrinceListView(leaf, this.archiveDelay, this.overdueLook, () => this.settings));
 		this.registerView(VIEW_TYPE_SCHEDULE, (leaf) =>
 			new ScheduleView(leaf, this.archiveDelay, this.overdueLook, () => this.settings.tagStrip, {

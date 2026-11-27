@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-18
+verified: 2026-11-27
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -739,7 +739,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
   It stays put while the list scrolls. Its name and tooltip are "New item" with its key on
   desktop: "New item (Cmd+Enter)" on macOS and "New item (Ctrl+Enter)" on Windows and Linux, and
   "New item" alone on mobile, which usually has no keyboard **(owner, 2026-11-05)**. It shows on
-  desktop and mobile by default, and the "Floating add button" setting can keep it to one of them
+  desktop and mobile by default, and the "Add button" setting can keep it to one of them
   or turn it off **(owner, 2026-11-05)**. While selecting, the selection's bar takes its place
   ([selecting several rows](2026-11-07-select-several-design.md), "The bar").
   - **On mobile it hides while editing (owner, 2026-11-17):** while a card is open, and while a
@@ -749,7 +749,7 @@ back only what was typed and leaves the empty line, which can be deleted like an
     field to another keeps it hidden, and so does an item or heading being added until its card or
     field opens, while the file is written, so ending selecting or leaving a field just before an
     add doesn't show it for that moment. The room it leaves below the last row stays, so the list
-    doesn't move. Mobile is `Platform.isMobile`, a tablet included, as for the "Floating add button"
+    doesn't move. Mobile is `Platform.isMobile`, a tablet included, as for the "Add button"
     setting. Desktop keeps it in view, and a list inside another note keeps its own New item button
     as it is.
   - **Cmd+Enter does what "+" does on desktop** (step two), anywhere in a list that has focus, a
