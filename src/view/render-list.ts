@@ -24,7 +24,7 @@ export const HEADING_CLASS = 'princelists-heading';
 export const OPEN_AS_MARKDOWN_CLASS = 'princelists-open-as-markdown';
 /** A row's title and the chips of its tail's tags, laid out as one run of text. */
 export const TITLE_AND_TAGS_CLASS = 'princelists-title-and-tags';
-/** A row's title, as Obsidian rendered it, which Find colors. */
+/** The element holding a row's title text, which Find colors. */
 export const ITEM_TITLE_CLASS = 'princelists-item-title';
 // A row's or heading's first line. The plugin's own name: Markdown that Obsidian renders carries its
 // own `data-line` attributes, which the view must not read or shift.

@@ -82,6 +82,8 @@ variables and no `:has()`.
 - **One highlight named `princelists-find` per window (call),** registered in `CSS.highlights` of the
   window the view is in (`el.win`), so a list in a pop-out window works too. Each view adds its own
   ranges and removes only those, so a list and the Schedule filtering at once don't clear each other.
+  The last range to go takes the highlight out of `CSS.highlights`, so none is left once the plugin
+  unloads.
 - **Text is read block by block (call).** The text nodes of one block element are joined as they
   are, so `**oa**t` is one word, while a line break goes between blocks, so a word can't run from
   one table cell or line into the next.

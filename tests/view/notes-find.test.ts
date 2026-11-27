@@ -1,20 +1,8 @@
 import { EditorState } from '@codemirror/state';
 import { EditorView, type DecorationSet } from '@codemirror/view';
 import { describe, expect, test } from 'vitest';
-import type { Find } from '../../src/core/display';
-import type { Span } from '../../src/core/find-spans';
 import { FIND_MARK_CLASS, notesFind, notesFindEffect } from '../../src/view/notes-find';
-
-// A stand-in for prepareSimpleSearch: every place the lowercased word appears.
-function findOf(query: string): Find {
-	const words = query.split(' ').map((word) => (text: string) => {
-		const spans: Span[] = [];
-		const lower = text.toLowerCase();
-		for (let at = lower.indexOf(word); at >= 0; at = lower.indexOf(word, at + word.length)) spans.push([at, at + word.length]);
-		return spans.length ? spans : null;
-	});
-	return { text: query, words, matches: () => true };
-}
+import { findOf } from './find-helpers';
 
 // The marked spans, as [from, to, class].
 function marks(state: EditorState): [number, number, string][] {

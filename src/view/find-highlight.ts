@@ -9,6 +9,7 @@ export const FIND_HIGHLIGHT = 'princelists-find';
 const BLOCK_SELECTOR = 'p, li, td, th, pre, blockquote, h1, h2, h3, h4, h5, h6, div';
 
 interface Painted {
+	registry: HighlightRegistry;
 	highlight: Highlight;
 	ranges: Range[];
 }
@@ -25,17 +26,20 @@ export class FindPaint {
 	paint(el: HTMLElement, find: Find | null): void {
 		this.forget(el);
 		if (!find) return;
-		const highlight = windowHighlight(el);
-		if (!highlight) return;
 		const { nodes, pieces } = textPieces(el);
-		const ranges = pieceSpans(pieces, find.words).map(({ start, end }) => {
+		const spans = pieceSpans(pieces, find.words);
+		if (spans.length === 0) return;
+		const found = windowHighlight(el);
+		if (!found) return;
+		const { registry, highlight } = found;
+		const ranges = spans.map(({ start, end }) => {
 			const range = el.doc.createRange();
 			range.setStart(nodes[start.piece] as Text, start.offset);
 			range.setEnd(nodes[end.piece] as Text, end.offset);
 			highlight.add(range);
 			return range;
 		});
-		if (ranges.length > 0) this.painted.set(el, { highlight, ranges });
+		this.painted.set(el, { registry, highlight, ranges });
 	}
 
 	/** Paints each of `els`, and takes the color from any element painted before that isn't one of them. */
@@ -51,6 +55,8 @@ export class FindPaint {
 		if (!painted) return;
 		for (const range of painted.ranges) painted.highlight.delete(range);
 		this.painted.delete(el);
+		// An empty highlight left registered would outlive the plugin once it unloads.
+		if (painted.highlight.size === 0) painted.registry.delete(FIND_HIGHLIGHT);
 	}
 
 	/** Takes the color from every element this view painted. */
@@ -59,8 +65,8 @@ export class FindPaint {
 	}
 }
 
-/** The Find highlight of `el`'s window, registered the first time, or null where the API is missing. */
-function windowHighlight(el: HTMLElement): Highlight | null {
+/** The Find highlight of `el`'s window and its registry, registered the first time, or null where the API is missing. */
+function windowHighlight(el: HTMLElement): { registry: HighlightRegistry; highlight: Highlight } | null {
 	// lib.dom declares CSS and Highlight on the global, not on Window; el.win is the window el is in.
 	const win = el.win as Window & typeof globalThis;
 	if (!('highlights' in win.CSS)) return null;
@@ -69,7 +75,7 @@ function windowHighlight(el: HTMLElement): Highlight | null {
 		highlight = new win.Highlight();
 		win.CSS.highlights.set(FIND_HIGHLIGHT, highlight);
 	}
-	return highlight;
+	return { registry: win.CSS.highlights, highlight };
 }
 
 /** `el`'s text nodes and their text, less any in a list block, each with the number of its block. */
