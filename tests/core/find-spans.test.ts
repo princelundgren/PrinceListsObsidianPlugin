@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { findSpans, pieceSpans, type Span, type WordSearch } from '../../src/core/find-spans';
+import { findSpans, pieceSpans, queryWords, type Span, type WordSearch } from '../../src/core/find-spans';
 
 /** A word's search that reports only its first match, case-insensitive like Obsidian's. */
 const first = (word: string): WordSearch => (text) => {
@@ -69,5 +69,11 @@ describe('pieceSpans', () => {
 		expect(pieceSpans([{ text: '', block: 0 }, { text: 'milk', block: 0 }], [first('milk')])).toEqual([
 			{ start: { piece: 1, offset: 0 }, end: { piece: 1, offset: 4 } },
 		]);
+	});
+});
+
+describe('queryWords', () => {
+	test('reads each space-separated word, however many spaces sit between them', () => {
+		expect(queryWords('oat  milk ')).toEqual(['oat', 'milk']);
 	});
 });

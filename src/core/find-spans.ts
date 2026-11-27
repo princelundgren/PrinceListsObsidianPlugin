@@ -4,6 +4,11 @@ export type Span = readonly [from: number, to: number];
 /** One word's search: its matches in `text`, or null when it finds none. It may report only the first. */
 export type WordSearch = (text: string) => readonly Span[] | null;
 
+/** The words of a Find query, each searched for alone: its space-separated words, as Obsidian's simple search reads them. */
+export function queryWords(query: string): string[] {
+	return query.split(' ').filter((word) => word !== '');
+}
+
 /** Every place in `text` any of `words` matches, in text order, with spans that overlap or touch merged. */
 export function findSpans(text: string, words: readonly WordSearch[]): Span[] {
 	const spans: Span[] = [];
