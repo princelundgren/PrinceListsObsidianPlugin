@@ -1,10 +1,10 @@
 import { getLanguage, Notice } from 'obsidian';
-import { itemRow } from '../core/display';
+import { itemRow, tickRedraws } from '../core/display';
 import { toggleItem } from '../core/edit-items';
 import type { OwnEdit } from '../core/follow';
 import { joinLines, type Line } from '../core/lines';
 import { itemAt } from '../core/parse';
-import { backDayMessage } from '../core/when';
+import { backDayMessage, dayOf } from '../core/when';
 import type { PrinceListView } from './list-view';
 import { lineOf, showDone } from './render-list';
 import { CHANGED_ELSEWHERE_NOTICE, tryEdit, writeAction } from './write';
@@ -66,8 +66,9 @@ async function tick(view: PrinceListView, row: HTMLElement | null, pending: { li
 			// such as "Show archived items", drew from the text before the tick, so the view redraws again.
 			const ticked = itemRow((edited[titleLine] as Line).text, titleLine, now, view.archiveDelay.ms);
 			// With the "At once" delay a tick archives the item, which hides it now, not at the next redraw.
-			// A tick that takes the repeat icon away, as on the last time, or brings it back, redraws too.
-			const redraws = (ticked.archived && !view.showArchived) || ticked.repeats !== was.repeats;
+			// A tick that takes the repeat icon away, as on the last time, or brings it back, redraws too,
+			// as does one that changes whether its day is overdue or its color.
+			const redraws = tickRedraws(was, ticked, dayOf(now), view.showArchived, view.overdueStyle());
 			if (!redraws && row?.isConnected && lineOf(row) === titleLine) showDone(row, ticked);
 			else view.render();
 			return;

@@ -9,10 +9,12 @@ import { NO_LINES_MOVED, type OwnEdit } from '../core/follow';
 import { splitLines } from '../core/lines';
 import { parseList } from '../core/parse';
 import { serialQueue } from '../core/queue';
+import type { OverdueStyle } from '../core/overdue';
 import { NO_LIT_TAGS } from '../core/tags';
 import { dayOf } from '../core/when';
 import { WriteEchoes } from '../core/write-echoes';
 import type { ArchiveDelay } from '../obsidian/archive-delay';
+import type { OverdueLook } from '../obsidian/overdue-look';
 import { contentStartLine, isListText } from '../obsidian/marker';
 import { blockDragHost, enableBlockDrag } from './block-drag';
 import { NEW_ITEM_CLASS, registerBlockEvents } from './block-events';
@@ -20,6 +22,7 @@ import { noticeLostField, type BlockField } from './block-fields';
 import type { RowDragHost } from './drag-host';
 import { LIST_BLOCK_CLASS } from './own-rows';
 import { buildHeading, buildRow, ITEMS_CLASS, type RowHost } from './render-list';
+import { showStarColor } from './row-marks';
 import { onWindowReturn } from './window-return';
 import { CHANGED_ELSEWHERE_NOTICE, SAVE_FAILED_NOTICE } from './write';
 
@@ -45,8 +48,11 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	private drawnText: string | null = null;
 	// What the rows showed when drawn, or null when the block drew a message instead.
 	private drawnRows: string | null = null;
-	// The archive delay changed under an open field or a drag, so the rows are drawn when that ends.
-	private delayChangedSinceDraw = false;
+	// The archive delay, the overdue settings or the day changed under an open field or a drag, so the
+	// rows are drawn when that ends.
+	private rowLookChangedSinceDraw = false;
+	// The day the rows were drawn on, whose days read differently after midnight.
+	private drawnDay: string | null = null;
 	// The text the last comeback failed to write on: a failed write isn't tried again (step one's design,
 	// "Saving").
 	private comeBackFailedOn: string | null = null;
@@ -57,6 +63,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		source: string,
 		private readonly notePath: string,
 		private readonly archiveDelay: ArchiveDelay,
+		private readonly overdueLook: OverdueLook,
 	) {
 		super(containerEl);
 		this.link = blockLink(source);
@@ -69,15 +76,17 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		const { metadataCache, vault, workspace } = this.app;
 		this.registerEvent(metadataCache.on('changed', (file, data) => this.fileChanged(file, data)));
 		this.registerEvent(workspace.on('active-leaf-change', (leaf) => {
-			if (leaf?.view.containerEl.contains(this.rootEl)) this.bringBack();
+			if (leaf?.view.containerEl.contains(this.rootEl)) this.returned();
 		}));
-		onWindowReturn(this, this.rootEl, () => this.bringBack());
+		onWindowReturn(this, this.rootEl, () => this.returned());
 		this.registerEvent(vault.on('create', () => void this.resolve()));
 		this.registerEvent(vault.on('rename', () => void this.resolve()));
 		this.registerEvent(vault.on('delete', () => void this.resolve()));
-		this.registerEvent(this.archiveDelay.onChange(() => {
-			if (this.field || this.dragging) this.delayChangedSinceDraw = true;
-			else this.drawIfRowsChanged();
+		this.registerEvent(this.archiveDelay.onChange(() => this.rowLookChanged()));
+		showStarColor(this.rootEl, this.overdueLook.style.starColor);
+		this.registerEvent(this.overdueLook.onChange(() => {
+			showStarColor(this.rootEl, this.overdueLook.style.starColor);
+			this.rowLookChanged();
 		}));
 		registerBlockEvents(this, this.rootEl, this.notePath);
 		enableBlockDrag(this);
@@ -141,6 +150,12 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		});
 	}
 
+	// Its note or window got focus. No timer moves the rows' days, so on a new day they draw again.
+	private returned(): void {
+		if (this.drawnDay !== null && dayOf(new Date()) !== this.drawnDay) this.rowLookChanged();
+		this.bringBack();
+	}
+
 	dragHost(): RowDragHost {
 		return blockDragHost(this);
 	}
@@ -152,9 +167,10 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 
 	// After a field closes, whose title went back in its place, or a drag ends: the rows are drawn
-	// again only if the text or the archive delay changed since they were, and never under a drag.
+	// again only if the text, the archive delay, the overdue settings or the day changed since they were,
+	// and never under a drag.
 	drawIfChanged(): void {
-		if (!this.dragging && (this.editing.text !== this.drawnText || this.delayChangedSinceDraw)) this.draw();
+		if (!this.dragging && (this.editing.text !== this.drawnText || this.rowLookChangedSinceDraw)) this.draw();
 	}
 
 	draw(): void {
@@ -164,7 +180,8 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	// `sections`, when given, are shownSections() of the current text.
 	private drawWith(sections: SectionRows[] | null): void {
 		this.drawnText = this.editing.text;
-		this.delayChangedSinceDraw = false;
+		this.rowLookChangedSinceDraw = false;
+		this.drawnDay = dayOf(new Date());
 		this.drawnRows = null;
 		// A drag whose row this detaches may never end here: a drop outside the block, or Escape,
 		// sends rowsEl nothing.
@@ -181,7 +198,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		this.rowsEl.empty();
 		this.rootEl.append(this.rowsEl);
 		const shown = sections ?? this.shownSections();
-		this.drawnRows = rowsKey(file, shown);
+		this.drawnRows = rowsKey(file, this.overdueStyle(), shown);
 		for (const section of shown) {
 			if (section.heading) this.rowsEl.append(buildHeading(this, file.path, section.heading, this.blocks));
 			let list: HTMLUListElement | null = null;
@@ -202,6 +219,15 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 		return visibleSections(lines, model, new Date(), { showArchived: false, starredOnly: false, lit: NO_LIT_TAGS, archiveDelayMs: this.archiveDelay.ms, find: null, keepLine: null, collapsed: new Set() }, NO_INHERITED_TAGS);
 	}
 
+	overdueStyle(): OverdueStyle {
+		return this.overdueLook.style;
+	}
+
+	private rowLookChanged(): void {
+		if (this.field || this.dragging) this.rowLookChangedSinceDraw = true;
+		else this.drawIfRowsChanged();
+	}
+
 	// A change from outside often leaves every row as drawn, such as a list view's save of an item's notes.
 	private drawIfRowsChanged(): void {
 		const { file, drawnRows } = this;
@@ -210,7 +236,7 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 			return;
 		}
 		const sections = this.shownSections();
-		if (rowsKey(file, sections) === drawnRows) this.drawnText = this.editing.text;
+		if (rowsKey(file, this.overdueStyle(), sections) === drawnRows) this.drawnText = this.editing.text;
 		else this.drawWith(sections);
 	}
 
@@ -260,9 +286,9 @@ export class ListBlock extends MarkdownRenderChild implements RowHost {
 	}
 }
 
-// The link's file, today, which a row's day is shown against, and every heading and item row the block
-// draws, with the lines their LINE_ATTRs must keep true.
-function rowsKey(file: TFile, sections: SectionRows[]): string {
+// The link's file, today and the overdue settings, which a row's day is shown with, and every heading
+// and item row the block draws, with the lines their LINE_ATTRs must keep true.
+function rowsKey(file: TFile, overdue: OverdueStyle, sections: SectionRows[]): string {
 	const drawn = sections.map(({ heading, rows }) => [heading, rows.filter((row) => row.kind === 'item')]);
-	return JSON.stringify([file.path, dayOf(new Date()), drawn]);
+	return JSON.stringify([file.path, dayOf(new Date()), overdue, drawn]);
 }

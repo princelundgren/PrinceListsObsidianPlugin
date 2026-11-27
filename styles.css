@@ -737,8 +737,9 @@ textarea.princelists-heading-field {
 	outline: none;
 }
 
-/* Heard by screen readers, not seen: how many rows are selected. */
-.princelists-selection-status {
+/* Heard by screen readers, not seen: how many rows are selected, and that a row's day is overdue. */
+.princelists-selection-status,
+.princelists-spoken {
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -1077,9 +1078,9 @@ button.princelists-archived-toggle.princelists-archived-shown {
 	color: var(--color-blue);
 }
 
-/* Filled yellow while only starred items show, as a starred row's star is. */
+/* Filled in the star's color while only starred items show, as a starred row's star is. */
 button.princelists-starred-toggle.princelists-starred-only {
-	color: var(--color-yellow);
+	color: var(--princelists-star-color, var(--color-yellow));
 }
 
 button.princelists-starred-toggle.princelists-starred-only svg {
@@ -1149,7 +1150,7 @@ button.princelists-undo:hover {
 	flex: none;
 	display: flex;
 	align-self: baseline;
-	color: var(--color-yellow);
+	color: var(--princelists-star-color, var(--color-yellow));
 }
 
 .princelists-star svg {
@@ -1158,7 +1159,7 @@ button.princelists-undo:hover {
 
 /* Filled, as the row's star. */
 button.princelists-card-star.is-starred {
-	color: var(--color-yellow);
+	color: var(--princelists-star-color, var(--color-yellow));
 }
 
 button.princelists-card-star.is-starred svg {
@@ -1180,6 +1181,76 @@ button.princelists-card-repeat.is-repeating {
 	align-self: baseline;
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
+}
+
+/* The star's color, as the settings pick it from the theme's colors, for the stars under a view's root or the settings' preview. */
+.princelists-star-color-none {
+	--princelists-star-color: var(--text-muted);
+}
+
+.princelists-star-color-red {
+	--princelists-star-color: var(--color-red);
+}
+
+.princelists-star-color-orange {
+	--princelists-star-color: var(--color-orange);
+}
+
+.princelists-star-color-yellow {
+	--princelists-star-color: var(--color-yellow);
+}
+
+.princelists-star-color-green {
+	--princelists-star-color: var(--color-green);
+}
+
+.princelists-star-color-cyan {
+	--princelists-star-color: var(--color-cyan);
+}
+
+.princelists-star-color-blue {
+	--princelists-star-color: var(--color-blue);
+}
+
+.princelists-star-color-purple {
+	--princelists-star-color: var(--color-purple);
+}
+
+.princelists-star-color-pink {
+	--princelists-star-color: var(--color-pink);
+}
+
+/* An overdue day's color, today's and a later day's, as the settings pick them from the theme's colors. */
+.princelists-when.princelists-when-red {
+	color: var(--color-red);
+}
+
+.princelists-when.princelists-when-orange {
+	color: var(--color-orange);
+}
+
+.princelists-when.princelists-when-yellow {
+	color: var(--color-yellow);
+}
+
+.princelists-when.princelists-when-green {
+	color: var(--color-green);
+}
+
+.princelists-when.princelists-when-cyan {
+	color: var(--color-cyan);
+}
+
+.princelists-when.princelists-when-blue {
+	color: var(--color-blue);
+}
+
+.princelists-when.princelists-when-purple {
+	color: var(--color-purple);
+}
+
+.princelists-when.princelists-when-pink {
+	color: var(--color-pink);
 }
 
 /* In the day's color and font size, just before it. */
@@ -1758,10 +1829,10 @@ button.princelists-collapse {
 }
 
 /* In a pane about as narrow as a sidebar, the Schedule has a sidebar's margins and a heading-sized
-   title. */
+   title. On desktop the bottom one also clears the status bar, which the wider margin already does. */
 @container (max-width: 480px) {
 	.princelists-schedule .princelists-scroll {
-		padding: var(--size-4-3);
+		padding: var(--size-4-3) var(--size-4-3) calc(var(--size-4-3) + var(--princelists-status-bar-room, 0px));
 	}
 
 	.princelists-schedule-title {
@@ -1932,4 +2003,18 @@ button.princelists-block-new-item {
 .princelists-block .external-link {
 	background-image: none;
 	padding-inline-end: 0;
+}
+
+/* The settings' preview: its sample rows on a line of their own, under its name, framed as a list. */
+.princelists-settings-preview {
+	flex-wrap: wrap;
+}
+
+.princelists-settings-preview > .princelists-settings-preview-rows {
+	flex-basis: 100%;
+	align-self: stretch;
+	padding: var(--size-4-1) var(--size-4-3);
+	border: var(--border-width) solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background-color: var(--background-primary);
 }

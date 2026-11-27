@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { findsNothing, headingText, isItemVisible, itemRow, listInheritedTags, listStripTags, visibleSections, type RowFilter } from '../../src/core/display';
+import { findsNothing, headingText, isItemVisible, itemRow, tickRedraws, listInheritedTags, listStripTags, visibleSections, type RowFilter } from '../../src/core/display';
+import type { DayColors } from '../../src/core/day-color';
 import { NO_INHERITED_TAGS } from '../../src/core/inherited-tags';
 import { tickLine } from '../../src/core/item-line';
 import { NO_LIT_TAGS } from '../../src/core/tags';
@@ -471,5 +472,55 @@ describe('inherited tags', () => {
 		const { lines, model } = list(plain);
 		const inherited = listInheritedTags(lines, model, ['home']);
 		expect(listStripTags(lines, model, now, { showArchived: false, archiveDelayMs: DAY }, [], inherited)).toEqual([]);
+	});
+});
+
+describe('tickRedraws', () => {
+	const now = new Date(2026, 10, 26, 12, 0);
+	const today = '2026-11-26';
+	const open = (when: string) => itemRow(`- [ ] a ⏳ ${when}`, 0, now, DAY);
+	const colors: DayColors = { overdueColor: 'red', todayColor: 'green', upcomingColor: 'purple' };
+
+	test.each([false, true])('is true when the tick changes whether an item dated before today is overdue (ticking: %s)', (ticking) => {
+		const was = { ...open('2026-11-23'), done: !ticking };
+		expect(tickRedraws(was, { ...was, done: ticking }, today, false, colors)).toBe(true);
+	});
+
+	test.each([false, true])("is true when the tick changes whether an item due today takes Today's color (ticking: %s)", (ticking) => {
+		const was = { ...open(today), done: !ticking };
+		expect(tickRedraws(was, { ...was, done: ticking }, today, false, colors)).toBe(true);
+	});
+
+	test("is false for a tick of an item due today when Today's color is none", () => {
+		const was = open(today);
+		expect(tickRedraws(was, { ...was, done: true }, today, false, { ...colors, todayColor: 'none' })).toBe(false);
+	});
+
+	test.each([false, true])('is true when the tick changes whether an item due after today takes the upcoming color (ticking: %s)', (ticking) => {
+		const was = { ...open('2026-11-27'), done: !ticking };
+		expect(tickRedraws(was, { ...was, done: ticking }, today, false, colors)).toBe(true);
+	});
+
+	test('is false for a tick of an item due after today when the upcoming color is none', () => {
+		const was = open('2026-11-27');
+		expect(tickRedraws(was, { ...was, done: true }, today, false, { ...colors, upcomingColor: 'none' })).toBe(false);
+	});
+
+	test('is false for a tick of an undated item', () => {
+		const was = itemRow('- [ ] a', 0, now, DAY);
+		expect(tickRedraws(was, { ...was, done: true }, today, false, colors)).toBe(false);
+	});
+
+	test('is true for a tick that archives an item while archived items are hidden, false while shown', () => {
+		const was = open('2026-11-27');
+		const ticked = { ...was, done: true, archived: true };
+		const plain = { ...colors, upcomingColor: 'none' } as const;
+		expect(tickRedraws(was, ticked, today, false, plain)).toBe(true);
+		expect(tickRedraws(was, ticked, today, true, plain)).toBe(false);
+	});
+
+	test('is true for a tick that changes the repeat icon', () => {
+		const was = { ...open('2026-11-27'), repeats: true };
+		expect(tickRedraws(was, { ...was, done: true, repeats: false }, today, false, colors)).toBe(true);
 	});
 });

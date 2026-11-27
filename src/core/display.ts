@@ -1,10 +1,12 @@
 import { isArchived } from './archive';
+import { dayColor, type DayColors } from './day-color';
 import { splitAtx } from './edit-headings';
 import { getItemNotes } from './edit-items';
 import { isDoneStatus, parseItemLine, type ItemLineParts } from './item-line';
 import { carriedTags, inheritedTags, withoutListTags, type InheritedTags } from './inherited-tags';
 import { itemTags } from './item-tags';
 import type { Line } from './lines';
+import { isOverdue } from './overdue';
 import type { ItemBlock, ListModel } from './parse';
 import { backDay, repeatOf } from './repeat-line';
 import { splitStar } from './star';
@@ -184,6 +186,19 @@ export function itemRow(text: string, titleLine: number, now: Date, archiveDelay
 	// A done item keeps its repeat icon only while it will come back.
 	const repeats = row.done ? backDay(text, now) !== null : row.repeats;
 	return { ...row, archived: row.done && isArchived(text, now, archiveDelayMs), repeats };
+}
+
+/**
+ * Whether a tick or an untick from `was` to `ticked` must redraw the list rather than change the
+ * row in place: it hides the item, changes its repeat icon, or changes whether it's overdue or the
+ * color `colors` give its day.
+ */
+export function tickRedraws(was: ItemRow, ticked: ItemRow, today: string, showArchived: boolean, colors: DayColors): boolean {
+	if (ticked.archived && !showArchived) return true;
+	if (ticked.repeats !== was.repeats) return true;
+	if (ticked.when === null) return false;
+	return isOverdue(ticked.when, today, ticked.done) !== isOverdue(ticked.when, today, was.done)
+		|| dayColor(ticked.when, today, ticked.done, colors) !== dayColor(ticked.when, today, was.done, colors);
 }
 
 /** The fields of an item's row that don't depend on the time: all but `archived`. */

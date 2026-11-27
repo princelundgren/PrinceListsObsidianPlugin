@@ -1,6 +1,6 @@
 ---
 status: live
-verified: 2026-11-18
+verified: 2026-11-27
 governs: [src/**, styles.css, manifest.json]
 ---
 
@@ -172,9 +172,9 @@ this met on 2026-10-30 **(owner)**.
   archived items", and the Schedule's, which in a sidebar opens from a right-click on its tab. It
   filters as typed text does: every heading shows, a Schedule group shows while one of its items
   shows, collapsed ones included, and content the plugin leaves alone hides. With text in the
-  field too, an item shows only if it's starred and matches. The toggle is yellow and filled
-  while it's on, as a row's star is, and a press on it doesn't take focus from the field
-  **(call)**. Its tooltip stays "Show starred only", and it has no key **(call)**. It's on only
+  field too, an item shows only if it's starred and matches. While it's on, the toggle is filled in
+  the star's color ("Star color" in Settings), as a row's star is, and a press on it doesn't take
+  focus from the field **(call)**. Its tooltip stays "Show starred only", and it has no key **(call)**. It's on only
   while the field is open, so the lit toggle always shows why items are hidden: the menu item
   opens the field when it's closed, without focusing it **(call)**, and closing the field turns it
   off (owner, 2026-11-06). It isn't remembered (owner, 2026-11-06).
@@ -351,10 +351,44 @@ this met on 2026-10-30 **(owner)**.
     clear the day.
 - **On a row (call):** a short day at the row's end, with no icon of its own: "Today", "Tomorrow", a
   weekday for the rest of the next seven days, or else the date, in the language set in Obsidian.
-  A past day shows its date. A repeating item's `repeat` icon stands just before it (repeating
-  items' design, "Showing a repeat").
+  A past day shows "Yesterday" for the day before today and the date for any earlier day, ticked or
+  not, unless the item is overdue (below). A repeating item's `repeat` icon stands just before it
+  (repeating items' design, "Showing a repeat").
   - **A date in the current year has no year (owner, 2026-11-05),** such as "Nov 12", since the
     year took much of the row; one in another year keeps it, such as "Jan 4, 2027".
+  - **An overdue item reads as late (owner, 2026-11-26, #163),** in a list, a list inside another
+    note and the Schedule alike, so one item reads the same everywhere. It's overdue when it isn't
+    ticked and its When, the `⏳` the row shows, is before today; a `📅` or `🛫` date doesn't count
+    **(call)**. A ticked item shows its day as any past day does, and a tick or an untick changes
+    the day's label and color at once **(call)**. Like every row, it runs no timer: an item turns
+    overdue when its view next draws after midnight, and a list or a list inside another note draws
+    again when it or Obsidian's window gets focus on a new day, as the Schedule does **(call)**.
+  - **Its label is a setting (owner, 2026-11-26),** "Overdue label" (Settings, below):
+    "Yesterday or the date", the default, which shows the day as any past day shows it, so a row
+    shows when it slipped without opening the card; "Overdue"; or "Today", which matches the group
+    it sits in.
+  - **Its color is a setting too (owner, 2026-11-27),** "Overdue color", None by default, with
+    every label. Each choice is one of Obsidian's documented theme colors, such as `--color-red`, so
+    it follows the theme and light and dark mode; a free color picker was weighed and turned down
+    for that reason (owner, 2026-11-27). The `repeat` icon before it keeps `--text-muted`
+    **(call)**.
+  - **Today's day has a color of its own (owner, 2026-11-27),** "Today color", None by
+    default: a row that isn't ticked and whose When is today takes it, the rule an overdue item
+    follows **(call)**. An overdue item that shows "Today" keeps the overdue color, so it still
+    reads as late.
+  - **Upcoming days have a color too (owner, 2026-11-27),** "Upcoming color", None by default: a
+    row that isn't ticked and whose When is after today, tomorrow included, takes it, by the same
+    rule.
+  - **A screen reader hears "Overdue,"** then the day as "Yesterday or the date" shows it, such as
+    "Overdue, Yesterday" or "Overdue, Nov 23", whatever the label shows, since the color can't
+    reach it. It's text only a screen reader reads, in place of the shown label, never an
+    `aria-label`, which Obsidian shows as a tooltip **(call)**.
+  - **The card shows the day as "Yesterday or the date" does,** in its accent color, whatever the
+    setting, so an overdue item's date is one click away **(call)**. The repeat form's next days
+    and the "Back …" notice are never past, so they don't change.
+  - **Showing "Today" for every past day by default was weighed (owner, 2026-11-26)** and left as
+    an option: it hides which items slipped. A separate Overdue group above Today would change the
+    decided groups.
 - **The Schedule view** is a view of its own, opened with an "Open schedule" command and a ribbon
   icon **(call)**. The icon is Lucide's `calendar-clock`, not `calendar`, which the Daily notes
   core plugin's ribbon button uses **(owner, 2026-10-27)**. It gathers, from every list in the vault, the items with a When
@@ -410,14 +444,16 @@ this met on 2026-10-30 **(owner)**.
   list's name, and go to the row's right edge in a narrow pane, as in every row ("Where the star
   and the day sit").
   - **Today's items show "Today" too (owner, 2026-10-28),** as in a list. Without it, a row in
-    Today with no day read as an item with no date beside the overdue ones that show theirs.
+    Today with no day read as an item with no date beside the overdue ones, which always show a
+    label.
 - **The page (owner, 2026-10-27)** has a list's margins and readable line width, and "Schedule" as
   its title in a list's title style. A muted line under it says in a few words what the page shows,
   so it takes one line on a phone, and the empty page says how an item gets a When **(owner,
   2026-11-04)**.
   - **In a pane about as narrow as a sidebar (owner, 2026-11-04),** it has a sidebar's margins and
     the title at heading size, through a container query; the width where that starts, 480 px, is
-    a **(call)**.
+    a **(call)**. On desktop its bottom margin grows by the floating "+"'s room for the status bar,
+    so the last row scrolls clear of it **(call)**.
 - **Ticking works in place.** A repeating item (🔁) ticks like any other, with the "Back" notice a
   tick in its list shows; one the plugin can't repeat shows the same message as in its list instead
   of ticking. A tick is worked out on the text the view last read, so a list changed, renamed or
@@ -441,13 +477,13 @@ this met on 2026-10-30 **(owner)**.
     view. It's added without being shown, unless a Schedule is open already. It isn't added when
     Obsidian starts: Obsidian keeps the tab in its workspace from one start to the next, and adding
     it at every start brought back a tab the user had closed.
-  - **A closed tab comes back from the settings (owner, 2026-11-04):** the Schedule tab's "Add to
-    sidebar" button in PrinceLists' settings does what the ribbon icon does.
+  - **A closed tab comes back from the settings (owner, 2026-11-04):** the "Add to sidebar" button of
+    the "Schedule in sidebar" setting does what the ribbon icon does.
 - **It updates (call)** when it opens, when it gets focus, and when a list changes, through the
   metadata cache's `changed` event and the vault's `rename` and `delete`. Those keep the lists it
   has read current, so focus reads only lists it doesn't hold yet, and it draws again only when
-  today or its rows change. Like a list, it runs no timer, so a view left open over midnight moves
-  its items when it next gets focus.
+  today, its rows or the overdue settings change. Like a list, it runs no timer, so a view left
+  open over midnight moves its items when it or Obsidian's window next gets focus.
 - **Repeating items that came due come back** when it opens or gets focus, or Obsidian's window
   does, while shown, never when a list changes. Every item in
   the lists it reads counts, archived and undated ones included
@@ -541,13 +577,16 @@ this met on 2026-10-30 **(owner)**.
 ### Star (owner: in its list only)
 
 - **A star button among the card's buttons adds or removes the star (owner, 2026-11-17),** after
-  the tag button. It is Lucide's `star`, filled in `--color-yellow` while the item has one, as
+  the tag button. It is Lucide's `star`, filled in the star's color while the item has one, as
   on the row, and its tooltip says Add star or Remove star. This replaces Add star or Remove star
   in the card's ⋯ menu, with a star mark beside the title: the row under the notes has room for it.
   A list's row adds or removes it from its right-click menu too **(owner, 2026-10-29)**: the step
   one design's "Item actions".
-- **The row shows Lucide's `star`** after the title, in `--color-yellow` **(call)**, wherever rows
+- **The row shows Lucide's `star`** after the title, filled in the star's color, wherever rows
   show: a list, the Schedule view and a list inside another note.
+- **The star's color is a setting (owner, 2026-11-27),** "Star color" (Settings, below), Yellow
+  by default, as the star always was. It colors the row's star, the card's star button while the
+  item has a star, and the starred-only toggle while it's on, so all three match.
 - **Where the star and the day sit (owner, 2026-11-05):**
   - On the title's first line: the day on its baseline, and the checkbox and the star centered on
     its capital letters.
@@ -670,41 +709,102 @@ The block fields this section described are gone.
 
 PrinceLists' page in Obsidian's settings, built with `getSettingDefinitions` (`@since` 1.13.0, the
 docs' way from 1.13 on). Each setting has a reason someone would change it, and its default keeps
-the plugin as it was before the page existed, except the floating "+"'s, below, and "Tag
-strip"'s ([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
+the plugin as it was before the page existed, except the Add button's, below, and "Tag strip"'s
+([filtering by tag](2026-11-07-tag-filter-design.md), "The setting").
 
-- **Folder for new lists:** Obsidian's `folder` control, which suggests the vault's folders. It sets
+- **Three headed sections on one page (owner, 2026-11-27):** Lists, Schedule and Appearance, each
+  a `group` definition with a `heading`, in that order, holding the settings below. Obsidian has no
+  tab bar for a plugin's settings, and one the plugin drew would be left out of Obsidian's settings
+  search. Sub-pages (`type: 'page'`) were the other choice; the owner chose sections, which show
+  every setting at once on a page this short.
+- **The texts (owner, 2026-11-27):** a name says what the setting controls, and a description is
+  one short sentence on what it changes, quoted with each setting below. That colors come from the
+  theme is said once, on the preview. A setting whose name changed keeps its earlier name in
+  `aliases`, so Obsidian's settings search still finds it by that name.
+
+#### Lists
+
+- **Folder for new lists:** "Where 'Create new list' puts a list. Leave empty to use Obsidian's
+  location for new notes." Obsidian's `folder` control, which suggests the vault's folders. It sets
   where "Create new list" and the ribbon icon put a list, as step one's "Where a new list goes"
   says. Any path is kept, and a folder that isn't there is made with the next list (call): the
   field then agrees with what a new list does when a chosen folder has gone. Obsidian saves the
   value to the plugin's `data.json` when the user changes it, so it's never written in the
   background, and `onExternalSettingsChange` reads it again when Sync brings a change.
-- **Hide ticked items after (owner, 2026-11-04):** a `dropdown` control with at once, 1 hour,
-  12 hours, 1 day (the default), 2 days and 1 week, saved as the hours in a string, such as
-  `"24"`. A value in `data.json` that is none of them is read as 1 day when the settings load, as
-  Obsidian's docs ask a plugin to check stored values when it reads them; nothing is written back.
+- **Hide ticked items after (owner, 2026-11-04):** "How long a ticked item stays in its list. One
+  ticked on a day with no time counts from the end of that day." A `dropdown` control with at
+  once, 1 hour, 12 hours, 1 day (the default), 2 days and 1 week, saved as the hours in a string,
+  such as `"24"`. A value in `data.json` that is none of them is read as 1 day when the settings
+  load, as Obsidian's docs ask a plugin to check stored values when it reads them; nothing is
+  written back.
   - **A change redraws** the list views, the list blocks and the Schedule. The settings tab's
     `setControlValue`, and `onExternalSettingsChange` when Sync changes the delay, tell them
     through an `Events` object the plugin hands each view, which each one listens to with
     `registerEvent`. A list block with an open field or a drag draws it when the field closes or
     the drag ends.
   - **It writes nothing to any list,** since archived is worked out, never written down.
-- **Floating add button (owner, 2026-11-05):** a `dropdown` control with desktop and mobile,
-  desktop only, mobile only and off, saved as `"both"`, `"desktop"`, `"mobile"` and `"off"`.
-  Mobile is `Platform.isMobile`, a tablet included, as for keys' names. The floating "+" shows
-  everywhere by default, so desktop gains it after the update: the owner chose that over the rule
-  that opens this section. A stored value that is none of them is read as the default, as the
-  delay's is. Open lists show or hide the button at once, and again when Sync brings a change.
-  Cmd+Enter adds an item whatever it says.
+- **Add button (owner, 2026-11-05):** "The round + at a list's bottom right." Its alias is
+  "Floating add button". A `dropdown` control with desktop and mobile, desktop only, mobile only
+  and off, saved as `"both"`, `"desktop"`, `"mobile"` and `"off"`. Mobile is `Platform.isMobile`,
+  a tablet included, as for keys' names. The floating "+" shows everywhere by default, so desktop
+  gains it after the update: the owner chose that over the rule that opens this section. A stored
+  value that is none of them is read as the default, as the delay's is. Open lists show or hide
+  the button at once, and again when Sync brings a change. Cmd+Enter adds an item whatever it
+  says.
 - **No Header add button (owner, 2026-11-15, #423):** the header's "+" and its setting are gone,
   since the floating "+" and Cmd+Enter already add an item. A `headerAddButton` value an earlier
   version stored is no longer read.
-- **Show Schedule button (owner, 2026-11-05):** a toggle that shows or hides the header's "Open
+- **Tag strip:** "The row of tags to filter by, in lists and the Schedule." Its choices are in
+  [filtering by tag](2026-11-07-tag-filter-design.md), "The setting".
+
+#### Schedule
+
+- **Schedule button in lists (owner, 2026-11-05):** "A button in each list's header that opens the
+  Schedule." Its alias is "Show Schedule button". A toggle that shows or hides the header's "Open
   schedule" button. It's off by default, so the header stays short and the ribbon icon and the
-  command open the Schedule. Open lists show or hide the button at once, and again when Sync brings
-  a change.
-- **Schedule tab:** an "Add to sidebar" button that opens the Schedule as the ribbon icon does, so a
-  closed tab is easy to get back. A button saves nothing.
+  command open the Schedule. Open lists show or hide the button at once, and again when Sync
+  brings a change.
+- **Schedule in sidebar:** "Puts the Schedule back in the right sidebar if you closed it." Its
+  alias is "Schedule tab". An "Add to sidebar" button that opens the Schedule as the ribbon icon
+  does, so a closed tab is easy to get back. A button saves nothing.
+
+#### Appearance
+
+- **Preview (owner, 2026-11-27):** "Colors come from your theme." The section's first row, a
+  `render` definition that draws four sample rows, in date order, with the star, the dates and
+  the styles a list's rows use: "Return the library books", due a week ago, so an overdue date
+  shows; "Water the plants", starred and due yesterday; "Call the dentist", due today; and "Pick
+  up the parcel", due in three days, so a weekday shows in the upcoming color (owner, 2026-11-27).
+  It redraws
+  when any of the five settings below changes, from the same `Events` object the views listen to.
+  When Obsidian tears the row down, as it does to draw it again after Sync changes a setting, it
+  stops listening and takes its rows away. A drawn imitation was the other choice; it
+  would drift from the real rows the next time their look changes. The sample rows can't be
+  ticked, opened or focused **(call)**.
+- **Overdue label (owner, 2026-11-26, #163):** "What the date says once an unticked item is past
+  due." Its alias is "Overdue dates show". A `dropdown` control with "Yesterday or the date" (the
+  default), "Overdue" and "Today", saved as `"yesterday-or-date"`, `"overdue"` and `"today"`. What
+  each shows is in "When and the Schedule view", "On a row". A stored value that is none of them
+  is read as the default, as the delay's is.
+- **Overdue color, Today color and Upcoming color (owner, 2026-11-27):** "The date of an item that's
+  past due.", "The date of an item due today." and "The date of an item due after today." The first
+  two keep "Overdue date color" and "Today date color" as aliases. Three `dropdown` controls, each
+  with None, Red, Orange, Yellow, Green, Cyan, Blue, Purple and Pink, saved as `"none"`, `"red"` and
+  so on. None leaves the day in `--text-muted`, as any other day; each color is `--color-` and its
+  name. All three default to None, so the plugin looks as it did before them (owner, 2026-11-27). Of
+  the colors, Red and Blue read most clearly as small text in light and dark alike; the light
+  theme's orange and green are faint. A stored value that is none of the choices is read as the
+  default.
+  - **A change to the label or any of the three colors redraws** the list views, the list blocks and
+    the Schedule, as the delay's does, and again when Sync brings a change. It writes nothing to any
+    list.
+- **Star color (owner, 2026-11-27):** "A starred item's star." A `dropdown` control with the date
+  colors' choices, saved the same way. It defaults to Yellow, so the star looks as it did before
+  the setting. None draws the star in `--text-muted`, still filled, so a starred item still reads
+  as starred **(call)**. Each color is `--color-` and its name. A stored value that is none of the
+  choices is read as the default.
+  - **A change shows at once** in the list views, the list blocks and the Schedule, and again when
+    Sync brings one. It writes nothing to any list.
 
 ### No onboarding (owner, 2026-11-04)
 
