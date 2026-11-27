@@ -37,7 +37,16 @@ const scene = {
 
 /** Throws unless Settings opens inside the main window, where the recording can see it. */
 async function checkSettingsInWindow(session) {
-	const app = await session.evaluate(`app.vault.adapter.read(app.vault.configDir + '/app.json').then(JSON.parse).catch(() => ({}))`);
+	const app = await session.evaluate(`(async () => {
+		const path = app.vault.configDir + '/app.json';
+		if (!(await app.vault.adapter.exists(path))) return {};
+		const text = await app.vault.adapter.read(path);
+		try {
+			return JSON.parse(text);
+		} catch (error) {
+			throw new Error(path + " isn't valid JSON: " + error.message);
+		}
+	})()`);
 	if (app.settingsPopoutWindow !== false) {
 		throw new Error('Settings opens in its own window in this vault. Copy the demo vault again, which turns "Open settings in window" off.');
 	}
