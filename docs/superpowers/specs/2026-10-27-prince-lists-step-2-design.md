@@ -786,17 +786,17 @@ the plugin as it was before the page existed, except the Add button's, below, an
   default), "Overdue" and "Today", saved as `"yesterday-or-date"`, `"overdue"` and `"today"`. What
   each shows is in "When and the Schedule view", "On a row". A stored value that is none of them
   is read as the default, as the delay's is.
-- **Overdue color, Today color and Upcoming color (owner, 2026-11-27):** "The date of an item
-  that's past due.", "The date of an item due today." and "The date of an item due after today."
-  The first two keep "Overdue date color" and "Today date color" as aliases. Three `dropdown`
-  controls, each with None, Red, Orange, Yellow, Green, Cyan, Blue, Purple
-  and Pink, saved as `"none"`, `"red"` and so on. None leaves the day in `--text-muted`, as any
-  other day; each color is `--color-` and its name. All three default to None, so the plugin looks as
-  it did before them (owner, 2026-11-27). Of the colors, Red and Blue read most clearly as small
-  text in light and dark alike; the light theme's orange and green are faint. A stored value that
-  is none of the choices is read as the default.
-  - **A change to the label or any of the three colors redraws** the list views, the list blocks and the
-    Schedule, as the delay's does, and again when Sync brings a change. It writes nothing to any
+- **Overdue color, Today color and Upcoming color (owner, 2026-11-27):** "The date of an item that's
+  past due.", "The date of an item due today." and "The date of an item due after today." The first
+  two keep "Overdue date color" and "Today date color" as aliases. Three `dropdown` controls, each
+  with None, Red, Orange, Yellow, Green, Cyan, Blue, Purple and Pink, saved as `"none"`, `"red"` and
+  so on. None leaves the day in `--text-muted`, as any other day; each color is `--color-` and its
+  name. All three default to None, so the plugin looks as it did before them (owner, 2026-11-27). Of
+  the colors, Red and Blue read most clearly as small text in light and dark alike; the light
+  theme's orange and green are faint. A stored value that is none of the choices is read as the
+  default.
+  - **A change to the label or any of the three colors redraws** the list views, the list blocks and
+    the Schedule, as the delay's does, and again when Sync brings a change. It writes nothing to any
     list.
 - **Star color (owner, 2026-11-27):** "A starred item's star." A `dropdown` control with the date
   colors' choices, saved the same way. It defaults to Yellow, so the star looks as it did before
