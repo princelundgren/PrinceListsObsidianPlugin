@@ -24,7 +24,7 @@ export function addRepeat(rowEl: HTMLElement): void {
 }
 
 /**
- * The row's day at its end, in the color `style` gives an overdue day or today's. An overdue item's
+ * The row's day at its end, in the color `style` gives an overdue day, today's or a later one. An overdue item's
  * shows the label `style` names, with "Overdue" and the plain label for screen readers in place of
  * what's shown.
  */

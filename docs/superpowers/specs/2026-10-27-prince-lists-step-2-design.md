@@ -376,6 +376,9 @@ this met on 2026-10-30 **(owner)**.
     default: a row that isn't ticked and whose When is today takes it, the rule an overdue item
     follows **(call)**. An overdue item that shows "Today" keeps the overdue color, so it still
     reads as late.
+  - **Upcoming days have a color too (owner, 2026-11-27),** "Upcoming color", None by default: a
+    row that isn't ticked and whose When is after today, tomorrow included, takes it, by the same
+    rule.
   - **A screen reader hears "Overdue,"** then the day as "Yesterday or the date" shows it, such as
     "Overdue, Yesterday" or "Overdue, Nov 23", whatever the label shows, since the color can't
     reach it. It's text only a screen reader reads, in place of the shown label, never an
@@ -771,9 +774,9 @@ the plugin as it was before the page existed, except the Add button's, below, an
   `render` definition that draws four sample rows, in date order, with the star, the dates and
   the styles a list's rows use: "Return the library books", due a week ago, so an overdue date
   shows; "Water the plants", starred and due yesterday; "Call the dentist", due today; and "Pick
-  up the parcel", due in three days, so a weekday shows in the plain color (owner, 2026-11-27).
+  up the parcel", due in three days, so a weekday shows in the upcoming color (owner, 2026-11-27).
   It redraws
-  when any of the four settings below changes, from the same `Events` object the views listen to.
+  when any of the five settings below changes, from the same `Events` object the views listen to.
   When Obsidian tears the row down, as it does to draw it again after Sync changes a setting, it
   stops listening and takes its rows away. A drawn imitation was the other choice; it
   would drift from the real rows the next time their look changes. The sample rows can't be
@@ -783,16 +786,17 @@ the plugin as it was before the page existed, except the Add button's, below, an
   default), "Overdue" and "Today", saved as `"yesterday-or-date"`, `"overdue"` and `"today"`. What
   each shows is in "When and the Schedule view", "On a row". A stored value that is none of them
   is read as the default, as the delay's is.
-- **Overdue color and Today color (owner, 2026-11-27):** "The date of an item that's past due."
-  and "The date of an item due today." Their aliases are "Overdue date color" and "Today date
-  color". Two `dropdown` controls, each with None, Red, Orange, Yellow, Green, Cyan, Blue, Purple
-  and Pink, saved as `"none"`, `"red"` and so on. None leaves the day in `--text-muted`, as any
-  other day; each color is `--color-` and its name. Both default to None, so the plugin looks as
-  it did before them (owner, 2026-11-27). Of the colors, Red and Blue read most clearly as small
-  text in light and dark alike; the light theme's orange and green are faint. A stored value that
-  is none of the choices is read as the default.
-  - **A change to the label or either color redraws** the list views, the list blocks and the
-    Schedule, as the delay's does, and again when Sync brings a change. It writes nothing to any
+- **Overdue color, Today color and Upcoming color (owner, 2026-11-27):** "The date of an item that's
+  past due.", "The date of an item due today." and "The date of an item due after today." The first
+  two keep "Overdue date color" and "Today date color" as aliases. Three `dropdown` controls, each
+  with None, Red, Orange, Yellow, Green, Cyan, Blue, Purple and Pink, saved as `"none"`, `"red"` and
+  so on. None leaves the day in `--text-muted`, as any other day; each color is `--color-` and its
+  name. All three default to None, so the plugin looks as it did before them (owner, 2026-11-27). Of
+  the colors, Red and Blue read most clearly as small text in light and dark alike; the light
+  theme's orange and green are faint. A stored value that is none of the choices is read as the
+  default.
+  - **A change to the label or any of the three colors redraws** the list views, the list blocks and
+    the Schedule, as the delay's does, and again when Sync brings a change. It writes nothing to any
     list.
 - **Star color (owner, 2026-11-27):** "A starred item's star." A `dropdown` control with the date
   colors' choices, saved the same way. It defaults to Yellow, so the star looks as it did before
